@@ -1,0 +1,13 @@
+<ul class="cheeses">
+    {% for cheese in cheeses %}
+    <li class="cheese">
+        <div class="cheese-content">
+            <div class="post-cheese-name">{{ cheese.cheese_name}}</div>
+            <div class="post-leaven-time">{{ cheese.leaven_time}}</div>
+            <div class="post-solidification-time">{{ cheese.solidification_time}}</div>
+            <div class="post-cutting-time">{{ cheese.cutting_time}}</div>
+            <div class="post-draining-time">{{ cheese.draining_time}}</div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
