@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %} SKU - List of SKU {% endblock %}
+
+{% block page_content %}
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+<script type="text/javascript">
+    $(function () {
+        $(".delete_sku").click(function () {
+            var id = $(this).data('id');
+            $(".btn.btn-danger.btn-ok").click(function(){
+                $.ajax(
+                {
+                    url: '/delete_sku/' + id,
+                    type: 'DELETE',
+                    success: function(res)
+                    {
+                        console.log(res)
+                    },
+                    error: function(error) {
+                          console.log(error);
+                    }
+                });
+            });
+        })
+    });
+</script>
+
+
+<table class="table table-hover cheese_makers">
+    <thead>
+        <tr>
+            <th> SKU name </th>
+            <th> Size </th>
+            <th> Is lactose </th>
+            <th> Percent </th>
+            <th> Actions </th>
+        </tr>
+    </thead>
+    {% for sku in skus %}
+    <tr>
+        <td> {{sku.name}} </td>
+        <td> {{sku.size}} </td>
+        <td> {{sku.boiling.is_lactose}} </td>
+        <td> {{sku.boiling.percent}} </td>
+        <td>
+            <a href="{{ url_for('main.edit_sku', sku_id = sku.id)}}" class="edit-sku" data-toggle="modal">
+                <i class="material-icons" data-toggle="tooltip" style="color:green" title="Edit"> &#xe3c9; </i>
+            </a>
+            <a href="#delete_sku" class="delete-sku" data-id={{sku.id}} data-toggle="modal">
+                <i class="material-icons" data-toggle="tooltip" style="color:red" title="Delete"> &#xE872; </i>
+            </a>
+            <div id="delete_sku" class="modal fade" >
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form>
+                            <div class="modal-header">
+                                <h4 class="modal-title">Delete SKU</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete sku?</p>
+                                <p class="text-warning"><small>This action cannot be undone.</small></p>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                                <input type="submit" class="btn btn-danger btn-ok" value= Delete>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

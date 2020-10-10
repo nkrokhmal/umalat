@@ -1,0 +1,29 @@
+{
+  "cheese_makers":{
+    "pouling_time": 25,
+    "beg_column": 5,
+    "beg_time": 60,
+    "termizator": 12,
+    "poly1": 6,
+    "poly2": 9,
+    "poly3": 15,
+    "poly4": 18
+  },
+  "mozzarella_water": {
+    "number_length": 15,
+    "melting": 24,
+    "packing": 29,
+    "beg_time": 420,
+    "beg_column": 5
+  },
+  "mozarella_brine": {
+    "number_length": 15,
+    "melting1": 33,
+    "melting2": 36,
+    "melting3": 39,
+    "melting4": 42,
+    "packing": 46,
+    "beg_time": 420,
+    "beg_column": 5
+  }
+}

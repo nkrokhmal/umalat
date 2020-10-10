@@ -18,14 +18,12 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Cheese</a>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">Home</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                <li><a href="{{ url_for('main.cheeses') }}">Cheese</a></li>
-                <li><a href="{{ url_for('main.cheese_makers') }}">Cheese makers</a></li>
-                <li><a href="{{ url_for('main.cheese_scheduler') }}">Cheese scheduler</a></li>
+                <li><a href="{{ url_for('main.get_sku') }}">SKU</a></li>
+                <li><a href="{{ url_for('main.add_sku') }}">Add SKU</a></li>
             </ul>
         </div>
     </div>
