@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %} Варки - список варок {% endblock %}
+
+{% block page_content %}
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<p>
+    <a href="{{ url_for('main.add_boilings')}}"><big> Добавить новый тип варки </big> </a>
+</p>
+
+<script type="text/javascript">
+    $(function () {
+        $(".delete_boiling").click(function () {
+            var id = $(this).data('id');
+            $(".btn.btn-danger.btn-ok").click(function(){
+                $.ajax(
+                {
+                    url: '/delete_boiling/' + id,
+                    type: 'DELETE',
+                    success: function(res)
+                    {
+                        console.log(res)
+                    },
+                    error: function(error) {
+                          console.log(error);
+                    }
+                });
+            });
+        })
+    });
+</script>
+
+
+<table class="table table-hover cheese_makers">
+    <thead>
+        <tr>
+            <th> Процент </th>
+            <th> Наличие лактозы </th>
+            <th> Приоритет </th>
+            <th> Параметры варки </th>
+            <th> Параметры плавления </th>
+            <th> Действия </th>
+        </tr>
+    </thead>
+    {% for boiling in boilings %}
+    <tr>
+        <td> {{boiling.percent}} </td>
+        <td> {{boiling.is_lactose}} </td>
+        <td> {{boiling.priority}} </td>
+        <td width="33%">
+            <table width="100%">
+                <tr><td> Внесение закваски </td><td>{{boiling.pourings.pouring_time}}</td></tr>
+                <tr><td> Схватка </td><td>{{boiling.pourings.soldification_time}}</td></tr>
+                <tr><td> Резка </td><td>{{boiling.pourings.cutting_time}}</td></tr>
+                <tr><td> Слив </td><td>{{boiling.pourings.pouring_off_time}}</td></tr>
+                <tr><td> Доп. время </td><td>{{boiling.pourings.extra_time}}</td></tr>
+          </table>
+        </td>
+        <td width="33%">
+            <table width="100%">
+                <tr><td> Подача и вымешивание </td><td>{{boiling.meltings.serving_time}}</td></tr>
+                <tr><td> Плавление </td><td>{{boiling.meltings.melting_time}}</td></tr>
+                <tr><td> Скорость </td><td>{{boiling.meltings.speed}}</td></tr>
+                <tr><td> Время охлажения 1 </td><td>{{boiling.meltings.first_cooling_time}}</td></tr>
+                <tr><td> Время охлаждения 2 </td><td>{{boiling.meltings.second_cooling_time}}</td></tr>
+                <tr><td> Время посолки </td><td>{{boiling.meltings.salting_time}}</td></tr>
+          </table>
+        </td>
+        <td>
+            <a href="{{ url_for('main.edit_boiling', boiling_id = boiling.id)}}" class="edit-boiling" data-toggle="modal">
+                <i class="material-icons" data-toggle="tooltip" style="color:green" title="Edit"> &#xe3c9; </i>
+            </a>
+            <a href="#delete_boiling" class="delete-boiling" data-id={{boiling.id}} data-toggle="modal">
+                <i class="material-icons" data-toggle="tooltip" style="color:red" title="Delete"> &#xE872; </i>
+            </a>
+            <div id="delete_boiling" class="modal fade" >
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form>
+                            <div class="modal-header">
+                                <h4 class="modal-title">Удаление варки</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Вы действительно хотите удалить эту варку?</p>
+                                <p class="text-warning"><small>"Это действие нельзя будет отменить".</small></p>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="button" class="btn btn-default" data-dismiss="modal" value="Закрыть">
+                                <input type="submit" class="btn btn-danger btn-ok" value= Удалить>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

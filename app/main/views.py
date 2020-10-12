@@ -3,8 +3,8 @@ from flask_restplus import abort
 from werkzeug.utils import redirect
 from . import main
 from .. import db
-from .forms import SKUForm
-from ..models import SKU, Boiling
+from .forms import SKUForm, PouringProcessForm, BoilingForm
+from ..models import SKU, Boiling, GlobalPouringProcess, MeltingProcess, PouringProcess
 
 @main.route('/')
 def index():
@@ -15,13 +15,11 @@ def index():
 def add_sku():
     form = SKUForm()
     if form.validate_on_submit():
-        print(form.boilings)
-        print(form.percent.data)
-        print(form.is_lactose.data)
-
         sku = SKU(
             name=form.name.data,
             size=form.size.data,
+            speed=form.speed.data,
+            packing_reconfiguration=form.packing_reconfiguration.data,
             boiling_id=[x.id for x in form.boilings if
                         x.percent == dict(form.percent.choices).get(form.percent.data) and
                         x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0]
@@ -53,6 +51,8 @@ def edit_sku(sku_id):
     if form.validate_on_submit() and sku is not None:
         sku.name = form.name.data
         sku.size = form.size.data
+        sku.speed = form.speed.data
+        sku.packing_reconfiguration = form.packing_reconfiguration.data
         sku.boiling_id = [x.id for x in form.boilings if
                         x.percent == dict(form.percent.choices).get(form.percent.data) and
                         x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0]
@@ -60,8 +60,10 @@ def edit_sku(sku_id):
         return redirect(url_for('.get_sku'))
     form.name.data = sku.name
     form.size.data = sku.size
-    form.percent = sku.boiling.percent
-    form.is_lactose = sku.boiling.is_lactose
+    form.speed.data = sku.speed
+    form.percent.data = sku.boiling.percent
+    form.is_lactose.data = sku.boiling.is_lactose
+    form.packing_reconfiguration.data = sku.packing_reconfiguration
     return render_template('edit_sku.html', form=form)
 
 
@@ -72,6 +74,179 @@ def delete_sku(id):
         db.session.delete(sku)
         db.session.commit()
     return redirect(url_for('.get_sku'))
+
+
+@main.route('/add_pouring_process', methods=['POST', 'GET'])
+def add_pouring_process():
+    form = PouringProcessForm()
+    if form.validate_on_submit():
+        pouring_process = GlobalPouringProcess(
+            pouring_time=form.pouring_time.data
+        )
+        db.session.add(pouring_process)
+        db.session.commit()
+        return redirect(url_for('.get_pouring_process'))
+    return render_template('add_pouring_process.html', form=form)
+
+
+@main.route('/get_pouring_process')
+def get_pouring_process():
+    pouring_processes = db.session.query(GlobalPouringProcess).all()
+    return render_template('get_pouring_process.html', pouring_processes=pouring_processes, endopoints='.get_pouring_process')
+
+
+@main.route('/edit_pouring_process/<int:id>', methods=['GET', 'POST'])
+def edit_pouring_process(id):
+    form = PouringProcessForm()
+    pouring_process = db.session.query(GlobalPouringProcess).get_or_404(id)
+    if form.validate_on_submit() and pouring_process is not None:
+        pouring_process.pouring_time = form.pouring_time.data
+        db.session.commit()
+        return redirect(url_for('.get_pouring_process'))
+    form.pouring_time.data = pouring_process.pouring_time
+    return render_template('edit_pouring_process.html', form=form)
+
+
+@main.route('/get_boiling', methods=['GET', 'POST'])
+def get_boiling():
+    boilings = db.session.query(Boiling).all()
+    return render_template('get_boiling.html', boilings=boilings, endpoints='.get_boiling')
+
+
+@main.route('/delete_boiling/<int:boiling_id>', methods=['DELETE'])
+def delete_boiling(boiling_id):
+    boiling_process = db.session.query(Boiling).get_or_404(boiling_id)
+    if boiling_process:
+        db.session.delete(boiling_process)
+        db.session.commit()
+    return redirect(url_for('.get_boiling'))
+
+
+@main.route('/edit_boiling/<int:boiling_id>',  methods=['GET', 'POST'])
+def edit_boiling(boiling_id):
+    form = BoilingForm()
+    with db.session.no_autoflush:
+        boiling_process = db.session.query(Boiling).get_or_404(boiling_id)
+        if form.validate_on_submit() and boiling_process is not None:
+            boiling_process.percent = form.percent.data
+            boiling_process.priority = form.priority.data
+            boiling_process.is_lactose = form.is_lactose.data
+
+            pouring_process = PouringProcess(
+                pouring_time=form.pouring_time.data,
+                soldification_time=form.soldification_time.data,
+                cutting_time=form.cutting_time.data,
+                pouring_off_time=form.pouring_off_time.data,
+                extra_time=form.extra_time.data
+            )
+            boiling_process.pourings = pouring_process
+
+            melting_process = MeltingProcess(
+                serving_time=form.serving_time.data,
+                melting_time=form.melting_time.data,
+                speed=form.speed.data,
+                first_cooling_time=form.first_cooling_time.data,
+                second_cooling_time=form.second_cooling_time.data,
+                salting_time=form.salting_time.data
+            )
+            boiling_process.meltings = melting_process
+
+            db.session.commit()
+            return redirect(url_for('.get_boiling'))
+        form.percent.data = boiling_process.percent
+        form.priority.data = boiling_process.priority
+        form.is_lactose.data = boiling_process.is_lactose
+        if boiling_process.pourings is not None:
+            form.pouring_time.data = boiling_process.pourings.pouring_time
+            form.soldification_time.data = boiling_process.pourings.soldification_time
+            form.cutting_time.data = boiling_process.pourings.cutting_time
+            form.pouring_off_time.data = boiling_process.pourings.pouring_off_time
+            form.extra_time.data = boiling_process.pourings.extra_time
+        if boiling_process.meltings is not None:
+            form.serving_time.data = boiling_process.meltings.serving_time
+            form.melting_time.data = boiling_process.meltings.melting_time
+            form.speed.data = boiling_process.meltings.speed
+            form.first_cooling_time.data = boiling_process.meltings.first_cooling_time
+            form.second_cooling_time.data = boiling_process.meltings.second_cooling_time
+            form.salting_time.data = boiling_process.meltings.salting_time
+
+        return render_template('edit_boiling.html', form=form)
+
+
+@main.route('/add_boiling', methods=['GET', 'POST'])
+def add_boilings():
+    form = BoilingForm()
+    if form.validate_on_submit():
+        boiling = Boiling(
+            percent=form.percent.data,
+            priority=form.priority.data,
+            is_lactose=form.is_lactose.data
+        )
+        pouring_process = PouringProcess(
+            pouring_time=form.pouring_time.data,
+            soldification_time=form.soldification_time.data,
+            cutting_time=form.cutting_time.data,
+            pouring_off_time=form.pouring_off_time.data,
+            extra_time=form.extra_time.data
+        )
+        melting_process = MeltingProcess(
+            serving_time=form.serving_time.data,
+            melting_time=form.melting_time.data,
+            speed=form.speed.data,
+            first_cooling_time=form.first_cooling_time.data,
+            second_cooling_time=form.second_cooling_time.data,
+            salting_time=form.salting_time.data
+        )
+        boiling.pourings = pouring_process
+        boiling.meltings = melting_process
+        db.session.add(boiling)
+        db.session.commit()
+        return redirect(url_for('.get_boiling'))
+    return render_template('add_boiling.html', form=form)
+
+
+@main.route('/get_packings/<int:boiling_id>', methods=['GET', 'POST'])
+def get_packings(boiling_id):
+    pass
+
+
+# @main.route('/add_pouring_process', methods=['GET', 'POST'])
+# def add_pouring_process():
+#     pass
+#
+#
+# @main.route('/delete_pouring_process/<int:pouring_process_id>', methods=['DELETE'])
+# def delete_pouring_process(pouring_process_id):
+#     pass
+#
+#
+# @main.route('/edit_pouring_process/<int:pouring_process_id>', methods=['GET', 'POST'])
+# def edit_pouring_process(pouring_process_id):
+#     pass
+#
+#
+# @main.route('/get_melting_process', methods=['GET', 'POST'])
+# def get_melting_process():
+#     pass
+#
+#
+# @main.route('/add_melting_process', methods=['GET', 'POST'])
+# def add_melting_process():
+#     pass
+#
+#
+# @main.route('/delete_melting_process/<int:melting_process_id>', methods=['DELETE'])
+# def delete_melting_process(melting_process_id):
+#     pass
+#
+#
+# @main.route('/edit_melting_process/<int:melting_process_id>', methods=['GET', 'POST'])
+# def edit_melting_process():
+#     pass
+
+
+
+
 
 
 

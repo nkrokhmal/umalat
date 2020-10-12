@@ -14,6 +14,9 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
+<p>
+    <a href="{{ url_for('main.add_sku')}}"><big> Добавить новый SKU </big> </a>
+</p>
 
 <script type="text/javascript">
     $(function () {
@@ -41,11 +44,13 @@
 <table class="table table-hover cheese_makers">
     <thead>
         <tr>
-            <th> SKU name </th>
-            <th> Size </th>
-            <th> Is lactose </th>
-            <th> Percent </th>
-            <th> Actions </th>
+            <th> Название SKU  </th>
+            <th> Размер упаковки </th>
+            <th> Наличие лактозы </th>
+            <th> Процент </th>
+            <th> Скорость упаковки </th>>
+            <th> Время на перенастройку </th>
+            <th> Действия </th>
         </tr>
     </thead>
     {% for sku in skus %}
@@ -54,6 +59,8 @@
         <td> {{sku.size}} </td>
         <td> {{sku.boiling.is_lactose}} </td>
         <td> {{sku.boiling.percent}} </td>
+        <td> {{sku.speed}} </td>
+        <td> {{sku.packing_reconfiguration}} </td>
         <td>
             <a href="{{ url_for('main.edit_sku', sku_id = sku.id)}}" class="edit-sku" data-toggle="modal">
                 <i class="material-icons" data-toggle="tooltip" style="color:green" title="Edit"> &#xe3c9; </i>

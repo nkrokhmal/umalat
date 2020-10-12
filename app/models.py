@@ -20,6 +20,9 @@ class SKU(db.Model):
     name = db.Column(db.String)
     boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
     size = db.Column(db.Float)
+    speed = db.Column(db.Integer)
+    shelf_life = db.Column(db.Integer)
+    packing_reconfiguration = db.Column(db.Integer)
 
 
 '''
@@ -41,9 +44,11 @@ class Boiling(db.Model):
     percent = db.Column(db.Float)
     priority = db.Column(db.Integer)
     is_lactose = db.Column(db.Boolean)
-    pourings = db.relationship('PouringProcess', backref='boiling', lazy='dynamic')
-    meltings = db.relationship('MeltingProcess', backref='boiling', lazy='dynamic')
     skus = db.relationship('SKU', backref='boiling', lazy='dynamic')
+    pouring_id = db.Column(db.Integer, db.ForeignKey('pourings.id'), nullable=True)
+    pourings = db.relationship('PouringProcess', backref='boiling', foreign_keys=pouring_id)
+    melting_id = db.Column(db.Integer, db.ForeignKey('meltings.id'), nullable=True)
+    meltings = db.relationship('MeltingProcess', backref='boiling', foreign_keys=melting_id)
 
     @staticmethod
     def generate_boilings():
@@ -83,6 +88,7 @@ class PouringProcess(db.Model):
     soldification_time = db.Column(db.Integer)
     cutting_time = db.Column(db.Integer)
     pouring_off_time = db.Column(db.Integer)
+    extra_time = db.Column(db.Integer)
     boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
 
 
@@ -101,32 +107,19 @@ class MeltingProcess(db.Model):
     boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
 
 
-'''
-    Процесс упаковки
-'''
-class PackingProcess(db.Model):
-    __tablename__ = 'packings'
-    id = db.Column(db.Integer, primary_key=True)
-    sku_id = db.Column(db.Integer, db.ForeignKey('skus.id'))
-    speed = db.Column(db.Integer)
-
-
-
-
-# class CheeseMaker(db.Model):
-#     __tablename__ = 'cheese_makers'
+# '''
+#     Описание цехов
+# '''
+# class Departmenent(db.Model):
+#     __tablename__ = 'departments'
 #     id = db.Column(db.Integer, primary_key=True)
-#     cheese_maker_name = db.Column(db.String)
-#     cheeses = db.relationship('Cheese', backref='cheese_maker', lazy='dynamic')
+#     name = db.Column(db.String)
 #
 #
-# class Cheese(db.Model):
-#     __tablename__ = 'cheese'
+# '''
+#     Описание линий
+# '''
+# class DepartmentLines(db.Model):
+#     __tablename__ = 'department_lines'
 #     id = db.Column(db.Integer, primary_key=True)
-#     cheese_name = db.Column(db.String)
-#     leaven_time = db.Column(db.Integer)
-#     solidification_time = db.Column(db.Integer)
-#     cutting_time = db.Column(db.Integer)
-#     draining_time = db.Column(db.Integer)
-#     cheese_maker_id = db.Column(db.Integer, db.ForeignKey('cheese_makers.id'))
-#     status_id = db.Column(db.Integer, db.ForeignKey('statuses.id'))
+
