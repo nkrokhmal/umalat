@@ -1,9 +1,11 @@
 from flask_restplus import ValidationError
-from wtforms import StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField
-from wtforms.validators import Required
+from flask_wtf.file import FileRequired, FileField
+from wtforms import StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField, DateTimeField
+from wtforms.validators import Required, Optional
 from flask_wtf import FlaskForm
 from ..models import MeltingProcess, Boiling
 from .. import db
+from datetime import datetime
 
 
 class BoilingForm(FlaskForm):
@@ -30,11 +32,11 @@ class BoilingForm(FlaskForm):
 
 class SKUForm(FlaskForm):
     name = StringField('Enter SKU name', validators=[Required()])
-    size = FloatField('Enter packing size', validators=[Required()])
+    size = FloatField('Enter packing size', validators=[Optional()])
     percent = SelectField('Choose percent', coerce=int)
     is_lactose = SelectField('Choose is lactose', coerce=int)
-    speed = IntegerField('Enter speed', validators=[Required()])
-    packing_reconfiguration = IntegerField('Введите на перенастройки упаковки', validators=[Required()])
+    speed = IntegerField('Enter speed', validators=[Optional()])
+    packing_reconfiguration = IntegerField('Введите на перенастройки упаковки', validators=[Optional()])
     boilings = None
     submit = SubmitField('Submit')
 
@@ -56,22 +58,13 @@ class PouringProcess(FlaskForm):
     cutting_time = IntegerField('Enter is lactose', validators=[Required()])
 
 
+class RequestForm(FlaskForm):
+    validators = [
+        FileRequired(message='There was no file!')
+    ]
 
-class CheeseForm(FlaskForm):
-    cheese_name = StringField('Cheese name', validators=[Required()])
-    leaven_time = IntegerField('Leaven time in minutes', validators=[Required()])
-    solidification_time = IntegerField('Solidification time in minutes', validators=[Required()])
-    cutting_time = IntegerField('Cutting time in minutes', validators=[Required()])
-    draining_time = IntegerField('Draining time in minutes', validators=[Required()])
-    cheese_maker = SelectField('Cheese maker', coerce=int)
-    submit = SubmitField('Submit')
-
-    # def __init__(self, *args, **kwargs):
-    #     super(CheeseForm, self).__init__(*args, **kwargs)
-    #     self.cheese_maker.choices = [(cm.id, cm.cheese_maker_name) for cm in
-    #                                  db.session.query(CheeseMaker).order_by(CheeseMaker.cheese_maker_name).all()]
+    input_file = FileField('', validators=validators)
+    request_day = DateTimeField('Which date is your favorite?', format="%Y-%m-%d", default=datetime.today, validators=[Required()])
+    submit = SubmitField(label="Submit")
 
 
-class CheeseMakerForm(FlaskForm):
-    cheese_maker_name = StringField('Name of cheese maker', validators=[Required()])
-    submit = SubmitField('Submit')

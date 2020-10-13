@@ -14,13 +14,9 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-<p>
-    <a href="{{ url_for('main.add_sku')}}"><big> Добавить новый SKU </big> </a>
-</p>
-
 <script type="text/javascript">
     $(function () {
-        $(".delete_sku").click(function () {
+        $(".delete-current-sku").click(function () {
             var id = $(this).data('id');
             $(".btn.btn-danger.btn-ok").click(function(){
                 $.ajax(
@@ -41,6 +37,10 @@
 </script>
 
 
+<p>
+    <a href="{{ url_for('main.add_sku')}}"><big> Добавить новый SKU </big> </a>
+</p>
+
 <table class="table table-hover cheese_makers">
     <thead>
         <tr>
@@ -48,7 +48,7 @@
             <th> Размер упаковки </th>
             <th> Наличие лактозы </th>
             <th> Процент </th>
-            <th> Скорость упаковки </th>>
+            <th> Скорость упаковки </th>
             <th> Время на перенастройку </th>
             <th> Действия </th>
         </tr>
@@ -62,10 +62,10 @@
         <td> {{sku.speed}} </td>
         <td> {{sku.packing_reconfiguration}} </td>
         <td>
-            <a href="{{ url_for('main.edit_sku', sku_id = sku.id)}}" class="edit-sku" data-toggle="modal">
-                <i class="material-icons" data-toggle="tooltip" style="color:green" title="Edit"> &#xe3c9; </i>
+            <a href="{{ url_for('main.edit_sku', sku_id = sku.id)}}" class="edit-sku">
+                <i class="material-icons" style="color:green" title="Edit"> &#xe3c9; </i>
             </a>
-            <a href="#delete_sku" class="delete-sku" data-id={{sku.id}} data-toggle="modal">
+            <a href="#delete_sku" class="delete-current-sku" data-id={{sku.id}} data-toggle="modal">
                 <i class="material-icons" data-toggle="tooltip" style="color:red" title="Delete"> &#xE872; </i>
             </a>
             <div id="delete_sku" class="modal fade" >

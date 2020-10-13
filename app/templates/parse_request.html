@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}Parse request{% endblock %}
+{% block page_content %}
+<div class="page-header">
+    <h1> Загрузите файл заявки и выберите дату </h1>
+</div>
+<div class="col-md-12">
+    {{ wtf.quick_form(form) }}
+</div>
+
+</br>
+</br>
+</br>
+</br>
+</br>
+
+{% if data is not none %}
+    <div>
+        <h1> Результаты загрузки файла заявки </h1>
+        <table class="table table-hover sku request">
+            <thead>
+                <tr>
+                    <th> Название SKU  </th>
+                    <th> Суммарный вес </th>
+                </tr>
+            </thead>
+            {% for d in data %}
+            <tr>
+                <td> {{d[0]}} </td>
+                <td> {{d[1]}} </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+{% endif %}
+
+{% endblock %}

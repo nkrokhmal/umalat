@@ -1,10 +1,14 @@
-from flask import session, url_for, render_template, flash, request, make_response, current_app
+from flask import session, url_for, render_template, flash, request, make_response, current_app, request
 from flask_restplus import abort
 from werkzeug.utils import redirect
 from . import main
 from .. import db
-from .forms import SKUForm, PouringProcessForm, BoilingForm
+from .forms import SKUForm, PouringProcessForm, BoilingForm, RequestForm
 from ..models import SKU, Boiling, GlobalPouringProcess, MeltingProcess, PouringProcess
+import pandas as pd
+from io import BytesIO
+
+
 
 @main.route('/')
 def index():
@@ -26,7 +30,7 @@ def add_sku():
         )
         db.session.add(sku)
         db.session.commit()
-        return redirect(url_for('.index'))
+        return redirect(url_for('.get_sku'))
     return render_template('add_sku.html', form=form)
 
 
@@ -67,9 +71,9 @@ def edit_sku(sku_id):
     return render_template('edit_sku.html', form=form)
 
 
-@main.route('/delete_sku/<int:id>', methods=['DELETE'])
-def delete_sku(id):
-    sku = db.session.query(SKU).get_or_404(id)
+@main.route('/delete_sku/<int:sku_id>', methods=['DELETE'])
+def delete_sku(sku_id):
+    sku = db.session.query(SKU).get_or_404(sku_id)
     if sku:
         db.session.delete(sku)
         db.session.commit()
@@ -208,6 +212,22 @@ def add_boilings():
 @main.route('/get_packings/<int:boiling_id>', methods=['GET', 'POST'])
 def get_packings(boiling_id):
     pass
+
+
+@main.route('/parse_request', methods=['GET', 'POST'])
+def parse_request():
+    form = RequestForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        file_bytes = request.files['input_file'].read()
+        df = pd.read_excel(BytesIO(file_bytes))
+        limit = df.shape[1] - 2
+        df = df.dropna(thresh=limit - 2).dropna(how='all', axis='columns')
+        sku_names = list(df.iloc[0].dropna()[1:-1])
+        sku_volumes = list(df.iloc[-1].dropna()[1:-1])
+        data = list(zip(sku_names, sku_volumes))
+        return render_template('parse_request.html', data=data, form=form)
+    data = None
+    return render_template('parse_request.html', data=data, form=form)
 
 
 # @main.route('/add_pouring_process', methods=['GET', 'POST'])
