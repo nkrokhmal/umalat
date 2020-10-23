@@ -3,7 +3,7 @@ from flask_admin import Admin
 from app import create_app
 from flask_script import Manager
 from flask_admin.contrib.sqla import ModelView
-import sys, inspect
+import inspect
 
 
 # from app.models import Boiling, MeltingProcess, SKU
@@ -19,11 +19,6 @@ admin = Admin(app, name='Umalat admin', template_mode='bootstrap3')
 for name, obj in inspect.getmembers(umalat_models):
     if inspect.isclass(obj):
         admin.add_view(ModelView(obj, db.session))
-
-# admin.add_view(ModelView(Boiling, db.session))
-# admin.add_view(ModelView(MeltingProcess, db.session))
-# admin.add_view(ModelView(SKU, db.session))
-# admin.add_view(ModelView(db.session))
 
 if __name__ == '__main__':
     manager.run()
