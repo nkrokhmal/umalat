@@ -19,10 +19,18 @@ class SKU(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
+    # Размер упаковки
     size = db.Column(db.Float)
+    # Скорость фасовки
     speed = db.Column(db.Integer)
+    # срок годности
     shelf_life = db.Column(db.Integer)
+    # время быстрой смены пленки
     packing_reconfiguration = db.Column(db.Integer)
+    # время смены формата пленки
+    packing_reconfiguration_format = db.Column(db.Integer)
+    # связка с фасовщиком
+    packing_id = db.Column(db.Integer, db.ForeignKey('packings.id'), nullable=True)
 
 
 '''
@@ -105,6 +113,21 @@ class MeltingProcess(db.Model):
     second_cooling_time = db.Column(db.Integer)
     salting_time = db.Column(db.Integer)
     boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
+
+
+'''
+    Фасовщики
+'''
+class Packing(db.Model):
+    __tablename__ = 'packings'
+    id = db.Column(db.Integer, primary_key=True)
+    packing_skus = db.relationship('SKU', backref='packing')
+
+    @staticmethod
+    def generate_packings():
+        for name in ['Ульма', '', '', '', '']:
+            pass
+
 
 
 # '''

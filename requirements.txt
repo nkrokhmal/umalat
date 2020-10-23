@@ -10,3 +10,4 @@ WTForms==2.2.1
 flask_pagedown
 flask_bootstrap
 flask_wtf
+pandas

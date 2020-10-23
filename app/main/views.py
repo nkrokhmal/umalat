@@ -224,7 +224,10 @@ def parse_request():
         df = df.dropna(thresh=limit - 2).dropna(how='all', axis='columns')
         sku_names = list(df.iloc[0].dropna()[1:-1])
         sku_volumes = list(df.iloc[-1].dropna()[1:-1])
-        data = list(zip(sku_names, sku_volumes))
+        # print(len(sku_names))
+        data = list(set(zip(sku_names, sku_volumes)))
+        # print(len(data))
+        # print(data)
         return render_template('parse_request.html', data=data, form=form)
     data = None
     return render_template('parse_request.html', data=data, form=form)

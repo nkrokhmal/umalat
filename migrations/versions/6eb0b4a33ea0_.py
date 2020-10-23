@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: fefb76beca44
+Revision ID: 6eb0b4a33ea0
 Revises: 
-Create Date: 2020-10-11 12:25:49.381177
+Create Date: 2020-10-23 14:14:07.074425
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'fefb76beca44'
+revision = '6eb0b4a33ea0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -54,9 +54,6 @@ def upgrade():
     )
     op.create_table('packings',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('sku_id', sa.Integer(), nullable=True),
-    sa.Column('speed', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['sku_id'], ['skus.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('pourings',
@@ -65,6 +62,7 @@ def upgrade():
     sa.Column('soldification_time', sa.Integer(), nullable=True),
     sa.Column('cutting_time', sa.Integer(), nullable=True),
     sa.Column('pouring_off_time', sa.Integer(), nullable=True),
+    sa.Column('extra_time', sa.Integer(), nullable=True),
     sa.Column('boiling_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['boiling_id'], ['boilings.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -74,7 +72,13 @@ def upgrade():
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('boiling_id', sa.Integer(), nullable=True),
     sa.Column('size', sa.Float(), nullable=True),
+    sa.Column('speed', sa.Integer(), nullable=True),
+    sa.Column('shelf_life', sa.Integer(), nullable=True),
+    sa.Column('packing_reconfiguration', sa.Integer(), nullable=True),
+    sa.Column('packing_reconfiguration_format', sa.Integer(), nullable=True),
+    sa.Column('packing_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['boiling_id'], ['boilings.id'], ),
+    sa.ForeignKeyConstraint(['packing_id'], ['packings.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('statuses',
