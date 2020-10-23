@@ -219,15 +219,13 @@ def parse_request():
     form = RequestForm()
     if request.method == 'POST' and form.validate_on_submit():
         file_bytes = request.files['input_file'].read()
-        df = pd.read_excel(BytesIO(file_bytes))
-        limit = df.shape[1] - 2
-        df = df.dropna(thresh=limit - 2).dropna(how='all', axis='columns')
-        sku_names = list(df.iloc[0].dropna()[1:-1])
-        sku_volumes = list(df.iloc[-1].dropna()[1:-1])
-        # print(len(sku_names))
-        data = list(set(zip(sku_names, sku_volumes)))
-        # print(len(data))
-        # print(data)
+        df = pd.read_excel(BytesIO(file_bytes), index_col=0)
+        df.columns = range(df.shape[1])
+        df = df[df.loc['Дата выработки продукции:'].dropna().index]
+        df = df.loc[['Дата выработки продукции:',
+                     'Фактические остатки на складах - Заявлено, кг:',
+                     'Нормативные остатки, кг']]
+        data = list(zip(*df.values.tolist()))
         return render_template('parse_request.html', data=data, form=form)
     data = None
     return render_template('parse_request.html', data=data, form=form)

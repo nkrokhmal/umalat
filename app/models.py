@@ -121,12 +121,16 @@ class MeltingProcess(db.Model):
 class Packing(db.Model):
     __tablename__ = 'packings'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Integer)
     packing_skus = db.relationship('SKU', backref='packing')
 
     @staticmethod
     def generate_packings():
-        for name in ['Ульма', '', '', '', '']:
-            pass
+        for name in ['Ульма', 'Мультиголова', 'Техновак', 'Мультиголова/Комета', 'малый Комет', 'САККАРДО',
+                     'Ручная работа']:
+            packing = Packing(name=name)
+            db.session.add(packing)
+        db.session.commit()
 
 
 
