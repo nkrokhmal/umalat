@@ -1,9 +1,18 @@
-from python:3.6
+FROM python:3.6 AS builder
+WORKDIR /install
+COPY requirements.txt /install
+RUN pip install --install-option="--prefix=/install" -r requirements.txt
+
+FROM python:3.6-alpine
+COPY --from=builder /install /usr/local
+COPY src /app
 
 WORKDIR /app
-COPY . /app
-RUN pip install -r /app/requirements.txt
+COPY ./app .
+COPY config.py .
+COPY data.sqlite .
+COPY manage.py .
 
 EXPOSE 8000
 
-cmd ["python", "manage.py"]
+cmd ["python", "manage.py", "runserver"]

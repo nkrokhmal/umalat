@@ -24,9 +24,12 @@ def add_sku():
             size=form.size.data,
             speed=form.speed.data,
             packing_reconfiguration=form.packing_reconfiguration.data,
+            packing_reconfiguration_format=form.packing_reconfiguration_format.data,
             boiling_id=[x.id for x in form.boilings if
                         x.percent == dict(form.percent.choices).get(form.percent.data) and
-                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0]
+                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0],
+            packing_id=[x.id for x in form.packings if
+                        x.name == dict(form.packing.choices).get(form.packing.data)][0]
         )
         db.session.add(sku)
         db.session.commit()
@@ -56,7 +59,10 @@ def edit_sku(sku_id):
         sku.name = form.name.data
         sku.size = form.size.data
         sku.speed = form.speed.data
+        sku.packing_id = [x.id for x in form.packings if
+                          x.name == dict(form.packing.choices).get(form.packing.data)][0]
         sku.packing_reconfiguration = form.packing_reconfiguration.data
+        sku.packing_reconfiguration_format = form.packing_reconfiguration_format.data
         sku.boiling_id = [x.id for x in form.boilings if
                         x.percent == dict(form.percent.choices).get(form.percent.data) and
                         x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0]
@@ -68,6 +74,7 @@ def edit_sku(sku_id):
     form.percent.data = sku.boiling.percent
     form.is_lactose.data = sku.boiling.is_lactose
     form.packing_reconfiguration.data = sku.packing_reconfiguration
+    form.packing_reconfiguration_format.data = sku.sku.packing_reconfiguration_format
     return render_template('edit_sku.html', form=form)
 
 
@@ -223,8 +230,9 @@ def parse_request():
         df.columns = range(df.shape[1])
         df = df[df.loc['Дата выработки продукции:'].dropna().index]
         df = df.loc[['Дата выработки продукции:',
+                     'Заявлено всего, кг:',
                      'Фактические остатки на складах - Заявлено, кг:',
-                     'Нормативные остатки, кг']]
+                     'Нормативные остатки, кг']].fillna(0)
         data = list(zip(*df.values.tolist()))
         return render_template('parse_request.html', data=data, form=form)
     data = None

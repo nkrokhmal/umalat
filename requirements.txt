@@ -11,3 +11,5 @@ flask_pagedown
 flask_bootstrap
 flask_wtf
 pandas
+xlrd
+flask_admin
