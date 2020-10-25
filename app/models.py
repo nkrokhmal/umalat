@@ -23,6 +23,8 @@ class SKU(db.Model):
     size = db.Column(db.Float)
     # Скорость фасовки
     speed = db.Column(db.Integer)
+    # выход в кг с одной варки
+    output_per_boiling = db.Column(db.Integer)
     # срок годности
     shelf_life = db.Column(db.Integer)
     # время быстрой смены пленки
@@ -31,6 +33,8 @@ class SKU(db.Model):
     packing_reconfiguration_format = db.Column(db.Integer)
     # связка с фасовщиком
     packing_id = db.Column(db.Integer, db.ForeignKey('packings.id'), nullable=True)
+    # связка с линиями
+    line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
 
 
 '''
@@ -60,7 +64,7 @@ class Boiling(db.Model):
 
     @staticmethod
     def generate_boilings():
-        for percent in [2.8, 3.3, 3.6]:
+        for percent in [2.7, 3.3, 3.6]:
             for is_lactose in [True, False]:
                 b = Boiling(
                     percent=percent,
@@ -132,6 +136,22 @@ class Packing(db.Model):
             db.session.add(packing)
         db.session.commit()
 
+
+'''
+    Линии
+'''
+class Line(db.Model):
+    __tablename__ = 'lines'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Integer)
+    lines_skus = db.relationship('SKU', backref='lines')
+
+    @staticmethod
+    def generate_lines():
+        for name in ['Пицца чиз', 'Моцарелла в воде']:
+            line = Line(name=name)
+            db.session.add(line)
+        db.session.commit()
 
 
 # '''

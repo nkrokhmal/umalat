@@ -3,7 +3,7 @@ from flask_wtf.file import FileRequired, FileField
 from wtforms import StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField, DateTimeField
 from wtforms.validators import Required, Optional
 from flask_wtf import FlaskForm
-from ..models import Packing, Boiling
+from ..models import Packing, Boiling, Line
 from .. import db
 from datetime import datetime
 
@@ -35,11 +35,16 @@ class SKUForm(FlaskForm):
     size = FloatField('Enter packing size', validators=[Optional()])
     percent = SelectField('Choose percent', coerce=int)
     packing = SelectField('Выберите тип фасовщика', coerce=int)
+    line = SelectField('Выберите линию', coerce=int)
     is_lactose = SelectField('Choose is lactose', coerce=int)
     speed = IntegerField('Enter speed', validators=[Optional()])
+    output_per_boiling = IntegerField('Введите выход с варки, кг', validators=[Optional()])
+    shelf_life = IntegerField('Введите время хранения, д', validators=[Optional()])
     packing_reconfiguration = IntegerField('Введите на перенастройки быстрой упаковки', validators=[Optional()])
     packing_reconfiguration_format = IntegerField('Введите на перенастройки долгой упаковки', validators=[Optional()])
 
+
+    lines = None
     packings = None
     boilings = None
     submit = SubmitField('Submit')
@@ -48,7 +53,10 @@ class SKUForm(FlaskForm):
         super(SKUForm, self).__init__(*args, **kwargs)
         self.boilings = db.session.query(Boiling).all()
         self.packings = db.session.query(Packing).all()
+        self.lines = db.session.query(Line).all()
+        print(self.lines)
 
+        self.line.choices = list(enumerate(set([x.name for x in self.lines])))
         self.packing.choices = list(enumerate(set([x.name for x in self.packings])))
         self.percent.choices = list(enumerate(set([x.percent for x in self.boilings])))
         self.is_lactose.choices = list(enumerate(set([x.is_lactose for x in self.boilings])))

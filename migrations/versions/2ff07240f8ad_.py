@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 6eb0b4a33ea0
+Revision ID: 2ff07240f8ad
 Revises: 
-Create Date: 2020-10-23 14:14:07.074425
+Create Date: 2020-10-25 17:18:56.236144
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6eb0b4a33ea0'
+revision = '2ff07240f8ad'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -40,6 +40,11 @@ def upgrade():
     sa.Column('pouring_time', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('lines',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('meltings',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('serving_time', sa.Integer(), nullable=True),
@@ -54,6 +59,7 @@ def upgrade():
     )
     op.create_table('packings',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('pourings',
@@ -73,11 +79,14 @@ def upgrade():
     sa.Column('boiling_id', sa.Integer(), nullable=True),
     sa.Column('size', sa.Float(), nullable=True),
     sa.Column('speed', sa.Integer(), nullable=True),
+    sa.Column('output_per_boiling', sa.Integer(), nullable=True),
     sa.Column('shelf_life', sa.Integer(), nullable=True),
     sa.Column('packing_reconfiguration', sa.Integer(), nullable=True),
     sa.Column('packing_reconfiguration_format', sa.Integer(), nullable=True),
     sa.Column('packing_id', sa.Integer(), nullable=True),
+    sa.Column('line_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['boiling_id'], ['boilings.id'], ),
+    sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
     sa.ForeignKeyConstraint(['packing_id'], ['packings.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -103,6 +112,7 @@ def downgrade():
     op.drop_table('pourings')
     op.drop_table('packings')
     op.drop_table('meltings')
+    op.drop_table('lines')
     op.drop_table('global_pouring_processes')
     op.drop_table('cheesemakers')
     op.drop_table('boilings')
