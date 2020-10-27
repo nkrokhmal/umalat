@@ -39,7 +39,6 @@ class SKU(db.Model):
     # связка с линиями
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
 
-    # todo: add ferment - закваска
     # todo: add Pack, FormFactor
     # todo: add brand_name
 
@@ -63,6 +62,9 @@ class Boiling(db.Model):
     priority = db.Column(db.Integer)
     percent = db.Column(db.Float)
     is_lactose = db.Column(db.Boolean)
+
+    # todo: add ferment - закваска
+
     skus = db.relationship('SKU', backref='boiling', lazy='dynamic')
     pouring_id = db.Column(db.Integer, db.ForeignKey('pourings.id'), nullable=True)
     pourings = db.relationship('PouringProcess', backref='boiling', foreign_keys=pouring_id)
