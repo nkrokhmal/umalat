@@ -92,7 +92,6 @@ class CheeseMakers(db.Model):
 
     # todo: add possible volumes: [6,7,8]
 
-
 class GlobalPouringProcess(db.Model):
     __tablename__ = 'global_pouring_processes'
     id = db.Column(db.Integer, primary_key=True)
@@ -107,6 +106,7 @@ class PouringProcess(db.Model):
     pouring_time = db.Column(db.Integer)
     soldification_time = db.Column(db.Integer)
     cutting_time = db.Column(db.Integer)
+    # todo: что это за время?
     pouring_off_time = db.Column(db.Integer)
     extra_time = db.Column(db.Integer)
     boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
