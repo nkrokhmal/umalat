@@ -27,6 +27,7 @@ class SKU(db.Model):
     # срок годности
     shelf_life = db.Column(db.Integer)
     # Скорость фасовки
+    # todo: rename to packing_speed
     speed = db.Column(db.Integer)
     # время быстрой смены пленки
     packing_reconfiguration = db.Column(db.Integer)
