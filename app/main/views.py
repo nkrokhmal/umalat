@@ -4,7 +4,7 @@ from werkzeug.utils import redirect
 from . import main
 from .. import db
 from .forms import SKUForm, PouringProcessForm, BoilingForm, RequestForm
-from ..models import SKU, Boiling, GlobalPouringProcess, MeltingProcess, PouringProcess, Line, Termizator, Packing,\
+from ..models import SKU, Boiling, GlobalPouringProcess, Melting, Pouring, Line, Termizator, Packer,\
     Departmenent
 import pandas as pd
 from io import BytesIO
@@ -33,8 +33,8 @@ def add_sku():
             boiling_id=[x.id for x in form.boilings if
                         x.percent == dict(form.percent.choices).get(form.percent.data) and
                         x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0],
-            packing_id=[x.id for x in form.packings if
-                        x.name == dict(form.packing.choices).get(form.packing.data)][0]
+            packer_id=[x.id for x in form.packers if
+                        x.name == dict(form.packer.choices).get(form.packer.data)][0]
         )
         db.session.add(sku)
         db.session.commit()
@@ -64,8 +64,8 @@ def edit_sku(sku_id):
         sku.name = form.name.data
         sku.size = form.size.data
         sku.speed = form.speed.data
-        sku.packing_id = [x.id for x in form.packings if
-                          x.name == dict(form.packing.choices).get(form.packing.data)][0]
+        sku.packer_id = [x.id for x in form.packers if
+                          x.name == dict(form.packer.choices).get(form.packer.data)][0]
         sku.packing_reconfiguration = form.packing_reconfiguration.data
         sku.shelf_life = form.shelf_life.data
         sku.packing_reconfiguration_format = form.packing_reconfiguration_format.data
@@ -74,7 +74,7 @@ def edit_sku(sku_id):
                         x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0]
         sku.output_per_boiling = form.output_per_boiling.data
         sku.line_id = [x.id for x in form.lines if
-                   x.name == dict(form.line.choices).get(form.packing.data)]
+                   x.name == dict(form.line.choices).get(form.line.data)]
         db.session.commit()
         return redirect(url_for('.get_sku'))
     form.name.data = sku.name
@@ -205,14 +205,14 @@ def add_boilings():
             priority=form.priority.data,
             is_lactose=form.is_lactose.data
         )
-        pouring_process = PouringProcess(
+        pouring_process = Pouring(
             pouring_time=form.pouring_time.data,
             soldification_time=form.soldification_time.data,
             cutting_time=form.cutting_time.data,
             pouring_off_time=form.pouring_off_time.data,
             extra_time=form.extra_time.data
         )
-        melting_process = MeltingProcess(
+        melting_process = Melting(
             serving_time=form.serving_time.data,
             melting_time=form.melting_time.data,
             speed=form.speed.data,
@@ -257,10 +257,10 @@ def get_lines():
     return jsonify([x.serialize() for x in lines])
 
 
-@main.route('/get_packing', methods=['GET', 'POST'])
-def get_packing():
-    packings = db.session.query(Packing).all()
-    return jsonify([x.serialize() for x in packings])
+@main.route('/get_packer', methods=['GET', 'POST'])
+def get_packer():
+    packers = db.session.query(Packer).all()
+    return jsonify([x.serialize() for x in packers])
 
 
 @main.route('/get_termizator', methods=['GET', 'POST'])
