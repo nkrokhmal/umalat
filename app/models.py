@@ -43,9 +43,25 @@ class SKU(db.Model):
 class Termizator(db.Model):
     __tablename__ = 'termizators'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
     short_cleaning_time = db.Column(db.Integer)
     long_cleaning_time = db.Column(db.Integer)
 
+    @staticmethod
+    def generate_termizator():
+        t = Termizator(
+            name='Termizator 1',
+            short_cleaning_time=25,
+            long_cleaning_time=60
+        )
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "short_cleaning_time": self.short_cleaning_time,
+            "long_cleaning_time": self.long_cleaning_time
+        }
 
 '''
     Параметры варки. Процент, приоритет, наличие лактозы
@@ -136,6 +152,12 @@ class Packing(db.Model):
             db.session.add(packing)
         db.session.commit()
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
+
 
 '''
     Линии
@@ -153,14 +175,25 @@ class Line(db.Model):
             db.session.add(line)
         db.session.commit()
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
 
 # '''
 #     Описание цехов
 # '''
-# class Departmenent(db.Model):
-#     __tablename__ = 'departments'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String)
+class Departmenent(db.Model):
+    __tablename__ = 'departments'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
 #
 #
 # '''

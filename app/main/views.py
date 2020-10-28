@@ -1,10 +1,11 @@
 from flask import session, url_for, render_template, flash, request, make_response, current_app, request
-from flask_restplus import abort
+from flask import jsonify
 from werkzeug.utils import redirect
 from . import main
 from .. import db
 from .forms import SKUForm, PouringProcessForm, BoilingForm, RequestForm
-from ..models import SKU, Boiling, GlobalPouringProcess, MeltingProcess, PouringProcess, Line, Termizator, Packing
+from ..models import SKU, Boiling, GlobalPouringProcess, MeltingProcess, PouringProcess, Line, Termizator, Packing,\
+    Departmenent
 import pandas as pd
 from io import BytesIO
 
@@ -253,22 +254,25 @@ def parse_request():
 @main.route('/get_lines', methods=['GET', 'POST'])
 def get_lines():
     lines = db.session.query(Line).all()
-    return lines
+    return jsonify([x.serialize() for x in lines])
 
 
 @main.route('/get_packing', methods=['GET', 'POST'])
 def get_packing():
     packings = db.session.query(Packing).all()
-    return packings
+    return jsonify([x.serialize() for x in packings])
 
 
 @main.route('/get_termizator', methods=['GET', 'POST'])
 def get_termizator():
     termizator = db.session.query(Termizator).all()
-    return termizator
+    return jsonify([x.serialize() for x in termizator])
 
 
-# @main.route('/get ')
+@main.route('/get_department', methods=['GET', 'POST'])
+def get_department():
+    departments = db.session.query(Departmenent).all()
+    return jsonify([x.serialize() for x in departments])
 
 # @main.route('/add_pouring_process', methods=['GET', 'POST'])
 # def add_pouring_process():
