@@ -3,7 +3,7 @@ from flask import jsonify
 from werkzeug.utils import redirect
 from . import main
 from .. import db
-from .forms import SKUForm, PouringProcessForm, BoilingForm, RequestForm
+from .forms import PouringProcessForm, BoilingForm, RequestForm
 from ..models import SKU, Boiling, GlobalPouringProcess, Melting, Pouring, Line, Termizator, Packer,\
     Departmenent
 import pandas as pd
@@ -12,7 +12,12 @@ from io import BytesIO
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    lines = db.session.query(Line).all()
+    packers = db.session.query(Packer).all()
+    termizators = db.session.query(Termizator).all()
+    departments = db.session.query(Departmenent).all()
+    return render_template('index.html', lines=lines, packers=packers, termizators=termizators, departments=departments)
+
 
 @main.route('/delete_sku/<int:sku_id>', methods=['DELETE'])
 def delete_sku(sku_id):

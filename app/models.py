@@ -65,10 +65,12 @@ class Termizator(db.Model):
     @staticmethod
     def generate_termizator():
         t = Termizator(
-            name='Termizator 1',
+            name='Термизатор 1',
             short_cleaning_time=25,
             long_cleaning_time=60
         )
+        db.session.add(t)
+        db.session.commit()
 
     def serialize(self):
         return {
