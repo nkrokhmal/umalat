@@ -10,85 +10,9 @@ import pandas as pd
 from io import BytesIO
 
 
-
 @main.route('/')
 def index():
     return render_template('index.html')
-
-
-@main.route('/add_sku', methods=['POST', 'GET'])
-def add_sku():
-    form = SKUForm()
-    if form.validate_on_submit():
-        sku = SKU(
-            name=form.name.data,
-            size=form.size.data,
-            speed=form.speed.data,
-            output_per_boiling=form.output_per_boiling.data,
-            line_id=[x.id for x in form.lines if
-                     x.name == dict(form.line.choices).get(form.line.data)][0],
-            packing_reconfiguration=form.packing_reconfiguration.data,
-            packing_reconfiguration_format=form.packing_reconfiguration_format.data,
-            shelf_life=form.shelf_life.data,
-            boiling_id=[x.id for x in form.boilings if
-                        x.percent == dict(form.percent.choices).get(form.percent.data) and
-                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0],
-            packer_id=[x.id for x in form.packers if
-                        x.name == dict(form.packer.choices).get(form.packer.data)][0]
-        )
-        db.session.add(sku)
-        db.session.commit()
-        return redirect(url_for('.get_sku'))
-    return render_template('add_sku.html', form=form)
-
-
-@main.route('/get_sku', methods=['GET'])
-def get_sku():
-    form = SKUForm()
-    page = request.args.get('page', 1, type=int)
-    pagination = db.session.query(SKU) \
-        .order_by(SKU.name) \
-        .paginate(
-            page, per_page=current_app.config['SKU_PER_PAGE'],
-            error_out=False
-    )
-    skus = pagination.items
-    return render_template('get_sku.html', form=form, skus=skus, paginations=pagination, endopoints='.get_sku')
-
-
-@main.route('/edit_sku/<int:sku_id>', methods=['GET', 'POST'])
-def edit_sku(sku_id):
-    form = SKUForm()
-    sku = db.session.query(SKU).get_or_404(sku_id)
-    if form.validate_on_submit() and sku is not None:
-        sku.name = form.name.data
-        sku.size = form.size.data
-        sku.speed = form.speed.data
-        sku.packer_id = [x.id for x in form.packers if
-                          x.name == dict(form.packer.choices).get(form.packer.data)][0]
-        sku.packing_reconfiguration = form.packing_reconfiguration.data
-        sku.shelf_life = form.shelf_life.data
-        sku.packing_reconfiguration_format = form.packing_reconfiguration_format.data
-        sku.boiling_id = [x.id for x in form.boilings if
-                        x.percent == dict(form.percent.choices).get(form.percent.data) and
-                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0]
-        sku.output_per_boiling = form.output_per_boiling.data
-        sku.line_id = [x.id for x in form.lines if
-                   x.name == dict(form.line.choices).get(form.line.data)]
-        db.session.commit()
-        return redirect(url_for('.get_sku'))
-    form.name.data = sku.name
-    form.size.data = sku.size
-    form.speed.data = sku.speed
-    form.percent.data = sku.boiling.percent
-    form.is_lactose.data = sku.boiling.is_lactose
-    form.packing_reconfiguration.data = sku.packing_reconfiguration
-    form.packing_reconfiguration_format.data = sku.packing_reconfiguration_format
-    form.shelf_life.data = sku.shelf_life
-    form.line.data = sku.lines.name
-    form.output_per_boiling.data = sku.output_per_boiling
-    return render_template('edit_sku.html', form=form)
-
 
 @main.route('/delete_sku/<int:sku_id>', methods=['DELETE'])
 def delete_sku(sku_id):
@@ -154,8 +78,9 @@ def edit_boiling(boiling_id):
             boiling_process.percent = form.percent.data
             boiling_process.priority = form.priority.data
             boiling_process.is_lactose = form.is_lactose.data
+            boiling_process.ferment = dict(form.ferment.choices).get(form.ferment.data)
 
-            pouring_process = PouringProcess(
+            pouring_process = Pouring(
                 pouring_time=form.pouring_time.data,
                 soldification_time=form.soldification_time.data,
                 cutting_time=form.cutting_time.data,
@@ -164,7 +89,7 @@ def edit_boiling(boiling_id):
             )
             boiling_process.pourings = pouring_process
 
-            melting_process = MeltingProcess(
+            melting_process = Melting(
                 serving_time=form.serving_time.data,
                 melting_time=form.melting_time.data,
                 speed=form.speed.data,
@@ -176,9 +101,15 @@ def edit_boiling(boiling_id):
 
             db.session.commit()
             return redirect(url_for('.get_boiling'))
+        for key, value in dict(form.ferment.choices).items():
+            if value == boiling_process.ferment:
+                form.ferment.default = key
+                form.process()
         form.percent.data = boiling_process.percent
         form.priority.data = boiling_process.priority
         form.is_lactose.data = boiling_process.is_lactose
+
+
         if boiling_process.pourings is not None:
             form.pouring_time.data = boiling_process.pourings.pouring_time
             form.soldification_time.data = boiling_process.pourings.soldification_time

@@ -1,9 +1,12 @@
 from . import db
-
+import json
+import os
 
 '''
     На всякий случай таблица со статусами
 '''
+
+
 class Status(db.Model):
     __tablename__ = 'statuses'
     id = db.Column(db.Integer, primary_key=True)
@@ -14,11 +17,12 @@ class Status(db.Model):
 '''
     Таблица SKU. Идет привязка к типам варки
 '''
+
+
 class SKU(db.Model):
     __tablename__ = 'skus'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
     # название бренда
     brand_name = db.Column(db.String)
     # весс нетто
@@ -30,13 +34,15 @@ class SKU(db.Model):
     # срок годности
     shelf_life = db.Column(db.Integer)
     # Скорость фасовки
-    packing_speed = db.Column(db.Integer)
+    packing_speed = db.Column(db.Integer, nullable=True)
     # время быстрой смены пленки
-    packing_reconfiguration = db.Column(db.Integer)
+    packing_reconfiguration = db.Column(db.Integer, nullable=True)
     # время смены формата пленки
-    packing_reconfiguration_format = db.Column(db.Integer)
+    packing_reconfiguration_format = db.Column(db.Integer, nullable=True)
     # связка с фасовщиком
     packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
+    # связка с варкой
+    boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
     # связка с линиями
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
     # связка с типом упаковки
@@ -46,6 +52,8 @@ class SKU(db.Model):
 '''
     Параметры термизатора.
 '''
+
+
 class Termizator(db.Model):
     __tablename__ = 'termizators'
     id = db.Column(db.Integer, primary_key=True)
@@ -74,6 +82,8 @@ class Termizator(db.Model):
 '''
     Параметры варки. Процент, приоритет, наличие лактозы
 '''
+
+
 class Boiling(db.Model):
     __tablename__ = 'boilings'
     id = db.Column(db.Integer, primary_key=True)
@@ -104,6 +114,8 @@ class Boiling(db.Model):
 '''
     Описание сыроизготовителя
 '''
+
+
 class CheeseMakers(db.Model):
     __tablename__ = 'cheesemakers'
     id = db.Column(db.Integer, primary_key=True)
@@ -121,6 +133,8 @@ class GlobalPouringProcess(db.Model):
 '''
     Описание процесса налива
 '''
+
+
 class Pouring(db.Model):
     __tablename__ = 'pourings'
     id = db.Column(db.Integer, primary_key=True)
@@ -140,6 +154,8 @@ class Pouring(db.Model):
 '''
     Процесс плавления
 '''
+
+
 class Melting(db.Model):
     __tablename__ = 'meltings'
     id = db.Column(db.Integer, primary_key=True)
@@ -155,6 +171,8 @@ class Melting(db.Model):
 '''
     Фасовщики
 '''
+
+
 class Packer(db.Model):
     __tablename__ = 'packers'
     id = db.Column(db.Integer, primary_key=True)
@@ -163,8 +181,8 @@ class Packer(db.Model):
 
     @staticmethod
     def generate_packer():
-        for name in ['Ульма', 'Мультиголова', 'Техновак', 'Мультиголова/Комета', 'малый Комет', 'САККАРДО',
-                     'Ручная работа']:
+        for name in ['Ульма', 'Мультиголова', 'Техновак', 'Мультиголова/Комет', 'малый Комет', 'САККАРДО',
+                     'САККАРДО другой цех', 'ручная работа']:
             packer = Packer(name=name)
             db.session.add(packer)
         db.session.commit()
@@ -179,10 +197,13 @@ class Packer(db.Model):
 '''
     Типы упаковок
 '''
+
+
 class PackType(db.Model):
     __tablename__ = 'pack_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
+    skus = db.relationship('SKU', backref='pack_types')
 
     @staticmethod
     def generate_types():
@@ -193,9 +214,12 @@ class PackType(db.Model):
             db.session.add(pack_type)
         db.session.commit()
 
+
 '''
     Линии
 '''
+
+
 class Line(db.Model):
     __tablename__ = 'lines'
     id = db.Column(db.Integer, primary_key=True)
@@ -254,4 +278,30 @@ def init_all():
     Termizator.generate_termizator()
 
 
-
+def init_sku():
+    with open('app/data/data.json', encoding='utf-8') as json_file:
+        data = json.load(json_file)
+    lines = db.session.query(Line).all()
+    boilings = db.session.query(Boiling).all()
+    packers = db.session.query(Packer).all()
+    packer_list = [x.name for x in packers]
+    print(packer_list)
+    try:
+        for d in data:
+            print(d['packer'])
+            print((d['packer'] in packer_list) or (d['packer'].replace(" ", "") in packer_list))
+            sku = SKU(
+                name=d['name'],
+                output_per_ton=d['output'],
+                packing_speed=d['packing_speed'],
+                shelf_life=int(d['shelf_life']),
+                line_id=[x.id for x in lines if x.name == d['line']][0],
+                boiling_id=[x.id for x in boilings if (x.percent == float(d['percent'])) and
+                            (x.ferment == d['ferment'].capitalize())][0],
+                packer_id=[x.id for x in packers if x.name == d['packer'] or x.name == d['packer'].replace(" ", "")][0]
+            )
+            db.session.add(sku)
+        db.session.commit()
+    except Exception as e:
+        print('Exception occurred {}'.format(e))
+        db.session.rollback()

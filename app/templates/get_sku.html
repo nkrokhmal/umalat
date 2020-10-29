@@ -56,10 +56,10 @@
     {% for sku in skus %}
     <tr>
         <td> {{sku.name}} </td>
-        <td> {{sku.size}} </td>
+        <td> {{sku.weight_netto}} </td>
         <td> {{sku.boiling.is_lactose}} </td>
         <td> {{sku.boiling.percent}} </td>
-        <td> {{sku.speed}} </td>
+        <td> {{sku.packing_speed}} </td>
         <td> {{sku.packing_reconfiguration}} </td>
         <td>
             <a href="{{ url_for('main.edit_sku', sku_id = sku.id)}}" class="edit-sku">

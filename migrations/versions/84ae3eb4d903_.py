@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 6b9ec3c03654
+Revision ID: 84ae3eb4d903
 Revises: 
-Create Date: 2020-10-28 12:58:10.457453
+Create Date: 2020-10-29 17:39:25.677450
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6b9ec3c03654'
+revision = '84ae3eb4d903'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -91,7 +91,6 @@ def upgrade():
     op.create_table('skus',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
-    sa.Column('boiling_id', sa.Integer(), nullable=True),
     sa.Column('brand_name', sa.String(), nullable=True),
     sa.Column('weight_netto', sa.Float(), nullable=True),
     sa.Column('weight_form_factor', sa.Float(), nullable=True),
@@ -101,6 +100,7 @@ def upgrade():
     sa.Column('packing_reconfiguration', sa.Integer(), nullable=True),
     sa.Column('packing_reconfiguration_format', sa.Integer(), nullable=True),
     sa.Column('packer_id', sa.Integer(), nullable=True),
+    sa.Column('boiling_id', sa.Integer(), nullable=True),
     sa.Column('line_id', sa.Integer(), nullable=True),
     sa.Column('pack_type_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['boiling_id'], ['boilings.id'], ),
