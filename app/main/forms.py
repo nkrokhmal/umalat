@@ -45,10 +45,11 @@ class SKUForm(FlaskForm):
     packing_reconfiguration = IntegerField('Введите на перенастройки быстрой упаковки', validators=[Optional()])
     packing_reconfiguration_format = IntegerField('Введите на перенастройки долгой упаковки', validators=[Optional()])
 
-    pack_type = SelectField('Выберите тип упаковки', coerce=int)
+    pack_type = SelectField('Выберите тип упаковки', coerce=int, default=-1)
     percent = SelectField('Выберите процент жира', coerce=int)
-    packer = SelectField('Выберите тип фасовщика', coerce=int)
-    line = SelectField('Выберите линию', coerce=int)
+    packer = SelectField('Выберите тип фасовщика', coerce=int, default=-1)
+    ferment = SelectField('Выберите тип закваски', coerce=int)
+    line = SelectField('Выберите линию', coerce=int, default=-1)
     is_lactose = SelectField('Выберите наличие лактозы', coerce=int)
 
     pack_types = None
@@ -64,11 +65,15 @@ class SKUForm(FlaskForm):
         self.lines = db.session.query(Line).all()
         self.pack_types = db.session.query(PackType).all()
 
-        self.line.choices = list(enumerate(set([x.name for x in self.lines])))
-        self.packer.choices = list(enumerate(set([x.name for x in self.packers])))
+        self.ferment.choices = list(enumerate(set([x.ferment for x in self.boilings])))
         self.percent.choices = list(enumerate(set([x.percent for x in self.boilings])))
         self.is_lactose.choices = list(enumerate(set([x.is_lactose for x in self.boilings])))
+        self.line.choices = list(enumerate(set([x.name for x in self.lines])))
+        self.line.choices.append((-1, ''))
+        self.packer.choices = list(enumerate(set([x.name for x in self.packers])))
+        self.packer.choices.append((-1, ''))
         self.pack_type.choices = list(enumerate(set([x.name for x in self.pack_types])))
+        self.pack_type.choices.append((-1, ''))
 
 
 class PouringProcessForm(FlaskForm):

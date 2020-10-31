@@ -14,7 +14,8 @@ def add_sku():
             name=form.name.data,
             boiling_id=[x.id for x in form.boilings if
                         x.percent == dict(form.percent.choices).get(form.percent.data) and
-                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0],
+                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data) and
+                        x.ferment == dict(form.ferment.choices).get(form.ferment.data)][0],
             brand_name=form.brand_name.data,
             weight_netto=form.weight_netto.data,
             weight_form_factor=form.weight_form_factor.data,
@@ -22,14 +23,21 @@ def add_sku():
             shelf_life=form.shelf_life.data,
             packing_speed=form.packing_speed.data,
             packing_reconfiguration=form.packing_reconfiguration.data,
-            packing_reconfiguration_format=form.packing_reconfiguration_format.data,
-            packer_id=[x.id for x in form.packers if
-                       x.name == dict(form.packer.choices).get(form.packer.data)][0],
-            line_id=[x.id for x in form.lines if
-                     x.name == dict(form.line.choices).get(form.line.data)][0],
-            pack_type_id=[x.id for x in form.pack_types if
-                          x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
+            packing_reconfiguration_format=form.packing_reconfiguration_format.data
         )
+
+        if form.line.data != '':
+            sku.line_id = [x.id for x in form.packers if
+                       x.name == dict(form.packer.choices).get(form.packer.data)][0]
+
+        if form.packer.data != '':
+            sku.packer_id = [x.id for x in form.packers if
+                         x.name == dict(form.packer.choices).get(form.packer.data)][0]
+
+        if form.pack_type.data != '':
+            sku.pack_type_id = [x.id for x in form.pack_types if
+                          x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
+
         db.session.add(sku)
         try:
             db.session.commit()
@@ -72,9 +80,10 @@ def edit_sku(sku_id):
 
         sku.packer_id = [x.id for x in form.packers if
                          x.name == dict(form.packer.choices).get(form.packer.data)][0]
-        sku.boiling_id = [x.id for x in form.boilings if
-                          x.percent == dict(form.percent.choices).get(form.percent.data) and
-                          x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data)][0]
+        sku.boiling_id=[x.id for x in form.boilings if
+                        x.percent == dict(form.percent.choices).get(form.percent.data) and
+                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data) and
+                        x.ferment == dict(form.ferment.choices).get(form.ferment.data)][0]
         sku.line_id = [x.id for x in form.lines if
                        x.name == dict(form.line.choices).get(form.line.data)][0]
         sku.pack_type_id = [x.id for x in form.pack_types if
@@ -85,6 +94,7 @@ def edit_sku(sku_id):
     if sku.boiling is not None:
         generate_default_value(form.percent, sku.boiling.percent)
         generate_default_value(form.is_lactose, sku.boiling.is_lactose)
+        generate_default_value(form.ferment, sku.boiling.ferment)
 
     if sku.lines is not None:
         generate_default_value(form.line, sku.lines.name)
