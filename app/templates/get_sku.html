@@ -68,22 +68,22 @@
     <thead>
         <tr>
             <th> Название SKU  </th>
-            <th> Размер упаковки </th>
+            <th> Форм фактор </th>
+            <th> Бренд </th>
             <th> Наличие лактозы </th>
             <th> Процент </th>
-            <th> Скорость упаковки </th>
-            <th> Время на перенастройку </th>
+            <th> Закваска </th>
             <th> Действия </th>
         </tr>
     </thead>
     {% for sku in skus %}
     <tr>
         <td> {{sku.name}} </td>
-        <td> {{sku.weight_netto}} </td>
+        <td> {{sku.form_factor}} </td>
+        <td> {{sku.brand_name}} </td>
         <td> {{sku.boiling.is_lactose}} </td>
         <td> {{sku.boiling.percent}} </td>
-        <td> {{sku.packing_speed}} </td>
-        <td> {{sku.packing_reconfiguration}} </td>
+        <td> {{sku.boiling.ferment}} </td>
         <td>
             <a href="{{ url_for('main.edit_sku', sku_id = sku.id)}}" class="edit-sku">
                 <i class="material-icons" style="color:green" title="Edit"> &#xe3c9; </i>
