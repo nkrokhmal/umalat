@@ -91,7 +91,6 @@ class RequestForm(FlaskForm):
     validators = [
         FileRequired(message='There was no file!')
     ]
-
     input_file = FileField('', validators=validators)
     request_day = DateTimeField('Which date is your favorite?', format="%Y-%m-%d", default=datetime.today, validators=[Required()])
     submit = SubmitField(label="Submit")
