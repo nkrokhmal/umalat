@@ -78,16 +78,19 @@ def edit_sku(sku_id):
         sku.packing_reconfiguration = form.packing_reconfiguration.data
         sku.packing_reconfiguration_format = form.packing_reconfiguration_format.data
 
-        sku.packer_id = [x.id for x in form.packers if
-                         x.name == dict(form.packer.choices).get(form.packer.data)][0]
-        sku.boiling_id=[x.id for x in form.boilings if
+        sku.boiling_id = [x.id for x in form.boilings if
                         x.percent == dict(form.percent.choices).get(form.percent.data) and
                         x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data) and
                         x.ferment == dict(form.ferment.choices).get(form.ferment.data)][0]
-        sku.line_id = [x.id for x in form.lines if
-                       x.name == dict(form.line.choices).get(form.line.data)][0]
-        sku.pack_type_id = [x.id for x in form.pack_types if
-                            x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
+        if form.packer.data != -1:
+            sku.packer_id = [x.id for x in form.packers if
+                             x.name == dict(form.packer.choices).get(form.packer.data)][0]
+        if form.line.data != -1:
+            sku.line_id = [x.id for x in form.lines if
+                           x.name == dict(form.line.choices).get(form.line.data)][0]
+        if form.pack_type.data != -1:
+            sku.pack_type_id = [x.id for x in form.pack_types if
+                                x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
         db.session.commit()
         return redirect(url_for('.get_sku'))
 

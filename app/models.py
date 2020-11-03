@@ -35,6 +35,8 @@ class SKU(db.Model):
     shelf_life = db.Column(db.Integer)
     # Скорость фасовки
     packing_speed = db.Column(db.Integer, nullable=True)
+    # форм фактор
+    form_factor = db.Column(db.String, nullable=True)
     # время быстрой смены пленки
     packing_reconfiguration = db.Column(db.Integer, nullable=True)
     # время смены формата пленки
@@ -52,8 +54,6 @@ class SKU(db.Model):
 '''
     Параметры термизатора.
 '''
-
-
 class Termizator(db.Model):
     __tablename__ = 'termizators'
     id = db.Column(db.Integer, primary_key=True)
@@ -286,20 +286,19 @@ def init_sku():
     lines = db.session.query(Line).all()
     boilings = db.session.query(Boiling).all()
     packers = db.session.query(Packer).all()
-    packer_list = [x.name for x in packers]
-    print(packer_list)
     try:
         for d in data:
-            print(d['packer'])
-            print((d['packer'] in packer_list) or (d['packer'].replace(" ", "") in packer_list))
             sku = SKU(
                 name=d['name'],
+                brand_name=d['brand'],
+                form_factor=d['form_factor'],
                 output_per_ton=d['output'],
                 packing_speed=d['packing_speed'],
                 shelf_life=int(d['shelf_life']),
                 line_id=[x.id for x in lines if x.name == d['line']][0],
                 boiling_id=[x.id for x in boilings if (x.percent == float(d['percent'])) and
-                            (x.ferment == d['ferment'].capitalize())][0],
+                            (x.ferment == d['ferment'].capitalize()) and
+                            (x.is_lactose == d['is_lactose'])][0],
                 packer_id=[x.id for x in packers if x.name == d['packer'] or x.name == d['packer'].replace(" ", "")][0]
             )
             db.session.add(sku)

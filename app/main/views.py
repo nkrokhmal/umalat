@@ -187,6 +187,11 @@ def parse_request():
     return render_template('parse_request.html', data=data, form=form)
 
 
+@main.route('/process_request', methods=['GET', 'POST'])
+def process_request():
+    pass
+
+
 @main.route('/get_lines', methods=['GET', 'POST'])
 def get_lines():
     lines = db.session.query(Line).all()
