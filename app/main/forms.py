@@ -10,22 +10,22 @@ from datetime import datetime
 
 class BoilingForm(FlaskForm):
     # Процессы самой варки
-    percent = FloatField('Enter percentage', validators=[Required()])
-    priority = IntegerField('Enter priority', validators=[Required()])
-    is_lactose = BooleanField('Enter is lactose')
+    percent = FloatField('Enter percentage', validators=[Optional()])
+    priority = IntegerField('Enter priority', validators=[Optional()])
+    is_lactose = BooleanField('Enter is lactose', validators=[Optional()])
     ferment = SelectField('Выберите фермент', coerce=int)
-    pouring_time = IntegerField('Enter pouring time', validators=[Required()])
-    soldification_time = IntegerField('Enter soldification time', validators=[Required()])
-    cutting_time = IntegerField('Enter cutting time', validators=[Required()])
-    pouring_off_time = IntegerField('Enter pouring off time', validators=[Required()])
-    extra_time = IntegerField('Enter extra time', [Required()])
+    pouring_time = IntegerField('Enter pouring time', validators=[Optional()])
+    soldification_time = IntegerField('Enter soldification time', validators=[Optional()])
+    cutting_time = IntegerField('Enter cutting time', validators=[Optional()])
+    pouring_off_time = IntegerField('Enter pouring off time', validators=[Optional()])
+    extra_time = IntegerField('Enter extra time', validators=[Optional()])
     # Процессы плавления
-    serving_time = IntegerField('Enter serving time', [Required()])
-    melting_time = IntegerField('Enter melting time', [Required()])
-    speed = IntegerField('Enter speed', [Required()])
-    first_cooling_time = IntegerField('Enter first cooling time', [Required()])
-    second_cooling_time = IntegerField('Enter seconds cooling time', [Required()])
-    salting_time = IntegerField('Enter salting time', [Required()])
+    serving_time = IntegerField('Enter serving time', validators=[Optional()])
+    melting_time = IntegerField('Enter melting time', validators=[Optional()])
+    speed = IntegerField('Enter speed', validators=[Optional()])
+    first_cooling_time = IntegerField('Enter first cooling time', validators=[Optional()])
+    second_cooling_time = IntegerField('Enter seconds cooling time', validators=[Optional()])
+    salting_time = IntegerField('Enter salting time', validators=[Optional()])
     # сабмит
     submit = SubmitField('Submit')
 
