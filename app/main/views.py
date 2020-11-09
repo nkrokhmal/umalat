@@ -172,7 +172,18 @@ def get_packings(boiling_id):
 @main.route('/parse_request', methods=['GET', 'POST'])
 def parse_request():
     form = RequestForm()
+    result_list = []
     if request.method == 'POST' and form.validate_on_submit():
+        skus = db.session.query(SKU).all()
+
+        group_items = [{
+            "Ferment": x.boiling.ferment,
+            "IsLactose": x.boiling.is_lactose,
+            "Percent": x.boiling.percent,
+            "FormFactor": x.form_factor
+        } for x in skus.copy()]
+        group_items = [dict(x) for x in set(frozenset(d.items()) for d in group_items)]
+
         file_bytes = request.files['input_file'].read()
         df = pd.read_excel(BytesIO(file_bytes), index_col=0)
         df.columns = range(df.shape[1])
@@ -180,11 +191,41 @@ def parse_request():
         df = df.loc[['Дата выработки продукции:',
                      'Заявлено всего, кг:',
                      'Фактические остатки на складах - Заявлено, кг:',
-                     'Нормативные остатки, кг']].fillna(0)
+                     'Нормативные остатки, кг']].fillna(0).iloc[:, :-1]
         data = list(zip(*df.values.tolist()))
-        return render_template('parse_request.html', data=data, form=form)
+
+        full_list = []
+        sku_for_create = []
+        for item in data:
+            sku = [x for x in skus if x.name == item[0]]
+            if sku is not None and len(sku) > 0:
+                full_list.append({
+                    "SKU": sku[0],
+                    "Request": item[2]
+                })
+            else:
+                sku_for_create.append(item[0])
+        flash('No SKU: {}'.format(sku_for_create))
+
+        for group_item in group_items:
+            group_sku = [x for x in full_list if
+                                 x["SKU"].boiling.ferment == group_item["Ferment"] and
+                                 x["SKU"].boiling.is_lactose == group_item["IsLactose"] and
+                                 x["SKU"].boiling.percent == group_item["Percent"] and
+                                 x["SKU"].form_factor == group_item["FormFactor"]]
+            if group_sku is not None:
+                output_weight = group_sku[0]["SKU"].output_per_ton
+                request_weight = sum([x["Request"] for x in group_sku])
+                result_list.append({
+                    "GroupSKU": group_sku,
+                    "BoilingId": group_sku[0]["SKU"].boiling_id,
+                    "BoilingCount": request_weight / output_weight
+                })
+        print(result_list)
+        return render_template('parse_request.html', data=data, form=form, result_list=result_list)
     data = None
-    return render_template('parse_request.html', data=data, form=form)
+    request_list = None
+    return render_template('parse_request.html', data=data, form=form, result_list=result_list)
 
 
 @main.route('/process_request', methods=['GET', 'POST'])
