@@ -13,13 +13,15 @@
     {{ wtf.quick_form(form) }}
 </div>
 
-<div class="col-md-12" style="margin-bottom: 20px;">
-    <input type="button" id="show_table" value="Показать/Свернуть">
-</div>
+{% if data is not none %}
+    <div class="col-md-12" style="margin-bottom: 20px;">
+        <input type="button" id="show_table" value="Показать/Свернуть">
+    </div>
+{% endif %}
 
+{% if data is not none %}
 <div id="display_table" class="placeholder">
-    {% if data is not none %}
-    <table id="sku_table" class="table table-hover sku request">
+    <table id="sku_table" class="table table-hover sku request" style="display:none">
         <thead>
             <tr>
                 <th> Название SKU  </th>
@@ -37,13 +39,13 @@
         </tr>
         {% endfor %}
     </table>
-    {% endif %}
 </div>
+{% endif %}
 
 <script type="text/javascript">
 document.getElementById("show_table").addEventListener("click", function(button) {
     if (document.getElementById("sku_table").style.display === "none") {
-        console.log("element is none");
+        console.log("Element is none");
         document.getElementById("sku_table").style.display = "block";
     }
     else {
