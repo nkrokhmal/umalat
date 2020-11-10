@@ -5,6 +5,18 @@
 {% block title %}Parse request{% endblock %}
 {% block page_content %}
 
+<link rel="stylesheet" type="text/css" href="static/css/templates/parse_request.css" />
+<link href="static/css/datatables2.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+
+
+<script type='text/javascript' src="static/js/jquery.min.js"></script>
+<script type='text/javascript' src="static/js/bootstrap.min.js"></script>
+<script type='text/javascript' src="static/js/mdb.min.js"></script>
+<script type='text/javascript' src="static/js/datatables2.min.js" defer></script>
+<script type='text/javascript' src="static/js/templates/parse_request.js"></script>
 
 <div class="page-header">
     <h1> Загрузите файл заявки и выберите дату </h1>
@@ -13,11 +25,41 @@
     {{ wtf.quick_form(form) }}
 </div>
 
+
+<div id="display_result" class="placeholder">
+    {% if result_list is not none %}
+    <table id="result_table" class="table table-hover result request">
+        <thead>
+            <tr>
+                <th> Форм фактор </th>
+                <th> Процент </th>
+                <th> Наличие лактозы </th>
+                <th> Закваска </th>
+                <th> Количество варок </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for d in result_list %}
+            <tr>
+                <td> {{d["GroupSKU"][0]["SKU"].form_factor}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].boiling.percent}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].boiling.is_lactose}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].boiling.ferment}} </td>
+                <td> {{d["BoilingCount"]}} </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+
 {% if data is not none %}
     <div class="col-md-12" style="margin-bottom: 20px;">
         <input type="button" id="show_table" value="Показать/Свернуть">
     </div>
 {% endif %}
+
 
 {% if data is not none %}
 <div id="display_table" class="placeholder">

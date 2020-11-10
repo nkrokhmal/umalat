@@ -3,11 +3,14 @@ from flask import jsonify
 from werkzeug.utils import redirect
 from . import main
 from .. import db
+from .. utils.excel_client import *
 from .forms import PouringProcessForm, BoilingForm, RequestForm
 from ..models import SKU, Boiling, GlobalPouringProcess, Melting, Pouring, Line, Termizator, Packer,\
     Departmenent
 import pandas as pd
 from io import BytesIO
+import os
+from datetime import datetime
 
 
 @main.route('/')
@@ -168,14 +171,15 @@ def add_boilings():
 def get_packings(boiling_id):
     pass
 
-
 @main.route('/parse_request', methods=['GET', 'POST'])
 def parse_request():
     form = RequestForm()
     result_list = []
     if request.method == 'POST' and form.validate_on_submit():
-        skus = db.session.query(SKU).all()
+        date = form.date.data
+        # create excel file for request
 
+        skus = db.session.query(SKU).all()
         group_items = [{
             "Ferment": x.boiling.ferment,
             "IsLactose": x.boiling.is_lactose,
@@ -186,6 +190,7 @@ def parse_request():
 
         file_bytes = request.files['input_file'].read()
         df = pd.read_excel(BytesIO(file_bytes), index_col=0)
+        df_save = df.copy()
         df.columns = range(df.shape[1])
         df = df[df.loc['Дата выработки продукции:'].dropna().index]
         df = df.loc[['Дата выработки продукции:',
@@ -221,10 +226,11 @@ def parse_request():
                     "BoilingId": group_sku[0]["SKU"].boiling_id,
                     "BoilingCount": request_weight / output_weight
                 })
-        print(result_list)
+
+        build_plan(date, df_save, request_list=result_list)
         return render_template('parse_request.html', data=data, form=form, result_list=result_list)
     data = None
-    request_list = None
+    result_list = None
     return render_template('parse_request.html', data=data, form=form, result_list=result_list)
 
 
@@ -256,137 +262,4 @@ def get_department():
     departments = db.session.query(Departmenent).all()
     return jsonify([x.serialize() for x in departments])
 
-# @main.route('/add_pouring_process', methods=['GET', 'POST'])
-# def add_pouring_process():
-#     pass
-#
-#
-# @main.route('/delete_pouring_process/<int:pouring_process_id>', methods=['DELETE'])
-# def delete_pouring_process(pouring_process_id):
-#     pass
-#
-#
-# @main.route('/edit_pouring_process/<int:pouring_process_id>', methods=['GET', 'POST'])
-# def edit_pouring_process(pouring_process_id):
-#     pass
-#
-#
-# @main.route('/get_melting_process', methods=['GET', 'POST'])
-# def get_melting_process():
-#     pass
-#
-#
-# @main.route('/add_melting_process', methods=['GET', 'POST'])
-# def add_melting_process():
-#     pass
-#
-#
-# @main.route('/delete_melting_process/<int:melting_process_id>', methods=['DELETE'])
-# def delete_melting_process(melting_process_id):
-#     pass
-#
-#
-# @main.route('/edit_melting_process/<int:melting_process_id>', methods=['GET', 'POST'])
-# def edit_melting_process():
-#     pass
 
-
-
-
-
-
-
-
-# @main.route('/cheeses', methods=['GET', 'POST'])
-# def cheeses():
-#     page = request.args.get('page', 1, type=int)
-#     pagination = db.session.query(Cheese)\
-#         .order_by(Cheese.cheese_name)\
-#         .paginate(
-#             page, per_page=current_app.config['CHEESE_PER_PAGE'],
-#             error_out=False
-#     )
-#     cheeses = pagination.items
-#     return render_template('cheeses.html', cheeses=cheeses, pagination=pagination, endpoint='.cheeses')
-#
-#
-# @main.route('/edit_cheese/<int:id>', methods=['GET', 'POST'])
-# def edit_cheese(id):
-#     form = CheeseForm()
-#     cheese = db.session.query(Cheese).get_or_404(id)
-#     print(cheese.cutting_time)
-#     if form.validate_on_submit():
-#         cheese.cheese_name = form.cheese_name.data
-#         cheese.leaven_time = form.leaven_time.data
-#         cheese.solidification_time = form.solidification_time.data
-#         cheese.draining_time = form.draining_time.data
-#         cheese.cutting_time = form.cutting_time.data
-#         cheese.cheese_maker = db.session.query(CheeseMaker).get(form.cheese_maker.data)
-#         db.session.add(cheese)
-#         db.session.commit()
-#         return redirect(url_for('.cheeses'))
-#     form.cheese_name.data = cheese.cheese_name
-#     form.leaven_time.data = cheese.leaven_time
-#     form.solidification_time.data = cheese.solidification_time
-#     form.cutting_time.data = cheese.cutting_time
-#     form.draining_time.data = cheese.draining_time
-#     form.cheese_maker.data = cheese.cheese_maker_id
-#     return render_template('edit_cheese.html', form=form)
-#
-#
-# @main.route('/delete_cheese/<int:id>', methods=['DELETE'])
-# def delete_cheese(id):
-#     cheese = db.session.query(Cheese).get_or_404(id)
-#     if cheese:
-#         db.session.delete(cheese)
-#         db.session.commit()
-#     return redirect(url_for('.cheeses'))
-#
-#
-# @main.route('/add_cheese', methods=['GET', 'POST'])
-# def add_cheese():
-#     form = CheeseForm()
-#     if form.validate_on_submit():
-#         cheese = Cheese(
-#             cheese_name=form.cheese_name.data,
-#             leaven_time=form.leaven_time.data,
-#             solidification_time=form.solidification_time.data,
-#             cutting_time=form.cutting_time.data,
-#             draining_time=form.draining_time.data,
-#             cheese_maker=db.session.query(CheeseMaker).get(form.cheese_maker.data)
-#         )
-#         db.session.add(cheese)
-#         db.session.commit()
-#         return redirect(url_for('.cheeses'))
-#     return render_template('add_cheese.html', form=form)
-#
-#
-# @main.route('/cheese_makers', methods=['GET', 'POST'])
-# def cheese_makers():
-#     page = request.args.get('page', 1, type=int)
-#     pagination = db.session.query(CheeseMaker)\
-#         .order_by(CheeseMaker.cheese_maker_name)\
-#         .paginate(
-#         page, per_page=current_app.config['CHEESE_MAKER_PER_PAGE'],
-#         error_out=False
-#     )
-#     cheese_makers = pagination.items
-#     return render_template('cheese_makers.html', cheese_makers=cheese_makers)
-#
-#
-# @main.route('/add_cheese_maker', methods=['GET', 'POST'])
-# def add_cheese_maker():
-#     form = CheeseMakerForm()
-#     if form.validate_on_submit():
-#         cheese_maker = CheeseMaker(
-#             cheese_maker_name=form.cheese_maker_name.data
-#         )
-#         db.session.add(cheese_maker)
-#         db.session.commit()
-#         return redirect(url_for('.index'))
-#     return render_template('add_cheese_maker.html', form=form)
-#
-#
-# @main.route('/cheese_scheduler', methods=['GET', 'POST'])
-# def cheese_scheduler():
-#     return render_template('cheese_scheduler.html')

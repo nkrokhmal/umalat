@@ -3,7 +3,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class BaseClass:
-    SECRET_KEY = 'Umalat'
+    SECRET_KEY = 'Umalat2'
     CHEESE_PER_PAGE = 10
     CHEESE_MAKER_PER_PAGE = 10
     SKU_PER_PAGE = 100
