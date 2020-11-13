@@ -13,3 +13,4 @@ flask_wtf
 pandas
 xlrd
 flask_admin
+openpyxl

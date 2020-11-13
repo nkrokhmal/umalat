@@ -171,6 +171,7 @@ def add_boilings():
 def get_packings(boiling_id):
     pass
 
+
 @main.route('/parse_request', methods=['GET', 'POST'])
 def parse_request():
     form = RequestForm()
