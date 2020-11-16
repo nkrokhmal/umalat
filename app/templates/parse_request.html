@@ -18,16 +18,27 @@
 <script type='text/javascript' src="static/js/datatables2.min.js" defer></script>
 <script type='text/javascript' src="static/js/templates/parse_request.js"></script>
 
+
 <div class="page-header">
     <h1> Загрузите файл заявки и выберите дату </h1>
 </div>
-<div class="col-md-12" style="margin-bottom: 20px;">
+<div class="col-md-6" style="margin-bottom: 20px;">
     {{ wtf.quick_form(form) }}
 </div>
 
+{% if result_path %}
+    <div class="col-md-6" style="margin-bottom: 20px;">
+        <a href="{{result_path}}"><button class="btn"><i class="fa fa-download"></i> Download </button></a>
+        <br>
+        <br>
+        <a href="{{schedule}}"> Перейти к созданию плана </a>
+    </div>
+{% endif %}
 
-<div id="display_result" class="placeholder">
+
+<div id="display_result" class="col-md-12" style="margin-bottom: 20px;">
     {% if result_list is not none %}
+    <h1> Количество варок по запросу </h1>
     <table id="result_table" class="table table-hover result request">
         <thead>
             <tr>
@@ -45,7 +56,7 @@
                 <td> {{d["GroupSKU"][0]["SKU"].boiling.percent}} </td>
                 <td> {{d["GroupSKU"][0]["SKU"].boiling.is_lactose}} </td>
                 <td> {{d["GroupSKU"][0]["SKU"].boiling.ferment}} </td>
-                <td> {{d["BoilingCount"]}} </td>
+                <td> {{d["BoilingCount"]|round|int}} </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -56,13 +67,14 @@
 
 {% if data is not none %}
     <div class="col-md-12" style="margin-bottom: 20px;">
+        <h1> Заявка </h1>
         <input type="button" id="show_table" value="Показать/Свернуть">
     </div>
 {% endif %}
 
 
 {% if data is not none %}
-<div id="display_table" class="placeholder">
+<div id="display_table" class="col-md-12" style="margin-bottom: 20px;">
     <table id="sku_table" class="table table-hover sku request" style="display:none">
         <thead>
             <tr>

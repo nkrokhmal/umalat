@@ -92,7 +92,16 @@ class RequestForm(FlaskForm):
         FileRequired(message='There was no file!')
     ]
     input_file = FileField('', validators=validators)
-    date = DateTimeField('Which date is your favorite?', format="%Y-%m-%d", default=datetime.today, validators=[Required()])
+    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.today, validators=[Required()])
+    submit = SubmitField(label="Submit")
+
+
+class ScheduleForm(FlaskForm):
+    validators = [
+        FileRequired(message='Отсутствует файл!')
+    ]
+    input_file = FileField('', validators=validators)
+    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.today, validators=[Required()])
     submit = SubmitField(label="Submit")
 
 

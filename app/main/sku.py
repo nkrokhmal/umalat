@@ -123,6 +123,15 @@ def edit_sku(sku_id):
     return render_template('edit_sku.html', form=form)
 
 
+@main.route('/delete_sku/<int:sku_id>', methods=['DELETE'])
+def delete_sku(sku_id):
+    sku = db.session.query(SKU).get_or_404(sku_id)
+    if sku:
+        db.session.delete(sku)
+        db.session.commit()
+    return redirect(url_for('.get_sku'))
+
+
 def generate_default_value(form, val):
     for key, value in dict(form.choices).items():
         if value == val:

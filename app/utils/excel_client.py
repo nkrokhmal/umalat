@@ -6,7 +6,8 @@ from openpyxl.utils import FORMULAE
 
 def build_plan(date, df, request_list):
     filename = '{}_{}.xlsx'.format('plan', date.strftime('%Y-%m-%d'))
-    path = '{}/{}'.format('data/plan', filename)
+    loc_path = '{}/{}'.format('data/plan', filename)
+    path = '{}/{}'.format('app/data/plan', filename)
 
     with pd.ExcelWriter(path) as writer:
         df.to_excel(writer, sheet_name='файл остатки')
@@ -78,3 +79,4 @@ def build_plan(date, df, request_list):
         cur_row = max(result_row, cur_row) + space_rows
 
     wb.save(path)
+    return loc_path

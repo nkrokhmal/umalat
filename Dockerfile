@@ -11,6 +11,7 @@ COPY ./app .
 COPY config.py .
 COPY data.sqlite .
 COPY manage.py .
+COPY data .
 
 EXPOSE 8000
 
