@@ -71,7 +71,7 @@
         <tr>
             <th> Процент </th>
             <th> Наличие лактозы </th>
-            <th> Закваска </th>>
+            <th> Закваска </th>
             <th> Приоритет </th>
             <th> Параметры варки </th>
             <th> Параметры плавления </th>
@@ -96,11 +96,41 @@
         <td width="33%">
             <table width="100%">
                 <tr><td> Подача и вымешивание </td><td>{{boiling.meltings.serving_time}}</td></tr>
-                <tr><td> Плавление </td><td>{{boiling.meltings.melting_time}}</td></tr>
-                <tr><td> Скорость </td><td>{{boiling.meltings.speed}}</td></tr>
-                <tr><td> Время охлажения 1 </td><td>{{boiling.meltings.first_cooling_time}}</td></tr>
-                <tr><td> Время охлаждения 2 </td><td>{{boiling.meltings.second_cooling_time}}</td></tr>
-                <tr><td> Время посолки </td><td>{{boiling.meltings.salting_time}}</td></tr>
+                <tr><td> Плавление </td><td>
+                    {% if boiling.meltings.melting_time %}
+                        {{boiling.meltings.melting_time}}
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                </td></tr>
+                <tr><td> Скорость </td><td>
+                    {% if boiling.meltings.speed %}
+                        {{boiling.meltings.speed}}
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                </td></tr>
+                <tr><td> Время охлажения 1 </td><td>
+                    {% if boiling.meltings.first_cooling_time %}
+                        {{boiling.meltings.first_cooling_time}}
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                </td></tr>
+                <tr><td> Время охлаждения 2 </td><td>
+                    {% if boiling.meltings.second_cooling_time %}
+                        {{boiling.meltings.second_cooling_time}}
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                </td></tr>
+                <tr><td> Время посолки </td><td>
+                    {% if boiling.meltings.salting_time %}
+                        {{boiling.meltings.salting_time}}
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                </td></tr>
           </table>
         </td>
         <td>
