@@ -1,9 +1,12 @@
-from flask import session, url_for, render_template, flash, request, make_response, current_app, request
+from flask import url_for, render_template, flash, request, make_response, current_app, request
 from werkzeug.utils import redirect
 from . import main
+from .errors import bad_request
 from .. import db
 from .forms import SKUForm
 from ..models import SKU
+from sqlalchemy import or_, and_
+from flask_restplus import reqparse
 
 
 @main.route('/add_sku', methods=['POST', 'GET'])
@@ -28,15 +31,15 @@ def add_sku():
 
         if form.line.data != '':
             sku.line_id = [x.id for x in form.packers if
-                       x.name == dict(form.packer.choices).get(form.packer.data)][0]
+                           x.name == dict(form.packer.choices).get(form.packer.data)][0]
 
         if form.packer.data != '':
             sku.packer_id = [x.id for x in form.packers if
-                         x.name == dict(form.packer.choices).get(form.packer.data)][0]
+                             x.name == dict(form.packer.choices).get(form.packer.data)][0]
 
         if form.pack_type.data != '':
             sku.pack_type_id = [x.id for x in form.pack_types if
-                          x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
+                                x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
 
         db.session.add(sku)
         try:
@@ -51,16 +54,26 @@ def add_sku():
 
 @main.route('/get_sku', methods=['GET'])
 def get_sku():
-    form = SKUForm()
-    page = request.args.get('page', 1, type=int)
-    pagination = db.session.query(SKU) \
-        .order_by(SKU.name) \
-        .paginate(
-            page, per_page=current_app.config['SKU_PER_PAGE'],
-            error_out=False
-    )
-    skus = pagination.items
-    return render_template('get_sku.html', form=form, skus=skus, paginations=pagination, endopoints='.get_sku')
+    try:
+        sku_ids = request.args.getlist('sku_id')
+        sku_names = request.args.getlist('sku_name')
+        packer_names = request.args.getlist('packer_name')
+
+        form = SKUForm()
+        page = request.args.get('page', 1, type=int)
+        pagination = db.session.query(SKU) \
+            .filter(and_(SKU.id.in_(sku_ids), len(sku_ids) != 0)) \
+            .filter(and_(SKU.name.in_(sku_names), len(sku_names) != 0)) \
+            .filter(and_(SKU.packer.name.in_(packer_names), len(packer_names) != 0)) \
+            .order_by(SKU.name) \
+            .paginate(
+                page, per_page=current_app.config['SKU_PER_PAGE'],
+                error_out=False
+        )
+        skus = pagination.items
+        return render_template('get_sku.html', form=form, skus=skus, paginations=pagination, endopoints='.get_sku')
+    except Exception as e:
+        return bad_request(e)
 
 
 @main.route('/edit_sku/<int:sku_id>', methods=['GET', 'POST'])

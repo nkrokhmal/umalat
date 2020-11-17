@@ -58,11 +58,11 @@ def parse_request():
                                  x["SKU"].form_factor == group_item["FormFactor"]]
             if group_sku is not None:
                 output_weight = group_sku[0]["SKU"].output_per_ton
-                request_weight = sum([x["Request"] for x in group_sku])
+                request_weight = sum([x["Request"] for x in group_sku if x["Request"] < 0])
                 result_list.append({
                     "GroupSKU": group_sku,
                     "BoilingId": group_sku[0]["SKU"].boiling_id,
-                    "BoilingCount": request_weight / output_weight
+                    "BoilingCount": - request_weight / output_weight
                 })
 
         result_path = build_plan(date, df_save, request_list=result_list)
