@@ -1,12 +1,19 @@
 import copy
-import interval
+
+
+import portion
+def cast_interval(a, b):
+    return portion.openclosed(a, b)
+
+def calc_interval_length(i):
+    if i.empty:
+        return 0
+    return sum([c.upper - c.lower for c in i])
+
 
 PERIODS_PER_HOUR = 12
 PERIODS_PER_DAY = 24 * PERIODS_PER_HOUR
 
-
-def calc_interval_length(i):
-    return sum([c[1] - c[0] for c in i])
 
 
 def validate(b1, b2):
@@ -32,24 +39,26 @@ class Block:
 
         self.children = []
         self.local_props = props or {}
-        self.update_props()
 
-    def update_props(self):
+    @property
+    def props(self):
         if self.parent:
             # accumulated keys
-            self.props = copy.deepcopy(self.parent.props)
+            res = copy.deepcopy(self.parent.props)
         else:
-            self.props = {}
+            res = {}
 
         for key in self.local_props:
-            if key not in self.props:
-                self.props[key] = self.local_props[key]
+            if key not in res:
+                res[key] = self.local_props[key]
             else:
                 # both contain key
                 if key in ['t', 'y']:  # accumulated keys
-                    self.props[key] = self.props[key] + self.local_props[key]
+                    res[key] = res[key] + self.local_props[key]
                 else:
-                    self.props[key] = self.local_props[key]
+                    res[key] = self.local_props[key]
+        return res
+
 
     @property
     def beg(self):
@@ -65,7 +74,7 @@ class Block:
 
     @property
     def interval(self):
-        return interval.interval[self.beg, self.end]
+        return cast_interval(self.beg, self.end)
 
     def __str__(self):
         res = f'{self.block_class} {self.local_props}\n'
@@ -86,7 +95,6 @@ class Block:
 
         while cur_t < before:
             block.local_props['t'] = cur_t
-            block.update_props()
 
             validated = self.validate(block)
 
@@ -136,21 +144,57 @@ class Block:
         else:
             raise Exception(f'Unknown key type {key}')
 
+    def __iter__(self):
+        yield self
+        for child in self.children:
+            for b in child:
+                yield b
 
 if __name__ == '__main__':
-    root = Block('boiling', props={'block_num': 12})
+    root = Block('root', t=10)
 
-    with root as boiling:
-        total_size = 27
-        with boiling.make('water_pouring', y=6) as water_pouring:
-            with water_pouring.make(y=0) as upper_block:
-                upper_block.make('pouring', size=6, block_num=12)
-                upper_block.make('pouring_name', size=total_size - 6, name='чильеджина  3,6 альче  8500кг')
-            with water_pouring.make(y=1) as lower_block:
-                lower_block.make('pouring_and_fermenting', size=8)
-                lower_block.make('soldification', size=7)
-                lower_block.make('cutting', size=7)
-                lower_block.make('pouring_off', size=3)
-                lower_block.make('extra', size=total_size - 8 - 8 - 7 - 3)
+    with root.make('boiling', block_num=12) as boiling:
+        with boiling.make('water_pouring', y=6, method='add') as water_pouring:
+            total_size = 27
 
-    print(root)
+            with water_pouring.make(y=0) as b:
+                b.make('pouring_label', size=6, block_num=12)
+                b.make('pouring_name', size=total_size - 6, name='чильеджина  3,6 альче  8500кг')
+            with water_pouring.make(y=1) as b:
+                b.make('pouring_and_fermenting', size=8)
+                b.make('soldification', size=7)
+                b.make('cutting', size=7)
+                b.make('pouring_off', size=3)
+                b.make('extra', size=total_size - 8 - 8 - 7 - 3)
+
+        boiling.make('termizator', size=6, visible=False)
+
+        with boiling.make('melting', y=10, method='add') as melting:
+            total_size = 25
+            with melting.make(y=0) as b:
+                b.make('melting_label', size=3)
+                b.make('melting_name', size=total_size - 3, name='чильеджина 5кг/сердечки/фдл 0,125(безлактозная)/0,1')
+            with melting.make(y=1) as b:
+                b.make('serving', size=6)
+                b.make('melting_process', size=total_size - 6, speed=900)
+            with melting.make(y=2) as b:
+                b.make(size=6, visible=False)
+
+                b.make('cooling1', size=5)
+                b.make('cooling2', size=10)
+
+        with boiling.make('packing', y=14, method='add') as packing:
+            total_size = 25
+            with packing.make(y=0) as b:
+                b.make('packing_label', size=3)
+                b.make('packing_name', size=total_size - 3, name='чильеджина 5кг/сердечки/фдл 0,125(безлактозная)/0,1')
+            with packing.make(y=1) as b:
+                b.make('packing_brand', size=total_size, name='безлактозная/претто')
+            with packing.make(y=2) as b:
+                b.make('configuration', size=3, visible=False)
+                b.make('configuration', size=1)
+                b.make('configuration', size=5, visible=False)
+                b.make('configuration', size=1)
+
+    for b in root:
+        print(b)
