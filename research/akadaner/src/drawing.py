@@ -4,6 +4,7 @@ from openpyxl.styles import PatternFill
 
 from src.color import cast_color
 from src.time import cast_t, cast_time
+from src.interval import cast_interval
 
 
 def draw_block(sheet, x, y, w, h, text, colour):
@@ -16,33 +17,28 @@ def draw_block(sheet, x, y, w, h, text, colour):
     merged_cell.fill = PatternFill("solid", fgColor=colour[1:])
 
 
-def draw(sheet, block, style=None):
-    style = style or {}
-    if block.children:
-        for child in block.children:
-            draw(sheet, child)
-    else:
-        props = block.props or {}
-        props.update(style.get(block.block_class, {}))
-        #         print(block.block_class, props)
-        text = props.get('text', '')
-        color = cast_color(props.get('color', 'white'))
 
-        if block.props.get('visible') == False:
-            return
+def draw(sheet, block):
+    for b, cur_props in block.iter():
+        if not b.children:
+            text = cur_props.get('text', '')
+            color = cast_color(cur_props.get('color', 'white'))
 
-        text = text.format(**props)
-        text = text.replace('<', '{')
-        text = text.replace('>', '}')
-        text = eval(f'f{text!r}')
+            if cur_props.get('visible') == False:
+                continue
 
-        beg = block.beg
-        beg -= cast_t(block.props['beg_time'])  # shift of timeline
-        beg += block.props['index_width']  # first index columns
-        beg += 1  # indexing starts with 1 in excel
+            text = text.format(**cur_props)
+            text = text.replace('<', '{')
+            text = text.replace('>', '}')
+            text = eval(f'f{text!r}')
 
-        print(sheet, beg, block.props['y'], block.props['size'], 1, text, color)
-        return draw_block(sheet, beg, block.props['y'], block.props['size'], 1, text, color)
+            beg = cur_props['t']
+            beg -= cast_t(cur_props['beg_time'])  # shift of timeline
+            beg += cur_props['index_width']  # first index columns
+            beg += 1  # indexing starts with 1 in excel
+
+            print(cur_props['class'], cur_props['y'], cast_interval(beg, beg + cur_props['size']))
+            draw_block(sheet, beg, cur_props['y'], cur_props['size'], 1, text, color)
 
 
 def init_sheet():

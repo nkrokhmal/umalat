@@ -1,70 +1,47 @@
-import copy
-
-
-import portion
-def cast_interval(a, b):
-    return portion.openclosed(a, b)
-
-def calc_interval_length(i):
-    if i.empty:
-        return 0
-    return sum([c.upper - c.lower for c in i])
-
-
 PERIODS_PER_HOUR = 12
 PERIODS_PER_DAY = 24 * PERIODS_PER_HOUR
 
+import copy
+
+import sys
+sys.path.append(r'C:\Users\arsen\Desktop\code\git\2020.10-umalat\umalat\research\akadaner')
+from src.interval import calc_interval_length, cast_interval
+
 
 def validate_disjoint(b1, b2):
-    b1, b2 = min([b1, b2], key=lambda b: str(b.interval)), max([b1, b2], key=lambda b: str(b.interval))
     assert calc_interval_length(b1.interval & b2.interval) == 0
+
+def gen_pair_validator(validate=validate_disjoint):
+    def f(parent, new_block):
+        try:
+            for b in parent.children:
+                validate(b, new_block)
+        except AssertionError:
+            return False
+        return True
+    return f
 
 
 class Block:
-    def __init__(self, block_class='block', **props):
-        self.block_class = block_class
-
-        if 'props' in props:
-            props.update(props.pop('props'))
-
-        if 'parent' in props:
-            self.parent = props.pop('parent')
-        else:
-            self.parent = None
-
+    def __init__(self, block_class=None, parent=None, **props):
+        block_class = block_class or 'block'
+        self.parent = parent
         self.children = []
 
         props['class'] = block_class
 
-        self.local_props = props or {}
+        if 'props' in props:
+            props.update(props.pop('props'))
 
-    @property
-    def props(self):
-        if self.parent:
-            # accumulated keys
-            res = copy.deepcopy(self.parent.props)
-        else:
-            res = {}
-
-        for key in self.local_props:
-            if key not in res:
-                res[key] = self.local_props[key]
-            else:
-                # both contain key
-                if key in ['t', 'y']:  # accumulated keys
-                    res[key] = res[key] + self.local_props[key]
-                else:
-                    res[key] = self.local_props[key]
-        return res
-
-
-    @property
-    def beg(self):
-        return self.props.get('t', 0)
+        self.props = props or {}
 
     @property
     def size(self):
         return self.props.get('size', 0)
+
+    @property
+    def beg(self):
+        return self.props.get('t', 0)
 
     @property
     def end(self):
@@ -75,7 +52,8 @@ class Block:
         return cast_interval(self.beg, self.end)
 
     def __str__(self):
-        res = f'{self.block_class} {self.local_props}\n'
+        res = f'{self.props["class"]} ({self.beg}, {self.end}]\n'
+
         for child in self.children:
             for line in str(child).split('\n'):
                 if not line:
@@ -86,127 +64,101 @@ class Block:
     def __repr__(self):
         return str(self)
 
-    def push(self, block, after=None, before=PERIODS_PER_DAY, validator=None):
-        original_parent = block.parent
-        block.parent = self
+    def iter(self, parent_props=None):
+        parent_props = parent_props or {}
+        cur_props = copy.deepcopy(parent_props)
 
-        after = after or 0
-
-        cur_t = after
-
-        while cur_t < before:
-            block.local_props['t'] = cur_t
-
-            validated = self.validate(block, validator=validator)
-
-            if validated:
-                self.add(block)
-                return block
+        # add our props
+        for key in self.props:
+            if key not in cur_props:
+                cur_props[key] = self.props[key]
             else:
-                # try to fit the block
-                cur_t += 1
+                # both contain key
+                if key in ['t', 'y']:  # accumulated keys
+                    cur_props[key] += self.props[key]
+                else:
+                    cur_props[key] = self.props[key]
 
-        block.parent = original_parent
+        yield (self, cur_props)
 
+        for child in self.children:
+            for b in child.iter(cur_props):
+                yield b
 
     def add(self, block):
         self.children.append(block)
 
-    def validate(self, block, validator=None):
-        validator = validator or validate_disjoint
-        for b in self.children:
-            try:
-                validator(b, block)
-            except AssertionError:
-                return False
-        return True
 
-    def __enter__(self):
-        return self
+def simple_push(parent, block, validate='basic'):
+    if validate == 'basic':
+        validate = gen_pair_validator()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    def make(self, block_class='block', method='push', validator=None, **kwargs):
-        block = Block(block_class, props=kwargs, parent=self)
-        if method == 'push':
-            self.push(block, validator=validator)
-        elif method == 'add':
-            self.add(block)
+    if validate and validate(parent, block):
+        parent.add(block)
         return block
 
-    def get_child(self, child_class):
-        if isinstance(child_class, str):
-            children_with_key = [child for child in self.children if child.block_class == child_class]
-            if len(children_with_key) == 0:
-                raise KeyError(child_class)
-            elif len(children_with_key) > 1:
-                raise Exception(f'Too many keys: {child_class}')
 
-            return children_with_key[0]
-        elif isinstance(child_class, int):
-            return self.children[child_class]
-        else:
-            raise Exception(f'Unknown key type {child_class}')
+def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY, validate='basic'):
+    if beg == 'last_beg':
+        cur_t = max([0] + [child.beg for child in parent.children])
+    elif beg == 'last_end':
+        cur_t = max([0] + [child.end for child in parent.children])
+    elif isinstance(beg, int):
+        cur_t = beg
+    else:
+        raise Exception('Unknown beg type')
 
-    def __getitem__(self, item):
-        return self.props[item]
+    end = min(end, cur_t + max_tries)
 
-    def get(self, item, *args, **kwargs):
-        return self.props.get(item, *args, *kwargs)
+    while cur_t < end:
+        block.props['t'] = cur_t
+        if simple_push(parent, block, validate=validate):
+            return block
+        cur_t += 1
 
-    def __iter__(self):
-        yield self
-        for child in self.children:
-            for b in child:
-                yield b
 
-    def flatten(self):
-        return [self] + sum([child.flatten() for child in self.children], [])
+class BlockMaker:
+    def __init__(self, default_push_func=simple_push):
+        self.root = Block(block_class='maker')
+        self.blocks = [self.root]
+        self.default_push_func = default_push_func
+
+    def make(self, block_class=None, push_func=None, push_kwargs=None, **kwargs):
+        push_func = push_func or self.default_push_func
+        push_kwargs = push_kwargs or {}
+        block = Block(block_class=block_class, **kwargs)
+        push_func(self.blocks[-1], block, **push_kwargs)
+        return BlockMakerContext(self, block)
+
+
+class BlockMakerContext:
+    def __init__(self, maker, block):
+        self.maker = maker
+        self.block = block
+
+    def __enter__(self):
+        self.maker.blocks.append(self.block)
+        return self.block
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.maker.blocks.pop()
 
 
 if __name__ == '__main__':
-    root = Block('root', t=10)
+    a = Block('a', size=3, t=5)
+    b = Block('b', size=2, t=0)
+    c = Block('c', size=1, t=2)
 
-    with root.make('boiling', block_num=12) as boiling:
-        with boiling.make('water_pouring', y=6, method='add') as water_pouring:
-            total_size = 27
+    dummy_push(a, b)
+    dummy_push(a, c)
+    print(a)
 
-            with water_pouring.make(y=0) as b:
-                b.make('pouring_label', size=6, block_num=12)
-                b.make('pouring_name', size=total_size - 6, name='чильеджина  3,6 альче  8500кг')
-            with water_pouring.make(y=1) as b:
-                b.make('pouring_and_fermenting', size=8)
-                b.make('soldification', size=7)
-                b.make('cutting', size=7)
-                b.make('pouring_off', size=3)
-                b.make('extra', size=total_size - 8 - 8 - 7 - 3)
 
-        boiling.make('termizator', size=6, visible=False)
+    maker = BlockMaker()
+    make = maker.make
 
-        with boiling.make('melting', y=10, method='add') as melting:
-            total_size = 25
-            with melting.make(y=0) as b:
-                b.make('melting_label', size=3)
-                b.make('melting_name', size=total_size - 3, name='чильеджина 5кг/сердечки/фдл 0,125(безлактозная)/0,1')
-            with melting.make(y=1) as b:
-                b.make('serving', size=6)
-                b.make('melting_process', size=total_size - 6, speed=900)
-            with melting.make(y=2) as b:
-                b.make(size=6, visible=False)
-                b.make('cooling1', size=5)
-                b.make('cooling2', size=10)
+    with make('a', size=3, t=5):
+        make('b', size=2, t=0)
+        make('c', size=1, t=2)
 
-        with boiling.make('packing', y=14, method='add') as packing:
-            total_size = 25
-            with packing.make(y=0) as b:
-                b.make('packing_label', size=3)
-                b.make('packing_name', size=total_size - 3, name='чильеджина 5кг/сердечки/фдл 0,125(безлактозная)/0,1')
-            with packing.make(y=1) as b:
-                b.make('packing_brand', size=total_size, name='безлактозная/претто')
-            with packing.make(y=2) as b:
-                b.make('configuration', size=3, visible=False)
-                b.make('configuration', size=1)
-                b.make('configuration', size=5, visible=False)
-                b.make('configuration', size=1)
-
+    print(maker.root)
