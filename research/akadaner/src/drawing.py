@@ -36,8 +36,8 @@ def draw(sheet, block):
             beg += b.abs_props['index_width']  # first index columns
             beg += 1  # indexing starts with 1 in excel
 
-            print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.abs_props['size']), b.abs_props)
-            draw_block(sheet, beg, b.abs_props['y'], b.abs_props['size'], 1, text, color)
+            print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size))
+            draw_block(sheet, beg, b.abs_props['y'], b.size, 1, text, color)
 
 
 def init_sheet():

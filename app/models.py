@@ -162,6 +162,7 @@ class Melting(db.Model):
     __tablename__ = 'meltings'
     id = db.Column(db.Integer, primary_key=True)
     serving_time = db.Column(db.Integer)
+    # todo: melting time should be calculated from the volume amount and speed
     melting_time = db.Column(db.Integer)
     speed = db.Column(db.Integer)
     first_cooling_time = db.Column(db.Integer)

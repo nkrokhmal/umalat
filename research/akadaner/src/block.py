@@ -2,6 +2,7 @@ PERIODS_PER_HOUR = 12
 PERIODS_PER_DAY = 24 * PERIODS_PER_HOUR
 
 import copy
+import math
 
 import sys
 sys.path.append(r'C:\Users\arsen\Desktop\code\git\2020.10-umalat\umalat\research\akadaner')
@@ -64,7 +65,16 @@ class Block:
 
     @property
     def size(self):
-        return self.props.get('size', 0)
+        res = self.props.get('size', 0)
+        if not res:
+            # check that int is divided by 5
+            assert self.props.get('time_size', 0) % 5 == 0
+            res = int(self.props.get('time_size', 0) / 5)
+
+        # check if int-like
+        assert math.ceil(res) == math.floor(res)
+
+        return int(res)
 
     @property
     def beg(self):
@@ -111,6 +121,9 @@ class Block:
             self.abs_props = copy.deepcopy(self.rel_props)
         else:
             self.abs_props = self._inherit_props(self.parent.abs_props, self.rel_props)
+
+        # todo: hardcode
+        self.abs_props['size'] = self.size
 
     def iter(self):
         self.upd_abs_props()
@@ -219,3 +232,13 @@ if __name__ == '__main__':
 
     print(maker.root['a']['b'][0].interval)
     print(maker.root['a'][2])
+
+    b = Block('a', time_size=10)
+    print(b.size)
+
+    b = Block('a', time_size=11)
+    try:
+        print(b.size)
+        raise Exception('Should not happend')
+    except AssertionError:
+        print('Time size should be divided by 5')
