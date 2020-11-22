@@ -14,12 +14,8 @@ def validate_disjoint(b1, b2):
 
 def gen_pair_validator(validate=validate_disjoint):
     def f(parent, new_block):
-        try:
-            for b in parent.children:
-                validate(b, new_block)
-        except AssertionError:
-            return False
-        return True
+        for b in parent.children:
+            validate(b, new_block)
     return f
 
 
@@ -55,10 +51,15 @@ class Block:
         for b in res:
             b.upd_abs_props()
 
-        if len(res) == 1:
+        if not res:
+            return
+
+        if hasattr(res, '__len__') and len(res) == 1:
             return res[0]
         else:
             return res
+
+
 
     @property
     def size(self):
@@ -125,21 +126,24 @@ class Block:
         return block
 
 
-def simple_push(parent, block, validate='basic'):
-    if validate == 'basic':
-        validate = gen_pair_validator()
+def simple_push(parent, block, validator='basic'):
+    if validator == 'basic':
+        validator = gen_pair_validator()
 
-    if validate and not validate(parent, block):
-        return
+    if validator:
+        try:
+            validator(parent, block)
+        except AssertionError:
+            return
 
     return parent.add(block)
 
 
 def add_push(parent, block):
-    return simple_push(parent, block, validate=None)
+    return simple_push(parent, block, validator=None)
 
 
-def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY, validate='basic'):
+def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY, validator='basic'):
     if beg == 'last_beg':
         cur_t = max([0] + [child.beg for child in parent.children])
     elif beg == 'last_end':
@@ -153,7 +157,7 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY,
 
     while cur_t < end:
         block.rel_props['t'] = cur_t
-        if simple_push(parent, block, validate=validate):
+        if simple_push(parent, block, validator=validator):
             return block
         cur_t += 1
 
@@ -211,4 +215,4 @@ if __name__ == '__main__':
         make('c', size=1)
 
     print(maker.root['a']['b'][0].interval)
-
+    print(maker.root['a'][0])
