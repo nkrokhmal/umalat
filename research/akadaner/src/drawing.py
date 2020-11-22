@@ -17,7 +17,6 @@ def draw_block(sheet, x, y, w, h, text, colour):
     merged_cell.fill = PatternFill("solid", fgColor=colour[1:])
 
 
-
 def draw(sheet, block):
     for b, cur_props in block.iter():
         if not b.children:
@@ -37,7 +36,7 @@ def draw(sheet, block):
             beg += cur_props['index_width']  # first index columns
             beg += 1  # indexing starts with 1 in excel
 
-            print(cur_props['class'], cur_props['y'], cast_interval(beg, beg + cur_props['size']))
+            print(cur_props['class'], cur_props['y'], cast_interval(beg, beg + cur_props['size']), cur_props)
             draw_block(sheet, beg, cur_props['y'], cur_props['size'], 1, text, color)
 
 

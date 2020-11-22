@@ -7,9 +7,9 @@ import sys
 sys.path.append(r'C:\Users\arsen\Desktop\code\git\2020.10-umalat\umalat\research\akadaner')
 from src.interval import calc_interval_length, cast_interval
 
-
 def validate_disjoint(b1, b2):
     assert calc_interval_length(b1.interval & b2.interval) == 0
+
 
 def gen_pair_validator(validate=validate_disjoint):
     def f(parent, new_block):
@@ -34,6 +34,20 @@ class Block:
             props.update(props.pop('props'))
 
         self.props = props or {}
+
+    def __getitem__(self, item):
+        if isinstance(item, str):
+            res = [b for b in self.children if b.props['class'] == item]
+
+            if len(res) == 1:
+                return res[0]
+            else:
+                return res
+        elif isinstance(item, int):
+            return self.children[item]
+        if isinstance(item, slice):
+            # Get the start, stop, and step from the slice
+            return [self[ii] for ii in range(*item.indices(len(self)))]
 
     @property
     def size(self):
@@ -87,15 +101,21 @@ class Block:
 
     def add(self, block):
         self.children.append(block)
+        return block
 
 
 def simple_push(parent, block, validate='basic'):
     if validate == 'basic':
         validate = gen_pair_validator()
 
-    if validate and validate(parent, block):
-        parent.add(block)
-        return block
+    if validate and not validate(parent, block):
+        return
+
+    return parent.add(block)
+
+
+def add_push(parent, block):
+    return simple_push(parent, block, validate=None)
 
 
 def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY, validate='basic'):
@@ -118,8 +138,8 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY,
 
 
 class BlockMaker:
-    def __init__(self, default_push_func=simple_push):
-        self.root = Block(block_class='maker')
+    def __init__(self, root_name='root', default_push_func=simple_push):
+        self.root = Block(block_class=root_name)
         self.blocks = [self.root]
         self.default_push_func = default_push_func
 
@@ -146,19 +166,27 @@ class BlockMakerContext:
 
 if __name__ == '__main__':
     a = Block('a', size=3, t=5)
-    b = Block('b', size=2, t=0)
-    c = Block('c', size=1, t=2)
+    b = Block('b', size=2)
+    c = Block('c', size=1)
 
     dummy_push(a, b)
     dummy_push(a, c)
     print(a)
 
+    maker = BlockMaker(default_push_func=dummy_push)
+    make = maker.make
 
-    maker = BlockMaker()
+    with make('a', size=3):
+        make('b', size=2)
+        make('c', size=1)
+    print(maker.root)
+
+    maker = BlockMaker(default_push_func=add_push)
     make = maker.make
 
     with make('a', size=3, t=5):
-        make('b', size=2, t=0)
-        make('c', size=1, t=2)
+        make('b', size=2)
+        make('b', size=2)
+        make('c', size=1)
 
-    print(maker.root)
+    print(maker.root['a']['b'])
