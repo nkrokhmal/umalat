@@ -39,7 +39,7 @@ class Block:
 
     def __getitem__(self, item):
         if isinstance(item, str):
-            res = [b for b in self.children if b.props['class'] == item]
+            res = [b for b in self.children if b.rel_props['class'] == item]
         elif isinstance(item, int):
             res = self.children[item]
         elif isinstance(item, slice):
@@ -48,8 +48,11 @@ class Block:
         else:
             raise TypeError('Item type not supported')
 
-        for b in res:
-            b.upd_abs_props()
+        if isinstance(res, Block):
+            res.upd_abs_props()
+        elif isinstance(res, list):
+            for b in res:
+                b.upd_abs_props()
 
         if not res:
             return
@@ -78,7 +81,7 @@ class Block:
         return cast_interval(self.beg, self.end)
 
     def __str__(self):
-        res = f'{self.props["class"]} ({self.beg}, {self.end}]\n'
+        res = f'{self.rel_props["class"]} ({self.beg}, {self.end}]\n'
 
         for child in self.children:
             for line in str(child).split('\n'):
@@ -157,6 +160,8 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY,
 
     while cur_t < end:
         block.rel_props['t'] = cur_t
+        block.upd_abs_props()
+
         if simple_push(parent, block, validator=validator):
             return block
         cur_t += 1
@@ -215,4 +220,4 @@ if __name__ == '__main__':
         make('c', size=1)
 
     print(maker.root['a']['b'][0].interval)
-    print(maker.root['a'][0])
+    print(maker.root['a'][2])
