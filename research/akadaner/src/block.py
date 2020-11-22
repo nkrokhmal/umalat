@@ -34,8 +34,12 @@ class Block:
         if 'props' in props:
             props.update(props.pop('props'))
 
-        self.props = props or {}
+        self.rel_props = props or {}
         self.abs_props = {}
+
+    @property
+    def props(self):
+        return self.abs_props if self.abs_props.get('override') else self.rel_props
 
     def __getitem__(self, item):
         if isinstance(item, str):
@@ -102,9 +106,9 @@ class Block:
 
     def upd_abs_props(self):
         if not self.parent:
-            self.abs_props = copy.deepcopy(self.props)
+            self.abs_props = copy.deepcopy(self.rel_props)
         else:
-            self.abs_props = self._inherit_props(self.parent.abs_props, self.props)
+            self.abs_props = self._inherit_props(self.parent.abs_props, self.rel_props)
 
     def iter(self):
         self.upd_abs_props()
@@ -148,7 +152,7 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY,
     end = min(end, cur_t + max_tries)
 
     while cur_t < end:
-        block.props['t'] = cur_t
+        block.rel_props['t'] = cur_t
         if simple_push(parent, block, validate=validate):
             return block
         cur_t += 1
@@ -201,9 +205,10 @@ if __name__ == '__main__':
     maker = BlockMaker(default_push_func=add_push)
     make = maker.make
 
-    with make('a', size=3, t=5):
+    with make('a', size=3, t=5, override=True):
         make('b', size=2)
         make('b', size=2)
         make('c', size=1)
 
-    print(maker.root['a']['b'])
+    print(maker.root['a']['b'][0].interval)
+
