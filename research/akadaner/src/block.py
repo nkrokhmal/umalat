@@ -35,7 +35,7 @@ class Block:
 
     @property
     def props(self):
-        return self.abs_props if self.abs_props.get('override') else self.rel_props
+        return self.abs_props if self.rel_props.get('props_mode') == 'absolute' or self.abs_props.get('props_mode') == 'absolute' else self.rel_props
 
     def __getitem__(self, item):
         if isinstance(item, str):
@@ -61,8 +61,6 @@ class Block:
             return res[0]
         else:
             return res
-
-
 
     @property
     def size(self):
