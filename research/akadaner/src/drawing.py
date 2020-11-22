@@ -18,26 +18,26 @@ def draw_block(sheet, x, y, w, h, text, colour):
 
 
 def draw(sheet, block):
-    for b, cur_props in block.iter():
+    for b in block.iter():
         if not b.children:
-            text = cur_props.get('text', '')
-            color = cast_color(cur_props.get('color', 'white'))
+            text = b.abs_props.get('text', '')
+            color = cast_color(b.abs_props.get('color', 'white'))
 
-            if cur_props.get('visible') == False:
+            if b.abs_props.get('visible') == False:
                 continue
 
-            text = text.format(**cur_props)
+            text = text.format(**b.abs_props)
             text = text.replace('<', '{')
             text = text.replace('>', '}')
             text = eval(f'f{text!r}')
 
-            beg = cur_props['t']
-            beg -= cast_t(cur_props['beg_time'])  # shift of timeline
-            beg += cur_props['index_width']  # first index columns
+            beg = b.abs_props['t']
+            beg -= cast_t(b.abs_props['beg_time'])  # shift of timeline
+            beg += b.abs_props['index_width']  # first index columns
             beg += 1  # indexing starts with 1 in excel
 
-            print(cur_props['class'], cur_props['y'], cast_interval(beg, beg + cur_props['size']), cur_props)
-            draw_block(sheet, beg, cur_props['y'], cur_props['size'], 1, text, color)
+            print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.abs_props['size']), b.abs_props)
+            draw_block(sheet, beg, b.abs_props['y'], b.abs_props['size'], 1, text, color)
 
 
 def init_sheet():

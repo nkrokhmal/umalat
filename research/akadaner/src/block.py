@@ -7,6 +7,7 @@ import sys
 sys.path.append(r'C:\Users\arsen\Desktop\code\git\2020.10-umalat\umalat\research\akadaner')
 from src.interval import calc_interval_length, cast_interval
 
+
 def validate_disjoint(b1, b2):
     assert calc_interval_length(b1.interval & b2.interval) == 0
 
@@ -34,20 +35,26 @@ class Block:
             props.update(props.pop('props'))
 
         self.props = props or {}
+        self.abs_props = {}
 
     def __getitem__(self, item):
         if isinstance(item, str):
             res = [b for b in self.children if b.props['class'] == item]
-
-            if len(res) == 1:
-                return res[0]
-            else:
-                return res
         elif isinstance(item, int):
-            return self.children[item]
-        if isinstance(item, slice):
+            res = self.children[item]
+        elif isinstance(item, slice):
             # Get the start, stop, and step from the slice
-            return [self[ii] for ii in range(*item.indices(len(self)))]
+            res = [self[ii] for ii in range(*item.indices(len(self)))]
+        else:
+            raise TypeError('Item type not supported')
+
+        for b in res:
+            b.upd_abs_props()
+
+        if len(res) == 1:
+            return res[0]
+        else:
+            return res
 
     @property
     def size(self):
@@ -78,28 +85,38 @@ class Block:
     def __repr__(self):
         return str(self)
 
-    def iter(self, parent_props=None):
-        parent_props = parent_props or {}
+    def _inherit_props(self, parent_props, props):
         cur_props = copy.deepcopy(parent_props)
 
         # add our props
-        for key in self.props:
+        for key in props:
             if key not in cur_props:
-                cur_props[key] = self.props[key]
+                # new key
+                cur_props[key] = props[key]
             else:
-                # both contain key
                 if key in ['t', 'y']:  # accumulated keys
-                    cur_props[key] += self.props[key]
+                    cur_props[key] += props[key]
                 else:
-                    cur_props[key] = self.props[key]
+                    cur_props[key] = props[key]
+        return cur_props
 
-        yield (self, cur_props)
+    def upd_abs_props(self):
+        if not self.parent:
+            self.abs_props = copy.deepcopy(self.props)
+        else:
+            self.abs_props = self._inherit_props(self.parent.abs_props, self.props)
+
+    def iter(self):
+        self.upd_abs_props()
+
+        yield self
 
         for child in self.children:
-            for b in child.iter(cur_props):
+            for b in child.iter():
                 yield b
 
     def add(self, block):
+        block.parent = self
         self.children.append(block)
         return block
 
