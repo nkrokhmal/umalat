@@ -44,7 +44,7 @@ def get_packer():
     return jsonify([x.serialize() for x in packers])
 
 
-@main.route('/get_termizator', methods=['GET', 'POST'])
+@main.route('//.', methods=['GET', 'POST'])
 def get_termizator():
     termizator = db.session.query(Termizator).all()
     return jsonify([x.serialize() for x in termizator])

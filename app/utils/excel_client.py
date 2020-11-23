@@ -1,6 +1,40 @@
 import pandas as pd
 import openpyxl
 from openpyxl.styles import Alignment
+import re
+import formulas
+
+
+def parse_plan(date, wb):
+    sheet_plan = wb['планирование суточное']
+    response = {}
+    response['Date'] = date
+    response['WeekDay'] = date.weekday()
+    response['Boilings'] = []
+    for i in range(1, 100):
+        if sheet_plan.cell(i, 10).value is not None and "Лактоза" in sheet_plan.cell(i, 10).value:
+            boiling_id = sheet_plan.cell(i, 10).value.split(' ')[-1]
+            boilings_count = sheet_plan.cell(i, 13).value
+            form_factor = sheet_plan.cell(i, 1).value
+
+            boiling_weights = []
+            if sheet_plan.cell(i, 14).value is not None:
+                boiling_weights = re.split(', |. | ', sheet_plan.cell(i, 14).value)
+                boiling_weights = [x for x in boiling_weights if 6000 <= x <= 8000]
+
+            if len(boiling_weights) > boilings_count:
+                boiling_weights = boilings_count * [8000]
+            else:
+                boiling_weights += (boilings_count - len(boiling_weights)) * [8000]
+            response['Boilings'].append({
+                "BoilingId": boiling_id,
+                # "FormFactor": form_factor,
+                "BoilingCount": boilings_count,
+                "BoilingWeights": boiling_weights
+            })
+
+    response['Boilings'] = [x for x in response['Boilings'] if x['BoilingCount'] > 0]
+    return response
 
 
 def build_plan(date, df, request_list):
@@ -25,6 +59,7 @@ def build_plan(date, df, request_list):
     sheet_plan.cell(1, 6).value = 'План производства'
     sheet_plan.cell(1, 12).value = 'Расчет'
     sheet_plan.cell(1, 13).value = 'План'
+    sheet_plan.cell(1, 14).value = 'Объемы варок'
     sheet_plan['O1'] = 'Фактические остатки на складах - Заявлено, кг:'
     sheet_plan['O2'] = 'Нормативные остатки, кг'
     sheet_plan.freeze_panes = sheet_plan['A2']
@@ -72,10 +107,11 @@ def build_plan(date, df, request_list):
             # Записываем результат
             sheet_plan.merge_cells(start_row=result_row, start_column=10,
                                    end_row=result_row, end_column=11)
-            sheet_plan.cell(result_row, 10).value = '{}% варка, {}, Лактоза {}'.format(
+            sheet_plan.cell(result_row, 10).value = '{}% варка, {}, Лактоза {}, Id {}'.format(
                 group_sku["GroupSKU"][0]["SKU"].boiling.percent,
                 group_sku["GroupSKU"][0]["SKU"].boiling.ferment,
-                group_sku["GroupSKU"][0]["SKU"].boiling.is_lactose
+                group_sku["GroupSKU"][0]["SKU"].boiling.is_lactose,
+                group_sku["GroupSKU"][0]["SKU"].boiling_id
             )
             formula_boiling_count = '{}'.format(str(group_formula).strip('[]').replace(',', ' +').replace('\'', "").upper())
             sheet_plan.cell(result_row, 12).value = '=-({}) / {}'.format(formula_boiling_count,
@@ -86,4 +122,14 @@ def build_plan(date, df, request_list):
 
         cur_row = max(result_row, cur_row) + space_rows
     wb.save(path)
+    print('Saved')
+    wb.close()
+    print('Closed')
+    # print('Calculate all')
+    # xl_model = formulas.ExcelModel().loads(path).finish()
+    # print('1')
+    # xl_model.calculate()
+    # print('2')
+    # xl_model.write(dirpath=path)
+    # print('Saved')
     return loc_path

@@ -15,9 +15,8 @@ def parse_request():
     result_list = []
     if request.method == 'POST' and form.validate_on_submit():
         date = form.date.data
-        # create excel file for request
-
         skus = db.session.query(SKU).all()
+
         group_items = [{
             "Ferment": x.boiling.ferment,
             "IsLactose": x.boiling.is_lactose,
