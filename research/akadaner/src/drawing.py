@@ -76,3 +76,15 @@ def init_template_sheet():
     move_sheet(work_book, 1, 0)
 
     return work_book, sheet
+
+
+def draw_schedule(root, style, fn='output.xlsx', init_sheet_func=init_sheet):
+    # update styles
+    for b in root.iter():
+        if b.rel_props['class'] in style:
+            b.rel_props.update(style[b.rel_props['class']])
+
+    work_book, sheet = init_sheet_func()
+    root.rel_props['index_width'] = 4
+    draw(sheet, root)
+    work_book.save(fn)
