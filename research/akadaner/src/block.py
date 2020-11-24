@@ -104,6 +104,9 @@ class Block:
     def _inherit_props(self, parent_props, props):
         cur_props = copy.deepcopy(parent_props)
 
+        # specify what we don't inherit
+        cur_props = {k: v for k, v in cur_props.items() if k not in ['size', 'time_size']}
+
         # add our props
         for key in props:
             if key not in cur_props:
@@ -124,6 +127,7 @@ class Block:
 
         # todo: hardcode
         self.abs_props['size'] = self.size
+        self.abs_props['time_size'] = self.abs_props['size'] * 5
 
     def iter(self):
         self.upd_abs_props()
@@ -184,10 +188,17 @@ class BlockMaker:
         self.blocks = [self.root]
         self.default_push_func = default_push_func
 
-    def make(self, block_class=None, push_func=None, push_kwargs=None, **kwargs):
+    def make(self, block_obj=None, push_func=None, push_kwargs=None, **kwargs):
         push_func = push_func or self.default_push_func
         push_kwargs = push_kwargs or {}
-        block = Block(block_class=block_class, **kwargs)
+
+        if isinstance(block_obj, str) or block_obj is None:
+            block = Block(block_class=block_obj, **kwargs)
+        elif isinstance(block_obj, Block):
+            block = block_obj
+        else:
+            raise Exception('Unknown block obj type')
+
         push_func(self.blocks[-1], block, **push_kwargs)
         return BlockMakerContext(self, block)
 
