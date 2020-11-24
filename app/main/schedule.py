@@ -6,6 +6,7 @@ from .forms import ScheduleForm
 from ..models import SKU
 import io
 import openpyxl
+from pycel import ExcelCompiler
 
 
 @main.route('/schedule', methods=['GET', 'POST'])
@@ -15,8 +16,16 @@ def schedule():
     if request.method == 'POST' and form.validate_on_submit():
         date = form.date.data
         file_bytes = request.files['input_file'].read()
-        wb = openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True)
+        wb = openpyxl.load_workbook(io.BytesIO(file_bytes))
+
+        filename = '{}_{}.xlsx'.format('schedule', date.strftime('%Y-%m-%d'))
+        loc_path = '{}/{}'.format('data/schedule', filename)
+        path = '{}/{}'.format('app/data/schedule', filename)
+        wb.save(path)
+
+        excel = ExcelCompiler(path)
+
         wb.create_sheet('планирование по цехам')
-        response = parse_plan(date=date, wb=wb)
+        response = parse_plan_cell(date=date, wb=wb, excel=excel)
         return jsonify(response)
     return render_template('schedule.html', form=form)

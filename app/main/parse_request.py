@@ -65,6 +65,7 @@ def parse_request():
                 })
 
         result_path = build_plan(date, df_save, request_list=result_list)
+        data = [x for x in data if type(x[1]) is not str]
         return render_template('parse_request.html', data=data, form=form, result_list=result_list, result_path=result_path)
     data = None
     result_list = None

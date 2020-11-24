@@ -2,35 +2,86 @@ import pandas as pd
 import openpyxl
 from openpyxl.styles import Alignment
 import re
-import formulas
+from pycel import ExcelCompiler
 
 
-def parse_plan(date, wb):
-    sheet_plan = wb['планирование суточное']
-    response = {}
-    response['Date'] = date
-    response['WeekDay'] = date.weekday()
-    response['Boilings'] = []
+class Cell:
+    def __init__(self, row, column, coordinate):
+        self.row = row
+        self.column = column
+        self.coordinate = coordinate
+
+
+SHEETS = {
+    0: 'файл остатки',
+    1: 'планирование суточное'
+}
+
+COLOURS = {
+    'Для пиццы': 'E5B7B6',
+    'Моцарелла': 'DAE5F1',
+    'Фиор ди Латте': 'CBC0D9',
+    'Чильеджина': 'E5DFEC',
+    'Качокавалло': 'F1DADA',
+    'Сулугуни': 'F1DADA'
+}
+
+CELLS = {
+    'Форм фактор': Cell(1, 1, 'A1'),
+    'Бренд': Cell(1, 2, 'B1'),
+    'Номенклатура': Cell(1, 3, 'C1'),
+    'Факт.остатки, заявка': Cell(1, 4, 'D1'),
+    'Нормативные остатки': Cell(1, 5, 'F1'),
+    'План производства': Cell(1, 6, 'F1'),
+    'Расчет': Cell(1, 12, 'K1'),
+    'План': Cell(1, 13, 'M1'),
+    'Объемы варок': Cell(1, 14, 'N1'),
+    'Фактические остатки на складах - Заявлено, кг:': Cell(1, 15, 'O1'),
+    'Нормативные остатки, кг': Cell(2, 15, 'O2')
+}
+
+COLUMNS = {
+    'BoilingVolume': 10,
+    'SKUS_ID': 18,
+    'BOILING_ID': 19
+}
+
+BOILING_LIMITS = {
+    'MIN': 6000,
+    'MAX': 8000
+}
+
+
+def parse_plan_cell(date, wb, excel):
+    sheet_plan = wb[SHEETS[1]]
+    response = {'Date': date, 'WeekDay': date.weekday(), 'Boilings': []}
     for i in range(1, 100):
-        if sheet_plan.cell(i, 10).value is not None and "Лактоза" in sheet_plan.cell(i, 10).value:
-            boiling_id = sheet_plan.cell(i, 10).value.split(' ')[-1]
-            boilings_count = sheet_plan.cell(i, 13).value
-            form_factor = sheet_plan.cell(i, 1).value
+        if sheet_plan.cell(i, COLUMNS['BoilingVolume']).value is not None and \
+                "Лактоза" in sheet_plan.cell(i, COLUMNS['BoilingVolume']).value:
+            # boiling_id = sheet_plan.cell(i, COLUMNS['BoilingVolume']).value.split(' ')[-1]
+            boilings_count = excel.evaluate("'{}'!{}".format(
+                SHEETS[1],
+                sheet_plan.cell(i, CELLS['План'].column).coordinate)
+            )
+            sku_ids = sheet_plan.cell(i, COLUMNS['SKUS_ID']).value
+            boiling_id = sheet_plan.cell(i, COLUMNS['BOILING_ID']).value
 
             boiling_weights = []
-            if sheet_plan.cell(i, 14).value is not None:
-                boiling_weights = re.split(', |. | ', sheet_plan.cell(i, 14).value)
-                boiling_weights = [x for x in boiling_weights if 6000 <= x <= 8000]
+            if sheet_plan.cell(i, CELLS['Объемы варок'].column).value is not None:
+                # todo: get only int
+                boiling_weights = re.split(', |. | ', sheet_plan.cell(i, CELLS['Объемы варок'].column).value)
+                boiling_weights = [x for x in boiling_weights if BOILING_LIMITS['MIN'] <= x <= BOILING_LIMITS['MAX']]
+                boiling_weights = [int(x) for x in boiling_weights if isinstance(x, int) or x.isdigit()]
 
             if len(boiling_weights) > boilings_count:
-                boiling_weights = boilings_count * [8000]
+                boiling_weights = boilings_count * [BOILING_LIMITS['MAX']]
             else:
-                boiling_weights += (boilings_count - len(boiling_weights)) * [8000]
+                boiling_weights += int(boilings_count - len(boiling_weights)) * [BOILING_LIMITS['MAX']]
             response['Boilings'].append({
                 "BoilingId": boiling_id,
-                # "FormFactor": form_factor,
                 "BoilingCount": boilings_count,
-                "BoilingWeights": boiling_weights
+                "BoilingWeights": boiling_weights,
+                "SKU_IDS": sku_ids
             })
 
     response['Boilings'] = [x for x in response['Boilings'] if x['BoilingCount'] > 0]
@@ -39,7 +90,6 @@ def parse_plan(date, wb):
 
 def build_plan(date, df, request_list):
     filename = '{}_{}.xlsx'.format('plan', date.strftime('%Y-%m-%d'))
-    loc_path = '{}/{}'.format('data/plan', filename)
     path = '{}/{}'.format('app/data/plan', filename)
 
     with pd.ExcelWriter(path) as writer:
@@ -47,89 +97,82 @@ def build_plan(date, df, request_list):
         writer.save()
 
     wb = openpyxl.load_workbook(filename=path)
-    sheet_plan = wb.create_sheet('планирование суточное')
+    sheet_plan = wb.create_sheet(SHEETS[1])
+
+    # make invisible columns
+    sheet_plan.column_dimensions[openpyxl.utils.get_column_letter(COLUMNS['SKUS_ID'])].hidden = True
+    sheet_plan.column_dimensions[openpyxl.utils.get_column_letter(COLUMNS['BOILING_ID'])].hidden = True
 
     # Заполнение первой строки и ее заморозка
     # todo: добавить еще цех и дальнейшую группировку ячеек
-    sheet_plan.cell(1, 1).value = 'Форм фактор'
-    sheet_plan.cell(1, 2).value = 'Бренд'
-    sheet_plan.cell(1, 3).value = 'Номенклатура'
-    sheet_plan.cell(1, 4).value = 'Факт.остатки, заявка'
-    sheet_plan.cell(1, 5).value = 'Нормативные остатки'
-    sheet_plan.cell(1, 6).value = 'План производства'
-    sheet_plan.cell(1, 12).value = 'Расчет'
-    sheet_plan.cell(1, 13).value = 'План'
-    sheet_plan.cell(1, 14).value = 'Объемы варок'
-    sheet_plan['O1'] = 'Фактические остатки на складах - Заявлено, кг:'
-    sheet_plan['O2'] = 'Нормативные остатки, кг'
+    for key in CELLS.keys():
+        sheet_plan.cell(CELLS[key].row, CELLS[key].column).value = key
     sheet_plan.freeze_panes = sheet_plan['A2']
 
+    # получаем все форм факторы
     form_factors = set([x["GroupSKU"][0]["SKU"].form_factor for x in request_list])
 
-    cur_row = 2
-    space_rows = 3
-
+    # задаем строки, с которых мы бежим вниз
+    cur_row, space_rows = 2, 3
     for form_factor in form_factors:
         group_skus = [x for x in request_list if x["GroupSKU"][0]["SKU"].form_factor == form_factor]
         result_row = cur_row
 
         # Создаем таблицу с итоговыми варками
         total_weight_row = (result_row + len(group_skus) + 1)
-        sheet_plan.merge_cells(start_row=total_weight_row, start_column=10,
-                               end_row=total_weight_row, end_column=11)
-        sheet_plan.cell(total_weight_row, 10).value = 'Объем варки'
-        sheet_plan.cell(total_weight_row, 12).value = group_skus[0]["GroupSKU"][0]["SKU"].output_per_ton
+        sheet_plan.merge_cells(start_row=total_weight_row,
+                               start_column=COLUMNS['BoilingVolume'],
+                               end_row=total_weight_row,
+                               end_column=COLUMNS['BoilingVolume'] + 1)
+        sheet_plan.cell(total_weight_row, COLUMNS['BoilingVolume']).value = 'Объем варки'
+        sheet_plan.cell(total_weight_row, CELLS['Расчет'].column).value = group_skus[0]["GroupSKU"][0]["SKU"].output_per_ton
 
         # создаем колонку с форм-фактором
         group_sku_length = sum([len(x["GroupSKU"]) for x in group_skus])
-        sheet_plan.merge_cells(start_row=cur_row, start_column=1,
-                               end_row=cur_row + group_sku_length - 1, end_column=1)
-        sheet_plan.cell(cur_row, 1).value = group_skus[0]["GroupSKU"][0]["SKU"].form_factor
-        sheet_plan.cell(cur_row, 1).alignment = Alignment(horizontal='center', vertical='center')
+        sheet_plan.merge_cells(start_row=cur_row,
+                               start_column=CELLS['Форм фактор'].column,
+                               end_row=cur_row + group_sku_length - 1,
+                               end_column=CELLS['Форм фактор'].column)
+        sheet_plan.cell(cur_row, CELLS['Форм фактор'].column).value = group_skus[0]["GroupSKU"][0]["SKU"].form_factor
+        sheet_plan.cell(cur_row, CELLS['Форм фактор'].column).alignment = Alignment(horizontal='center', vertical='center')
 
         for group_sku in group_skus:
             group_formula = []
             # Записываем все в таблицу с SKU
             for sku in group_sku["GroupSKU"]:
-                formula_plan = f"=INDEX('файл остатки'!$A$5:$DK$265,MATCH($O$1,'файл остатки'!$A$5:$A$228,0),MATCH({sheet_plan.cell(cur_row, 3).coordinate},'файл остатки'!$A$5:$DK$5,0))"
+                formula_plan = "=INDEX('файл остатки'!$A$5:$DK$265,MATCH($O$1,'файл остатки'!$A$5:$A$228,0),MATCH({},'файл остатки'!$A$5:$DK$5,0))".format(
+                    sheet_plan.cell(cur_row, CELLS['Номенклатура'].column).coordinate)
                 formula_remains = "=INDEX('файл остатки'!$A$5:$DK$265,MATCH($O$2,'файл остатки'!$A$5:$A$228,0),MATCH({},'файл остатки'!$A$5:$DK$5,0))".format(
-                    sheet_plan.cell(cur_row, 3).coordinate)
+                    sheet_plan.cell(cur_row, CELLS['Номенклатура'].column).coordinate)
 
-                sheet_plan.cell(cur_row, 2).value = sku["SKU"].brand_name
-                sheet_plan.cell(cur_row, 3).value = sku["SKU"].name
-                sheet_plan.cell(cur_row, 4).value = formula_plan
-                sheet_plan.cell(cur_row, 5).value = formula_remains
-                sheet_plan.cell(cur_row, 6).value = '=MIN({}, 0)'\
-                    .format(sheet_plan.cell(cur_row, 4).coordinate)
-                group_formula.append(sheet_plan.cell(cur_row, 6).coordinate)
+                sheet_plan.cell(cur_row, CELLS['Бренд'].column).value = sku["SKU"].brand_name
+                sheet_plan.cell(cur_row, CELLS['Номенклатура'].column).value = sku["SKU"].name
+                sheet_plan.cell(cur_row, CELLS['Факт.остатки, заявка'].column).value = formula_plan
+                sheet_plan.cell(cur_row, CELLS['Нормативные остатки'].column).value = formula_remains
+                sheet_plan.cell(cur_row, CELLS['План производства'].column).value = '=MIN({}, 0)'\
+                    .format(sheet_plan.cell(cur_row, CELLS['Факт.остатки, заявка'].column).coordinate)
+                group_formula.append(sheet_plan.cell(cur_row, CELLS['План производства'].column).coordinate)
                 cur_row += 1
 
             # Записываем результат
-            sheet_plan.merge_cells(start_row=result_row, start_column=10,
-                                   end_row=result_row, end_column=11)
-            sheet_plan.cell(result_row, 10).value = '{}% варка, {}, Лактоза {}, Id {}'.format(
+            sheet_plan.merge_cells(start_row=result_row, start_column=COLUMNS['BoilingVolume'],
+                                   end_row=result_row, end_column=COLUMNS['BoilingVolume'] + 1)
+            sheet_plan.cell(result_row, COLUMNS['BoilingVolume']).value = '{}% варка, {}, Лактоза {}, Id {}'.format(
                 group_sku["GroupSKU"][0]["SKU"].boiling.percent,
                 group_sku["GroupSKU"][0]["SKU"].boiling.ferment,
                 group_sku["GroupSKU"][0]["SKU"].boiling.is_lactose,
                 group_sku["GroupSKU"][0]["SKU"].boiling_id
             )
             formula_boiling_count = '{}'.format(str(group_formula).strip('[]').replace(',', ' +').replace('\'', "").upper())
-            sheet_plan.cell(result_row, 12).value = '=-({}) / {}'.format(formula_boiling_count,
-                                                                         sheet_plan.cell(total_weight_row, 12).coordinate.upper())
-            sheet_plan.cell(result_row, 13).value = '=ROUND({})'\
-                .format(sheet_plan.cell(result_row, 12).coordinate)
+            sheet_plan.cell(result_row, CELLS['Расчет'].column).value = '=-({}) / {}'.format(
+                formula_boiling_count,
+                sheet_plan.cell(total_weight_row, CELLS['Расчет'].column).coordinate.upper())
+            sheet_plan.cell(result_row, CELLS['План'].column).value = '=ROUND({}, 0)'\
+                .format(sheet_plan.cell(result_row, CELLS['Расчет'].column).coordinate)
+            sheet_plan.cell(result_row, COLUMNS['SKUS_ID']).value = str([x["SKU"].id for x in group_sku["GroupSKU"]])
+            sheet_plan.cell(result_row, COLUMNS['BOILING_ID']).value = group_sku["GroupSKU"][0]["SKU"].boiling_id
             result_row += 1
 
         cur_row = max(result_row, cur_row) + space_rows
     wb.save(path)
-    print('Saved')
-    wb.close()
-    print('Closed')
-    # print('Calculate all')
-    # xl_model = formulas.ExcelModel().loads(path).finish()
-    # print('1')
-    # xl_model.calculate()
-    # print('2')
-    # xl_model.write(dirpath=path)
-    # print('Saved')
-    return loc_path
+    return '{}/{}'.format('data/plan', filename)
