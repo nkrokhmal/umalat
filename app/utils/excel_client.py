@@ -1,8 +1,8 @@
 import pandas as pd
 import openpyxl
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, PatternFill
 import re
-from pycel import ExcelCompiler
+import json
 
 
 class Cell:
@@ -52,23 +52,32 @@ BOILING_LIMITS = {
 }
 
 
-def parse_plan_cell(date, wb, excel):
+def parse_plan_cell(date, wb, excel, skus):
     sheet_plan = wb[SHEETS[1]]
     response = {'Date': date, 'WeekDay': date.weekday(), 'Boilings': []}
     for i in range(1, 100):
         if sheet_plan.cell(i, COLUMNS['BoilingVolume']).value is not None and \
                 "Лактоза" in sheet_plan.cell(i, COLUMNS['BoilingVolume']).value:
-            # boiling_id = sheet_plan.cell(i, COLUMNS['BoilingVolume']).value.split(' ')[-1]
             boilings_count = excel.evaluate("'{}'!{}".format(
                 SHEETS[1],
                 sheet_plan.cell(i, CELLS['План'].column).coordinate)
             )
             sku_ids = sheet_plan.cell(i, COLUMNS['SKUS_ID']).value
             boiling_id = sheet_plan.cell(i, COLUMNS['BOILING_ID']).value
+            sku_group = [sku for sku in skus if sku.id in json.loads(sku_ids)]
+
+            sku_volumes = {}
+            for j in range(1, 100):
+                if sheet_plan.cell(j, CELLS['Номенклатура'].column).value in [x.name for x in sku_group]:
+                    sku_id = [x.id for x in sku_group if x.name == sheet_plan.cell(j, CELLS['Номенклатура'].column).value][0]
+                    volume = abs(excel.evaluate("'{}'!{}".format(
+                        SHEETS[1],
+                        sheet_plan.cell(j, CELLS['План производства'].column).coordinate)
+                    ))
+                    sku_volumes[sku_id] = volume
 
             boiling_weights = []
             if sheet_plan.cell(i, CELLS['Объемы варок'].column).value is not None:
-                # todo: get only int
                 boiling_weights = re.split(', |. | ', sheet_plan.cell(i, CELLS['Объемы варок'].column).value)
                 boiling_weights = [x for x in boiling_weights if BOILING_LIMITS['MIN'] <= x <= BOILING_LIMITS['MAX']]
                 boiling_weights = [int(x) for x in boiling_weights if isinstance(x, int) or x.isdigit()]
@@ -81,7 +90,9 @@ def parse_plan_cell(date, wb, excel):
                 "BoilingId": boiling_id,
                 "BoilingCount": boilings_count,
                 "BoilingWeights": boiling_weights,
-                "SKU_IDS": sku_ids
+                # "SKUIds": sku_ids,
+                "SKUVolumes": sku_volumes
+
             })
 
     response['Boilings'] = [x for x in response['Boilings'] if x['BoilingCount'] > 0]
@@ -93,7 +104,7 @@ def build_plan(date, df, request_list):
     path = '{}/{}'.format('app/data/plan', filename)
 
     with pd.ExcelWriter(path) as writer:
-        df.to_excel(writer, sheet_name='файл остатки')
+        df.to_excel(writer, sheet_name=SHEETS[0])
         writer.save()
 
     wb = openpyxl.load_workbook(filename=path)
@@ -133,6 +144,12 @@ def build_plan(date, df, request_list):
                                start_column=CELLS['Форм фактор'].column,
                                end_row=cur_row + group_sku_length - 1,
                                end_column=CELLS['Форм фактор'].column)
+        # colour_range(sheet=sheet_plan,
+        #              start_row=cur_row,
+        #              end_row=cur_row + group_sku_length - 1,
+        #              start_col=CELLS['Форм фактор'].column,
+        #              end_col=CELLS['Факт.остатки, заявка'].column,
+        #              colour=COLOURS[group_skus[0]["GroupSKU"][0]["SKU"].form_factor])
         sheet_plan.cell(cur_row, CELLS['Форм фактор'].column).value = group_skus[0]["GroupSKU"][0]["SKU"].form_factor
         sheet_plan.cell(cur_row, CELLS['Форм фактор'].column).alignment = Alignment(horizontal='center', vertical='center')
 
@@ -144,6 +161,8 @@ def build_plan(date, df, request_list):
                     sheet_plan.cell(cur_row, CELLS['Номенклатура'].column).coordinate)
                 formula_remains = "=INDEX('файл остатки'!$A$5:$DK$265,MATCH($O$2,'файл остатки'!$A$5:$A$228,0),MATCH({},'файл остатки'!$A$5:$DK$5,0))".format(
                     sheet_plan.cell(cur_row, CELLS['Номенклатура'].column).coordinate)
+
+
 
                 sheet_plan.cell(cur_row, CELLS['Бренд'].column).value = sku["SKU"].brand_name
                 sheet_plan.cell(cur_row, CELLS['Номенклатура'].column).value = sku["SKU"].name
@@ -176,3 +195,9 @@ def build_plan(date, df, request_list):
         cur_row = max(result_row, cur_row) + space_rows
     wb.save(path)
     return '{}/{}'.format('data/plan', filename)
+
+
+def colour_range(sheet, start_row, end_row, start_col, end_col, colour):
+    for i in range(start_row, end_row):
+        for j in range(start_col, end_col):
+            sheet.cell(i, j).fill = PatternFill(bgColor=colour, fill_type="solid")
