@@ -4,7 +4,7 @@ from openpyxl.styles import PatternFill
 
 from src.color import cast_color
 from src.time import cast_t, cast_time
-from src.interval import cast_interval
+from src.interval import cast_interval, calc_interval_length
 
 
 def draw_block(sheet, x, y, w, h, text, colour):
@@ -78,13 +78,27 @@ def init_template_sheet():
     return work_book, sheet
 
 
-def draw_schedule(root, style, fn='output.xlsx', init_sheet_func=init_sheet):
+def draw_schedule(root, styles, stylings, fn='output.xlsx', init_sheet_func=init_sheet):
     # update styles
     for b in root.iter():
-        if b.rel_props['class'] in style:
-            b.rel_props.update(style[b.rel_props['class']])
+        block_style = styles.get(b.rel_props['class'])
+        if block_style:
+            b.rel_props.update(block_style)
+
+        block_styling = stylings.get(b.rel_props['class'])
+        if block_styling:
+            b.rel_props.update(block_styling(b))
 
     work_book, sheet = init_sheet_func()
     root.rel_props['index_width'] = 4
     draw(sheet, root)
     work_book.save(fn)
+
+
+def draw_print(block):
+    res = ''
+    for b in block.iter():
+        if calc_interval_length(b.interval) != 0:
+            res += ' ' * int(b.abs_props['t']) + '=' * int(calc_interval_length(b.interval)) + f' {b.rel_props["class"]} {b.interval}'
+            res += '\n'
+    return res

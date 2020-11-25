@@ -5,7 +5,7 @@ import copy
 import math
 
 import sys
-sys.path.append(r'C:\Users\arsen\Desktop\code\git\2020.10-umalat\umalat\research\akadaner')
+sys.path.append(r'C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\research\akadaner')
 from src.interval import calc_interval_length, cast_interval
 
 
@@ -144,9 +144,17 @@ class Block:
         return block
 
 
-def simple_push(parent, block, validator='basic'):
+def simple_push(parent, block, validator='basic', props=None):
     if validator == 'basic':
         validator = gen_pair_validator()
+
+    # set parent for proper abs_props
+    block.parent = parent
+
+    props = props or {}
+    if props:
+        block.rel_props.update(props)
+        block.upd_abs_props()
 
     if validator:
         try:
@@ -161,7 +169,9 @@ def add_push(parent, block):
     return simple_push(parent, block, validator=None)
 
 
-def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY, validator='basic'):
+def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY, validator='basic', iter_props=None):
+    # note: make sure parent abs props are updated
+
     if beg == 'last_beg':
         cur_t = max([0] + [child.beg for child in parent.children])
     elif beg == 'last_end':
@@ -173,12 +183,14 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY,
 
     end = min(end, cur_t + max_tries)
 
-    while cur_t < end:
-        block.rel_props['t'] = cur_t
-        block.upd_abs_props()
+    iter_props = iter_props or [{}]
 
-        if simple_push(parent, block, validator=validator):
-            return block
+    while cur_t < end:
+        for props in iter_props:
+            props = copy.deepcopy(props)
+            props['t'] = cur_t
+            if simple_push(parent, block, validator=validator, props=props):
+                return block
         cur_t += 1
 
 
