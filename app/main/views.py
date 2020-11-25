@@ -15,11 +15,16 @@ from datetime import datetime
 
 @main.route('/')
 def index():
+    return  render_template('index.html')
+
+
+@main.route('/get_general_params')
+def get_general_params():
     lines = db.session.query(Line).all()
     packers = db.session.query(Packer).all()
     termizators = db.session.query(Termizator).all()
     departments = db.session.query(Departmenent).all()
-    return render_template('index.html', lines=lines, packers=packers, termizators=termizators, departments=departments)
+    return render_template('get_general_params.html', lines=lines, packers=packers, termizators=termizators, departments=departments)
 
 
 @main.route('/get_packings/<int:boiling_id>', methods=['GET', 'POST'])

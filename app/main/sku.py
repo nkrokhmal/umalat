@@ -29,10 +29,6 @@ def add_sku():
             packing_reconfiguration_format=form.packing_reconfiguration_format.data
         )
 
-        if form.line.data != '':
-            sku.line_id = [x.id for x in form.packers if
-                           x.name == dict(form.packer.choices).get(form.packer.data)][0]
-
         if form.packer.data != '':
             sku.packer_id = [x.id for x in form.packers if
                              x.name == dict(form.packer.choices).get(form.packer.data)][0]
@@ -88,9 +84,6 @@ def edit_sku(sku_id):
         if form.packer.data != -1:
             sku.packer_id = [x.id for x in form.packers if
                              x.name == dict(form.packer.choices).get(form.packer.data)][0]
-        if form.line.data != -1:
-            sku.line_id = [x.id for x in form.lines if
-                           x.name == dict(form.line.choices).get(form.line.data)][0]
         if form.pack_type.data != -1:
             sku.pack_type_id = [x.id for x in form.pack_types if
                                 x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
@@ -101,9 +94,6 @@ def edit_sku(sku_id):
         generate_default_value(form.percent, sku.boiling.percent)
         generate_default_value(form.is_lactose, sku.boiling.is_lactose)
         generate_default_value(form.ferment, sku.boiling.ferment)
-
-    if sku.lines is not None:
-        generate_default_value(form.line, sku.lines.name)
 
     if sku.pack_types is not None:
         generate_default_value(form.pack_type, sku.pack_types.name)

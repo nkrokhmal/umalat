@@ -26,12 +26,19 @@ class BoilingForm(FlaskForm):
     first_cooling_time = IntegerField('Enter first cooling time', validators=[Optional()])
     second_cooling_time = IntegerField('Enter seconds cooling time', validators=[Optional()])
     salting_time = IntegerField('Enter salting time', validators=[Optional()])
+
+    line = SelectField('Выберите линию', coerce=int, default=-1)
+    lines = None
     # сабмит
     submit = SubmitField('Submit')
 
     def __init__(self, *args, **kwargs):
         super(BoilingForm, self).__init__(*args, **kwargs)
         self.ferment.choices = list(enumerate(['Альче', 'Сакко']))
+
+        self.lines = db.session.query(Line).all()
+        self.line.choices = list(enumerate(set([x.name for x in self.lines])))
+        self.line.choices.append((-1, ''))
 
 
 class SKUForm(FlaskForm):
@@ -49,11 +56,9 @@ class SKUForm(FlaskForm):
     percent = SelectField('Выберите процент жира', coerce=int)
     packer = SelectField('Выберите тип фасовщика', coerce=int, default=-1)
     ferment = SelectField('Выберите тип закваски', coerce=int)
-    line = SelectField('Выберите линию', coerce=int, default=-1)
     is_lactose = SelectField('Выберите наличие лактозы', coerce=int)
 
     pack_types = None
-    lines = None
     packers = None
     boilings = None
     submit = SubmitField('Submit')
@@ -62,14 +67,11 @@ class SKUForm(FlaskForm):
         super(SKUForm, self).__init__(*args, **kwargs)
         self.boilings = db.session.query(Boiling).all()
         self.packers = db.session.query(Packer).all()
-        self.lines = db.session.query(Line).all()
         self.pack_types = db.session.query(PackType).all()
 
         self.ferment.choices = list(enumerate(set([x.ferment for x in self.boilings])))
         self.percent.choices = list(enumerate(set([x.percent for x in self.boilings])))
         self.is_lactose.choices = list(enumerate(set([x.is_lactose for x in self.boilings])))
-        self.line.choices = list(enumerate(set([x.name for x in self.lines])))
-        self.line.choices.append((-1, ''))
         self.packer.choices = list(enumerate(set([x.name for x in self.packers])))
         self.packer.choices.append((-1, ''))
         self.pack_type.choices = list(enumerate(set([x.name for x in self.pack_types])))

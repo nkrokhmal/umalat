@@ -46,7 +46,7 @@ class SKU(db.Model):
     # связка с варкой
     boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
     # связка с линиями
-    line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
+    # line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
     # связка с типом упаковки
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
 
@@ -98,6 +98,7 @@ class Boiling(db.Model):
     pourings = db.relationship('Pouring', backref='boiling', foreign_keys=pouring_id)
     melting_id = db.Column(db.Integer, db.ForeignKey('meltings.id'), nullable=True)
     meltings = db.relationship('Melting', backref='boiling', foreign_keys=melting_id)
+    line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
 
     @staticmethod
     def generate_boilings():
@@ -227,7 +228,8 @@ class Line(db.Model):
     __tablename__ = 'lines'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Integer)
-    lines_skus = db.relationship('SKU', backref='lines')
+    # lines_skus = db.relationship('SKU', backref='lines')
+    boiling_line = db.relationship('Boiling', backref='lines')
     cheddarization_time = db.Column(db.Integer)
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
 
@@ -296,7 +298,6 @@ def init_sku():
                 output_per_ton=d['output'],
                 packing_speed=d['packing_speed'],
                 shelf_life=int(d['shelf_life']),
-                line_id=[x.id for x in lines if x.name == d['line']][0],
                 boiling_id=[x.id for x in boilings if (x.percent == float(d['percent'])) and
                             (x.ferment == d['ferment'].capitalize()) and
                             (x.is_lactose == d['is_lactose'])][0],

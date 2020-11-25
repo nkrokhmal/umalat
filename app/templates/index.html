@@ -2,76 +2,75 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block page_content %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-<div class="col-md-6 col-sm-6 col-xs-12">
-    <div class="x_panel">
-      <div class="x_title">
-        <h2><i class="fa fa-square-o"></i> Линии </h2>
-      </div>
-      <div class="x_content">
-        <table class="table table-hover lines">
-          <thead>
-            <tr>
-              <th> Название линии </th>
-            </tr>
-          </thead>
-          {% for line in lines %}
-          <tr>
-            <td> {{line.name}} </td>
-          </tr>
-          {% endfor %}
-        </table>
-      </div>
-    </div>
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <header>
+    <h1>Правила составления расписания</h1>
+  </header>
 </div>
-
-<div class="col-md-6 col-sm-6 col-xs-12">
-    <div class="x_panel">
-      <div class="x_title">
-        <h2><i class="fa fa-square-o"></i> Фасовщики </h2>
-      </div>
-      <div class="x_content">
-        <table class="table table-hover lines">
-          <thead>
-            <tr>
-              <th> Типы фасовщиков </th>
-            </tr>
-          </thead>
-          {% for packer in packers %}
-          <tr>
-            <td> {{packer.name}} </td>
-          </tr>
-          {% endfor %}
-        </table>
-      </div>
-    </div>
-</div>
-
-<div class="col-md-6 col-sm-6 col-xs-12">
-    <div class="x_panel">
-      <div class="x_title">
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="x_title">
         <h2><i class="fa fa-square-o"></i> Термизатор </h2>
-      </div>
-      <div class="x_content">
-        <table class="table table-hover lines">
-          <thead>
-            <tr>
-              <th> Параметры термизатора </th>
-              <th> Время короткой мойки, мин </th>
-              <th> Время долгой мойки, мин </th>
-            </tr>
-          </thead>
-          {% for termizator in termizators %}
-          <tr>
-            <td> {{termizator.name}} </td>
-            <td> {{termizator.short_cleaning_time}} </td>
-            <td> {{termizator.long_cleaning_time}} </td>
-          </tr>
-          {% endfor %}
-        </table>
-      </div>
+    </div>
+    <div class="x_content" style="font-size: 12pt">
+        <ul>
+            <li> Время термизации составляет 30 минут </li>
+            <li> При простое термизатора не более одного часа требуется короткая мойка </li>
+            <li> При простое термизатора более одного часа требуется длинная мойка </li>
+        </ul>
     </div>
 </div>
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="x_title">
+        <h2><i class="fa fa-square-o"></i> Сыроизготовитель </h2>
+    </div>
+    <div class="x_content" style="font-size: 12pt">
+        <ul>
+            <li> Параметры каждой варки определяются процентом жирности смеси, наличием лактозы и типом закваски
+                <ul>
+                    <li>
+                        Жирность смеси
+                        <ul>
+                            <li> 2.7 </li>
+                            <li> 3.3 </li>
+                            <li> 3.6 </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Типы лактозы
+                        <ul>
+                            <li> С лактозой </li>
+                            <li> Без лактозы </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Типы заквасок
+                        <ul>
+                            <li> Альче </li>
+                            <li> Сакко </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li> Возможные объемы варок
+                <ul>
+                    <li> 6 тонн </li>
+                    <li> 7 тонн </li>
+                    <li> 8 тонн </li>
+                </ul>
+            </li>
+            <li>
+                Этапы
+                <ul>
+                    <li> Внесение закваски </li>
+                    <li> Схватка </li>
+                    <li> Резка/обсушка </li>
+                    <li> Слив (в дренатор) </li>
+                </ul>
+            </li>
+
+        </ul>
+    </div>
+</div>
+
 
 {% endblock %}

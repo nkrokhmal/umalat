@@ -51,16 +51,24 @@ def edit_boiling(boiling_id):
             )
             boiling_process.meltings = melting_process
 
+            if form.line.data != -1:
+                boiling_process.line_id = [x.id for x in form.lines if
+                                           x.name == dict(form.line.choices).get(form.line.data)][0]
+
             db.session.commit()
             return redirect(url_for('.get_boiling'))
+
         for key, value in dict(form.ferment.choices).items():
             if value == boiling_process.ferment:
                 form.ferment.default = key
-                form.process()
+
+        if boiling_process.lines is not None:
+            generate_default_value(form.line, boiling_process.lines.name)
+        form.process()
+
         form.percent.data = boiling_process.percent
         form.priority.data = boiling_process.priority
         form.is_lactose.data = boiling_process.is_lactose
-
 
         if boiling_process.pourings is not None:
             form.pouring_time.data = boiling_process.pourings.pouring_time
@@ -68,6 +76,7 @@ def edit_boiling(boiling_id):
             form.cutting_time.data = boiling_process.pourings.cutting_time
             form.pouring_off_time.data = boiling_process.pourings.pouring_off_time
             form.extra_time.data = boiling_process.pourings.extra_time
+
         if boiling_process.meltings is not None:
             form.serving_time.data = boiling_process.meltings.serving_time
             form.melting_time.data = boiling_process.meltings.melting_time
@@ -105,7 +114,20 @@ def add_boilings():
         )
         boiling.pourings = pouring_process
         boiling.meltings = melting_process
+
+        if form.line.data != '':
+            boiling.line_id = [x.id for x in form.lines if
+                               x.name == dict(form.line.choices).get(form.line.data)][0]
+
         db.session.add(boiling)
         db.session.commit()
         return redirect(url_for('.get_boiling'))
     return render_template('add_boiling.html', form=form)
+
+
+def generate_default_value(form, val):
+    for key, value in dict(form.choices).items():
+        if value == val:
+            form.default = key
+            print(key)
+            print(value)
