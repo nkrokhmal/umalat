@@ -1,20 +1,47 @@
 import openpyxl as opx
 from openpyxl.styles import Alignment
 from openpyxl.styles import PatternFill
+from openpyxl.reader.excel import load_workbook
+from openpyxl.styles.borders import Border, Side, BORDER_THIN
+from openpyxl.worksheet.cell_range import CellRange
+from openpyxl.utils import get_column_letter
+
 
 from src.color import cast_color
 from src.time import cast_t, cast_time
 from src.interval import cast_interval, calc_interval_length
 
 
-def draw_block(sheet, x, y, w, h, text, colour):
+def set_border(sheet, x, y, w, h, border):
+    rows = sheet['{}{}'.format(get_column_letter(x), y):'{}{}'.format(get_column_letter(x + w - 1), y + h - 1)]
+
+    for row in rows:
+        row[0].border = Border(left=border, top=row[0].border.top, bottom=row[0].border.bottom, right=row[0].border.right)
+        row[-1].border = Border(left=row[-1].border.left, top=row[-1].border.top, bottom=row[-1].border.bottom, right=border)
+    for c in rows[0]:
+        c.border = Border(left=c.border.left, top=border, bottom=c.border.bottom, right=c.border.right)
+    for c in rows[-1]:
+        c.border = Border(left=c.border.left, top=c.border.top, bottom=border, right=c.border.right)
+
+
+def draw_block(sheet, x, y, w, h, text, colour, border=None):
     if not colour:
-        colour = cast_color('white') # default white colour
+        colour = cast_color('white')  # default white colour
     sheet.merge_cells(start_row=y, start_column=x, end_row=y + h - 1, end_column=x + w - 1)
     merged_cell = sheet.cell(row=y, column=x)
     merged_cell.value = text
     merged_cell.alignment = Alignment(horizontal='center')
     merged_cell.fill = PatternFill("solid", fgColor=colour[1:])
+
+    if border is not None:
+        if isinstance(border, dict):
+            border = Side(**border)
+        elif isinstance(border, Side):
+            pass
+        else:
+            raise Exception('Unknown border type')
+
+        set_border(sheet, x, y, w, h, border)
 
 
 def draw(sheet, block):
@@ -37,11 +64,10 @@ def draw(sheet, block):
             beg += 1  # indexing starts with 1 in excel
 
             print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size))
-            draw_block(sheet, beg, b.abs_props['y'], b.size, 1, text, color)
+            draw_block(sheet, beg, b.abs_props['y'], b.size, 1, text, color, border={'border_style': 'thin', 'color': '000000'})
 
 
 def init_sheet():
-    from openpyxl.utils import get_column_letter
     work_book = opx.Workbook()
     sheet = work_book.worksheets[0]
     for i in range(288):
