@@ -129,27 +129,33 @@ def build_plan(date, df, request_list):
         group_skus = [x for x in request_list if x["GroupSKU"][0]["SKU"].form_factor == form_factor]
         result_row = cur_row
 
-        # Создаем таблицу с итоговыми варками
         total_weight_row = (result_row + len(group_skus) + 1)
+        group_sku_length = sum([len(x["GroupSKU"]) for x in group_skus])
+        colour = COLOURS[group_skus[0]["GroupSKU"][0]["SKU"].form_factor]
+        # красим ячейки в нужный цвет
+        colour_range(sheet=sheet_plan,
+                     start_row=cur_row,
+                     end_row=cur_row + group_sku_length,
+                     start_col=CELLS['Форм фактор'].column,
+                     end_col=CELLS['План производства'].column + 1,
+                     colour=colour)
+
+        # Создаем таблицу с итоговыми варками
         sheet_plan.merge_cells(start_row=total_weight_row,
                                start_column=COLUMNS['BoilingVolume'],
                                end_row=total_weight_row,
                                end_column=COLUMNS['BoilingVolume'] + 1)
         sheet_plan.cell(total_weight_row, COLUMNS['BoilingVolume']).value = 'Объем варки'
+        sheet_plan.cell(total_weight_row, COLUMNS['BoilingVolume']).fill = PatternFill("solid", fgColor=colour)
         sheet_plan.cell(total_weight_row, CELLS['Расчет'].column).value = group_skus[0]["GroupSKU"][0]["SKU"].output_per_ton
+        sheet_plan.cell(total_weight_row, CELLS['Расчет'].column).fill = PatternFill("solid", fgColor=colour)
 
         # создаем колонку с форм-фактором
-        group_sku_length = sum([len(x["GroupSKU"]) for x in group_skus])
         sheet_plan.merge_cells(start_row=cur_row,
                                start_column=CELLS['Форм фактор'].column,
                                end_row=cur_row + group_sku_length - 1,
                                end_column=CELLS['Форм фактор'].column)
-        # colour_range(sheet=sheet_plan,
-        #              start_row=cur_row,
-        #              end_row=cur_row + group_sku_length - 1,
-        #              start_col=CELLS['Форм фактор'].column,
-        #              end_col=CELLS['Факт.остатки, заявка'].column,
-        #              colour=COLOURS[group_skus[0]["GroupSKU"][0]["SKU"].form_factor])
+
         sheet_plan.cell(cur_row, CELLS['Форм фактор'].column).value = group_skus[0]["GroupSKU"][0]["SKU"].form_factor
         sheet_plan.cell(cur_row, CELLS['Форм фактор'].column).alignment = Alignment(horizontal='center', vertical='center')
 
@@ -190,14 +196,27 @@ def build_plan(date, df, request_list):
                 .format(sheet_plan.cell(result_row, CELLS['Расчет'].column).coordinate)
             sheet_plan.cell(result_row, COLUMNS['SKUS_ID']).value = str([x["SKU"].id for x in group_sku["GroupSKU"]])
             sheet_plan.cell(result_row, COLUMNS['BOILING_ID']).value = group_sku["GroupSKU"][0]["SKU"].boiling_id
+
+            colour_range(sheet_plan,
+                         start_row=result_row,
+                         end_row=result_row + 1,
+                         start_col=COLUMNS['BoilingVolume'],
+                         end_col=CELLS['План'].column + 1,
+                         colour=colour)
+
             result_row += 1
 
         cur_row = max(result_row, cur_row) + space_rows
+
+    # set style
+    col = sheet_plan.column_dimensions['A']
+
     wb.save(path)
     return '{}/{}'.format('data/plan', filename)
 
 
 def colour_range(sheet, start_row, end_row, start_col, end_col, colour):
+    print('Colour {} cells {}'.format(colour, (start_row, end_row, start_col, end_col)))
     for i in range(start_row, end_row):
         for j in range(start_col, end_col):
-            sheet.cell(i, j).fill = PatternFill(bgColor=colour, fill_type="solid")
+            sheet.cell(i, j).fill = PatternFill("solid", fgColor=colour)
