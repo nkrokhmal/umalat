@@ -1,6 +1,7 @@
 import pandas as pd
 import openpyxl
-from openpyxl.styles import Alignment, PatternFill
+from openpyxl.styles import Alignment
+from openpyxl.utils import get_column_letter
 import re
 import json
 from .openpyxl_wrapper import ExcelBlock
@@ -61,6 +62,10 @@ def generate_title(sheet):
     for key, val in CELLS.items():
         sheet.cell(val.row, val.column).value = val.name
     sheet.freeze_panes = sheet['A2']
+
+    sheet.column_dimensions[get_column_letter(CELLS['Brand'].column)].width = 3 * 5
+    sheet.column_dimensions[get_column_letter(CELLS['SKU'].column)].width = 10 * 5
+    sheet.column_dimensions[get_column_letter(COLUMNS['BoilingVolume'])].width = 5 * 5
 
 
 def build_plan(date, df, request_list):
