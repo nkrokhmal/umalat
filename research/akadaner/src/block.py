@@ -116,7 +116,8 @@ class Block:
                 if key in ['t', 'y']:  # accumulated keys
                     cur_props[key] += props[key]
                 else:
-                    cur_props[key] = props[key]
+                    if props[key] is not None:
+                        cur_props[key] = props[key]
         return cur_props
 
     def upd_abs_props(self):
