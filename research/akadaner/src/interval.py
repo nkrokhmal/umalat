@@ -12,5 +12,5 @@ def calc_interval_length(i):
 
 
 if __name__ == '__main__':
-    print(cast_interval(1,2))
+    print(cast_interval(1, 2))
     print(calc_interval_length(cast_interval(1, 2)))
