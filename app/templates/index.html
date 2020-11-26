@@ -2,75 +2,172 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block page_content %}
-<div class="col-md-12 col-sm-12 col-xs-12">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 18px;
+  transition: 0.4s;
+}
+
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+
+.ul>li
+{
+    margin: 5px;
+    font-size: 14px;
+}
+
+.panel {
+  padding: 0 18px;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+</style>
+</head>
+
+<div class="col-md-12 col-sm-12 col-xs-12" style="margin-bottom: 50px;">
     <header>
     <h1>Правила составления расписания</h1>
   </header>
 </div>
 <div class="col-md-12 col-sm-12 col-xs-12">
-    <div class="x_title">
-        <h2><i class="fa fa-square-o"></i> Термизатор </h2>
-    </div>
-    <div class="x_content" style="font-size: 12pt">
-        <ul>
+    <button class="accordion" style="font-size: 18px;">Термизатор</button>
+    <div class="panel">
+        <ul class="ul">
             <li> Время термизации составляет 30 минут </li>
             <li> При простое термизатора не более одного часа требуется короткая мойка </li>
-            <li> При простое термизатора более одного часа требуется длинная мойка </li>
+            <li> При простое термизатора более одного часа требуется длинная мойка </li
+            <li> Термизатор не может одновременно работать на нескольких варках </li>
+            <li> После последнего использования термизатора происходит полная мойка термизатора </li>
         </ul>
     </div>
 </div>
+
 <div class="col-md-12 col-sm-12 col-xs-12">
-    <div class="x_title">
-        <h2><i class="fa fa-square-o"></i> Сыроизготовитель </h2>
-    </div>
-    <div class="x_content" style="font-size: 12pt">
-        <ul>
-            <li> Параметры каждой варки определяются процентом жирности смеси, наличием лактозы и типом закваски
-                <ul>
-                    <li>
-                        Жирность смеси
-                        <ul>
-                            <li> 2.7 </li>
-                            <li> 3.3 </li>
-                            <li> 3.6 </li>
-                        </ul>
-                    </li>
-                    <li>
-                        Типы лактозы
-                        <ul>
-                            <li> С лактозой </li>
-                            <li> Без лактозы </li>
-                        </ul>
-                    </li>
-                    <li>
-                        Типы заквасок
-                        <ul>
-                            <li> Альче </li>
-                            <li> Сакко </li>
-                        </ul>
-                    </li>
-                </ul>
+    <button class="accordion"> Сыроизготовитель </button>
+    <div class="panel">
+        <ul class="ul">
+            <li> Сыроизготовитель начинает свою работу в 7:00 для воды и в 8:00 для соли </li>
+            <li> <a href="{{ url_for('main.get_boiling')}}"> Параметры </a> каждой варки определяются процентом жирности смеси (2.7%, 3.3%, 3.6%),
+                наличием лактозы и типом заквасок (Альче, Сакко).
             </li>
-            <li> Возможные объемы варок
-                <ul>
-                    <li> 6 тонн </li>
-                    <li> 7 тонн </li>
-                    <li> 8 тонн </li>
-                </ul>
-            </li>
-            <li>
-                Этапы
-                <ul>
-                    <li> Внесение закваски </li>
-                    <li> Схватка </li>
-                    <li> Резка/обсушка </li>
-                    <li> Слив (в дренатор) </li>
-                </ul>
+            <li> Объем одной варки может быть 6, 7 или 8 тонн. </li>
+            <li> В каждой варки есть 4 этапа (внесение закваски, схватка, резка/обсушка и слив в дренатор).
+                Время каждого из этапов можно настроить в <a href="{{ url_for('main.get_boiling')}}"> параметрах варок</a>.
             </li>
 
         </ul>
     </div>
 </div>
 
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <button class="accordion"> Дренатор </button>
+    <div class="panel">
+        <ul class="ul">
+            <li> Дренатор необходимо использовать сразу после процесса чеддеризации, его простой не допустим. </li>
+            <li> Время чеддеризации составляет 3 часа для воды и 4 часа для соли </li>
+        </ul>
+    </div>
+</div>
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <button class="accordion"> Плавление </button>
+    <div class="panel">
+        <ul class="ul">
+            <li> Для каждого типа варки определяются <a href="{{ url_for('main.get_boiling')}}"> параметры </a> плавления.
+                К ним относятся время подачи и вымешивания, скорость плавления, время охлаждения и время посолки.
+            </li>
+            <li> В случае, когда скорость плавления меньше скорости упаковки, время плавления подгоняется под упаковку. </li>
+            <li> Скорость охлаждения зависит напрямую от форм фактора. </li>
+            <li> Процессы плавления и формования не должны пересекаться по времени </li>
+            <li> Во время остановок процесса плавления-охлаждения сыр будет накапливается. Подобных пауз следует избегать,
+                иначе если его долго не фасовать - он будет теплым. </li>
+        </ul>
+    </div>
+</div>
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <button class="accordion"> Фасовка </button>
+    <div class="panel">
+        <ul class="ul">
+            <li> Время смены фасовки между одинаковыми сырами составляет 5 минут, между разными 25 минут. </li>
+            <li> Скорость фасовки определяется для каждого SKU </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <button class="accordion"> Линии </button>
+    <div class="panel">
+        <ul class="ul">
+            <li> На линию воды может идти только 2 водяных сыроизготовителя.
+                По особым дням 3 сыроизготовителя может работать на линии соли.
+            </li>
+            <li> В случае, когда скорость плавления меньше скорости упаковки, время плавления подгоняется под упаковку. </li>
+            <li> Скорость охлаждения зависит напрямую от форм фактора. </li>
+            <li> Процессы плавления и формования не должны пересекаться по времени </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <button class="accordion"> SKU </button>
+    <div class="panel">
+        <ul class="ul">
+            <li> Для каждого SKU определяются <a href="{{ url_for('main.get_sku')}}">параметры</a>, такие как
+                типа варки, форм фактор и тд. </li>
+            <li> В первую очередь необходимо изготовить безлактозную продукцию. </li>
+            <li> У всех SKU есть свой срок годности. Сыр можно продавать минимум с 80% сроком хранения. </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <button class="accordion"> Дни </button>
+    <div class="panel">
+        <ul class="ul">
+            <li> Завод не работает в понедельник и четверг. </li>
+            <li> В воскресенье и среду требуется закрывать все запросы (потому что следующие дни - выходные). </li>
+            <li> У всех SKU есть свой срок годности. Сыр можно продавать минимум с 80% сроком хранения. </li>
+        </ul>
+    </div>
+</div>
+
+
+
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.maxHeight) {
+      panel.style.maxHeight = null;
+    } else {
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    }
+  });
+}
+</script>
 
 {% endblock %}
