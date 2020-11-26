@@ -40,11 +40,27 @@
 </style>
 </head>
 
+
+
 <div class="col-md-12 col-sm-12 col-xs-12" style="margin-bottom: 50px;">
     <header>
     <h1>Правила составления расписания</h1>
   </header>
 </div>
+
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <button class="accordion" style="font-size: 18px;">Общее</button>
+    <div class="panel">
+        <ul class="ul">
+            <li> Процесс сыроизготовления происходит в несколько этапов: термизатор, сыроизготовитель, дренатор, плавление, фасовка. </li>
+            <li> Есть 2 линии: линия воды (линия для производства сыра типа "моцарелла в воде") и линия пицца-чиз (линия для производства соленого сыра). </li>
+  </ul>
+
+    </div>
+</div>
+
+
 <div class="col-md-12 col-sm-12 col-xs-12">
     <button class="accordion" style="font-size: 18px;">Термизатор</button>
     <div class="panel">
@@ -68,6 +84,7 @@
     <button class="accordion"> Сыроизготовители </button>
     <div class="panel">
         <ul class="ul">
+            <li> На каждой линии установлено по 2 сыроизготовителя. </li>
             <li> Время начала работы сыроизготовителей для линий воды и пицца-чиз задается в <a href="{{ url_for('main.get_general_params')}}"> общих параметрах</a>. </li>
             <li> <a href="{{ url_for('main.get_boiling')}}"> Параметры </a> каждой варки определяются процентом жирности смеси (2.7%, 3.3%, 3.6% итд),
                 наличием лактозы и типом заквасок (альче, сакко итд).
