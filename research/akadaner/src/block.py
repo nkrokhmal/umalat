@@ -169,8 +169,8 @@ def simple_push(parent, block, validator='basic', props=None):
 def add_push(parent, block):
     return simple_push(parent, block, validator=None)
 
-
-def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY, validator='basic', iter_props=None):
+# todo: limit end
+def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, validator='basic', iter_props=None):
     # note: make sure parent abs props are updated
 
     if beg == 'last_beg':
@@ -193,6 +193,8 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY,
             if simple_push(parent, block, validator=validator, props=props):
                 return block
         cur_t += 1
+
+    raise Exception('Failed to push element')
 
 
 class BlockMaker:
