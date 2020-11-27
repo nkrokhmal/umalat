@@ -4,10 +4,31 @@
 
 {% block title %}Schedule{% endblock %}
 {% block page_content %}
+
+<link rel="stylesheet" type="text/css" href="static/css/templates/parse_request.css" />
+<link href="static/css/datatables2.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+
+
+<script type='text/javascript' src="static/js/jquery.min.js"></script>
+<script type='text/javascript' src="static/js/bootstrap.min.js"></script>
+<script type='text/javascript' src="static/js/mdb.min.js"></script>
+<script type='text/javascript' src="static/js/datatables2.min.js" defer></script>
+<script type='text/javascript' src="static/js/templates/parse_request.js"></script>
+
+
 <div class="page-header">
     <h1> Загрузите файл плана и выберите дату </h1>
 </div>
 <div class="col-md-6" style="margin-bottom: 20px;">
     {{ wtf.quick_form(form) }}
 </div>
+
+{% if schedule_link %}
+    <div class="col-md-6" style="margin-bottom: 20px;">
+        <a href="{{schedule_link}}"><button class="btn"><i class="fa fa-download"></i> Download </button></a>
+    </div>
+{% endif %}
 {% endblock %}
