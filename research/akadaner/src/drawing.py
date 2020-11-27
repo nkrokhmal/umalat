@@ -28,10 +28,10 @@ def draw_block(sheet, x, y, w, h, text, colour, border=None):
         colour = cast_color('white')  # default white colour
     sheet.merge_cells(start_row=y, start_column=x, end_row=y + h - 1, end_column=x + w - 1)
     merged_cell = sheet.cell(row=y, column=x)
+    merged_cell.font = Font(size=7)
+    merged_cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
     merged_cell.value = text
-    merged_cell.alignment = Alignment(horizontal='center')
     merged_cell.fill = PatternFill("solid", fgColor=colour[1:])
-    merged_cell.font = Font(size=6)
 
     if border is not None:
         if isinstance(border, dict):
@@ -66,7 +66,7 @@ def draw(sheet, block):
             # if b.abs_props['class'] != 'termizator':
             #     continue
             print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size), cast_interval(b.abs_props['t'], b.abs_props['t'] + b.size))
-            draw_block(sheet, beg, b.abs_props['y'], b.size, 1, text, color, border={'border_style': 'thin', 'color': '000000'})
+            draw_block(sheet, beg, b.abs_props['y'], b.size, b.abs_props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'})
 
 def init_sheet():
     work_book = opx.Workbook()
@@ -76,7 +76,7 @@ def init_sheet():
     return work_book, sheet
 
 
-def init_template_sheet():
+def init_template_sheet(template_fn=r'2020.11.18 schedule_template.xlsx'):
     def move_sheet(wb, from_loc=None, to_loc=None):
         sheets = wb._sheets
 
@@ -91,7 +91,7 @@ def init_template_sheet():
         sheet = sheets.pop(from_loc)
         sheets.insert(to_loc, sheet)
 
-    work_book = opx.load_workbook(r'2020.11.18 schedule_template.xlsx')
+    work_book = opx.load_workbook(template_fn)
 
     # delete all but last - original
     for sheet in work_book.worksheets[:-1]:
