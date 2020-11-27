@@ -10,6 +10,8 @@ from pycel import ExcelCompiler
 
 from utils_ak.interactive_imports import *
 from umalat.app.schedule_maker.algo import *
+from umalat.config import basedir
+
 
 @main.route('/schedule', methods=['GET', 'POST'])
 def schedule():
@@ -32,7 +34,7 @@ def schedule():
         boiling_request = parse_plan_cell(date=date, wb=wb, excel=excel, skus=skus)
         date = cast_datetime(request['Date'])
         root = make_schedule(request, date)
-        schedule_wb = draw_workbook(root, mode='prod', template_fn="2020.11.18 schedule_template.xlsx")
+        schedule_wb = draw_workbook(root, mode='prod', template_fn=os.path.join(basedir, 'app', 'data', 'schedule_tempaltes', 'full_template.xlsx'))
 
         return jsonify(boiling_request)
     return render_template('schedule.html', form=form)
