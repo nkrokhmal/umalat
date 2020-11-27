@@ -1,4 +1,4 @@
-from umalat.app.schedule_maker.utils.block import validate_disjoint
+from app.schedule_maker.utils.block import validate_disjoint
 
 
 def boiling_validator(parent, boiling):

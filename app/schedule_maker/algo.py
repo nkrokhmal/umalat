@@ -1,10 +1,10 @@
 import anyconfig
 from utils_ak.interactive_imports import *
-from umalat.app.schedule_maker.models import *
-from umalat.app.schedule_maker.utils import *
-from umalat.app.schedule_maker.validation import *
-from umalat.app.schedule_maker.blocks import *
-from umalat.app.schedule_maker.style import *
+from app.schedule_maker.models import *
+from app.schedule_maker.utils import *
+from app.schedule_maker.validation import *
+from app.schedule_maker.blocks import *
+from app.schedule_maker.style import *
 from itertools import product
 
 

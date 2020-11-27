@@ -9,8 +9,8 @@ import openpyxl
 from pycel import ExcelCompiler
 
 from utils_ak.interactive_imports import *
-from umalat.app.schedule_maker.algo import *
-from umalat.config import basedir
+from app.schedule_maker.algo import *
+from config import basedir
 
 
 @main.route('/schedule', methods=['GET', 'POST'])

@@ -1,8 +1,8 @@
 import sys
 
-from umalat.app.models import *
-from umalat.app.models import Boiling as BoilingModel
-from umalat.app.models import Termizator as TermizatorModel
+from app.models import *
+from app.models import Boiling as BoilingModel
+from app.models import Termizator as TermizatorModel
 
 from utils_ak.interactive_imports import *
 

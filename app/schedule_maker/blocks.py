@@ -1,5 +1,5 @@
-from umalat.app.schedule_maker.models import *
-from umalat.app.schedule_maker.utils import *
+from app.schedule_maker.models import *
+from app.schedule_maker.utils import *
 
 from utils_ak.interactive_imports import *
 
