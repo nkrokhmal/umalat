@@ -4,9 +4,7 @@ PERIODS_PER_DAY = 24 * PERIODS_PER_HOUR
 import copy
 import math
 
-import sys
-sys.path.append(r'C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\research\akadaner')
-from src.interval import calc_interval_length, cast_interval
+from app.schedule_maker.utils.interval import calc_interval_length, cast_interval
 
 
 def validate_disjoint(b1, b2):

@@ -8,6 +8,8 @@ import io
 import openpyxl
 from pycel import ExcelCompiler
 
+from utils_ak.interactive_imports import *
+from umalat.app.schedule_maker.algo import *
 
 @main.route('/schedule', methods=['GET', 'POST'])
 def schedule():
@@ -26,6 +28,11 @@ def schedule():
         excel = ExcelCompiler(path)
 
         wb.create_sheet('планирование по цехам')
-        response = parse_plan_cell(date=date, wb=wb, excel=excel, skus=skus)
-        return jsonify(response)
+
+        boiling_request = parse_plan_cell(date=date, wb=wb, excel=excel, skus=skus)
+        date = cast_datetime(request['Date'])
+        root = make_schedule(request, date)
+        schedule_wb = draw_workbook(root, mode='prod', template_fn="2020.11.18 schedule_template.xlsx")
+
+        return jsonify(boiling_request)
     return render_template('schedule.html', form=form)

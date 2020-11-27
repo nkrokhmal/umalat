@@ -6,6 +6,9 @@ from flask_admin.contrib.sqla import ModelView
 import inspect
 
 
+import os
+os.environ['mode'] = 'prod'
+
 # from app.models import Boiling, MeltingProcess, SKU
 import app.models as umalat_models
 

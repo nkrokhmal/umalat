@@ -1,3 +1,4 @@
+import os
 import openpyxl as opx
 from openpyxl.styles import Alignment, PatternFill, Font
 from openpyxl.reader.excel import load_workbook
@@ -6,9 +7,9 @@ from openpyxl.worksheet.cell_range import CellRange
 from openpyxl.utils import get_column_letter
 
 
-from src.color import cast_color
-from src.time import cast_t, cast_time
-from src.interval import cast_interval, calc_interval_length
+from app.schedule_maker.utils.color import cast_color
+from app.schedule_maker.utils.time import cast_t, cast_time
+from app.schedule_maker.utils.interval import cast_interval, calc_interval_length
 
 
 def set_border(sheet, x, y, w, h, border):
@@ -63,10 +64,9 @@ def draw(sheet, block):
             beg += b.abs_props['index_width']  # first index columns
             beg += 1  # indexing starts with 1 in excel
 
-            # if b.abs_props['class'] != 'termizator':
-            #     continue
-            print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size), cast_interval(b.abs_props['t'], b.abs_props['t'] + b.size))
+            # print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size), cast_interval(b.abs_props['t'], b.abs_props['t'] + b.size))
             draw_block(sheet, beg, b.abs_props['y'], b.size, b.abs_props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'})
+
 
 def init_sheet():
     work_book = opx.Workbook()
@@ -77,35 +77,13 @@ def init_sheet():
 
 
 def init_template_sheet(template_fn=r'2020.11.18 schedule_template.xlsx'):
-    def move_sheet(wb, from_loc=None, to_loc=None):
-        sheets = wb._sheets
-
-        # if no from_loc given, assume last sheet
-        if from_loc is None:
-            from_loc = len(sheets) - 1
-
-        # if no to_loc given, assume first
-        if to_loc is None:
-            to_loc = 0
-
-        sheet = sheets.pop(from_loc)
-        sheets.insert(to_loc, sheet)
-
-    work_book = opx.load_workbook(template_fn)
-
-    # delete all but last - original
-    for sheet in work_book.worksheets[:-1]:
-        work_book.remove_sheet(sheet)
-
-    # copy sheet to work with
-    sheet = work_book.copy_worksheet(work_book.worksheets[0])
-    # put it at the beginning
-    move_sheet(work_book, 1, 0)
-
-    return work_book, sheet
+    def init_sheet():
+        work_book = opx.load_workbook(template_fn)
+        return work_book, work_book.worksheets[0]
+    return init_sheet
 
 
-def draw_schedule(root, style, fn='output.xlsx', init_sheet_func=init_sheet):
+def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
     # update styles
     for b in root.iter():
         block_style = style.get(b.rel_props['class'])
@@ -117,7 +95,9 @@ def draw_schedule(root, style, fn='output.xlsx', init_sheet_func=init_sheet):
     work_book, sheet = init_sheet_func()
     root.rel_props['index_width'] = 4
     draw(sheet, root)
-    work_book.save(fn)
+    if fn:
+        work_book.save(fn)
+    return work_book
 
 
 def draw_print(block):
