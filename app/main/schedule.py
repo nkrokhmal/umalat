@@ -32,7 +32,7 @@ def schedule():
         wb.create_sheet('планирование по цехам')
 
         boiling_request = parse_plan_cell(date=date, wb=wb, excel=excel, skus=skus)
-        root = make_schedule(request, date)
+        root = make_schedule(boiling_request, date)
         schedule_wb = draw_workbook(root, mode='prod', template_fn=os.path.join(basedir, 'app', 'data', 'schedule_templates', 'full_template.xlsx'))
 
         return jsonify(boiling_request)
