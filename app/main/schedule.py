@@ -33,7 +33,7 @@ def schedule():
 
         boiling_request = parse_plan_cell(date=date, wb=wb, excel=excel, skus=skus)
         root = make_schedule(request, date)
-        schedule_wb = draw_workbook(root, mode='prod', template_fn=os.path.join(basedir, 'app', 'data', 'schedule_tempaltes', 'full_template.xlsx'))
+        schedule_wb = draw_workbook(root, mode='prod', template_fn=os.path.join(basedir, 'app', 'data', 'schedule_templates', 'full_template.xlsx'))
 
         return jsonify(boiling_request)
     return render_template('schedule.html', form=form)
