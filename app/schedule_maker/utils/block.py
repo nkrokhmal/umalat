@@ -10,7 +10,15 @@ from app.schedule_maker.utils.interval import calc_interval_length, cast_interva
 
 
 def validate_disjoint(b1, b2):
-    assert calc_interval_length(b1.interval & b2.interval) == 0
+    # assert a disposition information
+    # todo: hack, a little bit hardcode
+
+    try:
+        disposition = b1.interval.upper - b2.interval.lower
+    except:
+        disposition = 1
+
+    assert calc_interval_length(b1.interval & b2.interval) == 0, cast_js({'disposition': disposition})
 
 
 def gen_pair_validator(validate=validate_disjoint):
@@ -161,9 +169,12 @@ def simple_push(parent, block, validator='basic', props=None):
     if validator:
         try:
             validator(parent, block)
-        except AssertionError:
-            return
-
+        except AssertionError as e:
+            try:
+                # todo: hardcode
+                return cast_dict(e.__str__()) # {'disposition': 2}
+            except:
+                return
     return parent.add(block)
 
 
@@ -187,13 +198,23 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
     iter_props = iter_props or [{}]
 
     while cur_t < end:
+        dispositions = []
         for props in iter_props:
             props = copy.deepcopy(props)
             props['t'] = cur_t
-            if simple_push(parent, block, validator=validator, props=props):
+            res = simple_push(parent, block, validator=validator, props=props)
+            if isinstance(res, Block):
                 return block
-        cur_t += 1
+            elif isinstance(res, dict):
+                # optimization by disposition from validate_disjoint error
+                if 'disposition' in res:
+                    dispositions.append(res['disposition'])
 
+        if len(dispositions) == len(iter_props):
+            # all iter_props failed because of bad disposition
+            cur_t += min(dispositions)
+        else:
+            cur_t += 1
 
     raise Exception('Failed to push element')
 
