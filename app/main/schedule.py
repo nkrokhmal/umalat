@@ -37,7 +37,7 @@ def schedule():
 
         boiling_request = parse_plan_cell(date=date, wb=wb, excel=excel, skus=skus)
         root = make_schedule(boiling_request, date)
-        schedule_wb = draw_workbook(root, mode='prod', template_fn=os.path.join(basedir, 'app', 'data', 'schedule_templates', 'full_template.xlsx'))
+        schedule_wb = draw_workbook(root, mode='prod')
         schedule_wb.save(path_schedule)
 
         schedule_link = '{}/{}'.format('data/schedule', filename_schedule)
