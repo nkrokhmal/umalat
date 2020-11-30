@@ -27,9 +27,9 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
             # todo: make proper order
             for sku, sku_kg in boiling_request.items():
                 packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
-            total_packing_time = sum(packing_times) + (
-                        len(packing_times) - 1) * 5  # add time for reconfiguration - 5 minutes between each
+            total_packing_time = sum(packing_times) + (len(packing_times) - 1) * 5  # add time for reconfiguration - 5 minutes between each
 
+            # fit melting time for packing
             melting_time = total_packing_time
 
             full_melting_time = boiling_conf.meltings.serving_time + melting_time + boiling_conf.meltings.salting_time
@@ -45,6 +45,9 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
             with make(y=1):
                 make('serving', time_size=boiling_conf.meltings.serving_time)
                 make('melting_process', time_size=melting_time, speed=boiling_conf.meltings.speed)
+
+                if boiling_type == 'salt':
+                    make('salting', time_size=boiling_conf.meltings.salting_time)
 
             with make(y=2):
                 make(time_size=boiling_conf.meltings.serving_time, visible=False)
@@ -120,8 +123,6 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
     res.rel_props['size'] = max(c.end for c in res.children)
 
     return res
-
-
 
 def make_termizator_cleaning_block(cleaning_type):
     maker = BlockMaker(default_push_func=dummy_push)
