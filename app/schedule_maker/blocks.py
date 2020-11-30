@@ -39,17 +39,25 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
         brand_label = ' / '.join([sku.brand_name for sku in boiling_request.keys()])
 
         with make('melting', y=10, time_size=full_melting_time, melting_line=melting_line):
-            with make(y=0):
+            # todo: make properly
+            cur_y = 0
+            if boiling_type == 'water':
+                with make(y=cur_y):
+                    make('serving', time_size=boiling_conf.meltings.serving_time)
+                    cur_y += 1
+            with make(y=cur_y):
+                make('serving', time_size=boiling_conf.meltings.serving_time, visible=False)
                 make('melting_label', time_size=4 * 5)
-                make('melting_name', time_size=full_melting_time - 4 * 5, form_factor_label=form_factor_label)
-            with make(y=1):
-                make('serving', time_size=boiling_conf.meltings.serving_time)
+                make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_conf.meltings.serving_time, form_factor_label=form_factor_label)
+                cur_y += 1
+            with make(y=cur_y):
+                make('serving', time_size=boiling_conf.meltings.serving_time, visible=False)
                 make('melting_process', time_size=melting_time, speed=boiling_conf.meltings.speed)
 
                 if boiling_type == 'salt':
                     make('salting', time_size=boiling_conf.meltings.salting_time)
-
-            with make(y=2):
+                cur_y += 1
+            with make(y=cur_y):
                 make(time_size=boiling_conf.meltings.serving_time, visible=False)
                 if boiling_type == 'water':
                     make('cooling1', time_size=boiling_conf.meltings.first_cooling_time)
@@ -93,7 +101,7 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
     boiling_label = '{} {} {} 8000кг'.format(boiling_conf.percent, boiling_conf.ferment,
                                              'с лактозой' if boiling_conf.is_lactose else 'безлактозная')
 
-    with make('boiling', block_num=block_num, boiling_type=boiling_type, boiling_label=boiling_label):
+    with make('boiling', block_num=block_num, boiling_type=boiling_type, boiling_label=boiling_label, boiling_id=boiling_conf.id):
         # todo: make boiling size
 
         timings = []

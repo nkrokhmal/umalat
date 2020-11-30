@@ -28,7 +28,11 @@ def boiling_validator(parent, boiling):
         if b1.props['boiling_type'] == b2.props['boiling_type']:
             boiling_type = b1.props['boiling_type']
             if boiling_type == 'water':
-                validate_disjoint(b1['melting_and_packing']['melting'], b2['melting_and_packing']['melting'])
+                if b1.props['boiling_id'] == b2.props['boiling_id']:
+                    # merging allowed
+                    validate_disjoint(b1['melting_and_packing']['melting'][2]['melting_process'], b2['melting_and_packing']['melting'][2]['melting_process'])
+                else:
+                    validate_disjoint(b1['melting_and_packing']['melting'], b2['melting_and_packing']['melting'])
             else:
                 if b1['melting_and_packing']['melting'].props['melting_line'] == b2['melting_and_packing']['melting'].props['melting_line']:
                     validate_disjoint(b1['melting_and_packing']['melting'], b2['melting_and_packing']['melting'])
