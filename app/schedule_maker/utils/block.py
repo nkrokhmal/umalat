@@ -12,7 +12,6 @@ from app.schedule_maker.utils.interval import calc_interval_length, cast_interva
 def validate_disjoint(b1, b2):
     # assert a disposition information
     # todo: hack, a little bit hardcode
-
     try:
         disposition = b1.interval.upper - b2.interval.lower
     except:
@@ -202,7 +201,15 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
         for props in iter_props:
             props = copy.deepcopy(props)
             props['t'] = cur_t
+
+            if block.props['class'] == 'boiling':
+                clock('simple_push_boiling')
+
             res = simple_push(parent, block, validator=validator, props=props)
+
+            if block.props['class'] == 'boiling':
+                clock('simple_push_boiling')
+
             if isinstance(res, Block):
                 return block
             elif isinstance(res, dict):
