@@ -1,3 +1,5 @@
+from utils_ak.interactive_imports import *
+
 PERIODS_PER_HOUR = 12
 PERIODS_PER_DAY = 24 * PERIODS_PER_HOUR
 
@@ -143,6 +145,7 @@ class Block:
         return block
 
 
+@clockify()
 def simple_push(parent, block, validator='basic', props=None):
     if validator == 'basic':
         validator = gen_pair_validator()
@@ -170,7 +173,6 @@ def add_push(parent, block):
 # todo: limit end
 def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, validator='basic', iter_props=None):
     # note: make sure parent abs props are updated
-
     if beg == 'last_beg':
         cur_t = max([0] + [child.beg for child in parent.children])
     elif beg == 'last_end':
@@ -191,6 +193,7 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
             if simple_push(parent, block, validator=validator, props=props):
                 return block
         cur_t += 1
+
 
     raise Exception('Failed to push element')
 

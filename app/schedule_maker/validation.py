@@ -1,3 +1,4 @@
+from utils_ak.interactive_imports import *
 from app.schedule_maker.utils.block import validate_disjoint
 
 
@@ -57,6 +58,6 @@ def boiling_validator(parent, boiling):
 
         c.rel_props.pop('props_mode')
         c.upd_abs_props()
-
     b2.rel_props.pop('props_mode')
     b2.upd_abs_props()
+

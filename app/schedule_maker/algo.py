@@ -165,6 +165,7 @@ def make_schedule(request, date):
 
 
 # todo: better naming
+@clockify()
 def draw_workbook(root, mode='prod', template_fn=None):
     style = load_style(mode=mode)
     root.rel_props['size'] = max(c.end for c in root.children)

@@ -7,10 +7,13 @@ from openpyxl.worksheet.cell_range import CellRange
 from openpyxl.utils import get_column_letter
 
 
+from utils_ak.interactive_imports import *
+
+
 from app.schedule_maker.utils.color import cast_color
 from app.schedule_maker.utils.time import cast_t, cast_time
 from app.schedule_maker.utils.interval import cast_interval, calc_interval_length
-
+from app.schedule_maker.blocks import make_template
 
 def set_border(sheet, x, y, w, h, border):
     rows = sheet['{}{}'.format(get_column_letter(x), y):'{}{}'.format(get_column_letter(x + w - 1), y + h - 1)]
@@ -24,13 +27,14 @@ def set_border(sheet, x, y, w, h, border):
         c.border = Border(left=c.border.left, top=c.border.top, bottom=border, right=c.border.right)
 
 
-def draw_block(sheet, x, y, w, h, text, colour, border=None):
+@clockify()
+def draw_block(sheet, x, y, w, h, text, colour, border=None, text_rotation=None):
     if not colour:
         colour = cast_color('white')  # default white colour
     sheet.merge_cells(start_row=y, start_column=x, end_row=y + h - 1, end_column=x + w - 1)
     merged_cell = sheet.cell(row=y, column=x)
     merged_cell.font = Font(size=7)
-    merged_cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    merged_cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, text_rotation=text_rotation)
     merged_cell.value = text
     merged_cell.fill = PatternFill("solid", fgColor=colour[1:])
 
@@ -44,7 +48,7 @@ def draw_block(sheet, x, y, w, h, text, colour, border=None):
 
         set_border(sheet, x, y, w, h, border)
 
-
+@clockify()
 def draw(sheet, block):
     for b in block.iter():
         if not b.children:
@@ -65,24 +69,32 @@ def draw(sheet, block):
             beg += 1  # indexing starts with 1 in excel
 
             # print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size), cast_interval(b.abs_props['t'], b.abs_props['t'] + b.size))
-            draw_block(sheet, beg, b.abs_props['y'], b.size, b.abs_props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'})
+            draw_block(sheet, beg, b.abs_props['y'], b.size, b.abs_props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'}, text_rotation=b.abs_props.get('text_rotation'))
 
 
 def init_sheet():
     work_book = opx.Workbook()
     sheet = work_book.worksheets[0]
-    for i in range(288 * 2):
+    for i in range(4):
+        sheet.column_dimensions[get_column_letter(i + 1)].width = 6
+    for i in range(4, 288 * 2):
         sheet.column_dimensions[get_column_letter(i + 1)].width = 1.2
     return work_book, sheet
 
 
-def init_template_sheet(template_fn=r'2020.11.18 schedule_template.xlsx'):
-    def init_sheet():
-        work_book = opx.load_workbook(template_fn)
-        return work_book, work_book.worksheets[0]
-    return init_sheet
+def init_template_sheet(template_fn=None):
+    def _init_sheet():
+        if template_fn:
+            work_book = opx.load_workbook(template_fn)
+            return work_book, work_book.worksheets[0]
+        else:
+            wb, sheet = init_sheet()
+            draw(sheet, make_template())
+            return wb, sheet
+    return _init_sheet
 
 
+@clockify()
 def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
     # update styles
     for b in root.iter():
@@ -92,7 +104,9 @@ def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
             block_style = {k: v(b) if callable(v) else v for k, v in block_style.items()}
             b.rel_props.update(block_style)
 
+    clock('init_sheet')
     work_book, sheet = init_sheet_func()
+    clock('init_sheet')
     root.rel_props['index_width'] = 4
     draw(sheet, root)
     if fn:
@@ -107,3 +121,7 @@ def draw_print(block):
             res += ' ' * int(b.abs_props['t']) + '=' * int(calc_interval_length(b.interval)) + f' {b.rel_props["class"]} {b.interval}'
             res += '\n'
     return res
+
+
+if __name__ == '__main__':
+    print(init_template_sheet(None)())

@@ -1,5 +1,6 @@
 from app.schedule_maker.models import *
 from app.schedule_maker.utils import *
+from app.schedule_maker.utils.time import cast_t, cast_time
 
 from utils_ak.interactive_imports import *
 
@@ -141,6 +142,48 @@ def make_termizator_cleaning_block(cleaning_type):
             make('short_cleaning', t=0, size=8)
         elif cleaning_type == 'full':
             make('full_cleaning', t=0, size=16)
+
+    res = maker.root.children[0]
+    res.rel_props['size'] = max(c.end for c in res.children)
+    return res
+
+
+
+def make_template():
+    maker = BlockMaker(default_push_func=add_push)
+    make = maker.make
+
+    with make('template', beg_time='00:00', index_width=0):
+        make(y=6, t=1, h=2, size=3, text='Сыроизготовитель №1 Poly 1', color=(183, 222, 232))
+        make(y=9, t=1, h=2, size=3, text='Сыроизготовитель №2 Poly 2', color=(183, 222, 232))
+        make(y=15, t=1, h=2, size=3, text='Сыроизготовитель №3 Poly 3', color=(252, 213, 180))
+        make(y=18, t=1, h=2, size=3, text='Сыроизготовитель №4 Poly 4', color=(252, 213, 180))
+        make(y=12, t=1, h=2, size=3, text='Мойка термизатора')
+        make(y=24, t=1, h=2, size=3, text='Линия плавления моцареллы в воде №1')
+        make(y=29, t=1, h=2, size=3, text='Фасовка')
+        make(y=33, t=1, h=6, size=3, text='Линия плавления моцареллы в рассоле №2')
+        make(y=46, t=1, h=2, size=3, text='Фасовка')
+
+        make(y=4, t=10, h=1, size=cast_t('13:35') - cast_t('01:30'), text='1 смена', color=(141, 180, 226))
+        make(y=4, t=4 + cast_t('13:35') - cast_t('01:00'), h=1, size=cast_t('23:55') - cast_t('13:35'),
+             text='2 смена', color=(0, 176, 240))
+
+        for i in range(288):
+            cur_time = cast_time(i + cast_t('01:00'))
+            if cur_time[-2:] == '00':
+                make(y=2, t=4 + i, size=1, h=1, text=str(int(cur_time[:2])), color=(218, 150, 148),
+                     text_rotation=90)
+            else:
+                make(y=2, t=4 + i, size=1, h=1, text=cur_time[-2:], color=(204, 255, 255), text_rotation=90)
+
+        for i in range(288):
+            cur_time = cast_time(i + cast_t('07:00'))
+            if cur_time[-2:] == '00':
+                make(y=21, t=4 + i, size=1, h=1, text=str(int(cur_time[:2])), color=(218, 150, 148),
+                     text_rotation=90)
+            else:
+                make(y=21, t=4 + i, size=1, h=1, text=cur_time[-2:], color=(204, 255, 255),
+                     text_rotation=90)
 
     res = maker.root.children[0]
     res.rel_props['size'] = max(c.end for c in res.children)

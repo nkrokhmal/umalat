@@ -27,9 +27,9 @@ def load_style(mode='prod'):
 
     row_style_dev = {
         'pouring': {'y': lambda b: {'0': 1, '1': 3, '2': 5, '3': 7}[b.abs_props['pouring_line']]},
-        'melting': {'y': lambda b: 9 if b.abs_props['boiling_type'] == 'water' else {'0': 14, '1': 17, '2': 20, '3': 23}[b.abs_props['melting_line']]},
-        'packing': {'y': lambda b: 12 if b.abs_props['boiling_type'] == 'water' else 26},
-        'cleaning': {'y': 28}
+        'melting': {'y': lambda b: 9 if b.abs_props['boiling_type'] == 'water' else {'0': 15, '1': 18, '2': 21, '3': 24}[b.abs_props['melting_line']]},
+        'packing': {'y': lambda b: 13 if b.abs_props['boiling_type'] == 'water' else 27},
+        'cleaning': {'y': 29}
     }
 
     row_style_prod = {
