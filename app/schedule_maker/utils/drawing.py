@@ -27,7 +27,6 @@ def set_border(sheet, x, y, w, h, border):
         c.border = Border(left=c.border.left, top=c.border.top, bottom=border, right=c.border.right)
 
 
-@clockify()
 def draw_block(sheet, x, y, w, h, text, colour, border=None, text_rotation=None):
     if not colour:
         colour = cast_color('white')  # default white colour
@@ -48,7 +47,6 @@ def draw_block(sheet, x, y, w, h, text, colour, border=None, text_rotation=None)
 
         set_border(sheet, x, y, w, h, border)
 
-@clockify()
 def draw(sheet, block):
     for b in block.iter():
         if not b.children:
@@ -94,7 +92,6 @@ def init_template_sheet(template_fn=None):
     return _init_sheet
 
 
-@clockify()
 def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
     # update styles
     for b in root.iter():
@@ -104,9 +101,8 @@ def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
             block_style = {k: v(b) if callable(v) else v for k, v in block_style.items()}
             b.rel_props.update(block_style)
 
-    clock('init_sheet')
     work_book, sheet = init_sheet_func()
-    clock('init_sheet')
+
     root.rel_props['index_width'] = 4
     draw(sheet, root)
     if fn:

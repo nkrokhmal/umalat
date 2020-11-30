@@ -109,7 +109,7 @@ class Block:
         return str(self)
 
     def _inherit_props(self, parent_props, props):
-        cur_props = copy.deepcopy(parent_props)
+        cur_props = dict(parent_props)
 
         # specify what we don't inherit
         cur_props = {k: v for k, v in cur_props.items() if k not in ['size', 'time_size']}
@@ -129,7 +129,7 @@ class Block:
 
     def upd_abs_props(self):
         if not self.parent:
-            self.abs_props = copy.deepcopy(self.rel_props)
+            self.abs_props = dict(self.rel_props)
         else:
             self.abs_props = self._inherit_props(self.parent.abs_props, self.rel_props)
 
@@ -152,7 +152,6 @@ class Block:
         return block
 
 
-@clockify()
 def simple_push(parent, block, validator='basic', props=None):
     if validator == 'basic':
         validator = gen_pair_validator()
@@ -180,7 +179,8 @@ def simple_push(parent, block, validator='basic', props=None):
 def add_push(parent, block):
     return simple_push(parent, block, validator=None)
 
-# todo: limit end
+
+# simple greedy algorithm
 def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, validator='basic', iter_props=None):
     # note: make sure parent abs props are updated
     if beg == 'last_beg':
@@ -202,13 +202,7 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
             props = copy.deepcopy(props)
             props['t'] = cur_t
 
-            if block.props['class'] == 'boiling':
-                clock('simple_push_boiling')
-
             res = simple_push(parent, block, validator=validator, props=props)
-
-            if block.props['class'] == 'boiling':
-                clock('simple_push_boiling')
 
             if isinstance(res, Block):
                 return block

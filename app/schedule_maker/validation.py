@@ -5,19 +5,15 @@ from app.schedule_maker.utils.block import validate_disjoint
 def boiling_validator(parent, boiling):
     if not parent.children:
         return
-    # todo: optimize
-    #     b1 = max(parent.children, key=lambda b: b.rel_props.get('t', 0))
 
     boilings = [node for node in parent.children if node.props['class'] == 'boiling']
-    boilings_on_the_line = [node for node in parent.children if node.props['class'] == 'boiling' and node.props['pouring_line'] == boiling.props['pouring_line']]
 
     b2 = boiling
     b2.rel_props['props_mode'] = 'absolute'
     b2.upd_abs_props()
 
     # compare with previous boiling and with previous boiling on the same line
-    # for b1 in boilings[-1:] + boilings_on_the_line[-1:]:
-    for b1 in boilings[-4:]:
+    for b1 in reversed(boilings[-4:]): # four checks is enough
         b1.rel_props['props_mode'] = 'absolute'
         b1.upd_abs_props()
 
