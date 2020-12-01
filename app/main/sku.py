@@ -13,6 +13,9 @@ from flask_restplus import reqparse
 def add_sku():
     form = SKUForm()
     if form.validate_on_submit():
+        print(dict(form.percent.choices).get(form.percent.data))
+        print(dict(form.is_lactose.choices).get(form.is_lactose.data))
+        print(dict(form.ferment.choices).get(form.ferment.data))
         sku = SKU(
             name=form.name.data,
             boiling_id=[x.id for x in form.boilings if

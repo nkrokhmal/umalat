@@ -208,7 +208,7 @@ def parse_plan_cell(date, wb, excel, skus):
             boiling_weights = []
             if sheet_plan.cell(i, CELLS['BoilingVolumes'].column).value is not None:
                 boiling_weights = re.split(', |. | ', sheet_plan.cell(i, CELLS['BoilingVolumes'].column).value)
-                boiling_weights = [x for x in boiling_weights if BOILING_LIMITS['MIN'] <= x <= BOILING_LIMITS['MAX']]
+                boiling_weights = [x for x in boiling_weights if BOILING_LIMITS['MIN'] <= int(x) <= BOILING_LIMITS['MAX']]
                 boiling_weights = [int(x) for x in boiling_weights if isinstance(x, int) or x.isdigit()]
 
             if len(boiling_weights) > boilings_count:

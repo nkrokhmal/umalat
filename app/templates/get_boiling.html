@@ -42,9 +42,34 @@
     });
 </script>
 
+<script type="text/javascript">
+    $(function () {
+        $(".delete-boiling").click(function () {
+            var id = $(this).data('id');
+            $(".btn.btn-danger.btn-ok").attr("data-id", id);
+        })
+    });
+</script>
+
 
 <script type="text/javascript">
     $(function () {
+        var x = $(this);
+        $(".btn.btn-danger.btn-ok").click(function(){
+            var id = $(this).attr("data-id");
+            $.ajax(
+            {
+                url: '/delete_boiling/' + id,
+                type: 'DELETE',
+                success: function(res)
+                {
+                    console.log(res);
+                },
+                error: function(error) {
+                      console.log(error);
+                }
+            });
+        });
         $(".delete_boiling").click(function () {
             var id = $(this).data('id');
             $(".btn.btn-danger.btn-ok").click(function(){
@@ -137,10 +162,10 @@
             <a href="{{ url_for('main.edit_boiling', boiling_id = boiling.id)}}" class="edit-boiling" data-toggle="modal">
                 <i class="material-icons" data-toggle="tooltip" style="color:green" title="Edit"> &#xe3c9; </i>
             </a>
-            <a href="#delete_boiling" class="delete-boiling" data-id={{boiling.id}} data-toggle="modal">
+            <a href="#deleteBoiling" class="delete-boiling" data-id={{boiling.id}} data-toggle="modal">
                 <i class="material-icons" data-toggle="tooltip" style="color:red" title="Delete"> &#xE872; </i>
             </a>
-            <div id="delete_boiling" class="modal fade" >
+            <div id="deleteBoiling" class="modal fade" >
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <form>

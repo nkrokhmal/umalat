@@ -1,8 +1,9 @@
 FROM python:3.6 
 WORKDIR /app
 COPY . /app
+ENV PYTHONPATH "${PYTHONPATH}:/utils/python-utils-ak"
+SHELL ["/bin/bash", "-c"]
+RUN mkdir /utils && cd /utils && git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akadaner/python-utils-ak.git
 RUN pip install -r requirements.txt
-
-EXPOSE 8000
-
-cmd ["python", "manage.py", "runserver"]
+EXPOSE 5000
+ENTRYPOINT ["python", "manage.py", "runserver"]

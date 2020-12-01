@@ -14,8 +14,33 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
+
 <script type="text/javascript">
     $(function () {
+        $(".delete-current-sku").click(function () {
+            var id = $(this).data('id');
+            $(".btn.btn-danger.btn-ok").attr("data-id", id);
+        })
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $(".btn.btn-danger.btn-ok").click(function(){
+            var id = $(this).attr("data-id");
+            $.ajax(
+            {
+                url: '/delete_sku/' + id,
+                type: 'DELETE',
+                success: function(res)
+                {
+                    console.log(res);
+                },
+                error: function(error) {
+                      console.log(error);
+                }
+            });
+        });
         $(".delete-current-sku").click(function () {
             var id = $(this).data('id');
             $(".btn.btn-danger.btn-ok").click(function(){
