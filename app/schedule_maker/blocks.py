@@ -192,19 +192,26 @@ def make_template():
     make = maker.make
 
     with make('template', beg_time='00:00', index_width=0):
+        make(y=2, t=2, h=1, size=1, text='График наливов')
         make(y=6, t=1, h=2, size=3, text='Сыроизготовитель №1 Poly 1', color=(183, 222, 232))
         make(y=9, t=1, h=2, size=3, text='Сыроизготовитель №2 Poly 2', color=(183, 222, 232))
+        make(y=12, t=1, h=2, size=3, text='Мойка термизатора')
         make(y=15, t=1, h=2, size=3, text='Сыроизготовитель №3 Poly 3', color=(252, 213, 180))
         make(y=18, t=1, h=2, size=3, text='Сыроизготовитель №4 Poly 4', color=(252, 213, 180))
-        make(y=12, t=1, h=2, size=3, text='Мойка термизатора')
+        make(y=21, t=2, h=1, size=1, text='График цеха плавления')
+        make(y=23, t=5, h=1, size=cast_t('19:05') - cast_t('07:00'), text='Оператор + Помощник', color=(149, 179, 215))
         make(y=24, t=1, h=2, size=3, text='Линия плавления моцареллы в воде №1')
+        make(y=28, t=5, h=1, size=cast_t('19:05') - cast_t('07:00'), text='бригадир упаковки + 5 рабочих', color=(149, 179, 215))
         make(y=29, t=1, h=2, size=3, text='Фасовка')
+        make(y=32, t=5, h=1, size=cast_t('19:00') - cast_t('07:00'), text='1 смена оператор + помощник', color='yellow')
+        make(y=32, t=5 + cast_t('19:00') - cast_t('07:00'), h=1, size=cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), text='1 оператор + помощник', color='red')
         make(y=33, t=1, h=6, size=3, text='Линия плавления моцареллы в рассоле №2')
+        make(y=45, t=5, h=1, size=cast_t('19:05') - cast_t('07:00'), text='Бригадир упаковки +5 рабочих упаковки + наладчик', color=(149, 179, 215))
+        make(y=45, t=5 + cast_t('19:05') - cast_t('07:00'), h=1, size=cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), text='бригадир + наладчик + 5 рабочих', color=(240, 184, 183))
         make(y=46, t=1, h=2, size=3, text='Фасовка')
 
         make(y=4, t=10, h=1, size=cast_t('13:35') - cast_t('01:30'), text='1 смена', color=(141, 180, 226))
-        make(y=4, t=4 + cast_t('13:35') - cast_t('01:00'), h=1, size=cast_t('23:55') - cast_t('13:35'),
-             text='2 смена', color=(0, 176, 240))
+        make(y=4, t=4 + cast_t('13:35') - cast_t('01:00'), h=1, size=cast_t('23:55') - cast_t('13:35'), text='2 смена', color=(0, 176, 240))
 
         for i in range(288):
             cur_time = cast_time(i + cast_t('01:00'))
@@ -217,11 +224,9 @@ def make_template():
         for i in range(288):
             cur_time = cast_time(i + cast_t('07:00'))
             if cur_time[-2:] == '00':
-                make(y=21, t=4 + i, size=1, h=1, text=str(int(cur_time[:2])), color=(218, 150, 148),
-                     text_rotation=90)
+                make(y=21, t=4 + i, size=1, h=1, text=str(int(cur_time[:2])), color=(218, 150, 148), text_rotation=90)
             else:
-                make(y=21, t=4 + i, size=1, h=1, text=cur_time[-2:], color=(204, 255, 255),
-                     text_rotation=90)
+                make(y=21, t=4 + i, size=1, h=1, text=cur_time[-2:], color=(204, 255, 255), text_rotation=90)
 
     res = maker.root.children[0]
     res.rel_props['size'] = max(c.end for c in res.children)

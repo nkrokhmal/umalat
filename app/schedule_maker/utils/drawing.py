@@ -77,7 +77,7 @@ def init_sheet():
     work_book = opx.Workbook()
     sheet = work_book.worksheets[0]
     for i in range(4):
-        sheet.column_dimensions[get_column_letter(i + 1)].width = 6
+        sheet.column_dimensions[get_column_letter(i + 1)].width = 12
     for i in range(4, 288 * 2):
         sheet.column_dimensions[get_column_letter(i + 1)].width = 1.2
     return work_book, sheet
