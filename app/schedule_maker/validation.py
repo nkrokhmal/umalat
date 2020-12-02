@@ -37,7 +37,7 @@ def boiling_validator(parent, boiling):
                     validate_disjoint(b1['melting_and_packing']['melting'][1]['melting_process'],
                                       b2['melting_and_packing']['melting'][1]['melting_process'])
 
-            validate_disjoint(b1['melting_and_packing']['packing'], b2['melting_and_packing']['packing'])
+            validate_disjoint(b1['melting_and_packing']['packing_and_preconfiguration'], b2['melting_and_packing']['packing_and_preconfiguration'])
 
         b1.rel_props.pop('props_mode')
         b1.upd_abs_props()

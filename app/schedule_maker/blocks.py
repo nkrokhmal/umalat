@@ -5,29 +5,45 @@ from app.schedule_maker.utils.time import cast_t, cast_time
 from utils_ak.interactive_imports import *
 
 
-def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
-                             melting_line=None):
+def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=None, last_packing_sku=None):
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
+
+    def get_configuration_times(skus):
+        res = []
+        for i in range(len(skus) - 1):
+            old_sku, sku = skus[i: i + 2]
+            if old_sku is None:
+                # todo: make first configuration properly
+                res.append(0)
+            elif old_sku.weight_netto != sku.weight_netto:
+                # todo: take from parameters
+                res.append(25)
+            elif old_sku == sku:
+                res.append(0)
+            else:
+                # todo: take from parameters
+                res.append(5)
+        return res
 
     with make('melting_and_packing'):
         # packing and melting time
         packing_times = []
+        configuration_times = get_configuration_times([last_packing_sku] + list(boiling_request.keys())) # add last_packing for first configuration
+
         if boiling_type == 'water':
             melting_time = custom_round(850 / boiling_conf.meltings.speed * 60 * 1.3, 5, rounding='ceil')
 
-            # todo: make proper order
             for sku, sku_kg in boiling_request.items():
                 packing_speed = min(sku.packing_speed, boiling_conf.meltings.speed)
                 packing_times.append(custom_round(sku_kg / packing_speed * 60, 5, rounding='ceil'))
-            total_packing_time = sum(packing_times) + (len(packing_times) - 1) * 5  # add time for reconfiguration - 5 minutes between each
+            total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
             full_melting_time = boiling_conf.meltings.serving_time + melting_time
 
         elif boiling_type == 'salt':
-            # todo: make proper order
             for sku, sku_kg in boiling_request.items():
                 packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
-            total_packing_time = sum(packing_times) + (len(packing_times) - 1) * 5  # add time for reconfiguration - 5 minutes between each
+            total_packing_time = sum(packing_times) + sum(configuration_times[1:]) # add time for configuration - first is made before packing process
 
             # fit melting time for packing
             melting_time = total_packing_time
@@ -82,26 +98,30 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
         elif boiling_type == 'salt':
             prepare_time = boiling_conf.meltings.serving_time + boiling_conf.meltings.salting_time
 
-        with make('packing', t=prepare_time / 5, time_size=total_packing_time, push_func=add_push):
-            with make(y=0):
-                make('packing_label', time_size=3 * 5)
-                # use different labels for water and salt
-                if boiling_type == 'water':
-                    make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
-                elif boiling_type == 'salt':
-                    make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=brand_label)
-            with make(y=1):
-                # use different labels for water and salt
-                if boiling_type == 'water':
-                    make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
-                elif boiling_type == 'salt':
-                    make('packing_brand', time_size=total_packing_time, brand_label='фасовка/confezionamento')
-            with make(y=2):
-                make('configuration', time_size=packing_times[0], visible=False)
+        with make('packing_and_preconfiguration', t=(prepare_time - configuration_times[0]) / 5, time_size=total_packing_time + configuration_times[0], push_func=add_push):
+            if configuration_times[0]:
+                make('configuration', time_size=configuration_times[0], y=2)
 
-                for packing_time in packing_times[1:]:
-                    make('configuration', size=1)
-                    make('configuration', time_size=packing_time, visible=False)
+            with make('packing', time_size=total_packing_time):
+                with make(y=0):
+                    make('packing_label', time_size=3 * 5)
+                    # use different labels for water and salt
+                    if boiling_type == 'water':
+                        make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
+                    elif boiling_type == 'salt':
+                        make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=brand_label)
+                with make(y=1):
+                    # use different labels for water and salt
+                    if boiling_type == 'water':
+                        make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
+                    elif boiling_type == 'salt':
+                        make('packing_brand', time_size=total_packing_time, brand_label='фасовка/confezionamento')
+                with make(y=2):
+                    make('configuration', time_size=packing_times[0], visible=False)
+
+                    for i, packing_time in enumerate(packing_times[1:]):
+                        make('configuration', time_size=configuration_times[i + 1])
+                        make('configuration', time_size=packing_time, visible=False)
 
     res = maker.root.children[0]
     res.rel_props['size'] = max(c.end for c in res.children)
@@ -109,8 +129,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
     return res
 
 
-def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=12, pouring_line=None,
-                 melting_line=None):
+def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=12, pouring_line=None, melting_line=None, last_packing_sku=None):
     termizator = db.session.query(Termizator).first()
     termizator.pouring_time = 30
 
@@ -144,12 +163,13 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
         # todo: specify parameter
         make('drenator', size=cast_t('03:50'), visible=False)
 
-        make(make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=melting_line))
+        make(make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=melting_line, last_packing_sku=last_packing_sku))
 
     res = maker.root.children[0]
     res.rel_props['size'] = max(c.end for c in res.children)
 
     return res
+
 
 def make_termizator_cleaning_block(cleaning_type):
     maker = BlockMaker(default_push_func=dummy_push)
