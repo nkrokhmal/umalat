@@ -20,8 +20,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
             for sku, sku_kg in boiling_request.items():
                 packing_speed = min(sku.packing_speed, boiling_conf.meltings.speed)
                 packing_times.append(custom_round(sku_kg / packing_speed * 60, 5, rounding='ceil'))
-            total_packing_time = sum(packing_times) + (
-                        len(packing_times) - 1) * 5  # add time for reconfiguration - 5 minutes between each
+            total_packing_time = sum(packing_times) + (len(packing_times) - 1) * 5  # add time for reconfiguration - 5 minutes between each
             full_melting_time = boiling_conf.meltings.serving_time + melting_time
 
         elif boiling_type == 'salt':
@@ -35,9 +34,20 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
 
             full_melting_time = boiling_conf.meltings.serving_time + melting_time + boiling_conf.meltings.salting_time
 
-        # todo: make proper order
-        form_factor_label = ' / '.join([str(sku.form_factor) for sku in boiling_request.keys()])
-        brand_label = ' / '.join([sku.brand_name for sku in boiling_request.keys()])
+        def gen_label(label_weights):
+            cur_label = None
+            values = []
+            for label, weight in label_weights:
+                s = ''
+                if label != cur_label:
+                    s += label + ' '
+                    cur_label = label
+                s += str(weight / 1000)
+                values.append(s)
+            return '/'.join(values)
+
+        form_factor_label = gen_label([(sku.form_factor, sku.weight_netto) for sku in boiling_request.keys()])
+        brand_label = gen_label([(sku.brand_name, sku.weight_netto) for sku in boiling_request.keys()])
 
         with make('melting', y=10, time_size=full_melting_time, melting_line=melting_line):
             # todo: make properly
@@ -75,9 +85,17 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type,
         with make('packing', t=prepare_time / 5, time_size=total_packing_time, push_func=add_push):
             with make(y=0):
                 make('packing_label', time_size=3 * 5)
-                make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
+                # use different labels for water and salt
+                if boiling_type == 'water':
+                    make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
+                elif boiling_type == 'salt':
+                    make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=brand_label)
             with make(y=1):
-                make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
+                # use different labels for water and salt
+                if boiling_type == 'water':
+                    make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
+                elif boiling_type == 'salt':
+                    make('packing_brand', time_size=total_packing_time, brand_label='фасовка/confezionamento')
             with make(y=2):
                 make('configuration', time_size=packing_times[0], visible=False)
 

@@ -7,6 +7,8 @@ from app.schedule_maker.blocks import *
 from app.schedule_maker.style import *
 from itertools import product
 
+from collections import OrderedDict
+
 
 def gen_request_df(request):
     values = []
@@ -28,7 +30,8 @@ def gen_request_df(request):
         n_boilings = int(total_kg / 850)
         for i in range(n_boilings):
             cur_kg = 850
-            boiling_request = {}
+
+            boiling_request = OrderedDict()
             for k, v in list(boiling_dic.items()):
                 boil_kg = min(cur_kg, boiling_dic[k])
 
