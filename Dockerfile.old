@@ -6,4 +6,5 @@ SHELL ["/bin/bash", "-c"]
 RUN mkdir /utils && cd /utils && git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akadaner/python-utils-ak.git
 RUN pip install -r requirements.txt
 EXPOSE 5000
+#CMD ["sleep", "3000"] 
 ENTRYPOINT ["python", "manage.py", "runserver"]
