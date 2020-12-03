@@ -95,20 +95,30 @@ def make_schedule(request, date):
 
     last_packing_skus = {} # {boiling_type: last_packing_sku}
 
-    i, row = 0, pick(df, 'water')
-    b = make_boiling_row(i, row, None)
-    beg = cast_t('08:00') - b['melting_and_packing'].beg
-    dummy_push(root, b, iter_props=iter_water_props, validator=boiling_validator, beg=beg, max_tries=100)
-    last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
+    # will be initialized one of the two first blocks
+    last_cleaning_t = None
 
-    # init last cleaning with termizator first start
-    last_cleaning_t = beg
+    i, row = 0, pick(df, 'water')
+    if row is not None:
+        # there is water boiling today
+        b = make_boiling_row(i, row, None)
+        beg = cast_t('08:00') - b['melting_and_packing'].beg
+        dummy_push(root, b, iter_props=iter_water_props, validator=boiling_validator, beg=beg, max_tries=100)
+        last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
+
+        # init last cleaning with termizator first start
+        last_cleaning_t = last_cleaning_t if last_cleaning_t else beg
 
     i, row = 1, pick(df, 'salt')
-    b = make_boiling_row(i, row, None)
-    beg = cast_t('08:20') - b['melting_and_packing'].beg
-    dummy_push(root, b, iter_props=iter_salt_props, validator=boiling_validator, beg=beg, max_tries=100)
-    last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
+    if row is not None:
+        # there is a salt boiling today
+        b = make_boiling_row(i, row, None)
+        beg = cast_t('08:20') - b['melting_and_packing'].beg
+        dummy_push(root, b, iter_props=iter_salt_props, validator=boiling_validator, beg=beg, max_tries=100)
+        last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
+
+        # init last cleaning with termizator first start
+        last_cleaning_t = last_cleaning_t if last_cleaning_t else beg
 
     boiling_types = ['water', 'salt']
     cur_type_i = -1

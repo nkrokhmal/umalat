@@ -18,7 +18,10 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                 res.append(0)
             elif old_sku.weight_netto != sku.weight_netto:
                 # todo: take from parameters
-                res.append(25)
+
+                # todo: switch
+                res.append(5)
+                # res.append(25)
             elif old_sku == sku:
                 res.append(0)
             else:
