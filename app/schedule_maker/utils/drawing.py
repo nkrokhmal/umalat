@@ -55,26 +55,29 @@ def draw(sheet, block):
 
             if b.abs_props.get('visible') == False:
                 continue
+            try:
+                text = text.format(**b.abs_props)
+                text = text.replace('<', '{')
+                text = text.replace('>', '}')
+                text = eval(f'f{text!r}')
 
-            text = text.format(**b.abs_props)
-            text = text.replace('<', '{')
-            text = text.replace('>', '}')
-            text = eval(f'f{text!r}')
+                beg = b.abs_props['t']
+                beg -= cast_t(b.abs_props['beg_time'])  # shift of timeline
+                beg += b.abs_props['index_width']  # first index columns
+                beg += 1  # indexing starts with 1 in excel
 
-            beg = b.abs_props['t']
-            beg -= cast_t(b.abs_props['beg_time'])  # shift of timeline
-            beg += b.abs_props['index_width']  # first index columns
-            beg += 1  # indexing starts with 1 in excel
-
-            # print(b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size), cast_interval(b.abs_props['t'], b.abs_props['t'] + b.size))
-            draw_block(sheet, beg, b.abs_props['y'], b.size, b.abs_props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'}, text_rotation=b.abs_props.get('text_rotation'))
-
+                # print('Drawing', b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size), cast_interval(b.abs_props['t'], b.abs_props['t'] + b.size))
+                draw_block(sheet, beg, b.abs_props['y'], b.size, b.abs_props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'}, text_rotation=b.abs_props.get('text_rotation'))
+            except:
+                print(b)
+                print(b.abs_props)
+                raise
 
 def init_sheet():
     work_book = opx.Workbook()
     sheet = work_book.worksheets[0]
     for i in range(4):
-        sheet.column_dimensions[get_column_letter(i + 1)].width = 6
+        sheet.column_dimensions[get_column_letter(i + 1)].width = 12
     for i in range(4, 288 * 2):
         sheet.column_dimensions[get_column_letter(i + 1)].width = 1.2
     return work_book, sheet

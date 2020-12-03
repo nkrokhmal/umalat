@@ -7,6 +7,8 @@ from app.schedule_maker.blocks import *
 from app.schedule_maker.style import *
 from itertools import product
 
+from collections import OrderedDict
+
 
 def gen_request_df(request):
     values = []
@@ -19,6 +21,7 @@ def gen_request_df(request):
     for boiling_id, boiling_grp in df.groupby(0):
         boiling_dic = boiling_grp[[1, 2]].set_index(1).to_dict(orient='index')
         boiling_dic = {k: v[2] for k, v in boiling_dic.items()}  # {'34': 1110.0, '35': 0.0, ...}
+        boiling_dic = {cast_sku(k): v for k, v in boiling_dic.items()} # {<SKU 34>: 1110.0, ...}
         total_kg = sum(boiling_dic.values())
 
         # round to get full
@@ -28,7 +31,8 @@ def gen_request_df(request):
         n_boilings = int(total_kg / 850)
         for i in range(n_boilings):
             cur_kg = 850
-            boiling_request = {}
+
+            boiling_request = OrderedDict()
             for k, v in list(boiling_dic.items()):
                 boil_kg = min(cur_kg, boiling_dic[k])
 
@@ -50,7 +54,7 @@ def gen_request_df(request):
 
             boiling_request = {k: v for k, v in boiling_request.items() if v != 0}
             values.append([boiling_id, boiling_request])
-    df = pd.DataFrame(values, columns=['boiling_id', 'request'])
+    df = pd.DataFrame(values, columns=['boiling_id', 'boiling_request'])
     df['boiling_id'] = df['boiling_id'].astype(str)
     df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: 'salt' if str(cast_boiling(boiling_id).percent) == '2.7' else 'water')
     df['used'] = False
@@ -81,26 +85,30 @@ def make_schedule(request, date):
     root.rel_props['props_mode'] = 'absolute'
     root.upd_abs_props()
 
-    def make_boiling_row(i, row):
-        return make_boiling(cast_boiling(row['boiling_id']), {cast_sku(k): v for k, v in row['request'].items()}, row['boiling_type'], block_num=i + 1)
+    def make_boiling_row(i, row, last_packing_sku):
+        return make_boiling(cast_boiling(row['boiling_id']), row['boiling_request'], row['boiling_type'], block_num=i + 1, last_packing_sku=last_packing_sku)
 
     iter_water_props = [{'pouring_line': str(v)} for v in [0, 1]]
     iter_salt_props_2 = [{'pouring_line': str(v[0]), 'melting_line': str(v[1])} for v in product([2, 3], [0, 1, 2, 3])]
     iter_salt_props_3 = [{'pouring_line': str(v[0]), 'melting_line': str(v[1])} for v in product([1, 2, 3], [0, 1, 2, 3])]
     iter_salt_props = iter_salt_props_2
 
+    last_packing_skus = {} # {boiling_type: last_packing_sku}
+
     i, row = 0, pick(df, 'water')
-    b = make_boiling_row(i, row)
+    b = make_boiling_row(i, row, None)
     beg = cast_t('08:00') - b['melting_and_packing'].beg
     dummy_push(root, b, iter_props=iter_water_props, validator=boiling_validator, beg=beg, max_tries=100)
+    last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
 
     # init last cleaning with termizator first start
     last_cleaning_t = beg
 
     i, row = 1, pick(df, 'salt')
-    b = make_boiling_row(i, row)
+    b = make_boiling_row(i, row, None)
     beg = cast_t('08:20') - b['melting_and_packing'].beg
     dummy_push(root, b, iter_props=iter_salt_props, validator=boiling_validator, beg=beg, max_tries=100)
+    last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
 
     boiling_types = ['water', 'salt']
     cur_type_i = -1
@@ -120,10 +128,12 @@ def make_schedule(request, date):
             elif boiling_type == 'salt':
                 # stop production when salt is finished
                 break
-        b = make_boiling_row(cur_i, row)
+        b = make_boiling_row(cur_i, row, last_packing_skus[row['boiling_type']])
 
         iter_props = iter_water_props if boiling_type == 'water' else iter_salt_props
         dummy_push(root, b, iter_props=iter_props, validator=boiling_validator, beg='last_beg', max_tries=100)
+        last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
+
         cur_i += 1
 
         # add cleaning if necessary
