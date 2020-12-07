@@ -14,7 +14,6 @@ from config import basedir
 import datetime
 
 
-
 @main.route('/schedule', methods=['GET', 'POST'])
 def schedule():
     form = ScheduleForm()

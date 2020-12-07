@@ -68,9 +68,12 @@ def generate_title(sheet):
     sheet.column_dimensions[get_column_letter(COLUMNS['BoilingVolume'])].width = 5 * 5
 
 
-def build_plan(date, df, request_list):
+def build_plan(date, df, request_list, plan_path=None):
     filename = '{}_{}.xlsx'.format('plan', date.strftime('%Y-%m-%d'))
-    path = '{}/{}'.format('app/data/plan', filename)
+    if plan_path is None:
+        path = '{}/{}'.format('app/data/plan', filename)
+    else:
+        path = plan_path
 
     form_factors = set([x["GroupSKU"][0]["SKU"].form_factor for x in request_list])
 

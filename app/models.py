@@ -37,18 +37,21 @@ class SKU(db.Model):
     packing_speed = db.Column(db.Integer, nullable=True)
     # форм фактор
     form_factor = db.Column(db.String, nullable=True)
+    # короткое название форм фактора
+    form_factor_short = db.Column(db.String, nullable=True)
     # время быстрой смены пленки
     packing_reconfiguration = db.Column(db.Integer, nullable=True)
+    # терка или нет
+    is_ribber = db.Column(db.Boolean)
     # время смены формата пленки
     packing_reconfiguration_format = db.Column(db.Integer, nullable=True)
     # связка с фасовщиком
     packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
     # связка с варкой
     boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
-    # связка с линиями
-    # line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
     # связка с типом упаковки
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
+
 
 
 '''
@@ -304,6 +307,29 @@ def init_sku():
                 packer_id=[x.id for x in packers if x.name == d['packer'] or x.name == d['packer'].replace(" ", "")][0]
             )
             db.session.add(sku)
+        db.session.commit()
+    except Exception as e:
+        print('Exception occurred {}'.format(e))
+        db.session.rollback()
+
+
+def add_short_form_factor():
+    try:
+        skus = db.session.query(SKU).all()
+        form_factors_short = {
+            'Фиор Ди Латте': 'ФДЛ',
+            'Фиор ди Латте': 'ФДЛ',
+            'Чильеджина': 'ЧЛДЖ',
+            'Для пиццы': 'ПИЦЦA',
+            'Сулугуни': 'CYЛГ',
+            'Моцарелла': 'МОЦ',
+            'Качокавалло': 'КАЧКВ'
+
+        }
+        for sku in skus:
+            if sku.form_factor is not None:
+                print(sku.form_factor)
+                sku.form_factor_short = form_factors_short[sku.form_factor]
         db.session.commit()
     except Exception as e:
         print('Exception occurred {}'.format(e))
