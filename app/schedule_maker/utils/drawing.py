@@ -73,6 +73,7 @@ def draw(sheet, block):
                 print(b.abs_props)
                 raise
 
+
 def init_sheet():
     work_book = opx.Workbook()
     sheet = work_book.worksheets[0]
