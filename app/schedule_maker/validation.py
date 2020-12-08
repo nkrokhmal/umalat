@@ -17,12 +17,15 @@ def boiling_validator(parent, boiling):
         b1.rel_props['props_mode'] = 'absolute'
         b1.upd_abs_props()
 
-        validate_disjoint(b1['pouring'][0]['termizator'], b2['pouring'][0]['termizator'])
+        validate_disjoint(b1['pouring'][0]['termizator'], b2['pouring'][0]['termizator'])  # [termizator.basic]
 
+        # cannot make two boilings on same line at the same time
         if b1['pouring'].props['pouring_line'] == b2['pouring'].props['pouring_line']:
             validate_disjoint(b1['pouring'], b2['pouring'])
 
         if b1.props['boiling_type'] == b2.props['boiling_type']:
+
+            # [melting.disjoint]
             boiling_type = b1.props['boiling_type']
             if boiling_type == 'water':
                 if b1.props['boiling_id'] == b2.props['boiling_id']:

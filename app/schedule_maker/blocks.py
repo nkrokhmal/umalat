@@ -9,6 +9,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
+    # [packing.reconfiguration_times]
     def get_configuration_times(skus):
         res = []
         for i in range(len(skus) - 1):
@@ -29,13 +30,20 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                 res.append(5)
         return res
 
+    # [melting.params, packing.params]
     with make('melting_and_packing'):
         # packing and melting time
         packing_times = []
         configuration_times = get_configuration_times([last_packing_sku] + list(boiling_request.keys())) # add last_packing for first configuration
 
         if boiling_type == 'water':
-            melting_time = custom_round(850 / boiling_conf.meltings.speed * 60 * 1.3, 5, rounding='ceil')
+            # [cheesemakers.boiling_output]
+            cheese_from_boiling = 1000 # todo: take from parameters
+
+            # [cheesemakers.boiling_volume]
+            cheese_from_boiling *= 8000 / 8000 # todo: make boiling_volume count
+
+            melting_time = custom_round(cheese_from_boiling / boiling_conf.meltings.speed * 60 * 1.3, 5, rounding='ceil')
 
             for sku, sku_kg in boiling_request.items():
                 packing_speed = min(sku.packing_speed, boiling_conf.meltings.speed)
@@ -48,7 +56,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                 packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
             total_packing_time = sum(packing_times) + sum(configuration_times[1:]) # add time for configuration - first is made before packing process
 
-            # fit melting time for packing
+            # fit melting time for packing [melting.slow_packing]
             melting_time = total_packing_time
 
             full_melting_time = boiling_conf.meltings.serving_time + melting_time + boiling_conf.meltings.salting_time
@@ -134,17 +142,20 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
 
 def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=12, pouring_line=None, melting_line=None, last_packing_sku=None):
     termizator = db.session.query(Termizator).first()
+    # [termizator.time]
     termizator.pouring_time = 30
 
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
-    boiling_label = '{} {} {} 8000кг'.format(boiling_conf.percent, boiling_conf.ferment,
-                                             'с лактозой' if boiling_conf.is_lactose else 'безлактозная')
+    # [cheesemakers.boiling_volume]
+    boiling_volume = 8000  # kg # todo: add different volumes
+
+    # [cheesemakers.boiling_params]
+    boiling_label = '{} {} {} {}кг'.format(boiling_conf.percent, boiling_conf.ferment, 'с лактозой' if boiling_conf.is_lactose else 'безлактозная', boiling_volume)
 
     with make('boiling', block_num=block_num, boiling_type=boiling_type, boiling_label=boiling_label, boiling_id=boiling_conf.id):
-        # todo: make boiling size
-
+        # [cheesemakers.boiling_times]
         timings = []
         timings.append(boiling_conf.pourings.pouring_time)
         timings.append(boiling_conf.pourings.soldification_time)
@@ -163,8 +174,8 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
                 make('pouring_off', time_size=timings[3])
                 make('extra', time_size=timings[4])
 
-        # todo: specify parameter
-        make('drenator', size=cast_t('03:50'), visible=False)
+        # [drenator.chedderization_time]
+        make('drenator', size=cast_t('03:50'), visible=False) # todo: take from parameters
 
         make(make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=melting_line, last_packing_sku=last_packing_sku))
 
@@ -178,11 +189,11 @@ def make_termizator_cleaning_block(cleaning_type):
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
+    # [termizator.cleaning_time]
+    cleaning_time = 8 if cleaning_type == 'short' else 16
+
     with make('cleaning'):
-        if cleaning_type == 'short':
-            make('short_cleaning', t=0, size=8)
-        elif cleaning_type == 'full':
-            make('full_cleaning', t=0, size=16)
+        make(f'{cleaning_type}_cleaning', t=0, size=cleaning_time)
 
     res = maker.root.children[0]
     res.rel_props['size'] = max(c.end for c in res.children)

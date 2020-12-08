@@ -81,7 +81,6 @@ def make_schedule(request, date):
     # draw salt and water
     root = Block('root')
 
-    # add cleanings
     root.rel_props['props_mode'] = 'absolute'
     root.upd_abs_props()
 
@@ -90,6 +89,7 @@ def make_schedule(request, date):
 
     iter_water_props = [{'pouring_line': str(v)} for v in [0, 1]]
     iter_salt_props_2 = [{'pouring_line': str(v[0]), 'melting_line': str(v[1])} for v in product([2, 3], [0, 1, 2, 3])]
+    # [lines.extra_salt_cheesemaker]
     iter_salt_props_3 = [{'pouring_line': str(v[0]), 'melting_line': str(v[1])} for v in product([1, 2, 3], [0, 1, 2, 3])]
     iter_salt_props = iter_salt_props_2
 
@@ -98,11 +98,15 @@ def make_schedule(request, date):
     # will be initialized one of the two first blocks
     last_cleaning_t = None
 
+    # [cheesemakers.start_time]
+    water_start_time = '08:00'
+    salt_start_time = '08:20'
+
     i, row = 0, pick(df, 'water')
     if row is not None:
         # there is water boiling today
         b = make_boiling_row(i, row, None)
-        beg = cast_t('08:00') - b['melting_and_packing'].beg
+        beg = cast_t(water_start_time) - b['melting_and_packing'].beg
         dummy_push(root, b, iter_props=iter_water_props, validator=boiling_validator, beg=beg, max_tries=100)
         last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
 
@@ -113,7 +117,7 @@ def make_schedule(request, date):
     if row is not None:
         # there is a salt boiling today
         b = make_boiling_row(i, row, None)
-        beg = cast_t('08:20') - b['melting_and_packing'].beg
+        beg = cast_t(salt_start_time) - b['melting_and_packing'].beg
         dummy_push(root, b, iter_props=iter_salt_props, validator=boiling_validator, beg=beg, max_tries=100)
         last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
 
@@ -129,15 +133,17 @@ def make_schedule(request, date):
         boiling_type = boiling_types[cur_type_i]
         row = pick(df, boiling_type)
 
-        # todo: make properly
         if row is None:
             if boiling_type == 'water':
                 # start working for 3 lines on salt
+                # [lines.extra_salt_cheesemaker]
                 iter_salt_props = iter_salt_props_3
                 continue
             elif boiling_type == 'salt':
                 # stop production when salt is finished
+                # todo: make properly
                 break
+
         b = make_boiling_row(cur_i, row, last_packing_skus[row['boiling_type']])
 
         iter_props = iter_water_props if boiling_type == 'water' else iter_salt_props
@@ -146,6 +152,7 @@ def make_schedule(request, date):
 
         cur_i += 1
 
+        # [termizator.cleaning]
         # add cleaning if necessary
         boilings = [node for node in root.children if node.props['class'] == 'boiling']
         a, b = list(boilings[-2:])
@@ -153,11 +160,13 @@ def make_schedule(request, date):
         b.upd_abs_props()
         rest = b['pouring'][0]['termizator'].beg - a['pouring'][0]['termizator'].end
         if 12 <= rest < 18:
+            # [termizator.cleaning.1]
             cleaning = make_termizator_cleaning_block('short')
             cleaning.rel_props['t'] = b['pouring'][0]['termizator'].beg - cleaning.size
             add_push(root, cleaning)
             last_cleaning_t = b['pouring'][0]['termizator'].end
         elif rest >= 18:
+            # [termizator.cleaning.2]
             cleaning = make_termizator_cleaning_block('full')
             cleaning.rel_props['t'] = b['pouring'][0]['termizator'].beg - cleaning.size
             add_push(root, cleaning)
@@ -165,12 +174,13 @@ def make_schedule(request, date):
 
         # add cleaning if working more than 12 hours without cleaning
         if b['pouring'][0]['termizator'].end - last_cleaning_t > cast_t('12:00'):
+            # [termizator.cleaning.3]
             cleaning = make_termizator_cleaning_block('short')
             cleaning.rel_props['t'] = b['pouring'][0]['termizator'].end
             add_push(root, cleaning)
             last_cleaning_t = b['pouring'][0]['termizator'].end + cleaning.size
 
-    # add final cleaning
+    # add final cleaning [termizator.cleaning.4]
     cleaning = make_termizator_cleaning_block('full')
     boilings = [node for node in root.children if node.props['class'] == 'boiling']
     cleaning.rel_props['t'] = boilings[-1]['pouring'][0]['termizator'].end + 1  # add five minutes extra
