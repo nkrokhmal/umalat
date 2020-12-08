@@ -4,7 +4,7 @@ from . import main
 from .errors import bad_request
 from .. import db
 from .forms import SKUForm
-from ..models import SKU
+from ..models import SKU, Boiling
 from sqlalchemy import or_, and_
 from flask_restplus import reqparse
 
@@ -13,15 +13,9 @@ from flask_restplus import reqparse
 def add_sku():
     form = SKUForm()
     if form.validate_on_submit():
-        print(dict(form.percent.choices).get(form.percent.data))
-        print(dict(form.is_lactose.choices).get(form.is_lactose.data))
-        print(dict(form.ferment.choices).get(form.ferment.data))
+        # todo: check if boiling does not exist
         sku = SKU(
             name=form.name.data,
-            boiling_id=[x.id for x in form.boilings if
-                        x.percent == dict(form.percent.choices).get(form.percent.data) and
-                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data) and
-                        x.ferment == dict(form.ferment.choices).get(form.ferment.data)][0],
             brand_name=form.brand_name.data,
             weight_netto=form.weight_netto.data,
             weight_form_factor=form.weight_form_factor.data,
@@ -31,12 +25,21 @@ def add_sku():
             packing_reconfiguration=form.packing_reconfiguration.data,
             packing_reconfiguration_format=form.packing_reconfiguration_format.data
         )
+        boiling = [x for x in form.boilings if
+                   x.percent == dict(form.percent.choices).get(form.percent.data) and
+                   x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data) and
+                   x.ferment == dict(form.ferment.choices).get(form.ferment.data)][0]
+        sku.boilings.append(boiling)
 
-        if form.packer.data != '':
+        if form.form_factor.data != -1:
+            sku.form_factor_id = [x.id for x in form.form_factors if
+                                  x.name == dict(form.form_factor.choices).get(form.form_factor.data)][0]
+
+        if form.packer.data != -1:
             sku.packer_id = [x.id for x in form.packers if
                              x.name == dict(form.packer.choices).get(form.packer.data)][0]
 
-        if form.pack_type.data != '':
+        if form.pack_type.data != -1:
             sku.pack_type_id = [x.id for x in form.pack_types if
                                 x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
 
@@ -58,8 +61,8 @@ def get_sku():
     pagination = db.session.query(SKU) \
         .order_by(SKU.name) \
         .paginate(
-            page, per_page=current_app.config['SKU_PER_PAGE'],
-            error_out=False
+        page, per_page=current_app.config['SKU_PER_PAGE'],
+        error_out=False
     )
     skus = pagination.items
     return render_template('get_sku.html', form=form, skus=skus, paginations=pagination, endopoints='.get_sku')
@@ -80,10 +83,19 @@ def edit_sku(sku_id):
         sku.packing_reconfiguration = form.packing_reconfiguration.data
         sku.packing_reconfiguration_format = form.packing_reconfiguration_format.data
 
-        sku.boiling_id = [x.id for x in form.boilings if
-                        x.percent == dict(form.percent.choices).get(form.percent.data) and
-                        x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data) and
-                        x.ferment == dict(form.ferment.choices).get(form.ferment.data)][0]
+        print(dict(form.percent.choices).get(form.percent.data))
+        print(dict(form.percent.choices).get(form.percent.data))
+        print(dict(form.ferment.choices).get(form.ferment.data))
+        boiling = [x for x in form.boilings if
+                   x.percent == dict(form.percent.choices).get(form.percent.data) and
+                   x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data) and
+                   x.ferment == dict(form.ferment.choices).get(form.ferment.data)][0]
+        sku.boilings.append(boiling)
+
+        if form.form_factor.data != -1:
+            sku.form_factor_id = [x.id for x in form.form_factors if
+                                  x.name == dict(form.form_factor.choices).get(form.form_factor.data)][0]
+
         if form.packer.data != -1:
             sku.packer_id = [x.id for x in form.packers if
                              x.name == dict(form.packer.choices).get(form.packer.data)][0]
@@ -93,16 +105,19 @@ def edit_sku(sku_id):
         db.session.commit()
         return redirect(url_for('.get_sku'))
 
-    if sku.boiling is not None:
-        generate_default_value(form.percent, sku.boiling.percent)
-        generate_default_value(form.is_lactose, sku.boiling.is_lactose)
-        generate_default_value(form.ferment, sku.boiling.ferment)
+    if not sku.boilings:
+        generate_default_value(form.percent, sku.boilings.first().percent)
+        generate_default_value(form.is_lactose, sku.boiling.first().is_lactose)
+        generate_default_value(form.ferment, sku.boiling.first().ferment)
 
     if sku.pack_types is not None:
         generate_default_value(form.pack_type, sku.pack_types.name)
 
     if sku.packer is not None:
         generate_default_value(form.packer, sku.packer.name)
+
+    if sku.form_factor is not None:
+        generate_default_value(form.form_factor, sku.form_factor.name)
 
     form.process()
 

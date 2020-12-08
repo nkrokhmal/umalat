@@ -1,17 +1,9 @@
 from . import db
 import json
-import os
 
-'''
-    На всякий случай таблица со статусами
-'''
-
-
-class Status(db.Model):
-    __tablename__ = 'statuses'
-    id = db.Column(db.Integer, primary_key=True)
-    status_name = db.Column(db.String)
-    # cheeses = db.relationship('Cheese', backref='roles', lazy='dynamic')
+sku_boiling = db.Table('sku_boiling',
+                       db.Column('boiling_id', db.Integer, db.ForeignKey('boilings.id'), primary_key=True),
+                       db.Column('sku_id', db.Integer, db.ForeignKey('skus.id'), primary_key=True))
 
 
 '''
@@ -23,40 +15,75 @@ class SKU(db.Model):
     __tablename__ = 'skus'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    # название бренда
     brand_name = db.Column(db.String)
-    # весс нетто
     weight_netto = db.Column(db.Float)
-    # вес одного шарика
     weight_form_factor = db.Column(db.Float)
-    # выход в кг с одной тонны воды
     output_per_ton = db.Column(db.Integer)
-    # срок годности
     shelf_life = db.Column(db.Integer)
-    # Скорость фасовки
     packing_speed = db.Column(db.Integer, nullable=True)
-    # форм фактор
-    form_factor = db.Column(db.String, nullable=True)
-    # короткое название форм фактора
-    form_factor_short = db.Column(db.String, nullable=True)
-    # время быстрой смены пленки
     packing_reconfiguration = db.Column(db.Integer, nullable=True)
-    # терка или нет
-    is_ribber = db.Column(db.Boolean)
-    # время смены формата пленки
+    is_rubber = db.Column(db.Boolean)
     packing_reconfiguration_format = db.Column(db.Integer, nullable=True)
-    # связка с фасовщиком
     packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
-    # связка с варкой
-    boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
-    # связка с типом упаковки
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
+    form_factor_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
+    boilings = db.relationship('Boiling', secondary=sku_boiling)
 
+
+'''
+    Таблица форм фактор
+'''
+
+
+class FormFactor(db.Model):
+    __tablename__ = 'form_factors'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    short_name = db.Column(db.String)
+    priorities = db.relationship('Priority', backref='form_factor', lazy='dynamic')
+    skus = db.relationship('SKU', backref='form_factor', lazy='dynamic')
+
+    @staticmethod
+    def generate_form_factors():
+        try:
+            form_factors = {
+                'Фиор Ди Латте': 'ФДЛ',
+                'Чильеджина': 'ЧЛДЖ',
+                'Для пиццы': 'ПИЦЦA',
+                'Сулугуни': 'CYЛГ',
+                'Моцарелла': 'МОЦ',
+                'Качокавалло': 'КАЧКВ'
+            }
+            for name, short_name in form_factors.items():
+                ff = FormFactor(
+                    name=name,
+                    short_name=short_name
+                )
+                db.session.add(ff)
+            db.session.commit()
+        except Exception as e:
+            print('Exception occurred {}'.format(e))
+            db.session.rollback()
+
+
+'''
+    Приоритеты
+'''
+
+
+class Priority(db.Model):
+    __tablename__ = 'priorities'
+    id = db.Column(db.Integer, primary_key=True)
+    priority = db.Column(db.Integer)
+    form_factor_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
+    boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'), nullable=True)
 
 
 '''
     Параметры термизатора.
 '''
+
+
 class Termizator(db.Model):
     __tablename__ = 'termizators'
     id = db.Column(db.Integer, primary_key=True)
@@ -92,11 +119,11 @@ class Termizator(db.Model):
 class Boiling(db.Model):
     __tablename__ = 'boilings'
     id = db.Column(db.Integer, primary_key=True)
-    priority = db.Column(db.Integer)
     percent = db.Column(db.Float)
     is_lactose = db.Column(db.Boolean)
     ferment = db.Column(db.String)
-    skus = db.relationship('SKU', backref='boiling', lazy='dynamic')
+    skus = db.relationship('SKU', secondary=sku_boiling)
+    priorities = db.relationship('Priority', backref='boiling', lazy='dynamic')
     pouring_id = db.Column(db.Integer, db.ForeignKey('pourings.id'), nullable=True)
     pourings = db.relationship('Pouring', backref='boiling', foreign_keys=pouring_id)
     melting_id = db.Column(db.Integer, db.ForeignKey('meltings.id'), nullable=True)
@@ -284,52 +311,33 @@ def init_all():
     Packer.generate_packer()
     Boiling.generate_boilings()
     Termizator.generate_termizator()
+    FormFactor.generate_form_factors()
 
 
 def init_sku():
     with open('app/data/data.json', encoding='utf-8') as json_file:
         data = json.load(json_file)
-    lines = db.session.query(Line).all()
     boilings = db.session.query(Boiling).all()
     packers = db.session.query(Packer).all()
+    form_factors = db.session.query(FormFactor).all()
     try:
         for d in data:
+            if d['form_factor'] == 'Фиор ди Латте':
+                d['form_factor'] = 'Фиор Ди Латте'
             sku = SKU(
                 name=d['name'],
                 brand_name=d['brand'],
-                form_factor=d['form_factor'],
+                form_factor_id=[x.id for x in form_factors if x.name == d['form_factor']][0],
                 output_per_ton=d['output'],
                 packing_speed=d['packing_speed'],
                 shelf_life=int(d['shelf_life']),
-                boiling_id=[x.id for x in boilings if (x.percent == float(d['percent'])) and
-                            (x.ferment == d['ferment'].capitalize()) and
-                            (x.is_lactose == d['is_lactose'])][0],
                 packer_id=[x.id for x in packers if x.name == d['packer'] or x.name == d['packer'].replace(" ", "")][0]
             )
+            boiling = [x for x in boilings if (x.percent == float(d['percent'])) and
+                       (x.ferment == d['ferment'].capitalize()) and
+                       (x.is_lactose == d['is_lactose'])][0]
+            sku.boilings.append(boiling)
             db.session.add(sku)
-        db.session.commit()
-    except Exception as e:
-        print('Exception occurred {}'.format(e))
-        db.session.rollback()
-
-
-def add_short_form_factor():
-    try:
-        skus = db.session.query(SKU).all()
-        form_factors_short = {
-            'Фиор Ди Латте': 'ФДЛ',
-            'Фиор ди Латте': 'ФДЛ',
-            'Чильеджина': 'ЧЛДЖ',
-            'Для пиццы': 'ПИЦЦA',
-            'Сулугуни': 'CYЛГ',
-            'Моцарелла': 'МОЦ',
-            'Качокавалло': 'КАЧКВ'
-
-        }
-        for sku in skus:
-            if sku.form_factor is not None:
-                print(sku.form_factor)
-                sku.form_factor_short = form_factors_short[sku.form_factor]
         db.session.commit()
     except Exception as e:
         print('Exception occurred {}'.format(e))

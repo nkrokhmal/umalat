@@ -28,7 +28,6 @@ def edit_boiling(boiling_id):
         boiling_process = db.session.query(Boiling).get_or_404(boiling_id)
         if form.validate_on_submit() and boiling_process is not None:
             boiling_process.percent = form.percent.data
-            boiling_process.priority = form.priority.data
             boiling_process.is_lactose = form.is_lactose.data
             boiling_process.ferment = dict(form.ferment.choices).get(form.ferment.data)
 
@@ -67,7 +66,6 @@ def edit_boiling(boiling_id):
         form.process()
 
         form.percent.data = boiling_process.percent
-        form.priority.data = boiling_process.priority
         form.is_lactose.data = boiling_process.is_lactose
 
         if boiling_process.pourings is not None:
@@ -94,7 +92,6 @@ def add_boilings():
     if form.validate_on_submit():
         boiling = Boiling(
             percent=form.percent.data,
-            priority=form.priority.data,
             is_lactose=form.is_lactose.data
         )
         pouring_process = Pouring(
@@ -115,7 +112,7 @@ def add_boilings():
         boiling.pourings = pouring_process
         boiling.meltings = melting_process
 
-        if form.line.data != '':
+        if form.line.data != -1:
             boiling.line_id = [x.id for x in form.lines if
                                x.name == dict(form.line.choices).get(form.line.data)][0]
 
@@ -129,5 +126,3 @@ def generate_default_value(form, val):
     for key, value in dict(form.choices).items():
         if value == val:
             form.default = key
-            print(key)
-            print(value)

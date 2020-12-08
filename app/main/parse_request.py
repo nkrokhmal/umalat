@@ -18,9 +18,9 @@ def parse_request():
         skus = db.session.query(SKU).all()
 
         group_items = [{
-            "Ferment": x.boiling.ferment,
-            "IsLactose": x.boiling.is_lactose,
-            "Percent": x.boiling.percent,
+            "Ferment": x.boilings[0].ferment,
+            "IsLactose": x.boilings[0].is_lactose,
+            "Percent": x.boilings[0].percent,
             "FormFactor": x.form_factor
         } for x in skus.copy()]
         group_items = [dict(x) for x in set(frozenset(d.items()) for d in group_items)]
@@ -51,16 +51,16 @@ def parse_request():
 
         for group_item in group_items:
             group_sku = [x for x in full_list if
-                                 x["SKU"].boiling.ferment == group_item["Ferment"] and
-                                 x["SKU"].boiling.is_lactose == group_item["IsLactose"] and
-                                 x["SKU"].boiling.percent == group_item["Percent"] and
+                                 x["SKU"].boilings[0].ferment == group_item["Ferment"] and
+                                 x["SKU"].boilings[0].is_lactose == group_item["IsLactose"] and
+                                 x["SKU"].boilings[0].percent == group_item["Percent"] and
                                  x["SKU"].form_factor == group_item["FormFactor"]]
             if group_sku is not None:
                 output_weight = group_sku[0]["SKU"].output_per_ton
                 request_weight = sum([x["Request"] for x in group_sku if x["Request"] < 0])
                 result_list.append({
                     "GroupSKU": group_sku,
-                    "BoilingId": group_sku[0]["SKU"].boiling_id,
+                    "BoilingId": group_sku[0]["SKU"].boilings[0].id,
                     "BoilingCount": - request_weight / output_weight
                 })
 

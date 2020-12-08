@@ -22,13 +22,13 @@ SHEETS = {
 COLOURS = {
     'Для пиццы': 'E5B7B6',
     'Моцарелла': 'DAE5F1',
-    'Фиор ди Латте': 'CBC0D9',
+    'Фиор Ди Латте': 'CBC0D9',
     'Чильеджина': 'E5DFEC',
     'Качокавалло': 'F1DADA',
     'Сулугуни': 'F1DADA'
 }
 
-ORDER = ['Фиор ди Латте', 'Чильеджина', 'Моцарелла', 'Сулугуни', 'Для пиццы', 'Качокавалло']
+ORDER = ['Фиор Ди Латте', 'Чильеджина', 'Моцарелла', 'Сулугуни', 'Для пиццы', 'Качокавалло']
 
 CELLS = {
     'FormFactor': Cell(1, 1, 'Форм фактор'),
@@ -74,9 +74,6 @@ def build_plan(date, df, request_list, plan_path=None):
         path = '{}/{}'.format('app/data/plan', filename)
     else:
         path = plan_path
-
-    form_factors = set([x["GroupSKU"][0]["SKU"].form_factor for x in request_list])
-
     with pd.ExcelWriter(path) as writer:
         df.to_excel(writer, sheet_name=SHEETS[0])
         writer.save()
@@ -87,11 +84,11 @@ def build_plan(date, df, request_list, plan_path=None):
 
     cur_row, space_rows = 2, 3
     for form_factor in ORDER:
-        group_skus = [x for x in request_list if x["GroupSKU"][0]["SKU"].form_factor == form_factor]
+        group_skus = [x for x in request_list if x["GroupSKU"][0]["SKU"].form_factor.name == form_factor]
         result_row = cur_row
         total_weight_row = (result_row + len(group_skus) + 1)
         group_sku_length = sum([len(x["GroupSKU"]) for x in group_skus])
-        colour = COLOURS[group_skus[0]["GroupSKU"][0]["SKU"].form_factor]
+        colour = COLOURS[group_skus[0]["GroupSKU"][0]["SKU"].form_factor.name]
 
         excel_block = ExcelBlock(sheet=sheet_plan, colour=colour)
         # создаем объем варки
@@ -114,7 +111,7 @@ def build_plan(date, df, request_list, plan_path=None):
             beg_col=CELLS['FormFactor'].column,
             end_row=cur_row + group_sku_length - 1,
             end_col=CELLS['FormFactor'].column,
-            value=group_skus[0]["GroupSKU"][0]["SKU"].form_factor,
+            value=group_skus[0]["GroupSKU"][0]["SKU"].form_factor.name,
             alignment=Alignment(horizontal='center', vertical='center')
         )
 
@@ -142,10 +139,10 @@ def build_plan(date, df, request_list, plan_path=None):
                 end_row=result_row,
                 end_col=COLUMNS['BoilingVolume'] + 1,
                 value='{}% варка, {}, Лактоза {}, Id {}'.format(
-                    group_sku["GroupSKU"][0]["SKU"].boiling.percent,
-                    group_sku["GroupSKU"][0]["SKU"].boiling.ferment,
-                    group_sku["GroupSKU"][0]["SKU"].boiling.is_lactose,
-                    group_sku["GroupSKU"][0]["SKU"].boiling_id
+                    group_sku["GroupSKU"][0]["SKU"].boilings[0].percent,
+                    group_sku["GroupSKU"][0]["SKU"].boilings[0].ferment,
+                    group_sku["GroupSKU"][0]["SKU"].boilings[0].is_lactose,
+                    group_sku["GroupSKU"][0]["SKU"].boilings[0].id
                 )
             )
             formula_boiling_count = '{}'.format(str(group_formula).strip('[]').replace(',', ' +').replace('\'', "").upper())
@@ -174,7 +171,7 @@ def build_plan(date, df, request_list, plan_path=None):
             excel_block.cell_value(
                 row=result_row,
                 col=COLUMNS['BOILING_ID'],
-                value=group_sku["GroupSKU"][0]["SKU"].boiling_id
+                value=group_sku["GroupSKU"][0]["SKU"].boilings[0].id
             )
             result_row += 1
 
