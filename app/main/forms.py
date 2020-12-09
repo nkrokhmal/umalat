@@ -70,7 +70,7 @@ class SKUForm(FlaskForm):
 
         self.ferment.choices = list(enumerate(set([x.ferment for x in self.boilings])))
         self.percent.choices = list(enumerate(set([x.percent for x in self.boilings])))
-        self.is_lactose.choices = list(enumerate(set([x.is_lactose for x in self.boilings])))
+        self.is_lactose.choices = list(enumerate([True, False]))
 
         self.packer.choices = list(enumerate(set([x.name for x in self.packers])))
         self.packer.choices.append((-1, ''))
