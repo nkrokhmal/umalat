@@ -83,9 +83,6 @@ def edit_sku(sku_id):
         sku.packing_reconfiguration = form.packing_reconfiguration.data
         sku.packing_reconfiguration_format = form.packing_reconfiguration_format.data
 
-        print(dict(form.percent.choices).get(form.percent.data))
-        print(dict(form.percent.choices).get(form.percent.data))
-        print(dict(form.ferment.choices).get(form.ferment.data))
         boiling = [x for x in form.boilings if
                    x.percent == dict(form.percent.choices).get(form.percent.data) and
                    x.is_lactose == dict(form.is_lactose.choices).get(form.is_lactose.data) and
@@ -105,10 +102,10 @@ def edit_sku(sku_id):
         db.session.commit()
         return redirect(url_for('.get_sku'))
 
-    if not sku.boilings:
-        generate_default_value(form.percent, sku.boilings.first().percent)
-        generate_default_value(form.is_lactose, sku.boiling.first().is_lactose)
-        generate_default_value(form.ferment, sku.boiling.first().ferment)
+    if len(sku.boilings) > 0:
+        generate_default_value(form.percent, sku.boilings[0].percent)
+        generate_default_value(form.is_lactose, sku.boilings[0].is_lactose)
+        generate_default_value(form.ferment, sku.boilings[0].ferment)
 
     if sku.pack_types is not None:
         generate_default_value(form.pack_type, sku.pack_types.name)
