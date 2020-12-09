@@ -135,6 +135,9 @@ def edit_sku(sku_id):
 def delete_sku(sku_id):
     sku = db.session.query(SKU).get_or_404(sku_id)
     if sku:
+        for boiling in sku.boilings:
+            sku.boilings.remove(boiling)
+        db.session.commit()
         db.session.delete(sku)
         db.session.commit()
     return redirect(url_for('.get_sku'))
