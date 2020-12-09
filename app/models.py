@@ -27,7 +27,7 @@ class SKU(db.Model):
     packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
     form_factor_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
-    boilings = db.relationship('Boiling', secondary=sku_boiling)
+    # boilings = db.relationship('Boiling', secondary=sku_boiling)
 
 
 '''
@@ -122,7 +122,7 @@ class Boiling(db.Model):
     percent = db.Column(db.Float)
     is_lactose = db.Column(db.Boolean)
     ferment = db.Column(db.String)
-    skus = db.relationship('SKU', secondary=sku_boiling)
+    skus = db.relationship('SKU', secondary=sku_boiling, backref='boilings')
     priorities = db.relationship('Priority', backref='boiling', lazy='dynamic')
     pouring_id = db.Column(db.Integer, db.ForeignKey('pourings.id'), nullable=True)
     pourings = db.relationship('Pouring', backref='boiling', foreign_keys=pouring_id)
