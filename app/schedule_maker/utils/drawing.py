@@ -118,7 +118,7 @@ def draw_print(block):
     res = ''
     for b in block.iter():
         if calc_interval_length(b.interval) != 0:
-            res += ' ' * int(b.abs_props['t']) + '=' * int(calc_interval_length(b.interval)) + f' {b.rel_props["class"]} {b.interval}'
+            res += ' ' * int(b.abs_props.get('t', 0)) + '=' * int(calc_interval_length(b.interval)) + f' {b.rel_props["class"]} {b.interval}' + f' ({b.abs_props.get("t", 0)}, {b.abs_props.get("t", 0) + b.abs_props["size"]}]'
             res += '\n'
     return res
 

@@ -98,57 +98,73 @@ def make_schedule(request, date):
     # will be initialized one of the two first blocks
     last_cleaning_t = None
 
+    latest_boiling = None
+
     # [cheesemakers.start_time]
-    water_start_time = '08:00'
-    salt_start_time = '08:20'
+    water_start_time = '09:50'
+    salt_start_time = '07:05'
 
     i, row = 0, pick(df, 'water')
     if row is not None:
         # there is water boiling today
         b = make_boiling_row(i, row, None)
         beg = cast_t(water_start_time) - b['melting_and_packing'].beg
-        dummy_push(root, b, iter_props=iter_water_props, validator=boiling_validator, beg=beg, max_tries=100)
+        boiling = dummy_push(root, b, iter_props=iter_water_props, validator=boiling_validator, beg=beg, max_tries=100)
         last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
 
         # init last cleaning with termizator first start
         last_cleaning_t = last_cleaning_t if last_cleaning_t else beg
+        latest_boiling = boiling if not latest_boiling else max([latest_boiling, boiling], key=lambda boiling: boiling.beg)
+    latest_water_boiling = boiling
 
     i, row = 1, pick(df, 'salt')
     if row is not None:
         # there is a salt boiling today
         b = make_boiling_row(i, row, None)
         beg = cast_t(salt_start_time) - b['melting_and_packing'].beg
-        dummy_push(root, b, iter_props=iter_salt_props, validator=boiling_validator, beg=beg, max_tries=100)
+        boiling = dummy_push(root, b, iter_props=iter_salt_props, validator=boiling_validator, beg=beg, max_tries=100)
         last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
 
         # init last cleaning with termizator first start
         last_cleaning_t = last_cleaning_t if last_cleaning_t else beg
+        latest_boiling = boiling if not latest_boiling else max([latest_boiling, boiling], key=lambda boiling: boiling.beg)
+    latest_salt_boiling = boiling
 
-    boiling_types = ['water', 'salt']
-    cur_type_i = -1
     cur_i = 2
 
     while True:
-        cur_type_i = (cur_type_i + 1) % 2
-        boiling_type = boiling_types[cur_type_i]
-        row = pick(df, boiling_type)
+        left_df = df[~df['used']]
+        left_unique = left_df['boiling_type'].unique()
 
-        if row is None:
-            if boiling_type == 'water':
+        if len(left_unique) == 1:
+            boiling_type = left_unique[0]
+
+            if boiling_type == 'salt':
                 # start working for 3 lines on salt
                 # [lines.extra_salt_cheesemaker]
                 iter_salt_props = iter_salt_props_3
-                continue
-            elif boiling_type == 'salt':
-                # stop production when salt is finished
-                # todo: make properly
-                break
+        elif len(left_unique) == 0:
+            # stop production
+            break
+        else:
+            # make different block
+            boiling_type = 'water' if latest_boiling.abs_props['boiling_type'] == 'salt' else 'salt'
+
+        row = pick(df, boiling_type)
+
+        beg = latest_water_boiling.beg if boiling_type == 'water' else latest_salt_boiling.beg
+        print('Starting from', beg, boiling_type, latest_water_boiling.beg, latest_salt_boiling.beg)
 
         b = make_boiling_row(cur_i, row, last_packing_skus[row['boiling_type']])
-
         iter_props = iter_water_props if boiling_type == 'water' else iter_salt_props
-        dummy_push(root, b, iter_props=iter_props, validator=boiling_validator, beg='last_beg', max_tries=100)
+        boiling = dummy_push(root, b, iter_props=iter_props, validator=boiling_validator, beg=int(beg), max_tries=100)
         last_packing_skus[row['boiling_type']] = list(row['boiling_request'].keys())[-1]
+        latest_boiling = boiling if not latest_boiling else max([latest_boiling, boiling], key=lambda boiling: boiling.beg)
+
+        if boiling_type == 'water':
+            latest_water_boiling = boiling
+        else:
+            latest_salt_boiling = boiling
 
         cur_i += 1
 

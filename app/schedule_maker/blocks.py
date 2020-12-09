@@ -43,7 +43,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
             # [cheesemakers.boiling_volume]
             cheese_from_boiling *= 8000 / 8000 # todo: make boiling_volume count
 
-            melting_time = custom_round(cheese_from_boiling / boiling_conf.meltings.speed * 60 * 1.3, 5, rounding='ceil')
+            melting_time = custom_round(cheese_from_boiling / boiling_conf.meltings.speed * 60, 5, rounding='ceil')
 
             for sku, sku_kg in boiling_request.items():
                 packing_speed = min(sku.packing_speed, boiling_conf.meltings.speed)
@@ -54,7 +54,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
         elif boiling_type == 'salt':
             for sku, sku_kg in boiling_request.items():
                 packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
-            total_packing_time = sum(packing_times) + sum(configuration_times[1:]) # add time for configuration - first is made before packing process
+            total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
 
             # fit melting time for packing [melting.slow_packing]
             melting_time = total_packing_time
@@ -69,12 +69,17 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                 if label != cur_label:
                     s += label + ' '
                     cur_label = label
-                s += str(weight / 1000)
+
+                # todo: make properly, this if-else if because of rubber. Should be something better
+                if weight:
+                    s += str(weight / 1000)
+                else:
+                    s += 'терка'
                 values.append(s)
             return '/'.join(values)
 
-        form_factor_label = gen_label([(sku.form_factor, sku.weight_netto) for sku in boiling_request.keys()])
-        brand_label = gen_label([(sku.brand_name, sku.weight_netto) for sku in boiling_request.keys()])
+        form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_request.keys()])
+        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku in boiling_request.keys()])
 
         with make('melting', y=10, time_size=full_melting_time, melting_line=melting_line):
             # todo: make properly
@@ -89,7 +94,12 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                 make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_conf.meltings.serving_time, form_factor_label=form_factor_label)
                 cur_y += 1
             with make(y=cur_y):
-                make('serving', time_size=boiling_conf.meltings.serving_time, visible=False)
+                # todo: make properly
+                if boiling_type == 'salt':
+                    serving_visible = True
+                else:
+                    serving_visible = False
+                make('serving', time_size=boiling_conf.meltings.serving_time, visible=serving_visible)
                 make('melting_process', time_size=melting_time, speed=boiling_conf.meltings.speed)
 
                 if boiling_type == 'salt':
@@ -175,7 +185,11 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
                 make('extra', time_size=timings[4])
 
         # [drenator.chedderization_time]
-        make('drenator', size=cast_t('03:50'), visible=False) # todo: take from parameters
+        if boiling_type == 'water':
+            chedderization_time = '03:50'
+        else:
+            chedderization_time = '03:00'
+        make('drenator', size=cast_t(chedderization_time) - 2, visible=False) # todo: take from parameters # todo: make properly timings[4]
 
         make(make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=melting_line, last_packing_sku=last_packing_sku))
 
