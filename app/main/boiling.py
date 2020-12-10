@@ -18,6 +18,7 @@ def delete_boiling(boiling_id):
     if boiling_process:
         db.session.delete(boiling_process)
         db.session.commit()
+        flash('Варка успешно удалена')
     return redirect(url_for('.get_boiling'))
 
 
@@ -55,6 +56,7 @@ def edit_boiling(boiling_id):
                                            x.name == dict(form.line.choices).get(form.line.data)][0]
 
             db.session.commit()
+            flash('Варка успешно изменена')
             return redirect(url_for('.get_boiling'))
 
         for key, value in dict(form.ferment.choices).items():
@@ -118,6 +120,7 @@ def add_boilings():
 
         db.session.add(boiling)
         db.session.commit()
+        flash('Варка успешно добавлена')
         return redirect(url_for('.get_boiling'))
     return render_template('add_boiling.html', form=form)
 

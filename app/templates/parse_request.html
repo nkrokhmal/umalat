@@ -17,6 +17,12 @@
 <script type='text/javascript' src="static/js/templates/parse_request.js"></script>
 
 
+<main>
+    <div class="header-img">
+         <img src= "{{ url_for('static', filename='parse_request.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+    </div>
+</main>
+
 <div class="page-header">
     <h1> Загрузите файл заявки и выберите дату </h1>
 </div>
@@ -29,7 +35,7 @@
         <a href="{{result_path}}"><button class="btn"><i class="fa fa-download"></i> Download </button></a>
         <br>
         <br>
-        <a href="{{schedule}}"> Перейти к созданию плана </a>
+        <a href="{{url_for('main.schedule')}}"> Перейти к созданию плана </a>
     </div>
 {% endif %}
 

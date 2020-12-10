@@ -100,6 +100,7 @@ def edit_sku(sku_id):
             sku.pack_type_id = [x.id for x in form.pack_types if
                                 x.name == dict(form.pack_type.choices).get(form.pack_type.data)][0]
         db.session.commit()
+        flash('SKU успешно изменено')
         return redirect(url_for('.get_sku'))
 
     if len(sku.boilings) > 0:
@@ -140,6 +141,7 @@ def delete_sku(sku_id):
         db.session.commit()
         db.session.delete(sku)
         db.session.commit()
+        flash('SKU успешно удалено')
     return redirect(url_for('.get_sku'))
 
 

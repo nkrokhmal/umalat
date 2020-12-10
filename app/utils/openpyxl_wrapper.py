@@ -3,7 +3,7 @@ import openpyxl
 
 
 class ExcelBlock:
-    def __init__(self, sheet, colour, font_size=10):
+    def __init__(self, sheet, colour='#FFFFFF', font_size=9):
         self.sheet = sheet
         self.colour = colour
         self.font_size = font_size
