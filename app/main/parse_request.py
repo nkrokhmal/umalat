@@ -46,7 +46,7 @@ def parse_request():
                 })
             else:
                 sku_for_create.append(item[0])
-        flash('No SKU: {}'.format(sku_for_create))
+        # flash('No SKU: {}'.format(sku_for_create))
 
         for group_item in group_items:
             group_sku = [x for x in full_list if
