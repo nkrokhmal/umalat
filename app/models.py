@@ -6,6 +6,11 @@ sku_boiling = db.Table('sku_boiling',
                        db.Column('sku_id', db.Integer, db.ForeignKey('skus.id'), primary_key=True))
 
 
+sku_boiling_form_factor = db.Table('sku_boiling_form_factor',
+                                   db.Column('bff_id', db.Integer, db.ForeignKey('boiling_form_factors.id'), primary_key=True),
+                                   db.Column('sku_id', db.Integer, db.ForeignKey('skus.id'), primary_key=True))
+
+
 '''
     Таблица SKU. Идет привязка к типам варки
 '''
@@ -28,6 +33,45 @@ class SKU(db.Model):
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
     form_factor_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
     # boilings = db.relationship('Boiling', secondary=sku_boiling)
+
+    @staticmethod
+    def generate_links_to_bff():
+        try:
+            skus = db.session.query(SKU).all()
+            bffs = db.session.query(BoilingFormFactor).all()
+            for sku in skus:
+                if not sku.is_rubber:
+                    bff = [x for x in bffs if x.weight == sku.weight_form_factor][0]
+                    sku.boiling_form_factors.append(bff)
+            db.session.commit()
+        except Exception as e:
+            print('Exception occurred {}'.format(e))
+            db.session.rollback()
+
+
+
+class BoilingFormFactor(db.Model):
+    __tablename__ = 'boiling_form_factors'
+    id = db.Column(db.Integer, primary_key=True)
+    weight = db.Column(db.Integer)
+    skus = db.relationship('SKU', secondary=sku_boiling_form_factor, backref='boiling_form_factors')
+
+    @staticmethod
+    def generate_boiling_form_factors():
+        try:
+            skus = db.session.query(SKU).all()
+            weights = set([x.weight_form_factor for x in skus])
+            for weight in weights:
+                bff = BoilingFormFactor(
+                    weight=weight
+                )
+                db.session.add(bff)
+            db.session.commit()
+        except Exception as e:
+            print('Exception occurred {}'.format(e))
+            db.session.rollback()
+
+
 
 
 '''
