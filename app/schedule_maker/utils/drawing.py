@@ -70,7 +70,7 @@ def draw(sheet, block):
                 draw_block(sheet, beg, b.props['y'], b.size, b.props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'}, text_rotation=b.props.get('text_rotation'))
             except:
                 print(b)
-                print(b.props.relative_props)
+                print(b.props.relative_props, b.interval)
                 raise
 
 
@@ -97,6 +97,9 @@ def init_template_sheet(template_fn=None):
 
 
 def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
+    # update all static style properties
+    root.props.accumulate_static(recursive=True)
+
     # update styles
     for b in root.iter():
         block_style = style.get(b.props['class'])
@@ -104,7 +107,6 @@ def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
         if block_style:
             block_style = {k: v(b) if callable(v) else v for k, v in block_style.items()}
             b.props.update(block_style)
-
 
     root.props.update({'index_width': 4})
 
@@ -119,11 +121,13 @@ def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
     return work_book
 
 
-def draw_print(block):
+def draw_print(block, visible_only=True):
     res = ''
     for b in block.iter():
         if calc_interval_length(b.interval) != 0:
-            res += ' ' * b.beg + '=' * int(calc_interval_length(b.interval)) + f' {b.props["class"]} {b.interval}'
+            if visible_only and b.props['visible'] is False:
+                continue
+            res += ' ' * b.beg + '=' * int(calc_interval_length(b.interval)) + f' {b.props["class"]} {b.props["y"]}:{b.interval}'
             res += '\n'
     return res
 

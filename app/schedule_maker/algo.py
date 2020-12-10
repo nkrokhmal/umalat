@@ -130,6 +130,7 @@ def make_schedule(request, date):
     cur_i = 2
 
     while True:
+
         left_df = df[~df['used']]
         left_unique = left_df['boiling_type'].unique()
 
@@ -150,8 +151,6 @@ def make_schedule(request, date):
         row = pick(df, boiling_type)
 
         beg = latest_water_boiling.beg if boiling_type == 'water' else latest_salt_boiling.beg
-
-        print('Starting from', beg, boiling_type, latest_water_boiling.beg, latest_salt_boiling.beg)
 
         b = make_boiling_row(cur_i, row, last_packing_skus[row['boiling_type']])
         iter_props = iter_water_props if boiling_type == 'water' else iter_salt_props

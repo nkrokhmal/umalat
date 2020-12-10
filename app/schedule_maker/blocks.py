@@ -135,7 +135,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                     if boiling_type == 'water':
                         make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
                     elif boiling_type == 'salt':
-                        make('packing_brand', time_size=total_packing_time, brand_label='фасовка/confezionamento')
+                        make('packing_brand', time_size=total_packing_time, brand_label='фасовка')
                 with make(y=2):
                     make('configuration', time_size=packing_times[0], visible=False)
 
@@ -256,4 +256,5 @@ def make_template():
 
     res = maker.root.children[0]
     res.props.update({'size': max(c.end for c in res.children)}, accumulate=['size', 'time_size'])
+    res.props.accumulate_static(recursive=True)
     return res

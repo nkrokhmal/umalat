@@ -58,7 +58,7 @@ def class_acc(parent, child, key):
 # todo: put y into static accumulators?
 DYNAMIC_ACCUMULATORS = {'t': cumsum_int_acc, 'y': cumsum_int_acc}
 STATIC_ACCUMULATORS = {'size': size_acc, 'time_size': time_size_acc, 'class': class_acc}
-DYNAMIC_KEYS = ['t', 'pouring_line', 'melting_line']
+DYNAMIC_KEYS = ['t', 'y', 'pouring_line', 'melting_line', 'boiling_type']
 REQUIRED_STATIC_KEYS = ['size', 'time_size', 'class']
 
 
@@ -181,14 +181,19 @@ def add_push(parent, block):
 def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, validator='basic', iter_props=None):
     # note: make sure parent abs props are updated
     if beg == 'last_beg':
-        cur_t = max([0] + [child.beg for child in parent.children])
+        cur_t = max([parent.beg] + [child.beg for child in parent.children])
     elif beg == 'last_end':
-        cur_t = max([0] + [child.end for child in parent.children])
+        cur_t = max([parent.beg] + [child.end for child in parent.children])
     elif isinstance(beg, int):
         cur_t = beg
     else:
         raise Exception('Unknown beg type')
 
+    # go to relative coordinates
+    cur_t -= parent.beg
+
+    # print([(child.props['class'], child.end, child.props.relative_props, child.beg) for child in parent.children])
+    # print('Starting from', cur_t, parent.props['class'], block.props['class'])
     end = min(end, cur_t + max_tries)
 
     iter_props = iter_props or [{}]
@@ -213,7 +218,6 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
             cur_t += min(dispositions)
         else:
             cur_t += 1
-
     raise Exception('Failed to push element')
 
 
