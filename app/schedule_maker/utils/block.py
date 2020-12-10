@@ -11,7 +11,6 @@ from app.schedule_maker.utils.interval import calc_interval_length, cast_interva
 
 def validate_disjoint(b1, b2):
     # assert a disposition information
-    # todo: hack, a little bit hardcode
     try:
         disposition = b1.interval.upper - b2.interval.lower
     except:
@@ -27,27 +26,64 @@ def gen_pair_validator(validate=validate_disjoint):
     return f
 
 
+def cumsum_int_acc(parent, child, key):
+    pv, v = cast_prop_values(parent, child, key)
+    pv = pv if pv else 0
+    v = v if v else 0
+    return int(pv + v)
+
+
+def size_acc(parent, child, key):
+    size, time_size = child.relative_props.get('size', 0), child.relative_props.get('time_size', 0)
+    size, time_size = int(size), int(time_size)
+    if size:
+        return int(size)
+    else:
+        assert time_size % 5 == 0
+        return time_size // 5
+
+
+def time_size_acc(parent, child, key):
+    size, time_size = child.relative_props.get('size', 0), child.relative_props.get('time_size', 0)
+    size, time_size = int(size), int(time_size)
+    if size:
+        return size * 5
+    else:
+        return time_size
+
+
+def class_acc(parent, child, key):
+    return child.relative_props.get('class')
+
+# todo: put y into static accumulators?
+DYNAMIC_ACCUMULATORS = {'t': cumsum_int_acc, 'y': cumsum_int_acc}
+STATIC_ACCUMULATORS = {'size': size_acc, 'time_size': time_size_acc, 'class': class_acc}
+DYNAMIC_KEYS = ['t', 'pouring_line', 'melting_line']
+REQUIRED_STATIC_KEYS = ['size', 'time_size', 'class']
+
+
 class Block:
-    def __init__(self, block_class=None, parent=None, **props):
+    def __init__(self, block_class=None, props=None, **kwargs):
         block_class = block_class or 'block'
-        self.parent = parent
+        props = props or {}
+        props['class'] = block_class
+        props.update(kwargs)
+
+        self.parent = None
         self.children = []
 
-        props['class'] = block_class
+        self.props = Props(props=props,
+                           dynamic_accumulators=DYNAMIC_ACCUMULATORS,
+                           dynamic_keys=DYNAMIC_KEYS,
+                           static_accumulators=STATIC_ACCUMULATORS,
+                           required_static_keys=REQUIRED_STATIC_KEYS)
 
-        if 'props' in props:
-            props.update(props.pop('props'))
-
-        self.rel_props = props or {}
-        self.abs_props = {}
-
-    @property
-    def props(self):
-        return self.abs_props if self.rel_props.get('props_mode') == 'absolute' or self.abs_props.get('props_mode') == 'absolute' else self.rel_props
+        # accumulate basic static props on initialization
+        self.props.accumulate_static()
 
     def __getitem__(self, item):
         if isinstance(item, str):
-            res = [b for b in self.children if b.rel_props['class'] == item]
+            res = [b for b in self.children if b.props['class'] == item]
         elif isinstance(item, int):
             res = self.children[item]
         elif isinstance(item, slice):
@@ -55,12 +91,6 @@ class Block:
             res = [self[ii] for ii in range(*item.indices(len(self)))]
         else:
             raise TypeError('Item type not supported')
-
-        if isinstance(res, Block):
-            res.upd_abs_props()
-        elif isinstance(res, list):
-            for b in res:
-                b.upd_abs_props()
 
         if not res:
             return
@@ -72,31 +102,22 @@ class Block:
 
     @property
     def size(self):
-        res = self.props.get('size', 0)
-        if not res:
-            # check that int is divided by 5
-            assert self.props.get('time_size', 0) % 5 == 0
-            res = int(self.props.get('time_size', 0) / 5)
-
-        # check if int-like
-        assert math.ceil(res) == math.floor(res)
-
-        return int(res)
+        return self.props['size']
 
     @property
     def beg(self):
-        return self.props.get('t', 0)
+        return self.props['t']
 
     @property
     def end(self):
-        return self.beg + self.size
+        return self.props['t'] + self.props['size']
 
     @property
     def interval(self):
         return cast_interval(self.beg, self.end)
 
     def __str__(self):
-        res = f'{self.rel_props["class"]} ({self.beg}, {self.end}]\n'
+        res = f'{self.props["class"]} ({self.beg}, {self.end}]\n'
 
         for child in self.children:
             for line in str(child).split('\n'):
@@ -108,61 +129,37 @@ class Block:
     def __repr__(self):
         return str(self)
 
-    def _inherit_props(self, parent_props, props):
-        cur_props = dict(parent_props)
-
-        # specify what we don't inherit
-        cur_props = {k: v for k, v in cur_props.items() if k not in ['size', 'time_size']}
-
-        # add our props
-        for key in props:
-            if key not in cur_props:
-                # new key
-                cur_props[key] = props[key]
-            else:
-                if key in ['t', 'y']:  # accumulated keys
-                    cur_props[key] += props[key]
-                else:
-                    if props[key] is not None:
-                        cur_props[key] = props[key]
-        return cur_props
-
-    def upd_abs_props(self):
-        if not self.parent:
-            self.abs_props = dict(self.rel_props)
-        else:
-            self.abs_props = self._inherit_props(self.parent.abs_props, self.rel_props)
-
-        # todo: hardcode
-        self.abs_props['size'] = self.size
-        self.abs_props['time_size'] = self.abs_props['size'] * 5
-
     def iter(self):
-        self.upd_abs_props()
-
         yield self
 
         for child in self.children:
             for b in child.iter():
                 yield b
 
-    def add(self, block):
-        block.parent = self
+    def set_parent(self, parent):
+        self.parent = parent
+        self.props.parent = parent.props
+
+    def add_child(self, block):
         self.children.append(block)
+        self.props.children.append(block.props)
+
+    def add(self, block):
+        block.set_parent(self)
+        self.add_child(block)
         return block
 
 
-def simple_push(parent, block, validator='basic', props=None):
+def simple_push(parent, block, validator='basic', new_props=None):
     if validator == 'basic':
         validator = gen_pair_validator()
 
     # set parent for proper abs_props
-    block.parent = parent
+    block.set_parent(parent)
 
-    props = props or {}
-    if props:
-        block.rel_props.update(props)
-        block.upd_abs_props()
+    # update props for current try
+    new_props = new_props or {}
+    block.props.update(new_props)
 
     if validator:
         try:
@@ -202,7 +199,7 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
             props = copy.deepcopy(props)
             props['t'] = cur_t
 
-            res = simple_push(parent, block, validator=validator, props=props)
+            res = simple_push(parent, block, validator=validator, new_props=props)
 
             if isinstance(res, Block):
                 return block
@@ -221,8 +218,8 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
 
 
 class BlockMaker:
-    def __init__(self, root_name='root', default_push_func=simple_push):
-        self.root = Block(block_class=root_name)
+    def __init__(self, root_class='root', default_push_func=simple_push):
+        self.root = Block(root_class)
         self.blocks = [self.root]
         self.default_push_func = default_push_func
 
@@ -231,7 +228,7 @@ class BlockMaker:
         push_kwargs = push_kwargs or {}
 
         if isinstance(block_obj, str) or block_obj is None:
-            block = Block(block_class=block_obj, **kwargs)
+            block = Block(block_obj, **kwargs)
         elif isinstance(block_obj, Block):
             block = block_obj
         else:
@@ -274,7 +271,7 @@ if __name__ == '__main__':
     maker = BlockMaker(default_push_func=add_push)
     make = maker.make
 
-    with make('a', size=3, t=5, override=True):
+    with make('a', size=3, t=5):
         make('b', size=2)
         make('b', size=2)
         make('c', size=1)
@@ -285,9 +282,8 @@ if __name__ == '__main__':
     b = Block('a', time_size=10)
     print(b.size)
 
-    b = Block('a', time_size=11)
     try:
-        print(b.size)
-        raise Exception('Should not happend')
+        b = Block('a', time_size=11)
+        raise Exception('Should not happen')
     except AssertionError:
         print('Time size should be divided by 5')

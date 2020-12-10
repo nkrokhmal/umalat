@@ -81,9 +81,6 @@ def make_schedule(request, date):
     # draw salt and water
     root = Block('root')
 
-    root.rel_props['props_mode'] = 'absolute'
-    root.upd_abs_props()
-
     def make_boiling_row(i, row, last_packing_sku):
         return make_boiling(cast_boiling(row['boiling_id']), row['boiling_request'], row['boiling_type'], block_num=i + 1, last_packing_sku=last_packing_sku)
 
@@ -148,7 +145,7 @@ def make_schedule(request, date):
             break
         else:
             # make different block
-            boiling_type = 'water' if latest_boiling.abs_props['boiling_type'] == 'salt' else 'salt'
+            boiling_type = 'water' if latest_boiling.props['boiling_type'] == 'salt' else 'salt'
 
         row = pick(df, boiling_type)
 
@@ -169,55 +166,48 @@ def make_schedule(request, date):
 
         cur_i += 1
 
-        # todo: del
-        if cur_i == 3:
-            break
-
         # [termizator.cleaning]
         # add cleaning if necessary
-        # boilings = [node for node in root.children if node.props['class'] == 'boiling']
-        # a, b = list(boilings[-2:])
-        # a.upd_abs_props()
-        # b.upd_abs_props()
-        # rest = b['pouring'][0]['termizator'].beg - a['pouring'][0]['termizator'].end
-        # if 12 <= rest < 18:
-        #     # [termizator.cleaning.1]
-        #     cleaning = make_termizator_cleaning_block('short')
-        #     cleaning.rel_props['t'] = b['pouring'][0]['termizator'].beg - cleaning.size
-        #     add_push(root, cleaning)
-        #     last_cleaning_t = b['pouring'][0]['termizator'].end
-        # elif rest >= 18:
-        #     # [termizator.cleaning.2]
-        #     cleaning = make_termizator_cleaning_block('full')
-        #     cleaning.rel_props['t'] = b['pouring'][0]['termizator'].beg - cleaning.size
-        #     add_push(root, cleaning)
-        #     last_cleaning_t = b['pouring'][0]['termizator'].end
-        #
-        # # add cleaning if working more than 12 hours without cleaning
-        # if b['pouring'][0]['termizator'].end - last_cleaning_t > cast_t('12:00'):
-        #     # [termizator.cleaning.3]
-        #     cleaning = make_termizator_cleaning_block('short')
-        #     cleaning.rel_props['t'] = b['pouring'][0]['termizator'].end
-        #     add_push(root, cleaning)
-        #     last_cleaning_t = b['pouring'][0]['termizator'].end + cleaning.size
+        boilings = [node for node in root.children if node.props['class'] == 'boiling']
+        a, b = list(boilings[-2:])
+
+        rest = b['pouring'][0]['termizator'].beg - a['pouring'][0]['termizator'].end
+        if 12 <= rest < 18:
+            # [termizator.cleaning.1]
+            cleaning = make_termizator_cleaning_block('short')
+            cleaning.props.update({'t': b['pouring'][0]['termizator'].beg - cleaning.size})
+            add_push(root, cleaning)
+            last_cleaning_t = b['pouring'][0]['termizator'].end
+        elif rest >= 18:
+            # [termizator.cleaning.2]
+            cleaning = make_termizator_cleaning_block('full')
+            cleaning.props.update({'t': b['pouring'][0]['termizator'].beg - cleaning.size})
+            add_push(root, cleaning)
+            last_cleaning_t = b['pouring'][0]['termizator'].end
+
+        # add cleaning if working more than 12 hours without cleaning
+        if b['pouring'][0]['termizator'].end - last_cleaning_t > cast_t('12:00'):
+            # [termizator.cleaning.3]
+            cleaning = make_termizator_cleaning_block('short')
+            cleaning.props.update({'t': b['pouring'][0]['termizator'].end})
+
+            add_push(root, cleaning)
+            last_cleaning_t = b['pouring'][0]['termizator'].end + cleaning.size
 
     # add final cleaning [termizator.cleaning.4]
     cleaning = make_termizator_cleaning_block('full')
     boilings = [node for node in root.children if node.props['class'] == 'boiling']
-    cleaning.rel_props['t'] = boilings[-1]['pouring'][0]['termizator'].end + 1  # add five minutes extra
+
+    cleaning.props.update({'t': boilings[-1]['pouring'][0]['termizator'].end + 1}) # add five minutes extra
     add_push(root, cleaning)
 
-    root.rel_props.pop('props_mode')
-    root.upd_abs_props()
-
-    root.rel_props['size'] = max(c.end for c in root.children)
-
+    root.props.update({'size': max(c.end for c in root.children)}, accumulate=['size', 'time_size'])
     return root
 
 
 # todo: better naming
 def draw_workbook(root, mode='prod', template_fn=None):
     style = load_style(mode=mode)
-    root.rel_props['size'] = max(c.end for c in root.children)
+    root.props.update({'size': max(c.end for c in root.children)}, accumulate=['size', 'time_size'])
     init_sheet_func = init_sheet if mode == 'dev' else init_template_sheet(template_fn=template_fn)
     return draw_schedule(root, style, init_sheet_func=init_sheet_func)
