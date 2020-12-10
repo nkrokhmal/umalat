@@ -48,7 +48,19 @@ class SKU(db.Model):
             print('Exception occurred {}'.format(e))
             db.session.rollback()
 
-
+    @staticmethod
+    def generate_links_to_bff_rubber():
+        try:
+            skus = db.session.query(SKU).all()
+            bffs = db.session.query(BoilingFormFactor).all()
+            skus = [x for x in skus if x.is_rubber == True]
+            for sku in skus:
+                for bff in bffs:
+                    sku.boiling_form_factors.append(bff)
+            db.session.commit()
+        except Exception as e:
+            print('Exception occurred {}'.format(e))
+            db.session.rollback()
 
 class BoilingFormFactor(db.Model):
     __tablename__ = 'boiling_form_factors'
@@ -72,8 +84,6 @@ class BoilingFormFactor(db.Model):
             db.session.rollback()
 
 
-
-
 '''
     Таблица форм фактор
 '''
@@ -86,6 +96,7 @@ class FormFactor(db.Model):
     short_name = db.Column(db.String)
     priorities = db.relationship('Priority', backref='form_factor', lazy='dynamic')
     skus = db.relationship('SKU', backref='form_factor', lazy='dynamic')
+
 
     @staticmethod
     def generate_form_factors():
