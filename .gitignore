@@ -1,10 +1,7 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
-app/main/__pychache__/
-app/utils/__pychache__/
-research/akadaner/.ipynb_checkpoints/
-research/nkrokhmal/.ipynb_checkpoints/
-research/.ipynb_checkpoints/
+**/__pycache__/
+**/.ipynb_checkpoints/
+
 *.py[cod]
 
 # C extensions

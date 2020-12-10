@@ -11,18 +11,16 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
 
     # [packing.reconfiguration_times]
     def get_configuration_times(skus):
+
         res = []
         for i in range(len(skus) - 1):
             old_sku, sku = skus[i: i + 2]
             if old_sku is None:
-                # todo: make first configuration properly
+                # todo: display first configuration?
                 res.append(0)
-            elif old_sku.weight_netto != sku.weight_netto:
+            elif boiling_type == 'salt' and old_sku.weight_form_factor != sku.weight_form_factor:
                 # todo: take from parameters
-
-                # todo: switch
-                res.append(5)
-                # res.append(25)
+                res.append(25)
             elif old_sku == sku:
                 res.append(0)
             else:
@@ -57,7 +55,8 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
             total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
 
             # fit melting time for packing [melting.slow_packing]
-            melting_time = total_packing_time
+            # melting_time = total_packing_time
+            melting_time = 50
 
             full_melting_time = boiling_conf.meltings.serving_time + melting_time + boiling_conf.meltings.salting_time
 
