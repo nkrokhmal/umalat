@@ -1,9 +1,9 @@
 from flask_restplus import ValidationError
 from flask_wtf.file import FileRequired, FileField
-from wtforms import StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField, DateTimeField
+from wtforms import fields, StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField, DateTimeField, SelectMultipleField
 from wtforms.validators import Required, Optional
 from flask_wtf import FlaskForm
-from ..models import Packer, Boiling, Line, PackType, FormFactor
+from ..models import Packer, Boiling, Line, PackType, FormFactor, BoilingFormFactor
 from .. import db
 from datetime import datetime
 
@@ -55,10 +55,13 @@ class SKUForm(FlaskForm):
     is_lactose = SelectField('Выберите наличие лактозы', coerce=int)
     form_factor = SelectField('Выберите форм фактор', coerce=int, default=-1)
 
+    bff = SelectField('Выберите форм фактор плавления', coerce=int, default=-1)
+
     pack_types = None
     packers = None
     boilings = None
     form_factors = None
+    bffs = None
     submit = SubmitField('Submit')
 
     def __init__(self, *args, **kwargs):
@@ -66,6 +69,7 @@ class SKUForm(FlaskForm):
         self.boilings = db.session.query(Boiling).all()
         self.packers = db.session.query(Packer).all()
         self.pack_types = db.session.query(PackType).all()
+        self.bffs = db.session.query(BoilingFormFactor).all()
         self.form_factors = db.session.query(FormFactor).all()
 
         self.ferment.choices = list(enumerate(set([x.ferment for x in self.boilings])))
@@ -80,6 +84,9 @@ class SKUForm(FlaskForm):
 
         self.form_factor.choices = list(enumerate(set([x.name for x in self.form_factors])))
         self.form_factor.choices.append((-1, ''))
+
+        self.bff.choices = list(enumerate(set([x.weight for x in self.bffs])))
+        self.bff.choices.append((-1, ''))
 
 
 class PouringProcessForm(FlaskForm):
