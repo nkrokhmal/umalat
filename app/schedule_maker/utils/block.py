@@ -26,12 +26,11 @@ def gen_pair_validator(validate=validate_disjoint):
     return f
 
 
-
-def t_acc(parent, child, key):
+def cumsum_int_acc(parent, child, key):
     pv, v = cast_prop_values(parent, child, key)
     pv = pv if pv else 0
     v = v if v else 0
-    return pv + v
+    return int(pv + v)
 
 
 def size_acc(parent, child, key):
@@ -56,8 +55,8 @@ def time_size_acc(parent, child, key):
 def class_acc(parent, child, key):
     return child.relative_props.get('class')
 
-
-DYNAMIC_ACCUMULATORS = {'t': t_acc}
+# todo: put y into static accumulators?
+DYNAMIC_ACCUMULATORS = {'t': cumsum_int_acc, 'y': cumsum_int_acc}
 STATIC_ACCUMULATORS = {'size': size_acc, 'time_size': time_size_acc, 'class': class_acc}
 DYNAMIC_KEYS = ['t', 'pouring_line', 'melting_line']
 REQUIRED_STATIC_KEYS = ['size', 'time_size', 'class']

@@ -47,30 +47,30 @@ def draw_block(sheet, x, y, w, h, text, colour, border=None, text_rotation=None)
 
         set_border(sheet, x, y, w, h, border)
 
+
 def draw(sheet, block):
     for b in block.iter():
         if not b.children:
-            text = b.abs_props.get('text', '')
-            color = cast_color(b.abs_props.get('color', 'white'))
+            text = b.props.get('text', '')
+            color = cast_color(b.props.get('color', 'white'))
 
-            if b.abs_props.get('visible') == False:
+            if b.props.get('visible') == False:
                 continue
             try:
-                text = text.format(**b.abs_props)
+                text = text.format(**b.props.static_props)
                 text = text.replace('<', '{')
                 text = text.replace('>', '}')
                 text = eval(f'f{text!r}')
 
-                beg = b.abs_props['t']
-                beg -= cast_t(b.abs_props['beg_time'])  # shift of timeline
-                beg += b.abs_props['index_width']  # first index columns
+                beg = b.props['t']
+                beg -= cast_t(b.props['beg_time'])  # shift of timeline
+                beg += b.props['index_width']  # first index columns
                 beg += 1  # indexing starts with 1 in excel
 
-                # print('Drawing', b.abs_props['class'], b.abs_props['y'], cast_interval(beg, beg + b.size), cast_interval(b.abs_props['t'], b.abs_props['t'] + b.size))
-                draw_block(sheet, beg, b.abs_props['y'], b.size, b.abs_props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'}, text_rotation=b.abs_props.get('text_rotation'))
+                draw_block(sheet, beg, b.props['y'], b.size, b.props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'}, text_rotation=b.props.get('text_rotation'))
             except:
                 print(b)
-                print(b.abs_props)
+                print(b.props.relative_props)
                 raise
 
 
@@ -99,15 +99,20 @@ def init_template_sheet(template_fn=None):
 def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
     # update styles
     for b in root.iter():
-        block_style = style.get(b.rel_props['class'])
+        block_style = style.get(b.props['class'])
 
         if block_style:
             block_style = {k: v(b) if callable(v) else v for k, v in block_style.items()}
-            b.rel_props.update(block_style)
+            b.props.update(block_style)
+
+
+    root.props.update({'index_width': 4})
+
+    # update all static style propertis
+    root.props.accumulate_static(recursive=True)
 
     work_book, sheet = init_sheet_func()
 
-    root.rel_props['index_width'] = 4
     draw(sheet, root)
     if fn:
         work_book.save(fn)
@@ -118,7 +123,7 @@ def draw_print(block):
     res = ''
     for b in block.iter():
         if calc_interval_length(b.interval) != 0:
-            res += ' ' * int(b.abs_props.get('t', 0)) + '=' * int(calc_interval_length(b.interval)) + f' {b.rel_props["class"]} {b.interval}' + f' ({b.abs_props.get("t", 0)}, {b.abs_props.get("t", 0) + b.abs_props["size"]}]'
+            res += ' ' * b.beg + '=' * int(calc_interval_length(b.interval)) + f' {b.props["class"]} {b.interval}'
             res += '\n'
     return res
 

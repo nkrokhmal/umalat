@@ -145,7 +145,7 @@ def make_schedule(request, date):
             break
         else:
             # make different block
-            boiling_type = 'water' if latest_boiling.abs_props['boiling_type'] == 'salt' else 'salt'
+            boiling_type = 'water' if latest_boiling.props['boiling_type'] == 'salt' else 'salt'
 
         row = pick(df, boiling_type)
 
