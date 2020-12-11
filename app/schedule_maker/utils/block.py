@@ -3,9 +3,6 @@ from utils_ak.interactive_imports import *
 PERIODS_PER_HOUR = 12
 PERIODS_PER_DAY = 24 * PERIODS_PER_HOUR
 
-import copy
-import math
-
 from app.schedule_maker.utils.interval import calc_interval_length, cast_interval
 
 
@@ -49,17 +46,12 @@ def time_size_acc(parent, child, key):
     if size:
         return size * 5
     else:
+        assert time_size % 5 == 0
         return time_size
 
 
-def class_acc(parent, child, key):
-    return child.relative_props.get('class')
-
-# todo: put y into static accumulators?
-DYNAMIC_ACCUMULATORS = {'t': cumsum_int_acc, 'y': cumsum_int_acc}
-STATIC_ACCUMULATORS = {'size': size_acc, 'time_size': time_size_acc, 'class': class_acc}
-DYNAMIC_KEYS = ['t', 'y', 'pouring_line', 'melting_line', 'boiling_type']
-REQUIRED_STATIC_KEYS = ['size', 'time_size', 'class']
+ACCUMULATORS = {'t': cumsum_int_acc, 'y': cumsum_int_acc, 'size': size_acc, 'time_size': time_size_acc}
+REQUIRED_KEYS = ['size', 'time_size']
 
 
 class Block:
@@ -72,14 +64,7 @@ class Block:
         self.parent = None
         self.children = []
 
-        self.props = Props(props=props,
-                           dynamic_accumulators=DYNAMIC_ACCUMULATORS,
-                           dynamic_keys=DYNAMIC_KEYS,
-                           static_accumulators=STATIC_ACCUMULATORS,
-                           required_static_keys=REQUIRED_STATIC_KEYS)
-
-        # accumulate basic static props on initialization
-        self.props.accumulate_static()
+        self.props = DynamicProps(props=props, accumulators=ACCUMULATORS, required_keys=REQUIRED_KEYS)
 
     def __getitem__(self, item):
         if isinstance(item, str):
@@ -288,6 +273,7 @@ if __name__ == '__main__':
 
     try:
         b = Block('a', time_size=11)
+        print(b.props['time_size'])
         raise Exception('Should not happen')
     except AssertionError:
         print('Time size should be divided by 5')
