@@ -144,7 +144,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                         make('configuration', time_size=packing_time, visible=False)
 
     res = maker.root.children[0]
-    res.props.update({'size': max(c.end for c in res.children)}, accumulate=['size', 'time_size'])
+    res.props.update({'size': max(c.end for c in res.children)})
     return res
 
 
@@ -192,7 +192,7 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
         make(make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=melting_line, last_packing_sku=last_packing_sku))
 
     res = maker.root.children[0]
-    res.props.update({'size': max(c.end for c in res.children)}, accumulate=['size', 'time_size'])
+    res.props.update({'size': max(c.end for c in res.children)})
 
     return res
 
@@ -208,7 +208,7 @@ def make_termizator_cleaning_block(cleaning_type):
         make(f'{cleaning_type}_cleaning', t=0, size=cleaning_time)
 
     res = maker.root.children[0]
-    res.props.update({'size': max(c.end for c in res.children)}, accumulate=['size', 'time_size'])
+    res.props.update({'size': max(c.end for c in res.children)})
     return res
 
 
@@ -255,6 +255,5 @@ def make_template():
                 make(y=21, t=4 + i, size=1, h=1, text=cur_time[-2:], color=(204, 255, 255), text_rotation=90)
 
     res = maker.root.children[0]
-    res.props.update({'size': max(c.end for c in res.children)}, accumulate=['size', 'time_size'])
-    res.props.accumulate_static(recursive=True)
+    res.props.update({'size': max(c.end for c in res.children)})
     return res

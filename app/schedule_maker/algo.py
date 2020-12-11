@@ -200,13 +200,13 @@ def make_schedule(request, date):
     cleaning.props.update({'t': boilings[-1]['pouring'][0]['termizator'].end + 1}) # add five minutes extra
     add_push(root, cleaning)
 
-    root.props.update({'size': max(c.end for c in root.children)}, accumulate=['size', 'time_size'])
+    root.props.update({'size': max(c.end for c in root.children)})
     return root
 
 
 # todo: better naming
 def draw_workbook(root, mode='prod', template_fn=None):
     style = load_style(mode=mode)
-    root.props.update({'size': max(c.end for c in root.children)}, accumulate=['size', 'time_size'])
+    root.props.update({'size': max(c.end for c in root.children)})
     init_sheet_func = init_sheet if mode == 'dev' else init_template_sheet(template_fn=template_fn)
     return draw_schedule(root, style, init_sheet_func=init_sheet_func)

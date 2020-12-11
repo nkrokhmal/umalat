@@ -57,7 +57,7 @@ def draw(sheet, block):
             if b.props.get('visible') == False:
                 continue
             try:
-                text = text.format(**b.props.static_props)
+                text = text.format(**b.props.get_all_props())
                 text = text.replace('<', '{')
                 text = text.replace('>', '}')
                 text = eval(f'f{text!r}')
@@ -97,9 +97,6 @@ def init_template_sheet(template_fn=None):
 
 
 def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
-    # update all static style properties
-    root.props.accumulate_static(recursive=True)
-
     # update styles
     for b in root.iter():
         block_style = style.get(b.props['class'])
@@ -109,9 +106,6 @@ def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
             b.props.update(block_style)
 
     root.props.update({'index_width': 4})
-
-    # update all static style propertis
-    root.props.accumulate_static(recursive=True)
 
     work_book, sheet = init_sheet_func()
 
