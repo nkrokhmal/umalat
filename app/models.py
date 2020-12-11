@@ -62,6 +62,9 @@ class SKU(db.Model):
             print('Exception occurred {}'.format(e))
             db.session.rollback()
 
+    # def __str__(self):
+    #     return super().__str__() + " " + self.name
+
 class BoilingFormFactor(db.Model):
     __tablename__ = 'boiling_form_factors'
     id = db.Column(db.Integer, primary_key=True)

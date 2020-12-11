@@ -25,10 +25,29 @@ def cast_sku(obj):
     if isinstance(obj, SKU):
         return obj
     elif isinstance(obj, (str, int)):
-        obj = str(obj)
-        return db.session.query(SKU).filter(SKU.id == obj).first()
+        # try to return by id if int-like
+        try:
+            obj = str(int(obj))
+            return db.session.query(SKU).filter(SKU.id == obj).first()
+        except:
+            pass
+
+        # return by name
+        return db.session.query(SKU).filter(SKU.name == str(obj)).first()
     else:
         raise Exception('Unknown sku type')
+
+
+def cast_packer(obj):
+    if isinstance(obj, Packer):
+        return obj
+    elif isinstance(obj, int):
+        return db.session.query(Packer).filter(Packer.id == obj).first()
+    if isinstance(obj, SKU):
+        return cast_packer(obj.packer_id)
+    else:
+        raise Exception('Unknown packer type')
+
 
 
 def cast_boiling(obj):

@@ -4,7 +4,7 @@ PERIODS_PER_HOUR = 12
 PERIODS_PER_DAY = 24 * PERIODS_PER_HOUR
 
 from app.schedule_maker.utils.interval import calc_interval_length, cast_interval
-
+from app.schedule_maker.utils.time import *
 
 def validate_disjoint(b1, b2):
     # assert a disposition information
@@ -13,6 +13,8 @@ def validate_disjoint(b1, b2):
     except:
         disposition = 1
 
+    if calc_interval_length(b1.interval & b2.interval) != 0:
+        logging.info(['Disposition', disposition, b1.props['class'], b1.time_interval, b2.props['class'], b2.time_interval, b1.props.get_all_props(), b2.props.get_all_props()])
     assert calc_interval_length(b1.interval & b2.interval) == 0, cast_js({'disposition': disposition})
 
 
@@ -100,6 +102,10 @@ class Block:
     @property
     def interval(self):
         return cast_interval(self.beg, self.end)
+
+    @property
+    def time_interval(self):
+        return '[{}, {})'.format(cast_time(self.beg), cast_time(self.end))
 
     def __str__(self):
         res = f'{self.props["class"]} ({self.beg}, {self.end}]\n'
@@ -203,6 +209,8 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
             cur_t += min(dispositions)
         else:
             cur_t += 1
+
+        logging.info(['All dispositions', dispositions])
     raise Exception('Failed to push element')
 
 

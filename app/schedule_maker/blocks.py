@@ -18,7 +18,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
             if old_sku is None:
                 # todo: display first configuration?
                 res.append(0)
-            elif boiling_type == 'salt' and old_sku.weight_form_factor != sku.weight_form_factor:
+            elif boiling_type == 'salt' and old_sku.weight_form_factor != sku.weight_form_factor and cast_packer(old_sku) == cast_packer(sku):
                 # todo: take from parameters
                 res.append(25)
             elif old_sku == sku:
@@ -32,7 +32,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
     with make('melting_and_packing'):
         # packing and melting time
         packing_times = []
-        configuration_times = get_configuration_times([last_packing_sku] + list(boiling_request.keys())) # add last_packing for first configuration
+        configuration_times = get_configuration_times([last_packing_sku] + [sku for sku, sku_kg in boiling_request]) # add last_packing for first configuration
 
         if boiling_type == 'water':
             # [cheesemakers.boiling_output]
@@ -43,14 +43,14 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
 
             melting_time = custom_round(cheese_from_boiling / boiling_conf.meltings.speed * 60, 5, rounding='ceil')
 
-            for sku, sku_kg in boiling_request.items():
+            for sku, sku_kg in boiling_request:
                 packing_speed = min(sku.packing_speed, boiling_conf.meltings.speed)
                 packing_times.append(custom_round(sku_kg / packing_speed * 60, 5, rounding='ceil'))
             total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
             full_melting_time = boiling_conf.meltings.serving_time + melting_time
 
         elif boiling_type == 'salt':
-            for sku, sku_kg in boiling_request.items():
+            for sku, sku_kg in boiling_request:
                 packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
             total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
 
@@ -77,8 +77,8 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                 values.append(s)
             return '/'.join(values)
 
-        form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_request.keys()])
-        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku in boiling_request.keys()])
+        form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_request])
+        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_request])
 
         with make('melting', y=10, time_size=full_melting_time, melting_line=melting_line):
             # todo: make properly
@@ -160,7 +160,7 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
     boiling_volume = 8000  # kg # todo: add different volumes
 
     # [cheesemakers.boiling_params]
-    boiling_label = '{} {} {} {}кг'.format(boiling_conf.percent, boiling_conf.ferment, 'с лактозой' if boiling_conf.is_lactose else 'безлактозная', boiling_volume)
+    boiling_label = '{} {} {} {}кг'.format(boiling_conf.percent, boiling_conf.ferment, '' if boiling_conf.is_lactose else 'безлактозная', boiling_volume)
 
     with make('boiling', block_num=block_num, boiling_type=boiling_type, boiling_label=boiling_label, boiling_id=boiling_conf.id):
         # [cheesemakers.boiling_times]
@@ -184,10 +184,10 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
 
         # [drenator.chedderization_time]
         if boiling_type == 'water':
-            chedderization_time = '03:50'
+            chedderization_time = '04:00'
         else:
             chedderization_time = '03:00'
-        make('drenator', size=cast_t(chedderization_time) - 2, visible=False)  # todo: take from parameters # todo: make properly timings[4]
+        make('drenator', time_size=cast_t(chedderization_time) * 5 - timings[3] - timings[4], visible=False)
 
         make(make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=melting_line, last_packing_sku=last_packing_sku))
 

@@ -2,7 +2,7 @@ import portion
 
 
 def cast_interval(a, b):
-    return portion.openclosed(a, b)
+    return portion.closedopen(a, b)
 
 
 def calc_interval_length(i):
