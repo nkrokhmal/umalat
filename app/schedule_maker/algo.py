@@ -7,8 +7,6 @@ from app.schedule_maker.blocks import *
 from app.schedule_maker.style import *
 from itertools import product
 
-from collections import OrderedDict
-
 
 def pick(df, boiling_type):
     tmp = df
