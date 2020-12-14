@@ -27,15 +27,28 @@ def set_border(sheet, x, y, w, h, border):
         c.border = Border(left=c.border.left, top=c.border.top, bottom=border, right=c.border.right)
 
 
-def draw_block(sheet, x, y, w, h, text, colour, border=None, text_rotation=None):
-    if not colour:
-        colour = cast_color('white')  # default white colour
+def draw_cell(sheet, x, y, text, color=None, font_size=None, text_rotation=None, alignment=None):
+    cell = sheet.cell(row=y, column=x)
+    cell.font = Font(size=font_size)
+    if alignment == 'center':
+        cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, text_rotation=text_rotation)
+    cell.value = text
+
+    if color:
+        cell.fill = PatternFill("solid", fgColor=color[1:])
+    return cell
+
+
+def draw_block(sheet, x, y, w, h, text, color=None, border=None, text_rotation=None, font_size=None, alignment=None):
+    color = color or cast_color('white')
     sheet.merge_cells(start_row=y, start_column=x, end_row=y + h - 1, end_column=x + w - 1)
     merged_cell = sheet.cell(row=y, column=x)
-    merged_cell.font = Font(size=7)
-    merged_cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, text_rotation=text_rotation)
+    merged_cell.font = Font(size=font_size)
+    if alignment == 'center':
+        merged_cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, text_rotation=text_rotation)
     merged_cell.value = text
-    merged_cell.fill = PatternFill("solid", fgColor=colour[1:])
+    if color:
+        merged_cell.fill = PatternFill("solid", fgColor=color[1:])
 
     if border is not None:
         if isinstance(border, dict):
@@ -73,10 +86,13 @@ def draw(sheet, block):
                 print(b.props.relative_props, b.interval)
                 raise
 
-
-def init_sheet():
+def init_empty_sheet():
     work_book = opx.Workbook()
     sheet = work_book.worksheets[0]
+    return work_book, sheet
+
+def init_sheet():
+    work_book, sheet = init_empty_sheet()
     for i in range(4):
         sheet.column_dimensions[get_column_letter(i + 1)].width = 12
     for i in range(4, 288 * 2):
@@ -94,6 +110,11 @@ def init_template_sheet(template_fn=None):
             draw(sheet, make_template())
             return wb, sheet
     return _init_sheet
+
+
+def draw_row(sheet, y, values, color=None, **kwargs):
+    for i, v in enumerate(values, 1):
+        draw_cell(sheet, i, y, text=v, color=color, **kwargs)
 
 
 def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
