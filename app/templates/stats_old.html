@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}Распарсить файл{% endblock %}
+{% block page_content %}
+<div class="page-header">
+    <h1> Парсинг старого файла </h1>
+</div>
+<div class="col-md-6">
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

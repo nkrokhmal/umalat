@@ -169,6 +169,28 @@ class Termizator(db.Model):
         }
 
 
+class CheeseType(db.Model):
+    __tablename__ = 'cheese_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    output = db.Column(db.Integer)
+    boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'), nullable=True)
+
+    @staticmethod
+    def generate_cheese_types():
+        type1 = CheeseType(
+            name='вода',
+            output=1000
+        )
+        type2 = CheeseType(
+            name='соль',
+            output=850
+        )
+        db.session.add(type1)
+        db.session.add(type2)
+        db.session.commit()
+
+
 '''
     Параметры варки. Процент, приоритет, наличие лактозы
 '''
@@ -187,6 +209,22 @@ class Boiling(db.Model):
     melting_id = db.Column(db.Integer, db.ForeignKey('meltings.id'), nullable=True)
     meltings = db.relationship('Melting', backref='boiling', foreign_keys=melting_id)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
+    cheese_type = db.relationship('CheeseType', backref='boiling', lazy='dynamic')
+
+    @staticmethod
+    def generate_cheese_types_links():
+        boilings = db.session.query(Boiling).all()
+        cheese_types = db.session.query(CheeseType).all()
+        water = [x for x in cheese_types if x.name == 'вода'][0]
+        salt = [x for x in cheese_types if x.name == 'соль'][0]
+        for boiling in boilings:
+            if boiling.percent > 2.7:
+                boiling.cheese_type = water
+            else:
+                boiling.cheese_type = salt
+        db.session.commit()
+
+
 
     @staticmethod
     def generate_boilings():

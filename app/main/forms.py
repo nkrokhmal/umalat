@@ -118,3 +118,10 @@ class ScheduleForm(FlaskForm):
     submit = SubmitField(label="Submit")
 
 
+class StatisticForm(FlaskForm):
+    validators = [
+        FileRequired(message='Отсутствует файл!')
+    ]
+    input_file = FileField('', validators=validators)
+    submit = SubmitField(label="Отправить")
+

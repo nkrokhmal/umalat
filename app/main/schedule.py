@@ -17,12 +17,12 @@ import datetime
 @main.route('/schedule', methods=['GET', 'POST'])
 def schedule():
     form = ScheduleForm()
-    print('Schedule function started')
     if request.method == 'POST' and form.validate_on_submit():
 
         date = form.date.data
         skus = db.session.query(SKU).all()
         file_bytes = request.files['input_file'].read()
+        # print(request.files['input_file'].filename)
         wb = openpyxl.load_workbook(io.BytesIO(file_bytes))
 
         filename = '{}_{}.xlsx'.format('schedule', date.strftime('%Y-%m-%d'))
