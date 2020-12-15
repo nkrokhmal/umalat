@@ -93,42 +93,48 @@ def generate_empty_sku():
 
 
 def draw_constructor(df):
-    wb, sheet = init_empty_sheet()
+    wb = init_sheets('Соль', 'Вода')
 
-    for i, v in enumerate([15, 15, 15, 15, 15, 50, 15], 1):
-        sheet.column_dimensions[get_column_letter(i)].width = v
+    skus = db.session.query(SKU).all()
+    data_sku = {}
+    # data_sku['Вода'] = [x.name for x in skus if x.boilings[0].percent  ]
+    for sheet_name in ['Вода', 'План']:
 
-    cur_i = 1
-    draw_row(sheet, cur_i,
-             ['id варки', "Номер варки", 'Тип варки', 'Объем варки', 'Форм фактор', 'SKU', 'КГ', 'Разделитель'],
-             font_size=8)
-    cur_i += 1
+        sheet = wb[sheet_name]
+        for i, v in enumerate([15, 15, 15, 15, 15, 50, 15], 1):
+            sheet.column_dimensions[get_column_letter(i)].width = v
 
-    values = []
-    for id, grp in df.groupby('id'):
-        for i, row in grp.iterrows():
-            v = []
-            v += list(row.values)
-            v += ['']
-            values.append(v)
-
-        # add separator
-        values.append(['-'] * (len(df.columns) + 1))
-
-    for v in values:
-        draw_row(sheet, cur_i, v, font_size=8)
+        cur_i = 1
+        draw_row(sheet, cur_i,
+                 ['id варки', "Номер варки", 'Тип варки', 'Объем варки', 'Форм фактор', 'SKU', 'КГ', 'Разделитель'],
+                 font_size=8)
         cur_i += 1
 
-    cur_i += 1
-    skus = generate_full_constructor_df(generate_empty_sku())
-    values = []
-    for boiling_name, grp1 in skus.groupby('boiling_name'):
-        for form_factor, grp2 in grp1.groupby('form_factor'):
-            for i, row in grp2.iterrows():
-                values.append(list(row.values))
+        values = []
+        for id, grp in df.groupby('id'):
+            for i, row in grp.iterrows():
+                v = []
+                v += list(row.values)
+                v += ['']
+                values.append(v)
 
-    for v in values:
-        draw_row(sheet, cur_i, v, font_size=8)
+            # add separator
+            values.append(['-'] * (len(df.columns) + 1))
+
+        for v in values:
+            draw_row(sheet, cur_i, v, font_size=8)
+            cur_i += 1
+
         cur_i += 1
+        skus = generate_full_constructor_df(generate_empty_sku())
+        values = []
+        for boiling_name, grp1 in skus.groupby('boiling_name'):
+            for form_factor, grp2 in grp1.groupby('form_factor'):
+                for i, row in grp2.iterrows():
+                    values.append(list(row.values))
+
+        for v in values:
+            draw_row(sheet, cur_i, v, font_size=8)
+            cur_i += 1
 
     wb.save('app/data/tmp/constructor.xlsx')

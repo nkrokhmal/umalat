@@ -86,10 +86,19 @@ def draw(sheet, block):
                 print(b.props.relative_props, b.interval)
                 raise
 
+
 def init_empty_sheet():
     work_book = opx.Workbook()
     sheet = work_book.worksheets[0]
     return work_book, sheet
+
+
+def init_sheets(*args):
+    workbook = opx.Workbook()
+    for arg in args:
+        workbook.create_sheet(arg)
+    return workbook
+
 
 def init_sheet():
     work_book, sheet = init_empty_sheet()
