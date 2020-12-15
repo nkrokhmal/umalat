@@ -40,11 +40,14 @@ def generate_stats_new():
         df = pd.DataFrame(values[1:], columns=['sku', 'remainings - request', 'normative remainings', 'plan'])
         df = df.fillna(0)
         df = df[df['plan'] != 0]
-        path = '{}/{}.csv'.format('app/data/stats', os.path.splitext(file.filename)[0])
+        df = df[df['plan'].apply(lambda x: type(x) == int or x.isnumeric())]
+        path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
+        link = '{}/{}.csv'.format(current_app.config['STATS_LINK_FOLDER'], os.path.splitext(file.filename)[0])
         df[['sku', 'plan']].to_csv(path, index=False)
         os.remove(file_path)
-        return render_template('stats_new.html', form=form)
-    return render_template('stats_new.html', form=form)
+        return render_template('stats_new.html', form=form, link=link)
+    link = None
+    return render_template('stats_new.html', form=form, link=link)
 
 
 # todo: add plan
@@ -66,7 +69,10 @@ def generate_stats_old():
         df = pd.DataFrame(values[1:], columns=['sku', 'remainings - request', 'normative remainings', 'plan'])
         df = df.fillna(0)
         df = df[df['plan'] != 0]
-        path = '{}/{}.csv'.format('app/data/stats', os.path.splitext(file_name)[0])
+        df = df[df['plan'].apply(lambda x: type(x) == int or x.isnumeric())]
+        path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file_name)[0])
+        link = '{}/{}.csv'.format(current_app.config['STATS_LINK_FOLDER'], os.path.splitext(file_name)[0])
         df[['sku', 'plan']].to_csv(path, index=False)
-        return render_template('stats_old.html', form=form)
-    return render_template('stats_old.html', form=form)
+        return render_template('stats_old.html', form=form, link=link)
+    link = None
+    return render_template('stats_old.html', form=form, link=link)

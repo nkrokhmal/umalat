@@ -95,8 +95,8 @@ def init_empty_sheet():
 
 def init_sheets(*args):
     workbook = opx.Workbook()
-    for arg in args:
-        workbook.create_sheet(arg)
+    for i, arg in enumerate(args):
+        workbook.create_sheet(arg, i)
     return workbook
 
 

@@ -34,7 +34,7 @@ def generate_constructor():
         df.columns = range(3)
         boiling_plan_df = generate_constructor_df(df)
         full_plan = generate_full_constructor_df(boiling_plan_df)
-        draw_constructor(full_plan)
-
-        return render_template('generate_constructor.html', form=form)
-    return render_template('generate_constructor.html', form=form)
+        link = draw_constructor(full_plan, file_name)
+        return render_template('generate_constructor.html', form=form, link=link)
+    link = None
+    return render_template('generate_constructor.html', form=form, link=link)

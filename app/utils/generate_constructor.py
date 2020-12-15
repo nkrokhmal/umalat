@@ -1,7 +1,18 @@
 from app.interactive_imports import *
 import pandas as pd
 import numpy as np
+from flask import current_app
 
+# todo: вынести цвета в конфиг
+COLOURS = {
+    'Для пиццы': '#E5B7B6',
+    'Моцарелла': '#DAE5F1',
+    'Фиор Ди Латте': '#CBC0D9',
+    'Чильеджина': '#E5DFEC',
+    'Качокавалло': '#F1DADA',
+    'Сулугуни': '#F1DADA',
+    'Default': '#FFFFFF'
+}
 
 def generate_constructor_df(df):
     values = []
@@ -92,14 +103,15 @@ def generate_empty_sku():
     return skus
 
 
-def draw_constructor(df):
+def draw_constructor(df, file_name):
     wb = init_sheets('Соль', 'Вода')
 
     skus = db.session.query(SKU).all()
-    data_sku = {}
-    # data_sku['Вода'] = [x.name for x in skus if x.boilings[0].percent  ]
-    for sheet_name in ['Вода', 'План']:
+    data_sku = {'Вода': [x.name for x in skus if x.boilings[0].cheese_types.name == 'Вода'],
+                'Соль': [x.name for x in skus if x.boilings[0].cheese_types.name == 'Соль']}
 
+    for sheet_name in ['Соль', 'Вода']:
+        sku_names = data_sku[sheet_name]
         sheet = wb[sheet_name]
         for i, v in enumerate([15, 15, 15, 15, 15, 50, 15], 1):
             sheet.column_dimensions[get_column_letter(i)].width = v
@@ -111,7 +123,8 @@ def draw_constructor(df):
         cur_i += 1
 
         values = []
-        for id, grp in df.groupby('id'):
+        df_filter = df[df['name'].isin(sku_names)].copy()
+        for id, grp in df_filter.groupby('id'):
             for i, row in grp.iterrows():
                 v = []
                 v += list(row.values)
@@ -119,22 +132,54 @@ def draw_constructor(df):
                 values.append(v)
 
             # add separator
-            values.append(['-'] * (len(df.columns) + 1))
+            values.append(['-'] * (len(df_filter.columns) + 1))
 
+        # todo: column names to config
         for v in values:
-            draw_row(sheet, cur_i, v, font_size=8)
+            sheet.column_dimensions['J'].hidden = True
+            sheet.column_dimensions['K'].hidden = True
+            sheet.column_dimensions['L'].hidden = True
+            sheet.column_dimensions['M'].hidden = True
+
+            formula_remains = '=IF({0}{1} - {0}{2} = 0, "", {0}{1} - {0}{2})'.format('M', cur_i, cur_i - 1)
+            formula_calc = '=IF({0}{3} = "-", -{1}{4},{2}{3})'.format('I', 'D', 'G', cur_i, cur_i - 1)
+            formula_remains_cumsum = '=IF({0}{2} = "-", SUM({1}$2:J{2}), 0)'.format('I', 'J', cur_i, cur_i - 1)
+            formula_delimiter_int = '=IF({0}{1}="-",1,0)'.format('I', cur_i)
+            formula_zeros = '=IF({0}{2} = 0, {1}{3}, {0}{2})'.format('K', 'M', cur_i, cur_i - 1)
+
+            v.insert(-1, formula_remains)
+            v.append(formula_calc)
+            v.append(formula_remains_cumsum)
+            v.append(formula_delimiter_int)
+            v.append(formula_zeros)
+
+            colour = get_colour_by_name(v[5], skus)
+            draw_row(sheet, cur_i, v, font_size=8, color=colour)
             cur_i += 1
 
         cur_i += 1
-        skus = generate_full_constructor_df(generate_empty_sku())
+        skus_df = generate_full_constructor_df(generate_empty_sku())
+        skus_df = skus_df[skus_df['name'].isin(sku_names)]
         values = []
-        for boiling_name, grp1 in skus.groupby('boiling_name'):
+        for boiling_name, grp1 in skus_df.groupby('boiling_name'):
             for form_factor, grp2 in grp1.groupby('form_factor'):
                 for i, row in grp2.iterrows():
                     values.append(list(row.values))
 
         for v in values:
-            draw_row(sheet, cur_i, v, font_size=8)
+            colour = get_colour_by_name(v[5], skus)
+            draw_row(sheet, cur_i, v, font_size=8, color=colour)
             cur_i += 1
 
-    wb.save('app/data/tmp/constructor.xlsx')
+    path = '{}/{}.xlsx'.format(current_app.config['CONSTRUCTOR_FOLDER'], os.path.splitext(file_name)[0])
+    link = '{}/{}.xlsx'.format(current_app.config['CONSTRUCTOR_LINK_FOLDER'], os.path.splitext(file_name)[0])
+    wb.save(path)
+    return link
+
+
+def get_colour_by_name(sku_name, skus):
+    sku = [x for x in skus if x.name == sku_name]
+    if len(sku) > 0:
+        return COLOURS[sku[0].form_factor.name]
+    else:
+        return COLOURS['Default']

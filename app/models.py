@@ -62,8 +62,6 @@ class SKU(db.Model):
             print('Exception occurred {}'.format(e))
             db.session.rollback()
 
-    # def __str__(self):
-    #     return super().__str__() + " " + self.name
 
 class BoilingFormFactor(db.Model):
     __tablename__ = 'boiling_form_factors'
@@ -174,7 +172,7 @@ class CheeseType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     output = db.Column(db.Integer)
-    boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'), nullable=True)
+    boilings = db.relationship('Boiling', backref='cheese_types', lazy='dynamic')
 
     @staticmethod
     def generate_cheese_types():
@@ -209,7 +207,7 @@ class Boiling(db.Model):
     melting_id = db.Column(db.Integer, db.ForeignKey('meltings.id'), nullable=True)
     meltings = db.relationship('Melting', backref='boiling', foreign_keys=melting_id)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
-    cheese_type = db.relationship('CheeseType', backref='boiling', lazy='dynamic')
+    cheese_type_id = db.Column(db.Integer, db.ForeignKey('cheese_types.id'), nullable=True)
 
     @staticmethod
     def generate_cheese_types_links():
@@ -234,7 +232,6 @@ class Boiling(db.Model):
                     b = Boiling(
                         ferment=ferment,
                         percent=percent,
-                        priority=0,
                         is_lactose=is_lactose)
                     db.session.add(b)
         db.session.commit()
@@ -408,6 +405,11 @@ def init_all():
     Boiling.generate_boilings()
     Termizator.generate_termizator()
     FormFactor.generate_form_factors()
+    BoilingFormFactor.generate_boiling_form_factors()
+    SKU.generate_links_to_bff()
+    SKU.generate_links_to_bff_rubber()
+    CheeseType.generate_cheese_types()
+    Boiling.generate_cheese_types_links()
 
 
 def init_sku():

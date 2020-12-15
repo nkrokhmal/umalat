@@ -10,4 +10,10 @@
 <div class="col-md-6">
     {{ wtf.quick_form(form) }}
 </div>
+
+{% if link %}
+    <div class="col-md-6" style="margin-bottom: 20px;">
+        <a href="{{link}}"><button class="btn"><i class="fa fa-download"></i> Download </button></a>
+    </div>
+{% endif %}
 {% endblock %}
