@@ -63,6 +63,7 @@ def generate_constructor_df(df):
             cur_id += 1
 
     boiling_plan_df = pd.DataFrame(values, columns=['id', 'boiling', 'sku', 'kg'])
+    boiling_plan_df = boiling_plan_df[boiling_plan_df['kg'] != 0]
     return boiling_plan_df
 
 
@@ -72,6 +73,7 @@ def generate_full_constructor_df(boiling_plan_df):
     df['name'] = df['sku'].apply(lambda sku: sku.name)
     # todo: make properly
     df['boiling_name'] = df['boiling'].apply(lambda b: '{} {} {}'.format(b.percent, b.ferment, '' if b.is_lactose else 'без лактозы'))
+    # todo: make properly
     df['boiling_volume'] = np.where(df['boiling_name'].str.contains('2.7'), 850, 1000)
     df['form_factor'] = df['sku'].apply(lambda sku: sku.form_factor.name)
     df['boiling_id'] = df['boiling'].apply(lambda b: b.id)
