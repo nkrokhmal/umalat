@@ -16,18 +16,17 @@ COLOURS = {
 
 def generate_constructor_df(df):
     values = []
-    for boiling_id, boiling_grp in df.groupby(0):
-        boiling_dic = boiling_grp[[1, 2]].set_index(1).to_dict(orient='index')
-        boiling_dic = {k: v[2] for k, v in boiling_dic.items()}
+    for boiling_id, boiling_grp in df.groupby('boiling_id'):
+        boiling_dic = boiling_grp[['sku_id', 'plan']].set_index('sku_id').to_dict(orient='index')
+        boiling_dic = {k: v['plan'] for k, v in boiling_dic.items()}
         boiling_dic = {cast_sku(k): v for k, v in boiling_dic.items()}
         total_kg = sum(boiling_dic.values())
 
         # round to get full
-        # todo: proper logic
-        boiling_type = 'salt' if str(cast_boiling(boiling_id).percent) == '2.7' else 'water'
+        boiling_type = 'salt' if str(cast_boiling(boiling_id).lines.name) == 'Пицца чиз' else 'water'
         volume = 1000 if boiling_type == 'water' else 850
 
-        total_kg = custom_round(total_kg, volume, rounding='floor')
+        total_kg = custom_round(total_kg, volume, rounding='ceil')
 
         n_boilings = int(total_kg / volume)
         for i in range(n_boilings):
@@ -48,7 +47,7 @@ def generate_constructor_df(df):
                     break
 
             if cur_kg != 0:
-                print('Non-zero')
+                print('Non-zero', k, v, cur_kg)
                 k = [k for k, v in boiling_request.items() if v != 0][0]
                 boiling_request[k] += cur_kg
 
