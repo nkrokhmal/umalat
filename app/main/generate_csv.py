@@ -40,7 +40,7 @@ def generate_stats_new():
         df = pd.DataFrame(values[1:], columns=['sku', 'remainings - request', 'normative remainings', 'plan'])
         df = df.fillna(0)
         df = df[df['plan'] != 0]
-        df = df[df['plan'].apply(lambda x: type(x) == int or x.isnumeric())]
+        df = df[df['plan'].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())]
         path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
         link = '{}/{}.csv'.format(current_app.config['STATS_LINK_FOLDER'], os.path.splitext(file.filename)[0])
         df[['sku', 'plan']].to_csv(path, index=False)
@@ -57,21 +57,28 @@ def generate_stats_old():
     form = StatisticForm()
     if request.method == 'POST' and form.validate_on_submit():
         file = request.files['input_file']
-        file_name = file.filename
-        file_data = BytesIO(file.read())
-        wb = openpyxl.load_workbook(filename=file_data)
-        ws = wb['планирование суточное']
+        file_path = os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename)
+        if file:
+            file.save(file_path)
+
+        excel = ExcelCompiler(file_path)
+        wb = openpyxl.load_workbook(filename=os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename),
+                                    data_only=True)
+        sheet_name = 'планирование суточное'
+        ws = wb[sheet_name]
         values = []
         for i in range(1, 200):
             if ws.cell(i, 3).value:
-                values.append([ws.cell(i, j).value for j in range(3, 7)])
+                values.append([excel.evaluate("'{}'!{}".format(
+                    sheet_name,
+                    ws.cell(i, j).coordinate)) for j in range(3, 7)])
 
         df = pd.DataFrame(values[1:], columns=['sku', 'remainings - request', 'normative remainings', 'plan'])
         df = df.fillna(0)
         df = df[df['plan'] != 0]
-        df = df[df['plan'].apply(lambda x: type(x) == int or x.isnumeric())]
-        path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file_name)[0])
-        link = '{}/{}.csv'.format(current_app.config['STATS_LINK_FOLDER'], os.path.splitext(file_name)[0])
+        df = df[df['plan'].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())]
+        path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
+        link = '{}/{}.csv'.format(current_app.config['STATS_LINK_FOLDER'], os.path.splitext(file.filename)[0])
         df[['sku', 'plan']].to_csv(path, index=False)
         return render_template('stats_old.html', form=form, link=link)
     link = None
