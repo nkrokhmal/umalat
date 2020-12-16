@@ -16,66 +16,51 @@ COLOURS = {
 
 def generate_constructor_df(df):
     values = []
+    cur_id = 1
     for boiling_id, boiling_grp in df.groupby('boiling_id'):
-        sku_plan = OrderedDict()
 
+        # create sku_plan as dict
+        sku_plan = OrderedDict() # {sku: kg}
         for i, row in boiling_grp[['sku', 'plan']].iterrows():
             if row['sku'] not in sku_plan:
                 sku_plan[row['sku']] = 0
             sku_plan[row['sku']] += row['plan']
+
         total_kg = sum(sku_plan.values())
 
         # round to get full
         boiling_type = 'salt' if str(cast_boiling(boiling_id).lines.name) == 'Пицца чиз' else 'water'
+        # todo: take from db
         volume = 1000 if boiling_type == 'water' else 850
 
         total_kg = custom_round(total_kg, volume, rounding='ceil')
-
         n_boilings = int(total_kg / volume)
+
         for i in range(n_boilings):
             cur_kg = volume
 
             boiling_contents = OrderedDict()
-            for k, v in list(sku_plan.items()):
-                boil_kg = min(cur_kg, sku_plan[k])
+            for sku, kg in list(sku_plan.items()):
+                boil_kg = min(cur_kg, sku_plan[sku])
 
-                sku_plan[k] -= boil_kg
+                sku_plan[sku] -= boil_kg
                 cur_kg -= boil_kg
 
-                if k not in boiling_contents:
-                    boiling_contents[k] = 0
-                boiling_contents[k] += boil_kg
+                if sku not in boiling_contents:
+                    boiling_contents[sku] = 0
+                boiling_contents[sku] += boil_kg
 
                 if cur_kg == 0:
                     break
 
             if cur_kg != 0:
-                print('Non-zero', k, v, cur_kg)
-                k = [k for k, v in boiling_contents.items() if v != 0][0]
-                boiling_contents[k] += cur_kg
+                print('Non-zero', sku, kg, cur_kg)
+                sku = [k for k, v in boiling_contents.items() if v != 0][0]
+                boiling_contents[sku] += cur_kg
 
-            boiling_contents = [[k, v] for k, v in boiling_contents.items() if v != 0]
-            values.append([boiling_id, boiling_contents])
-
-    df = pd.DataFrame(values, columns=['boiling_id', 'boiling_request'])
-    df['boiling_id'] = df['boiling_id'].astype(str)
-    df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: 'salt' if str(cast_boiling(boiling_id).lines.name) == 'Пицца чиз' else 'water')
-    df['used'] = False
-
-    df['boiling_label'] = df['boiling_id'].apply(
-        lambda boiling_id: '{} {}{}'.format(cast_boiling(boiling_id).percent,
-                                            cast_boiling(boiling_id).ferment,
-                                            '' if cast_boiling(boiling_id).is_lactose else ' без лактозы'))
-
-    df['volume'] = df['boiling_request'].apply(lambda req: sum([v for k, v in req]))
-
-    df['boiling_request'] = df['boiling_request'].apply(
-        lambda req: [[cast_sku(k), round(v)] for k, v in req if v != 0])
-
-    values = []
-    for i, row in df.iterrows():
-        for sku, kg in row['boiling_request']:
-            values.append([i + 1, cast_boiling(row['boiling_id']), sku, kg])
+            for sku, kg in boiling_contents.items():
+                values.append([cur_id, cast_boiling(boiling_id), sku, kg])
+            cur_id += 1
 
     boiling_plan_df = pd.DataFrame(values, columns=['id', 'boiling', 'sku', 'kg'])
     return boiling_plan_df
