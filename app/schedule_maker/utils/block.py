@@ -1,8 +1,7 @@
-from utils_ak.interactive_imports import *
-
 PERIODS_PER_HOUR = 12
 PERIODS_PER_DAY = 24 * PERIODS_PER_HOUR
 
+from utils_ak.interactive_imports import *
 from app.schedule_maker.utils.interval import calc_interval_length, cast_interval
 from app.schedule_maker.utils.time import *
 
@@ -158,7 +157,7 @@ def simple_push(parent, block, validator='basic', new_props=None):
         except AssertionError as e:
             try:
                 # todo: hardcode
-                return cast_dict(e.__str__()) # {'disposition': 2}
+                return cast_dict_or_list(e.__str__()) # {'disposition': 2}
             except:
                 return
     return parent.add(block)

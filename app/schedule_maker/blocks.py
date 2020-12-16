@@ -2,10 +2,8 @@ from app.schedule_maker.models import *
 from app.schedule_maker.utils import *
 from app.schedule_maker.utils.time import cast_t, cast_time
 
-from utils_ak.interactive_imports import *
 
-
-def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=None, last_packing_sku=None):
+def make_melting_and_packing(boiling_model, boiling_contents, boiling_type, melting_line=None, last_packing_sku=None):
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
@@ -32,7 +30,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
     with make('melting_and_packing'):
         # packing and melting time
         packing_times = []
-        configuration_times = get_configuration_times([last_packing_sku] + [sku for sku, sku_kg in boiling_request]) # add last_packing for first configuration
+        configuration_times = get_configuration_times([last_packing_sku] + [sku for sku, sku_kg in boiling_contents]) # add last_packing for first configuration
 
         if boiling_type == 'water':
             # [cheesemakers.boiling_output]
@@ -41,16 +39,16 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
             # [cheesemakers.boiling_volume]
             cheese_from_boiling *= 8000 / 8000 # todo: make boiling_volume count
 
-            melting_time = custom_round(cheese_from_boiling / boiling_conf.meltings.speed * 60, 5, rounding='ceil')
+            melting_time = custom_round(cheese_from_boiling / boiling_model.meltings.speed * 60, 5, rounding='ceil')
 
-            for sku, sku_kg in boiling_request:
-                packing_speed = min(sku.packing_speed, boiling_conf.meltings.speed)
+            for sku, sku_kg in boiling_contents:
+                packing_speed = min(sku.packing_speed, boiling_model.meltings.speed)
                 packing_times.append(custom_round(sku_kg / packing_speed * 60, 5, rounding='ceil'))
             total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
-            full_melting_time = boiling_conf.meltings.serving_time + melting_time
+            full_melting_time = boiling_model.meltings.serving_time + melting_time
 
         elif boiling_type == 'salt':
-            for sku, sku_kg in boiling_request:
+            for sku, sku_kg in boiling_contents:
                 packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
             total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
 
@@ -58,7 +56,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
             # melting_time = total_packing_time
             melting_time = 50
 
-            full_melting_time = boiling_conf.meltings.serving_time + melting_time + boiling_conf.meltings.salting_time
+            full_melting_time = boiling_model.meltings.serving_time + melting_time + boiling_model.meltings.salting_time
 
         def gen_label(label_weights):
             cur_label = None
@@ -77,20 +75,20 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                 values.append(s)
             return '/'.join(values)
 
-        form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_request])
-        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_request])
+        form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
+        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
 
         with make('melting', y=10, time_size=full_melting_time, melting_line=melting_line):
             # todo: make properly
             cur_y = 0
             if boiling_type == 'water':
                 with make(y=cur_y):
-                    make('serving', time_size=boiling_conf.meltings.serving_time)
+                    make('serving', time_size=boiling_model.meltings.serving_time)
                     cur_y += 1
             with make(y=cur_y):
-                make('serving', time_size=boiling_conf.meltings.serving_time, visible=False)
+                make('serving', time_size=boiling_model.meltings.serving_time, visible=False)
                 make('melting_label', time_size=4 * 5)
-                make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_conf.meltings.serving_time, form_factor_label=form_factor_label)
+                make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_model.meltings.serving_time, form_factor_label=form_factor_label)
                 cur_y += 1
             with make(y=cur_y):
                 # todo: make properly
@@ -98,25 +96,25 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
                     serving_visible = True
                 else:
                     serving_visible = False
-                make('serving', time_size=boiling_conf.meltings.serving_time, visible=serving_visible)
-                make('melting_process', time_size=melting_time, speed=boiling_conf.meltings.speed)
+                make('serving', time_size=boiling_model.meltings.serving_time, visible=serving_visible)
+                make('melting_process', time_size=melting_time, speed=boiling_model.meltings.speed)
 
                 if boiling_type == 'salt':
-                    make('salting', time_size=boiling_conf.meltings.salting_time)
+                    make('salting', time_size=boiling_model.meltings.salting_time)
                 cur_y += 1
             with make(y=cur_y):
-                make(time_size=boiling_conf.meltings.serving_time, visible=False)
+                make(time_size=boiling_model.meltings.serving_time, visible=False)
                 if boiling_type == 'water':
-                    make('cooling1', time_size=boiling_conf.meltings.first_cooling_time)
-                    make('cooling2', time_size=boiling_conf.meltings.second_cooling_time)
+                    make('cooling1', time_size=boiling_model.meltings.first_cooling_time)
+                    make('cooling2', time_size=boiling_model.meltings.second_cooling_time)
                 elif boiling_type == 'salt':
-                    make('salting', time_size=boiling_conf.meltings.salting_time)
+                    make('salting', time_size=boiling_model.meltings.salting_time)
 
         # prepare time
         if boiling_type == 'water':
-            prepare_time = boiling_conf.meltings.serving_time + boiling_conf.meltings.first_cooling_time + boiling_conf.meltings.second_cooling_time
+            prepare_time = boiling_model.meltings.serving_time + boiling_model.meltings.first_cooling_time + boiling_model.meltings.second_cooling_time
         elif boiling_type == 'salt':
-            prepare_time = boiling_conf.meltings.serving_time + boiling_conf.meltings.salting_time
+            prepare_time = boiling_model.meltings.serving_time + boiling_model.meltings.salting_time
 
         with make('packing_and_preconfiguration', t=(prepare_time - configuration_times[0]) / 5, time_size=total_packing_time + configuration_times[0], push_func=add_push):
             if configuration_times[0]:
@@ -148,7 +146,7 @@ def make_melting_and_packing(boiling_conf, boiling_request, boiling_type, meltin
     return res
 
 
-def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=12, pouring_line=None, melting_line=None, last_packing_sku=None):
+def make_boiling(boiling_model, boiling_contents, boiling_type='water', block_num=12, pouring_line=None, melting_line=None, last_packing_sku=None):
     termizator = db.session.query(Termizator).first()
     # [termizator.time]
     termizator.pouring_time = 30
@@ -160,16 +158,16 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
     boiling_volume = 8000  # kg # todo: add different volumes
 
     # [cheesemakers.boiling_params]
-    boiling_label = '{} {} {} {}кг'.format(boiling_conf.percent, boiling_conf.ferment, '' if boiling_conf.is_lactose else 'безлактозная', boiling_volume)
+    boiling_label = '{} {} {} {}кг'.format(boiling_model.percent, boiling_model.ferment, '' if boiling_model.is_lactose else 'безлактозная', boiling_volume)
 
-    with make('boiling', block_num=block_num, boiling_type=boiling_type, boiling_label=boiling_label, boiling_id=boiling_conf.id):
+    with make('boiling', block_num=block_num, boiling_type=boiling_type, boiling_label=boiling_label, boiling_id=boiling_model.id):
         # [cheesemakers.boiling_times]
         timings = []
-        timings.append(boiling_conf.pourings.pouring_time)
-        timings.append(boiling_conf.pourings.soldification_time)
-        timings.append(boiling_conf.pourings.cutting_time)
-        timings.append(boiling_conf.pourings.pouring_off_time)
-        timings.append(boiling_conf.pourings.extra_time)
+        timings.append(boiling_model.pourings.pouring_time)
+        timings.append(boiling_model.pourings.soldification_time)
+        timings.append(boiling_model.pourings.cutting_time)
+        timings.append(boiling_model.pourings.pouring_off_time)
+        timings.append(boiling_model.pourings.extra_time)
 
         with make('pouring', time_size=sum(timings), pouring_line=pouring_line):
             with make(y=0):
@@ -189,7 +187,7 @@ def make_boiling(boiling_conf, boiling_request, boiling_type='water', block_num=
             chedderization_time = '03:00'
         make('drenator', time_size=cast_t(chedderization_time) * 5 - timings[3] - timings[4], visible=False)
 
-        make(make_melting_and_packing(boiling_conf, boiling_request, boiling_type, melting_line=melting_line, last_packing_sku=last_packing_sku))
+        make(make_melting_and_packing(boiling_model, boiling_contents, boiling_type, melting_line=melting_line, last_packing_sku=last_packing_sku))
 
     res = maker.root.children[0]
     res.props.update({'size': max(c.end for c in res.children)})

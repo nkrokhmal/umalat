@@ -1,8 +1,4 @@
-import sys
-
 from app.models import *
-from app.models import Boiling as BoilingModel
-from app.models import Termizator as TermizatorModel
 
 from utils_ak.interactive_imports import *
 
@@ -49,7 +45,6 @@ def cast_packer(obj):
         raise Exception('Unknown packer type')
 
 
-
 def cast_boiling(obj):
     if isinstance(obj, Boiling):
         return obj
@@ -57,5 +52,5 @@ def cast_boiling(obj):
         obj = str(obj)
         return db.session.query(Boiling).filter(Boiling.id == obj).first()
     else:
-        raise Exception('Unknown boiling type')
+        raise Exception(f'Unknown boiling type {type(obj)}')
 
