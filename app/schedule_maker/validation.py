@@ -10,7 +10,7 @@ def boiling_validator(parent, boiling):
 
     b2 = boiling
 
-    for b1 in reversed(boilings[-4:]): # compare with four previous boilings (four is enough)
+    for b1 in reversed(boilings[-6:]): # compare with four previous boilings (four is enough)
         validate_disjoint(b1['pouring'][0]['termizator'], b2['pouring'][0]['termizator'])  # [termizator.basic]
 
         # cannot make two boilings on same line at the same time
