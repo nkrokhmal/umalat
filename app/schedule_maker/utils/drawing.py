@@ -80,7 +80,8 @@ def draw(sheet, block):
                 beg += b.props['index_width']  # first index columns
                 beg += 1  # indexing starts with 1 in excel
 
-                draw_block(sheet, beg, b.props['y'], b.size, b.props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'}, text_rotation=b.props.get('text_rotation'))
+                draw_block(sheet, beg, b.props['y'], b.size, b.props.get('h', 1), text, color, border={'border_style': 'thin', 'color': '000000'},
+                           text_rotation=b.props.get('text_rotation'), font_size=8, alignment='center')
             except:
                 print(b)
                 print(b.props.relative_props, b.interval)
