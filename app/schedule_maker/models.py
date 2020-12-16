@@ -8,7 +8,7 @@ elif os.getenv('mode') == 'dev':
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
-    sqlite_filepath = r"C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\data.sqlite"
+    sqlite_filepath = r"/home/nkrokhmal/Desktop/umalat/data.sqlite"
     engine = create_engine(f"sqlite:///{sqlite_filepath}")
     Session = sessionmaker()
     Session.configure(bind=engine)

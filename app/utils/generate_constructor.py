@@ -14,57 +14,31 @@ COLOURS = {
     'Default': '#FFFFFF'
 }
 
+
 def generate_constructor_df(df):
-    values = []
-    cur_id = 1
+    result = []
     for boiling_id, boiling_grp in df.groupby('boiling_id'):
+        boiling_grp['weight'] = boiling_grp['sku'].apply(lambda x: x.weight_netto)
+        boiling_volume = boiling_grp['sku'].iloc[0].boilings[0].cheese_types.output
 
-        # create sku_plan as dict
-        sku_plan = OrderedDict() # {sku: kg}
-        for i, row in boiling_grp[['sku', 'plan']].iterrows():
-            if row['sku'] not in sku_plan:
-                sku_plan[row['sku']] = 0
-            sku_plan[row['sku']] += row['plan']
+        boiling = 1
+        while boiling is not None:
+            boiling_grp, boiling = iteration(boiling_grp, boiling_volume)
+            if boiling is not None:
+                result.append(boiling)
+        if (boiling_grp['plan'].sum() > 0):
+            result.append(boiling_grp.to_dict('records'))
 
-        total_kg = sum(sku_plan.values())
-
-        # round to get full
-        boiling_type = 'salt' if str(cast_boiling(boiling_id).lines.name) == 'Пицца чиз' else 'water'
-        # todo: take from db
-        volume = 1000 if boiling_type == 'water' else 850
-
-        total_kg = custom_round(total_kg, volume, rounding='ceil')
-        n_boilings = int(total_kg / volume)
-
-        for i in range(n_boilings):
-            cur_kg = volume
-
-            boiling_contents = OrderedDict()
-            for sku, kg in list(sku_plan.items()):
-                boil_kg = min(cur_kg, sku_plan[sku])
-
-                sku_plan[sku] -= boil_kg
-                cur_kg -= boil_kg
-
-                if sku not in boiling_contents:
-                    boiling_contents[sku] = 0
-                boiling_contents[sku] += boil_kg
-
-                if cur_kg == 0:
-                    break
-
-            if cur_kg != 0:
-                print('Non-zero', sku, kg, cur_kg)
-                sku = [k for k, v in boiling_contents.items() if v != 0][0]
-                boiling_contents[sku] += cur_kg
-
-            for sku, kg in boiling_contents.items():
-                values.append([cur_id, cast_boiling(boiling_id), sku, kg])
-            cur_id += 1
-
-    boiling_plan_df = pd.DataFrame(values, columns=['id', 'boiling', 'sku', 'kg'])
-    boiling_plan_df = boiling_plan_df[boiling_plan_df['kg'] != 0]
-    return boiling_plan_df
+    full_result = []
+    for i, boiling in enumerate(result):
+        for boiling_element in boiling:
+            full_result.append({
+                'id': i,
+                'boiling': boiling_element['sku'].boilings[0],
+                'sku': boiling_element['sku'],
+                'kg': boiling_element['plan']
+            })
+    return pd.DataFrame(full_result)
 
 
 def generate_full_constructor_df(boiling_plan_df):
@@ -163,6 +137,45 @@ def draw_constructor(df, file_name):
     link = '{}/{}.xlsx'.format(current_app.config['CONSTRUCTOR_LINK_FOLDER'], os.path.splitext(file_name)[0])
     wb.save(path)
     return link
+
+
+def iteration(df, volume):
+    full_boilings = df[df['plan'] > volume]
+    if full_boilings.shape[0] > 0:
+        new_boiling = full_boilings.iloc[0].to_dict()
+        new_boiling['plan'] = volume
+        df['plan'].loc[df['sku'] == new_boiling['sku']] -= volume
+        return df, [new_boiling]
+
+    for weight, boiling_grp in df.groupby('weight'):
+        if boiling_grp['plan'].sum() > volume:
+            boiling_grp = boiling_grp.sort_values(by='plan', ascending=False).to_dict('records')
+            new_boiling = []
+            cur_weight = 0
+            for b_grp in boiling_grp:
+                if cur_weight + b_grp['plan'] < volume:
+                    new_boiling.append(b_grp)
+                    df['plan'].loc[df['sku'] == b_grp['sku']] = 0
+                    cur_weight += b_grp['plan']
+                else:
+                    b_grp['plan'] = volume - cur_weight
+                    new_boiling.append(b_grp)
+                    df['plan'].loc[df['sku'] == b_grp['sku']] -= volume - cur_weight
+                    return df, new_boiling
+    df = df[df['plan'] > 0]
+    new_boiling = []
+    cur_weight = 0
+    for data in df.sort_values(by='weight').to_dict('records'):
+        if cur_weight + data['plan'] < volume:
+            new_boiling.append(data)
+            df['plan'].loc[df['sku'] == data['sku']] = 0
+            cur_weight += data['plan']
+        else:
+            data['plan'] = volume - cur_weight
+            new_boiling.append(data)
+            df['plan'].loc[df['sku'] == data['sku']] -= volume - cur_weight
+            return df, new_boiling
+    return df, None
 
 
 def get_colour_by_name(sku_name, skus):

@@ -17,8 +17,8 @@ from .. utils.generate_constructor import *
 
 # todo: add plan
 # todo: file naming
-@main.route('/generate_constructor', methods=['POST', 'GET'])
-def generate_constructor():
+@main.route('/generate_boiling_plan', methods=['POST', 'GET'])
+def generate_boiling_plan():
     form = StatisticForm()
     if request.method == 'POST' and form.validate_on_submit():
         file = request.files['input_file']
@@ -35,6 +35,6 @@ def generate_constructor():
         boiling_plan_df = generate_constructor_df(df)
         full_plan = generate_full_constructor_df(boiling_plan_df)
         link = draw_constructor(full_plan, file_name)
-        return render_template('generate_constructor.html', form=form, link=link)
+        return render_template('boiling_plan.html', form=form, link=link)
     link = None
-    return render_template('generate_constructor.html', form=form, link=link)
+    return render_template('boiling_plan.html', form=form, link=link)
