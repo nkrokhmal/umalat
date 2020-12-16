@@ -31,6 +31,7 @@ def generate_constructor():
         df['sku_id'] = df['sku'].apply(lambda x: x.id)
         df['plan'] = df['plan'].apply(lambda x: -float(x))
         df = df[['boiling_id', 'sku_id', 'plan']]
+        df['sku'] = df['sku_id'].apply(cast_sku)
         boiling_plan_df = generate_constructor_df(df)
         full_plan = generate_full_constructor_df(boiling_plan_df)
         link = draw_constructor(full_plan, file_name)

@@ -17,10 +17,13 @@ COLOURS = {
 def generate_constructor_df(df):
     values = []
     for boiling_id, boiling_grp in df.groupby('boiling_id'):
-        boiling_dic = boiling_grp[['sku_id', 'plan']].set_index('sku_id').to_dict(orient='index')
-        boiling_dic = {k: v['plan'] for k, v in boiling_dic.items()}
-        boiling_dic = {cast_sku(k): v for k, v in boiling_dic.items()}
-        total_kg = sum(boiling_dic.values())
+        sku_plan = OrderedDict()
+
+        for i, row in boiling_grp[['sku', 'plan']].iterrows():
+            if row['sku'] not in sku_plan:
+                sku_plan[row['sku']] = 0
+            sku_plan[row['sku']] += row['plan']
+        total_kg = sum(sku_plan.values())
 
         # round to get full
         boiling_type = 'salt' if str(cast_boiling(boiling_id).lines.name) == 'Пицца чиз' else 'water'
@@ -32,27 +35,27 @@ def generate_constructor_df(df):
         for i in range(n_boilings):
             cur_kg = volume
 
-            boiling_request = OrderedDict()
-            for k, v in list(boiling_dic.items()):
-                boil_kg = min(cur_kg, boiling_dic[k])
+            boiling_contents = OrderedDict()
+            for k, v in list(sku_plan.items()):
+                boil_kg = min(cur_kg, sku_plan[k])
 
-                boiling_dic[k] -= boil_kg
+                sku_plan[k] -= boil_kg
                 cur_kg -= boil_kg
 
-                if k not in boiling_request:
-                    boiling_request[k] = 0
-                boiling_request[k] += boil_kg
+                if k not in boiling_contents:
+                    boiling_contents[k] = 0
+                boiling_contents[k] += boil_kg
 
                 if cur_kg == 0:
                     break
 
             if cur_kg != 0:
                 print('Non-zero', k, v, cur_kg)
-                k = [k for k, v in boiling_request.items() if v != 0][0]
-                boiling_request[k] += cur_kg
+                k = [k for k, v in boiling_contents.items() if v != 0][0]
+                boiling_contents[k] += cur_kg
 
-            boiling_request = [[k, v] for k, v in boiling_request.items() if v != 0]
-            values.append([boiling_id, boiling_request])
+            boiling_contents = [[k, v] for k, v in boiling_contents.items() if v != 0]
+            values.append([boiling_id, boiling_contents])
 
     df = pd.DataFrame(values, columns=['boiling_id', 'boiling_request'])
     df['boiling_id'] = df['boiling_id'].astype(str)
