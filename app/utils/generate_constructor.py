@@ -59,8 +59,7 @@ def generate_constructor_df(df):
 
     df = pd.DataFrame(values, columns=['boiling_id', 'boiling_request'])
     df['boiling_id'] = df['boiling_id'].astype(str)
-    df['boiling_type'] = df['boiling_id'].apply(
-        lambda boiling_id: 'salt' if str(cast_boiling(boiling_id).percent) == '2.7' else 'water')
+    df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: 'salt' if str(cast_boiling(boiling_id).lines.name) == 'Пицца чиз' else 'water')
     df['used'] = False
 
     df['boiling_label'] = df['boiling_id'].apply(

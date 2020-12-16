@@ -30,7 +30,7 @@ def make_schedule(boiling_plan_df):
         values.append([boiling, boiling_contents])
     boiling_plan_grouped_df = pd.DataFrame(values, columns=['boiling', 'contents'])
     boiling_plan_grouped_df['used'] = False
-    boiling_plan_grouped_df['type'] = boiling_plan_grouped_df['boiling'].apply(lambda b: 'salt' if b.percent == '2.7' else 'water')
+    boiling_plan_grouped_df['type'] = boiling_plan_grouped_df['boiling'].apply(lambda b: 'salt' if b.lines.name == 'Пицца чиз' else 'water')
     boiling_plan_grouped_df['id'] = boiling_plan_grouped_df['boiling'].apply(lambda b: int(b.id))
 
     root = Block('root')
