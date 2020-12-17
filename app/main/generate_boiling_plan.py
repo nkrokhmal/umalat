@@ -53,7 +53,7 @@ def generate_boiling_plan_full():
         excel = ExcelCompiler(file_path)
         wb = openpyxl.load_workbook(filename=os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename),
                                     data_only=True)
-        sheet_name = 'планирование суточное'
+        sheet_name = current_app.config['SHEET_NAMES']['schedule_plan']
         ws = wb[sheet_name]
         values = []
         for i in range(1, 200):
