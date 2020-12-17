@@ -78,7 +78,7 @@ def make_melting_and_packing(boiling_model, boiling_contents, boiling_type, melt
         form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
         brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
 
-        with make('melting', y=10, time_size=full_melting_time, melting_line=melting_line):
+        with make('melting', time_size=full_melting_time, melting_line=melting_line):
             # todo: make properly
             cur_y = 0
             if boiling_type == 'water':
@@ -210,7 +210,6 @@ def make_termizator_cleaning_block(cleaning_type):
     return res
 
 
-
 def make_template():
     maker = BlockMaker(default_push_func=add_push)
     make = maker.make
@@ -255,3 +254,6 @@ def make_template():
     res = maker.root.children[0]
     res.props.update({'size': max(c.end for c in res.children)})
     return res
+
+if __name__ == '__main__':
+    make_template()

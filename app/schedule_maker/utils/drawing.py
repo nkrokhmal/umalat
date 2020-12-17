@@ -75,15 +75,17 @@ def draw(sheet, block):
                 text = text.replace('>', '}')
                 text = eval(f'f{text!r}')
 
-                beg = b.props['t']
-                beg -= cast_t(b.props['beg_time'])  # shift of timeline
-                beg += b.props['index_width']  # first index columns
-                beg += 1  # indexing starts with 1 in excel
+                t = b.props['t']
+                if 'beg_time' in b.props.get_all_props():
+                    t -= cast_t(b.props['beg_time'])  # shift of timeline
+                t += b.props['index_width']  # first index columns
+                t += 1  # indexing starts with 1 in excel
 
+                print(b.props['class'], t, b.props['size'], b.props['y'], b.props.get('h', 1))
                 draw_block(sheet,
-                           beg,
+                           t,
                            b.props['y'],
-                           b.size,
+                           b.props['size'],
                            b.props.get('h', 1),
                            text,
                            color,

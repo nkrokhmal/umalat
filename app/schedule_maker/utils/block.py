@@ -51,13 +51,21 @@ def time_size_acc(parent, child, key):
         return time_size
 
 
-ACCUMULATORS = {'t': cumsum_int_acc, 'y': cumsum_int_acc, 'size': size_acc, 'time_size': time_size_acc}
+def h_acc(parent, child, key):
+    return child.relative_props.get('h', 1)
+
+ACCUMULATORS = {'t': cumsum_int_acc, 'y': cumsum_int_acc, 'size': size_acc, 'time_size': time_size_acc, 'h': h_acc}
 REQUIRED_KEYS = ['size', 'time_size']
 
 
 class Block:
-    def __init__(self, block_class=None, props=None, **kwargs):
+    def __init__(self, block_class=None, props=None, orient='horizontal', **kwargs):
         block_class = block_class or 'block'
+        # todo: create a better solution
+        self.orient = orient
+        self.beg_key = 't' if self.orient == 'horizontal' else 'y'
+        self.size_key = 'size' if self.orient == 'horizontal' else 'h'
+
         props = props or {}
         props['class'] = block_class
         props.update(kwargs)
@@ -87,16 +95,16 @@ class Block:
             return res
 
     @property
-    def size(self):
-        return self.props['size']
+    def length(self):
+        return self.props[self.size_key]
 
     @property
     def beg(self):
-        return self.props['t']
+        return self.props[self.beg_key]
 
     @property
     def end(self):
-        return self.props['t'] + self.props['size']
+        return self.beg + self.length
 
     @property
     def interval(self):
@@ -163,36 +171,36 @@ def simple_push(parent, block, validator='basic', new_props=None):
     return parent.add(block)
 
 
-def add_push(parent, block):
-    return simple_push(parent, block, validator=None)
+def add_push(parent, block, new_props=None):
+    return simple_push(parent, block, validator=None, new_props=new_props)
 
 
 # simple greedy algorithm
 def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, validator='basic', iter_props=None):
     # note: make sure parent abs props are updated
     if beg == 'last_beg':
-        cur_t = max([parent.beg] + [child.beg for child in parent.children])
+        cur_beg = max([parent.beg] + [child.beg for child in parent.children])
     elif beg == 'last_end':
-        cur_t = max([parent.beg] + [child.end for child in parent.children])
+        cur_beg = max([parent.beg] + [child.end for child in parent.children])
     elif isinstance(beg, int):
-        cur_t = beg
+        cur_beg = beg
     else:
         raise Exception('Unknown beg type')
 
     # go to relative coordinates
-    cur_t -= parent.beg
+    cur_beg -= parent.beg
 
     # print([(child.props['class'], child.end, child.props.relative_props, child.beg) for child in parent.children])
     # print('Starting from', cur_t, parent.props['class'], block.props['class'])
-    end = min(end, cur_t + max_tries)
+    end = min(end, cur_beg + max_tries)
 
     iter_props = iter_props or [{}]
 
-    while cur_t < end:
+    while cur_beg < end:
         dispositions = []
         for props in iter_props:
             props = copy.deepcopy(props)
-            props['t'] = cur_t
+            props[block.beg_key] = cur_beg
 
             res = simple_push(parent, block, validator=validator, new_props=props)
 
@@ -205,9 +213,9 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
 
         if len(dispositions) == len(iter_props):
             # all iter_props failed because of bad disposition
-            cur_t += min(dispositions)
+            cur_beg += min(dispositions)
         else:
-            cur_t += 1
+            cur_beg += 1
 
         logging.info(['All dispositions', dispositions])
     raise Exception('Failed to push element')
@@ -276,7 +284,7 @@ if __name__ == '__main__':
     print(maker.root['a'][2])
 
     b = Block('a', time_size=10)
-    print(b.size)
+    print(b.length)
 
     try:
         b = Block('a', time_size=11)

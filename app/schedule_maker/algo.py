@@ -108,13 +108,13 @@ def make_schedule(boiling_plan_df):
         if 12 <= rest < 18:
             # [termizator.cleaning.1]
             cleaning = make_termizator_cleaning_block('short')
-            cleaning.props.update({'t': b['pouring'][0]['termizator'].beg - cleaning.size})
+            cleaning.props.update({'t': b['pouring'][0]['termizator'].beg - cleaning.length})
             add_push(root, cleaning)
             last_cleaning_t = b['pouring'][0]['termizator'].end
         elif rest >= 18:
             # [termizator.cleaning.2]
             cleaning = make_termizator_cleaning_block('full')
-            cleaning.props.update({'t': b['pouring'][0]['termizator'].beg - cleaning.size})
+            cleaning.props.update({'t': b['pouring'][0]['termizator'].beg - cleaning.length})
             add_push(root, cleaning)
             last_cleaning_t = b['pouring'][0]['termizator'].end
 
@@ -125,7 +125,7 @@ def make_schedule(boiling_plan_df):
             cleaning.props.update({'t': b['pouring'][0]['termizator'].end})
 
             add_push(root, cleaning)
-            last_cleaning_t = b['pouring'][0]['termizator'].end + cleaning.size
+            last_cleaning_t = b['pouring'][0]['termizator'].end + cleaning.length
 
 
     # add final cleaning [termizator.cleaning.4]
