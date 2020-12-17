@@ -35,10 +35,10 @@ def generate_boiling_plan():
         df['sku'] = df['sku_id'].apply(cast_sku)
         boiling_plan_df = generate_constructor_df(df)
         full_plan = generate_full_constructor_df(boiling_plan_df)
-        link = draw_constructor(full_plan, file_name)
-        return render_template('boiling_plan.html', form=form, link=link)
-    link = None
-    return render_template('boiling_plan.html', form=form, link=link)
+        new_file_name = draw_constructor(full_plan, file_name)
+        return render_template('boiling_plan.html', form=form, file_name=new_file_name)
+    file_name = None
+    return render_template('boiling_plan.html', form=form, file_name=file_name)
 
 
 @main.route('/generate_boiling_plan_full', methods=['POST', 'GET'])
@@ -80,10 +80,9 @@ def generate_boiling_plan_full():
         df['sku'] = df['sku_id'].apply(cast_sku)
         boiling_plan_df = generate_constructor_df(df)
         full_plan = generate_full_constructor_df(boiling_plan_df)
-        link = draw_constructor(full_plan, file.filename)
-        return render_template('boiling_plan_full.html', form=form, link=link, file_name=file.filename)
-    link = None
+        new_file_name = draw_constructor(full_plan, file.filename)
+        return render_template('boiling_plan_full.html', form=form, file_name=new_file_name)
     file_name = None
-    return render_template('boiling_plan_full.html', form=form, link=link)
+    return render_template('boiling_plan_full.html', form=form, file_name=file_name)
 
 

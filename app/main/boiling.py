@@ -27,7 +27,6 @@ def edit_boiling(boiling_id):
     form = BoilingForm()
     with db.session.no_autoflush:
         boiling_process = db.session.query(Boiling).get_or_404(boiling_id)
-        print(1)
         if form.validate_on_submit() and boiling_process is not None:
             boiling_process.percent = form.percent.data
             boiling_process.is_lactose = form.is_lactose.data
@@ -85,7 +84,6 @@ def edit_boiling(boiling_id):
             form.first_cooling_time.data = boiling_process.meltings.first_cooling_time
             form.second_cooling_time.data = boiling_process.meltings.second_cooling_time
             form.salting_time.data = boiling_process.meltings.salting_time
-        print('Finished')
         return render_template('edit_boiling.html', form=form)
 
 

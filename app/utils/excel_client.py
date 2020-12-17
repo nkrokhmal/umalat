@@ -1,10 +1,11 @@
-import pandas as pd
+# from app.interactive_imports import *
 import openpyxl
 from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
 import re
-import json
 from .openpyxl_wrapper import ExcelBlock
+import pandas as pd
+from flask import current_app
 
 
 class Cell:
@@ -13,23 +14,6 @@ class Cell:
         self.column = column
         self.name = name
 
-
-SHEETS = {
-    0: 'файл остатки',
-    1: 'планирование суточное'
-}
-
-COLOURS = {
-    'Для пиццы': 'E5B7B6',
-    'Моцарелла': 'DAE5F1',
-    'Фиор Ди Латте': 'CBC0D9',
-    'Чильеджина': 'E5DFEC',
-    'Качокавалло': 'F1DADA',
-    'Сулугуни': 'F1DADA',
-    'Default': 'D9DDDC'
-}
-
-ORDER = ['Фиор Ди Латте', 'Чильеджина', 'Моцарелла', 'Сулугуни', 'Для пиццы', 'Качокавалло']
 
 CELLS = {
     'Boiling': Cell(1, 1, 'Тип варки'),
@@ -54,11 +38,6 @@ COLUMNS = {
     'BOILING_ID': 19
 }
 
-BOILING_LIMITS = {
-    'MIN': 6000,
-    'MAX': 8000
-}
-
 
 def generate_title(sheet):
     sheet.column_dimensions[openpyxl.utils.get_column_letter(COLUMNS['SKUS_ID'])].hidden = True
@@ -72,18 +51,19 @@ def generate_title(sheet):
     sheet.column_dimensions[get_column_letter(CELLS['Boiling'].column)].width = 5 * 5
 
 
-def build_plan(date, df, request_list, plan_path=None):
-    filename = '{}_{}.xlsx'.format('plan', date.strftime('%Y-%m-%d'))
+# todo: build plan -> build sku plan
+def build_plan_sku(date, df, request_list, plan_path=None):
+    filename = '{}.xlsx'.format(date.strftime('%Y-%m-%d'))
     if plan_path is None:
-        path = '{}/{}'.format('app/data/plan', filename)
+        path = '{}/{}'.format(current_app.config['SKU_PLAN_FOLDER'], filename)
     else:
         path = plan_path
     with pd.ExcelWriter(path) as writer:
-        df.to_excel(writer, sheet_name=SHEETS[0])
+        df.to_excel(writer, sheet_name=current_app.config['SHEET_NAMES']['remainings'])
         writer.save()
 
     wb = openpyxl.load_workbook(filename=path)
-    sheet_plan = wb.create_sheet(SHEETS[1])
+    sheet_plan = wb.create_sheet(current_app.config['SHEET_NAMES']['schedule_plan'])
     generate_title(sheet=sheet_plan)
 
     cur_row, space_rows = 2, 2
@@ -92,16 +72,16 @@ def build_plan(date, df, request_list, plan_path=None):
         block = ExcelBlock(sheet=sheet_plan)
         group_formula = []
 
-        for form_factor in ORDER:
+        for form_factor in current_app.config['ORDER']:
             block_skus = [x for x in group_skus['GroupSKU'] if x['SKU'].form_factor.name == form_factor]
             beg_ff_row = cur_row
             for sku in block_skus:
                 formula_plan = "=INDEX('{0}'!$A$5:$DK$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0))".format(
-                    SHEETS[0], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
+                    current_app.config['SHEET_NAMES']['remainings'], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
                 formula_remains = "=INDEX('{0}'!$A$5:$DK$265,MATCH($O$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0))".format(
-                    SHEETS[0], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
+                    current_app.config['SHEET_NAMES']['remainings'], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
 
-                block.colour = COLOURS[sku['SKU'].form_factor.name]
+                block.colour = current_app.config['COLOURS'][sku['SKU'].form_factor.name][1:]
                 block.cell_value(row=cur_row, col=CELLS['Brand'].column, value=sku["SKU"].brand_name)
                 block.cell_value(row=cur_row, col=CELLS['SKU'].column, value=sku["SKU"].name)
                 block.cell_value(row=cur_row, col=CELLS['FactRemains'].column, value=formula_plan)
@@ -123,7 +103,7 @@ def build_plan(date, df, request_list, plan_path=None):
                     alignment=Alignment(horizontal='center', vertical='center')
                 )
         end_row = cur_row - 1
-        block.colour = COLOURS['Default']
+        block.colour = current_app.config['COLOURS']['Default'][1:]
         block.merge_cells(
             beg_row=beg_row,
             end_row=end_row,
@@ -159,16 +139,16 @@ def build_plan(date, df, request_list, plan_path=None):
         )
         cur_row += space_rows
     wb.save(path)
-    return '{}/{}'.format('data/plan', filename)
+    return filename
 
 
 def parse_plan_cell(date, wb, excel, skus):
-    sheet_plan = wb[SHEETS[1]]
+    sheet_plan = wb[current_app.config['SHEET_NAMES']['remainings']]
     response = {'Date': date, 'WeekDay': date.weekday(), 'Boilings': []}
     for i in range(1, 200):
         if sheet_plan.cell(i, COLUMNS['BOILING_ID']).value is not None:
             boilings_count = excel.evaluate("'{}'!{}".format(
-                SHEETS[1],
+                current_app.config['SHEET_NAMES']['remainings'],
                 sheet_plan.cell(i, CELLS['Plan'].column).coordinate)
             )
             sku_ids = sheet_plan.cell(i, COLUMNS['SKUS_ID']).value
@@ -180,7 +160,7 @@ def parse_plan_cell(date, wb, excel, skus):
                 if sheet_plan.cell(j, CELLS['SKU'].column).value in [x.name for x in sku_group]:
                     sku_id = [x.id for x in sku_group if x.name == sheet_plan.cell(j, CELLS['SKU'].column).value][0]
                     volume = abs(excel.evaluate("'{}'!{}".format(
-                        SHEETS[1],
+                        current_app.config['SHEET_NAMES']['remainings'],
                         sheet_plan.cell(j, CELLS['ProductionPlan'].column).coordinate)
                     ))
                     sku_volumes[sku_id] = volume
@@ -188,13 +168,14 @@ def parse_plan_cell(date, wb, excel, skus):
             boiling_weights = []
             if sheet_plan.cell(i, CELLS['BoilingVolumes'].column).value is not None:
                 boiling_weights = re.split(', |. | ', sheet_plan.cell(i, CELLS['BoilingVolumes'].column).value)
-                boiling_weights = [x for x in boiling_weights if BOILING_LIMITS['MIN'] <= int(x) <= BOILING_LIMITS['MAX']]
+                boiling_weights = [x for x in boiling_weights if current_app.config['BOILING_VOLUME_LIMITS']['MIN'] <=
+                                   int(x) <= current_app.config['BOILING_VOLUME_LIMITS']['MAX']]
                 boiling_weights = [int(x) for x in boiling_weights if isinstance(x, int) or x.isdigit()]
 
             if len(boiling_weights) > boilings_count:
-                boiling_weights = boilings_count * [BOILING_LIMITS['MAX']]
+                boiling_weights = boilings_count * [current_app.config['BOILING_VOLUME_LIMITS']['MAX']]
             else:
-                boiling_weights += int(boilings_count - len(boiling_weights)) * [BOILING_LIMITS['MAX']]
+                boiling_weights += int(boilings_count - len(boiling_weights)) * [current_app.config['BOILING_VOLUME_LIMITS']['MAX']]
             response['Boilings'].append({
                 "BoilingId": boiling_id,
                 "BoilingCount": boilings_count,

@@ -7,14 +7,33 @@ class BaseClass:
     CHEESE_PER_PAGE = 10
     CHEESE_MAKER_PER_PAGE = 10
     SKU_PER_PAGE = 100
+
     UPLOAD_TMP_FOLDER = 'app/data/tmp'
     STATS_FOLDER = 'app/data/stats'
-    STATS_LINK_FOLDER = 'data/stats'
-    CONSTRUCTOR_FOLDER = 'app/data/constructor'
-    CONSTRUCTOR_LINK_FOLDER = 'data/constructor'
-    BOILING_PLAN_FOLDER = 'data/constructor'
-    SKU_PLAN_FOLDER = 'data/plan'
-    SCHEDULE_PLAN_FOLDER = '/data/schedule'
+    BOILING_PLAN_FOLDER = 'app/data/boiling_plan'
+    SKU_PLAN_FOLDER = 'app/data/sku_plan'
+    SCHEDULE_PLAN_FOLDER = 'app/data/schedule_plan'
+
+    SHEET_NAMES = {
+        'remainings': 'файл остатки',
+        'schedule_plan': 'планирование суточное',
+        'water': 'Вода',
+        'salt': 'Соль'
+    }
+    COLOURS = {
+        'Для пиццы': '#E5B7B6',
+        'Моцарелла': '#DAE5F1',
+        'Фиор Ди Латте': '#CBC0D9',
+        'Чильеджина': '#E5DFEC',
+        'Качокавалло': '#F1DADA',
+        'Сулугуни': '#F1DADA',
+        'Default': '#FFFFFF'
+    }
+    ORDER = ['Фиор Ди Латте', 'Чильеджина', 'Моцарелла', 'Сулугуни', 'Для пиццы', 'Качокавалло']
+    BOILING_VOLUME_LIMITS = {
+        'MIN': 6000,
+        'MAX': 8000
+    }
     CONSTRUCTOR_CELLS = {
         'value': 'J',
         'remains_cumsum': 'K',
