@@ -24,24 +24,28 @@ def pick(df, boiling_type):
 
 
 def make_schedule(boiling_plan_df):
-    # prepare boiling_contents from boiling_plan
     values = []
-    for i, grp in boiling_plan_df.groupby('id'):
-        boiling = grp['boiling'].iloc[0]
-        boiling_contents = [[row['sku'], row['kg']] for i, row in grp.iterrows()]
-        values.append([boiling, boiling_contents])
-    boiling_plan_grouped_df = pd.DataFrame(values, columns=['boiling', 'contents'])
+    for i, boiling_grp in boiling_plan_df.groupby('id'):
+        values.append([boiling_grp['boiling'].iloc[0], boiling_grp])
+
+    boiling_plan_grouped_df = pd.DataFrame(values, columns=['boiling', 'grp'])
     boiling_plan_grouped_df['used'] = False
     boiling_plan_grouped_df['type'] = boiling_plan_grouped_df['boiling'].apply(lambda b: 'salt' if b.lines.name == 'Пицца чиз' else 'water')
     boiling_plan_grouped_df['id'] = boiling_plan_grouped_df['boiling'].apply(lambda b: int(b.id))
 
-    line_df = pd.DataFrame(index=['water', 'salt'], columns=['iter_props', 'last_packing_sku', 'latest_boiling', 'start_time', 'boilings'])
+    line_df = pd.DataFrame(index=['water', 'salt'], columns=['iter_props', 'last_packing_sku', 'latest_boiling', 'start_time', 'boilings', 'chedderization_time'])
     line_df.at['water', 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
     line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
 
+    # todo: take from parameters
     # [cheesemakers.start_time]
     line_df.at['water', 'start_time'] = '09:50'
     line_df.at['salt', 'start_time'] = '07:05'
+
+    # todo: take from parameters
+    # [drenator.chedderization_time]
+    line_df.at['water', 'chedderization_time'] = '04:00'
+    line_df.at['salt', 'chedderization_time'] = '03:00'
 
     line_df.at['water', 'boilings'] = []
     line_df.at['salt', 'boilings'] = []
@@ -56,14 +60,14 @@ def make_schedule(boiling_plan_df):
         row = pick(boiling_plan_grouped_df, boiling_type)
         if row is None:
             return
-        b = make_boiling(cast_boiling(str(row['id'])), row['contents'], boiling_type, block_num=i + 1, last_packing_sku=line_df.at[boiling_type, 'last_packing_sku'])
+        b = make_boiling(line_df, cast_boiling(str(row['id'])), row['grp'], block_num=i + 1)
 
         if init:
             beg = cast_t(line_df.at[boiling_type, 'start_time']) - b['melting_and_packing'].beg
         else:
             beg = line_df.at[row['type'], 'latest_boiling'].beg
         b = dummy_push(root, b, iter_props=line_df.at[boiling_type, 'iter_props'], validator=boiling_validator, beg=beg, max_tries=100)
-        line_df.at[boiling_type, 'last_packing_sku'] = list([sku for sku, sku_kg in row['contents']])[-1]
+        line_df.at[boiling_type, 'last_packing_sku'] = row['grp'].iloc[-1]['sku']
         line_df.at[boiling_type, 'latest_boiling'] = b if not line_df.at[boiling_type, 'latest_boiling'] else max([line_df.at[boiling_type, 'latest_boiling'], b], key=lambda b: b.beg)
         line_df.at[boiling_type, 'boilings'].append(b)
 
@@ -141,7 +145,7 @@ def make_schedule(boiling_plan_df):
 
 
 def draw_workbook(root, mode='prod', template_fn=None):
-    style = load_style(mode=mode)
+    style = load_style()
     root.props.update({'size': max(c.end for c in root.children)})
     init_sheet_func = init_sheet if mode == 'dev' else init_template_sheet(template_fn=template_fn)
     return draw_schedule(root, style, init_sheet_func=init_sheet_func)

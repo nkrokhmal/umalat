@@ -209,6 +209,10 @@ class Boiling(db.Model):
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
     cheese_type_id = db.Column(db.Integer, db.ForeignKey('cheese_types.id'), nullable=True)
 
+    @property
+    def boiling_type(self):
+        return 'salt' if self.lines.name == 'Пицца чиз' else 'water'
+
     @staticmethod
     def generate_cheese_types_links():
         boilings = db.session.query(Boiling).all()
