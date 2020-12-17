@@ -9,6 +9,7 @@ from app.schedule_maker.models import *
 from itertools import product
 
 
+
 def pick(df, boiling_type):
     tmp = df
     tmp = tmp[tmp['used'] == False]
@@ -86,7 +87,8 @@ def make_schedule(boiling_plan_df):
             if boiling_type == 'salt':
                 # start working for 3 lines on salt
                 # [lines.extra_salt_cheesemaker]
-                line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [1, 2, 3]]
+                # line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [1, 2, 3]]
+                pass
         elif len(left_unique) == 0:
             # stop production
             break
