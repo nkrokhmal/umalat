@@ -79,29 +79,21 @@ def make_melting_and_packing(line_df, boiling_model, boiling_contents):
         brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
 
         with make('melting', time_size=full_melting_time):
-            cur_y = 0
             if boiling_model.boiling_type == 'water':
-                with make(y=cur_y):
+                with make(orient='vertical', h=1):
                     make('serving', time_size=boiling_model.meltings.serving_time)
-                    cur_y += 1
-            with make(y=cur_y):
+            with make(orient='vertical', h=1):
                 make('serving', time_size=boiling_model.meltings.serving_time, visible=False)
                 make('melting_label', time_size=4 * 5)
                 make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_model.meltings.serving_time, form_factor_label=form_factor_label)
-                cur_y += 1
-            with make(y=cur_y):
-                # todo: make properly
-                if boiling_model.boiling_type == 'salt':
-                    serving_visible = True
-                else:
-                    serving_visible = False
+            with make(orient='vertical', h=1):
+                serving_visible = boiling_model.boiling_type == 'salt'
                 make('serving', time_size=boiling_model.meltings.serving_time, visible=serving_visible)
                 make('melting_process', time_size=melting_time, speed=boiling_model.meltings.speed)
 
                 if boiling_model.boiling_type == 'salt':
                     make('salting', time_size=boiling_model.meltings.salting_time)
-                cur_y += 1
-            with make(y=cur_y):
+            with make(orient='vertical', h=1):
                 make(time_size=boiling_model.meltings.serving_time, visible=False)
                 if boiling_model.boiling_type == 'water':
                     make('cooling1', time_size=boiling_model.meltings.first_cooling_time)
