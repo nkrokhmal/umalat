@@ -56,7 +56,7 @@ def make_schedule(boiling_plan_df):
         row = pick(boiling_plan_grouped_df, boiling_type)
         if row is None:
             return
-        b = make_boiling(cast_boiling(str(row['id'])), row['contents'], boiling_type, block_num=i + 1, last_packing_sku=line_df.at[boiling_type, 'last_packing_sku'])
+        b = make_boiling(cast_boiling(str(row['id'])), row['contents'], block_num=i + 1, last_packing_sku=line_df.at[boiling_type, 'last_packing_sku'])
 
         if init:
             beg = cast_t(line_df.at[boiling_type, 'start_time']) - b['melting_and_packing'].beg
@@ -141,7 +141,7 @@ def make_schedule(boiling_plan_df):
 
 
 def draw_workbook(root, mode='prod', template_fn=None):
-    style = load_style(mode=mode)
+    style = load_style()
     root.props.update({'size': max(c.end for c in root.children)})
     init_sheet_func = init_sheet if mode == 'dev' else init_template_sheet(template_fn=template_fn)
     return draw_schedule(root, style, init_sheet_func=init_sheet_func)
