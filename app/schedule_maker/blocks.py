@@ -3,8 +3,7 @@ from app.schedule_maker.utils import *
 from app.schedule_maker.utils.time import cast_t, cast_time
 
 
-
-def make_melting_and_packing(boiling_model, boiling_contents, melting_line=None, last_packing_sku=None):
+def make_melting_and_packing(line_df, boiling_model, boiling_contents):
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
@@ -30,11 +29,11 @@ def make_melting_and_packing(boiling_model, boiling_contents, melting_line=None,
     with make('melting_and_packing'):
         # packing and melting time
         packing_times = []
-        configuration_times = get_configuration_times([last_packing_sku] + [sku for sku, sku_kg in boiling_contents]) # add last_packing for first configuration
+        configuration_times = get_configuration_times([line_df.at[boiling_model.boiling_type, 'last_packing_sku']] + [sku for sku, sku_kg in boiling_contents]) # add last_packing for first configuration
 
         if boiling_model.boiling_type == 'water':
             # [cheesemakers.boiling_output]
-            cheese_from_boiling = 1000 # todo: take from parameters
+            cheese_from_boiling = 1000  # todo: take from parameters
 
             # [cheesemakers.boiling_volume]
             cheese_from_boiling *= 8000 / 8000 # todo: make boiling_volume count
@@ -79,8 +78,7 @@ def make_melting_and_packing(boiling_model, boiling_contents, melting_line=None,
         form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
         brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
 
-        with make('melting', time_size=full_melting_time, melting_line=melting_line):
-            # todo: make properly
+        with make('melting', time_size=full_melting_time):
             cur_y = 0
             if boiling_model.boiling_type == 'water':
                 with make(y=cur_y):
@@ -147,8 +145,9 @@ def make_melting_and_packing(boiling_model, boiling_contents, melting_line=None,
     return res
 
 
-def make_boiling(boiling_model, boiling_contents, block_num=12, pouring_line=None, last_packing_sku=None):
+def make_boiling(line_df, boiling_model, boiling_contents, block_num=12, pouring_line=None):
     termizator = db.session.query(Termizator).first()
+
     # [termizator.time]
     termizator.pouring_time = 30
 
@@ -181,14 +180,8 @@ def make_boiling(boiling_model, boiling_contents, block_num=12, pouring_line=Non
                 make('pouring_off', time_size=timings[3])
                 make('extra', time_size=timings[4])
 
-        # [drenator.chedderization_time]
-        if boiling_model.boiling_type == 'water':
-            chedderization_time = '04:00'
-        else:
-            chedderization_time = '03:00'
-        make('drenator', time_size=cast_t(chedderization_time) * 5 - timings[3] - timings[4], visible=False)
-
-        make(make_melting_and_packing(boiling_model, boiling_contents, last_packing_sku=last_packing_sku))
+        make('drenator', time_size=cast_t(line_df.at[boiling_model.boiling_type, 'chedderization_time']) * 5 - timings[3] - timings[4], visible=False)
+        make(make_melting_and_packing(line_df, boiling_model, boiling_contents))
 
     res = maker.root.children[0]
     res.props.update({'size': max(c.end for c in res.children)})

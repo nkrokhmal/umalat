@@ -35,13 +35,19 @@ def make_schedule(boiling_plan_df):
     boiling_plan_grouped_df['type'] = boiling_plan_grouped_df['boiling'].apply(lambda b: 'salt' if b.lines.name == 'Пицца чиз' else 'water')
     boiling_plan_grouped_df['id'] = boiling_plan_grouped_df['boiling'].apply(lambda b: int(b.id))
 
-    line_df = pd.DataFrame(index=['water', 'salt'], columns=['iter_props', 'last_packing_sku', 'latest_boiling', 'start_time', 'boilings'])
+    line_df = pd.DataFrame(index=['water', 'salt'], columns=['iter_props', 'last_packing_sku', 'latest_boiling', 'start_time', 'boilings', 'chedderization_time'])
     line_df.at['water', 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
     line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
 
+    # todo: take from parameters
     # [cheesemakers.start_time]
     line_df.at['water', 'start_time'] = '09:50'
     line_df.at['salt', 'start_time'] = '07:05'
+
+    # todo: take from parameters
+    # [drenator.chedderization_time]
+    line_df.at['water', 'chedderization_time'] = '04:00'
+    line_df.at['salt', 'chedderization_time'] = '03:00'
 
     line_df.at['water', 'boilings'] = []
     line_df.at['salt', 'boilings'] = []
@@ -56,7 +62,7 @@ def make_schedule(boiling_plan_df):
         row = pick(boiling_plan_grouped_df, boiling_type)
         if row is None:
             return
-        b = make_boiling(cast_boiling(str(row['id'])), row['contents'], block_num=i + 1, last_packing_sku=line_df.at[boiling_type, 'last_packing_sku'])
+        b = make_boiling(line_df, cast_boiling(str(row['id'])), row['contents'], block_num=i + 1)
 
         if init:
             beg = cast_t(line_df.at[boiling_type, 'start_time']) - b['melting_and_packing'].beg
