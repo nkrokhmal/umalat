@@ -32,15 +32,7 @@ def boiling_validator(parent, boiling):
                 else:
                     validate_disjoint(b1['melting_and_packing']['melting'], b2['melting_and_packing']['melting'])
             else:
-                if b1['melting_and_packing']['melting'].props['melting_line'] == b2['melting_and_packing']['melting'].props['melting_line']:
-                    validate_disjoint(b1['melting_and_packing']['melting'], b2['melting_and_packing']['melting'])
-
-                    # todo:del, make properly
-                    validate_disjoint(b1['melting_and_packing']['melting'][1]['salting'],
-                                      b2['melting_and_packing']['melting'][1]['serving'])
-
-                else:
-                    validate_disjoint(b1['melting_and_packing']['melting'][1]['melting_process'], b2['melting_and_packing']['melting'][1]['melting_process'])
+                validate_disjoint(b1['melting_and_packing']['melting'][1]['melting_process'], b2['melting_and_packing']['melting'][1]['melting_process'])
 
             validate_disjoint(b1['melting_and_packing']['packing_and_preconfiguration'], b2['melting_and_packing']['packing_and_preconfiguration'])
 

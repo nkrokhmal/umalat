@@ -36,7 +36,7 @@ def make_schedule(boiling_plan_df):
 
     line_df = pd.DataFrame(index=['water', 'salt'], columns=['iter_props', 'last_packing_sku', 'latest_boiling', 'start_time', 'boilings'])
     line_df.at['water', 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
-    line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v[0]), 'melting_line': str(v[1])} for v in product([2, 3], [0, 1, 2, 3])]
+    line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
 
     # [cheesemakers.start_time]
     line_df.at['water', 'start_time'] = '09:50'
@@ -86,7 +86,7 @@ def make_schedule(boiling_plan_df):
             if boiling_type == 'salt':
                 # start working for 3 lines on salt
                 # [lines.extra_salt_cheesemaker]
-                line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v[0]), 'melting_line': str(v[1])} for v in product([1, 2, 3], [0, 1, 2, 3])]
+                line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [1, 2, 3]]
         elif len(left_unique) == 0:
             # stop production
             break

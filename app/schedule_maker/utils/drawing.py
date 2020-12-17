@@ -81,7 +81,6 @@ def draw(sheet, block):
                 t += b.props['index_width']  # first index columns
                 t += 1  # indexing starts with 1 in excel
 
-                print(b.props['class'], t, b.props['size'], b.props['y'], b.props.get('h', 1))
                 draw_block(sheet,
                            t,
                            b.props['y'],
