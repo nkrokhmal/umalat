@@ -1,5 +1,5 @@
 from io import BytesIO
-from flask import url_for, render_template, flash, request, make_response, current_app, request
+from flask import url_for, render_template, flash, request, make_response, current_app, request, send_from_directory
 from pycel import ExcelCompiler
 from werkzeug.utils import redirect
 from . import main
@@ -81,6 +81,13 @@ def generate_boiling_plan_full():
         boiling_plan_df = generate_constructor_df(df)
         full_plan = generate_full_constructor_df(boiling_plan_df)
         link = draw_constructor(full_plan, file.filename)
+
+        print(current_app.root_path)
+        print(link)
+        uploads = os.path.join(current_app.root_path, link)
+        print(uploads)
+        # send_from_directory(uploads)
+        # send_from_directory(directory=uploads, filename=filename)
         return render_template('boiling_plan_full.html', form=form, link=link)
     link = None
     return render_template('boiling_plan_full.html', form=form, link=link)

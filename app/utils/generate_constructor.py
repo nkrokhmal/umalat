@@ -112,11 +112,11 @@ def draw_constructor(df, file_name):
             # formula_zeros = '=IF({0}{2} = 0, {1}{3}, {0}{2})'.format('K', 'M', cur_i, cur_i - 1)
             formula_remains = '=IF(M{0} - INDIRECT("M" & ROW() - 1) = 0, "", INDIRECT("M" & ROW() - 1) - M{0})'.format(cur_i)
             formula_calc = '=IF(I{0} = "-", -INDIRECT("D" & ROW() - 1),G{0})'.format(cur_i)
-            formula_remains_cumsum = '=IF(I{0} = "-", SUM(J$2:J{0}), 0)'.format(cur_i)
+            formula_remains_cumsum = '=IF(I{0} = "-", SUM(INDIRECT(ADDRESS(2,COLUMN(J{0})) & ":" & ADDRESS(ROW(),COLUMN(J{0})))), 0)'.format(cur_i)
             formula_delimiter_int = '=IF(I{0}="-",1,0)'.format(cur_i)
             formula_zeros = '=IF(K{0} = 0, INDIRECT("M" & ROW() - 1), K{0})'.format(cur_i)
 
-            v[1] = '=IF(I{0}="-", "", 1 +SUM(L$2:L{0}))'.format(cur_i)
+            v[1] = '=IF(I{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(cur_i)
             v.insert(-1, formula_remains)
             v.append(formula_calc)
             v.append(formula_remains_cumsum)

@@ -24,7 +24,7 @@
 </main>
 
 <div class="page-header">
-    <h1> загрузите файл входной заявки и выберите дату </h1>
+    <h1> Загрузите файл входной заявки и выберите дату </h1>
 </div>
 <div class="col-md-6" style="margin-bottom: 20px;">
     {{ wtf.quick_form(form) }}
@@ -32,7 +32,7 @@
 
 {% if result_path %}
     <div class="col-md-6" style="margin-bottom: 20px;">
-        <a href="{{result_path}}"><button class="btn"><i class="fa fa-download"></i> Download </button></a>
+        <a href="{{result_path}}"><button class="btn"><i class="fa fa-download"></i> Скачать </button></a>
         <br>
         <br>
         <a href="{{url_for('main.schedule')}}"> Перейти к созданию плана </a>
