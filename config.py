@@ -12,6 +12,9 @@ class BaseClass:
     STATS_LINK_FOLDER = 'data/stats'
     CONSTRUCTOR_FOLDER = 'app/data/constructor'
     CONSTRUCTOR_LINK_FOLDER = 'data/constructor'
+    BOILING_PLAN_FOLDER = 'data/constructor'
+    SKU_PLAN_FOLDER = 'data/plan'
+    SCHEDULE_PLAN_FOLDER = '/data/schedule'
     CONSTRUCTOR_CELLS = {
         'value': 'J',
         'remains_cumsum': 'K',

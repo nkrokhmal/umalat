@@ -6,6 +6,7 @@ from .forms import RequestForm
 from ..models import SKU
 import pandas as pd
 from io import BytesIO
+import os
 
 
 COLUMNS = {
@@ -65,12 +66,13 @@ def parse_request():
 
         result_path = build_plan(date, df_save, request_list=result_list)
         data = [x for x in data if type(x[1]) is not str]
+        file_name = os.path.basename(result_path)
         return render_template('parse_request.html', data=data, form=form, result_list=result_list,
-                               result_path=result_path)
+                               file_name=file_name)
     data = None
     result_list = None
-    result_path = None
-    return render_template('parse_request.html', data=data, form=form, result_list=result_list, result_path=result_path)
+    file_name = None
+    return render_template('parse_request.html', data=data, form=form, result_list=result_list, file_name=file_name)
 
 
 # @main.route('/parse_request2', methods=['GET', 'POST'])

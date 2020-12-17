@@ -32,12 +32,23 @@
     {{ wtf.quick_form(form) }}
 </div>
 
-{% if schedule_link %}
+{% if filename %}
     <div class="col-md-6" style="margin-bottom: 20px;">
-        <a href="{{schedule_link}}"><button class="btn"><i class="fa fa-download"></i> Скачать </button></a>
-        <br>
-        <br>
-        <a href="{{schedule_json_link}}"><button class="btn"><i class="fa fa-download"></i> Скачать json (Для разработчиков) </button></a>
+        <script>
+            function download(url, filename) {
+            fetch(url).then(function(t) {
+                return t.blob().then((b)=>{
+                    var a = document.createElement("a");
+                    a.href = URL.createObjectURL(b);
+                    a.setAttribute("download", filename);
+                    a.click();
+                }
+                );
+            });
+            }
+            var url = "download_schedule_plan/" + "{{filename}}";
+            download(url,"{{file_name}}");
+        </script>
     </div>
 {% endif %}
 {% endblock %}

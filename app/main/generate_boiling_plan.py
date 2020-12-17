@@ -81,13 +81,9 @@ def generate_boiling_plan_full():
         boiling_plan_df = generate_constructor_df(df)
         full_plan = generate_full_constructor_df(boiling_plan_df)
         link = draw_constructor(full_plan, file.filename)
-
-        # print(current_app.root_path)
-        # uploads = os.path.join(current_app.root_path, current_app.config['CONSTRUCTOR_LINK_FOLDER'])
-        # print(uploads, file.filename)
-        # send_from_directory(directory=uploads, filename=file.filename, as_attachment=True)
-        return render_template('boiling_plan_full.html', form=form, link=link)
+        return render_template('boiling_plan_full.html', form=form, link=link, file_name=file.filename)
     link = None
+    file_name = None
     return render_template('boiling_plan_full.html', form=form, link=link)
 
 

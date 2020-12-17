@@ -49,10 +49,6 @@ def schedule():
         root = make_schedule(boiling_request, date)
         schedule_wb = draw_workbook(root, mode='prod')
         schedule_wb.save(path_schedule)
-
-        schedule_link = '{}/{}'.format('data/schedule', filename_schedule)
-        schedule_json_link = '{}/{}'.format('data/schedule_json', json_schedule)
-        return render_template('schedule.html', form=form, schedule_link=schedule_link, schedule_json_link=schedule_json_link)
-    schedule_link = None
-    schedule_json_link = None
-    return render_template('schedule.html', form=form, schedule_link=schedule_link, schedule_json_link=schedule_json_link)
+        return render_template('schedule.html', form=form, filename=filename)
+    filename = None
+    return render_template('schedule.html', form=form, filename=filename)
