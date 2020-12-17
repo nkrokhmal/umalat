@@ -96,13 +96,15 @@ def draw_constructor(df, file_name):
             # add separator
             values.append(['-'] * (len(df_filter.columns) + 1))
 
+        sheet.column_dimensions['A'].hidden = True
+        sheet.column_dimensions['H'].hidden = True
+        sheet.column_dimensions['J'].hidden = True
+        sheet.column_dimensions['K'].hidden = True
+        sheet.column_dimensions['L'].hidden = True
+        sheet.column_dimensions['M'].hidden = True
+
         # todo: column names to config
         for v in values:
-            sheet.column_dimensions['J'].hidden = True
-            sheet.column_dimensions['K'].hidden = True
-            sheet.column_dimensions['L'].hidden = True
-            sheet.column_dimensions['M'].hidden = True
-
             # formula_remains = '=IF({0}{1} - {0}{2} = 0, "", {0}{1} - {0}{2})'.format('M', cur_i, cur_i - 1)
             # formula_calc = '=IF({0}{3} = "-", -{1}{4},{2}{3})'.format('I', 'D', 'G', cur_i, cur_i - 1)
             # formula_remains_cumsum = '=IF({0}{2} = "-", SUM({1}$2:J{2}), 0)'.format('I', 'J', cur_i, cur_i - 1)
