@@ -97,7 +97,7 @@ def draw_constructor(df, file_name):
             values.append(['-'] * (len(df_filter.columns) + 1))
 
         sheet.column_dimensions['A'].hidden = True
-        sheet.column_dimensions['H'].hidden = True
+        sheet.column_dimensions['I'].hidden = True
         sheet.column_dimensions['J'].hidden = True
         sheet.column_dimensions['K'].hidden = True
         sheet.column_dimensions['L'].hidden = True
