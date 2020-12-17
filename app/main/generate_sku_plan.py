@@ -80,6 +80,7 @@ def generate_sku_plan_old():
         path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
         link = '{}/{}.csv'.format(current_app.config['STATS_LINK_FOLDER'], os.path.splitext(file.filename)[0])
         df[['sku', 'plan']].to_csv(path, index=False)
+        os.remove(file_path)
         return render_template('sku_plan_old.html', form=form, link=link)
     link = None
     return render_template('sku_plan_old.html', form=form, link=link)

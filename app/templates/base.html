@@ -20,12 +20,13 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Home</a>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">Правила</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="{{ url_for('main.parse_request') }}"> Заявка </a></li>
-                <li><a href="{{ url_for('main.schedule') }}"> Планирование </a></li>
+                <li><a href="{{ url_for('main.generate_boiling_plan_full') }}"> Варки </a></li>
+                <li><a href="{{ url_for('main.schedule') }}"> Расписание </a></li>
                 <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Параметры </a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('main.get_general_params') }}"> Общие параметры </a></li>
@@ -33,13 +34,13 @@
                         <li><a href="{{ url_for('main.get_boiling') }}"> Процесс варки </a></li>
                     </ul>
                 </li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Парсинг файлов </a>
+                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Разное </a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('main.generate_sku_plan_old') }}"> Парсинг старого файла </a></li>
                         <li><a href="{{ url_for('main.generate_sku_plan_new') }}"> Парсинг нового файла </a></li>
+                        <li><a href="{{ url_for('main.generate_boiling_plan') }}">Создание Excel конструктора</a></li>
                     </ul>
                 </li>
-                <li><a href="{{ url_for('main.generate_boiling_plan') }}">Создание Excel конструктора</a></li>
             </ul>
         </div>
     </div>
