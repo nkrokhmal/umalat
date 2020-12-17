@@ -3,7 +3,7 @@ from app.schedule_maker.utils import *
 from app.schedule_maker.utils.time import cast_t, cast_time
 
 
-def make_melting_and_packing(line_df, boiling_model, boiling_contents):
+def make_melting_and_packing(line_df, boiling_model, boiling_grp):
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
@@ -29,7 +29,7 @@ def make_melting_and_packing(line_df, boiling_model, boiling_contents):
     with make('melting_and_packing'):
         # packing and melting time
         packing_times = []
-        configuration_times = get_configuration_times([line_df.at[boiling_model.boiling_type, 'last_packing_sku']] + [sku for sku, sku_kg in boiling_contents]) # add last_packing for first configuration
+        configuration_times = get_configuration_times([line_df.at[boiling_model.boiling_type, 'last_packing_sku']] + boiling_grp['sku'].values.tolist()) # add last_packing for first configuration
 
         if boiling_model.boiling_type == 'water':
             # [cheesemakers.boiling_output]
@@ -40,14 +40,14 @@ def make_melting_and_packing(line_df, boiling_model, boiling_contents):
 
             melting_time = custom_round(cheese_from_boiling / boiling_model.meltings.speed * 60, 5, rounding='ceil')
 
-            for sku, sku_kg in boiling_contents:
+            for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist():
                 packing_speed = min(sku.packing_speed, boiling_model.meltings.speed)
                 packing_times.append(custom_round(sku_kg / packing_speed * 60, 5, rounding='ceil'))
             total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
             full_melting_time = boiling_model.meltings.serving_time + melting_time
 
         elif boiling_model.boiling_type == 'salt':
-            for sku, sku_kg in boiling_contents:
+            for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist():
                 packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
 
             total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
@@ -75,8 +75,8 @@ def make_melting_and_packing(line_df, boiling_model, boiling_contents):
                 values.append(s)
             return '/'.join(values)
 
-        form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
-        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_contents])
+        form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
+        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
 
         with make('melting', time_size=full_melting_time):
             if boiling_model.boiling_type == 'water':
@@ -137,7 +137,7 @@ def make_melting_and_packing(line_df, boiling_model, boiling_contents):
     return res
 
 
-def make_boiling(line_df, boiling_model, boiling_contents, block_num=12, pouring_line=None):
+def make_boiling(line_df, boiling_model, boiling_grp, block_num=12, pouring_line=None):
     termizator = db.session.query(Termizator).first()
 
     # [termizator.time]
@@ -173,7 +173,7 @@ def make_boiling(line_df, boiling_model, boiling_contents, block_num=12, pouring
                 make('extra', time_size=timings[4])
 
         make('drenator', time_size=cast_t(line_df.at[boiling_model.boiling_type, 'chedderization_time']) * 5 - timings[3] - timings[4], visible=False)
-        make(make_melting_and_packing(line_df, boiling_model, boiling_contents))
+        make(make_melting_and_packing(line_df, boiling_model, boiling_grp))
 
     res = maker.root.children[0]
     res.props.update({'size': max(c.end for c in res.children)})
