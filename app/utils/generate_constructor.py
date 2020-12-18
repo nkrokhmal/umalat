@@ -55,6 +55,51 @@ def generate_empty_sku():
     return skus
 
 
+def draw_constructor_template(df, file_name, wb):
+    skus = db.session.query(SKU).all()
+    data_sku = {'Вода': [x.name for x in skus if x.boilings[0].cheese_types.name == 'Вода'],
+                'Соль': [x.name for x in skus if x.boilings[0].cheese_types.name == 'Соль']}
+
+    for sheet_name in ['Соль', 'Вода']:
+        sku_names = data_sku[sheet_name]
+        sku_sheet_name = '{} SKU'.format(sheet_name)
+        boiling_sheet = wb[sheet_name]
+        sku_sheet = wb[sku_sheet_name]
+
+        draw_row(sku_sheet, 1, ['-'], font_size=8)
+        cur_i = 2
+
+        for sku_name in sku_names:
+            draw_row(sku_sheet, cur_i, [sku_name], font_size=8)
+            cur_i += 1
+
+        cur_i = 2
+        values = []
+        df_filter = df[df['name'].isin(sku_names)].copy()
+
+        for id, grp in df_filter.groupby('id'):
+            for i, row in grp.iterrows():
+                v = []
+                v += list(row.values)
+                v += ['']
+                values.append(v[:-1])
+            values.append(['-'] * (len(df_filter.columns) + 2))
+
+        for v in values:
+            if v[0] == '-':
+                ids = [1, 3, 4, 5, 6, 7, 9]
+                for id in ids:
+                    draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
+            else:
+                colour = get_colour_by_name(v[5], skus)
+                draw_row(boiling_sheet, cur_i, v, font_size=8, color=colour)
+            cur_i += 1
+
+    path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], os.path.splitext(file_name)[0])
+    wb.save(path)
+    return '{}.xlsx'.format(os.path.splitext(file_name)[0])
+
+
 def draw_constructor(df, file_name):
     wb = init_sheets('Соль', 'Вода')
 

@@ -13,6 +13,7 @@ class BaseClass:
     BOILING_PLAN_FOLDER = 'app/data/boiling_plan'
     SKU_PLAN_FOLDER = 'app/data/sku_plan'
     SCHEDULE_PLAN_FOLDER = 'app/data/schedule_plan'
+    TEMPLATE_BOILING_PLAN = 'app/data/templates/constructor.xlsx'
 
     SHEET_NAMES = {
         'remainings': 'файл остатки',

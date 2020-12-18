@@ -80,7 +80,8 @@ def generate_boiling_plan_full():
         df['sku'] = df['sku_id'].apply(cast_sku)
         boiling_plan_df = generate_constructor_df(df)
         full_plan = generate_full_constructor_df(boiling_plan_df)
-        new_file_name = draw_constructor(full_plan, file.filename)
+        template_wb = openpyxl.load_workbook(current_app.config['TEMPLATE_BOILING_PLAN'])
+        new_file_name = draw_constructor_template(full_plan, file.filename, template_wb)
         return render_template('boiling_plan_full.html', form=form, file_name=new_file_name)
     file_name = None
     return render_template('boiling_plan_full.html', form=form, file_name=file_name)
