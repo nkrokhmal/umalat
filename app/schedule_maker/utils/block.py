@@ -6,16 +6,16 @@ from app.schedule_maker.utils.interval import calc_interval_length, cast_interva
 from app.schedule_maker.utils.time import *
 
 
-def validate_disjoint(b1, b2):
+def validate_disjoint(b1, b2, axis='x'):
     # assert a disposition information
     try:
-        disposition = b1.interval.upper - b2.interval.lower
+        disposition = b1.interval(axis).upper - b2.interval(axis).lower
     except:
         disposition = 1
 
-    if calc_interval_length(b1.interval & b2.interval) != 0:
+    if calc_interval_length(b1.interval(axis) & b2.interval(axis)) != 0:
         logging.info(['Disposition', disposition, b1.props['class'], b1.time_interval, b2.props['class'], b2.time_interval, b1.props.get_all_props(), b2.props.get_all_props()])
-    assert calc_interval_length(b1.interval & b2.interval) == 0, cast_js({'disposition': disposition})
+    assert calc_interval_length(b1.interval(axis) & b2.interval(axis)) == 0, cast_js({'disposition': disposition})
 
 
 def gen_pair_validator(validate=validate_disjoint):
@@ -60,13 +60,9 @@ REQUIRED_KEYS = ['size', 'time_size']
 
 
 class Block:
-    def __init__(self, block_class=None, props=None, orient='horizontal', **kwargs):
+    def __init__(self, block_class=None, props=None, **kwargs):
         block_class = block_class or 'block'
         # todo: create a better solution
-        self.orient = orient
-        self.beg_key = 't' if self.orient == 'horizontal' else 'y'
-        self.size_key = 'size' if self.orient == 'horizontal' else 'h'
-
         props = props or {}
         props['class'] = block_class
         props.update(kwargs)
@@ -95,9 +91,20 @@ class Block:
         else:
             return res
 
+    def length(self, axis='x'):
+        return self.w if axis == 'x' else self.h
+
     @property
-    def length(self):
-        res = self.props[self.size_key]
+    def x1(self):
+        return self.props['t']
+
+    @property
+    def x2(self):
+        return self.x1 + self.length('x')
+
+    @property
+    def w(self):
+        res = self.props['size']
 
         if res:
             return res
@@ -106,33 +113,56 @@ class Block:
             if not self.children:
                 return 0
             else:
-                if {self.orient} == {c.orient for c in self.children}:
-                    # orient is the same as in the children
-                    return max([0] + [c.end - self.beg for c in self.children])
-                else:
-                    return 0
-
-        return res
-
+                # orient is the same as in the children
+                return max([0] + [c.x2 - self.x1 for c in self.children])
 
     @property
-    def beg(self):
-        return self.props[self.beg_key]
+    def y1(self):
+        return self.props['y']
 
     @property
-    def end(self):
-        return self.beg + self.length
+    def y2(self):
+        return self.y1 + self.length('y')
+
+    def beg(self, axis='x'):
+        if axis == 'x':
+            return self.x1
+        else:
+            return self.y1
+
+    def end(self, axis='x'):
+        if axis == 'x':
+            return self.x2
+        else:
+            return self.y2
 
     @property
-    def interval(self):
-        return cast_interval(self.beg, self.end)
+    def h(self):
+        res = self.props.relative_props.get('h')
+
+        if res:
+            return res
+        else:
+            # no length - get length from children!
+            if not self.children:
+                # default h
+                return 1
+            else:
+                # orient is the same as in the children
+                return max([0] + [c.y2 - self.y1 for c in self.children])
+
+    def interval(self, axis='x'):
+        if axis == 'x':
+            return cast_interval(self.x1, self.x2)
+        elif axis == 'y':
+            return cast_interval(self.y1, self.y2)
 
     @property
     def time_interval(self):
-        return '[{}, {})'.format(cast_time(self.beg), cast_time(self.end))
+        return '[{}, {})'.format(cast_time(self.x1), cast_time(self.x2))
 
     def __str__(self):
-        res = f'{self.props["class"]} ({self.beg}, {self.end}]\n'
+        res = f'{self.props["class"]} ({self.y1}, {self.y2}] x ({self.x1}, {self.x2}]\n'
 
         for child in self.children:
             for line in str(child).split('\n'):
@@ -165,9 +195,10 @@ class Block:
         return block
 
 
-def simple_push(parent, block, validator='basic', new_props=None):
-    if validator == 'basic':
-        validator = gen_pair_validator()
+def simple_push(parent, block, validator='x', new_props=None):
+    if validator in ['x', 'y']:
+        axis = str(validator)
+        validator = gen_pair_validator(validate=lambda b1, b2: validate_disjoint(b1, b2, axis=axis))
 
     # set parent for proper abs_props
     block.set_parent(parent)
@@ -193,24 +224,21 @@ def add_push(parent, block, new_props=None):
 
 
 # simple greedy algorithm
-def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, validator='basic', iter_props=None):
+def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, axis='x', validator='x', iter_props=None):
     # note: make sure parent abs props are updated
-
-    orient = {c.orient for c in parent.children} | {block.orient}
-    if len(orient) != 1:
-        raise Exception('Multiple orientations found')
+    beg_key = 't' if axis == 'x' else 'y'
 
     if beg == 'last_beg':
-        cur_beg = max([parent.props[block.beg_key]] + [child.beg for child in parent.children])
+        cur_beg = max([parent.beg(axis)] + [child.beg(axis) for child in parent.children])
     elif beg == 'last_end':
-        cur_beg = max([parent.props[block.beg_key]] + [child.end for child in parent.children])
+        cur_beg = max([parent.beg(axis)] + [child.end(axis) for child in parent.children])
     elif isinstance(beg, int):
         cur_beg = beg
     else:
         raise Exception('Unknown beg type')
 
     # go to relative coordinates
-    cur_beg -= parent.props[block.beg_key]
+    cur_beg -= parent.beg(axis)
 
     # print('Starting from', cur_beg, parent.props['class'], block.props['class'])
     # print([parent.beg] + [(child.beg, child.end, child.length, child.props['size']) for child in parent.children])
@@ -223,8 +251,7 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
         dispositions = []
         for props in iter_props:
             props = copy.deepcopy(props)
-            props[block.beg_key] = cur_beg
-
+            props[beg_key] = cur_beg
             res = simple_push(parent, block, validator=validator, new_props=props)
             if isinstance(res, Block):
                 return block
@@ -242,6 +269,8 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
         logging.info(['All dispositions', dispositions])
     raise Exception('Failed to push element')
 
+def dummy_push_y(parent, block, **kwargs):
+    return dummy_push(parent, block, axis='y', **kwargs)
 
 class BlockMaker:
     def __init__(self, root='root', default_push_func=simple_push):
@@ -290,7 +319,8 @@ if __name__ == '__main__':
     dummy_push(a, b)
     dummy_push(a, c)
     print(a)
-    print('No sizes specified', a.props['size'], a.props['time_size'], a.length, a.beg, a.end)
+    print('No sizes specified', a.props['size'], a.props['time_size'], a.length(), a.x1, a.x2)
+    print()
 
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
@@ -299,21 +329,24 @@ if __name__ == '__main__':
         make('b', size=2)
         make('c', size=1)
 
+    print('Block maker')
+    print(maker.root)
+
     maker = BlockMaker(default_push_func=add_push)
     make = maker.make
 
-    print('Add push')
     with make('a', size=3, t=5):
         make('b', t=2, size=2)
         make('b', size=2)
         make('c', size=1)
+    print('Add push')
     print(maker.root)
 
-    print(maker.root['a']['b'][0].interval)
+    print(maker.root['a']['b'][0].interval())
     print(maker.root['a'][2])
 
     b = Block('a', time_size=10)
-    print(b.length)
+    print(b.length())
 
     try:
         b = Block('a', time_size=11)

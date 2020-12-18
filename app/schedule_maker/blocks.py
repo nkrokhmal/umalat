@@ -80,20 +80,20 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
 
         with make('melting', time_size=full_melting_time):
             if boiling_model.boiling_type == 'water':
-                with make(orient='vertical', h=1):
+                with make(h=1, push_func=dummy_push_y):
                     make('serving', time_size=boiling_model.meltings.serving_time)
-            with make(orient='vertical', h=1):
+            with make(h=1, push_func=dummy_push_y):
                 make('serving', time_size=boiling_model.meltings.serving_time, visible=False)
                 make('melting_label', time_size=4 * 5)
                 make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_model.meltings.serving_time, form_factor_label=form_factor_label)
-            with make(orient='vertical', h=1):
+            with make(h=1, push_func=dummy_push_y):
                 serving_visible = boiling_model.boiling_type == 'salt'
                 make('serving', time_size=boiling_model.meltings.serving_time, visible=serving_visible)
                 make('melting_process', time_size=melting_time, speed=boiling_model.meltings.speed)
 
                 if boiling_model.boiling_type == 'salt':
                     make('salting', time_size=boiling_model.meltings.salting_time)
-            with make(orient='vertical', h=1):
+            with make(h=1, push_func=dummy_push_y):
                 make(time_size=boiling_model.meltings.serving_time, visible=False)
                 if boiling_model.boiling_type == 'water':
                     make('cooling1', time_size=boiling_model.meltings.first_cooling_time)
@@ -112,20 +112,20 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
                 with make('preconfiguration'):
                     make('configuration', time_size=configuration_times[0], y=2)
             with make('packing', time_size=total_packing_time):
-                with make(orient='vertical', h=1):
+                with make(h=1, push_func=dummy_push_y):
                     make('packing_label', time_size=3 * 5)
                     # use different labels for water and salt
                     if boiling_model.boiling_type == 'water':
                         make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
                     elif boiling_model.boiling_type == 'salt':
                         make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=brand_label)
-                with make(orient='vertical', h=1):
+                with make(h=1, push_func=dummy_push_y):
                     # use different labels for water and salt
                     if boiling_model.boiling_type == 'water':
                         make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
                     elif boiling_model.boiling_type == 'salt':
                         make('packing_brand', time_size=total_packing_time, brand_label='фасовка')
-                with make(orient='vertical', h=1):
+                with make(h=1, push_func=dummy_push_y):
 
 
                     make('packing_process', time_size=packing_times[0], visible=False)
@@ -162,10 +162,10 @@ def make_boiling(line_df, boiling_model, boiling_grp, block_num=12, pouring_line
         timings.append(boiling_model.pourings.extra_time)
 
         with make('pouring', time_size=sum(timings), pouring_line=pouring_line):
-            with make(orient='vertical', h=1):
+            with make(h=1, push_func=dummy_push_y):
                 make('termizator', time_size=termizator.pouring_time)
                 make('pouring_name', time_size=sum(timings) - termizator.pouring_time)
-            with make(orient='vertical', h=1):
+            with make(h=1, push_func=dummy_push_y):
                 make('pouring_and_fermenting', time_size=timings[0])
                 make('soldification', time_size=timings[1])
                 make('cutting', time_size=timings[2])

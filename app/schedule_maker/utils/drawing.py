@@ -75,7 +75,7 @@ def draw(sheet, block):
                 text = text.replace('>', '}')
                 text = eval(f'f{text!r}')
 
-                t = b.props['t']
+                t = b.x1
                 if 'beg_time' in b.props.get_all_props():
                     t -= cast_t(b.props['beg_time'])  # shift of timeline
                 t += b.props['index_width']  # first index columns
@@ -83,16 +83,16 @@ def draw(sheet, block):
 
                 draw_block(sheet,
                            t,
-                           b.props['y'],
-                           b.props['size'],
-                           b.props.get('h', 1),
+                           b.y1,
+                           b.w,
+                           b.h,
                            text,
                            color,
                            border={'border_style': 'thin', 'color': '000000'},
                            text_rotation=b.props.get('text_rotation'), font_size=8, alignment='center')
             except:
-                print(b)
-                print(b.props.relative_props, b.interval)
+                print(b, t, b.y1, b.w, b.h)
+                print(b.props.relative_props, b.interval())
                 raise
 
 
