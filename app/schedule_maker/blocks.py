@@ -109,32 +109,32 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
 
         with make('packing_and_preconfiguration', t=(prepare_time - configuration_times[0]) / 5, time_size=total_packing_time + configuration_times[0], push_func=add_push):
             if configuration_times[0]:
-                make('configuration', time_size=configuration_times[0], y=2)
-
+                with make('preconfiguration'):
+                    make('configuration', time_size=configuration_times[0], y=2)
             with make('packing', time_size=total_packing_time):
-                with make(y=0):
+                with make(orient='vertical', h=1):
                     make('packing_label', time_size=3 * 5)
                     # use different labels for water and salt
                     if boiling_model.boiling_type == 'water':
                         make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
                     elif boiling_model.boiling_type == 'salt':
                         make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=brand_label)
-                with make(y=1):
+                with make(orient='vertical', h=1):
                     # use different labels for water and salt
                     if boiling_model.boiling_type == 'water':
                         make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
                     elif boiling_model.boiling_type == 'salt':
                         make('packing_brand', time_size=total_packing_time, brand_label='фасовка')
-                with make(y=2):
-                    make('configuration', time_size=packing_times[0], visible=False)
+                with make(orient='vertical', h=1):
+
+
+                    make('packing_process', time_size=packing_times[0], visible=False)
 
                     for i, packing_time in enumerate(packing_times[1:]):
                         make('configuration', time_size=configuration_times[i + 1])
-                        make('configuration', time_size=packing_time, visible=False)
+                        make('packing_process', time_size=packing_time, visible=False)
 
-    res = maker.root.children[0]
-    res.props.update({'size': max(c.end for c in res.children)})
-    return res
+    return maker.root.children[0]
 
 
 def make_boiling(line_df, boiling_model, boiling_grp, block_num=12, pouring_line=None):
@@ -162,10 +162,10 @@ def make_boiling(line_df, boiling_model, boiling_grp, block_num=12, pouring_line
         timings.append(boiling_model.pourings.extra_time)
 
         with make('pouring', time_size=sum(timings), pouring_line=pouring_line):
-            with make(y=0):
+            with make(orient='vertical', h=1):
                 make('termizator', time_size=termizator.pouring_time)
                 make('pouring_name', time_size=sum(timings) - termizator.pouring_time)
-            with make(y=1):
+            with make(orient='vertical', h=1):
                 make('pouring_and_fermenting', time_size=timings[0])
                 make('soldification', time_size=timings[1])
                 make('cutting', time_size=timings[2])
@@ -175,10 +175,7 @@ def make_boiling(line_df, boiling_model, boiling_grp, block_num=12, pouring_line
         make('drenator', time_size=cast_t(line_df.at[boiling_model.boiling_type, 'chedderization_time']) * 5 - timings[3] - timings[4], visible=False)
         make(make_melting_and_packing(line_df, boiling_model, boiling_grp))
 
-    res = maker.root.children[0]
-    res.props.update({'size': max(c.end for c in res.children)})
-
-    return res
+    return maker.root.children[0]
 
 
 def make_termizator_cleaning_block(cleaning_type):
@@ -191,9 +188,7 @@ def make_termizator_cleaning_block(cleaning_type):
     with make('cleaning'):
         make(f'{cleaning_type}_cleaning', t=0, size=cleaning_time)
 
-    res = maker.root.children[0]
-    res.props.update({'size': max(c.end for c in res.children)})
-    return res
+    return maker.root.children[0]
 
 
 def make_template():
@@ -237,9 +232,7 @@ def make_template():
             else:
                 make(y=21, t=4 + i, size=1, h=1, text=cur_time[-2:], color=(204, 255, 255), text_rotation=90)
 
-    res = maker.root.children[0]
-    res.props.update({'size': max(c.end for c in res.children)})
-    return res
+    return maker.root.children[0]
 
 if __name__ == '__main__':
     make_template()

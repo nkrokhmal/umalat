@@ -5,6 +5,7 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker.utils.interval import calc_interval_length, cast_interval
 from app.schedule_maker.utils.time import *
 
+
 def validate_disjoint(b1, b2):
     # assert a disposition information
     try:
@@ -98,20 +99,21 @@ class Block:
     def length(self):
         res = self.props[self.size_key]
 
+        if res:
+            return res
+        else:
+            # no length - get length from children!
+            if not self.children:
+                return 0
+            else:
+                if {self.orient} == {c.orient for c in self.children}:
+                    # orient is the same as in the children
+                    return max([0] + [c.end - self.beg for c in self.children])
+                else:
+                    return 0
+
         return res
 
-        # if res:
-        #     return res
-        # else:
-        #     # no length - get length from children!
-        #     if not self.children:
-        #         return 0
-        #     else:
-        #         if {self.orient} == {c.orient for c in self.children}:
-        #             # orient is the same as in the children
-        #             return max([0] + [c.end - self.beg for c in self.children])
-        #         else:
-        #             return 0
 
     @property
     def beg(self):
@@ -193,20 +195,26 @@ def add_push(parent, block, new_props=None):
 # simple greedy algorithm
 def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, validator='basic', iter_props=None):
     # note: make sure parent abs props are updated
+
+    orient = {c.orient for c in parent.children} | {block.orient}
+    if len(orient) != 1:
+        raise Exception('Multiple orientations found')
+
     if beg == 'last_beg':
-        cur_beg = max([parent.beg] + [child.beg for child in parent.children])
+        cur_beg = max([parent.props[block.beg_key]] + [child.beg for child in parent.children])
     elif beg == 'last_end':
-        cur_beg = max([parent.beg] + [child.end for child in parent.children])
+        cur_beg = max([parent.props[block.beg_key]] + [child.end for child in parent.children])
     elif isinstance(beg, int):
         cur_beg = beg
     else:
         raise Exception('Unknown beg type')
 
     # go to relative coordinates
-    cur_beg -= parent.beg
+    cur_beg -= parent.props[block.beg_key]
 
+    # print('Starting from', cur_beg, parent.props['class'], block.props['class'])
+    # print([parent.beg] + [(child.beg, child.end, child.length, child.props['size']) for child in parent.children])
     # print([(child.props['class'], child.end, child.props.relative_props, child.beg) for child in parent.children])
-    # print('Starting from', cur_t, parent.props['class'], block.props['class'])
     end = min(end, cur_beg + max_tries)
 
     iter_props = iter_props or [{}]
@@ -294,8 +302,9 @@ if __name__ == '__main__':
     maker = BlockMaker(default_push_func=add_push)
     make = maker.make
 
+    print('Add push')
     with make('a', size=3, t=5):
-        make('b', size=2)
+        make('b', t=2, size=2)
         make('b', size=2)
         make('c', size=1)
     print(maker.root)
