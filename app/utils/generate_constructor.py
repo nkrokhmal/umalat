@@ -3,17 +3,6 @@ import pandas as pd
 import numpy as np
 from flask import current_app
 
-# todo: вынести цвета в конфиг
-COLOURS = {
-    'Для пиццы': '#E5B7B6',
-    'Моцарелла': '#DAE5F1',
-    'Фиор Ди Латте': '#CBC0D9',
-    'Чильеджина': '#E5DFEC',
-    'Качокавалло': '#F1DADA',
-    'Сулугуни': '#F1DADA',
-    'Default': '#FFFFFF'
-}
-
 
 def generate_constructor_df(df):
     result = []
@@ -54,6 +43,7 @@ def generate_full_constructor_df(boiling_plan_df):
     df = df[['id', 'boiling_id', 'boiling_name','boiling_volume','form_factor', 'name', 'kg']]
     df = df.sort_values(by=['boiling_id', 'id', 'boiling_name', 'form_factor', 'name'])
     return df.reset_index(drop=True)
+
 
 def generate_empty_sku():
     values = db.session.query(SKU).all()
@@ -105,11 +95,6 @@ def draw_constructor(df, file_name):
 
         # todo: column names to config
         for v in values:
-            # formula_remains = '=IF({0}{1} - {0}{2} = 0, "", {0}{1} - {0}{2})'.format('M', cur_i, cur_i - 1)
-            # formula_calc = '=IF({0}{3} = "-", -{1}{4},{2}{3})'.format('I', 'D', 'G', cur_i, cur_i - 1)
-            # formula_remains_cumsum = '=IF({0}{2} = "-", SUM({1}$2:J{2}), 0)'.format('I', 'J', cur_i, cur_i - 1)
-            # formula_delimiter_int = '=IF({0}{1}="-",1,0)'.format('I', cur_i)
-            # formula_zeros = '=IF({0}{2} = 0, {1}{3}, {0}{2})'.format('K', 'M', cur_i, cur_i - 1)
             formula_remains = '=IF(M{0} - INDIRECT("M" & ROW() - 1) = 0, "", INDIRECT("M" & ROW() - 1) - M{0})'.format(cur_i)
             formula_calc = '=IF(I{0} = "-", -INDIRECT("D" & ROW() - 1),G{0})'.format(cur_i)
             formula_remains_cumsum = '=IF(I{0} = "-", SUM(INDIRECT(ADDRESS(2,COLUMN(J{0})) & ":" & ADDRESS(ROW(),COLUMN(J{0})))), 0)'.format(cur_i)
@@ -141,10 +126,9 @@ def draw_constructor(df, file_name):
             draw_row(sheet, cur_i, v, font_size=8, color=colour)
             cur_i += 1
 
-    path = '{}/{}.xlsx'.format(current_app.config['CONSTRUCTOR_FOLDER'], os.path.splitext(file_name)[0])
-    link = '{}/{}.xlsx'.format(current_app.config['CONSTRUCTOR_LINK_FOLDER'], os.path.splitext(file_name)[0])
+    path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], os.path.splitext(file_name)[0])
     wb.save(path)
-    return link
+    return '{}.xlsx'.format(os.path.splitext(file_name)[0])
 
 
 def iteration(df, volume):
@@ -189,6 +173,6 @@ def iteration(df, volume):
 def get_colour_by_name(sku_name, skus):
     sku = [x for x in skus if x.name == sku_name]
     if len(sku) > 0:
-        return COLOURS[sku[0].form_factor.name]
+        return current_app.config['COLOURS'][sku[0].form_factor.name]
     else:
-        return COLOURS['Default']
+        return current_app.config['COLOURS']['Default']

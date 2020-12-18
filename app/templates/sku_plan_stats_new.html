@@ -2,22 +2,16 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "_macros.html" as macros %}
 
-{% block title %}Создание файла конструктора {% endblock %}
+{% block title %}Распарсить новый файл{% endblock %}
 {% block page_content %}
-<main>
-    <div class="header-img">
-         <img src= "{{ url_for('static', filename='boiling_plan_full.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
-    </div>
-</main>
-
 <div class="page-header">
-    <h1> Загрузите файл плана по sku </h1>
+    <h1> Парсинг нового файла </h1>
 </div>
 <div class="col-md-6">
     {{ wtf.quick_form(form) }}
 </div>
 
-{% if file_name %}
+{% if filename %}
     <div class="col-md-6" style="margin-bottom: 20px;">
         <script>
             function download(url, filename) {
@@ -31,8 +25,8 @@
                 );
             });
             }
-            var url = "download_boiling_plan/" + "{{file_name}}";
-            download(url,"{{file_name}}");
+            var url = "download_stats/" + "{{filename}}";
+            download(url,"{{filename}}");
         </script>
     </div>
 {% endif %}

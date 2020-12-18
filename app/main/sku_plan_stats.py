@@ -16,8 +16,8 @@ from pycel import ExcelCompiler
 
 # todo: add naming
 # todo: add plan
-@main.route('/generate_sku_plan_new', methods=['POST', 'GET'])
-def generate_sku_plan_new():
+@main.route('/sku_plan_stats_new', methods=['POST', 'GET'])
+def sku_plan_stats_new():
     form = StatisticForm()
     if request.method == 'POST' and form.validate_on_submit():
         file = request.files['input_file']
@@ -28,6 +28,7 @@ def generate_sku_plan_new():
         excel = ExcelCompiler(file_path)
         wb = openpyxl.load_workbook(filename=os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename),
                                     data_only=True)
+        # todo: use config
         sheet_name = 'планирование суточное'
         ws = wb[sheet_name]
         values = []
@@ -42,18 +43,17 @@ def generate_sku_plan_new():
         df = df[df['plan'] != 0]
         df = df[df['plan'].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())]
         path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
-        link = '{}/{}.csv'.format(current_app.config['STATS_LINK_FOLDER'], os.path.splitext(file.filename)[0])
         df[['sku', 'plan']].to_csv(path, index=False)
         os.remove(file_path)
-        return render_template('sku_plan_new.html', form=form, link=link)
-    link = None
-    return render_template('sku_plan_new.html', form=form, link=link)
+        return render_template('sku_plan_stats_new.html', form=form, filename='{}.csv'.format(os.path.splitext(file.filename)[0]))
+    filename = None
+    return render_template('sku_plan_stats_new.html', form=form, filename=filename)
 
 
 # todo: add plan
 # todo: file naming
-@main.route('/generate_sku_plan_old', methods=['POST', 'GET'])
-def generate_sku_plan_old():
+@main.route('/sku_plan_stats_old', methods=['POST', 'GET'])
+def sku_plan_stats_old():
     form = StatisticForm()
     if request.method == 'POST' and form.validate_on_submit():
         file = request.files['input_file']
@@ -78,9 +78,8 @@ def generate_sku_plan_old():
         df = df[df['plan'] != 0]
         df = df[df['plan'].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())]
         path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
-        link = '{}/{}.csv'.format(current_app.config['STATS_LINK_FOLDER'], os.path.splitext(file.filename)[0])
         df[['sku', 'plan']].to_csv(path, index=False)
         os.remove(file_path)
-        return render_template('sku_plan_old.html', form=form, link=link)
-    link = None
-    return render_template('sku_plan_old.html', form=form, link=link)
+        return render_template('sku_plan_stats_old.html', form=form, filename='{}.csv'.format(os.path.splitext(file.filename)[0]))
+    filename = None
+    return render_template('sku_plan_stats_old.html', form=form, filename=filename)

@@ -3,7 +3,6 @@ from flask import jsonify
 from werkzeug.utils import redirect
 from . import main
 from .. import db
-from .. utils.excel_client import *
 from .forms import PouringProcessForm, BoilingForm, RequestForm
 from ..models import SKU, Boiling, GlobalPouringProcess, Melting, Pouring, Line, Termizator, Packer,\
     Departmenent

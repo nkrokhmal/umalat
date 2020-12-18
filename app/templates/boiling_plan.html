@@ -11,9 +11,23 @@
     {{ wtf.quick_form(form) }}
 </div>
 
-{% if link %}
+{% if file_name %}
     <div class="col-md-6" style="margin-bottom: 20px;">
-        <a href="{{link}}"><button class="btn"><i class="fa fa-download"></i> Download </button></a>
+        <script>
+            function download(url, filename) {
+            fetch(url).then(function(t) {
+                return t.blob().then((b)=>{
+                    var a = document.createElement("a");
+                    a.href = URL.createObjectURL(b);
+                    a.setAttribute("download", filename);
+                    a.click();
+                }
+                );
+            });
+            }
+            var url = "download_boiling_plan/" + "{{file_name}}";
+            download(url,"{{file_name}}");
+        </script>
     </div>
 {% endif %}
 {% endblock %}
