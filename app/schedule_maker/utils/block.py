@@ -34,22 +34,22 @@ def cumsum_int_acc(parent, child, key):
 def size_acc(parent, child, key):
     size, time_size = child.relative_props.get('size', 0), child.relative_props.get('time_size', 0)
     size, time_size = int(size), int(time_size)
+
     if size:
         return int(size)
     else:
         assert time_size % 5 == 0
         return time_size // 5
 
-
 def time_size_acc(parent, child, key):
     size, time_size = child.relative_props.get('size', 0), child.relative_props.get('time_size', 0)
     size, time_size = int(size), int(time_size)
+
     if size:
         return size * 5
     else:
         assert time_size % 5 == 0
         return time_size
-
 
 def h_acc(parent, child, key):
     return child.relative_props.get('h', 1)
@@ -96,7 +96,22 @@ class Block:
 
     @property
     def length(self):
-        return self.props[self.size_key]
+        res = self.props[self.size_key]
+
+        return res
+
+        # if res:
+        #     return res
+        # else:
+        #     # no length - get length from children!
+        #     if not self.children:
+        #         return 0
+        #     else:
+        #         if {self.orient} == {c.orient for c in self.children}:
+        #             # orient is the same as in the children
+        #             return max([0] + [c.end - self.beg for c in self.children])
+        #         else:
+        #             return 0
 
     @property
     def beg(self):
@@ -203,7 +218,6 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
             props[block.beg_key] = cur_beg
 
             res = simple_push(parent, block, validator=validator, new_props=props)
-
             if isinstance(res, Block):
                 return block
             elif isinstance(res, dict):
@@ -222,8 +236,13 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
 
 
 class BlockMaker:
-    def __init__(self, root_class='root', default_push_func=simple_push):
-        self.root = Block(root_class)
+    def __init__(self, root='root', default_push_func=simple_push):
+        if isinstance(root, str):
+            self.root = Block(root)
+        elif isinstance(root, Block):
+            self.root = root
+        else:
+            raise Exception('Unknown root type')
         self.blocks = [self.root]
         self.default_push_func = default_push_func
 
@@ -256,21 +275,21 @@ class BlockMakerContext:
 
 
 if __name__ == '__main__':
-    a = Block('a', size=3, t=5)
+    a = Block('a', t=5)
     b = Block('b', size=2)
     c = Block('c', size=1)
 
     dummy_push(a, b)
     dummy_push(a, c)
     print(a)
+    print('No sizes specified', a.props['size'], a.props['time_size'], a.length, a.beg, a.end)
 
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
-    with make('a', size=3):
+    with make('a'):
         make('b', size=2)
         make('c', size=1)
-    print(maker.root)
 
     maker = BlockMaker(default_push_func=add_push)
     make = maker.make
@@ -279,6 +298,7 @@ if __name__ == '__main__':
         make('b', size=2)
         make('b', size=2)
         make('c', size=1)
+    print(maker.root)
 
     print(maker.root['a']['b'][0].interval)
     print(maker.root['a'][2])
