@@ -92,6 +92,8 @@ def draw_constructor_template(df, file_name, wb):
                     draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
             else:
                 colour = get_colour_by_name(v[5], skus)
+                v[1] = '=IF(I{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
+                    cur_i)
                 draw_row(boiling_sheet, cur_i, v, font_size=8, color=colour)
             cur_i += 1
 
