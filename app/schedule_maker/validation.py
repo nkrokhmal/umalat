@@ -18,23 +18,8 @@ def boiling_validator(parent, boiling):
             validate_disjoint(b1['pouring'], b2['pouring'])
 
         if b1.props['boiling_type'] == b2.props['boiling_type']:
-
             # [melting.disjoint]
-            boiling_type = b1.props['boiling_type']
-            if boiling_type == 'water':
-                # todo: del, make properly
-                validate_disjoint(b1['melting_and_packing']['melting']['block'][-1]['cooling2'],
-                                  b2['melting_and_packing']['melting']['block'][-1]['cooling1'])
-
-                if b1.props['boiling_id'] == b2.props['boiling_id']:
-                    # merging allowed
-                    validate_disjoint(b1['melting_and_packing']['melting'][2]['melting_process'], b2['melting_and_packing']['melting'][2]['melting_process'])
-                else:
-                    validate_disjoint(b1['melting_and_packing']['melting'], b2['melting_and_packing']['melting'])
-            else:
-                validate_disjoint(b1['melting_and_packing']['melting'][1]['melting_process'], b2['melting_and_packing']['melting'][1]['melting_process'])
-
-            validate_disjoint(b1['melting_and_packing']['packing_and_preconfiguration'], b2['melting_and_packing']['packing_and_preconfiguration'])
+            validate_disjoint(b1['melting_and_packing']['melting']['meltings']['full_melting_process'], b2['melting_and_packing']['melting']['meltings']['full_melting_process'])
 
     # no intersection with cleanings also
     cleanings = [node for node in parent.children if node.props['class'] == 'cleaning']

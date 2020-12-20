@@ -7,132 +7,142 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
-    # [packing.reconfiguration_times]
-    def get_configuration_times(skus):
-        res = []
-        for i in range(len(skus) - 1):
-            old_sku, sku = skus[i: i + 2]
-            if old_sku is None:
-                # todo: display first configuration?
-                res.append(0)
-            elif boiling_model.boiling_type == 'salt' and old_sku.weight_form_factor != sku.weight_form_factor and cast_packer(old_sku) == cast_packer(sku):
-                # todo: take from parameters
-                res.append(25)
-            elif old_sku == sku:
-                res.append(0)
+    # mark groups
+    cur_group = 0
+    cur_form_factor = None
+    group_values = []
+    for i, row in boiling_grp.iterrows():
+        if row['bff'] != cur_form_factor:
+            cur_group += 1
+            cur_form_factor = row['bff']
+        group_values.append(cur_group)
+    boiling_grp['group'] = group_values
+
+    # generate labels
+    def gen_label(label_weights):
+        cur_label = None
+        values = []
+        for label, weight in label_weights:
+            s = ''
+            if label != cur_label:
+                s += label + ' '
+                cur_label = label
+
+            # todo: make properly, this if-else if because of rubber. Should be something better
+            if weight:
+                s += str(weight / 1000)
             else:
-                # todo: take from parameters
-                res.append(5)
-        return res
+                s += 'терка'
+            values.append(s)
+        return '/'.join(values)
+
+    form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
+    brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
 
     # [melting.params, packing.params]
-    with make('melting_and_packing'):
-        # packing and melting time
-        packing_times = []
-        configuration_times = get_configuration_times([line_df.at[boiling_model.boiling_type, 'last_packing_sku']] + boiling_grp['sku'].values.tolist()) # add last_packing for first configuration
+    with make('melting_and_packing', form_factor_label=form_factor_label, brand_label=brand_label):
+        melting_events = []
+        with make('melting'):
+            labels = make('labels', h=1, push_func=dummy_push_y).block
+            meltings = make('meltings', h=1, push_func=dummy_push_y).block
+            coolings = make('coolings', h=1, push_func=dummy_push_y).block
 
-        if boiling_model.boiling_type == 'water':
-            # [cheesemakers.boiling_output]
-            cheese_from_boiling = 1000  # todo: take from parameters
+            # add first serving as time
+            dummy_push(meltings, Block('serving', time_size=boiling_model.meltings.serving_time, visible=False))
 
-            # [cheesemakers.boiling_volume]
-            cheese_from_boiling *= 8000 / 8000 # todo: make boiling_volume count
+            full_melting_process = Block('full_melting_process')
+            dummy_push(meltings, full_melting_process)
 
-            melting_time = custom_round(cheese_from_boiling / boiling_model.meltings.speed * 60, 5, rounding='ceil')
+            for group, grp in boiling_grp.groupby('group'):
+                if group > 1:
+                    # non-first group - reconfigure time
+                    dummy_push(full_melting_process, Block('melting_configuration', size=1))
 
-            for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist():
-                packing_speed = min(sku.packing_speed, boiling_model.meltings.speed)
-                packing_times.append(custom_round(sku_kg / packing_speed * 60, 5, rounding='ceil'))
-            total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
-            full_melting_time = boiling_model.meltings.serving_time + melting_time
+                melting_process = dummy_push(full_melting_process, Block('melting_process', time_size=custom_round(grp['kg'].sum() / boiling_model.meltings.speed * 60, 5, 'ceil')))
 
-        elif boiling_model.boiling_type == 'salt':
-            for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist():
-                packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
+                melting_events.append({'beg': melting_process.beg(),
+                                       'time_size': grp['kg'].sum() / boiling_model.meltings.speed * 60,
+                                       'speed': boiling_model.meltings.speed,
+                                       'kg': grp['kg'].sum(),
+                                       'bff': grp.iloc[0]['bff']})
 
-            total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
+                # add cooling
+                cooling_process = Block('cooling_process', t=melting_process.beg())
+                cooling_maker = BlockMaker(cooling_process, default_push_func=dummy_push)
+                cooling_make = cooling_maker.make
 
-            # fit melting time for packing [melting.slow_packing]
-            # melting_time = total_packing_time
-            melting_time = 50
-
-            full_melting_time = boiling_model.meltings.serving_time + melting_time + boiling_model.meltings.salting_time
-
-        def gen_label(label_weights):
-            cur_label = None
-            values = []
-            for label, weight in label_weights:
-                s = ''
-                if label != cur_label:
-                    s += label + ' '
-                    cur_label = label
-
-                # todo: make properly, this if-else if because of rubber. Should be something better
-                if weight:
-                    s += str(weight / 1000)
-                else:
-                    s += 'терка'
-                values.append(s)
-            return '/'.join(values)
-
-        form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
-        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
-
-        with make('melting', time_size=full_melting_time):
-            if boiling_model.boiling_type == 'water':
-                with make(h=1, push_func=dummy_push_y):
-                    make('serving', time_size=boiling_model.meltings.serving_time)
-            with make(h=1, push_func=dummy_push_y):
-                make('serving', time_size=boiling_model.meltings.serving_time, visible=False)
-                make('melting_label', time_size=4 * 5)
-                make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_model.meltings.serving_time, form_factor_label=form_factor_label)
-            with make(h=1, push_func=dummy_push_y):
-                serving_visible = boiling_model.boiling_type == 'salt'
-                make('serving', time_size=boiling_model.meltings.serving_time, visible=serving_visible)
-                make('melting_process', time_size=melting_time, speed=boiling_model.meltings.speed)
-
-                if boiling_model.boiling_type == 'salt':
-                    make('salting', time_size=boiling_model.meltings.salting_time)
-            with make(h=1, push_func=dummy_push_y):
-                make(time_size=boiling_model.meltings.serving_time, visible=False)
-                if boiling_model.boiling_type == 'water':
-                    make('cooling1', time_size=boiling_model.meltings.first_cooling_time)
-                    make('cooling2', time_size=boiling_model.meltings.second_cooling_time)
-                elif boiling_model.boiling_type == 'salt':
-                    make('salting', time_size=boiling_model.meltings.salting_time)
-
-        # prepare time
-        if boiling_model.boiling_type == 'water':
-            prepare_time = boiling_model.meltings.serving_time + boiling_model.meltings.first_cooling_time + boiling_model.meltings.second_cooling_time
-        elif boiling_model.boiling_type == 'salt':
-            prepare_time = boiling_model.meltings.serving_time + boiling_model.meltings.salting_time
-
-        with make('packing_and_preconfiguration', t=(prepare_time - configuration_times[0]) / 5, time_size=total_packing_time + configuration_times[0], push_func=add_push):
-            if configuration_times[0]:
-                with make('preconfiguration'):
-                    make('configuration', time_size=configuration_times[0], y=2)
-            with make('packing', time_size=total_packing_time):
-                with make(h=1, push_func=dummy_push_y):
-                    make('packing_label', time_size=3 * 5)
-                    # use different labels for water and salt
+                with cooling_make('start'):
                     if boiling_model.boiling_type == 'water':
-                        make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
+                        cooling_make('cooling', time_size=boiling_model.meltings.first_cooling_time)
+                        cooling_make('cooling', time_size=boiling_model.meltings.second_cooling_time)
                     elif boiling_model.boiling_type == 'salt':
-                        make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=brand_label)
-                with make(h=1, push_func=dummy_push_y):
-                    # use different labels for water and salt
-                    if boiling_model.boiling_type == 'water':
-                        make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
-                    elif boiling_model.boiling_type == 'salt':
-                        make('packing_brand', time_size=total_packing_time, brand_label='фасовка')
-                with make(h=1, push_func=dummy_push_y):
+                        cooling_make('cooling', time_size=boiling_model.meltings.salting_time)
 
+                with cooling_make('finish'):
+                    cooling_make('cooling', time_size=melting_process.props['time_size'])
 
-                    make('packing_process', time_size=packing_times[0], visible=False)
+                add_push(coolings, cooling_process)
 
-                    for i, packing_time in enumerate(packing_times[1:]):
-                        make('configuration', time_size=configuration_times[i + 1])
-                        make('packing_process', time_size=packing_time, visible=False)
+            dummy_push(labels, Block('serving', time_size=boiling_model.meltings.serving_time))
+            dummy_push(labels, Block('melting_name', time_size=meltings.length() * 5 - boiling_model.meltings.serving_time - boiling_model.meltings.serving_time))
+
+        # # packing and melting time
+        # packing_times = []
+        # configuration_times = get_configuration_times([line_df.at[boiling_model.boiling_type, 'last_packing_sku']] + boiling_grp['sku'].values.tolist()) # add last_packing for first configuration
+        #
+        # if boiling_model.boiling_type == 'water':
+        #     # [cheesemakers.boiling_output]
+        #     cheese_from_boiling = 1000  # todo: take from parameters
+        #
+        #     # [cheesemakers.boiling_volume]
+        #     cheese_from_boiling *= 8000 / 8000 # todo: make boiling_volume count
+        #
+        #     melting_time = custom_round(cheese_from_boiling / boiling_model.meltings.speed * 60, 5, rounding='ceil')
+        #
+        #     for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist():
+        #         packing_speed = min(sku.packing_speed, boiling_model.meltings.speed)
+        #         packing_times.append(custom_round(sku_kg / packing_speed * 60, 5, rounding='ceil'))
+        #     total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
+        #     full_melting_time = boiling_model.meltings.serving_time + melting_time
+        #
+        # elif boiling_model.boiling_type == 'salt':
+        #     for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist():
+        #         packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
+        #
+        #     total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
+        #
+        #     # fit melting time for packing [melting.slow_packing]
+        #     # melting_time = total_packing_time
+        #     melting_time = 50
+        #
+        #     full_melting_time = boiling_model.meltings.serving_time + melting_time + boiling_model.meltings.salting_time
+
+        # with make('packing_and_preconfiguration', t=(prepare_time - configuration_times[0]) / 5, time_size=total_packing_time + configuration_times[0], push_func=add_push):
+        #     if configuration_times[0]:
+        #         with make('preconfiguration'):
+        #             make('configuration', time_size=configuration_times[0], y=2)
+        #     with make('packing', time_size=total_packing_time):
+        #         with make(h=1, push_func=dummy_push_y):
+        #             make('packing_label', time_size=3 * 5)
+        #             # use different labels for water and salt
+        #             if boiling_model.boiling_type == 'water':
+        #                 make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
+        #             elif boiling_model.boiling_type == 'salt':
+        #                 make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=brand_label)
+        #         with make(h=1, push_func=dummy_push_y):
+        #             # use different labels for water and salt
+        #             if boiling_model.boiling_type == 'water':
+        #                 make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
+        #             elif boiling_model.boiling_type == 'salt':
+        #                 make('packing_brand', time_size=total_packing_time, brand_label='фасовка')
+        #         with make(h=1, push_func=dummy_push_y):
+        #
+        #
+        #             make('packing_process', time_size=packing_times[0], visible=False)
+        #
+        #             for i, packing_time in enumerate(packing_times[1:]):
+        #                 make('configuration', time_size=configuration_times[i + 1])
+        #                 make('packing_process', time_size=packing_time, visible=False)
 
     return maker.root.children[0]
 

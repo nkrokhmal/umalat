@@ -6,9 +6,6 @@ from app.schedule_maker.blocks import *
 from app.schedule_maker.style import *
 from app.schedule_maker.models import *
 
-from itertools import product
-
-
 
 def pick(df, boiling_type):
     tmp = df
@@ -72,9 +69,10 @@ def make_schedule(boiling_plan_df):
         line_df.at[boiling_type, 'boilings'].append(b)
 
     add_new_boiling(0, 'water', init=True)
-    add_new_boiling(1, 'salt', init=True)
+    # add_new_boiling(1, 'salt', init=True)
 
-    latest_boiling = max(line_df['latest_boiling'], key=lambda b: b.x1)
+    # latest_boiling = max(line_df['latest_boiling'], key=lambda b: b.x1)
+    latest_boiling = max(line_df['latest_boiling'], key=lambda b: (0 if not b else b.x1))
     last_cleaning_t = latest_boiling.x1
 
     cur_i = 2
