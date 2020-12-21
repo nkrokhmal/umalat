@@ -23,13 +23,12 @@ def schedule():
         date = form.date.data
         skus = db.session.query(SKU).all()
         file_bytes = request.files['input_file'].read()
-        wb = openpyxl.load_workbook(io.BytesIO(file_bytes))
+        wb = openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True)
         boiling_plan_df = load_boiling_plan(wb)
         schedule_wb = create_excel_frontend(boiling_plan_df)
-        filename = '{}_{}.xlsx'.format('schedule', date.strftime('%Y-%m-%d'))
-        filename_schedule = '{}_{}.xlsx'.format('schedule', date.strftime('%Y-%m-%d'))
-        path_schedule = '{}/{}'.format('app/data/schedule', filename_schedule)
+        filename_schedule = '{}_{}.xlsx'.format('schedule_plan', date.strftime('%Y-%m-%d'))
+        path_schedule = '{}/{}'.format('app/data/schedule_plan', filename_schedule)
         schedule_wb.save(path_schedule)
-        return render_template('schedule.html', form=form, filename=filename)
-    filename = None
-    return render_template('schedule.html', form=form, filename=filename)
+        return render_template('schedule.html', form=form, filename=filename_schedule)
+    filename_schedule = None
+    return render_template('schedule.html', form=form, filename=filename_schedule)

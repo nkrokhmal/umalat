@@ -33,8 +33,8 @@ def download_stats(file_name):
     return response
 
 
-@main.route('/download_schedule/<file_name>', methods=['POST', 'GET'])
-def download_schedule(file_name):
+@main.route('/download_schedule_plan/<file_name>', methods=['POST', 'GET'])
+def download_schedule_plan(file_name):
     uploads = os.path.join(os.path.dirname(current_app.root_path), current_app.config['SCHEDULE_PLAN_FOLDER'])
     response = send_from_directory(directory=uploads,
                                    filename=file_name,
