@@ -174,11 +174,22 @@ class Block:
     def __repr__(self):
         return str(self)
 
-    def iter(self):
-        yield self
+    def run_filter(self, filter):
+        for k, v in filter.items():
+            if callable(v):
+                if not v(self):
+                    return False
+            else:
+                if not self.props[k] == v:
+                    return False
+        return True
+
+    def iter(self, filter=None):
+        if not filter or self.run_filter(filter):
+            yield self
 
         for child in self.children:
-            for b in child.iter():
+            for b in child.iter(filter):
                 yield b
 
     def set_parent(self, parent):
@@ -357,3 +368,17 @@ if __name__ == '__main__':
         raise Exception('Should not happen')
     except AssertionError:
         print('Time size should be divided by 5')
+
+
+    print('Run filter')
+
+    maker = BlockMaker(default_push_func=add_push)
+    make = maker.make
+
+    with make('a', size=3, t=5):
+        make('b', t=2, size=2)
+        make('b', size=3)
+        make('c', size=1)
+
+    for b in maker.root.iter({'class': 'b', 'size': lambda b: b.props['size'] % 2 == 0}):
+        print(b)

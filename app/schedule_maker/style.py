@@ -1,7 +1,7 @@
 def load_style():
     base_style = {
         'cheese_makers': {'beg_time': '01:00'},
-        'termizator': {'text': 'налив'},
+        'termizator': {'text': '{block_front_id} налив'},
         'soldification': {'text': 'схватка', 'color': 'yellow'},
         'cutting': {'text': 'резка/обсушка', 'color': '#92d050'}, # light green color
         'pouring_off': {'text': 'слив', 'color': 'red'},
