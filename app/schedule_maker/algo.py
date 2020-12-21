@@ -57,7 +57,7 @@ def make_schedule(boiling_plan_df):
         row = pick(boiling_plan_grouped_df, boiling_type)
         if row is None:
             return
-        b = make_boiling(line_df, cast_boiling(str(row['id'])), row['grp'], block_num=i + 1)
+        b = make_boiling(line_df, cast_boiling(str(row['id'])), row['grp'], boiling_plan_df, block_num=i + 1)
 
         if init:
             beg = cast_t(line_df.at[boiling_type, 'start_time']) - b['melting_and_packing'].x1

@@ -297,6 +297,9 @@ class BlockMaker:
         push_func(self.blocks[-1], block, **push_kwargs)
         return BlockMakerContext(self, block)
 
+def new_block_maker(*args, **kwargs):
+    maker = BlockMaker(*args, **kwargs)
+    return maker, maker.root, maker.make
 
 class BlockMakerContext:
     def __init__(self, maker, block):

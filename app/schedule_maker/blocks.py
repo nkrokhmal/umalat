@@ -3,7 +3,7 @@ from app.schedule_maker.utils import *
 from app.schedule_maker.utils.time import cast_t, cast_time
 
 
-def make_melting_and_packing(line_df, boiling_model, boiling_grp):
+def make_melting_and_packing(line_df, boiling_model, boiling_grp, boiling_plan_df):
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 
@@ -36,7 +36,7 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
             values.append(s)
         return '/'.join(values)
 
-    form_factor_label = gen_label([(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
+    form_factor_label = gen_label([(sku.form_factor.short_name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
     brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
 
     # [melting.params, packing.params]
@@ -45,7 +45,7 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
         with make('melting'):
             labels = make('labels', h=1, push_func=dummy_push_y).block
             meltings = make('meltings', h=1, push_func=dummy_push_y).block
-            coolings = make('coolings', h=1, push_func=dummy_push_y).block
+            coolings = make('coolings', push_func=add_push).block
 
             # add first serving as time
             dummy_push(meltings, Block('serving', time_size=boiling_model.meltings.serving_time, visible=False))
@@ -60,12 +60,6 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
 
                 melting_process = dummy_push(full_melting_process, Block('melting_process', time_size=custom_round(grp['kg'].sum() / boiling_model.meltings.speed * 60, 5, 'ceil')))
 
-                melting_events.append({'beg': melting_process.beg(),
-                                       'time_size': grp['kg'].sum() / boiling_model.meltings.speed * 60,
-                                       'speed': boiling_model.meltings.speed,
-                                       'kg': grp['kg'].sum(),
-                                       'bff': grp.iloc[0]['bff']})
-
                 # add cooling
                 cooling_process = Block('cooling_process', t=melting_process.beg())
                 cooling_maker = BlockMaker(cooling_process, default_push_func=dummy_push)
@@ -76,78 +70,148 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
                         cooling_make('cooling', time_size=boiling_model.meltings.first_cooling_time)
                         cooling_make('cooling', time_size=boiling_model.meltings.second_cooling_time)
                     elif boiling_model.boiling_type == 'salt':
-                        cooling_make('cooling', time_size=boiling_model.meltings.salting_time)
+                        cooling_make('salting', time_size=boiling_model.meltings.salting_time)
 
                 with cooling_make('finish'):
-                    cooling_make('cooling', time_size=melting_process.props['time_size'])
+                    if boiling_model.boiling_type == 'water':
+                        cooling_make('cooling', time_size=melting_process.props['time_size'])
+                    elif boiling_model.boiling_type == 'salt':
+                        cooling_make('salting', time_size=melting_process.props['time_size'])
 
                 add_push(coolings, cooling_process)
+
+                melting_events.append({'beg': cooling_process['start'].end(),
+                                       'time_size': grp['kg'].sum() / boiling_model.meltings.speed * 60,
+                                       'speed': boiling_model.meltings.speed,
+                                       'kg': grp['kg'].sum(),
+                                       'bff': grp.iloc[0]['bff']})
 
             dummy_push(labels, Block('serving', time_size=boiling_model.meltings.serving_time))
             dummy_push(labels, Block('melting_name', time_size=meltings.length() * 5 - boiling_model.meltings.serving_time - boiling_model.meltings.serving_time))
 
-        # # packing and melting time
-        # packing_times = []
-        # configuration_times = get_configuration_times([line_df.at[boiling_model.boiling_type, 'last_packing_sku']] + boiling_grp['sku'].values.tolist()) # add last_packing for first configuration
-        #
-        # if boiling_model.boiling_type == 'water':
-        #     # [cheesemakers.boiling_output]
-        #     cheese_from_boiling = 1000  # todo: take from parameters
-        #
-        #     # [cheesemakers.boiling_volume]
-        #     cheese_from_boiling *= 8000 / 8000 # todo: make boiling_volume count
-        #
-        #     melting_time = custom_round(cheese_from_boiling / boiling_model.meltings.speed * 60, 5, rounding='ceil')
-        #
-        #     for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist():
-        #         packing_speed = min(sku.packing_speed, boiling_model.meltings.speed)
-        #         packing_times.append(custom_round(sku_kg / packing_speed * 60, 5, rounding='ceil'))
-        #     total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
-        #     full_melting_time = boiling_model.meltings.serving_time + melting_time
-        #
-        # elif boiling_model.boiling_type == 'salt':
-        #     for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist():
-        #         packing_times.append(custom_round(sku_kg / sku.packing_speed * 60, 5, rounding='ceil'))
-        #
-        #     total_packing_time = sum(packing_times) + sum(configuration_times[1:])  # add time for configuration - first is made before packing process
-        #
-        #     # fit melting time for packing [melting.slow_packing]
-        #     # melting_time = total_packing_time
-        #     melting_time = 50
-        #
-        #     full_melting_time = boiling_model.meltings.serving_time + melting_time + boiling_model.meltings.salting_time
+        # calculate packings
+        packing_teams = pack(melting_events, boiling_plan_df)
 
-        # with make('packing_and_preconfiguration', t=(prepare_time - configuration_times[0]) / 5, time_size=total_packing_time + configuration_times[0], push_func=add_push):
-        #     if configuration_times[0]:
-        #         with make('preconfiguration'):
-        #             make('configuration', time_size=configuration_times[0], y=2)
-        #     with make('packing', time_size=total_packing_time):
-        #         with make(h=1, push_func=dummy_push_y):
-        #             make('packing_label', time_size=3 * 5)
-        #             # use different labels for water and salt
-        #             if boiling_model.boiling_type == 'water':
-        #                 make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
-        #             elif boiling_model.boiling_type == 'salt':
-        #                 make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=brand_label)
-        #         with make(h=1, push_func=dummy_push_y):
-        #             # use different labels for water and salt
-        #             if boiling_model.boiling_type == 'water':
-        #                 make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
-        #             elif boiling_model.boiling_type == 'salt':
-        #                 make('packing_brand', time_size=total_packing_time, brand_label='фасовка')
-        #         with make(h=1, push_func=dummy_push_y):
-        #
-        #
-        #             make('packing_process', time_size=packing_times[0], visible=False)
-        #
-        #             for i, packing_time in enumerate(packing_times[1:]):
-        #                 make('configuration', time_size=configuration_times[i + 1])
-        #                 make('packing_process', time_size=packing_time, visible=False)
-
+        # add packings
+        with make('packing', t=full_melting_process.beg(), push_func=add_push):
+            for team_id, team in packing_teams.items():
+                assert is_int_like(team_id)
+                if team.packings:
+                    # todo: make team_id coordinate properly
+                    with make('packing_team', y=int(team_id) - 1, team_id=team_id, push_func=add_push):
+                        print(team_id, team.packings)
+                        for beg, end, row in team.packings:
+                            assert is_int_like(beg) and is_int_like(end)
+                            beg, end = int(beg), int(end)
+                            with make('packing_block'):
+                                with make('packing_header', t=beg, y=0, push_func=add_push):
+                                    make('packing_label', size=3)
+                                    make('packing_brand', size=end - beg - 3)
+                                make('packing_process', y=1, t=beg, size=end - beg, push_func=add_push)
     return maker.root.children[0]
 
 
-def make_boiling(line_df, boiling_model, boiling_grp, block_num=12, pouring_line=None):
+def pack(melting_events, boiling_plan_df):
+    # generate packings with event manager
+    em = SimpleEventManager()
+
+    # collect incoming speed of cheese
+    class Meltings:
+        def __init__(self):
+            self.df = pd.DataFrame(columns=['speed', 'kg'])
+            self.last_ts = None
+
+        def on_melting(self, topic, ts, event):
+            if event['bff'] not in self.df.index:
+                self.df.at[event['bff'], 'kg'] = 0
+            self.df.at[event['bff'], 'speed'] = event['speed']
+
+        def update(self, topic, ts, event):
+            if self.last_ts is None:
+                self.last_ts = ts
+                return
+
+            self.df['kg'] += (ts - self.last_ts) / 3600 * self.df['speed']
+            self.last_ts = ts
+
+
+    meltings = Meltings()
+
+    em.subscribe('', meltings.update)
+    em.subscribe('melting', meltings.on_melting)
+
+    for me in melting_events:
+        em.add_event('melting', me['beg'] * 300, me)
+        me = dict(me)
+        me['speed'] = 0
+        em.add_event('melting', me['beg'] * 300 + me['time_size'] * 60, me)
+
+    for i in range(288):
+        em.add_event('checkpoint', i * 300, {})
+
+
+    class PackerTeam:
+        def __init__(self, meltings, df, team_id):
+            self.meltings = meltings
+            self.df = df
+            self.df['collected'] = 0.
+
+            self.last_ts = None
+
+            self.packing_start_ts = None
+            self.packings = []
+
+            self.team_id = team_id
+
+        def update(self, topic, ts, event):
+            df = self.df[self.df['packing_left'].abs() > 1e-2]
+            df = df[df['packing_team_id'] == self.team_id]
+
+            if len(df) == 0:
+                return
+
+            if not self.last_ts:
+                self.last_ts = ts
+                return
+
+            cur_row = df.iloc[0] # pack one sku at one time
+            if cur_row['bff'] in self.meltings.df.index:
+                # take as much as we can
+                available = self.meltings.df.at[cur_row['bff'], 'kg']
+                needed = cur_row['packing_left']
+                collected = min([(ts - self.last_ts) / 3600 * cur_row['speed'],
+                                 available,
+                                 needed])
+                self.df.at[cur_row.name, 'packing_left'] -= collected
+                self.meltings.df.at[cur_row['bff'], 'kg'] -= collected
+                self.df.at[cur_row.name, 'collected'] += collected
+
+                if not self.packing_start_ts and collected:
+                    # start packing
+                    self.packing_start_ts = self.last_ts
+
+            if abs(self.df.at[cur_row.name, 'packing_left']) < 1e-2:
+                # finish packing
+
+                beg = self.packing_start_ts / 300
+                end = ts / 300
+                self.packings.append([beg, end, self.df.iloc[0]])
+                self.packing_start_ts = None
+
+            self.last_ts = ts
+
+            # todo: add packing configuration
+
+    packing_teams = {}
+    for team_id in boiling_plan_df['packing_team_id'].unique():
+        packing_teams[team_id] = PackerTeam(meltings, boiling_plan_df, team_id=team_id)
+        em.subscribe('checkpoint', packing_teams[team_id].update)
+
+    em.run()
+    return packing_teams
+
+
+def make_boiling(line_df, boiling_model, boiling_grp, boiling_plan_df, block_num=12, pouring_line=None):
     termizator = db.session.query(Termizator).first()
 
     # [termizator.time]
@@ -183,7 +247,7 @@ def make_boiling(line_df, boiling_model, boiling_grp, block_num=12, pouring_line
                 make('extra', time_size=timings[4])
 
         make('drenator', time_size=cast_t(line_df.at[boiling_model.boiling_type, 'chedderization_time']) * 5 - timings[3] - timings[4], visible=False)
-        make(make_melting_and_packing(line_df, boiling_model, boiling_grp))
+        make(make_melting_and_packing(line_df, boiling_model, boiling_grp, boiling_plan_df))
 
     return maker.root.children[0]
 
