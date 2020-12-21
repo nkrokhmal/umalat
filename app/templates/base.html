@@ -1,6 +1,6 @@
 {% extends "bootstrap/base.html" %}
 
-{% block title %}Cheese{% endblock %}
+{% block title %} Правила {% endblock %}
 
 {% block head %}
 {{ super() }}
@@ -27,14 +27,14 @@
                 <li><a href="{{ url_for('main.sku_plan') }}"> План по SKU </a></li>
                 <li><a href="{{ url_for('main.generate_boiling_plan_full') }}"> План по варкам </a></li>
                 <li><a href="{{ url_for('main.schedule') }}"> Расписание </a></li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Параметры </a>
+                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Параметры <b class="caret"></b> </a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('main.get_general_params') }}"> Общие параметры </a></li>
                         <li><a href="{{ url_for('main.get_sku') }}"> SKU </a></li>
                         <li><a href="{{ url_for('main.get_boiling') }}"> Процесс варки </a></li>
                     </ul>
                 </li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Разное </a>
+                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Разное <b class="caret"></b> </a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('main.sku_plan_stats_old') }}"> Парсинг старого файла </a></li>
                         <li><a href="{{ url_for('main.sku_plan_stats_new') }}"> Парсинг нового файла </a></li>

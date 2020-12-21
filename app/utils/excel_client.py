@@ -46,9 +46,9 @@ def generate_title(sheet):
         sheet.cell(val.row, val.column).value = val.name
     sheet.freeze_panes = sheet['A2']
 
-    sheet.column_dimensions[get_column_letter(CELLS['Brand'].column)].width = 3 * 5
+    sheet.column_dimensions[get_column_letter(CELLS['Brand'].column)].width = 2 * 5
     sheet.column_dimensions[get_column_letter(CELLS['SKU'].column)].width = 10 * 5
-    sheet.column_dimensions[get_column_letter(CELLS['Boiling'].column)].width = 5 * 5
+    sheet.column_dimensions[get_column_letter(CELLS['Boiling'].column)].width = 3 * 5
 
 
 # todo: build plan -> build sku plan
@@ -69,7 +69,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
     cur_row, space_rows = 2, 2
     for group_skus in request_list:
         beg_row = cur_row
-        block = ExcelBlock(sheet=sheet_plan)
+        block = ExcelBlock(sheet=sheet_plan, row_height=24)
         group_formula = []
 
         for form_factor in current_app.config['ORDER']:
@@ -100,10 +100,10 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                     beg_col=CELLS['FormFactor'].column,
                     end_col=CELLS['FormFactor'].column,
                     value=form_factor,
-                    alignment=Alignment(horizontal='center', vertical='center')
+                    alignment=Alignment(horizontal='center', vertical='center', wrapText=True)
                 )
         end_row = cur_row - 1
-        block.colour = current_app.config['COLOURS']['Default'][1:]
+        block.colour = current_app.config['COLOURS']['DefaultGray'][1:]
         block.merge_cells(
             beg_row=beg_row,
             end_row=end_row,
@@ -114,7 +114,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                 group_skus["GroupSKU"][0]["SKU"].boilings[0].ferment,
                 ', без лактозы' if not group_skus["GroupSKU"][0]["SKU"].boilings[0].is_lactose else ''
             ),
-            alignment=Alignment(horizontal='center', vertical='center')
+            alignment=Alignment(horizontal='center', vertical='center', wrapText=True)
 
         )
         block.cell_value(row=beg_row, col=CELLS['Volume'].column, value=group_skus['Volume'])
@@ -125,7 +125,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                             formula_boiling_count,
                             block.sheet.cell(beg_row, CELLS['Volume'].column).coordinate.upper()))
 
-        block.cell_value(row=beg_row, col=CELLS['Plan'].column, value='=ROUND({})'
+        block.cell_value(row=beg_row, col=CELLS['Plan'].column, value='=ROUND({}, 0)'
                          .format(block.sheet.cell(beg_row, CELLS['Estimation'].column).coordinate.upper()))
         block.cell_value(
             row=beg_row,

@@ -28,7 +28,8 @@ class BaseClass:
         'Чильеджина': '#E5DFEC',
         'Качокавалло': '#F1DADA',
         'Сулугуни': '#F1DADA',
-        'Default': '#FFFFFF'
+        'Default': '#FFFFFF',
+        'DefaultGray': '#D9DDDC'
     }
     ORDER = ['Фиор Ди Латте', 'Чильеджина', 'Моцарелла', 'Сулугуни', 'Для пиццы', 'Качокавалло']
     BOILING_VOLUME_LIMITS = {
@@ -42,6 +43,9 @@ class BaseClass:
         'zeros': 'M',
         'start_row': 2
     }
+    # cache files for 30 seconds
+    CACHE_FILE_MAX_AGE = 30
+
 
 class DebugConfig(BaseClass):
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
