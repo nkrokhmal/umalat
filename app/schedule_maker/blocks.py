@@ -90,9 +90,13 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
                 with make(h=1, push_func=dummy_push_y):
                     make('serving', time_size=boiling_model.meltings.serving_time)
             with make(h=1, push_func=dummy_push_y):
-                make('serving', time_size=boiling_model.meltings.serving_time, visible=False)
-                make('melting_label', time_size=4 * 5)
-                make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_model.meltings.serving_time, form_factor_label=form_factor_label)
+                if boiling_model.boiling_type == 'water':
+                    make('serving', time_size=boiling_model.meltings.serving_time, visible=False)
+                    make('melting_label', time_size=4 * 5)
+                    make('melting_name', time_size=full_melting_time - 4 * 5 - boiling_model.meltings.serving_time, form_factor_label=form_factor_label)
+                else:
+                    make('melting_label', time_size=4 * 5)
+                    make('melting_name', time_size=full_melting_time - 4 * 5, form_factor_label=form_factor_label)
             with make(h=1, push_func=dummy_push_y):
                 serving_visible = boiling_model.boiling_type == 'salt'
                 make('serving', time_size=boiling_model.meltings.serving_time, visible=serving_visible)

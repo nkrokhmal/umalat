@@ -11,7 +11,7 @@ def load_style():
         'melting_label': {'text': '{block_num}', 'bold': True},
         'melting_name': {'text': '{form_factor_label}'},
         'serving': {'color': 'orange', 'text': 'подача и вымешивание'},
-        'melting_process': {'color': 'orange', 'text': lambda b: 'плавление/формирование {speed} кг/ч' if b.props['boiling_type'] == 'water' else 'плавление/формирование'},
+        'melting_process': {'color': 'orange', 'text': lambda b: 'плавление {speed} кг/ч' if b.props['boiling_type'] == 'water' else 'плавление/формирование'},
         'cooling1': {'text': 'охлаж1 <{size} * 5> мин'},
         'cooling2': {'text': 'охлаж2 <{size} * 5> мин'},
         'packing_and_preconfiguration': {'beg_time': '07:00'},
