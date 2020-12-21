@@ -103,7 +103,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                     alignment=Alignment(horizontal='center', vertical='center')
                 )
         end_row = cur_row - 1
-        block.colour = current_app.config['COLOURS']['Default'][1:]
+        block.colour = current_app.config['COLOURS']['DefaultGray'][1:]
         block.merge_cells(
             beg_row=beg_row,
             end_row=end_row,

@@ -34,6 +34,7 @@
             var url = "download_boiling_plan/" + "{{file_name}}";
             download(url,"{{file_name}}");
         </script>
+        <a href="{{url_for('main.schedule')}}"> <h4> Перейти к созданию расписания </h4> </a>
     </div>
 {% endif %}
 {% endblock %}

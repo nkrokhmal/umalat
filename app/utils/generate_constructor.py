@@ -69,7 +69,7 @@ def draw_constructor_template(df, file_name, wb):
         draw_row(sku_sheet, 1, ['-'], font_size=8)
         cur_i = 2
 
-        for sku_name in sku_names:
+        for sku_name in sorted(sku_names):
             draw_row(sku_sheet, cur_i, [sku_name], font_size=8)
             cur_i += 1
 
