@@ -20,14 +20,20 @@ def generate_constructor_df(df):
 
     full_result = []
     for i, boiling in enumerate(result):
+        min_boiling_weight = min([x['weight'] for x in boiling])
+        max_boiling_weight = max([x['weight'] for x in boiling])
         for boiling_element in boiling:
             full_result.append({
                 'id': i,
                 'boiling': boiling_element['sku'].boilings[0],
                 'sku': boiling_element['sku'],
-                'kg': boiling_element['plan']
+                'kg': boiling_element['plan'],
+                'min_weight': min_boiling_weight,
+                'max_weight': max_boiling_weight
             })
-    return pd.DataFrame(full_result)
+    boiling_plan_df = pd.DataFrame(full_result)
+    boiling_plan_df = boiling_plan_df.sort_values(by=['min_weight', 'max_weight', 'id'])
+    return boiling_plan_df
 
 
 def generate_full_constructor_df(boiling_plan_df):
@@ -40,8 +46,8 @@ def generate_full_constructor_df(boiling_plan_df):
     df['boiling_volume'] = np.where(df['boiling_name'].str.contains('2.7'), 850, 1000)
     df['form_factor'] = df['sku'].apply(lambda sku: sku.form_factor.name)
     df['boiling_id'] = df['boiling'].apply(lambda b: b.id)
-    df = df[['id', 'boiling_id', 'boiling_name','boiling_volume','form_factor', 'name', 'kg']]
-    df = df.sort_values(by=['boiling_id', 'id', 'boiling_name', 'form_factor', 'name'])
+    df = df[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg', 'min_weight', 'max_weight']]
+    # df = df.sort_values(by=['boiling_id', 'id', 'boiling_name', 'form_factor', 'name'])
     return df.reset_index(drop=True)
 
 
@@ -76,9 +82,15 @@ def draw_constructor_template(df, file_name, wb):
         cur_i = 2
         values = []
         df_filter = df[df['name'].isin(sku_names)].copy()
-
-        for id, grp in df_filter.groupby('id'):
+        if sheet_name == 'Вода':
+            df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'], ascending=[False, False, True])
+        else:
+            df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'])
+        df_filter = df_filter[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg']]
+        print(df_filter)
+        for id, grp in df_filter.groupby('id', sort=False):
             for i, row in grp.iterrows():
+                print(i)
                 v = []
                 v += list(row.values)
                 v += ['']
