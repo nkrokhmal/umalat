@@ -11,7 +11,6 @@ pycel==1.0b22
 flask_pagedown
 flask_bootstrap
 flask_wtf
-xlrd
 flask_admin
 openpyxl
 boto3==1.15.18
@@ -44,3 +43,5 @@ msgpack
 portion
 notebook
 pyyaml
+pyperclip
+xlrd==1.2.0
