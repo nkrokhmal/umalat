@@ -87,10 +87,8 @@ def draw_constructor_template(df, file_name, wb):
         else:
             df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'])
         df_filter = df_filter[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg']]
-        print(df_filter)
         for id, grp in df_filter.groupby('id', sort=False):
             for i, row in grp.iterrows():
-                print(i)
                 v = []
                 v += list(row.values)
                 v += ['']
