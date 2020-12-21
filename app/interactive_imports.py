@@ -15,3 +15,4 @@ from app.schedule_maker.blocks import *
 from app.schedule_maker.algo import *
 from app.schedule_maker.style import *
 from app.schedule_maker.validation import *
+from app.schedule_maker.frontend import *

@@ -6,6 +6,9 @@ from app.schedule_maker.blocks import *
 from app.schedule_maker.style import *
 from app.schedule_maker.models import *
 
+from itertools import product
+
+
 
 def pick(df, boiling_type):
     tmp = df
@@ -57,7 +60,7 @@ def make_schedule(boiling_plan_df):
         row = pick(boiling_plan_grouped_df, boiling_type)
         if row is None:
             return
-        b = make_boiling(line_df, cast_boiling(str(row['id'])), row['grp'], boiling_plan_df, block_num=i + 1)
+        b = make_boiling(line_df, cast_boiling(str(row['id'])), row['grp'], block_num=i + 1)
 
         if init:
             beg = cast_t(line_df.at[boiling_type, 'start_time']) - b['melting_and_packing'].x1
@@ -69,10 +72,9 @@ def make_schedule(boiling_plan_df):
         line_df.at[boiling_type, 'boilings'].append(b)
 
     add_new_boiling(0, 'water', init=True)
-    # add_new_boiling(1, 'salt', init=True)
+    add_new_boiling(1, 'salt', init=True)
 
-    # latest_boiling = max(line_df['latest_boiling'], key=lambda b: b.x1)
-    latest_boiling = max(line_df['latest_boiling'], key=lambda b: (0 if not b else b.x1))
+    latest_boiling = max(line_df['latest_boiling'], key=lambda b: b.x1)
     last_cleaning_t = latest_boiling.x1
 
     cur_i = 2

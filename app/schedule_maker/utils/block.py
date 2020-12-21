@@ -14,9 +14,7 @@ def validate_disjoint(b1, b2, axis='x'):
         disposition = 1
 
     if calc_interval_length(b1.interval(axis) & b2.interval(axis)) != 0:
-        # print(['Disposition', disposition, b1.props['class'], b1.time_interval, b2.props['class'], b2.time_interval, b1.props.get_all_props(), b2.props.get_all_props()])
-        # print(['Disposition', disposition, b1.props['class'], b1.interval(axis), b2.props['class'], b2.interval(axis)])
-        pass
+        logging.info(['Disposition', disposition, b1.props['class'], b1.time_interval, b2.props['class'], b2.time_interval, b1.props.get_all_props(), b2.props.get_all_props()])
     assert calc_interval_length(b1.interval(axis) & b2.interval(axis)) == 0, cast_js({'disposition': disposition})
 
 
@@ -44,7 +42,6 @@ def size_acc(parent, child, key):
         assert time_size % 5 == 0
         return time_size // 5
 
-
 def time_size_acc(parent, child, key):
     size, time_size = child.relative_props.get('size', 0), child.relative_props.get('time_size', 0)
     size, time_size = int(size), int(time_size)
@@ -55,12 +52,12 @@ def time_size_acc(parent, child, key):
         assert time_size % 5 == 0
         return time_size
 
-
 def h_acc(parent, child, key):
     return child.relative_props.get('h', 1)
 
 ACCUMULATORS = {'t': cumsum_int_acc, 'y': cumsum_int_acc, 'size': size_acc, 'time_size': time_size_acc, 'h': h_acc}
 REQUIRED_KEYS = ['size', 'time_size']
+
 
 class Block:
     def __init__(self, block_class=None, props=None, **kwargs):
@@ -74,13 +71,6 @@ class Block:
         self.children = []
 
         self.props = DynamicProps(props=props, accumulators=ACCUMULATORS, required_keys=REQUIRED_KEYS)
-
-    def clone(self):
-        res = Block(self.props['class'])
-        res.props.update(self.props.relative_props)
-        for c in self.children:
-            res.add(c.clone())
-        return res
 
     def __getitem__(self, item):
         if isinstance(item, str):
@@ -184,22 +174,11 @@ class Block:
     def __repr__(self):
         return str(self)
 
-    def run_filter(self, filter):
-        for k, v in filter.items():
-            if callable(v):
-                if not v(self):
-                    return False
-            else:
-                if not self.props[k] == v:
-                    return False
-        return True
-
-    def iter(self, filter=None):
-        if not filter or self.run_filter(filter):
-            yield self
+    def iter(self):
+        yield self
 
         for child in self.children:
-            for b in child.iter(filter):
+            for b in child.iter():
                 yield b
 
     def set_parent(self, parent):
@@ -216,7 +195,7 @@ class Block:
         return block
 
 
-def simple_push(parent, block, validator='x', new_props=None, axis=None):
+def simple_push(parent, block, validator='x', new_props=None):
     if validator in ['x', 'y']:
         axis = str(validator)
         validator = gen_pair_validator(validate=lambda b1, b2: validate_disjoint(b1, b2, axis=axis))
@@ -236,32 +215,18 @@ def simple_push(parent, block, validator='x', new_props=None, axis=None):
                 # todo: hardcode
                 return cast_dict_or_list(e.__str__()) # {'disposition': 2}
             except:
-                # use dispositions only for now
-                raise
-                # return
+                return
     return parent.add(block)
 
 
-def add_push(parent, block, new_props=None, axis=None):
+def add_push(parent, block, new_props=None):
     return simple_push(parent, block, validator=None, new_props=new_props)
 
 
-def stack_push(parent, block, new_props=None, axis='x'):
-    beg_key = 't' if axis == 'x' else 'y'
-
-    if parent.children:
-        cur_beg = max([c.end(axis) for c in parent.children])
-        rel_beg = cur_beg - parent.props[beg_key]
-    else:
-        rel_beg = 0
-    block.props.update({beg_key: rel_beg})
-    return add_push(parent, block, new_props=new_props)
-
-
-def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, axis='x', validator=None, iter_props=None):
+# simple greedy algorithm
+def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY * 10, axis='x', validator='x', iter_props=None):
     # note: make sure parent abs props are updated
     beg_key = 't' if axis == 'x' else 'y'
-    validator = validator or axis
 
     if beg == 'last_beg':
         cur_beg = max([parent.beg(axis)] + [child.beg(axis) for child in parent.children])
@@ -304,11 +269,13 @@ def dummy_push(parent, block, max_tries=24, beg='last_end', end=PERIODS_PER_DAY 
         logging.info(['All dispositions', dispositions])
     raise Exception('Failed to push element')
 
+def dummy_push_y(parent, block, **kwargs):
+    return dummy_push(parent, block, axis='y', **kwargs)
 
 class BlockMaker:
-    def __init__(self, root='root', default_push_func=stack_push, **kwargs):
+    def __init__(self, root='root', default_push_func=simple_push):
         if isinstance(root, str):
-            self.root = Block(root, **kwargs)
+            self.root = Block(root)
         elif isinstance(root, Block):
             self.root = root
         else:
@@ -316,9 +283,8 @@ class BlockMaker:
         self.blocks = [self.root]
         self.default_push_func = default_push_func
 
-    def make(self, block_obj=None, push_func=None, axis='x', push_kwargs=None, **kwargs):
+    def make(self, block_obj=None, push_func=None, push_kwargs=None, **kwargs):
         push_func = push_func or self.default_push_func
-        push_func = cast_push_func(push_func)
         push_kwargs = push_kwargs or {}
 
         if isinstance(block_obj, str) or block_obj is None:
@@ -328,13 +294,8 @@ class BlockMaker:
         else:
             raise Exception('Unknown block obj type')
 
-        push_func(self.blocks[-1], block, axis=axis, **push_kwargs)
+        push_func(self.blocks[-1], block, **push_kwargs)
         return BlockMakerContext(self, block)
-
-
-def new_block_maker(*args, **kwargs):
-    maker = BlockMaker(*args, **kwargs)
-    return maker, maker.root, maker.make
 
 
 class BlockMakerContext:
@@ -349,23 +310,6 @@ class BlockMakerContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.maker.blocks.pop()
 
-def cast_push_func(push_func):
-    if callable(push_func):
-        return push_func
-    elif isinstance(push_func, str):
-        if push_func == 'stack':
-            return stack_push
-        elif push_func == 'add':
-            return add_push
-        elif push_func == 'dummy':
-            return dummy_push
-    raise Exception('Unknown push function')
-
-
-def push(parent, block, method='stack', *args, **kwargs):
-    func = cast_push_func(method)
-    return func(parent, block, *args, **kwargs)
-
 
 if __name__ == '__main__':
     a = Block('a', t=5)
@@ -378,7 +322,8 @@ if __name__ == '__main__':
     print('No sizes specified', a.props['size'], a.props['time_size'], a.length(), a.x1, a.x2)
     print()
 
-    maker, root, make = new_block_maker(default_push_func=dummy_push)
+    maker = BlockMaker(default_push_func=dummy_push)
+    make = maker.make
 
     with make('a'):
         make('b', size=2)
@@ -387,7 +332,8 @@ if __name__ == '__main__':
     print('Block maker')
     print(maker.root)
 
-    maker, root, make = new_block_maker(default_push_func=add_push)
+    maker = BlockMaker(default_push_func=add_push)
+    make = maker.make
 
     with make('a', size=3, t=5):
         make('b', t=2, size=2)
@@ -408,46 +354,3 @@ if __name__ == '__main__':
         raise Exception('Should not happen')
     except AssertionError:
         print('Time size should be divided by 5')
-
-
-    print('Run filter')
-
-    maker, root, make = new_block_maker(default_push_func=add_push)
-
-    with make('a', size=3, t=5):
-        make('b', t=2, size=2)
-        make('b', size=3)
-        make('c', size=1)
-
-    for b in maker.root.iter({'class': 'b', 'size': lambda b: b.props['size'] % 2 == 0}):
-        print(b)
-
-    print('Clone')
-
-    maker, root, make = new_block_maker(default_push_func=add_push)
-
-    with make('a', size=3, t=5):
-        make('b', t=2, size=2)
-        make('b', size=3)
-        make('c', size=1)
-    print(maker.root)
-    print(maker.root.clone())
-
-    print('Stack push')
-
-    maker, root, make = new_block_maker()
-
-    with make('a'):
-        with make('b'):
-            make('c', size=3)
-            make('c', size=3)
-        with make('d'):
-            make('e', size=5)
-            make('e', size=5)
-    print(maker.root)
-
-    maker, front, make = new_block_maker('front')
-    make('foo', h=1, axis='y')
-    print(front.end('y'))
-    make('bar', h=1, axis='y')
-    print(front)

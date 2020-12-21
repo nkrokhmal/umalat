@@ -18,18 +18,23 @@ def boiling_validator(parent, boiling):
             validate_disjoint(b1['pouring'], b2['pouring'])
 
         if b1.props['boiling_type'] == b2.props['boiling_type']:
+
             # [melting.disjoint]
-            validate_disjoint(b1['melting_and_packing']['melting']['meltings']['full_melting_process'], b2['melting_and_packing']['melting']['meltings']['full_melting_process'])
-        #
-        # s1 = set([b.props['team_id'] for b in listify(b1['melting_and_packing']['packing']['packing_team'])])
-        # s2 = set([b.props['team_id'] for b in listify(b2['melting_and_packing']['packing']['packing_team'])])
-        # common_team_ids = s1 & s2
-        # print('common_team_ids', common_team_ids)
-        #
-        # for team_id in common_team_ids:
-        #     t1 = [b for b in listify(b1['melting_and_packing']['packing']['packing_team']) if b.props['team_id'] == team_id][0]
-        #     t2 = [b for b in listify(b2['melting_and_packing']['packing']['packing_team']) if b.props['team_id'] == team_id][0]
-        #     validate_disjoint(t1, t2)
+            boiling_type = b1.props['boiling_type']
+            if boiling_type == 'water':
+                # todo: del, make properly
+                validate_disjoint(b1['melting_and_packing']['melting']['block'][-1]['cooling2'],
+                                  b2['melting_and_packing']['melting']['block'][-1]['cooling1'])
+
+                if b1.props['boiling_id'] == b2.props['boiling_id']:
+                    # merging allowed
+                    validate_disjoint(b1['melting_and_packing']['melting'][2]['melting_process'], b2['melting_and_packing']['melting'][2]['melting_process'])
+                else:
+                    validate_disjoint(b1['melting_and_packing']['melting'], b2['melting_and_packing']['melting'])
+            else:
+                validate_disjoint(b1['melting_and_packing']['melting'][1]['melting_process'], b2['melting_and_packing']['melting'][1]['melting_process'])
+
+            validate_disjoint(b1['melting_and_packing']['packing_and_preconfiguration'], b2['melting_and_packing']['packing_and_preconfiguration'])
 
     # no intersection with cleanings also
     cleanings = [node for node in parent.children if node.props['class'] == 'cleaning']

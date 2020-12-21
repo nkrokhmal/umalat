@@ -63,7 +63,7 @@ def draw_block(sheet, x, y, w, h, text, color=None, border=None, text_rotation=N
 
 def draw(sheet, block):
     for b in block.iter():
-        if not b.children and b.length() > 0:
+        if not b.children:
             text = b.props.get('text', '')
             color = cast_color(b.props.get('color', 'white'))
 
@@ -157,10 +157,10 @@ def draw_schedule(root, style, fn=None, init_sheet_func=init_sheet):
 def draw_print(block, visible_only=True):
     res = ''
     for b in block.iter():
-        if calc_interval_length(b.interval()) != 0:
+        if calc_interval_length(b.interval) != 0:
             if visible_only and b.props['visible'] is False:
                 continue
-            res += ' ' * b.beg() + '=' * int(calc_interval_length(b.interval())) + f' {b.props["class"]} {b.props["y"]}:{b.interval()}'
+            res += ' ' * b.beg + '=' * int(calc_interval_length(b.interval)) + f' {b.props["class"]} {b.props["y"]}:{b.interval}'
             res += '\n'
     return res
 
