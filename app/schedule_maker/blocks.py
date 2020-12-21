@@ -59,7 +59,7 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
             full_melting_time = boiling_model.meltings.serving_time + melting_time + boiling_model.meltings.salting_time
 
         def gen_label(label_weights):
-            label_weights = remove_duplicates(label_weights)
+            label_weights = remove_neighbor_duplicates(label_weights)
             cur_label = None
             values = []
             for label, weight in label_weights:
@@ -82,7 +82,8 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
             values = [(sku.form_factor.name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()]
         form_factor_label = gen_label(values)
 
-        brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
+        # brand_label = gen_label([(sku.brand_name, sku.weight_form_factor) for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()])
+        brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku, sku_kg in boiling_grp[['sku', 'kg']].values.tolist()]))
 
         with make('melting', time_size=full_melting_time):
             if boiling_model.boiling_type == 'water':
@@ -124,7 +125,7 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
                     make('packing_name', time_size=total_packing_time - 3 * 5, form_factor_label=form_factor_label)
                 with make(h=1, push_func=dummy_push_y):
                     # use different labels for water and salt
-                    make('packing_brand', time_size=total_packing_time, brand_label='фасовка')
+                    make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
                 with make(h=1, push_func=dummy_push_y):
 
 
