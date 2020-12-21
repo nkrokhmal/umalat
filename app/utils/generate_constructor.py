@@ -4,10 +4,85 @@ import numpy as np
 from flask import current_app
 
 
+def generate_constructor_df_v2(df):
+    values = []
+    for boiling_id, boiling_grp in df.groupby('boiling_id'):
+        volume = boiling_grp['sku'].iloc[0].boilings[0].cheese_types.output
+        print(volume)
+        boiling_grp['weight'] = boiling_grp['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
+        if volume == 1000:
+            boiling_grp = boiling_grp.sort_values(by='weight', ascending=False)
+        else:
+            boiling_grp = boiling_grp.sort_values(by='weight', ascending=True)
+        boiling_grp = boiling_grp.sort_values(by='weight')
+        boiling_dic = boiling_grp[['sku_id', 'plan']].set_index('sku_id').to_dict(orient='index')
+        boiling_dic = {k: v['plan'] for k, v in boiling_dic.items()}
+        boiling_dic = {cast_sku(k): v for k, v in boiling_dic.items()}
+        for key in boiling_dic.keys():
+            print(key.boiling_form_factors[0].weight)
+        total_kg = sum(boiling_dic.values())
+        total_kg = custom_round(total_kg, volume, rounding='floor')
+
+        n_boilings = int(total_kg / volume)
+        for i in range(n_boilings):
+            cur_kg = volume
+
+            boiling_request = OrderedDict()
+            for k, v in list(boiling_dic.items()):
+                boil_kg = min(cur_kg, boiling_dic[k])
+
+                boiling_dic[k] -= boil_kg
+                cur_kg -= boil_kg
+
+                if k not in boiling_request:
+                    boiling_request[k] = 0
+                boiling_request[k] += boil_kg
+
+                if cur_kg == 0:
+                    break
+
+            if cur_kg != 0:
+                print('Non-zero')
+                k = [k for k, v in boiling_request.items() if v != 0][0]
+                boiling_request[k] += cur_kg
+
+            boiling_request = [[k, v] for k, v in boiling_request.items() if v != 0]
+            values.append([boiling_id, boiling_request])
+
+    df = pd.DataFrame(values, columns=['boiling_id', 'boiling_request'])
+    df['boiling_id'] = df['boiling_id'].astype(str)
+    df['boiling_type'] = df['boiling_id'].apply(
+        lambda boiling_id: 'salt' if str(cast_boiling(boiling_id).percent) == '2.7' else 'water')
+    df['used'] = False
+
+    df['boiling_label'] = df['boiling_id'].apply(
+        lambda boiling_id: '{} {}{}'.format(cast_boiling(boiling_id).percent,
+                                            cast_boiling(boiling_id).ferment,
+                                            '' if cast_boiling(boiling_id).is_lactose else ' без лактозы'))
+
+    df['volume'] = df['boiling_request'].apply(lambda req: sum([v for k, v in req]))
+
+    df['boiling_request'] = df['boiling_request'].apply(
+        lambda req: [[cast_sku(k), round(v)] for k, v in req if v != 0])
+
+    values = []
+    for i, row in df.iterrows():
+        for sku, kg in row['boiling_request']:
+            values.append([i + 1, cast_boiling(row['boiling_id']), sku, kg])
+
+    print(values)
+    # boiling_plan_df = pd.DataFrame(values, columns=['id', 'boiling', 'sku', 'kg', 'weight'])
+    # print(boiling_plan_df)
+    boiling_plan_df = pd.DataFrame(values, columns=['id', 'boiling', 'sku', 'kg'])
+    boiling_plan_df['weight'] = boiling_plan_df['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
+    print(boiling_plan_df)
+    return boiling_plan_df
+
+
 def generate_constructor_df(df):
     result = []
     for boiling_id, boiling_grp in df.groupby('boiling_id'):
-        boiling_grp['weight'] = boiling_grp['sku'].apply(lambda x: x.weight_netto)
+        boiling_grp['weight'] = boiling_grp['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
         boiling_volume = boiling_grp['sku'].iloc[0].boilings[0].cheese_types.output
 
         boiling = 1
@@ -46,7 +121,7 @@ def generate_full_constructor_df(boiling_plan_df):
     df['boiling_volume'] = np.where(df['boiling_name'].str.contains('2.7'), 850, 1000)
     df['form_factor'] = df['sku'].apply(lambda sku: sku.form_factor.name)
     df['boiling_id'] = df['boiling'].apply(lambda b: b.id)
-    df = df[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg', 'min_weight', 'max_weight']]
+    df = df[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg']]
     # df = df.sort_values(by=['boiling_id', 'id', 'boiling_name', 'form_factor', 'name'])
     return df.reset_index(drop=True)
 
@@ -82,11 +157,11 @@ def draw_constructor_template(df, file_name, wb):
         cur_i = 2
         values = []
         df_filter = df[df['name'].isin(sku_names)].copy()
-        if sheet_name == 'Вода':
-            df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'], ascending=[False, False, True])
-        else:
-            df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'])
-        df_filter = df_filter[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg']]
+        # if sheet_name == 'Вода':
+        #     df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'], ascending=[False, False, True])
+        # else:
+        #     df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'])
+        # df_filter = df_filter[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg']]
         for id, grp in df_filter.groupby('id', sort=False):
             for i, row in grp.iterrows():
                 v = []
