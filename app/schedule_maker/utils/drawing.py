@@ -39,11 +39,11 @@ def draw_cell(sheet, x, y, text, color=None, font_size=None, text_rotation=None,
     return cell
 
 
-def draw_block(sheet, x, y, w, h, text, color=None, border=None, text_rotation=None, font_size=None, alignment=None):
+def draw_block(sheet, x, y, w, h, text, color=None, border=None, text_rotation=None, font_size=None, alignment=None, bold=False):
     color = color or cast_color('white')
     sheet.merge_cells(start_row=y, start_column=x, end_row=y + h - 1, end_column=x + w - 1)
     merged_cell = sheet.cell(row=y, column=x)
-    merged_cell.font = Font(size=font_size)
+    merged_cell.font = Font(size=font_size, bold=bold)
     if alignment == 'center':
         merged_cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, text_rotation=text_rotation)
     merged_cell.value = text
@@ -81,6 +81,8 @@ def draw(sheet, block):
                 t += b.props['index_width']  # first index columns
                 t += 1  # indexing starts with 1 in excel
 
+                bold = b.props['bold']
+
                 draw_block(sheet,
                            t,
                            b.y1,
@@ -88,8 +90,9 @@ def draw(sheet, block):
                            b.h,
                            text,
                            color,
+                           bold=bold,
                            border={'border_style': 'thin', 'color': '000000'},
-                           text_rotation=b.props.get('text_rotation'), font_size=8, alignment='center')
+                           text_rotation=b.props.get('text_rotation'), font_size=6, alignment='center')
             except:
                 print(b, t, b.y1, b.w, b.h)
                 print(b.props.relative_props, b.interval())
