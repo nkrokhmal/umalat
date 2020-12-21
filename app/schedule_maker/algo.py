@@ -39,8 +39,8 @@ def make_schedule(boiling_plan_df):
 
     # todo: take from parameters
     # [cheesemakers.start_time]
-    line_df.at['water', 'start_time'] = '09:50'
-    line_df.at['salt', 'start_time'] = '07:05'
+    line_df.at['water', 'start_time'] = '08:25'
+    line_df.at['salt', 'start_time'] = '07:15'
 
     # todo: take from parameters
     # [drenator.chedderization_time]
