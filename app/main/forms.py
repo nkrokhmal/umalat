@@ -1,11 +1,11 @@
 from flask_restplus import ValidationError
 from flask_wtf.file import FileRequired, FileField
-from wtforms import fields, StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField, DateTimeField, SelectMultipleField
+from wtforms import fields, StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField, DateTimeField, TimeField
 from wtforms.validators import Required, Optional
 from flask_wtf import FlaskForm
 from ..models import Packer, Boiling, Line, PackType, FormFactor, BoilingFormFactor
 from .. import db
-from datetime import datetime
+import datetime
 
 
 class BoilingForm(FlaskForm):
@@ -105,8 +105,8 @@ class RequestForm(FlaskForm):
         FileRequired(message='There was no file!')
     ]
     input_file = FileField('', validators=validators)
-    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.today, validators=[Required()])
-    submit = SubmitField(label="Submit")
+    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
+    submit = SubmitField(label="Отправить")
 
 
 class ScheduleForm(FlaskForm):
@@ -114,8 +114,10 @@ class ScheduleForm(FlaskForm):
         FileRequired(message='Отсутствует файл!')
     ]
     input_file = FileField('', validators=validators)
-    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.today, validators=[Required()])
-    submit = SubmitField(label="Submit")
+    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
+    salt_beg_time = TimeField('Время начала варок соли', validators=[Optional()], default=datetime.time(7, 0))
+    water_beg_time = TimeField('Время начала варок воды', validators=[Optional()], default=datetime.time(7, 0))
+    submit = SubmitField(label="Отправить")
 
 
 class StatisticForm(FlaskForm):
