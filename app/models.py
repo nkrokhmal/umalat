@@ -354,7 +354,7 @@ class PackType(db.Model):
 class Line(db.Model):
     __tablename__ = 'lines'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer)
+    name = db.Column(db.String)
     # lines_skus = db.relationship('SKU', backref='lines')
     boiling_line = db.relationship('Boiling', backref='lines')
     cheddarization_time = db.Column(db.Integer)

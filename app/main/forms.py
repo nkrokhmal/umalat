@@ -116,7 +116,7 @@ class ScheduleForm(FlaskForm):
     input_file = FileField('', validators=validators)
     date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
     salt_beg_time = TimeField('Время начала варок соли', validators=[Optional()], default=datetime.time(7, 0))
-    water_beg_time = TimeField('Время начала варок воды', validators=[Optional()], default=datetime.time(7, 0))
+    water_beg_time = TimeField('Время начала варок воды', validators=[Optional()], default=datetime.time(8, 0))
     submit = SubmitField(label="Отправить")
 
 
