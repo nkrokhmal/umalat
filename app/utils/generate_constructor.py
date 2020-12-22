@@ -13,7 +13,8 @@ def generate_constructor_df_v2(df):
     df = df.sort_values(by='_sorting_key')
     df.pop('_sorting_key')
 
-    for boiling_id, boiling_grp in df.groupby('boiling_id'):
+    for boiling_id in remove_duplicates(df['boiling_id'].values):
+        boiling_grp = df[df['boiling_id'] == boiling_id]
         volume = boiling_grp['sku'].iloc[0].boilings[0].cheese_types.output
 
         boiling_dic = OrderedDict()
