@@ -6,20 +6,23 @@ from flask import current_app
 
 def generate_constructor_df_v2(df):
     values = []
+
+    df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
+    df['weight'] = df['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
+    df['_sorting_key'] = np.where(df['boiling_type'] == 'salt', df['weight'], -df['weight'])
+    df = df.sort_values(by='_sorting_key')
+    df.pop('_sorting_key')
+
     for boiling_id, boiling_grp in df.groupby('boiling_id'):
         volume = boiling_grp['sku'].iloc[0].boilings[0].cheese_types.output
-        print(volume)
-        boiling_grp['weight'] = boiling_grp['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
-        if volume == 1000:
-            boiling_grp = boiling_grp.sort_values(by='weight', ascending=False)
-        else:
-            boiling_grp = boiling_grp.sort_values(by='weight', ascending=True)
-        boiling_grp = boiling_grp.sort_values(by='weight')
-        boiling_dic = boiling_grp[['sku_id', 'plan']].set_index('sku_id').to_dict(orient='index')
-        boiling_dic = {k: v['plan'] for k, v in boiling_dic.items()}
-        boiling_dic = {cast_sku(k): v for k, v in boiling_dic.items()}
+
+        boiling_dic = OrderedDict()
+        for i, row in boiling_grp.iterrows():
+            boiling_dic[cast_sku(row['sku_id'])] = row['plan']
+
         for key in boiling_dic.keys():
             print(key.boiling_form_factors[0].weight)
+
         total_kg = sum(boiling_dic.values())
         total_kg = custom_round(total_kg, volume, rounding='floor')
 
@@ -51,8 +54,7 @@ def generate_constructor_df_v2(df):
 
     df = pd.DataFrame(values, columns=['boiling_id', 'boiling_request'])
     df['boiling_id'] = df['boiling_id'].astype(str)
-    df['boiling_type'] = df['boiling_id'].apply(
-        lambda boiling_id: 'salt' if str(cast_boiling(boiling_id).percent) == '2.7' else 'water')
+    df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
     df['used'] = False
 
     df['boiling_label'] = df['boiling_id'].apply(
