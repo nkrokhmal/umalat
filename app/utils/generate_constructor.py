@@ -15,7 +15,7 @@ def generate_constructor_df_v2(df):
 
     # todo: haddcode
     boiling_grp_df = pd.DataFrame(remove_duplicates(df['boiling_id'].values), columns=['boiling_id'])
-    boiling_grp_df['n_chiledzhina'] = boiling_grp_df['boiling_id'].apply(lambda boiling_id: df[(df['boiling_id'] == boiling_id) & (df['sku'].apply(lambda sku: sku.form_factor.name).str.contains('Чильеджина'))].count())
+    boiling_grp_df['n_chiledzhina'] = boiling_grp_df['boiling_id'].apply(lambda boiling_id: len(df[(df['boiling_id'] == boiling_id) & (df['sku'].apply(lambda sku: sku.form_factor.name).str.contains('Чильеджина'))]))
     boiling_grp_df = boiling_grp_df.sort_values(by='n_chiledzhina')
 
     for boiling_id in boiling_grp_df['boiling_id'].values:
