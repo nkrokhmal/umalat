@@ -145,9 +145,6 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
 def make_boiling(line_df, boiling_model, boiling_grp, block_num=12, pouring_line=None):
     termizator = db.session.query(Termizator).first()
 
-    # [termizator.time]
-    termizator.pouring_time = 30
-
     maker = BlockMaker(default_push_func=dummy_push)
     make = maker.make
 

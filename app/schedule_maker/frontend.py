@@ -69,12 +69,14 @@ def generate_schedule_frontend_block(root):
                 with make('header', index_width=0):
                     make('template', t=1, h=2, size=3, text=f'Сыроизготовитель №1 Poly {i + 1}', color=(183, 222, 232), push_func=add_push)
                 with make('pourings'):
+                    make('stub', visible=False, push_func=add_push)
                     for block in root['boiling']:
                         if block.props['pouring_line'] == str(i):
                             make(block['pouring'], push_func=add_push_with_props)
             make(h=1, visible=False, push_func=dummy_push_y)
 
         with make('cleanings', h=2, push_func=dummy_push_y):
+
             with make('header', index_width=0):
                 make('template', t=1, h=2, size=3, text='Мойка термизатора', push_func=add_push)
             with make('cleanings'):
@@ -87,6 +89,8 @@ def generate_schedule_frontend_block(root):
                 with make('header', index_width=0):
                     make('template', t=1, h=2, size=3, text=f'Сыроизготовитель №1 Poly {i + 1}', color=(183, 222, 232), push_func=add_push)
                 with make('pourings'):
+                    make('stub', visible=False, push_func=add_push)
+
                     for block in root['boiling']:
                         if block.props['pouring_line'] == str(i):
                             make(block['pouring'], push_func=add_push_with_props)
@@ -108,6 +112,8 @@ def generate_schedule_frontend_block(root):
             with make('header'):
                 make('template', index_width=0, t=1, h=2, size=3, text='Линия плавления моцареллы в воде №1', push_func=add_push)
             with make('meltings'):
+                make('stub', visible=False, push_func=add_push)
+
                 for block in root['boiling']:
                     if block.props['boiling_type'] == 'water':
                         make(block['melting_and_packing']['melting'], push_func=add_push_with_props)
@@ -119,6 +125,8 @@ def generate_schedule_frontend_block(root):
             with make('header'):
                 make('template', index_width=0, t=1, h=2, size=3, text='Фасовка', push_func=add_push)
             with make('packings'):
+                make('stub', visible=False, push_func=add_push)
+
                 for block in root['boiling']:
                     if block.props['boiling_type'] == 'water':
                         make(block['melting_and_packing']['packing_and_preconfiguration'], push_func=add_push_with_props)
@@ -134,7 +142,7 @@ def generate_schedule_frontend_block(root):
 
         # todo: hardcode, add empty elements for drawing not to draw melting_line itself
         for b in melting_lines:
-            add_push(b, Block('block', visible=False))
+            add_push(b, Block('stub', visible=False))
 
         for i, block in enumerate([b for b in root['boiling'] if b.props['boiling_type'] == 'salt']):
             add_push_with_props(melting_lines[i % n_lines], block['melting_and_packing']['melting'])
@@ -147,6 +155,8 @@ def generate_schedule_frontend_block(root):
             with make('header'):
                 make('template', index_width=0, t=1, h=2, size=3, text='Фасовка', push_func=add_push)
             with make('packings'):
+                make('stub', visible=False, push_func=add_push)
+
                 for block in root['boiling']:
                     if block.props['boiling_type'] == 'salt':
                         make(block['melting_and_packing']['packing_and_preconfiguration'], push_func=add_push_with_props)
