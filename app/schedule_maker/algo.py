@@ -23,7 +23,7 @@ def pick(df, boiling_type):
     return row
 
 
-def make_schedule(boiling_plan_df):
+def make_schedule(boiling_plan_df, start_times=None):
     values = []
     for i, boiling_grp in boiling_plan_df.groupby('id'):
         values.append([boiling_grp['boiling'].iloc[0], boiling_grp])
@@ -37,10 +37,11 @@ def make_schedule(boiling_plan_df):
     line_df.at['water', 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
     line_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
 
-    # todo: take from parameters
     # [cheesemakers.start_time]
-    line_df.at['water', 'start_time'] = '08:25'
-    line_df.at['salt', 'start_time'] = '07:15'
+    # todo: add validation
+    start_times = start_times or {'water': '08:25', 'salt': '07:15'}
+    line_df.at['water', 'start_time'] = start_times['water']
+    line_df.at['salt', 'start_time'] = start_times['salt']
 
     # todo: take from parameters
     # [drenator.chedderization_time]
@@ -66,6 +67,7 @@ def make_schedule(boiling_plan_df):
             beg = cast_t(line_df.at[boiling_type, 'start_time']) - b['melting_and_packing'].x1
         else:
             beg = line_df.at[row['type'], 'latest_boiling'].x1
+
         b = dummy_push(root, b, iter_props=line_df.at[boiling_type, 'iter_props'], validator=boiling_validator, beg=beg, max_tries=100)
         line_df.at[boiling_type, 'last_packing_sku'] = row['grp'].iloc[-1]['sku']
         line_df.at[boiling_type, 'latest_boiling'] = b if not line_df.at[boiling_type, 'latest_boiling'] else max([line_df.at[boiling_type, 'latest_boiling'], b], key=lambda b: b.x1)

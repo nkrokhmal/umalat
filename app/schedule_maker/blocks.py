@@ -70,7 +70,10 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
 
                 # todo: make properly, this if-else if because of rubber. Should be something better
                 if weight:
-                    s += str(weight / 1000)
+                    if str(weight / 1000) == '0.03':
+                        s += 'палочки'
+                    else:
+                        s += str(weight / 1000)
                 else:
                     s += 'терка'
                 values.append(s)
