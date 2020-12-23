@@ -163,8 +163,8 @@ def generate_schedule_frontend_block(root):
     return maker.root
 
 
-def create_excel_frontend(boiling_plan_df):
-    schedule = make_schedule(boiling_plan_df)
+def create_excel_frontend(boiling_plan_df, start_times=None):
+    schedule = make_schedule(boiling_plan_df, start_times)
     frontend_block = generate_schedule_frontend_block(schedule)
     style = load_style()
     init_sheet_func = init_sheet

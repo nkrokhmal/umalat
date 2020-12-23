@@ -49,8 +49,7 @@ def sku_plan():
 
         for group_item in group_items:
             group_sku = [x for x in full_list if
-                         x['SKU'].boilings[0].id == group_item['BoilingId'] and
-                         x['Request'] < 0]
+                         x['SKU'].boilings[0].id == group_item['BoilingId']]
             if len(group_sku) > 0:
                 # todo: вынести выход с тонны в параметры линии
                 output_weight = group_sku[0]['SKU'].output_per_ton
@@ -59,7 +58,8 @@ def sku_plan():
                     'GroupSKU': group_sku,
                     'BoilingId': group_sku[0]['SKU'].boilings[0].id,
                     'BoilingCount': - request_weight / output_weight,
-                    'Volume': group_sku[0]['SKU'].output_per_ton
+                    'Volume': group_sku[0]['SKU'].output_per_ton,
+                    'IsLactose': group_sku[0]['SKU'].boilings[0].is_lactose
                 })
 
         file_name = build_plan_sku(date, df_save, request_list=result_list)

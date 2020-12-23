@@ -2,7 +2,7 @@ from app.interactive_imports import *
 import pandas as pd
 import numpy as np
 from flask import current_app
-
+import math
 
 def generate_constructor_df_v2(df):
     values = []
@@ -26,13 +26,11 @@ def generate_constructor_df_v2(df):
         for i, row in boiling_grp.iterrows():
             boiling_dic[cast_sku(row['sku_id'])] = row['plan']
 
-        for key in boiling_dic.keys():
-            print(key.boiling_form_factors[0].weight)
-
         total_kg = sum(boiling_dic.values())
-        total_kg = custom_round(total_kg, volume, rounding='floor')
+        total_kg = custom_round(total_kg, volume, rounding='ceil')
 
-        n_boilings = int(total_kg / volume)
+        # n_boilings = int(total_kg / volume)
+        n_boilings = math.ceil(total_kg / volume)
         for i in range(n_boilings):
             cur_kg = volume
 
@@ -78,12 +76,8 @@ def generate_constructor_df_v2(df):
         for sku, kg in row['boiling_request']:
             values.append([i + 1, cast_boiling(row['boiling_id']), sku, kg])
 
-    print(values)
-    # boiling_plan_df = pd.DataFrame(values, columns=['id', 'boiling', 'sku', 'kg', 'weight'])
-    # print(boiling_plan_df)
     boiling_plan_df = pd.DataFrame(values, columns=['id', 'boiling', 'sku', 'kg'])
     boiling_plan_df['weight'] = boiling_plan_df['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
-    print(boiling_plan_df)
     return boiling_plan_df
 
 
@@ -191,6 +185,7 @@ def draw_constructor_template(df, file_name, wb):
             cur_i += 1
 
     path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], os.path.splitext(file_name)[0])
+    wb.active = 0
     wb.save(path)
     return '{}.xlsx'.format(os.path.splitext(file_name)[0])
 

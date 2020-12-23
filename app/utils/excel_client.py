@@ -67,7 +67,12 @@ def build_plan_sku(date, df, request_list, plan_path=None):
     generate_title(sheet=sheet_plan)
 
     cur_row, space_rows = 2, 2
+    request_list = sorted(request_list, key=lambda k: (k['IsLactose'], k['GroupSKU'][0]['SKU'].boilings[0].percent))
+    is_lactose = False
     for group_skus in request_list:
+        if group_skus['GroupSKU'][0]['SKU'].boilings[0].is_lactose != is_lactose:
+            cur_row += space_rows
+        is_lactose = group_skus['GroupSKU'][0]['SKU'].boilings[0].is_lactose
         beg_row = cur_row
         block = ExcelBlock(sheet=sheet_plan, row_height=24)
         group_formula = []
@@ -137,7 +142,9 @@ def build_plan_sku(date, df, request_list, plan_path=None):
             col=COLUMNS['BOILING_ID'],
             value=group_skus['BoilingId']
         )
-        cur_row += space_rows
+        if is_lactose:
+            cur_row += space_rows
+    wb.active = 1
     wb.save(path)
     return filename
 
