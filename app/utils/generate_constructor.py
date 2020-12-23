@@ -138,7 +138,7 @@ def generate_empty_sku():
     return skus
 
 
-def draw_constructor_template(df, file_name, wb):
+def draw_constructor_template(df, file_name, wb, batch_number=0):
     skus = db.session.query(SKU).all()
     data_sku = {'Вода': [x.name for x in skus if x.boilings[0].cheese_types.name == 'Вода'],
                 'Соль': [x.name for x in skus if x.boilings[0].cheese_types.name == 'Соль']}
@@ -179,6 +179,8 @@ def draw_constructor_template(df, file_name, wb):
                     draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
             else:
                 colour = get_colour_by_name(v[5], skus)
+                v[0] = '=IF(I{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
+                    cur_i, batch_number)
                 v[1] = '=IF(I{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
                     cur_i)
                 draw_row(boiling_sheet, cur_i, v, font_size=8, color=colour)

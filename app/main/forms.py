@@ -109,14 +109,23 @@ class RequestForm(FlaskForm):
     submit = SubmitField(label="Отправить")
 
 
+class BoilingPlanForm(FlaskForm):
+    validators = [
+        FileRequired(message='Отсутствует файл!')
+    ]
+    batch_number = IntegerField('Введите номер последней партии', default=0, validators=[Optional()])
+    input_file = FileField('', validators=validators)
+    submit = SubmitField(label="Отправить")
+
+
 class ScheduleForm(FlaskForm):
     validators = [
         FileRequired(message='Отсутствует файл!')
     ]
     input_file = FileField('', validators=validators)
     date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
-    salt_beg_time = TimeField('Время начала варок соли', validators=[Optional()], default=datetime.time(7, 0))
-    water_beg_time = TimeField('Время начала варок воды', validators=[Optional()], default=datetime.time(8, 0))
+    salt_beg_time = TimeField('Начало первой подачи на линии "Пицца Чиз"', validators=[Optional()], default=datetime.time(7, 0))
+    water_beg_time = TimeField('Начало первой подачи на линии "Моцарелла в воде"', validators=[Optional()], default=datetime.time(8, 0))
     submit = SubmitField(label="Отправить")
 
 

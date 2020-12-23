@@ -37,6 +37,12 @@ class ExcelBlock:
             self.sheet.cell(row, col).alignment = Alignment(wrapText=True)
 
     def merge_cells(self, beg_row, end_row, beg_col, end_col, value, alignment=None, set_colour=True, set_font=True, set_border=True):
+        if set_border:
+            for row in range(beg_row + 1, end_row + 1):
+                self.sheet.cell(end_row, end_col).border = Border(left=Side(style='thin'),
+                                                                  right=Side(style='thin'))
+            if end_row != beg_row:
+                self.sheet.cell(end_row, end_col).border = Border(bottom=Side(style='thin'))
         self.sheet.merge_cells(start_row=beg_row,
                                end_row=end_row,
                                start_column=beg_col,
@@ -44,12 +50,7 @@ class ExcelBlock:
         self.cell_value(row=beg_row, col=beg_col, value=value, alignment=alignment, set_colour=set_colour, set_font=set_font, set_border=set_border)
         self.default_colour(beg_row, beg_col, set_colour)
         self.default_font(beg_row, beg_col, set_font)
-        if set_border:
-            for row in range(beg_row + 1, end_row + 1):
-                self.sheet.cell(end_row, end_col).border = Border(left=Side(style='thin'),
-                                                                  right=Side(style='thin'))
-            if end_row != beg_row:
-                self.sheet.cell(end_row, end_col).border = Border(bottom=Side(style='thin'))
+
 
 
 
