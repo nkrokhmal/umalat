@@ -66,9 +66,9 @@ def generate_schedule_frontend_block(root):
 
         for i in range(2):
             with make(f'cheese_maker_{i}', h=2, push_func=dummy_push_y):
-                with make('header', index_width=0):
+                with make('header', index_width=0, push_func=add_push):
                     make('template', t=1, h=2, size=3, text=f'Сыроизготовитель №1 Poly {i + 1}', color=(183, 222, 232), push_func=add_push)
-                with make('pourings'):
+                with make('pourings', push_func=add_push):
                     make('stub', visible=False, push_func=add_push)
                     for block in root['boiling']:
                         if block.props['pouring_line'] == str(i):
@@ -77,18 +77,18 @@ def generate_schedule_frontend_block(root):
 
         with make('cleanings', h=2, push_func=dummy_push_y):
 
-            with make('header', index_width=0):
+            with make('header', index_width=0, push_func=add_push):
                 make('template', t=1, h=2, size=3, text='Мойка термизатора', push_func=add_push)
-            with make('cleanings'):
+            with make('cleanings', push_func=add_push):
                 for block in root['cleaning']:
                     make(block, push_func=add_push_with_props)
         make(h=1, visible=False, push_func=dummy_push_y)
 
         for i in range(2, 4):
             with make(f'cheese_maker_{i}', h=2, push_func=dummy_push_y):
-                with make('header', index_width=0):
+                with make('header', index_width=0, push_func=add_push):
                     make('template', t=1, h=2, size=3, text=f'Сыроизготовитель №1 Poly {i + 1}', color=(183, 222, 232), push_func=add_push)
-                with make('pourings'):
+                with make('pourings', push_func=add_push):
                     make('stub', visible=False, push_func=add_push)
 
                     for block in root['boiling']:
@@ -109,9 +109,9 @@ def generate_schedule_frontend_block(root):
             make('template', h=1, size=cast_t('19:05') - cast_t('07:00'), text='Оператор + Помощник', color=(149, 179, 215), push_func=add_push)
 
         with make('water_melting', h=4, push_func=dummy_push_y):
-            with make('header'):
+            with make('header', push_func=add_push):
                 make('template', index_width=0, t=1, h=2, size=3, text='Линия плавления моцареллы в воде №1', push_func=add_push)
-            with make('meltings'):
+            with make('meltings', push_func=add_push):
                 make('stub', visible=False, push_func=add_push)
 
                 for block in root['boiling']:
@@ -122,9 +122,9 @@ def generate_schedule_frontend_block(root):
             make('template', t=5, h=1, size=cast_t('19:05') - cast_t('07:00'), text='бригадир упаковки + 5 рабочих', color=(149, 179, 215), push_func=add_push)
 
         with make('water_packing', h=3, push_func=dummy_push_y):
-            with make('header'):
+            with make('header', push_func=add_push):
                 make('template', index_width=0, t=1, h=2, size=3, text='Фасовка', push_func=add_push)
-            with make('packings'):
+            with make('packings', push_func=add_push):
                 make('stub', visible=False, push_func=add_push)
 
                 for block in root['boiling']:
@@ -152,9 +152,9 @@ def generate_schedule_frontend_block(root):
             make('template', t=5 + cast_t('19:05') - cast_t('07:00'), h=1, size=cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), text='бригадир + наладчик + 5 рабочих', color=(240, 184, 183), push_func=add_push)
 
         with make('salt_packing', h=3, push_func=dummy_push_y):
-            with make('header'):
+            with make('header', push_func=add_push):
                 make('template', index_width=0, t=1, h=2, size=3, text='Фасовка', push_func=add_push)
-            with make('packings'):
+            with make('packings', push_func=add_push):
                 make('stub', visible=False, push_func=add_push)
 
                 for block in root['boiling']:

@@ -132,7 +132,6 @@ def make_melting_and_packing(line_df, boiling_model, boiling_grp):
                     make('packing_brand', time_size=total_packing_time, brand_label=brand_label)
                 with make(h=1, push_func=dummy_push_y):
 
-
                     make('packing_process', time_size=packing_times[0], visible=False)
 
                     for i, packing_time in enumerate(packing_times[1:]):
