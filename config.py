@@ -29,7 +29,8 @@ class BaseClass:
         'Качокавалло': '#F1DADA',
         'Сулугуни': '#F1DADA',
         'Default': '#FFFFFF',
-        'DefaultGray': '#D9DDDC'
+        'DefaultGray': '#D9DDDC',
+        'Remainings': '#F3F3C0'
     }
     ORDER = ['Фиор Ди Латте', 'Чильеджина', 'Моцарелла', 'Сулугуни', 'Для пиццы', 'Качокавалло']
     BOILING_VOLUME_LIMITS = {

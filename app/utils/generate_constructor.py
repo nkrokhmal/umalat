@@ -3,10 +3,115 @@ import pandas as pd
 import numpy as np
 from flask import current_app
 import math
+from copy import deepcopy
+
+
+def generate_constructor_df_v3(df_copy):
+    # todo: delete
+    df = df_copy.copy()
+    df['plan'] = df['plan'].apply(lambda x: round(x))
+    df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
+    df['weight'] = df['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
+    df['percent'] = df['sku'].apply(lambda x: x.boilings[0].percent)
+    df['is_lactose'] = df['sku'].apply(lambda x: x.boilings[0].is_lactose)
+    df['ferment'] = df['sku'].apply(lambda x: x.boilings[0].ferment)
+    df['form_factor'] = df['sku'].apply(lambda x: x.form_factor.name)
+
+    water, boiling_number = handle_water(df[df['boiling_type'] == 'water'])
+    salt, boiling_number = handle_salt(df[df['boiling_type'] == 'salt'], boiling_number=boiling_number + 1)
+    result = pd.concat([water, salt])
+    result['kg'] = result['plan']
+    result['boiling'] = result['boiling_id'].apply(lambda x: cast_boiling(x))
+    result['name'] = result['sku'].apply(lambda sku: sku.name)
+    result['boiling_name'] = result['boiling'].apply(
+        lambda b: '{} {} {}'.format(b.percent, b.ferment, '' if b.is_lactose else 'без лактозы'))
+    result['boiling_volume'] = np.where(result['boiling_name'].str.contains('2.7'), 850, 1000)
+    result = result[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg', 'tag']]
+    print(result)
+    return result
+
+
+def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
+    boilings = Boilings(max_weight=max_weight, min_weight=min_weight, boiling_number=boiling_number)
+    orders = [(False, 3.3, 'Альче', None),
+              (True, 3.3, 'Альче', 'Фиор Ди Латте'),
+              (True, 3.3, 'Сакко', 'Фиор Ди Латте'),
+              (True, 3.6, 'Альче', 'Фиор Ди Латте'),
+              (True, 3.6, 'Альче', 'Чильеджина'),
+              (True, 3.3, 'Альче', 'Чильеджина'),
+              (True, 3.3, 'Сакко', 'Чильеджина')]
+    is_lactose = False
+    for order in orders:
+        df_filter = df[(df['is_lactose'] == order[0]) &
+                       (df['percent'] == order[1]) &
+                       (df['ferment'] == order[2]) &
+                       (order[3] is None or df['form_factor'] == order[3])]
+        df_filter_dict = df_filter.sort_values(by='weight', ascending=False).to_dict('records')
+        boilings.add_group(df_filter_dict, is_lactose)
+        is_lactose = order[0]
+    return pd.DataFrame(boilings.boilings), boilings.boiling_number
+
+
+def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
+    boilings = Boilings(max_weight=850, min_weight=850, boiling_number=boiling_number)
+    for weight, df_grouped_weight in df.groupby('weight'):
+        for boiling_id, df_grouped_boiling_id in df_grouped_weight.groupby('boiling_id'):
+            new = True
+            for form_factor, df_grouped in df_grouped_boiling_id.groupby('form_factor'):
+                boilings.add_group(df_grouped.to_dict('records'), new)
+                new = False
+    return pd.DataFrame(boilings.boilings), boilings.boiling_number
+
+
+# todo: logic for min weight
+class Boilings:
+    def __init__(self, max_weight=1000, min_weight=1000, boiling_number=0):
+        self.max_weight = max_weight
+        self.min_weight = min_weight
+        self.boiling_number = boiling_number
+        self.boilings = []
+        self.cur_boiling = []
+
+    def cur_sum(self):
+        if self.cur_boiling:
+            return sum([x['plan'] for x in self.cur_boiling])
+        return 0
+
+    def add(self, sku):
+        while sku['plan'] > 0:
+            remainings = self.max_weight - self.cur_sum()
+            boiling_weight = min(remainings, sku['plan'])
+            new_boiling = deepcopy(sku)
+            new_boiling['plan'] = boiling_weight
+            new_boiling['tag'] = 'main'
+            new_boiling['id'] = self.boiling_number
+            sku['plan'] -= boiling_weight
+            self.cur_boiling.append(new_boiling)
+            if boiling_weight == remainings:
+                self.boilings += self.cur_boiling
+                self.boiling_number += 1
+                self.cur_boiling = []
+
+    def add_remainings(self):
+        if self.cur_boiling:
+            last_boiling = deepcopy(self.cur_boiling[-1])
+            last_boiling['plan'] = self.max_weight - self.cur_sum()
+            last_boiling['tag'] = 'remainings'
+            self.cur_boiling.append(last_boiling)
+            self.boilings += self.cur_boiling
+            self.boiling_number += 1
+            self.cur_boiling = []
+
+    def add_group(self, skus, new=True):
+        if new:
+            self.add_remainings()
+        for sku in skus:
+            self.add(sku)
+
 
 def generate_constructor_df_v2(df):
     values = []
-
+    generate_constructor_df_v3(df)
     df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
     df['weight'] = df['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
     df['_sorting_key'] = np.where(df['boiling_type'] == 'salt', df['weight'], -df['weight'])
@@ -15,7 +120,9 @@ def generate_constructor_df_v2(df):
 
     # todo: haddcode
     boiling_grp_df = pd.DataFrame(remove_duplicates(df['boiling_id'].values), columns=['boiling_id'])
-    boiling_grp_df['n_chiledzhina'] = boiling_grp_df['boiling_id'].apply(lambda boiling_id: df[(df['boiling_id'] == boiling_id) & (df['sku'].apply(lambda sku: sku.form_factor.name).str.contains('Чильеджина'))]['plan'].sum())
+    boiling_grp_df['n_chiledzhina'] = boiling_grp_df['boiling_id'].apply(lambda boiling_id: df[
+        (df['boiling_id'] == boiling_id) & (
+            df['sku'].apply(lambda sku: sku.form_factor.name).str.contains('Чильеджина'))]['plan'].sum())
     boiling_grp_df = boiling_grp_df.sort_values(by='n_chiledzhina')
 
     for boiling_id in boiling_grp_df['boiling_id'].values:
@@ -118,7 +225,8 @@ def generate_full_constructor_df(boiling_plan_df):
     df = boiling_plan_df.copy()
     df['name'] = df['sku'].apply(lambda sku: sku.name)
     # todo: make properly
-    df['boiling_name'] = df['boiling'].apply(lambda b: '{} {} {}'.format(b.percent, b.ferment, '' if b.is_lactose else 'без лактозы'))
+    df['boiling_name'] = df['boiling'].apply(
+        lambda b: '{} {} {}'.format(b.percent, b.ferment, '' if b.is_lactose else 'без лактозы'))
     # todo: make properly
     df['boiling_volume'] = np.where(df['boiling_name'].str.contains('2.7'), 850, 1000)
     df['form_factor'] = df['sku'].apply(lambda sku: sku.form_factor.name)
@@ -159,18 +267,13 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
         cur_i = 2
         values = []
         df_filter = df[df['name'].isin(sku_names)].copy()
-        # if sheet_name == 'Вода':
-        #     df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'], ascending=[False, False, True])
-        # else:
-        #     df_filter = df_filter.sort_values(by=['min_weight', 'max_weight', 'id'])
-        # df_filter = df_filter[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg']]
         for id, grp in df_filter.groupby('id', sort=False):
             for i, row in grp.iterrows():
                 v = []
                 v += list(row.values)
                 v += ['']
                 values.append(v[:-1])
-            values.append(['-'] * (len(df_filter.columns) + 2))
+            values.append(['-'] * (len(df_filter.columns) + 1))
 
         for v in values:
             if v[0] == '-':
@@ -178,12 +281,16 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                 for id in ids:
                     draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
             else:
-                colour = get_colour_by_name(v[5], skus)
+                print(v[-1])
+                if v[-1] == 'main':
+                    colour = get_colour_by_name(v[5], skus)
+                else:
+                    colour = current_app.config['COLOURS']['Remainings']
                 v[0] = '=IF(I{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
                     cur_i, batch_number)
                 v[1] = '=IF(I{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
                     cur_i)
-                draw_row(boiling_sheet, cur_i, v, font_size=8, color=colour)
+                draw_row(boiling_sheet, cur_i, v[:-1], font_size=8, color=colour)
             cur_i += 1
 
     path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], os.path.splitext(file_name)[0])
@@ -207,7 +314,8 @@ def draw_constructor(df, file_name):
 
         cur_i = 1
         draw_row(sheet, cur_i,
-                 ['id варки', "Номер варки", 'Тип варки', 'Объем варки', 'Форм фактор', 'SKU', 'КГ', 'Остатки', 'Разделитель'],
+                 ['id варки', "Номер варки", 'Тип варки', 'Объем варки', 'Форм фактор', 'SKU', 'КГ', 'Остатки',
+                  'Разделитель'],
                  font_size=8)
         cur_i += 1
 
@@ -232,13 +340,17 @@ def draw_constructor(df, file_name):
 
         # todo: column names to config
         for v in values:
-            formula_remains = '=IF(M{0} - INDIRECT("M" & ROW() - 1) = 0, "", INDIRECT("M" & ROW() - 1) - M{0})'.format(cur_i)
+            formula_remains = '=IF(M{0} - INDIRECT("M" & ROW() - 1) = 0, "", INDIRECT("M" & ROW() - 1) - M{0})'.format(
+                cur_i)
             formula_calc = '=IF(I{0} = "-", -INDIRECT("D" & ROW() - 1),G{0})'.format(cur_i)
-            formula_remains_cumsum = '=IF(I{0} = "-", SUM(INDIRECT(ADDRESS(2,COLUMN(J{0})) & ":" & ADDRESS(ROW(),COLUMN(J{0})))), 0)'.format(cur_i)
+            formula_remains_cumsum = '=IF(I{0} = "-", SUM(INDIRECT(ADDRESS(2,COLUMN(J{0})) & ":" & ADDRESS(ROW(),COLUMN(J{0})))), 0)'.format(
+                cur_i)
             formula_delimiter_int = '=IF(I{0}="-",1,0)'.format(cur_i)
             formula_zeros = '=IF(K{0} = 0, INDIRECT("M" & ROW() - 1), K{0})'.format(cur_i)
 
-            v[1] = '=IF(I{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(cur_i)
+            v[
+                1] = '=IF(I{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
+                cur_i)
             v.insert(-1, formula_remains)
             v.append(formula_calc)
             v.append(formula_remains_cumsum)
