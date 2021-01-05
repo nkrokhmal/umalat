@@ -90,8 +90,8 @@ def make_water_meltings(schedule):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
     cur_cooling_line_i = 0
-    # n_cooling_lines = 5
-    n_cooling_lines = 1
+    n_cooling_lines = 5
+    # n_cooling_lines = 1
     for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'water'}):
 
         # todo: use bffs instead of skus
@@ -129,8 +129,8 @@ def make_water_meltings(schedule):
                                      x=[cooling_process['start']['cooling'][i].x[0], 0])
                         push(cooling_lines[cur_cooling_line_i % n_cooling_lines], block, push_func=add_push)
                     cur_cooling_line_i += 1
-                    # todo: del
-                    break
+                    # # todo: del
+                    # break
     return maker.root
 
 
