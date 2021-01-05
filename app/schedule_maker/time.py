@@ -1,10 +1,13 @@
+
 def cast_t(obj):
     if isinstance(obj, int):
         return obj
     elif isinstance(obj, str):
         # 12:00
         hours, minutes = obj.split(':')
-        return int(hours) * 12 + int(int(minutes) / 5)
+        minutes = int(hours) * 60 + int(minutes)
+        assert minutes % 5 == 0
+        return minutes // 5
     else:
         raise Exception('Unknown format')
 

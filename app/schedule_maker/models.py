@@ -57,3 +57,13 @@ def cast_boiling(obj):
     else:
         raise Exception(f'Unknown boiling type {type(obj)}')
 
+
+
+def cast_boiling_form_factor(obj):
+    if isinstance(obj, BoilingFormFactor):
+        return obj
+    elif isinstance(obj, (str, int)):
+        obj = str(obj)
+        return db.session.query(BoilingFormFactor).filter(BoilingFormFactor.id == obj).first()
+    else:
+        raise Exception(f'Unknown boiling form factor {type(obj)}')
