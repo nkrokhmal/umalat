@@ -286,12 +286,12 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                     colour = get_colour_by_name(v[5], skus)
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
-                if sheet_name == 'Вода':
-                    v[0] = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                # if sheet_name == 'Вода':
+                v[0] = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
                         cur_i, batch_number)
-                else:
-                    v[0] = '=IF(J{0}="-", "", 1 + MAX(\'Вода\'!A2:A100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
-                        cur_i, batch_number)
+                # else:
+                #     v[0] = '=IF(J{0}="-", "", 1 + MAX(\'Вода\'!A2:A100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                #         cur_i, batch_number)
                 v[1] = '=IF(J{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
                     cur_i)
                 draw_row(boiling_sheet, cur_i, v[:-1], font_size=8, color=colour)
@@ -300,6 +300,7 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
 
     path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], os.path.splitext(file_name)[0])
     wb.active = 0
+    wb["Соль"].views.sheetView[0].tabSelected = False
     wb.save(path)
     return '{}.xlsx'.format(os.path.splitext(file_name)[0])
 
