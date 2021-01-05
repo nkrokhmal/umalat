@@ -123,6 +123,7 @@ def make_water_meltings(schedule):
             with make('cooling_row', axis=1):
                 cooling_lines = [make('cooling_line', size=(0, 1), is_parent_node=True).block for _ in range(n_cooling_lines)]
                 for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
+                    cooling_block = maker.create_block('cooling_block', x=[cooling_process['start']['cooling'][0].x[0], 0])
                     for i in range(2):
                         block = maker.create_block('cooling',
                                      size=(cooling_process['start']['cooling'][i].size[0], 1),

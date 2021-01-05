@@ -63,6 +63,27 @@ def make_mpp(boiling_df, left_boiling_volume):
     # set current time - collected how much we could
     boiling_df['end_ts'] = np.where((~boiling_df['beg_ts'].isnull()) & boiling_df['end_ts'].isnull(), cur_ts, boiling_df['end_ts'])
 
+    def round_timestamps(df, packing_team_ids):
+        # todo: hardcode
+        # round last end_ts up
+        # df.at[df[~df['end_ts'].isnull()].index[-1], 'end_ts'] = custom_round(df.at[df[~df['end_ts'].isnull()].index[-1], 'end_ts'], 5, 'ceil')
+
+        # round to five-minute intervals
+        df['beg_ts'] = df['beg_ts'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
+        df['end_ts'] = df['end_ts'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
+
+        # fix small intervals (like beg_ts and end_ts: 5, 5 -> 5, 10)
+        for packing_team_id in packing_team_ids:
+            grp = df[boiling_df['packing_team_id'] == packing_team_id]
+            grp = grp[~grp['beg_ts'].isnull()]
+            cur_fix = 0
+            for i, row in grp.iterrows():
+                df.at[i, 'beg_ts'] += cur_fix
+                if row['beg_ts'] == row['end_ts']:
+                    cur_fix += 5
+                df.at[i, 'end_ts'] += cur_fix
+    round_timestamps(boiling_df, packing_team_ids)
+
     # create block
     maker, make = init_block_maker('melting_and_packing_process', axis=1)
 
