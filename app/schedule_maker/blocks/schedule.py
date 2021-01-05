@@ -78,6 +78,10 @@ def make_schedule(boilings, start_times=None):
             break
         elif are_boilings_left.sum() == 1:
             boiling_type = are_boilings_left[are_boilings_left].index[0]
+
+            # start working on 3 line for salt
+            lines_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [1, 2, 3]]
+
         elif are_boilings_left.sum() == 2:
             df = lines_df[~lines_df['latest_boiling'].isnull()]
             if len(df) == 0:

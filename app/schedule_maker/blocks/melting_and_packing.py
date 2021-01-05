@@ -4,9 +4,8 @@ from app.schedule_maker.blocks.packing import *
 
 
 def make_melting_and_packing_basic(boiling_plan):
-    boiling_model = boiling_plan.iloc[0]['boiling']
-
     boiling_plan = boiling_plan.copy()
+    boiling_model = boiling_plan.iloc[0]['boiling']
     # todo: make properly
     boiling_plan['bff'] = boiling_plan['sku'].apply(lambda sku: sku.boiling_form_factors[0])
     mark_consecutive_groups(boiling_plan, 'bff', 'bff_group')
