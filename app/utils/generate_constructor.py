@@ -286,9 +286,9 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                     colour = get_colour_by_name(v[5], skus)
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
-                v[0] = '=IF(I{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
+                v[0] = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
                     cur_i, batch_number)
-                v[1] = '=IF(I{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
+                v[1] = '=IF(J{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
                     cur_i)
                 draw_row(boiling_sheet, cur_i, v[:-1], font_size=8, color=colour)
                 draw_cell(boiling_sheet, 9, cur_i, 1, font_size=8)
