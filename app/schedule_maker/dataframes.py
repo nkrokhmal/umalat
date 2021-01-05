@@ -20,11 +20,11 @@ def read_boiling_plan(wb_obj):
         for i in range(2, 200):
             if not ws.cell(i, 1).value:
                 continue
-            values.append([ws.cell(i, j).value for j in [1, 2, 6, 7]])
-        df = pd.DataFrame(values, columns=['boiling', 'id', 'sku', 'kg'])  # first value is header
+            values.append([ws.cell(i, j).value for j in [1, 2, 6, 7, 9]])
+        df = pd.DataFrame(values, columns=['boiling', 'id', 'sku', 'kg', 'packing_team_id'])  # first value is header
         df = df[df['boiling'] != '-']
         df = df[~df['kg'].isnull()]
-        df = df[['id', 'boiling', 'sku', 'kg']]  # reorder
+        df = df[['id', 'boiling', 'sku', 'kg', 'packing_team_id']]  # reorder
         if dfs:
             df['id'] = df['id'] + dfs[-1].iloc[-1]['id']
         dfs.append(df)
@@ -33,6 +33,5 @@ def read_boiling_plan(wb_obj):
     boiling_plan_df = df
     boiling_plan_df['sku'] = boiling_plan_df['sku'].apply(cast_sku)
     boiling_plan_df['boiling'] = boiling_plan_df['sku'].apply(lambda sku: sku.boilings[0])
-    boiling_plan_df['packing_team_id'] = 1
 
     return boiling_plan_df.reset_index(drop=True)
