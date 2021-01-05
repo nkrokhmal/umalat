@@ -226,7 +226,7 @@ def make_packings(schedule, boiling_type):
     return maker.root
 
 
-def draw_excel_frontend(schedule, open_file=False):
+def draw_excel_frontend(schedule, open_file=False, fn='schedule.xlsx'):
     maker, make = init_block_maker('root', axis=1)
 
     make('stub', size=(0, 1))
@@ -252,11 +252,13 @@ def draw_excel_frontend(schedule, open_file=False):
     make(make_packings(schedule, 'salt'))
 
     wb = draw_schedule(maker.root, STYLE)
-    sf = SplitFile('schedule.xlsx')
-    fn = sf.get_new()
-    wb.save(fn)
 
-    if open_file:
-        open_file_in_os(fn)
+    if fn:
+        sf = SplitFile(fn)
+        fn = sf.get_new()
+        wb.save(fn)
+
+        if open_file:
+            open_file_in_os(fn)
 
     return wb

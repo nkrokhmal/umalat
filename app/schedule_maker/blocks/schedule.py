@@ -37,7 +37,8 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
     return maker.root
 
 
-def make_schedule(boilings):
+def make_schedule(boilings, start_times=None):
+    start_times = start_times or {'water': '09:50', 'salt': '07:05'}
     maker, make = init_block_maker('schedule')
     schedule = maker.root
 
@@ -45,8 +46,8 @@ def make_schedule(boilings):
     lines_df.at['water', 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
     lines_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
 
-    lines_df.at['water', 'start_time'] = '09:50'
-    lines_df.at['salt', 'start_time'] = '07:05'
+    lines_df.at['water', 'start_time'] = cast_time(start_times['water'])
+    lines_df.at['salt', 'start_time'] = cast_time(start_times['salt'])
 
     make('cleanings', push_func=add_push)
 

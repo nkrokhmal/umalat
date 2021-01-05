@@ -9,7 +9,8 @@ import openpyxl
 from pycel import ExcelCompiler
 
 from utils_ak.interactive_imports import *
-from app.schedule_maker.algo import *
+from app.schedule_maker import *
+
 from config import basedir
 
 from app.schedule_maker.frontend import *
@@ -27,10 +28,12 @@ def schedule():
             file.save(file_path)
         wb = openpyxl.load_workbook(filename=os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename),
                                     data_only=True)
-        boiling_plan_df = load_boiling_plan(wb)
-        start_times = {'water': datetime.time.strftime(form.water_beg_time.data, '%H:%M'),
-                       'salt': datetime.time.strftime(form.salt_beg_time.data, '%H:%M')}
-        schedule_wb = create_excel_frontend(boiling_plan_df, start_times)
+
+        boiling_plan_df = read_boiling_plan(wb)
+        boilings = make_boilings_by_groups(boiling_plan_df)
+        schedule = make_schedule(boilings, start_times={'water': form.water_beg_time.data, 'salt': form.salt_beg_time.data})
+        schedule_wb = draw_excel_frontend(schedule, open_file=True, fn=None)
+
         filename_schedule = '{}_{}.xlsx'.format('schedule_plan', date.strftime('%Y-%m-%d'))
         path_schedule = '{}/{}'.format('app/data/schedule_plan', filename_schedule)
         schedule_wb.save(path_schedule)
