@@ -277,11 +277,11 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
 
         for v in values:
             if v[0] == '-':
-                ids = [1, 3, 4, 5, 6, 7, 9]
+                ids = [1, 3, 4, 5, 6, 7, 9, 10]
                 for id in ids:
-                    draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
+                    draw_cell(boiling_sheet, id, cur_i, v[0], font_size=8)
+                    # draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
             else:
-                print(v[-1])
                 if v[-1] == 'main':
                     colour = get_colour_by_name(v[5], skus)
                 else:
@@ -291,6 +291,7 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                 v[1] = '=IF(I{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(L{0})) & ":" & ADDRESS(ROW(),COLUMN(L{0})))))'.format(
                     cur_i)
                 draw_row(boiling_sheet, cur_i, v[:-1], font_size=8, color=colour)
+                draw_cell(boiling_sheet, 9, cur_i, 1, font_size=8)
             cur_i += 1
 
     path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], os.path.splitext(file_name)[0])
