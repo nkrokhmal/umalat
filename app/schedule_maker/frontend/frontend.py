@@ -123,12 +123,14 @@ def make_water_meltings(schedule):
             with make('cooling_row', axis=1):
                 cooling_lines = [make('cooling_line', size=(0, 1), is_parent_node=True).block for _ in range(n_cooling_lines)]
                 for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
-                    cooling_block = maker.create_block('cooling_block', x=[cooling_process['start']['cooling'][0].x[0], 0])
+                    beg = cooling_process['start']['cooling'][0].x[0]
+                    cooling_block = maker.create_block('cooling_block', x=(beg, 0)) # todo: create dynamic x calculation when empty block
                     for i in range(2):
                         block = maker.create_block('cooling',
                                      size=(cooling_process['start']['cooling'][i].size[0], 1),
-                                     x=[cooling_process['start']['cooling'][i].x[0], 0])
-                        push(cooling_lines[cur_cooling_line_i % n_cooling_lines], block, push_func=add_push)
+                                     x=[cooling_process['start']['cooling'][i].x[0] - beg, 0])
+                        push(cooling_block, block, push_func=add_push)
+                    push(cooling_lines[cur_cooling_line_i % n_cooling_lines], cooling_block, push_func=add_push)
                     cur_cooling_line_i += 1
                     # # todo: del
                     # break
