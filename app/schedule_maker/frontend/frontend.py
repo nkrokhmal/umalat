@@ -130,7 +130,7 @@ def make_water_meltings(schedule):
                 cur_cooling_size = None
                 for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
                     beg = cooling_process['start']['cooling'][0].x[0]
-                    cooling_block = maker.create_block('cooling_block', x=(beg, 0)) # todo: create dynamic x calculation when empty block
+                    cooling_block = maker.create_block('cooling_block', x=(beg, 0))  # todo: create dynamic x calculation when empty block
                     for i in range(2):
                         block = maker.create_block('cooling',
                                      size=(cooling_process['start']['cooling'][i].size[0], 1),
@@ -151,8 +151,6 @@ def make_water_meltings(schedule):
                             break
                         if j == 4:
                             raise Exception("Failed to draw cooling block")
-                    # # todo: del
-                    # break
     return maker.root
 
 
