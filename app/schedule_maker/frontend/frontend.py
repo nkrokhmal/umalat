@@ -89,9 +89,8 @@ def make_water_meltings(schedule):
     with make('header', beg_time='00:00', push_func=add_push):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
-    cur_cooling_line_i = 0
     n_cooling_lines = 5
-    # n_cooling_lines = 1
+
     for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'water'}):
 
         # todo: use bffs instead of skus
@@ -121,22 +120,42 @@ def make_water_meltings(schedule):
                      size=(boiling['melting_and_packing']['melting']['meltings'].size[0], 1), speed=900, push_func=add_push)
 
             with make('cooling_row', axis=1):
-                cooling_lines = [make('cooling_line', size=(0, 1), is_parent_node=True).block for _ in range(n_cooling_lines)]
+                cooling_lines = [make('cooling_line', is_parent_node=True).block for _ in range(n_cooling_lines)]
+
+                class_validator = ClassValidator()
+                def validate(b1, b2):
+                    validate_disjoint_by_axis(b1, b2)
+                class_validator.add('cooling_block', 'cooling_block', validate)
+
+                cur_cooling_size = None
                 for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
-                    cooling_block = maker.create_block('cooling_block', x=[cooling_process['start']['cooling'][0].x[0], 0])
+                    beg = cooling_process['start']['cooling'][0].x[0]
+                    cooling_block = maker.create_block('cooling_block', x=(beg, 0))  # todo: create dynamic x calculation when empty block
                     for i in range(2):
                         block = maker.create_block('cooling',
                                      size=(cooling_process['start']['cooling'][i].size[0], 1),
-                                     x=[cooling_process['start']['cooling'][i].x[0], 0])
-                        push(cooling_lines[cur_cooling_line_i % n_cooling_lines], block, push_func=add_push)
-                    cur_cooling_line_i += 1
-                    # # todo: del
-                    # break
+                                     x=[cooling_process['start']['cooling'][i].x[0] - beg, 0])
+                        push(cooling_block, block, push_func=add_push)
+
+                    # do not draw cooling block if previous is same size
+                    if cur_cooling_size == cooling_block.size[0]:
+                        continue
+                    else:
+                        cur_cooling_size = cooling_block.size[0]
+
+                    # try to add to the earliest line as possible
+                    for j in range(n_cooling_lines):
+                        res = simple_push(cooling_lines[j], cooling_block, validator=class_validator)
+                        if isinstance(res, Block):
+                            # pushed block successfully
+                            break
+                        if j == 4:
+                            raise Exception("Failed to draw cooling block")
     return maker.root
 
 
 def make_shifts(start_from, shifts):
-    maker, make = init_block_maker('shifts', axis=0, x=[start_from, 0])
+    maker, make = init_block_maker('shifts', x=[start_from, 0])
 
     for shift in shifts:
         shift.setdefault('color', (149, 179, 215))
@@ -233,22 +252,22 @@ def draw_excel_frontend(schedule, open_file=False, fn='schedule.xlsx'):
     make('stub', size=(0, 1))
 
     make(make_header(start_time='01:00'))
-    make(make_shifts(5, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
+    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                          {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
     make(make_cheese_makers(schedule, range(2)))
-    make(make_shifts(5, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
+    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                          {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
     make(make_cleanings(schedule))
     make(make_cheese_makers(schedule, range(2, 4)))
-    make(make_shifts(5, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
+    make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
     make(make_header(start_time='07:00'))
     make(make_water_meltings(schedule))
-    make(make_shifts(5, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
+    make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
     make(make_packings(schedule, 'water'))
-    make(make_shifts(5, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
+    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
                          {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
     make(make_salt_meltings(schedule))
-    make(make_shifts(5, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
+    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
                          {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
     make(make_packings(schedule, 'salt'))
 
