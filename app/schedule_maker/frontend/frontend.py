@@ -89,9 +89,8 @@ def make_water_meltings(schedule):
     with make('header', beg_time='00:00', push_func=add_push):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
-    cur_cooling_line_i = 0
     n_cooling_lines = 5
-    # n_cooling_lines = 1
+
     for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'water'}):
 
         # todo: use bffs instead of skus
@@ -121,19 +120,37 @@ def make_water_meltings(schedule):
                      size=(boiling['melting_and_packing']['melting']['meltings'].size[0], 1), speed=900, push_func=add_push)
 
             with make('cooling_row', axis=1):
-                cooling_lines = [make('cooling_line', size=(0, 1), is_parent_node=True).block for _ in range(n_cooling_lines)]
+                cooling_lines = [make('cooling_line', is_parent_node=True).block for _ in range(n_cooling_lines)]
+
+                class_validator = ClassValidator()
+                def validate(b1, b2):
+                    validate_disjoint_by_axis(b1, b2)
+                class_validator.add('cooling_block', 'cooling_block', validate)
+
+                cur_cooling_size = None
                 for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
                     beg = cooling_process['start']['cooling'][0].x[0]
-                    cooling_block = maker.create_block('cooling_block', x=(beg, 0)) # todo: create dynamic x calculation when empty block
+                    cooling_block = maker.create_block('cooling_block', x=(beg, 0))  # todo: create dynamic x calculation when empty block
                     for i in range(2):
                         block = maker.create_block('cooling',
                                      size=(cooling_process['start']['cooling'][i].size[0], 1),
                                      x=[cooling_process['start']['cooling'][i].x[0] - beg, 0])
                         push(cooling_block, block, push_func=add_push)
-                    push(cooling_lines[cur_cooling_line_i % n_cooling_lines], cooling_block, push_func=add_push)
-                    cur_cooling_line_i += 1
-                    # # todo: del
-                    # break
+
+                    # do not draw cooling block if previous is same size
+                    if cur_cooling_size == cooling_block.size[0]:
+                        continue
+                    else:
+                        cur_cooling_size = cooling_block.size[0]
+
+                    # try to add to the earliest line as possible
+                    for j in range(n_cooling_lines):
+                        res = simple_push(cooling_lines[j], cooling_block, validator=class_validator)
+                        if isinstance(res, Block):
+                            # pushed block successfully
+                            break
+                        if j == 4:
+                            raise Exception("Failed to draw cooling block")
     return maker.root
 
 
