@@ -142,21 +142,31 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
 
         for v in values:
             if v[0] == '-':
-                ids = [1, 3, 4, 5, 6, 7, 9, 10]
+                ids = [3, 4, 5, 6, 7, 9, 10]
                 for id in ids:
                     draw_cell(boiling_sheet, id, cur_i, v[0], font_size=8)
                     # draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
+                if sheet_name == 'Вода':
+                    first_cell_formula = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                        cur_i, batch_number)
+                else:
+                    first_cell_formula = '=IF(J{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                        cur_i, batch_number)
+                draw_cell(boiling_sheet, 1, cur_i, first_cell_formula, font_size=8)
+
             else:
                 if v[-1] == 'main':
                     colour = get_colour_by_name(v[5], skus)
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
+
                 if sheet_name == 'Вода':
                     v[0] = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
                         cur_i, batch_number)
                 else:
-                    v[0] = '=IF(J{0}="-", "", 1 + MAX(\'Вода\'!A2:A100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    v[0] = '=IF(J{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
                         cur_i, batch_number)
+
                 v[1] = '=IF(F{0}="","",IF(J{0}="-","",1+SUM(INDIRECT(ADDRESS(2,COLUMN(M{0}))&":"&ADDRESS(ROW(),COLUMN(M{0}))))))'.format(
                     cur_i)
                 draw_row(boiling_sheet, cur_i, v[:-1], font_size=8, color=colour)
