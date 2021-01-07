@@ -1,6 +1,7 @@
 from app.schedule_maker.dataframes import *
 
 
+
 def make_boiling(boiling_model, boiling_id, melting_and_packing):
     maker, make = init_block_maker('root')
 
