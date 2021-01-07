@@ -155,7 +155,7 @@ def make_water_meltings(schedule):
 
 
 def make_shifts(start_from, shifts):
-    maker, make = init_block_maker('shifts', axis=0, x=[start_from, 0])
+    maker, make = init_block_maker('shifts', x=[start_from, 0])
 
     for shift in shifts:
         shift.setdefault('color', (149, 179, 215))
@@ -252,22 +252,22 @@ def draw_excel_frontend(schedule, open_file=False, fn='schedule.xlsx'):
     make('stub', size=(0, 1))
 
     make(make_header(start_time='01:00'))
-    make(make_shifts(5, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
+    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                          {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
     make(make_cheese_makers(schedule, range(2)))
-    make(make_shifts(5, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
+    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                          {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
     make(make_cleanings(schedule))
     make(make_cheese_makers(schedule, range(2, 4)))
-    make(make_shifts(5, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
+    make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
     make(make_header(start_time='07:00'))
     make(make_water_meltings(schedule))
-    make(make_shifts(5, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
+    make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
     make(make_packings(schedule, 'water'))
-    make(make_shifts(5, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
+    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
                          {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
     make(make_salt_meltings(schedule))
-    make(make_shifts(5, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
+    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
                          {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
     make(make_packings(schedule, 'salt'))
 
