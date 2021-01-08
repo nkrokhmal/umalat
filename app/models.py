@@ -226,7 +226,10 @@ class Boiling(db.Model):
                 boiling.cheese_type = salt
         db.session.commit()
 
-
+    def to_str(self):
+        values = [self.percent, self.ferment, '' if self.is_lactose else 'без лактозы']
+        values = [str(v) for v in values if v]
+        return ', '.join(values)
 
     @staticmethod
     def generate_boilings():
