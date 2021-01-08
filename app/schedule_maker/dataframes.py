@@ -39,7 +39,7 @@ def read_boiling_plan(wb_obj):
     df = pd.concat(dfs)
     df['sku'] = df['sku'].apply(cast_sku)
 
-    # todo: put to different place
+    # todo: find by short_boiling_type and sku
     df['boiling'] = df['sku'].apply(lambda sku: sku.boilings[0])
 
     return df.reset_index(drop=True)
