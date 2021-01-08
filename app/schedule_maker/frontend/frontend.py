@@ -1,7 +1,7 @@
 import openpyxl
 import pandas as pd
 
-from app.schedule_maker.drawing import *
+from app.schedule_maker.frontend.drawing import *
 from app.schedule_maker.frontend.style import *
 from utils_ak.interactive_imports import *
 
@@ -35,20 +35,20 @@ def make_header(start_time='01:00'):
         make(size=(1, 1), text='График наливов', push_func=add_push)
         for i in range(288):
             cur_time = cast_time(i + cast_t(start_time))
+            days, hours, minutes = cur_time.split(':')
             if cur_time[-2:] == '00':
-                make(x=(1 + i, 0), size=(1,1), text=str(int(cur_time[:2])), color=(218, 150, 148), text_rotation=90, push_func=add_push)
+                make(x=(1 + i, 0), size=(1, 1), text=str(int(hours)), color=(218, 150, 148), text_rotation=90, push_func=add_push)
             else:
-                make(x=(1 + i, 0), size=(1,1), text=cur_time[-2:], color=(204, 255, 255), text_rotation=90, push_func=add_push)
+                make(x=(1 + i, 0), size=(1, 1), text=minutes, color=(204, 255, 255), text_rotation=90, push_func=add_push)
     return maker.root['header']
 
 
 def make_cheese_makers(schedule, rng):
-    maker, make = init_block_maker('cheese_makers',
-                                   axis=1)
+    maker, make = init_block_maker('cheese_makers', axis=1)
 
     for i in rng:
         with make(f'cheese_maker', is_parent_node=True):
-            with make('header', index_width=0, beg_time='00:00', push_func=add_push):
+            with make('header', index_width=0, start_time='00:00', push_func=add_push):
                 make('template', x=(1, 0), size=(3, 2), text=f'Сыроизготовитель №1 Poly {i + 1}', color=(183, 222, 232), push_func=add_push)
 
             for boiling in schedule.iter({'class': 'boiling', 'pouring_line': str(i)}):
@@ -76,8 +76,8 @@ def make_cheese_makers(schedule, rng):
 
 
 def make_cleanings(schedule):
-    maker, make = init_block_maker('cleanings_row', axis=1, make_with_copy_cut=True)
-    make(schedule['cleanings'])
+    maker, make = init_block_maker('cleanings_row', axis=1)
+    make(maker.copy(schedule['cleanings'], with_props=True))
     for cleaning in listify(maker.root['cleanings']['cleaning']):
         cleaning.props.update({'size': (cleaning.size[0], 2)})
     return maker.root['cleanings']
@@ -86,7 +86,7 @@ def make_cleanings(schedule):
 def make_water_meltings(schedule):
     maker, make = init_block_maker('melting')
 
-    with make('header', beg_time='00:00', push_func=add_push):
+    with make('header', start_time='00:00', push_func=add_push):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
     n_cooling_lines = 5
@@ -155,7 +155,7 @@ def make_water_meltings(schedule):
 
 
 def make_shifts(start_from, shifts):
-    maker, make = init_block_maker('shifts', x=[start_from, 0])
+    maker, make = init_block_maker('shifts', start_time='00:00', x=[start_from, 0])
 
     for shift in shifts:
         shift.setdefault('color', (149, 179, 215))
@@ -199,12 +199,12 @@ def make_salt_melting(boiling):
 
 def make_salt_meltings(schedule):
     # todo: make dynamic lines
-    maker, make = init_block_maker('melting', axis=1, make_with_copy_cut=True)
+    maker, make = init_block_maker('melting', axis=1)
 
     n_lines = 5
     melting_lines = [make(f'salt_melting_{i}', size=(0, 3), is_parent_node=True).block for i in range(n_lines)]
 
-    make('template', index_width=0, x=(1, melting_lines[0].x[1]), size=(3, 6), beg_time='00:00', text='Линия плавления моцареллы в рассоле №2', push_func=add_push)
+    make('template', index_width=0, x=(1, melting_lines[0].x[1]), size=(3, 6), start_time='00:00', text='Линия плавления моцареллы в рассоле №2', push_func=add_push)
 
     # todo: hardcode, add empty elements for drawing not to draw melting_line itself
 
@@ -246,32 +246,46 @@ def make_packings(schedule, boiling_type):
     return maker.root
 
 
-def draw_excel_frontend(schedule, open_file=False, fn='schedule.xlsx'):
+def make_frontend(schedule):
     maker, make = init_block_maker('root', axis=1)
 
     make('stub', size=(0, 1))
 
-    make(make_header(start_time='01:00'))
-    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
-                         {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
-    make(make_cheese_makers(schedule, range(2)))
-    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
-                         {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
-    make(make_cleanings(schedule))
-    make(make_cheese_makers(schedule, range(2, 4)))
-    make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
-    make(make_header(start_time='07:00'))
-    make(make_water_meltings(schedule))
-    make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
-    make(make_packings(schedule, 'water'))
-    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
-                         {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
-    make(make_salt_meltings(schedule))
-    make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
-                         {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
-    make(make_packings(schedule, 'salt'))
+    start_t = min([boiling.x[0] for boiling in listify(schedule['boiling'])]) # first pouring time
+    start_t = int(custom_round(start_t, 12, 'floor')) # round to last hour
+    start_time = cast_time(start_t)
+    make(make_header(start_time=start_time))
 
-    wb = draw_schedule(maker.root, STYLE)
+    with make('pouring', start_time=start_time, axis=1):
+        make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
+                             {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
+        make(make_cheese_makers(schedule, range(2)))
+        make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
+                             {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
+        make(make_cleanings(schedule))
+        make(make_cheese_makers(schedule, range(2, 4)))
+        make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
+
+    start_t = min([boiling['melting_and_packing'].x[0] for boiling in listify(schedule['boiling'])])  # first melting time
+    start_t = int(custom_round(start_t, 12, 'floor'))  # round to last hour
+    start_time = cast_time(start_t)
+    make(make_header(start_time=start_time))
+
+    with make('melting', start_time=start_time, axis=1):
+        make(make_water_meltings(schedule))
+        make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
+        make(make_packings(schedule, 'water'))
+        make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
+                             {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
+        make(make_salt_meltings(schedule))
+        make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
+                             {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
+        make(make_packings(schedule, 'salt'))
+    return maker.root
+
+
+def draw_excel_frontend(frontend, open_file=False, fn='schedule.xlsx'):
+    wb = draw_schedule(frontend, STYLE)
 
     if fn:
         sf = SplitFile(fn)

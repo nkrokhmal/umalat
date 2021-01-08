@@ -22,8 +22,12 @@ def make_melting_and_packing_basic(boiling_plan):
                 # non-first group - reconfigure time
                 push(meltings, maker.create_block('melting_configuration', size=(1, 0)))
 
+            # todo: del
+            if boiling_model.boiling_type == 'salt':
+                boiling_model.meltings.speed = 850 / 50 * 60
+
             melting_process = maker.create_block('melting_process',
-                                                 size=(custom_round(grp['kg'].sum() / boiling_model.meltings.speed * 60, 5, 'ceil') // 5, 0),
+                                                 size=(int(custom_round(grp['kg'].sum() / boiling_model.meltings.speed * 60, 5, 'ceil')) // 5, 0),
                                                  bff=grp.iloc[0]['bff'])
 
             push(meltings, melting_process)
@@ -54,7 +58,7 @@ def make_melting_and_packing_basic(boiling_plan):
             sku, kg = row['sku'], row['kg']
             packing_speed = min(sku.packing_speed, boiling_model.meltings.speed)
             make('packing_process',
-                 size=[custom_round(kg / packing_speed * 60, 5, rounding='ceil') // 5, 0],
+                 size=[int(custom_round(kg / packing_speed * 60, 5, rounding='ceil')) // 5, 0],
                  sku=sku)
 
             if i != len(boiling_plan) - 1:
@@ -65,3 +69,5 @@ def make_melting_and_packing_basic(boiling_plan):
                     make('packing_configuration', size=[conf_time_size // 5, 0])
 
     return maker.root
+
+
