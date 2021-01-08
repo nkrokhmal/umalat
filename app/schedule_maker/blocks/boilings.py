@@ -14,6 +14,7 @@ def make_boilings_basic(boiling_plan_df):
 
         boiling_model = boiling_plan.iloc[0]['boiling']
 
+        # todo: del
         if boiling_model.boiling_type == 'salt':
             boiling_model.meltings.speed = 850 / 50 * 60
 
