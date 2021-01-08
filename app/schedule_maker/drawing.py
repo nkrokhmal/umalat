@@ -3,8 +3,6 @@ from utils_ak.openpyxl import *
 from app.schedule_maker.time import *
 
 
-
-
 def draw_schedule(schedule, style, fn=None):
     # update styles
     for b in schedule.iter():

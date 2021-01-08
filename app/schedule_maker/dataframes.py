@@ -1,9 +1,5 @@
-import openpyxl
-import pandas as pd
-
-from utils_ak.openpyxl import *
+from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
-
 
 
 def read_boiling_plan(wb_obj):
@@ -18,21 +14,34 @@ def read_boiling_plan(wb_obj):
     for ws_name in ['Вода', 'Соль']:
         ws = wb[ws_name]
         values = []
+
+        # collect header
+        header = [ws.cell(1, i).value for i in range(1, 100) if ws.cell(1, i).value]
+
         for i in range(2, 200):
             if not ws.cell(i, 1).value:
                 continue
-            values.append([ws.cell(i, j).value for j in [1, 2, 6, 7, 9]])
-        df = pd.DataFrame(values, columns=['boiling', 'id', 'sku', 'kg', 'packing_team_id'])  # first value is header
-        df = df[df['boiling'] != '-']
+            values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
+
+        df = pd.DataFrame(values, columns=header)
+        df = df[['Номер партии', 'SKU', 'КГ', 'Номер команды']]
+        df.columns = ['batch_id', 'sku', 'kg', 'packing_team_id']
+
+        # reorder
+        df = df[['batch_id', 'sku', 'kg', 'packing_team_id']]
+
+        # remove separators and empty lines
+        df = df[df['sku'] != '-']
         df = df[~df['kg'].isnull()]
-        df = df[['id', 'boiling', 'sku', 'kg', 'packing_team_id']]  # reorder
-        if dfs:
-            df['id'] = df['id'] + dfs[-1].iloc[-1]['id']
+
         dfs.append(df)
 
     df = pd.concat(dfs)
-    boiling_plan_df = df
-    boiling_plan_df['sku'] = boiling_plan_df['sku'].apply(cast_sku)
-    boiling_plan_df['boiling'] = boiling_plan_df['sku'].apply(lambda sku: sku.boilings[0])
+    df['sku'] = df['sku'].apply(cast_sku)
 
-    return boiling_plan_df.reset_index(drop=True)
+    # todo: put to different place
+    df['boiling'] = df['sku'].apply(lambda sku: sku.boilings[0])
+
+    return df.reset_index(drop=True)
+
+

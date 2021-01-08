@@ -235,7 +235,7 @@ def make_boilings_parallel_dynamic(boiling_group_df):
         else:
             return sku.boiling_form_factors[0]
 
-    boiling_volumes = [grp['kg'].sum() for i, grp in boiling_group_df.groupby('id')]
+    boiling_volumes = [grp['kg'].sum() for i, grp in boiling_group_df.groupby('batch_id')]
 
     # sum same skus for same teams
     boiling_group_df['sku_name'] = boiling_group_df['sku'].apply(lambda sku: sku.name)
@@ -246,13 +246,13 @@ def make_boilings_parallel_dynamic(boiling_group_df):
         values.append(value)
     boiling_group_df = pd.DataFrame(values)
     boiling_group_df.pop('sku_name')
-    boiling_group_df = boiling_group_df.sort_values(by='id')
+    boiling_group_df = boiling_group_df.sort_values(by='batch_id')
 
     boiling_group_df['bff'] = boiling_group_df['sku'].apply(cast_bff)
     boiling_group_df['left'] = boiling_group_df['kg']
 
     boiling_model = boiling_group_df.iloc[0]['boiling']
-    ids = remove_duplicates(boiling_group_df['id'].sort_values())
+    ids = remove_duplicates(boiling_group_df['batch_id'].sort_values())
     form_factors = remove_duplicates(boiling_group_df['bff'])
 
     cur_form_factor = form_factors[0]

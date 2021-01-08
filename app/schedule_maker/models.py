@@ -1,6 +1,7 @@
 from app.models import *
 
 from utils_ak.interactive_imports import *
+from config import SQLITE_PATH
 
 
 def get_db(environment=None):
@@ -12,11 +13,7 @@ def get_db(environment=None):
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 
-        if not os.getenv('SQLITE_PATH'):
-            raise Exception('Specify "SQLITE_PATH" environment variable')
-
-        sqlite_filepath = os.getenv('SQLITE_PATH')
-        engine = create_engine(f"sqlite:///{sqlite_filepath}")
+        engine = create_engine(f"sqlite:///{SQLITE_PATH}")
         Session = sessionmaker()
         Session.configure(bind=engine)
         session = Session()

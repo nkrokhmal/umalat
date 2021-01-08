@@ -10,7 +10,7 @@ def make_boilings_basic(boiling_plan_df):
 
     boilings = []
 
-    for boiling_id, boiling_plan in boiling_plan_df.groupby('id'):
+    for boiling_id, boiling_plan in boiling_plan_df.groupby('batch_id'):
 
         boiling_model = boiling_plan.iloc[0]['boiling']
 
@@ -27,7 +27,7 @@ def make_boilings_by_groups(boiling_plan_df):
     boiling_plan_df = boiling_plan_df.copy()
     boiling_plan_df['is_lactose'] = boiling_plan_df['boiling'].apply(lambda boiling: boiling.is_lactose)
 
-    for _, boiling_plan in boiling_plan_df.groupby('id'):
+    for _, boiling_plan in boiling_plan_df.groupby('batch_id'):
         # todo: hardcode
         if len(boiling_plan['boiling'].unique()) > 1:
             if len(boiling_plan['is_lactose'].unique()) == 1:
