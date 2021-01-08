@@ -76,8 +76,8 @@ def make_cheese_makers(schedule, rng):
 
 
 def make_cleanings(schedule):
-    maker, make = init_block_maker('cleanings_row', axis=1, make_with_copy_cut=True)
-    make(schedule['cleanings'])
+    maker, make = init_block_maker('cleanings_row', axis=1)
+    make(maker.copy(schedule['cleanings'], with_props=True))
     for cleaning in listify(maker.root['cleanings']['cleaning']):
         cleaning.props.update({'size': (cleaning.size[0], 2)})
     return maker.root['cleanings']
@@ -199,7 +199,7 @@ def make_salt_melting(boiling):
 
 def make_salt_meltings(schedule):
     # todo: make dynamic lines
-    maker, make = init_block_maker('melting', axis=1, make_with_copy_cut=True)
+    maker, make = init_block_maker('melting', axis=1)
 
     n_lines = 5
     melting_lines = [make(f'salt_melting_{i}', size=(0, 3), is_parent_node=True).block for i in range(n_lines)]
