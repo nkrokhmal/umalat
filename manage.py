@@ -5,10 +5,10 @@ from flask_admin import Admin
 from flask_script import Manager
 from flask_admin.contrib.sqla import ModelView
 
+os.environ['environment'] = 'flask_app'
+
 from app import create_app
 import app.models as umalat_models
-
-os.environ['environment'] = 'flask_app'
 
 app, db = create_app()
 manager = Manager(app)

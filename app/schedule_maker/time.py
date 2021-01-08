@@ -1,5 +1,6 @@
 import datetime
 
+
 def cast_t(obj):
     if isinstance(obj, int):
         return obj

@@ -26,23 +26,33 @@ def get_db(environment=None):
         raise Exception(f'Enviroment {environment} not supported')
     return db
 
+db = None
+def set_global_db(environment=None):
+    global db
+    db = get_db(environment)
 
-db = get_db()
+set_global_db()
+
+
+def query_exactly_one(cls, key, value):
+    query = db.session.query(cls).filter(getattr(cls, key) == value)
+    res = query.all()
+
+    if len(res) == 0:
+        raise Exception('Failed to fetch element {} {} {}'.format(cls, key, value))
+    elif len(res) > 1:
+        raise Exception('Fetched too many elements {} {} {}: {}'.format(cls, key, value, res))
+    else:
+        return res[0]
 
 
 def cast_sku(obj):
     if isinstance(obj, SKU):
         return obj
-    elif isinstance(obj, (str, int)):
-        # try to return by id if int-like
-        try:
-            obj = str(int(obj))
-            return db.session.query(SKU).filter(SKU.id == obj).first()
-        except:
-            pass
-
-        # return by name
-        return db.session.query(SKU).filter(SKU.name == str(obj)).first()
+    elif is_int_like(obj):
+        return query_exactly_one(SKU, 'id', int(obj))
+    elif isinstance(obj, str):
+        return query_exactly_one(SKU, 'name', obj)
     else:
         raise Exception('Unknown sku type')
 
@@ -50,9 +60,11 @@ def cast_sku(obj):
 def cast_packer(obj):
     if isinstance(obj, Packer):
         return obj
-    elif isinstance(obj, int):
-        return db.session.query(Packer).filter(Packer.id == obj).first()
-    if isinstance(obj, SKU):
+    elif is_int_like(obj):
+        return query_exactly_one(Packer, 'id', int(obj))
+    elif isinstance(obj, str):
+        return query_exactly_one(Packer, 'name', obj)
+    elif isinstance(obj, SKU):
         return cast_packer(obj.packer_id)
     else:
         raise Exception('Unknown packer type')
@@ -61,19 +73,16 @@ def cast_packer(obj):
 def cast_boiling(obj):
     if isinstance(obj, Boiling):
         return obj
-    elif isinstance(obj, (str, int)):
-        obj = str(obj)
-        return db.session.query(Boiling).filter(Boiling.id == obj).first()
+    elif isinstance(obj, is_int_like(obj)):
+        return query_exactly_one(Boiling, 'id', int(obj))
     else:
         raise Exception(f'Unknown boiling type {type(obj)}')
-
 
 
 def cast_boiling_form_factor(obj):
     if isinstance(obj, BoilingFormFactor):
         return obj
-    elif isinstance(obj, (str, int)):
-        obj = str(obj)
-        return db.session.query(BoilingFormFactor).filter(BoilingFormFactor.id == obj).first()
+    elif isinstance(obj, is_int_like(obj)):
+        return query_exactly_one(BoilingFormFactor, 'id', int(obj))
     else:
         raise Exception(f'Unknown boiling form factor {type(obj)}')
