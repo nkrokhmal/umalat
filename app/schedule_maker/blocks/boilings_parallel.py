@@ -126,7 +126,6 @@ def make_mpp(boiling_df, left_boiling_volume):
 
 from itertools import product
 
-
 def _make_melting_and_packing_from_mpps(boiling_model, mpps):
     maker, make = init_block_maker('melting_and_packing', axis=0)
 
