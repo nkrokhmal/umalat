@@ -1,7 +1,4 @@
 STYLE = {
-    'cheese_maker': {'beg_time': '01:00'},
-    'boiling': {'beg_time': '01:00'},
-
     'termizator': {'text': '{boiling_id} налив', 'bold': True},
     'pouring_name': {'text': '{boiling_label}'},
     'pouring_and_fermenting': {'text': 'налив/внесение\nзакваски', 'color': (255, 192, 0)},  # orange color
@@ -11,8 +8,6 @@ STYLE = {
 
     'drenator': {'text': 'чеддеризация'},
 
-    'melting': {'beg_time': '07:00'},
-    'packing': {'beg_time': '07:00'},
     'melting_label': {'text': '{boiling_id}', 'bold': True},
     'melting_name': {'text': '{form_factor_label}'},
     'serving': {'color': 'orange', 'text': 'подача и вымешивание'},
@@ -22,7 +17,6 @@ STYLE = {
     # 'cooling': {'text': 'охлаж <{size}[0] * 5> мин'},
     'cooling': {'text': 'охлаждение'},
 
-    # 'packing_and_preconfiguration': {'beg_time': '07:00'},
     'packing_label': {'text': '{boiling_id}', 'bold': True},
     'packing_name': {'text': '{form_factor_label}'},
     'packing_brand': {'color': '#f2dcdb', 'text': '{brand_label}'},  # pink color
@@ -30,8 +24,7 @@ STYLE = {
 
     'salting': {'color': (0, 176, 240), 'text': 'посолка'},  # light-blue color
 
-    'cleaning': {'beg_time': '01:00',
-                 'color': 'yellow',
+    'cleaning': {'color': 'yellow',
                  'text': lambda b: 'полная мойка термизатора' if b.props['cleaning_type'] == 'full' else 'короткая мойка\nтермизатора'},
 
     'template': {'visible': True},

@@ -33,8 +33,8 @@ def draw_schedule(schedule, style, fn=None):
                 text = eval(f'f{text!r}')
 
                 x1 = b.x[0]
-                if 'beg_time' in b.props.get_all_props():
-                    x1 -= cast_t(b.props['beg_time'])  # shift of timeline
+                if 'start_time' in b.props.get_all_props():
+                    x1 -= cast_t(b.props['start_time'])  # shift of timeline
                 x1 += b.props['index_width']  # first index columns
                 x1 += 1  # indexing starts with 1 in excel
 

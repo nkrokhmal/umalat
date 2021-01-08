@@ -38,7 +38,8 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
 
 
 def make_schedule(boilings, start_times=None):
-    start_times = start_times or {'water': '09:50', 'salt': '07:05'}
+    start_times = start_times or {'water': '', 'salt': '07:00'}
+
     maker, make = init_block_maker('schedule')
     schedule = maker.root
 
@@ -58,16 +59,21 @@ def make_schedule(boilings, start_times=None):
 
     lines_df['latest_boiling'] = None
 
+    if not lines_df['start_time'].any():
+        raise Exception('Укажите время начала варок')
+
     def add_block(boiling_type):
         boiling = lines_df.at[boiling_type, 'boilings_left'].pop(0)
-
         if not lines_df.at[boiling_type, 'latest_boiling']:
-            start_from = cast_t(lines_df.at[boiling_type, 'start_time']) - boiling['melting_and_packing']['melting'].x[0]
+            if lines_df.at[boiling_type, 'start_time']:
+                start_from = cast_t(lines_df.at[boiling_type, 'start_time']) - boiling['melting_and_packing'].x[0]
+            else:
+                latest_boiling = lines_df[~lines_df['latest_boiling'].isnull()].iloc[0]['latest_boiling']
+                start_from = latest_boiling.x[0]
         else:
             start_from = lines_df.at[boiling_type, 'latest_boiling'].x[0]
 
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[boiling_type, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
-
         lines_df.at[boiling_type, 'latest_boiling'] = boiling
         return boiling
 

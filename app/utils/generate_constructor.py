@@ -23,11 +23,9 @@ def generate_constructor_df_v3(df_copy):
     result['kg'] = result['plan']
     result['boiling'] = result['boiling_id'].apply(lambda x: cast_boiling(x))
     result['name'] = result['sku'].apply(lambda sku: sku.name)
-    result['boiling_name'] = result['boiling'].apply(
-        lambda b: '{} {} {}'.format(b.percent, b.ferment, '' if b.is_lactose else 'без лактозы'))
+    result['boiling_name'] = result['boiling'].apply(lambda b: b.to_str())
     result['boiling_volume'] = np.where(result['boiling_name'].str.contains('2.7'), 850, 1000)
     result = result[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg', 'tag']]
-    print(result)
     return result
 
 
@@ -109,28 +107,45 @@ class Boilings:
             self.add(sku)
 
 
+def draw_boiling_names(wb):
+    boilings = db.session.query(Boiling).all()
+    boiling_names = list(set([x.to_str() for x in boilings]))
+    boiling_type_sheet = wb['Типы варок']
+    draw_row(boiling_type_sheet, 1, ['-'], font_size=8)
+    cur_i = 2
+    for boiling_name in boiling_names:
+        draw_row(boiling_type_sheet, cur_i, [boiling_name], font_size=8)
+        cur_i += 1
+
+
+def draw_skus(wb, sheet_name, data_sku):
+    grouped_skus = data_sku[sheet_name]
+    grouped_skus.sort(key=lambda x: x.name, reverse=False)
+    sku_sheet_name = '{} SKU'.format(sheet_name)
+    sku_sheet = wb[sku_sheet_name]
+
+    draw_row(sku_sheet, 1, ['-', '-'], font_size=8)
+    cur_i = 2
+
+    for group_sku in grouped_skus:
+        draw_row(sku_sheet, cur_i, [group_sku.name, group_sku.boilings[0].to_str()], font_size=8)
+        cur_i += 1
 
 
 def draw_constructor_template(df, file_name, wb, batch_number=0):
     skus = db.session.query(SKU).all()
-    data_sku = {'Вода': [x.name for x in skus if x.boilings[0].cheese_types.name == 'Вода'],
-                'Соль': [x.name for x in skus if x.boilings[0].cheese_types.name == 'Соль']}
+    data_sku = {'Вода': [x for x in skus if x.boilings[0].cheese_types.name == 'Вода'],
+                'Соль': [x for x in skus if x.boilings[0].cheese_types.name == 'Соль']}
+
+    draw_boiling_names(wb)
 
     for sheet_name in ['Соль', 'Вода']:
-        sku_names = data_sku[sheet_name]
-        sku_sheet_name = '{} SKU'.format(sheet_name)
         boiling_sheet = wb[sheet_name]
-        sku_sheet = wb[sku_sheet_name]
-
-        draw_row(sku_sheet, 1, ['-'], font_size=8)
-        cur_i = 2
-
-        for sku_name in sorted(sku_names):
-            draw_row(sku_sheet, cur_i, [sku_name], font_size=8)
-            cur_i += 1
+        draw_skus(wb, sheet_name, data_sku)
 
         cur_i = 2
         values = []
+        sku_names = [x.name for x in data_sku[sheet_name]]
         df_filter = df[df['name'].isin(sku_names)].copy()
         for id, grp in df_filter.groupby('id', sort=False):
             for i, row in grp.iterrows():
@@ -173,11 +188,12 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                 draw_cell(boiling_sheet, 9, cur_i, 1, font_size=8)
             cur_i += 1
 
-    path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], os.path.splitext(file_name)[0])
+    new_file_name = file_name.split(' ')[0]
+    path = '{}/{} План по варкам.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)
     wb.active = 0
     wb["Соль"].views.sheetView[0].tabSelected = False
     wb.save(path)
-    return '{}.xlsx'.format(os.path.splitext(file_name)[0])
+    return '{} План по варкам.xlsx'.format(new_file_name)
 
 
 def get_colour_by_name(sku_name, skus):

@@ -2,6 +2,8 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+SQLITE_PATH = os.path.join(basedir, 'data.sqlite')
+
 class BaseClass:
     SECRET_KEY = 'Umalat'
     CHEESE_PER_PAGE = 10
@@ -49,11 +51,11 @@ class BaseClass:
 
 
 class DebugConfig(BaseClass):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH
 
 
 class ProductionConfig(BaseClass):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH
 
 
 config = {

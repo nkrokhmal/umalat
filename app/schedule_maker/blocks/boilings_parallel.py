@@ -126,7 +126,6 @@ def make_mpp(boiling_df, left_boiling_volume):
 
 from itertools import product
 
-
 def _make_melting_and_packing_from_mpps(boiling_model, mpps):
     maker, make = init_block_maker('melting_and_packing', axis=0)
 
@@ -233,10 +232,12 @@ def make_boilings_parallel_dynamic(boiling_group_df):
     def cast_bff(sku):
         if sku == cast_sku(4):
             return cast_boiling_form_factor(5)
+        elif sku == cast_sku(37):
+            return cast_boiling_form_factor(8)
         else:
             return sku.boiling_form_factors[0]
 
-    boiling_volumes = [grp['kg'].sum() for i, grp in boiling_group_df.groupby('id')]
+    boiling_volumes = [grp['kg'].sum() for i, grp in boiling_group_df.groupby('batch_id')]
 
     # sum same skus for same teams
     boiling_group_df['sku_name'] = boiling_group_df['sku'].apply(lambda sku: sku.name)
@@ -247,13 +248,13 @@ def make_boilings_parallel_dynamic(boiling_group_df):
         values.append(value)
     boiling_group_df = pd.DataFrame(values)
     boiling_group_df.pop('sku_name')
-    boiling_group_df = boiling_group_df.sort_values(by='id')
+    boiling_group_df = boiling_group_df.sort_values(by='batch_id')
 
     boiling_group_df['bff'] = boiling_group_df['sku'].apply(cast_bff)
     boiling_group_df['left'] = boiling_group_df['kg']
 
     boiling_model = boiling_group_df.iloc[0]['boiling']
-    ids = remove_duplicates(boiling_group_df['id'].sort_values())
+    ids = remove_duplicates(boiling_group_df['batch_id'].sort_values())
     form_factors = remove_duplicates(boiling_group_df['bff'])
 
     cur_form_factor = form_factors[0]
