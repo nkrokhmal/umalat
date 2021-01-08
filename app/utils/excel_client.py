@@ -53,7 +53,7 @@ def generate_title(sheet):
 
 # todo: build plan -> build sku plan
 def build_plan_sku(date, df, request_list, plan_path=None):
-    filename = '{}.xlsx'.format(date.strftime('%Y-%m-%d'))
+    filename = '{} План по SKU.xlsx'.format(date.strftime('%Y-%m-%d'))
     if plan_path is None:
         path = '{}/{}'.format(current_app.config['SKU_PLAN_FOLDER'], filename)
     else:
@@ -120,7 +120,6 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                 ', без лактозы' if not group_skus["GroupSKU"][0]["SKU"].boilings[0].is_lactose else ''
             ),
             alignment=Alignment(horizontal='center', vertical='center', wrapText=True)
-
         )
         block.cell_value(row=beg_row, col=CELLS['Volume'].column, value=group_skus['Volume'])
         formula_boiling_count = '{}'.format(str(group_formula).strip('[]').replace(',', ' +').replace('\'', "").upper())
