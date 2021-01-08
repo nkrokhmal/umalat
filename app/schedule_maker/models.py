@@ -47,7 +47,7 @@ def cast_sku(obj):
     if isinstance(obj, SKU):
         return obj
     elif is_int_like(obj):
-        return query_exactly_one(SKU, 'id', int(obj))
+        return query_exactly_one(SKU, 'id', int(float(obj)))
     elif isinstance(obj, str):
         return query_exactly_one(SKU, 'name', obj)
     else:
@@ -58,7 +58,7 @@ def cast_packer(obj):
     if isinstance(obj, Packer):
         return obj
     elif is_int_like(obj):
-        return query_exactly_one(Packer, 'id', int(obj))
+        return query_exactly_one(Packer, 'id', int(float(obj)))
     elif isinstance(obj, str):
         return query_exactly_one(Packer, 'name', obj)
     elif isinstance(obj, SKU):
@@ -70,16 +70,34 @@ def cast_packer(obj):
 def cast_boiling(obj):
     if isinstance(obj, Boiling):
         return obj
-    elif isinstance(obj, is_int_like(obj)):
-        return query_exactly_one(Boiling, 'id', int(obj))
+    elif is_int_like(obj):
+        return query_exactly_one(Boiling, 'id', int(float(obj)))
+    elif isinstance(obj, str):
+        try:
+            # water, 2.7, Альче
+            values = obj.split(',')
+            boiling_type, percent, ferment = values[:3]
+            percent = percent.replace(' ', '')
+            ferment = re.sub(spaces_on_edge('beg'), '', ferment)
+            ferment = re.sub(spaces_on_edge('end'), '', ferment)
+            is_lactose = len(values) < 4
+            query = db.session.query(Boiling).filter((Boiling.percent == percent) & (Boiling.is_lactose == is_lactose) & (Boiling.ferment == ferment))
+            boilings = query.all()
+            boilings = [b for b in boilings if b.boiling_type == boiling_type]
+            # todo: uncom
+            # assert len(boilings) == 1
+            return boilings[0]
+        except:
+            raise Exception('Unknown boiling')
     else:
-        raise Exception(f'Unknown boiling type {type(obj)}')
+        raise Exception(f'Unknown boiling')
 
 
 def cast_boiling_form_factor(obj):
     if isinstance(obj, BoilingFormFactor):
         return obj
-    elif isinstance(obj, is_int_like(obj)):
-        return query_exactly_one(BoilingFormFactor, 'id', int(obj))
+    elif is_int_like(obj):
+        return query_exactly_one(BoilingFormFactor, 'id', int(float(obj)))
     else:
         raise Exception(f'Unknown boiling form factor {type(obj)}')
+

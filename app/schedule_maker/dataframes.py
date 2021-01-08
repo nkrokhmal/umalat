@@ -24,24 +24,24 @@ def read_boiling_plan(wb_obj):
             values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
         df = pd.DataFrame(values, columns=header)
-        df = df[['Номер партии', 'SKU', 'КГ', 'Номер команды']]
-        df.columns = ['batch_id', 'sku', 'kg', 'packing_team_id']
-
-        # reorder
-        df = df[['batch_id', 'sku', 'kg', 'packing_team_id']]
+        df = df[['Номер партии', 'Тип варки', 'SKU', 'КГ', 'Номер команды']]
+        # todo: boiling_full_type -> boiling_type, boiling_type -> boiling_line_type
+        df.columns = ['batch_id', 'boiling_params', 'sku', 'kg', 'packing_team_id']
 
         # remove separators and empty lines
         df = df[df['sku'] != '-']
         df = df[~df['kg'].isnull()]
 
+        df['boiling_line_type'] = 'water' if ws_name == 'Вода' else 'salt'
         dfs.append(df)
 
     df = pd.concat(dfs)
     df['sku'] = df['sku'].apply(cast_sku)
 
-    # todo: find by short_boiling_type and sku
-    df['boiling'] = df['sku'].apply(lambda sku: sku.boilings[0])
+    df['boiling_full_type'] = df['boiling_line_type'] + ',' + df['boiling_params']
+    df['boiling'] = df['boiling_full_type'].apply(cast_boiling)
 
+    # todo: check that all boiling groups have the same boiling
     return df.reset_index(drop=True)
 
 
