@@ -1,5 +1,5 @@
 import datetime
-import datetime
+
 def cast_t(obj):
     if isinstance(obj, int):
         return obj
@@ -36,10 +36,14 @@ def cast_time(obj):
         return f'{days:02}:{hours:02}:{minutes:02}'
 
 
-if __name__ == '__main__':
+def test():
     print(cast_t('1:23:55'))
     print(cast_t('0:23:55'))
     print(cast_t('-1:23:55'))
     print(cast_time(1))
     print(cast_time(0))
     print(cast_time(-1))
+
+
+if __name__ == '__main__':
+    test()

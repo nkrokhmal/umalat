@@ -2,22 +2,32 @@ from app.models import *
 
 from utils_ak.interactive_imports import *
 
-if os.getenv('mode') == 'prod':
-    from app import db
-elif os.getenv('mode') == 'dev':
-    from sqlalchemy import create_engine
-    from sqlalchemy.orm import sessionmaker
 
-    if not os.getenv('SQLITE_PATH'):
-        raise Exception('Specify SQLITE_PATH in environment variables')
+def get_db(environment=None):
+    environment = environment or os.getenv('environment')
 
-    sqlite_filepath = os.getenv('SQLITE_PATH')
-    engine = create_engine(f"sqlite:///{sqlite_filepath}")
-    Session = sessionmaker()
-    Session.configure(bind=engine)
-    session = Session()
-    db = dotdict()
-    db['session'] = session
+    if environment == 'flask_app':
+        from app import db
+    elif environment == 'interactive':
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+
+        if not os.getenv('SQLITE_PATH'):
+            raise Exception('Specify "SQLITE_PATH" environment variable')
+
+        sqlite_filepath = os.getenv('SQLITE_PATH')
+        engine = create_engine(f"sqlite:///{sqlite_filepath}")
+        Session = sessionmaker()
+        Session.configure(bind=engine)
+        session = Session()
+        db = dotdict()
+        db['session'] = session
+    else:
+        raise Exception(f'Enviroment {environment} not supported')
+    return db
+
+
+db = get_db()
 
 
 def cast_sku(obj):
