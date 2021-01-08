@@ -1,7 +1,7 @@
 import openpyxl
 import pandas as pd
 
-from app.schedule_maker.drawing import *
+from app.schedule_maker.frontend.drawing import *
 from app.schedule_maker.frontend.style import *
 from utils_ak.interactive_imports import *
 
