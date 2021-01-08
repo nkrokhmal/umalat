@@ -40,6 +40,7 @@ def read_boiling_plan(wb_obj):
 
     df['boiling_full_type'] = df['boiling_line_type'] + ',' + df['boiling_params']
     df['boiling'] = df['boiling_full_type'].apply(cast_boiling)
+    df.pop('boiling_full_type')
 
     # todo: check that all boiling groups have the same boiling
     return df.reset_index(drop=True)

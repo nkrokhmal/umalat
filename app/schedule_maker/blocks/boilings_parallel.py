@@ -232,6 +232,8 @@ def make_boilings_parallel_dynamic(boiling_group_df):
     def cast_bff(sku):
         if sku == cast_sku(4):
             return cast_boiling_form_factor(5)
+        elif sku == cast_sku(37):
+            return cast_boiling_form_factor(8)
         else:
             return sku.boiling_form_factors[0]
 
