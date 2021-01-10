@@ -19,7 +19,7 @@ class BaseClass:
     TEMPLATE_BOILING_PLAN = 'app/data/templates/constructor.xlsx'
     IGNORE_SKU_FILE = 'app/data/ignore/ignore_sku.json'
     with open(IGNORE_SKU_FILE) as json_file:
-        IGNORE_SKUS = json.load(json_file)
+        IGNORE_SKUS = json.load(json_file, encoding='utf-8')
 
     SHEET_NAMES = {
         'remainings': 'файл остатки',

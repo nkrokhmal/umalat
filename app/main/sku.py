@@ -12,6 +12,7 @@ from flask_restplus import reqparse
 @main.route('/add_sku', methods=['POST', 'GET'])
 def add_sku():
     form = SKUForm()
+    name = request.args.get('name')
     if form.validate_on_submit():
         # todo: check if boiling does not exist
         sku = SKU(
@@ -51,6 +52,8 @@ def add_sku():
             flash('Exception occurred in get_sku request. Error: {}.'.format(e), 'error')
             db.session.rollback()
         return redirect(url_for('.get_sku'))
+    if name:
+        form.name.data = name
     return render_template('add_sku.html', form=form)
 
 

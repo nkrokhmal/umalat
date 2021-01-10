@@ -1,5 +1,5 @@
 from ..models import *
-from flask import render_template, flash,  request, current_app
+from flask import render_template, flash,  request, current_app, Markup
 from . import main
 from .forms import RequestForm
 from io import BytesIO
@@ -11,6 +11,7 @@ COLUMNS = {
     'Fact': 'Фактические остатки на складах - Заявлено, кг:',
     'Normative': 'Нормативные остатки, кг'
 }
+
 
 @main.route('/sku_plan', methods=['GET', 'POST'])
 def sku_plan():
@@ -44,7 +45,8 @@ def sku_plan():
                 sku_for_create.append(item[0])
             else:
                 pass
-        flash('No SKU: {}'.format(sku_for_create))
+        if sku_for_create:
+            flash(convert_sku(sku_for_create))
 
         for group_item in group_items:
             group_sku = [x for x in full_list if
@@ -70,3 +72,7 @@ def sku_plan():
     file_name = None
     return render_template('sku_plan.html', data=data, form=form, result_list=result_list, file_name=file_name)
 
+
+def convert_sku(sku):
+    return Markup('В базе нет следующих SKU: <br> <br>' +
+                  ' '.join(['<a href="/add_sku?name={0}">{0}</a> <br>'.format(x) for x in sku]))
