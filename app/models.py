@@ -67,6 +67,9 @@ class BoilingFormFactor(db.Model):
     __tablename__ = 'boiling_form_factors'
     id = db.Column(db.Integer, primary_key=True)
     weight = db.Column(db.Integer)
+    first_cooling_time = db.Column(db.Integer)
+    second_cooling_time = db.Column(db.Integer)
+    salting_time = db.Column(db.Integer)
     skus = db.relationship('SKU', secondary=sku_boiling_form_factor, backref='boiling_form_factors')
 
     @staticmethod
@@ -80,6 +83,44 @@ class BoilingFormFactor(db.Model):
                 )
                 db.session.add(bff)
             db.session.commit()
+        except Exception as e:
+            print('Exception occurred {}'.format(e))
+            db.session.rollback()
+
+    @staticmethod
+    def get_data():
+        try:
+            skus = db.session.query(SKU).all()
+            skus = [x for x in skus if not x.is_rubber]
+            skus = [x for x in skus if len(x.boilings) == 1]
+            for sku in skus:
+                bff = sku.boiling_form_factors[0]
+                melting = sku.boilings[0].meltings
+                new_first_cooling_time = melting.first_cooling_time
+                new_second_cooling_time = melting.second_cooling_time
+                new_salting_time = melting.salting_time
+
+                if bff.salting_time is not None and bff.salting_time != new_salting_time and new_salting_time is not None:
+                    print()
+                    print(bff.weight, bff.salting_time, new_salting_time)
+                    print('Error in data occurred in salting for SKU {}'.format(sku.name))
+                else:
+                    bff.salting_time = new_salting_time
+
+                if bff.first_cooling_time is not None and bff.first_cooling_time != new_first_cooling_time and new_first_cooling_time is not None:
+                    print()
+                    print(bff.weight, bff.first_cooling_time, new_first_cooling_time)
+                    print('Error in data occurred in first cooling for SKU {}'.format(sku.name))
+                else:
+                    bff.first_cooling_time = new_first_cooling_time
+
+                if bff.second_cooling_time is not None and bff.second_cooling_time != new_second_cooling_time and new_second_cooling_time is not None:
+                    print()
+                    print(bff.weight, bff.second_cooling_time, new_second_cooling_time)
+                    print('Error in data occurred in second cooling for SKU {}'.format(sku.name))
+                else:
+                    bff.second_cooling_time = new_second_cooling_time
+                db.session.commit()
         except Exception as e:
             print('Exception occurred {}'.format(e))
             db.session.rollback()
