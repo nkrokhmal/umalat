@@ -18,8 +18,8 @@ class BaseClass:
     SCHEDULE_PLAN_FOLDER = 'app/data/schedule_plan'
     TEMPLATE_BOILING_PLAN = 'app/data/templates/constructor.xlsx'
     IGNORE_SKU_FILE = 'app/data/ignore/ignore_sku.json'
-    with open(IGNORE_SKU_FILE) as json_file:
-        IGNORE_SKUS = json.load(json_file, encoding='utf-8')
+    with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding='utf-8') as json_file:
+        IGNORE_SKUS = json.load(json_file)
 
     SHEET_NAMES = {
         'remainings': 'файл остатки',

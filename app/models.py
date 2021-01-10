@@ -1,5 +1,6 @@
 from . import db
 import json
+import numpy as np
 
 sku_boiling = db.Table('sku_boiling',
                        db.Column('boiling_id', db.Integer, db.ForeignKey('boilings.id'), primary_key=True),
@@ -71,6 +72,13 @@ class BoilingFormFactor(db.Model):
     second_cooling_time = db.Column(db.Integer)
     salting_time = db.Column(db.Integer)
     skus = db.relationship('SKU', secondary=sku_boiling_form_factor, backref='boiling_form_factors')
+
+    @property
+    def post_processing_time(self):
+        # todo: hardcode, make properly
+        values = [self.first_cooling_time, self.second_cooling_time, self.salting_time]
+        values = [v if v else np.nan for v in values]
+        return float(np.nansum(values))
 
     def to_json(self):
         return {
