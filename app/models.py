@@ -72,6 +72,14 @@ class BoilingFormFactor(db.Model):
     salting_time = db.Column(db.Integer)
     skus = db.relationship('SKU', secondary=sku_boiling_form_factor, backref='boiling_form_factors')
 
+    def to_json(self):
+        return {
+            'weight': self.weight,
+            'first_cooling_time': self.first_cooling_time,
+            'second_cooling_time': self.second_cooling_time,
+            'salting_time': self.salting_time
+        }
+
     @staticmethod
     def generate_boiling_form_factors():
         try:
