@@ -5,15 +5,12 @@ from .forms import RequestForm
 from io import BytesIO
 from .. utils.excel_client import *
 
-
-
 COLUMNS = {
     'Date': 'Дата выработки продукции:',
     'Total': 'Заявлено всего, кг:',
     'Fact': 'Фактические остатки на складах - Заявлено, кг:',
     'Normative': 'Нормативные остатки, кг'
 }
-
 
 @main.route('/sku_plan', methods=['GET', 'POST'])
 def sku_plan():
@@ -43,9 +40,11 @@ def sku_plan():
                     'SKU': sku[0],
                     'Request': item[2]
                 })
-            else:
+            elif item[0] not in current_app.config['IGNORE_SKUS']:
                 sku_for_create.append(item[0])
-        # flash('No SKU: {}'.format(sku_for_create))
+            else:
+                pass
+        flash('No SKU: {}'.format(sku_for_create))
 
         for group_item in group_items:
             group_sku = [x for x in full_list if

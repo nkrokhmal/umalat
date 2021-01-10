@@ -95,9 +95,8 @@
     <thead>
         <tr>
             <th> Процент </th>
-            <th> Наличие лактозы </th>
+            <th> Лактоза </th>
             <th> Закваска </th>
-            <th> Приоритет </th>
             <th> Параметры варки </th>
             <th> Параметры плавления </th>
             <th> Действия </th>
@@ -106,9 +105,8 @@
     {% for boiling in boilings %}
     <tr>
         <td> {{boiling.percent}} </td>
-        <td> {{boiling.is_lactose}} </td>
+        <td> {% if boiling.is_lactose == True %} &#10004; {% else %} &times; {% endif %} </td>
         <td> {{boiling.ferment}} </td>
-        <td> {{boiling.priority}} </td>
         <td width="33%">
             <table width="100%">
                 <tr><td> Внесение закваски </td><td>{{boiling.pourings.pouring_time}}</td></tr>
@@ -131,27 +129,6 @@
                 <tr><td> Скорость </td><td>
                     {% if boiling.meltings.speed %}
                         {{boiling.meltings.speed}}
-                    {% else %}
-                        &nbsp;
-                    {% endif %}
-                </td></tr>
-                <tr><td> Время охлажения 1 </td><td>
-                    {% if boiling.meltings.first_cooling_time %}
-                        {{boiling.meltings.first_cooling_time}}
-                    {% else %}
-                        &nbsp;
-                    {% endif %}
-                </td></tr>
-                <tr><td> Время охлаждения 2 </td><td>
-                    {% if boiling.meltings.second_cooling_time %}
-                        {{boiling.meltings.second_cooling_time}}
-                    {% else %}
-                        &nbsp;
-                    {% endif %}
-                </td></tr>
-                <tr><td> Время посолки </td><td>
-                    {% if boiling.meltings.salting_time %}
-                        {{boiling.meltings.salting_time}}
                     {% else %}
                         &nbsp;
                     {% endif %}

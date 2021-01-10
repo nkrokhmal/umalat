@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %} Форм фактор плавления - Параметры {% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $(".delete-current-bff").click(function () {
+            var id = $(this).data('id');
+            $(".btn.btn-danger.btn-ok").attr("data-id", id);
+        })
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $(".btn.btn-danger.btn-ok").click(function(){
+            var id = $(this).attr("data-id");
+            $.ajax(
+            {
+                url: '/delete_boiling_form_factor/' + id,
+                type: 'DELETE',
+                success: function(res)
+                {
+                    console.log(res);
+                },
+                error: function(error) {
+                      console.log(error);
+                }
+            });
+        });
+        $(".delete-current-bff").click(function () {
+            var id = $(this).data('id');
+            $(".btn.btn-danger.btn-ok").click(function(){
+                $.ajax(
+                {
+                    url: '/delete_boiling_form_factor/' + id,
+                    type: 'DELETE',
+                    success: function(res)
+                    {
+                        console.log(res)
+                    },
+                    error: function(error) {
+                          console.log(error);
+                    }
+                });
+            });
+        })
+    });
+</script>
+
+<p>
+    <a href="{{ url_for('main.add_boiling_form_factor')}}"><big> Добавить новый форм фактор плавления </big> </a>
+</p>
+
+<table class="table table-hover bff" id="bff">
+    <thead>
+        <tr>
+            <th>Вес, г</th>
+            <th>Время первого охлаждения, мин</th>
+            <th>Время второго охлаждения, мин</th>
+            <th>Время посолки, мин</th>
+            <th> Действия </th>
+        </tr>
+    </thead>
+    {% for bff in bffs %}
+    <tr>
+        <td> {{bff.weight}} </td>
+        <td>
+            {% if bff.first_cooling_time %}
+                {{bff.first_cooling_time}}
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </td>
+        <td>
+            {% if bff.second_cooling_time %}
+                {{bff.second_cooling_time}}
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </td>
+        <td>
+            {% if bff.salting_time %}
+                {{bff.salting_time}}
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </td>
+        <td>
+            <a href="{{ url_for('main.edit_boiling_form_factor', bff_id = bff.id)}}" class="edit-bff">
+                <i class="material-icons" style="color:green" title="Edit"> &#xe3c9; </i>
+            </a>
+            <a href="#delete_bff" class="delete-current-bff" data-id={{bff.id}} data-toggle="modal">
+                <i class="material-icons" data-toggle="tooltip" style="color:red" title="Delete"> &#xE872; </i>
+            </a>
+            <div id="delete_bff" class="modal fade" >
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form>
+                            <div class="modal-header">
+                                <h4 class="modal-title">Удалить форм фактор плавления</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Вы уверены, что хотите удалить этот форм фактор плавления?</p>
+                                <p class="text-warning"><small>Это действие не может быть отменено</small></p>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                                <input type="submit" class="btn btn-danger btn-ok" value= Delete>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

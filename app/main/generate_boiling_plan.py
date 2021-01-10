@@ -79,8 +79,6 @@ def generate_boiling_plan_full():
         df['plan'] = df['plan'].apply(lambda x: -float(x))
         df = df[['boiling_id', 'sku_id', 'plan']]
         df['sku'] = df['sku_id'].apply(cast_sku)
-        # boiling_plan_df = generate_constructor_df_v2(df)
-        # full_plan = generate_full_constructor_df(boiling_plan_df)
         full_plan = generate_constructor_df_v3(df)
         template_wb = openpyxl.load_workbook(current_app.config['TEMPLATE_BOILING_PLAN'])
         new_file_name = draw_constructor_template(full_plan, file.filename, template_wb, batch_number=batch_number)

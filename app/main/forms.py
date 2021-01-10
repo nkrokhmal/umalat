@@ -21,9 +21,6 @@ class BoilingForm(FlaskForm):
     serving_time = IntegerField('Введите время обслуживания', validators=[Optional()])
     melting_time = IntegerField('Введите время плавления', validators=[Optional()])
     speed = IntegerField('Введите скорость плавления', validators=[Optional()])
-    first_cooling_time = IntegerField('Введите первое время охлаждения', validators=[Optional()])
-    second_cooling_time = IntegerField('Введите второе время охлаждения', validators=[Optional()])
-    salting_time = IntegerField('Введите время посолки', validators=[Optional()])
 
     line = SelectField('Выберите линию', coerce=int, default=-1)
     lines = None
@@ -135,4 +132,17 @@ class StatisticForm(FlaskForm):
     ]
     input_file = FileField('', validators=validators)
     submit = SubmitField(label="Отправить")
+
+
+class BoilingFormFactorForm(FlaskForm):
+    weight = IntegerField('Введите вес форм фактора плавления', validators=[Required()])
+    first_cooling_time = IntegerField('Введите время первого охлаждения (для Воды)', validators=[Optional()])
+    second_cooling_time = IntegerField('Введите время второго охлаждения (для Воды)', validators=[Optional()])
+    salting_time = IntegerField('Введите время посолки (для линии Соли)', validators=[Optional()])
+    submit = SubmitField(label='Сохранить')
+
+    def validate_weight(self, weight):
+        bffs = db.session.query(BoilingFormFactor).filter(BoilingFormFactor.weight == weight.data).first()
+        if bffs is not None:
+            raise ValidationError('Такой вес форм фактора уже существует!')
 

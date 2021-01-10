@@ -44,10 +44,7 @@ def edit_boiling(boiling_id):
             melting_process = Melting(
                 serving_time=form.serving_time.data,
                 melting_time=form.melting_time.data,
-                speed=form.speed.data,
-                first_cooling_time=form.first_cooling_time.data,
-                second_cooling_time=form.second_cooling_time.data,
-                salting_time=form.salting_time.data
+                speed=form.speed.data
             )
             boiling_process.meltings = melting_process
 
@@ -56,7 +53,7 @@ def edit_boiling(boiling_id):
                                            x.name == dict(form.line.choices).get(form.line.data)][0]
 
             db.session.commit()
-            flash('Варка успешно изменена')
+            flash('Варка успешно изменена!')
             return redirect(url_for('.get_boiling'))
 
         for key, value in dict(form.ferment.choices).items():
@@ -81,9 +78,6 @@ def edit_boiling(boiling_id):
             form.serving_time.data = boiling_process.meltings.serving_time
             form.melting_time.data = boiling_process.meltings.melting_time
             form.speed.data = boiling_process.meltings.speed
-            form.first_cooling_time.data = boiling_process.meltings.first_cooling_time
-            form.second_cooling_time.data = boiling_process.meltings.second_cooling_time
-            form.salting_time.data = boiling_process.meltings.salting_time
         return render_template('edit_boiling.html', form=form)
 
 
@@ -105,10 +99,7 @@ def add_boilings():
         melting_process = Melting(
             serving_time=form.serving_time.data,
             melting_time=form.melting_time.data,
-            speed=form.speed.data,
-            first_cooling_time=form.first_cooling_time.data,
-            second_cooling_time=form.second_cooling_time.data,
-            salting_time=form.salting_time.data
+            speed=form.speed.data
         )
         boiling.pourings = pouring_process
         boiling.meltings = melting_process

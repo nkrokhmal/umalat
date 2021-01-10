@@ -1,4 +1,5 @@
 import os
+import json
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -16,6 +17,9 @@ class BaseClass:
     SKU_PLAN_FOLDER = 'app/data/sku_plan'
     SCHEDULE_PLAN_FOLDER = 'app/data/schedule_plan'
     TEMPLATE_BOILING_PLAN = 'app/data/templates/constructor.xlsx'
+    IGNORE_SKU_FILE = 'app/data/ignore/ignore_sku.json'
+    with open(IGNORE_SKU_FILE) as json_file:
+        IGNORE_SKUS = json.load(json_file)
 
     SHEET_NAMES = {
         'remainings': 'файл остатки',

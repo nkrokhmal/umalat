@@ -187,13 +187,14 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                 draw_row(boiling_sheet, cur_i, v[:-1], font_size=8, color=colour)
                 draw_cell(boiling_sheet, 9, cur_i, 1, font_size=8)
             cur_i += 1
+    new_file_name = '{} План по варкам'.format(file_name.split(' ')[0])
+    path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)
 
-    new_file_name = file_name.split(' ')[0]
-    path = '{}/{} План по варкам.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)
     wb.active = 0
     wb["Соль"].views.sheetView[0].tabSelected = False
     wb.save(path)
-    return '{} План по варкам.xlsx'.format(new_file_name)
+
+    return '{}.xlsx'.format(new_file_name)
 
 
 def get_colour_by_name(sku_name, skus):
