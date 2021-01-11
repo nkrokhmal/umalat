@@ -108,19 +108,19 @@ class schema_to_boilings_dataframes:
         # # round last end up?
         # #         df.at[df.index[-1], 'end'] = custom_round(df.at[df.index[-1], 'end'], 5, 'ceil')
         #
-        # # round to five-minute intervals
-        # df['beg'] = df['beg'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
-        # df['end'] = df['end'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
-        #
-        # # fix small intervals (like beg and end: 5, 5 -> 5, 10)
-        # if fix_small_intervals:
-        #     for i in range(len(df)):
-        #         if i >= 1:
-        #             while df.at[i, 'beg'] <= df.at[i - 1, 'end']:
-        #                 df.at[i, 'beg'] += 5
-        #
-        #         while df.at[i, 'beg'] >= df.at[i, 'end']:
-        #             df.at[i, 'end'] += 5
+        # round to five-minute intervals
+        df['beg'] = df['beg'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
+        df['end'] = df['end'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
+
+        # fix small intervals (like beg and end: 5, 5 -> 5, 10)
+        if fix_small_intervals:
+            for i in range(len(df)):
+                if i >= 1:
+                    while df.at[i, 'beg'] <= df.at[i - 1, 'end']:
+                        df.at[i, 'beg'] += 5
+
+                while df.at[i, 'beg'] >= df.at[i, 'end']:
+                    df.at[i, 'end'] += 5
         return df
 
     def __call__(self, boilings_meltings, packings, melting_speed, post_process=True):
