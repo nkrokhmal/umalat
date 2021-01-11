@@ -18,8 +18,8 @@ from .. utils.generate_constructor import *
 
 # todo: add plan
 # todo: file naming
-@main.route('/generate_boiling_plan', methods=['POST', 'GET'])
-def generate_boiling_plan():
+@main.route('/boiling_plan', methods=['POST', 'GET'])
+def boiling_plan():
     form = StatisticForm()
     if request.method == 'POST' and form.validate_on_submit():
         file = request.files['input_file']
@@ -41,8 +41,8 @@ def generate_boiling_plan():
     return render_template('boiling_plan.html', form=form, file_name=file_name)
 
 
-@main.route('/generate_boiling_plan_full', methods=['POST', 'GET'])
-def generate_boiling_plan_full():
+@main.route('/boiling_plan_full', methods=['POST', 'GET'])
+def boiling_plan_full():
     form = BoilingPlanForm()
     if request.method == 'POST' and form.validate_on_submit():
         batch_number = form.batch_number.data
