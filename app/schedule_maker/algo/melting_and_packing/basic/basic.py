@@ -1,7 +1,7 @@
 from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
 from app.schedule_maker.algo.packing import *
-
+from app.schedule_maker.algo.cooling import *
 
 def make_melting_and_packing_basic(boiling_plan):
     boiling_plan = boiling_plan.copy()
@@ -32,23 +32,7 @@ def make_melting_and_packing_basic(boiling_plan):
 
             push(meltings, melting_process)
 
-            # add cooling
-            cooling_process = maker.create_block('cooling_process', x=melting_process.props['x_rel'])
-            _, cooling_make = init_block_maker(cooling_process)
-
-            with cooling_make('start'):
-                if boiling_model.boiling_type == 'water':
-                    cooling_make('cooling', size=(boiling_model.meltings.first_cooling_time // 5, 0))
-                    cooling_make('cooling', size=(boiling_model.meltings.second_cooling_time // 5, 0))
-                elif boiling_model.boiling_type == 'salt':
-                    cooling_make('salting', size=(boiling_model.meltings.salting_time // 5, 0))
-
-            with cooling_make('finish'):
-                if boiling_model.boiling_type == 'water':
-                    cooling_make('cooling', size=(melting_process.size[0], 0))
-                elif boiling_model.boiling_type == 'salt':
-                    cooling_make('salting', size=(melting_process.size[0], 0))
-
+            cooling_process = make_cooling_process(boiling_model, melting_process.size[0], x=melting_process.props['x_rel'])
             push(coolings, cooling_process, push_func=add_push)
 
     with make('packing',

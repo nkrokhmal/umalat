@@ -1,8 +1,7 @@
 from utils_ak.interactive_imports import *
 
-from app.schedule_maker.blocks.melting_and_packing import make_melting_and_packing_basic
-from app.schedule_maker.blocks.boiling import make_boiling
-from app.schedule_maker.blocks.boilings_parallel import make_boilings_parallel_dynamic
+from app.schedule_maker.algo.boiling import make_boiling
+from app.schedule_maker.algo.melting_and_packing import make_melting_and_packing_basic, make_boilings_parallel_dynamic
 
 
 def make_boilings_basic(boiling_plan_df):
