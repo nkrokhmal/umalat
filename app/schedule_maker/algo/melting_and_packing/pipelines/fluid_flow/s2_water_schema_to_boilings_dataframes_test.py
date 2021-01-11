@@ -14,8 +14,8 @@ def test():
     mark_consecutive_groups(df, 'boiling', 'boiling_group')
     boiling_group_df = df[df['boiling_group'] == 2]
 
-    boilings_meltings, packings, melting_speed = BoilingGroupToSchemaTransformer()(boiling_group_df)
-    boilings_dataframes = SchemaToBoilingsDataFramesTransformer()(boilings_meltings, packings, melting_speed)
+    boilings_meltings, packings, melting_speed = boiling_group_to_schema()(boiling_group_df)
+    boilings_dataframes = schema_to_boilings_dataframes()(boilings_meltings, packings, melting_speed)
     print(boilings_dataframes)
 
 

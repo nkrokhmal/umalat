@@ -11,7 +11,7 @@ def cast_bff(sku):
         return sku.boiling_form_factors[0]
 
 
-class BoilingGroupToSchemaTransformer:
+class boiling_group_to_schema:
     def _calc_melting_speed(self, boiling_group_df):
         boiling_type = boiling_group_df.iloc[0]['boiling'].boiling_type
         return 900 if boiling_type == 'water' else 1020  # todo: make properly

@@ -1,8 +1,9 @@
 from utils_ak.block_tree import *
 from app.schedule_maker.algo.cooling import make_cooling_process
+from app.schedule_maker.algo.boiling import make_boiling
 from app.schedule_maker.calculation import *
 
-class BoilingsDataFramesToMeltingAndPackings:
+class boilings_dataframes_to_boilings:
 
     def _make_line(self, df, line_name, process_name, filler_name, item_name, make_fillers=True):
         maker, make = init_block_maker(line_name)
@@ -51,5 +52,10 @@ class BoilingsDataFramesToMeltingAndPackings:
         return maker.root
 
     def __call__(self, boilings_dataframes, boiling_model):
-        return [self._make_melting_and_packing(boiling_dataframes, boiling_model) for boiling_dataframes in boilings_dataframes]
-            
+        res = []
+        for boiling_dataframes in boilings_dataframes:
+            mp = self._make_melting_and_packing(boiling_dataframes, boiling_model)
+            # todo: make proper boiling_id
+            boiling = make_boiling(boiling_model, 0, mp)
+            res.append(boiling)
+        return res

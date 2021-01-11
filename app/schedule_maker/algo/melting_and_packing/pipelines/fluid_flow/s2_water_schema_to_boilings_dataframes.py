@@ -2,7 +2,7 @@ from utils_ak.fluid_flow import *
 from utils_ak.numeric import *
 
 
-class SchemaToBoilingsDataFramesTransformer:
+class schema_to_boilings_dataframes:
     def _calc_melting_actors_by_boiling(self, boilings_meltings, melting_speed):
         # generate meltings by boilings
         res = []

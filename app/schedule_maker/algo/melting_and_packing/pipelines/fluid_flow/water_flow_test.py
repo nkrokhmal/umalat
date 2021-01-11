@@ -14,12 +14,8 @@ def test():
     mark_consecutive_groups(df, 'boiling', 'boiling_group')
     boiling_group_df = df[df['boiling_group'] == 2]
 
-    boilings_meltings, packings, melting_speed = BoilingGroupToSchemaTransformer()(boiling_group_df)
-    boilings_dataframes = SchemaToBoilingsDataFramesTransformer()(boilings_meltings, packings, melting_speed)
-    melting_and_packings = BoilingsDataFramesToMeltingAndPackings()(boilings_dataframes, boiling_group_df.iloc[0]['boiling'])
-    for mp in melting_and_packings:
-        print(mp)
-        print()
+    for boiling in make_flow_water_boilings(boiling_group_df):
+        print(boiling)
 
 if __name__ == '__main__':
     test()
