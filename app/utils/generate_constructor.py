@@ -24,7 +24,7 @@ def generate_constructor_df_v3(df_copy):
     result['boiling'] = result['boiling_id'].apply(lambda x: cast_boiling(x))
     result['name'] = result['sku'].apply(lambda sku: sku.name)
     result['boiling_name'] = result['boiling'].apply(lambda b: b.to_str())
-    result['boiling_volume'] = np.where(result['boiling_name'].str.contains('2.7'), 850, 1000)
+    result['boiling_volume'] = np.where(result['boiling_type'] == 'salt', 850, 1000)
     result = result[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg', 'tag']]
     return result
 
@@ -58,6 +58,7 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
             for form_factor, df_grouped in df_grouped_boiling_id.groupby('form_factor'):
                 boilings.add_group(df_grouped.to_dict('records'), new)
                 new = False
+    boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
 
 
@@ -89,6 +90,12 @@ class Boilings:
                 self.boilings += self.cur_boiling
                 self.boiling_number += 1
                 self.cur_boiling = []
+
+    def finish(self):
+        if self.cur_boiling:
+            self.boilings += self.cur_boiling
+            self.boiling_number += 1
+            self.cur_boiling = []
 
     def add_remainings(self):
         if self.cur_boiling:
