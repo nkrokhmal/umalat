@@ -3,6 +3,7 @@ os.environ['environment'] = 'interactive'
 
 from app.schedule_maker.models import *
 
+
 def test_models():
     print(cast_sku(1))
     print(cast_sku('1.0'))
