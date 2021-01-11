@@ -1,7 +1,8 @@
 from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
-from app.schedule_maker.blocks.boiling import make_boiling
-from app.schedule_maker.blocks.packing import *
+
+from app.schedule_maker.algo import make_boiling
+from app.schedule_maker.algo.packing import *
 
 ERROR = 1e-5
 
@@ -279,65 +280,3 @@ def make_boilings_parallel_dynamic(boiling_group_df):
         boiling = make_boiling(boiling_model, ids[0] + i, melting_and_packing)
         boilings.append(boiling)
     return boilings
-
-
-
-def test1():
-    def cast_bff(sku):
-        if sku == cast_sku(4):
-            return cast_boiling_form_factor(5)
-        else:
-            return sku.boiling_form_factors[0]
-
-    from app.schedule_maker.dataframes import read_boiling_plan
-    boiling_plan_df = read_boiling_plan(r"C:\Users\Mi\YandexDisk\Shared\2020 umalat\schedules\2020.12.15_boiling_plan.xlsx")
-    # boiling_plan_df['packing_team_id'] = pd.read_csv('boiling_plan.csv', sep=';')['packing_team_id']
-    mark_consecutive_groups(boiling_plan_df, 'boiling', 'boiling_group')
-
-    for _, grp in boiling_plan_df.groupby('boiling_group'):
-        grp['packing_speed'] = grp['sku'].apply(lambda sku: sku.packing_speed)
-        grp['bff'] = grp['sku'].apply(cast_bff)
-        display(grp)
-        boilings = make_boilings_parallel_dynamic(grp)
-        for boiling in boilings:
-            mp = boiling['melting_and_packing']
-            mp.props.update({'x': (0, 0)})
-            display(mp)
-
-def test2():
-    mark_consecutive_groups(boiling_plan_df, 'boiling', 'boiling_group')
-
-    grp = boiling_plan_df[boiling_plan_df['boiling_group'] == 3]
-
-    grp['packing_speed'] = grp['sku'].apply(lambda sku: sku.packing_speed)
-    grp['bff'] = grp['sku'].apply(cast_bff)
-    display(grp)
-    boilings = make_boilings_parallel_dynamic(grp)
-    for boiling in boilings:
-        print(boiling.props['boiling_id'])
-        mp = boiling['melting_and_packing']
-        mp.props.update({'x': (0, 0)})
-        display(mp)
-
-
-def test3():
-    boiling_plan_df['bff'] = boiling_plan_df['sku'].apply(cast_bff)
-
-    boiling_df = boiling_plan_df[boiling_plan_df['bff'] == cast_boiling_form_factor(14)]
-    boiling_df['sku_name'] = boiling_df['sku'].apply(lambda sku: sku.name)
-
-    values = []
-    for _, grp in boiling_df.groupby(['packing_team_id', 'sku_name']):
-        value = grp.iloc[0]
-        value['kg'] = grp['kg'].sum()
-        values.append(value)
-    boiling_df = pd.DataFrame(values)
-    boiling_df.pop('sku_name')
-
-    boiling_df['left'] = boiling_df['kg']
-    boiling_df['packing_speed'] = boiling_df['sku'].apply(lambda sku: sku.packing_speed)
-
-    boiling_df
-
-    make_mpp(boiling_df, 850)
-    boiling_df

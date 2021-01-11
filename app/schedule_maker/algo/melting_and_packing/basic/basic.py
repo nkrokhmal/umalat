@@ -1,6 +1,6 @@
 from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
-from app.schedule_maker.blocks.packing import *
+from app.schedule_maker.algo.packing import *
 
 
 def make_melting_and_packing_basic(boiling_plan):
