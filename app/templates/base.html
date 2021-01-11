@@ -25,7 +25,7 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="{{ url_for('main.sku_plan') }}"> План по SKU </a></li>
-                <li><a href="{{ url_for('main.generate_boiling_plan_full') }}"> План по варкам </a></li>
+                <li><a href="{{ url_for('main.boiling_plan_full') }}"> План по варкам </a></li>
                 <li><a href="{{ url_for('main.schedule') }}"> Расписание </a></li>
                 <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Параметры <b class="caret"></b> </a>
                     <ul class="dropdown-menu">
@@ -39,7 +39,7 @@
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('main.sku_plan_stats_old') }}"> Парсинг старого файла </a></li>
                         <li><a href="{{ url_for('main.sku_plan_stats_new') }}"> Парсинг нового файла </a></li>
-                        <li><a href="{{ url_for('main.generate_boiling_plan') }}">Создание Excel конструктора</a></li>
+                        <li><a href="{{ url_for('main.boiling_plan') }}">Создание Excel конструктора</a></li>
                     </ul>
                 </li>
             </ul>

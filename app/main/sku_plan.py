@@ -4,6 +4,7 @@ from . import main
 from .forms import RequestForm
 from io import BytesIO
 from .. utils.excel_client import *
+from urllib.parse import quote
 
 COLUMNS = {
     'Date': 'Дата выработки продукции:',
@@ -75,4 +76,4 @@ def sku_plan():
 
 def convert_sku(sku):
     return Markup('В базе нет следующих SKU: <br> <br>' +
-                  ' '.join(['<a href="/add_sku?name={0}">{0}</a> <br>'.format(x) for x in sku]))
+                  ' '.join(['<a href="/add_sku?name={0}">{1}</a> <br>'.format(quote(x), x) for x in sku]))
