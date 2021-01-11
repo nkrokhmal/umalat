@@ -1,8 +1,7 @@
 from utils_ak.interactive_imports import *
 
 from app.schedule_maker.algo.boiling import make_boiling
-from app.schedule_maker.algo.melting_and_packing import make_melting_and_packing_basic, make_boilings_parallel_dynamic
-
+from app.schedule_maker.algo.melting_and_packing import *
 
 def make_boilings_basic(boiling_plan_df):
     boiling_plan_df = boiling_plan_df.copy()
@@ -42,7 +41,7 @@ def make_boilings_by_groups(boiling_plan_df):
     res = []
     for boiling_group, grp in boiling_plan_df.groupby('boiling_group'):
         if grp.iloc[0]['boiling'].boiling_type == 'water':
-            res += make_boilings_basic(grp)
+            res += make_flow_water_boilings(grp)
         else:
             res += make_boilings_parallel_dynamic(grp)
     return res

@@ -2,7 +2,7 @@ from utils_ak.fluid_flow import *
 from utils_ak.numeric import *
 
 
-class SchemaToBoilingsDataFramesTransformer:
+class schema_to_boilings_dataframes:
     def _calc_melting_actors_by_boiling(self, boilings_meltings, melting_speed):
         # generate meltings by boilings
         res = []
@@ -50,7 +50,7 @@ class SchemaToBoilingsDataFramesTransformer:
             packing_queues.append(packing_queue)
         return packing_queues
 
-    def _calc_boilings_dataframes(self, melting_actors_by_boiling, packing_queues):
+    def _calc_boilings_dataframes(self, melting_actors_by_boiling, packing_queues, post_process=True):
         res = []
 
         for drenator, melting_queue, cooling_queue in melting_actors_by_boiling:
@@ -79,10 +79,15 @@ class SchemaToBoilingsDataFramesTransformer:
             #                     make(label, x=[beg, 0], size=(end - beg, 1))
             #         print(maker.root.tabular())
 
-            boiling_dataframes['meltings'] = self._post_process_dataframe(pd.DataFrame(melting_queue.active_periods(), columns=['item', 'beg', 'end']))
-            boiling_dataframes['coolings'] = self._post_process_dataframe(pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end']))
-            # todo: make dictionary
-            boiling_dataframes['packings'] = [self._post_process_dataframe(pd.DataFrame(packing_queue.active_periods('out'), columns=['item', 'beg', 'end'])) for packing_queue in packing_queues]
+            boiling_dataframes['meltings'] = pd.DataFrame(melting_queue.active_periods(), columns=['item', 'beg', 'end'])
+            boiling_dataframes['coolings'] = pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end'])
+            # todo: make as dictionary
+            boiling_dataframes['packings'] = [pd.DataFrame(packing_queue.active_periods('out'), columns=['item', 'beg', 'end']) for packing_queue in packing_queues]
+
+            if post_process:
+                boiling_dataframes['meltings'] = self._post_process_dataframe(boiling_dataframes['meltings'])
+                boiling_dataframes['coolings'] = self._post_process_dataframe(boiling_dataframes['coolings'], fix_small_intervals=True)
+                boiling_dataframes['packings'] = [self._post_process_dataframe(df) for df in boiling_dataframes['packings']]
 
             res.append(boiling_dataframes)
 
@@ -95,31 +100,31 @@ class SchemaToBoilingsDataFramesTransformer:
                 pipe_disconnect(packing_hub, packing_queue)
         return res
 
-    def _post_process_dataframe(self, df):
+    def _post_process_dataframe(self, df, fix_small_intervals=True):
         # move to minutes
         df['beg'] = df['beg'] * 60
         df['end'] = df['end'] * 60
-
-        # round last end up?
-        #         df.at[df.index[-1], 'end'] = custom_round(df.at[df.index[-1], 'end'], 5, 'ceil')
-
+        #
+        # # round last end up?
+        # #         df.at[df.index[-1], 'end'] = custom_round(df.at[df.index[-1], 'end'], 5, 'ceil')
+        #
         # round to five-minute intervals
         df['beg'] = df['beg'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
         df['end'] = df['end'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
 
-        # fix small intervals (like beg_ts and end_ts: 5, 5 -> 5, 10)
-        for i in range(len(df)):
-            if i >= 1:
-                while df.at[i, 'beg'] <= df.at[i - 1, 'end']:
-                    df.at[i, 'beg'] += 5
+        # fix small intervals (like beg and end: 5, 5 -> 5, 10)
+        if fix_small_intervals:
+            for i in range(len(df)):
+                if i >= 1:
+                    while df.at[i, 'beg'] <= df.at[i - 1, 'end']:
+                        df.at[i, 'beg'] += 5
 
-            while df.at[i, 'beg'] >= df.at[i, 'end']:
-                df.at[i, 'end'] += 5
-
+                while df.at[i, 'beg'] >= df.at[i, 'end']:
+                    df.at[i, 'end'] += 5
         return df
 
-    def __call__(self, boilings_meltings, packings, melting_speed):
+    def __call__(self, boilings_meltings, packings, melting_speed, post_process=True):
         melting_actors_by_boiling = self._calc_melting_actors_by_boiling(boilings_meltings, melting_speed)
         packing_queues = self._calc_packing_queues(packings)
-        boilings_dataframes = self._calc_boilings_dataframes(melting_actors_by_boiling, packing_queues)
+        boilings_dataframes = self._calc_boilings_dataframes(melting_actors_by_boiling, packing_queues, post_process=post_process)
         return boilings_dataframes
