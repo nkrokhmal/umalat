@@ -80,8 +80,9 @@ class SchemaToBoilingsDataFramesTransformer:
             #         print(maker.root.tabular())
 
             boiling_dataframes['meltings'] = self._post_process_dataframe(pd.DataFrame(melting_queue.active_periods(), columns=['item', 'beg', 'end']))
-            boiling_dataframes['coolings'] = self._post_process_dataframe(pd.DataFrame(melting_queue.active_periods(), columns=['item', 'beg', 'end']))
-            boiling_dataframes['packings'] = self._post_process_dataframe(pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end']))
+            boiling_dataframes['coolings'] = self._post_process_dataframe(pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end']))
+            # todo: make dictionary
+            boiling_dataframes['packings'] = [self._post_process_dataframe(pd.DataFrame(packing_queue.active_periods('out'), columns=['item', 'beg', 'end'])) for packing_queue in packing_queues]
 
             res.append(boiling_dataframes)
 
