@@ -3,7 +3,7 @@ os.environ['environment'] = 'interactive'
 
 from app.schedule_maker import mark_consecutive_groups
 from app.schedule_maker.algo.s1_boiling_group_to_schema_transformer import BoilingGroupToSchemaTransformer
-from app.schedule_maker.algo.s2_schema_to_boilings_dataframes_transformer import SchemaToBoilingsDataFramesTransformer
+from app.schedule_maker.algo.s2_water_schema_to_boilings_dataframes_transformer import SchemaToBoilingsDataFramesTransformer
 
 import warnings
 warnings.filterwarnings('ignore')
