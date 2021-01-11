@@ -83,74 +83,75 @@ def make_cleanings(schedule):
     return maker.root['cleanings']
 
 
-def make_water_meltings(schedule):
-    maker, make = init_block_maker('melting')
+def make_water_meltings(schedule, draw_all_coolings=True):
+    maker, make = init_block_maker('melting', axis=1)
 
     with make('header', start_time='00:00', push_func=add_push):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
+    with make('melting_row', push_func=add_push):
+        for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'water'}):
+            # todo: use bffs instead of skus
+            # bffs = [melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})]
+            # form_factor_label = format_label([('', bff.weight) for bff in bffs])
+
+            boiling_skus = []
+            for packing in listify(boiling['melting_and_packing']['packing']):
+                boiling_skus += [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
+            values = [(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_skus]
+            if len(set(v[0] for v in values)) > 1:
+                values = [(sku.form_factor.short_name, sku.weight_form_factor) for sku in boiling_skus]
+            form_factor_label = format_label(values)
+
+            with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], push_func=add_push, form_factor_label=form_factor_label):
+                with make('serving_row'):
+                    make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0),
+                         size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), push_func=add_push)
+
+                with make('label_row'):
+                    make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), visible=False, push_func=add_push)
+                    make('melting_label', size=(4, 1))
+                    make('melting_name', size=(boiling['melting_and_packing']['melting']['meltings'].size[0] - 4, 1), form_factor_label=boiling.props['form_factor_label'])
+
+                with make('melting_row'):
+                    make('melting_process', x=(boiling['melting_and_packing']['melting']['meltings'].x[0], 0),
+                         size=(boiling['melting_and_packing']['melting']['meltings'].size[0], 1), speed=900, push_func=add_push)
+
     n_cooling_lines = 5
+    with make('cooling_row', axis=1):
+        cooling_lines = [make('cooling_line', is_parent_node=True, size=(0, 1)).block for _ in range(n_cooling_lines)]
 
     for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'water'}):
+        class_validator = ClassValidator(window=10)
+        def validate(b1, b2):
+            validate_disjoint_by_axis(b1, b2)
+        class_validator.add('cooling_block', 'cooling_block', validate)
 
-        # todo: use bffs instead of skus
-        # bffs = [melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})]
-        # form_factor_label = format_label([('', bff.weight) for bff in bffs])
+        cur_cooling_size = None
+        for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
+            start_from = cooling_process['start']['cooling'][0].x[0]
+            cooling_block = maker.create_block('cooling_block', x=(start_from, 0))  # todo: create dynamic x calculation when empty block
+            for i in range(2):
+                block = maker.create_block('cooling',
+                             size=(cooling_process['start']['cooling'][i].size[0], 1),
+                             x=[cooling_process['start']['cooling'][i].x[0] - start_from, 0])
+                push(cooling_block, block, push_func=add_push)
 
-        boiling_skus = []
-        for packing in listify(boiling['melting_and_packing']['packing']):
-            boiling_skus += [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
-        values = [(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_skus]
-        if len(set(v[0] for v in values)) > 1:
-            values = [(sku.form_factor.short_name, sku.weight_form_factor) for sku in boiling_skus]
-        form_factor_label = format_label(values)
+            if not draw_all_coolings:
+                # do not draw cooling block if previous is same size
+                if cur_cooling_size == cooling_block.size[0]:
+                    continue
+                else:
+                    cur_cooling_size = cooling_block.size[0]
 
-        with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], push_func=add_push, form_factor_label=form_factor_label):
-            with make('serving_row'):
-                make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0),
-                     size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), push_func=add_push)
-
-            with make('label_row'):
-                make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), visible=False, push_func=add_push)
-                make('melting_label', size=(4, 1))
-                make('melting_name', size=(boiling['melting_and_packing']['melting']['meltings'].size[0] - 4, 1), form_factor_label=boiling.props['form_factor_label'])
-
-            with make('melting_row'):
-                make('melting_process', x=(boiling['melting_and_packing']['melting']['meltings'].x[0], 0),
-                     size=(boiling['melting_and_packing']['melting']['meltings'].size[0], 1), speed=900, push_func=add_push)
-
-            with make('cooling_row', axis=1):
-                cooling_lines = [make('cooling_line', is_parent_node=True).block for _ in range(n_cooling_lines)]
-
-                class_validator = ClassValidator()
-                def validate(b1, b2):
-                    validate_disjoint_by_axis(b1, b2)
-                class_validator.add('cooling_block', 'cooling_block', validate)
-
-                cur_cooling_size = None
-                for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
-                    beg = cooling_process['start']['cooling'][0].x[0]
-                    cooling_block = maker.create_block('cooling_block', x=(beg, 0))  # todo: create dynamic x calculation when empty block
-                    for i in range(2):
-                        block = maker.create_block('cooling',
-                                     size=(cooling_process['start']['cooling'][i].size[0], 1),
-                                     x=[cooling_process['start']['cooling'][i].x[0] - beg, 0])
-                        push(cooling_block, block, push_func=add_push)
-
-                    # do not draw cooling block if previous is same size
-                    if cur_cooling_size == cooling_block.size[0]:
-                        continue
-                    else:
-                        cur_cooling_size = cooling_block.size[0]
-
-                    # try to add to the earliest line as possible
-                    for j in range(n_cooling_lines):
-                        res = simple_push(cooling_lines[j], cooling_block, validator=class_validator)
-                        if isinstance(res, Block):
-                            # pushed block successfully
-                            break
-                        if j == 4:
-                            raise Exception("Failed to draw cooling block")
+            # try to add to the earliest line as possible
+            for j in range(n_cooling_lines):
+                res = simple_push(cooling_lines[j], cooling_block, validator=class_validator)
+                if isinstance(res, Block):
+                    # pushed block successfully
+                    break
+                if j == n_cooling_lines - 1:
+                    raise Exception("Failed to draw cooling block")
     return maker.root
 
 

@@ -41,7 +41,7 @@ def make_boilings_by_groups(boiling_plan_df):
     res = []
     for boiling_group, grp in boiling_plan_df.groupby('boiling_group'):
         if grp.iloc[0]['boiling'].boiling_type == 'water':
-            res += make_flow_water_boilings(grp)
+            res += make_flow_water_boilings(grp, start_from_id=len(res) + 1)
         else:
             res += make_boilings_parallel_dynamic(grp)
     return res

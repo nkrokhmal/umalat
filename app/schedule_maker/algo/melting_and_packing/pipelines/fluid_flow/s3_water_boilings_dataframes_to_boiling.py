@@ -57,11 +57,10 @@ class boilings_dataframes_to_boilings:
             push(maker.root, line, push_func=add_push)
         return maker.root
 
-    def __call__(self, boilings_dataframes, boiling_model):
+    def __call__(self, boilings_dataframes, boiling_model, start_from_id):
         res = []
-        for i, boiling_dataframes in enumerate(boilings_dataframes, 1):
+        for i, boiling_dataframes in enumerate(boilings_dataframes):
             mp = self._make_melting_and_packing(boiling_dataframes, boiling_model)
-            # todo: make proper batch_id
-            boiling = make_boiling(boiling_model, i, mp)
+            boiling = make_boiling(boiling_model, start_from_id + i, mp)
             res.append(boiling)
         return res
