@@ -1,5 +1,6 @@
 from utils_ak.block_tree import *
 
+
 def make_cooling_process(boiling_model, melting_process_size, *args, **kwargs):
     maker, make = init_block_maker('cooling_process', *args, **kwargs)
     with make('start'):

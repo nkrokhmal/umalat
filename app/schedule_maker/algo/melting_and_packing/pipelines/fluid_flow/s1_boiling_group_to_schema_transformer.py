@@ -1,6 +1,5 @@
 from app.schedule_maker.models import *
-
-ERROR = 1e-5
+from app.schedule_maker.calculation import *
 
 # todo: make properly
 def cast_bff(sku):
