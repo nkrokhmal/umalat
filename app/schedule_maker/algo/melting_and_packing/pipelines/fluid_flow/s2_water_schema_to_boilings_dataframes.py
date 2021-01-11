@@ -86,7 +86,7 @@ class schema_to_boilings_dataframes:
 
             if post_process:
                 boiling_dataframes['meltings'] = self._post_process_dataframe(boiling_dataframes['meltings'])
-                boiling_dataframes['coolings'] = self._post_process_dataframe(boiling_dataframes['coolings'], fix_small_intervals=True)
+                boiling_dataframes['coolings'] = self._post_process_dataframe(boiling_dataframes['coolings'], fix_small_intervals=False)
                 boiling_dataframes['packings'] = [self._post_process_dataframe(df) for df in boiling_dataframes['packings']]
 
             res.append(boiling_dataframes)
@@ -104,11 +104,12 @@ class schema_to_boilings_dataframes:
         # move to minutes
         df['beg'] = df['beg'] * 60
         df['end'] = df['end'] * 60
-        #
+
         # # round last end up?
         # #         df.at[df.index[-1], 'end'] = custom_round(df.at[df.index[-1], 'end'], 5, 'ceil')
         #
         # round to five-minute intervals
+
         df['beg'] = df['beg'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
         df['end'] = df['end'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
 
@@ -116,7 +117,7 @@ class schema_to_boilings_dataframes:
         if fix_small_intervals:
             for i in range(len(df)):
                 if i >= 1:
-                    while df.at[i, 'beg'] <= df.at[i - 1, 'end']:
+                    while df.at[i, 'beg'] < df.at[i - 1, 'end']:
                         df.at[i, 'beg'] += 5
 
                 while df.at[i, 'beg'] >= df.at[i, 'end']:

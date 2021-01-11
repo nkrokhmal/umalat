@@ -15,7 +15,7 @@ def test():
     boiling_group_df = df[df['boiling_group'] == 2]
 
     boilings_meltings, packings, melting_speed = boiling_group_to_schema()(boiling_group_df)
-    boilings_dataframes = schema_to_boilings_dataframes()(boilings_meltings, packings, melting_speed)
+    boilings_dataframes = schema_to_boilings_dataframes()(boilings_meltings, packings, melting_speed, post_process=True)
     print(boilings_dataframes)
 
 
