@@ -1,4 +1,4 @@
-from app.models import *
+from app.models_new import *
 
 from utils_ak.interactive_imports import *
 from config import SQLITE_PATH
