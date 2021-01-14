@@ -334,6 +334,7 @@ def fill_sku():
     lines = db.session.query(Line).all()
     packer = db.session.query(Packer).all()
     boilings = db.session.query(Boiling).all()
+    form_factors = db.session.query(FormFactor).all()
     path = 'app/data/params.xlsx'
     df = pd.read_excel(path, index_col=0)
     columns = ['Название SKU', 'Процент', 'Наличие лактозы', 'Тип закваски', 'Имя бренда', 'Вес нетто', 'Срок хранения',
@@ -350,18 +351,20 @@ def fill_sku():
             shelf_life=sku['Срок хранения'],
             packing_speed=sku['Скорость упаковки']
         )
-        add_sku.packer_id = [x.id for x in packer if x.name == sku['Упаковщик']][0]
-        if sku['Линия'] == 'Соль':
-            line_id = [x for x in lines if x.name == 'salt'][0].id
-        else:
-            line_id = [x for x in lines if x.name == 'water'][0].id
-        boiling = [x for x in boilings if
+
+        add_sku.packer = [x for x in packer if x.name == sku['Упаковщик']][0]
+
+        line_name = 'salt' if sku['Линия'] == 'Соль' else 'water'
+        add_sku.line = [x for x in lines if x.name == line_name][0]
+
+        add_sku.made_from_boiling = [x for x in boilings if
                    (x.percent == sku['Процент']) &
                    (x.is_lactose == is_lactose) &
                    (x.ferment == sku['Тип закваски']) &
-                   (x.line_id == line_id)][0]
-        add_sku.made_from_boiling = boiling
-        add_sku.line_id = line_id
+                   (x.line_id == add_sku.line.id)][0]
+
+        add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора'] and x.group.name == sku['Название форм фактора']][0]
+
         db.session.add(add_sku)
     db.session.commit()
 
