@@ -90,7 +90,7 @@ def make_water_meltings(schedule, draw_all_coolings=True):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
     with make('melting_row', push_func=add_push):
-        for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'water'}):
+        for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == 'water'}):
             # todo: use bffs instead of skus
             # bffs = [melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})]
             # form_factor_label = format_label([('', bff.weight) for bff in bffs])
@@ -98,9 +98,9 @@ def make_water_meltings(schedule, draw_all_coolings=True):
             boiling_skus = []
             for packing in listify(boiling['melting_and_packing']['packing']):
                 boiling_skus += [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
-            values = [(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_skus]
+            values = [(sku.form_factor.group.name, sku.form_factor.relative_weight) for sku in boiling_skus]
             if len(set(v[0] for v in values)) > 1:
-                values = [(sku.form_factor.short_name, sku.weight_form_factor) for sku in boiling_skus]
+                values = [(sku.form_factor.group.short_name, sku.form_factor.relative_weight) for sku in boiling_skus]
             form_factor_label = format_label(values)
 
             with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], push_func=add_push, form_factor_label=form_factor_label):
@@ -121,7 +121,7 @@ def make_water_meltings(schedule, draw_all_coolings=True):
     with make('cooling_row', axis=1):
         cooling_lines = [make('cooling_line', is_parent_node=True, size=(0, 1)).block for _ in range(n_cooling_lines)]
 
-    for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'water'}):
+    for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == 'water'}):
         class_validator = ClassValidator(window=10)
         def validate(b1, b2):
             validate_disjoint_by_axis(b1, b2)
@@ -174,9 +174,9 @@ def make_salt_melting(boiling):
     boiling_skus = []
     for packing in listify(boiling['melting_and_packing']['packing']):
         boiling_skus += [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
-    values = [(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_skus]
+    values = [(sku.form_factor.group.name, sku.form_factor.relative_weight) for sku in boiling_skus]
     if len(set(v[0] for v in values)) > 1:
-        values = [(sku.form_factor.short_name, sku.weight_form_factor) for sku in boiling_skus]
+        values = [(sku.form_factor.group.short_name, sku.form_factor.relative_weight) for sku in boiling_skus]
     form_factor_label = format_label(values)
 
     with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], form_factor_label=form_factor_label, push_func=add_push):
@@ -209,25 +209,25 @@ def make_salt_meltings(schedule):
 
     # todo: hardcode, add empty elements for drawing not to draw melting_line itself
 
-    for i, boiling in enumerate(schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'salt'})):
+    for i, boiling in enumerate(schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == 'salt'})):
         push(melting_lines[i % n_lines], make_salt_melting(boiling), push_func=add_push)
     return maker.root
 
 
-def make_packings(schedule, boiling_type):
+def make_packings(schedule, line_name):
     maker, make = init_block_maker('packing', axis=1)
 
     for packing_team_id in range(1, 3):
         with make('packing_team', size=(0, 3), axis=0, is_parent_node=True):
-            for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == boiling_type}):
+            for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == line_name}):
                 for packing in boiling.iter({'class': 'packing', 'packing_team_id': packing_team_id}):
 
                     boiling_skus = [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
 
                     # todo: take weight from boiling_form_factor
-                    values = [(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_skus]
+                    values = [(sku.form_factor.group.name, sku.form_factor.relative_weight) for sku in boiling_skus]
                     if len(set(v[0] for v in values)) > 1:
-                        values = [(sku.form_factor.short_name, sku.weight_form_factor) for sku in boiling_skus]
+                        values = [(sku.form_factor.group.short_name, sku.form_factor.relative_weight) for sku in boiling_skus]
                     form_factor_label = format_label(values)
 
                     brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in boiling_skus]))
