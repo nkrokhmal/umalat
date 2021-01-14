@@ -48,14 +48,15 @@ def fill_cooling_technologies():
     data = data.drop_duplicates()
     data = data.to_dict('records')
     for value in data:
-        technology = CoolingTechnology(
-            first_cooling_time=value['Охлаждение 1(для воды)'],
-            second_cooling_time=value['Охлаждение 2(для воды)'],
-            salting_time=value['Время посолки']
-        )
+        if any([not np.isnan(x) for x in value.values()]):
+            technology = CoolingTechnology(
+                first_cooling_time=value['Охлаждение 1(для воды)'],
+                second_cooling_time=value['Охлаждение 2(для воды)'],
+                salting_time=value['Время посолки']
+            )
 
-        db.session.add(technology)
-        db.session.commit()
+            db.session.add(technology)
+    db.session.commit()
 
 
 def fill_boilings():
@@ -115,7 +116,8 @@ def fill_form_factors():
         form_factor = FormFactor(name=name, relative_weight=value['Вес форм фактора'], group_id=group_id)
 
         cooling_technologies = db.session.query(CoolingTechnology).all()
-        form_factor.default_cooling_technology = [x for x in cooling_technologies if all([x.first_cooling_time == _cast_non_nan(value['Охлаждение 1(для воды)']),
+        if name != 'Терка':
+            form_factor.default_cooling_technology = [x for x in cooling_technologies if all([x.first_cooling_time == _cast_non_nan(value['Охлаждение 1(для воды)']),
                                                                               x.second_cooling_time == _cast_non_nan(value['Охлаждение 2(для воды)']),
                                                                               x.salting_time == _cast_non_nan(value['Время посолки'])])][0]
 

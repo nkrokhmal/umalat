@@ -189,7 +189,8 @@ class Group(db.Model):
                 'Сулугуни': 'CYЛГ',
                 'Моцарелла': 'МОЦ',
                 'Качокавалло': 'КАЧКВ',
-                'Масса': 'МАССА'
+                'Масса': 'МАССА',
+                'Терка': 'Терка'
             }
             for name, short_name in groups.items():
                 ff = Group(
@@ -204,7 +205,7 @@ class Group(db.Model):
 
 
 parent_child = db.Table(
-    'ParentChild',
+    'FormFactorMadeFromMadeTo',
     db.Column('ParentChildId', db.Integer, primary_key=True),
     db.Column('ParentId', db.Integer, db.ForeignKey('form_factors.id')),
     db.Column('ChildId', db.Integer, db.ForeignKey('form_factors.id'))
