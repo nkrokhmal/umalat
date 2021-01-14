@@ -3,6 +3,7 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker.algo.boiling import make_boiling
 from app.schedule_maker.algo.melting_and_packing import *
 
+
 def make_boilings_basic(boiling_plan_df):
     boiling_plan_df = boiling_plan_df.copy()
 

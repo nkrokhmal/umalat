@@ -25,24 +25,21 @@ def read_boiling_plan(wb_obj):
 
         df = pd.DataFrame(values, columns=header)
         df = df[['Номер партии', 'Тип варки', 'SKU', 'КГ', 'Номер команды']]
-        # todo: boiling_full_type -> boiling_type, boiling_type -> boiling_line_type
         df.columns = ['batch_id', 'boiling_params', 'sku', 'kg', 'packing_team_id']
 
         # remove separators and empty lines
         df = df[df['sku'] != '-']
         df = df[~df['kg'].isnull()]
 
-        df['boiling_line_type'] = 'water' if ws_name == 'Вода' else 'salt'
+        # add line name to boiling_params
+        df['boiling_params'] = ('water' if ws_name == 'Вода' else 'salt') + ',' + df['boiling_params']
         dfs.append(df)
 
     df = pd.concat(dfs)
     df['sku'] = df['sku'].apply(cast_sku)
 
-    df['boiling_full_type'] = df['boiling_line_type'] + ',' + df['boiling_params']
-    df['boiling'] = df['boiling_full_type'].apply(cast_boiling)
-    df.pop('boiling_full_type')
+    df['boiling'] = df['boiling_params'].apply(cast_boiling)
 
-    # todo: check that all boiling groups have the same boiling
     return df.reset_index(drop=True)
 
 

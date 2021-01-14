@@ -1,5 +1,4 @@
 from utils_ak.block_tree import *
-from app.schedule_maker.models import cast_boiling_form_factor
 # todo: take parameters from boiling_form_factor
 
 # todo: use bff

@@ -9,7 +9,7 @@ def test_models():
     print(cast_sku('1.0'))
     print(cast_boiling(1))
     print(cast_boiling('salt, 2.7, Альче'))
-    print(cast_boiling_form_factor(1))
+    print(cast_form_factor(1))
 
 
 if __name__ == '__main__':
