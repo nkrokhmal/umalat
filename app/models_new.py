@@ -7,6 +7,9 @@ from sqlalchemy.orm import backref
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 
+
+from .enum import LineName
+
 # Base = declarative_base()
 
 
@@ -50,14 +53,12 @@ class SKU(db.Model):
     packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
     form_factor_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
-    cooling_technology_id = db.Column(db.Integer, db.ForeignKey('cooling_technologies.id'), nullable=True)
 
 
 class Line(db.Model):
     __tablename__ = 'lines'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    display_name = db.Column(db.String)
     output_per_ton = db.Column(db.Integer)
     pouring_time = db.Column(db.Integer)
     serving_time = db.Column(db.Integer)
@@ -77,15 +78,14 @@ class Line(db.Model):
     @staticmethod
     def generate_lines():
         mozzarella_department = Department.query.filter_by(name='Моцарельный цех').first()
-        for params in [('salt', 'Пицца чиз', 180, 850, 1020, 30, 30), ('water', 'Моцарелла в воде', 240, 1000, 800, 30, 30)]:
+        for params in [(LineName.SALT, 180, 850, 1020, 30, 30), (LineName.WATER, 240, 1000, 800, 30, 30)]:
             line = Line(
                 name=params[0],
-                display_name=params[1],
-                chedderization_time=params[2],
-                output_per_ton=params[3],
-                melting_speed=params[4],
-                serving_time=params[5],
-                pouring_time=params[6],
+                chedderization_time=params[1],
+                output_per_ton=params[2],
+                melting_speed=params[3],
+                serving_time=params[4],
+                pouring_time=params[5],
             )
             if mozzarella_department is not None:
                 line.department_id = mozzarella_department.id
@@ -161,7 +161,7 @@ class CoolingTechnology(db.Model):
     second_cooling_time = db.Column(db.Integer)
     salting_time = db.Column(db.Integer)
 
-    skus = db.relationship('SKU', backref=backref('cooling_technology', uselist=False))
+    form_factors = db.relationship('FormFactor', backref=backref('default_cooling_technology', uselist=False))
 
 
 class Termizator(db.Model):
@@ -203,13 +203,8 @@ class Group(db.Model):
             db.session.rollback()
 
 
-form_factor_link = db.Table('form_factor_link',
-                            db.Column('form_factor_id', db.Integer, db.ForeignKey('form_factors.id'), primary_key=True),
-                            db.Column('made_from_id', db.Integer, db.ForeignKey('form_factors.id'), primary_key=True))
-
 parent_child = db.Table(
     'ParentChild',
-    # Base.metadata,
     db.Column('ParentChildId', db.Integer, primary_key=True),
     db.Column('ParentId', db.Integer, db.ForeignKey('form_factors.id')),
     db.Column('ChildId', db.Integer, db.ForeignKey('form_factors.id'))
@@ -219,9 +214,10 @@ parent_child = db.Table(
 class FormFactor(db.Model):
     __tablename__ = 'form_factors'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
     relative_weight = db.Column(db.Integer)
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
-
+    default_cooling_technology_id = db.Column(db.Integer, db.ForeignKey('cooling_technologies.id'), nullable=True)
     skus = db.relationship('SKU', backref=backref('form_factor', uselist=False))
 
     made_from = relationship(

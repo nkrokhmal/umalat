@@ -3,7 +3,6 @@ from app.schedule_maker.models import *
 from app.schedule_maker.algo.packing import *
 from app.schedule_maker.algo.cooling import *
 
-
 def make_melting_and_packing_basic(boiling_plan):
     boiling_plan = boiling_plan.copy()
     boiling_model = boiling_plan.iloc[0]['boiling']
@@ -21,7 +20,7 @@ def make_melting_and_packing_basic(boiling_plan):
         coolings = make('coolings', x=(serving.size[0], 0), push_func=add_push).block
 
         for i, (group, grp) in enumerate(boiling_plan.groupby('melting_group')):
-            if i >= 1 and boiling_model.line.name == 'water':
+            if i >= 1 and boiling_model.line.name == LineName.water:
                 # non-first group - reconfigure time
                 push(meltings, maker.create_block('melting_configuration', size=(1, 0)))
                 # todo: remove reconfiguration when neighbour form_factors are the same
