@@ -14,7 +14,7 @@ from datetime import datetime
 
 @main.route('/')
 def index():
-    return  render_template('index.html')
+    return render_template('index.html')
 
 
 @main.route('/get_general_params')

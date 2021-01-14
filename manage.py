@@ -8,7 +8,7 @@ from flask_admin.contrib.sqla import ModelView
 os.environ['environment'] = 'flask_app'
 
 from app import create_app
-import app.models as umalat_models
+import app.models_new as umalat_models
 
 app, db = create_app()
 manager = Manager(app)
@@ -21,5 +21,5 @@ for name, obj in inspect.getmembers(umalat_models):
         admin.add_view(ModelView(obj, db.session))
 
 if __name__ == '__main__':
-    # manager.run()
-    app.run(port=5000, debug=True, threaded=True, host='0.0.0.0')
+    manager.run()
+    # app.run(port=5000, debug=True, threaded=True, host='0.0.0.0')
