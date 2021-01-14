@@ -4,10 +4,6 @@ import numpy as np
 import pandas as pd
 
 from sqlalchemy.orm import backref
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
 
 
 sku_boiling = db.Table('sku_boiling',
@@ -196,14 +192,6 @@ form_factor_link = db.Table('form_factor_link',
                             db.Column('form_factor_id', db.Integer, db.ForeignKey('form_factors.id'), primary_key=True),
                             db.Column('made_from_id', db.Integer, db.ForeignKey('form_factors.id'), primary_key=True))
 
-parent_child = db.Table(
-    'ParentChild',
-    Base.metadata,
-    db.Column('ParentChildId', db.Integer, primary_key=True),
-    db.Column('ParentId', db.Integer, db.ForeignKey('FormFactor.Id')),
-    db.Column('ChildId', db.Integer, db.ForeignKey('FormFactor.Id'))
-)
-
 
 class FormFactor(db.Model):
     __tablename__ = 'form_factors'
@@ -211,18 +199,28 @@ class FormFactor(db.Model):
     relative_weight = db.Column(db.Integer)
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
 
+    made_from_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
+
     skus = db.relationship('SKU', backref=backref('form_factor', uselist=False), lazy='dynamic')
 
-    made_from = relationship(
+    made_from = db.relationship(
         'FormFactor',
-        secondary=parent_child,
-        primaryjoin=id == parent_child.c.ChildId,
-        secondaryjoin=id == parent_child.c.ParentId,
-        backref=backref('made_to')
+        backref=db.backref('form_factor_link', lazy='dynamic'),
+        secondary=form_factor_link,
+        primaryjoin=(form_factor_link.c.form_factor_id == id),
+        secondaryjoin=(form_factor_link.c.made_from_id == id),
+        lazy='dynamic'
     )
 
+    def get_made_from(self):
+        return self.made_from.all()
+
+    def is_made_from(self, ff):
+        return self.made_from.filter(
+            form_factor_link.c.made_from_id == ff.id).count() > 0
+
     def add_made_from(self, ff):
-        if ff not in self.made_from:
+        if not self.is_made_from(ff):
             self.made_from.append(ff)
 
 
