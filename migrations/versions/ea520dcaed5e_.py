@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 9417257071ab
+Revision ID: ea520dcaed5e
 Revises: 
-Create Date: 2021-01-11 23:40:40.701195
+Create Date: 2021-01-14 16:20:36.017854
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9417257071ab'
+revision = 'ea520dcaed5e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -25,19 +25,6 @@ def upgrade():
     sa.Column('cutting_time', sa.Integer(), nullable=True),
     sa.Column('pouring_off_time', sa.Integer(), nullable=True),
     sa.Column('extra_time', sa.Integer(), nullable=True),
-    sa.Column('boiling_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['boiling_id'], ['boilings.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('boilings',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('percent', sa.Float(), nullable=True),
-    sa.Column('is_lactose', sa.Boolean(), nullable=True),
-    sa.Column('ferment', sa.String(), nullable=True),
-    sa.Column('boiling_technology_id', sa.Integer(), nullable=True),
-    sa.Column('line_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['boiling_technology_id'], ['boiling_technologies.id'], ),
-    sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('departments',
@@ -45,38 +32,10 @@ def upgrade():
     sa.Column('name', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('form_factor_link',
-    sa.Column('form_factor_id', sa.Integer(), nullable=False),
-    sa.Column('made_from_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['form_factor_id'], ['form_factors.id'], ),
-    sa.ForeignKeyConstraint(['made_from_id'], ['form_factors.id'], ),
-    sa.PrimaryKeyConstraint('form_factor_id', 'made_from_id')
-    )
-    op.create_table('form_factors',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('relative_weight', sa.Integer(), nullable=True),
-    sa.Column('group_id', sa.Integer(), nullable=True),
-    sa.Column('made_from_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['group_id'], ['groups.id'], ),
-    sa.ForeignKeyConstraint(['made_from_id'], ['form_factors.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('groups',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('short_name', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('lines',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
-    sa.Column('output_per_ton', sa.Integer(), nullable=True),
-    sa.Column('pouring_time', sa.Integer(), nullable=True),
-    sa.Column('serving_time', sa.Integer(), nullable=True),
-    sa.Column('melting_speed', sa.Integer(), nullable=True),
-    sa.Column('chedderization_time', sa.Integer(), nullable=True),
-    sa.Column('department_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('pack_types',
@@ -89,12 +48,58 @@ def upgrade():
     sa.Column('name', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('sku_boiling',
-    sa.Column('boiling_id', sa.Integer(), nullable=False),
-    sa.Column('sku_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['boiling_id'], ['boilings.id'], ),
-    sa.ForeignKeyConstraint(['sku_id'], ['skus.id'], ),
-    sa.PrimaryKeyConstraint('boiling_id', 'sku_id')
+    op.create_table('termizators',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('short_cleaning_time', sa.Integer(), nullable=True),
+    sa.Column('long_cleaning_time', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('form_factors',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('relative_weight', sa.Integer(), nullable=True),
+    sa.Column('group_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['group_id'], ['groups.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('lines',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('display_name', sa.String(), nullable=True),
+    sa.Column('output_per_ton', sa.Integer(), nullable=True),
+    sa.Column('pouring_time', sa.Integer(), nullable=True),
+    sa.Column('serving_time', sa.Integer(), nullable=True),
+    sa.Column('melting_speed', sa.Integer(), nullable=True),
+    sa.Column('chedderization_time', sa.Integer(), nullable=True),
+    sa.Column('department_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('ParentChild',
+    sa.Column('ParentChildId', sa.Integer(), nullable=False),
+    sa.Column('ParentId', sa.Integer(), nullable=True),
+    sa.Column('ChildId', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['ChildId'], ['form_factors.id'], ),
+    sa.ForeignKeyConstraint(['ParentId'], ['form_factors.id'], ),
+    sa.PrimaryKeyConstraint('ParentChildId')
+    )
+    op.create_table('boilings',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('percent', sa.Float(), nullable=True),
+    sa.Column('is_lactose', sa.Boolean(), nullable=True),
+    sa.Column('ferment', sa.String(), nullable=True),
+    sa.Column('boiling_technology_id', sa.Integer(), nullable=True),
+    sa.Column('line_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['boiling_technology_id'], ['boiling_technologies.id'], ),
+    sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('form_factor_link',
+    sa.Column('form_factor_id', sa.Integer(), nullable=False),
+    sa.Column('made_from_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['form_factor_id'], ['form_factors.id'], ),
+    sa.ForeignKeyConstraint(['made_from_id'], ['form_factors.id'], ),
+    sa.PrimaryKeyConstraint('form_factor_id', 'made_from_id')
     )
     op.create_table('skus',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -113,29 +118,29 @@ def upgrade():
     sa.ForeignKeyConstraint(['packer_id'], ['packers.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('termizators',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
-    sa.Column('short_cleaning_time', sa.Integer(), nullable=True),
-    sa.Column('long_cleaning_time', sa.Integer(), nullable=True),
-    sa.Column('pouring_time', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    op.create_table('sku_boiling',
+    sa.Column('boiling_id', sa.Integer(), nullable=False),
+    sa.Column('sku_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['boiling_id'], ['boilings.id'], ),
+    sa.ForeignKeyConstraint(['sku_id'], ['skus.id'], ),
+    sa.PrimaryKeyConstraint('boiling_id', 'sku_id')
     )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('termizators')
-    op.drop_table('skus')
     op.drop_table('sku_boiling')
+    op.drop_table('skus')
+    op.drop_table('form_factor_link')
+    op.drop_table('boilings')
+    op.drop_table('ParentChild')
+    op.drop_table('lines')
+    op.drop_table('form_factors')
+    op.drop_table('termizators')
     op.drop_table('packers')
     op.drop_table('pack_types')
-    op.drop_table('lines')
     op.drop_table('groups')
-    op.drop_table('form_factors')
-    op.drop_table('form_factor_link')
     op.drop_table('departments')
-    op.drop_table('boilings')
     op.drop_table('boiling_technologies')
     # ### end Alembic commands ###

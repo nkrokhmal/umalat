@@ -30,7 +30,6 @@ def set_global_db(environment=None):
 
 set_global_db()
 
-
 def query_exactly_one(cls, key, value):
     query = db.session.query(cls).filter(getattr(cls, key) == value)
     res = query.all()
@@ -43,61 +42,72 @@ def query_exactly_one(cls, key, value):
         return res[0]
 
 
-def cast_sku(obj):
-    if isinstance(obj, SKU):
+def cast_model(cls, obj, int_attribute='id', str_attribute='name'):
+    if isinstance(obj, cls):
         return obj
     elif is_int_like(obj):
-        return query_exactly_one(SKU, 'id', int(float(obj)))
+        return query_exactly_one(cls, int_attribute, int(float(obj)))
     elif isinstance(obj, str):
-        return query_exactly_one(SKU, 'name', obj)
+        return query_exactly_one(cls, str_attribute, obj)
     else:
-        raise Exception('Unknown sku type')
+        raise Exception(f'Unknown {cls} type')
+
+
+def cast_sku(obj):
+    return cast_model(SKU, obj)
+
+
+def cast_line(obj):
+    return cast_model(Line, obj)
 
 
 def cast_packer(obj):
-    if isinstance(obj, Packer):
-        return obj
-    elif is_int_like(obj):
-        return query_exactly_one(Packer, 'id', int(float(obj)))
-    elif isinstance(obj, str):
-        return query_exactly_one(Packer, 'name', obj)
-    elif isinstance(obj, SKU):
-        return cast_packer(obj.packer_id)
-    else:
-        raise Exception('Unknown packer type')
+    if isinstance(obj, SKU):
+        return obj.packer
+    return cast_model(Packer, obj)
+
+
+def cast_pack_type(obj):
+    return cast_model(PackType, obj)
+
+
+def cast_boiling_technology(obj):
+    return cast_model(BoilingTechnology, obj)
+
+
+def get_termizator():
+    return db.session.query(Termizator).first()
+
+
+def cast_group(obj):
+    return cast_model(Group, obj)
+
+
+def cast_form_factor(obj):
+    return cast_model(FormFactor, obj)
 
 
 def cast_boiling(obj):
-    if isinstance(obj, Boiling):
-        return obj
-    elif is_int_like(obj):
-        return query_exactly_one(Boiling, 'id', int(float(obj)))
-    elif isinstance(obj, str):
+    if isinstance(obj, str):
         try:
             # water, 2.7, Альче
             values = obj.split(',')
-            boiling_type, percent, ferment = values[:3]
+            line_name, percent, ferment = values[:3]
             percent = percent.replace(' ', '')
             ferment = re.sub(spaces_on_edge('beg'), '', ferment)
             ferment = re.sub(spaces_on_edge('end'), '', ferment)
             is_lactose = len(values) < 4
             query = db.session.query(Boiling).filter((Boiling.percent == percent) & (Boiling.is_lactose == is_lactose) & (Boiling.ferment == ferment))
             boilings = query.all()
-            boilings = [b for b in boilings if b.boiling_type == boiling_type]
-            # todo: uncom
-            # assert len(boilings) == 1
-            return boilings[0]
+            boilings = [b for b in boilings if b.line.name == line_name]
         except:
             raise Exception('Unknown boiling')
-    else:
-        raise Exception(f'Unknown boiling')
 
+        if len(boilings) == 0:
+            raise Exception(f'Boiling {obj} not found')
+        elif len(boilings) > 1:
+            raise Exception(f'Found multiple boilings {obj}')
 
-def cast_boiling_form_factor(obj):
-    if isinstance(obj, BoilingFormFactor):
-        return obj
-    elif is_int_like(obj):
-        return query_exactly_one(BoilingFormFactor, 'id', int(float(obj)))
-    else:
-        raise Exception(f'Unknown boiling form factor {type(obj)}')
+        return boilings[0]
 
+    return cast_model(Boiling, obj)

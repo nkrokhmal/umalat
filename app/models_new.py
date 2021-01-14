@@ -4,6 +4,10 @@ import numpy as np
 import pandas as pd
 
 from sqlalchemy.orm import backref
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.declarative import declarative_base
+
+# Base = declarative_base()
 
 
 sku_boiling = db.Table('sku_boiling',
@@ -52,6 +56,7 @@ class Line(db.Model):
     __tablename__ = 'lines'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
+    display_name = db.Column(db.String)
     output_per_ton = db.Column(db.Integer)
     pouring_time = db.Column(db.Integer)
     serving_time = db.Column(db.Integer)
@@ -59,8 +64,8 @@ class Line(db.Model):
     chedderization_time = db.Column(db.Integer)
 
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
-    skus = db.relationship('SKU', backref=backref('line', uselist=False), lazy='dynamic')
-    boilings = db.relationship('Boiling', backref=backref('line', uselist=False), lazy='dynamic')
+    skus = db.relationship('SKU', backref=backref('line', uselist=False))
+    boilings = db.relationship('Boiling', backref=backref('line', uselist=False))
 
     def serialize(self):
         return {
@@ -71,13 +76,14 @@ class Line(db.Model):
     @staticmethod
     def generate_lines():
         mozzarella_department = Department.query.filter_by(name='Моцарельный цех').first()
-        for params in [('Пицца чиз', 180, 850, 1020, 30), ('Моцарелла в воде', 240, 1000, 800, 30)]:
+        for params in [('salt', 'Пицца чиз', 180, 850, 1020, 30), ('water', 'Моцарелла в воде', 240, 1000, 800, 30)]:
             line = Line(
                 name=params[0],
-                chedderization_time=params[1],
-                output_per_ton=params[2],
-                melting_speed=params[3],
-                serving_time=params[4]
+                display_name=params[1],
+                chedderization_time=params[2],
+                output_per_ton=params[3],
+                melting_speed=params[4],
+                serving_time=params[5]
             )
             if mozzarella_department is not None:
                 line.department_id = mozzarella_department.id
@@ -145,7 +151,7 @@ class BoilingTechnology(db.Model):
     pouring_off_time = db.Column(db.Integer)
     extra_time = db.Column(db.Integer)
 
-    boilings = db.relationship('Boiling', backref=backref('boiling_technology', uselist=False), lazy='dynamic')
+    boilings = db.relationship('Boiling', backref=backref('boiling_technology', uselist=False))
 
 
 class Termizator(db.Model):
@@ -154,7 +160,6 @@ class Termizator(db.Model):
     name = db.Column(db.String)
     short_cleaning_time = db.Column(db.Integer)
     long_cleaning_time = db.Column(db.Integer)
-    pouring_time = db.Column(db.Integer)
 
 
 class Group(db.Model):
@@ -162,7 +167,7 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     short_name = db.Column(db.String)
-    form_factors = db.relationship('FormFactor', backref='group', lazy='dynamic')
+    form_factors = db.relationship('FormFactor', backref='group')
 
     @staticmethod
     def generate_group():
@@ -192,6 +197,14 @@ form_factor_link = db.Table('form_factor_link',
                             db.Column('form_factor_id', db.Integer, db.ForeignKey('form_factors.id'), primary_key=True),
                             db.Column('made_from_id', db.Integer, db.ForeignKey('form_factors.id'), primary_key=True))
 
+parent_child = db.Table(
+    'ParentChild',
+    # Base.metadata,
+    db.Column('ParentChildId', db.Integer, primary_key=True),
+    db.Column('ParentId', db.Integer, db.ForeignKey('form_factors.id')),
+    db.Column('ChildId', db.Integer, db.ForeignKey('form_factors.id'))
+)
+
 
 class FormFactor(db.Model):
     __tablename__ = 'form_factors'
@@ -199,38 +212,28 @@ class FormFactor(db.Model):
     relative_weight = db.Column(db.Integer)
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
 
-    made_from_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
+    skus = db.relationship('SKU', backref=backref('form_factor', uselist=False))
 
-    skus = db.relationship('SKU', backref=backref('form_factor', uselist=False), lazy='dynamic')
-
-    made_from = db.relationship(
+    made_from = relationship(
         'FormFactor',
-        backref=db.backref('form_factor_link', lazy='dynamic'),
-        secondary=form_factor_link,
-        primaryjoin=(form_factor_link.c.form_factor_id == id),
-        secondaryjoin=(form_factor_link.c.made_from_id == id),
-        lazy='dynamic'
+        secondary=parent_child,
+        primaryjoin=id == parent_child.c.ChildId,
+        secondaryjoin=id == parent_child.c.ParentId,
+        backref=backref('made_to')
     )
 
-    def get_made_from(self):
-        return self.made_from.all()
-
-    def is_made_from(self, ff):
-        return self.made_from.filter(
-            form_factor_link.c.made_from_id == ff.id).count() > 0
-
     def add_made_from(self, ff):
-        if not self.is_made_from(ff):
+        if ff not in self.made_from:
             self.made_from.append(ff)
 
 
 def fill_db():
     fill_simple_data()
     fill_boiling_technologies()
-    fill_boiling_technologies()
     fill_boilings()
     fill_form_factors()
     fill_sku()
+    fill_termizator()
 
 
 def fill_simple_data():
@@ -275,9 +278,9 @@ def fill_boilings():
     b_data = b_data.to_dict('records')
     for b in b_data:
         if b['Линия'] == 'Соль':
-            line_id = [x for x in lines if x.name == 'Пицца чиз'][0].id
+            line_id = [x for x in lines if x.name == 'salt'][0].id
         else:
-            line_id = [x for x in lines if x.name == 'Моцарелла в воде'][0].id
+            line_id = [x for x in lines if x.name == 'water'][0].id
         bt_id = [x for x in bts if (x.pouring_time == b['Время налива']) &
                  (x.soldification_time == b['Время отвердевания']) &
                  (x.cutting_time == b['Время нарезки']) &
@@ -349,22 +352,24 @@ def fill_sku():
         )
         add_sku.packer_id = [x.id for x in packer if x.name == sku['Упаковщик']][0]
         if sku['Линия'] == 'Соль':
-            line_id = [x for x in lines if x.name == 'Пицца чиз'][0].id
+            line_id = [x for x in lines if x.name == 'salt'][0].id
         else:
-            line_id = [x for x in lines if x.name == 'Моцарелла в воде'][0].id
+            line_id = [x for x in lines if x.name == 'water'][0].id
         boiling = [x for x in boilings if
                    (x.percent == sku['Процент']) &
                    (x.is_lactose == is_lactose) &
                    (x.ferment == sku['Тип закваски']) &
                    (x.line_id == line_id)][0]
-        add_sku.made_from_boilings.append(boiling)
+        add_sku.made_from_boiling = boiling
         add_sku.line_id = line_id
         db.session.add(add_sku)
     db.session.commit()
 
 
-
-
-
-
-
+def fill_termizator():
+    termizator = Termizator()
+    termizator.name = 'термизатор'
+    termizator.short_cleaning_time = 40
+    termizator.long_cleaning_time = 80
+    db.session.add(termizator)
+    db.session.commit()
