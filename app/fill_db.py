@@ -120,6 +120,7 @@ def fill_form_factors():
         form_factor.add_made_from(mass_ff)
     db.session.commit()
 
+
 def _cast_non_nan(obj):
     if obj is None:
         return
@@ -127,6 +128,7 @@ def _cast_non_nan(obj):
         return
     else:
         return obj
+
 
 def fill_sku():
     df = read_params()

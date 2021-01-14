@@ -77,14 +77,15 @@ class Line(db.Model):
     @staticmethod
     def generate_lines():
         mozzarella_department = Department.query.filter_by(name='Моцарельный цех').first()
-        for params in [('salt', 'Пицца чиз', 180, 850, 1020, 30), ('water', 'Моцарелла в воде', 240, 1000, 800, 30)]:
+        for params in [('salt', 'Пицца чиз', 180, 850, 1020, 30, 30), ('water', 'Моцарелла в воде', 240, 1000, 800, 30, 30)]:
             line = Line(
                 name=params[0],
                 display_name=params[1],
                 chedderization_time=params[2],
                 output_per_ton=params[3],
                 melting_speed=params[4],
-                serving_time=params[5]
+                serving_time=params[5],
+                pouring_time=params[6],
             )
             if mozzarella_department is not None:
                 line.department_id = mozzarella_department.id

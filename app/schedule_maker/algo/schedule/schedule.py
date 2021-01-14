@@ -13,7 +13,7 @@ def validate(b1, b2):
     if b1['pouring'].props['pouring_line'] == b2['pouring'].props['pouring_line']:
         validate_disjoint_by_axis(b1['pouring'], b2['pouring'])
 
-    if b1.props['boiling_model'].boiling_type == b2.props['boiling_model'].boiling_type:
+    if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
         validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
 
         for p1, p2 in product(b1.iter({'class': 'packing'}), b2.iter({'class': 'packing'})):
@@ -54,27 +54,27 @@ def make_schedule(boilings, start_times=None):
 
     # generate boilings
     lines_df['boilings_left'] = [[], []]
-    for boiling_type in ['water', 'salt']:
-        lines_df.at[boiling_type, 'boilings_left'] = [boiling for boiling in boilings if boiling.props['boiling_model'].boiling_type == boiling_type]
+    for line_name in ['water', 'salt']:
+        lines_df.at[line_name, 'boilings_left'] = [boiling for boiling in boilings if boiling.props['boiling_model'].line.name == line_name]
 
     lines_df['latest_boiling'] = None
 
     if not lines_df['start_time'].any():
         raise Exception('Укажите время начала варок')
 
-    def add_block(boiling_type):
-        boiling = lines_df.at[boiling_type, 'boilings_left'].pop(0)
-        if not lines_df.at[boiling_type, 'latest_boiling']:
-            if lines_df.at[boiling_type, 'start_time']:
-                start_from = cast_t(lines_df.at[boiling_type, 'start_time']) - boiling['melting_and_packing'].x[0]
+    def add_block(line_name):
+        boiling = lines_df.at[line_name, 'boilings_left'].pop(0)
+        if not lines_df.at[line_name, 'latest_boiling']:
+            if lines_df.at[line_name, 'start_time']:
+                start_from = cast_t(lines_df.at[line_name, 'start_time']) - boiling['melting_and_packing'].x[0]
             else:
                 latest_boiling = lines_df[~lines_df['latest_boiling'].isnull()].iloc[0]['latest_boiling']
                 start_from = latest_boiling.x[0]
         else:
-            start_from = lines_df.at[boiling_type, 'latest_boiling'].x[0]
+            start_from = lines_df.at[line_name, 'latest_boiling'].x[0]
 
-        push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[boiling_type, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
-        lines_df.at[boiling_type, 'latest_boiling'] = boiling
+        push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
+        lines_df.at[line_name, 'latest_boiling'] = boiling
         return boiling
 
     while True:
@@ -83,7 +83,7 @@ def make_schedule(boilings, start_times=None):
             # finished
             break
         elif are_boilings_left.sum() == 1:
-            boiling_type = are_boilings_left[are_boilings_left].index[0]
+            line_name = are_boilings_left[are_boilings_left].index[0]
 
             # start working on 3 line for salt
             lines_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [1, 2, 3]]
@@ -91,16 +91,16 @@ def make_schedule(boilings, start_times=None):
         elif are_boilings_left.sum() == 2:
             df = lines_df[~lines_df['latest_boiling'].isnull()]
             if len(df) == 0:
-                boiling_type = 'water'
+                line_name = 'water'
             else:
-                boiling_type = max(df['latest_boiling'], key=lambda b: b.x[0]).props['boiling_model'].boiling_type
+                line_name = max(df['latest_boiling'], key=lambda b: b.x[0]).props['boiling_model'].line.name
 
             # reverse
-            boiling_type = 'water' if boiling_type == 'salt' else 'salt'
+            line_name = 'water' if line_name == 'salt' else 'salt'
         else:
             raise Exception('Should not happen')
 
-        add_block(boiling_type)
+        add_block(line_name)
 
     # add cleanings if necessary
     boilings = list(schedule.iter({'class': 'boiling'}))

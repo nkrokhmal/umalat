@@ -10,7 +10,6 @@ def make_boilings_basic(boiling_plan_df):
     boilings = []
 
     for boiling_id, boiling_plan in boiling_plan_df.groupby('batch_id'):
-
         boiling_model = boiling_plan.iloc[0]['boiling']
         melting_and_packing = make_melting_and_packing_basic(boiling_plan)
         boiling = make_boiling(boiling_model, boiling_id, melting_and_packing)
@@ -36,8 +35,10 @@ def make_boilings_by_groups(boiling_plan_df):
 
     res = []
     for boiling_group, grp in boiling_plan_df.groupby('boiling_group'):
-        if grp.iloc[0]['boiling'].boiling_type == 'water':
-            res += make_flow_water_boilings(grp, start_from_id=len(res) + 1)
+        if grp.iloc[0]['boiling'].line.name == 'water':
+            # res += make_flow_water_boilings(grp, start_from_id=len(res) + 1)
+            res += make_boilings_basic(grp)
         else:
-            res += make_boilings_parallel_dynamic(grp)
+            res += make_boilings_basic(grp)
+            # res += make_boilings_parallel_dynamic(grp)
     return res
