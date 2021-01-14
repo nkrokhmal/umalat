@@ -8,8 +8,9 @@ def make_melting_and_packing_basic(boiling_plan):
     boiling_plan = boiling_plan.copy()
     boiling_model = boiling_plan.iloc[0]['boiling']
 
-    boiling_plan['ff'] = boiling_plan['sku'].apply(lambda sku: sku.boiling_form_factors[0])
-    mark_consecutive_groups(boiling_plan, 'bff', 'bff_group')
+    # todo: take from boiling_plan!
+    boiling_plan['ff'] = boiling_plan['sku'].apply(lambda sku: sku.form_factor)
+    mark_consecutive_groups(boiling_plan, 'ff', 'ff_group')
 
     maker, make = init_block_maker('melting_and_packing')
 
@@ -18,18 +19,14 @@ def make_melting_and_packing_basic(boiling_plan):
         meltings = make('meltings', x=(serving.size[0], 0), push_func=add_push).block
         coolings = make('coolings', x=(serving.size[0], 0), push_func=add_push).block
 
-        for i, (group, grp) in enumerate(boiling_plan.groupby('bff_group')):
-            if i >= 1 and boiling_model.boiling_type == 'water':
+        for i, (group, grp) in enumerate(boiling_plan.groupby('ff_group')):
+            if i >= 1 and boiling_model.line.name == 'water':
                 # non-first group - reconfigure time
                 push(meltings, maker.create_block('melting_configuration', size=(1, 0)))
 
-            # todo: del
-            if boiling_model.boiling_type == 'salt':
-                boiling_model.meltings.speed = 850 / 50 * 60
-
             melting_process = maker.create_block('melting_process',
-                                                 size=(int(custom_round(grp['kg'].sum() / boiling_model.meltings.speed * 60, 5, 'ceil')) // 5, 0),
-                                                 bff=grp.iloc[0]['bff'])
+                                                 size=(int(custom_round(grp['kg'].sum() / boiling_model.line.melting_speed * 60, 5, 'ceil')) // 5, 0),
+                                                 ff=grp.iloc[0]['ff'])
 
             push(meltings, melting_process)
 
@@ -41,7 +38,7 @@ def make_melting_and_packing_basic(boiling_plan):
               packing_team_id=1, push_func=add_push):
         for i, (_, row) in enumerate(boiling_plan.iterrows()):
             sku, kg = row['sku'], row['kg']
-            packing_speed = min(sku.packing_speed, boiling_model.meltings.speed)
+            packing_speed = min(sku.packing_speed, boiling_model.line.melting_speed)
             make('packing_process',
                  size=[int(custom_round(kg / packing_speed * 60, 5, rounding='ceil')) // 5, 0],
                  sku=sku)

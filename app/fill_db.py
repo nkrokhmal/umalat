@@ -7,6 +7,7 @@ def read_params(fn='app/data/params.xlsx'):
 def fill_db():
     fill_simple_data()
     fill_boiling_technologies()
+    fill_cooling_technologies()
     fill_boilings()
     fill_form_factors()
     fill_sku()
@@ -35,6 +36,22 @@ def fill_boiling_technologies():
             cutting_time=bt['Время нарезки'],
             pouring_off_time=bt['Время слива'],
             extra_time=bt['Дополнительное время']
+        )
+
+        db.session.add(technology)
+        db.session.commit()
+
+
+def fill_cooling_technologies():
+    df = read_params()
+    data = df[['Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']]
+    data = data.drop_duplicates()
+    data = data.to_dict('records')
+    for value in data:
+        technology = CoolingTechnology(
+            first_cooling_time=value['Охлаждение 1(для воды)'],
+            second_cooling_time=value['Охлаждение 2(для воды)'],
+            salting_time=value['Время посолки']
         )
 
         db.session.add(technology)
@@ -103,6 +120,13 @@ def fill_form_factors():
         form_factor.add_made_from(mass_ff)
     db.session.commit()
 
+def _cast_non_nan(obj):
+    if obj is None:
+        return
+    elif np.isnan(obj):
+        return
+    else:
+        return obj
 
 def fill_sku():
     df = read_params()
@@ -110,8 +134,11 @@ def fill_sku():
     packer = db.session.query(Packer).all()
     boilings = db.session.query(Boiling).all()
     form_factors = db.session.query(FormFactor).all()
+    cooling_tecnhologies = db.session.query(CoolingTechnology).all()
+
     columns = ['Название SKU', 'Процент', 'Наличие лактозы', 'Тип закваски', 'Имя бренда', 'Вес нетто', 'Срок хранения',
-               'Является ли SKU теркой', 'Упаковщик', 'Скорость упаковки', 'Линия', 'Вес форм фактора', 'Название форм фактора']
+               'Является ли SKU теркой', 'Упаковщик', 'Скорость упаковки', 'Линия', 'Вес форм фактора', 'Название форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
+
     sku_data = df[columns]
     sku_data = sku_data.drop_duplicates()
     sku_data = sku_data.to_dict('records')
@@ -130,13 +157,17 @@ def fill_sku():
         line_name = 'salt' if sku['Линия'] == 'Соль' else 'water'
         add_sku.line = [x for x in lines if x.name == line_name][0]
 
-        add_sku.made_from_boiling = [x for x in boilings if
+        add_sku.made_from_boilings = [x for x in boilings if
                    (x.percent == sku['Процент']) &
                    (x.is_lactose == is_lactose) &
                    (x.ferment == sku['Тип закваски']) &
-                   (x.line_id == add_sku.line.id)][0]
+                   (x.line_id == add_sku.line.id)]
 
         add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора'] and x.group.name == sku['Название форм фактора']][0]
+
+        add_sku.cooling_technology = [x for x in cooling_tecnhologies if all([x.first_cooling_time == _cast_non_nan(sku['Охлаждение 1(для воды)']),
+                                                                              x.second_cooling_time == _cast_non_nan(sku['Охлаждение 2(для воды)']),
+                                                                              x.salting_time == _cast_non_nan(sku['Время посолки'])])][0]
 
         db.session.add(add_sku)
     db.session.commit()

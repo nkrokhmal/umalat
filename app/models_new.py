@@ -50,6 +50,7 @@ class SKU(db.Model):
     packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
     form_factor_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
+    cooling_technology_id = db.Column(db.Integer, db.ForeignKey('cooling_technologies.id'), nullable=True)
 
 
 class Line(db.Model):
@@ -137,8 +138,6 @@ class Boiling(db.Model):
     skus = db.relationship('SKU', secondary=sku_boiling, backref='made_from_boilings')
 
     boiling_technology_id = db.Column(db.Integer, db.ForeignKey('boiling_technologies.id'), nullable=True)
-    boiling_technologies = db.relationship('BoilingTechnology', backref='boiling', foreign_keys=boiling_technology_id)
-
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
 
 
@@ -152,6 +151,16 @@ class BoilingTechnology(db.Model):
     extra_time = db.Column(db.Integer)
 
     boilings = db.relationship('Boiling', backref=backref('boiling_technology', uselist=False))
+
+
+class CoolingTechnology(db.Model):
+    __tablename__ = 'cooling_technologies'
+    id = db.Column(db.Integer, primary_key=True)
+    first_cooling_time = db.Column(db.Integer)
+    second_cooling_time = db.Column(db.Integer)
+    salting_time = db.Column(db.Integer)
+
+    skus = db.relationship('SKU', backref=backref('cooling_technology', uselist=False))
 
 
 class Termizator(db.Model):
