@@ -33,7 +33,7 @@ class boilings_dataframes_to_boilings:
 
         for i in range(len(df)):
             cur_row = df.iloc[i]
-            cooling_process = make_cooling_process(boiling_model, size=(cur_row['end'] - cur_row['beg']) // 5, x=(cur_row['beg'] // 5 - start_from // 5, 0))
+            cooling_process = make_cooling_process(boiling_model=boiling_model, bff=cur_row['item'], size=(cur_row['end'] - cur_row['beg']) // 5, x=(cur_row['beg'] // 5 - start_from // 5, 0))
             make(cooling_process, push_func=add_push, bff=cur_row['item'])
         return maker.root
 

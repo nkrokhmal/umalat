@@ -266,6 +266,10 @@ class Boiling(db.Model):
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
     cheese_type_id = db.Column(db.Integer, db.ForeignKey('cheese_types.id'), nullable=True)
 
+    # todo: del
+    def to_json(self):
+        return {key: getattr(self.meltings[0], key) for key in ['first_cooling_time', 'second_cooling_time', 'salting_time']}
+
     @property
     def boiling_type(self):
         return 'salt' if self.lines.name == 'Пицца чиз' else 'water'

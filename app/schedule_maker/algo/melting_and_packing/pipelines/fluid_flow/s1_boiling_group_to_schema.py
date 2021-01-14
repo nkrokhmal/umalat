@@ -7,6 +7,8 @@ def cast_bff(sku):
         return cast_boiling_form_factor(5)
     elif sku == cast_sku(37):
         return cast_boiling_form_factor(8)
+    elif sku == cast_sku(12):
+        return cast_boiling_form_factor(10)
     else:
         return sku.boiling_form_factors[0]
 
