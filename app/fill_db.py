@@ -1,9 +1,11 @@
 from .models_new import *
 from .enum import LineName
 
+
 def read_params(fn='app/data/params.xlsx'):
     df = pd.read_excel(fn, index_col=0)
     return df
+
 
 def fill_db():
     fill_simple_data()
