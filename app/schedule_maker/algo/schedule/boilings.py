@@ -12,11 +12,6 @@ def make_boilings_basic(boiling_plan_df):
     for boiling_id, boiling_plan in boiling_plan_df.groupby('batch_id'):
 
         boiling_model = boiling_plan.iloc[0]['boiling']
-
-        # todo: del
-        if boiling_model.boiling_type == 'salt':
-            boiling_model.meltings.speed = 850 / 50 * 60
-
         melting_and_packing = make_melting_and_packing_basic(boiling_plan)
         boiling = make_boiling(boiling_model, boiling_id, melting_and_packing)
         boilings.append(boiling)
