@@ -3,6 +3,9 @@ import json
 import numpy as np
 import pandas as pd
 
+from sqlalchemy.orm import backref
+
+
 sku_boiling = db.Table('sku_boiling',
                        db.Column('boiling_id', db.Integer, db.ForeignKey('boilings.id'), primary_key=True),
                        db.Column('sku_id', db.Integer, db.ForeignKey('skus.id'), primary_key=True))
@@ -12,7 +15,7 @@ class Department(db.Model):
     __tablename__ = 'departments'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    lines = db.relationship('Line', backref='departments')
+    lines = db.relationship('Line', backref=backref('department', uselist=False))
 
     def serialize(self):
         return {
@@ -38,6 +41,7 @@ class SKU(db.Model):
     weight_netto = db.Column(db.Float)
     shelf_life = db.Column(db.Integer)
     packing_speed = db.Column(db.Integer, nullable=True)
+
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
     packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
@@ -53,8 +57,10 @@ class Line(db.Model):
     serving_time = db.Column(db.Integer)
     melting_speed = db.Column(db.Integer)
     chedderization_time = db.Column(db.Integer)
+
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
-    skus = db.relationship('SKU', backref='lines', lazy='dynamic')
+    skus = db.relationship('SKU', backref=backref('line', uselist=False), lazy='dynamic')
+    boilings = db.relationship('Boiling', backref=backref('line', uselist=False), lazy='dynamic')
 
     def serialize(self):
         return {
@@ -83,7 +89,7 @@ class Packer(db.Model):
     __tablename__ = 'packers'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    packer_skus = db.relationship('SKU', backref='packer')
+    packer_skus = db.relationship('SKU', backref=backref('packer', uselist=False))
 
     @staticmethod
     def generate_packer():
@@ -104,7 +110,7 @@ class PackType(db.Model):
     __tablename__ = 'pack_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    skus = db.relationship('SKU', backref='pack_types')
+    skus = db.relationship('SKU', backref=backref('pack_type', uselist=False))
 
     @staticmethod
     def generate_types():
@@ -138,7 +144,8 @@ class BoilingTechnology(db.Model):
     cutting_time = db.Column(db.Integer)
     pouring_off_time = db.Column(db.Integer)
     extra_time = db.Column(db.Integer)
-    boiling_id = db.Column(db.Integer, db.ForeignKey('boilings.id'))
+
+    boilings = db.relationship('Boiling', backref=backref('boiling_technology', uselist=False), lazy='dynamic')
 
 
 class Termizator(db.Model):
@@ -191,8 +198,11 @@ class FormFactor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     relative_weight = db.Column(db.Integer)
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
+
     made_from_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
-    skus = db.relationship('SKU', backref='form_factor', lazy='dynamic')
+
+    skus = db.relationship('SKU', backref=backref('form_factor', uselist=False), lazy='dynamic')
+
     made_from = db.relationship(
         'FormFactor',
         backref=db.backref('form_factor_link', lazy='dynamic'),
