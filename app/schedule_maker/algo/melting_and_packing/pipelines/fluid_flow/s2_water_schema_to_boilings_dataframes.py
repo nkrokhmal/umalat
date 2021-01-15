@@ -79,14 +79,30 @@ class schema_to_boilings_dataframes:
             #                     make(label, x=[beg, 0], size=(end - beg, 1))
             #         print(maker.root.tabular())
 
-            boiling_dataframes['meltings'] = pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end'])
-            boiling_dataframes['coolings'] = pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end'])
+            df = pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end'])
+            df['name'] = 'melting_process'
+            boiling_dataframes['meltings'] = df
 
-            boiling_dataframes['packings'] = {packing_team_id: pd.DataFrame(queue.active_periods('out'), columns=['item', 'beg', 'end']) for packing_team_id, queue in packing_queues.items()}
+            df = pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end'])
+            df['name'] = 'cooling_process'
+            boiling_dataframes['coolings'] = df
 
+            boiling_dataframes['packings'] = {}
+            for packing_team_id, queue in packing_queues.items():
+                df1 = pd.DataFrame(queue.active_periods('out'), columns=['item', 'beg', 'end'])
+                df1['name'] = 'packing_process'
+
+                df2 = pd.DataFrame(queue.breaks, columns=['beg', 'end'])
+                df2['name'] = 'packing_configuration'
+                df2['item'] = None
+                df = pd.concat([df1, df2]).sort_values(by='beg').reset_index(drop=True)
+
+                if df.iloc[-1]['name'] == 'packing_configuration':
+                    df = df.iloc[:-1]
+
+                boiling_dataframes['packings'][packing_team_id] = df
             boiling_dataframes['meltings'] = self._post_process_dataframe(boiling_dataframes['meltings'], round=round)
             boiling_dataframes['coolings'] = self._post_process_dataframe(boiling_dataframes['coolings'], fix_small_intervals=False, round=round)
-
             boiling_dataframes['packings'] = {packing_team_id: self._post_process_dataframe(df, round=round) for packing_team_id, df in boiling_dataframes['packings'].items()}
 
             res.append(boiling_dataframes)

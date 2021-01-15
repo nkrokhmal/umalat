@@ -5,37 +5,26 @@ from app.schedule_maker.calculation import *
 
 
 class boilings_dataframes_to_boilings:
-    def _make_line(self, df, line_name, process_name, filler_name, item_name, make_fillers=True):
+    def _make_line(self, df, line_name, item_name):
         if len(df) == 0:
             raise Exception('Should not happen')
         start_from = df.iloc[0]['beg']
 
         maker, make = init_block_maker(line_name, x=(start_from // 5, 0))
 
-        for i in range(len(df)):
-            cur_row = df.iloc[i]
-            next_row = None if i == len(df) - 1 else df.iloc[i + 1]  # todo: use simple_bounded_iterator?
-
-            # todo: refactor item_name, make general key item in process?
-            make(process_name, size=((cur_row['end'] - cur_row['beg']) // 5, 0), x=(cur_row['beg'] // 5 - start_from // 5, 0), push_func=add_push, **{item_name: cur_row['item']})
-
-            if make_fillers and next_row is not None:
-                beg = cur_row['end']
-                end = next_row['beg']
-                if abs(end - beg) > ERROR:
-                    make(filler_name, size=((end - beg) // 5, 0), x=(beg // 5 - start_from // 5, 0), push_func=add_push)
+        for i, row in df.iterrows():
+            make(row['name'], size=((row['end'] - row['beg']) // 5, 0), x=(row['beg'] // 5 - start_from // 5, 0), push_func=add_push, **{item_name: row['item']})
         return maker.root
 
     def _make_cooling_line(self, df, boiling_model):
-        if len(df) == 0:
-            raise Exception('Should not happen')
+        assert len(df) > 0, 'Should not happen'
+
         start_from = df.iloc[0]['beg']
         maker, make = init_block_maker('coolings', x=(start_from // 5, 0))
 
-        for i in range(len(df)):
-            cur_row = df.iloc[i]
-            cooling_process = make_cooling_process(boiling_model=boiling_model, cooling_technology=cur_row['item'].default_cooling_technology, bff=cur_row['item'], size=(cur_row['end'] - cur_row['beg']) // 5, x=(cur_row['beg'] // 5 - start_from // 5, 0))
-            make(cooling_process, push_func=add_push, bff=cur_row['item'])
+        for i, row in df.iterrows():
+            cooling_process = make_cooling_process(boiling_model=boiling_model, cooling_technology=row['item'].default_cooling_technology, bff=row['item'], size=(row['end'] - row['beg']) // 5, x=(row['beg'] // 5 - start_from // 5, 0))
+            make(cooling_process, push_func=add_push, bff=row['item'])
         return maker.root
 
     def _make_melting_and_packing(self, boiling_dataframes, boiling_model):
@@ -44,7 +33,7 @@ class boilings_dataframes_to_boilings:
         with make('melting'):
             serving = make('serving', size=(boiling_model.line.serving_time // 5, 0), push_func=add_push).block
 
-            line = self._make_line(boiling_dataframes['meltings'], 'meltings', 'melting_process', 'melting_configuration', 'bff')
+            line = self._make_line(boiling_dataframes['meltings'], 'meltings', 'bff')
             line.props.update({'x': (serving.size[0], 0)})
             push(maker.root['melting'], line, push_func=add_push)
 
@@ -53,7 +42,7 @@ class boilings_dataframes_to_boilings:
             push(maker.root['melting'], line, push_func=add_push)
 
         for packing_team_id, df in boiling_dataframes['packings'].items():
-            line = self._make_line(df, 'packing', 'packing_process', 'packing_configuration', 'sku')
+            line = self._make_line(df, 'packing',  'sku')
             line.props.update({'x': (serving.size[0] + line.x[0], 0), 'packing_team_id': int(packing_team_id)})
             push(maker.root, line, push_func=add_push)
         return maker.root
