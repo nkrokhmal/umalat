@@ -45,8 +45,8 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                 continue
             packing2 = packings[0]
 
-            sku1 = listify(packing1['packing_process'])[-1].props['sku'] # last sku
-            sku2 = listify(packing2['packing_process'])[0].props['sku'] # first sku
+            sku1 = listify(packing1['packing_process'])[-1].props['sku']  # last sku
+            sku2 = listify(packing2['packing_process'])[0].props['sku']  # first sku
 
             conf_time_size = get_configuration_time(boiling_model, sku1, sku2)
             if conf_time_size:

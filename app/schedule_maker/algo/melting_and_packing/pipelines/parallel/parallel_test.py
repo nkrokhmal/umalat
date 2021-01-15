@@ -9,19 +9,20 @@ from app.schedule_maker.dataframes import read_boiling_plan
 import warnings
 warnings.filterwarnings('ignore')
 
+
 def test1():
     boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
     mark_consecutive_groups(boiling_plan_df, 'boiling', 'boiling_group')
 
     for _, grp in boiling_plan_df.groupby('boiling_group'):
         grp['packing_speed'] = grp['sku'].apply(lambda sku: sku.packing_speed)
-        grp['ff'] = grp['sku'].apply(cast_bff)
         display(grp)
         boilings = make_boilings_parallel_dynamic(grp)
         for boiling in boilings:
             mp = boiling['melting_and_packing']
             mp.props.update({'x': (0, 0)})
             display(mp)
+
 
 def test2():
     boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
@@ -31,7 +32,6 @@ def test2():
     grp = boiling_plan_df[boiling_plan_df['boiling_group'] == 3]
 
     grp['packing_speed'] = grp['sku'].apply(lambda sku: sku.packing_speed)
-    grp['bff'] = grp['sku'].apply(cast_bff)
     display(grp)
     boilings = make_boilings_parallel_dynamic(grp)
     for boiling in boilings:
@@ -44,9 +44,7 @@ def test2():
 def test3():
     boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
 
-    boiling_plan_df['bff'] = boiling_plan_df['sku'].apply(cast_bff)
-
-    boiling_df = boiling_plan_df[boiling_plan_df['bff'] == cast_boiling_form_factor(14)]
+    boiling_df = boiling_plan_df[boiling_plan_df['bff'] == cast_form_factor(14)]
     boiling_df['sku_name'] = boiling_df['sku'].apply(lambda sku: sku.name)
 
     values = []
@@ -68,5 +66,5 @@ def test3():
 
 if __name__ == '__main__':
     test1()
-    # test2()
-    # test3()
+    test2()
+    test3()

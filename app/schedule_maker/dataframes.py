@@ -42,10 +42,10 @@ def read_boiling_plan(wb_obj):
     df['boiling'] = df['boiling_params'].apply(cast_boiling)
 
     # set boiling form factors
-    df['bff'] = df['sku'].apply(lambda sku: sku.form_factor)
+    df['ff'] = df['sku'].apply(lambda sku: sku.form_factor)
 
     # remove Терка from form_factors
-    df['bff'] = df['bff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
+    df['bff'] = df['ff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
 
     # fill Терка empty form factor values
     df['bff'] = df['bff'].fillna(method='ffill')

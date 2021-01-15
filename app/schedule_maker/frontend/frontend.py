@@ -18,7 +18,10 @@ def calc_form_factor_label(form_factors):
         if label != cur_label:
             s += label + ' '
             cur_label = label
-        s += ff.name
+
+        if ff.name != 'Терка':
+            # in case of ff.name == 'Терка', ff.group.name == 'Терка' - hence don't repeat
+            s += ff.name
 
         values.append(s)
     return '/'.join(values)
@@ -199,7 +202,7 @@ def make_packings(schedule, line_name):
                 for packing in boiling.iter({'class': 'packing', 'packing_team_id': packing_team_id}):
                     boiling_skus = [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
 
-                    form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})])
+                    form_factor_label = calc_form_factor_label([sku.form_factor for sku in boiling_skus])
 
                     brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in boiling_skus]))
                     with make('packing_block', x=(packing.x[0], 0), boiling_id=boiling.props['boiling_id'],

@@ -99,9 +99,10 @@ def make_mpp(boiling_df, left_boiling_volume):
     # get packings max size
     packings_max_size = max([packing.size[0] for packing in listify(maker.root['packing'])])
 
-    make('melting_process', size=(packings_max_size, 0), bff=boiling_df.iloc[0]['bff'])
+    bff = boiling_df.iloc[0]['bff']
+    make('melting_process', size=(packings_max_size, 0), bff=bff)
 
-    make(make_cooling_process(boiling_model, maker.root['melting_process'].size[0]))
+    make(make_cooling_process(boiling_model, bff.default_cooling_technology, maker.root['melting_process'].size[0]))
 
     for packing in maker.root['packing']:
         packing.props.update({'x': [maker.root['cooling_process']['start'].y[0], 0]})
@@ -110,22 +111,11 @@ def make_mpp(boiling_df, left_boiling_volume):
     return maker.root
 
 
-
-
 def make_boilings_parallel_dynamic(boiling_group_df):
     boilings = []
 
     boiling_group_df = boiling_group_df.copy()
     boiling_group_df['packing_speed'] = boiling_group_df['sku'].apply(lambda sku: sku.packing_speed)
-
-    # todo: hardcode
-    def cast_bff(sku):
-        if sku == cast_sku(4):
-            return cast_boiling_form_factor(5)
-        elif sku == cast_sku(37):
-            return cast_boiling_form_factor(8)
-        else:
-            return sku.boiling_form_factors[0]
 
     boiling_volumes = [grp['kg'].sum() for i, grp in boiling_group_df.groupby('batch_id')]
 
@@ -140,7 +130,6 @@ def make_boilings_parallel_dynamic(boiling_group_df):
     boiling_group_df.pop('sku_name')
     boiling_group_df = boiling_group_df.sort_values(by='batch_id')
 
-    boiling_group_df['bff'] = boiling_group_df['sku'].apply(cast_bff)
     boiling_group_df['left'] = boiling_group_df['kg']
 
     boiling_model = boiling_group_df.iloc[0]['boiling']
