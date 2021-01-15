@@ -8,20 +8,11 @@ def make_melting_and_packing_basic(boiling_plan):
     boiling_plan = boiling_plan.copy()
     boiling_model = boiling_plan.iloc[0]['boiling']
 
-    boiling_plan['ff'] = boiling_plan['sku'].apply(lambda sku: sku.form_factor)
-
-    # remove Терка from form_factors
-    boiling_plan['ff'] = boiling_plan['ff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
-
-    # fill Терка empty form factor values
-    boiling_plan['ff'] = boiling_plan['ff'].fillna(method='ffill')
-    boiling_plan['ff'] = boiling_plan['ff'].fillna(method='bfill')
-
     # todo: test
-    assert boiling_plan['ff'].any(), 'At least one sku should be non-Терка for now' # todo: make properly
+    assert boiling_plan['bff'].any(), 'At least one sku should be non-Терка for now' # todo: make properly
 
-    boiling_plan['ct'] = boiling_plan['ff'].apply(lambda ff: ff.default_cooling_technology)
-    boiling_plan['group_key'] = boiling_plan['ff'].astype(str) + boiling_plan['ct'].astype(str)
+    boiling_plan['ct'] = boiling_plan['bff'].apply(lambda ff: ff.default_cooling_technology)
+    boiling_plan['group_key'] = boiling_plan['bff'].astype(str) + boiling_plan['ct'].astype(str)
     mark_consecutive_groups(boiling_plan, 'group_key', 'melting_group')
 
     maker, make = init_block_maker('melting_and_packing')
@@ -39,11 +30,11 @@ def make_melting_and_packing_basic(boiling_plan):
                 push(meltings, maker.create_block('melting_configuration', size=(1, 0)))
                 # todo: remove reconfiguration when neighbour form_factors are the same
 
-            ff, ct = grp.iloc[0]['ff'], grp.iloc[0]['ct']
+            bff, ct = grp.iloc[0]['bff'], grp.iloc[0]['ct']
 
             melting_process = maker.create_block('melting_process',
                                                  size=(int(custom_round(grp['kg'].sum() / boiling_model.line.melting_speed * 60, 5, 'ceil')) // 5, 0),
-                                                 ff=ff)
+                                                 bff=bff)
 
             push(meltings, melting_process)
             cooling_process = make_cooling_process(boiling_model, ct, melting_process.size[0], x=melting_process.props['x_rel'])

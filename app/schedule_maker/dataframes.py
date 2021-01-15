@@ -2,6 +2,7 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
 from app.enum import LineName
 
+
 def read_boiling_plan(wb_obj):
     """
     :param wb_obj: str or openpyxl.Workbook
@@ -39,6 +40,16 @@ def read_boiling_plan(wb_obj):
     df['sku'] = df['sku'].apply(cast_sku)
 
     df['boiling'] = df['boiling_params'].apply(cast_boiling)
+
+    # set boiling form factors
+    df['bff'] = df['sku'].apply(lambda sku: sku.form_factor)
+
+    # remove Терка from form_factors
+    df['bff'] = df['bff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
+
+    # fill Терка empty form factor values
+    df['bff'] = df['bff'].fillna(method='ffill')
+    df['bff'] = df['bff'].fillna(method='bfill')
 
     return df.reset_index(drop=True)
 

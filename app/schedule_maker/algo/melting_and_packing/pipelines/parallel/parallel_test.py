@@ -10,18 +10,12 @@ import warnings
 warnings.filterwarnings('ignore')
 
 def test1():
-    def cast_bff(sku):
-        if sku == cast_sku(4):
-            return cast_boiling_form_factor(5)
-        else:
-            return sku.boiling_form_factors[0]
-
     boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
     mark_consecutive_groups(boiling_plan_df, 'boiling', 'boiling_group')
 
     for _, grp in boiling_plan_df.groupby('boiling_group'):
         grp['packing_speed'] = grp['sku'].apply(lambda sku: sku.packing_speed)
-        grp['bff'] = grp['sku'].apply(cast_bff)
+        grp['ff'] = grp['sku'].apply(cast_bff)
         display(grp)
         boilings = make_boilings_parallel_dynamic(grp)
         for boiling in boilings:
@@ -74,5 +68,5 @@ def test3():
 
 if __name__ == '__main__':
     test1()
-    test2()
-    test3()
+    # test2()
+    # test3()

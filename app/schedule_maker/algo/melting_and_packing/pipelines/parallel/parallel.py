@@ -7,6 +7,7 @@ from app.schedule_maker.algo.cooling import *
 from app.schedule_maker.calculation import *
 from app.schedule_maker.algo.melting_and_packing.melting_process import make_melting_and_packing_from_mpps
 
+
 def make_mpp(boiling_df, left_boiling_volume):
     boiling_df['cur_speed'] = 0
     boiling_df['beg_ts'] = None
@@ -32,12 +33,7 @@ def make_mpp(boiling_df, left_boiling_volume):
                 cur_skus_values.append(team_df.iloc[0])
         cur_skus_df = pd.DataFrame(cur_skus_values).sort_values(by='packing_speed')  # two rows for next packing skus
 
-        # set speeds
-        # todo: del
-        if boiling_model.boiling_type == 'salt':
-            boiling_model.meltings.speed = 850 / 50 * 60
-
-        packing_speed_left = boiling_model.meltings.speed
+        packing_speed_left = boiling_model.line.melting_speed
         for i, cur_sku in cur_skus_df.iterrows():
             cur_speed = min(packing_speed_left, cur_sku['packing_speed'])
             boiling_df.at[cur_sku.name, 'cur_speed'] = cur_speed

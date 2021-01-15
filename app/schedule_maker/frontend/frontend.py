@@ -87,7 +87,7 @@ def make_water_meltings(schedule, draw_all_coolings=True):
 
     with make('melting_row', push_func=add_push):
         for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == LineName.WATER}):
-            form_factor_label = calc_form_factor_label([melting_process.props['ff'] for melting_process in boiling.iter({'class': 'melting_process'})])
+            form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})])
 
             with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], push_func=add_push, form_factor_label=form_factor_label):
                 with make('serving_row'):
@@ -153,7 +153,7 @@ def make_shifts(start_from, shifts):
 def make_salt_melting(boiling):
     maker, make = init_block_maker('meltings', axis=1)
 
-    form_factor_label = calc_form_factor_label([melting_process.props['ff'] for melting_process in boiling.iter({'class': 'melting_process'})])
+    form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})])
 
     with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], form_factor_label=form_factor_label, push_func=add_push):
         with make('label_row', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), push_func=add_push):
@@ -199,7 +199,7 @@ def make_packings(schedule, line_name):
                 for packing in boiling.iter({'class': 'packing', 'packing_team_id': packing_team_id}):
                     boiling_skus = [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
 
-                    form_factor_label = calc_form_factor_label([melting_process.props['ff'] for melting_process in boiling.iter({'class': 'melting_process'})])
+                    form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})])
 
                     brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in boiling_skus]))
                     with make('packing_block', x=(packing.x[0], 0), boiling_id=boiling.props['boiling_id'],

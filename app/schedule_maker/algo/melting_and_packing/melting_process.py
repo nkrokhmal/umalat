@@ -64,7 +64,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
     maker, make = init_block_maker('melting_and_packing', axis=0, make_with_copy_cut=True)
 
     with make('melting'):
-        serving = make('serving', size=(boiling_model.meltings.serving_time // 5, 0), push_func=add_push).block
+        serving = make('serving', size=(boiling_model.line.serving_time // 5, 0), push_func=add_push).block
 
         with make('meltings', x=(serving.size[0], 0), push_func=add_push):
             for i, block in enumerate(listify(mp['melting_and_packing_process'])):
