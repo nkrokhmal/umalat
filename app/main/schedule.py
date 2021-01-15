@@ -3,7 +3,7 @@ from .. utils.excel_client import *
 from . import main
 from .. import db
 from .forms import ScheduleForm
-from ..models import SKU
+from ..models_new import SKU
 import io
 import openpyxl
 from pycel import ExcelCompiler

@@ -103,11 +103,11 @@
     {% for sku in skus %}
     <tr>
         <td> {{sku.name}} </td>
-        <td> {{sku.form_factor.name}} </td>
+        <td> {{sku.form_factor.group.name}} </td>
         <td> {{sku.brand_name}} </td>
-        <td> {{sku.boilings[0].is_lactose}} </td>
-        <td> {{sku.boilings[0].percent}} </td>
-        <td> {{sku.boilings[0].ferment}} </td>
+        <td> {{sku.made_from_boilings[0].is_lactose}} </td>
+        <td> {{sku.made_from_boilings[0].percent}} </td>
+        <td> {{sku.made_from_boilings[0].ferment}} </td>
         <td>
             <a href="{{ url_for('main.edit_sku', sku_id = sku.id)}}" class="edit-sku">
                 <i class="material-icons" style="color:green" title="Edit"> &#xe3c9; </i>

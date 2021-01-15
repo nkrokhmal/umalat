@@ -141,6 +141,15 @@ class Boiling(db.Model):
     boiling_technology_id = db.Column(db.Integer, db.ForeignKey('boiling_technologies.id'), nullable=True)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
 
+    @property
+    def boiling_type(self):
+        return 'salt' if self.line.name == 'Пицца чиз' else 'water'
+
+    def to_str(self):
+        values = [self.percent, self.ferment, '' if self.is_lactose else 'без лактозы']
+        values = [str(v) for v in values if v]
+        return ', '.join(values)
+
 
 class BoilingTechnology(db.Model):
     __tablename__ = 'boiling_technologies'
@@ -232,4 +241,8 @@ class FormFactor(db.Model):
     def add_made_from(self, ff):
         if ff not in self.made_from:
             self.made_from.append(ff)
+
+    @property
+    def full_name(self):
+        return '{}, {}'.format(self.group.name, self.name)
 

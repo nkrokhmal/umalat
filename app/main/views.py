@@ -3,9 +3,7 @@ from flask import jsonify
 from werkzeug.utils import redirect
 from . import main
 from .. import db
-from .forms import PouringProcessForm, BoilingForm, RequestForm
-from ..models import SKU, Boiling, GlobalPouringProcess, Melting, Pouring, Line, Termizator, Packer,\
-    Departmenent
+from ..models_new import SKU, Boiling, Line, Termizator, Packer, Department
 import pandas as pd
 from io import BytesIO
 import os
@@ -22,7 +20,7 @@ def get_general_params():
     lines = db.session.query(Line).all()
     packers = db.session.query(Packer).all()
     termizators = db.session.query(Termizator).all()
-    departments = db.session.query(Departmenent).all()
+    departments = db.session.query(Department).all()
     return render_template('get_general_params.html', lines=lines, packers=packers, termizators=termizators, departments=departments)
 
 
@@ -56,7 +54,7 @@ def get_termizator():
 
 @main.route('/get_department', methods=['GET', 'POST'])
 def get_department():
-    departments = db.session.query(Departmenent).all()
+    departments = db.session.query(Department).all()
     return jsonify([x.serialize() for x in departments])
 
 

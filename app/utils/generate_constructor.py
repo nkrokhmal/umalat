@@ -7,15 +7,14 @@ from copy import deepcopy
 
 
 def generate_constructor_df_v3(df_copy):
-    # todo: delete
     df = df_copy.copy()
     df['plan'] = df['plan'].apply(lambda x: round(x))
     df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
-    df['weight'] = df['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
-    df['percent'] = df['sku'].apply(lambda x: x.boilings[0].percent)
-    df['is_lactose'] = df['sku'].apply(lambda x: x.boilings[0].is_lactose)
-    df['ferment'] = df['sku'].apply(lambda x: x.boilings[0].ferment)
-    df['form_factor'] = df['sku'].apply(lambda x: x.form_factor.name)
+    df['weight'] = df['sku'].apply(lambda x: x.form_factor.relative_weight)
+    df['percent'] = df['sku'].apply(lambda x: x.made_from_boilings[0].percent)
+    df['is_lactose'] = df['sku'].apply(lambda x: x.made_from_boilings[0].is_lactose)
+    df['ferment'] = df['sku'].apply(lambda x: x.made_from_boilings[0].ferment)
+    df['form_factor'] = df['sku'].apply(lambda x: x.form_factor.group.name)
 
     water, boiling_number = handle_water(df[df['boiling_type'] == 'water'])
     salt, boiling_number = handle_salt(df[df['boiling_type'] == 'salt'], boiling_number=boiling_number + 1)
@@ -45,6 +44,7 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
                        (df['ferment'] == order[2]) &
                        (order[3] is None or df['form_factor'] == order[3])]
         df_filter_dict = df_filter.sort_values(by='weight', ascending=False).to_dict('records')
+        print(df_filter_dict)
         boilings.add_group(df_filter_dict, is_lactose)
         is_lactose = order[0]
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
@@ -99,10 +99,6 @@ class Boilings:
 
     def add_remainings(self):
         if self.cur_boiling:
-            # last_boiling = deepcopy(self.cur_boiling[-1])
-            # last_boiling['plan'] = self.max_weight - self.cur_sum()
-            # last_boiling['tag'] = 'remainings'
-            # self.cur_boiling.append(last_boiling)
             self.boilings += self.cur_boiling
             self.boiling_number += 1
             self.cur_boiling = []
@@ -135,14 +131,14 @@ def draw_skus(wb, sheet_name, data_sku):
     cur_i = 2
 
     for group_sku in grouped_skus:
-        draw_row(sku_sheet, cur_i, [group_sku.name, group_sku.boilings[0].to_str()], font_size=8)
+        draw_row(sku_sheet, cur_i, [group_sku.name, group_sku.made_from_boilings[0].to_str()], font_size=8)
         cur_i += 1
 
 
 def draw_constructor_template(df, file_name, wb, batch_number=0):
     skus = db.session.query(SKU).all()
-    data_sku = {'Вода': [x for x in skus if x.boilings[0].cheese_types.name == 'Вода'],
-                'Соль': [x for x in skus if x.boilings[0].cheese_types.name == 'Соль']}
+    data_sku = {'Вода': [x for x in skus if x.made_from_boilings[0].boiling_type == 'water'],
+                'Соль': [x for x in skus if x.made_from_boilings[0].boiling_type == 'salt']}
 
     draw_boiling_names(wb)
 
@@ -200,13 +196,12 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
     wb.active = 0
     wb["Соль"].views.sheetView[0].tabSelected = False
     wb.save(path)
-
     return '{}.xlsx'.format(new_file_name)
 
 
 def get_colour_by_name(sku_name, skus):
     sku = [x for x in skus if x.name == sku_name]
     if len(sku) > 0:
-        return current_app.config['COLOURS'][sku[0].form_factor.name]
+        return current_app.config['COLOURS'][sku[0].form_factor.group.name]
     else:
         return current_app.config['COLOURS']['Default']
