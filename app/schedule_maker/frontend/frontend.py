@@ -1,5 +1,6 @@
 import openpyxl
 import pandas as pd
+from app.enum import LineName
 
 from app.schedule_maker.frontend.drawing import *
 from app.schedule_maker.frontend.style import *
@@ -90,7 +91,7 @@ def make_water_meltings(schedule, draw_all_coolings=True):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
     with make('melting_row', push_func=add_push):
-        for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == 'water'}):
+        for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == LineName.WATER}):
             # todo: use bffs instead of skus
             # bffs = [melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})]
             # form_factor_label = format_label([('', bff.weight) for bff in bffs])
@@ -121,7 +122,7 @@ def make_water_meltings(schedule, draw_all_coolings=True):
     with make('cooling_row', axis=1):
         cooling_lines = [make('cooling_line', is_parent_node=True, size=(0, 1)).block for _ in range(n_cooling_lines)]
 
-    for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == 'water'}):
+    for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == LineName.WATER}):
         class_validator = ClassValidator(window=10)
         def validate(b1, b2):
             validate_disjoint_by_axis(b1, b2)
@@ -209,7 +210,7 @@ def make_salt_meltings(schedule):
 
     # todo: hardcode, add empty elements for drawing not to draw melting_line itself
 
-    for i, boiling in enumerate(schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == 'salt'})):
+    for i, boiling in enumerate(schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == LineName.SALT})):
         push(melting_lines[i % n_lines], make_salt_melting(boiling), push_func=add_push)
     return maker.root
 
@@ -275,13 +276,13 @@ def make_frontend(schedule):
     with make('melting', start_time=start_time, axis=1):
         make(make_water_meltings(schedule))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
-        make(make_packings(schedule, 'water'))
+        make(make_packings(schedule, LineName.WATER))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
         make(make_salt_meltings(schedule))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
-        make(make_packings(schedule, 'salt'))
+        make(make_packings(schedule, LineName.SALT))
     return maker.root
 
 

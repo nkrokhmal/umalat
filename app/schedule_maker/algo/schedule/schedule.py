@@ -2,6 +2,7 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker.time import *
 from itertools import product
 
+from app.enum import LineName
 
 class_validator = ClassValidator(window=10)
 
@@ -38,23 +39,23 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
 
 
 def make_schedule(boilings, start_times=None):
-    start_times = start_times or {'water': '', 'salt': '07:00'}
+    start_times = start_times or {LineName.WATER: '', LineName.SALT: '07:00'}
 
     maker, make = init_block_maker('schedule')
     schedule = maker.root
 
-    lines_df = pd.DataFrame(index=['water', 'salt'], columns=['iter_props', 'start_time', 'boilings_left', 'latest_boiling'])
-    lines_df.at['water', 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
-    lines_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
+    lines_df = pd.DataFrame(index=[LineName.WATER, LineName.SALT], columns=['iter_props', 'start_time', 'boilings_left', 'latest_boiling'])
+    lines_df.at[LineName.WATER, 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
+    lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
 
-    lines_df.at['water', 'start_time'] = cast_time(start_times['water'])
-    lines_df.at['salt', 'start_time'] = cast_time(start_times['salt'])
+    lines_df.at[LineName.WATER, 'start_time'] = cast_time(start_times[LineName.WATER])
+    lines_df.at[LineName.SALT, 'start_time'] = cast_time(start_times[LineName.SALT])
 
     make('cleanings', push_func=add_push)
 
     # generate boilings
     lines_df['boilings_left'] = [[], []]
-    for line_name in ['water', 'salt']:
+    for line_name in [LineName.WATER, LineName.SALT]:
         lines_df.at[line_name, 'boilings_left'] = [boiling for boiling in boilings if boiling.props['boiling_model'].line.name == line_name]
 
     lines_df['latest_boiling'] = None
@@ -86,17 +87,17 @@ def make_schedule(boilings, start_times=None):
             line_name = are_boilings_left[are_boilings_left].index[0]
 
             # start working on 3 line for salt
-            lines_df.at['salt', 'iter_props'] = [{'pouring_line': str(v)} for v in [1, 2, 3]]
+            lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [1, 2, 3]]
 
         elif are_boilings_left.sum() == 2:
             df = lines_df[~lines_df['latest_boiling'].isnull()]
             if len(df) == 0:
-                line_name = 'water'
+                line_name = LineName.WATER
             else:
                 line_name = max(df['latest_boiling'], key=lambda b: b.x[0]).props['boiling_model'].line.name
 
             # reverse
-            line_name = 'water' if line_name == 'salt' else 'salt'
+            line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
         else:
             raise Exception('Should not happen')
 

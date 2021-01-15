@@ -1,6 +1,6 @@
 from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
-
+from app.enum import LineName
 
 def read_boiling_plan(wb_obj):
     """
@@ -32,7 +32,7 @@ def read_boiling_plan(wb_obj):
         df = df[~df['kg'].isnull()]
 
         # add line name to boiling_params
-        df['boiling_params'] = ('water' if ws_name == 'Вода' else 'salt') + ',' + df['boiling_params']
+        df['boiling_params'] = (LineName.WATER if ws_name == 'Вода' else LineName.SALT) + ',' + df['boiling_params']
         dfs.append(df)
 
     df = pd.concat(dfs)
