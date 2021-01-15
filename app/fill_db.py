@@ -112,8 +112,10 @@ def fill_form_factors():
 
         if value['Вес форм фактора'] == 1:
             name = 'Терка'
+        elif value['Вес форм фактора'] == 30:
+            name = 'Палочки'
         else:
-            name = 'Форм фактор ' + str(value['Вес форм фактора']) + 'г'
+            name = str(value['Вес форм фактора'] / 1000)
 
         form_factor = FormFactor(name=name, relative_weight=value['Вес форм фактора'], group_id=group_id)
 

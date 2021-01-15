@@ -3,11 +3,13 @@ from app.schedule_maker.models import *
 from app.schedule_maker.algo.packing import *
 from app.schedule_maker.algo.cooling import *
 
+
 def make_melting_and_packing_basic(boiling_plan):
     boiling_plan = boiling_plan.copy()
     boiling_model = boiling_plan.iloc[0]['boiling']
 
     boiling_plan['ff'] = boiling_plan['sku'].apply(lambda sku: sku.form_factor)
+
     # remove Терка from form_factors
     boiling_plan['ff'] = boiling_plan['ff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
 
