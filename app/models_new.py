@@ -163,6 +163,12 @@ class CoolingTechnology(db.Model):
 
     form_factors = db.relationship('FormFactor', backref=backref('default_cooling_technology', uselist=False))
 
+    @property
+    def time(self):
+        values = [self.first_cooling_time, self.second_cooling_time, self.salting_time]
+        values = [v if v is not None else np.nan for v in values]
+        return np.nansum(values)
+
 
 class Termizator(db.Model):
     __tablename__ = 'termizators'

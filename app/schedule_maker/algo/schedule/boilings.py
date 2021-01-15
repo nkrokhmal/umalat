@@ -5,6 +5,7 @@ from app.schedule_maker.algo.melting_and_packing import *
 
 from app.enum import LineName
 
+
 def make_boilings_basic(boiling_plan_df):
     boiling_plan_df = boiling_plan_df.copy()
 
@@ -37,8 +38,8 @@ def make_boilings_by_groups(boiling_plan_df):
     res = []
     for boiling_group, grp in boiling_plan_df.groupby('boiling_group'):
         if grp.iloc[0]['boiling'].line.name == LineName.WATER:
-            # res += make_flow_water_boilings(grp, start_from_id=len(res) + 1)
-            res += make_boilings_basic(grp)
+            res += make_flow_water_boilings(grp, start_from_id=len(res) + 1)
+            # res += make_boilings_basic(grp)
         else:
             # res += make_boilings_basic(grp)
             res += make_boilings_parallel_dynamic(grp)

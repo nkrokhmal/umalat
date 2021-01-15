@@ -24,7 +24,7 @@ class schema_to_boilings_dataframes:
                 cooling_processor = Processor(f'Cooling{i}',
                                               items=[bff, bff],
                                               max_pressures=[None, None],
-                                              processing_time=bff.post_processing_time / 60,
+                                              processing_time=bff.default_cooling_technology.time / 60,
                                               limits=[kg, kg])
                 cooling_processors.append(cooling_processor)
             melting_queue = Queue('MeltingQueue', melting_processors, break_funcs={'in': lambda old, new: 1 / 12})
@@ -79,7 +79,7 @@ class schema_to_boilings_dataframes:
             #                     make(label, x=[beg, 0], size=(end - beg, 1))
             #         print(maker.root.tabular())
 
-            boiling_dataframes['meltings'] = pd.DataFrame(melting_queue.active_periods(), columns=['item', 'beg', 'end'])
+            boiling_dataframes['meltings'] = pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end'])
             boiling_dataframes['coolings'] = pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end'])
             # todo: make as dictionary
             boiling_dataframes['packings'] = [pd.DataFrame(packing_queue.active_periods('out'), columns=['item', 'beg', 'end']) for packing_queue in packing_queues]

@@ -3,6 +3,7 @@ from app.schedule_maker.algo.cooling import make_cooling_process
 from app.schedule_maker.algo.boiling import make_boiling
 from app.schedule_maker.calculation import *
 
+
 class boilings_dataframes_to_boilings:
     def _make_line(self, df, line_name, process_name, filler_name, item_name, make_fillers=True):
         if len(df) == 0:
@@ -33,7 +34,7 @@ class boilings_dataframes_to_boilings:
 
         for i in range(len(df)):
             cur_row = df.iloc[i]
-            cooling_process = make_cooling_process(boiling_model=boiling_model, bff=cur_row['item'], size=(cur_row['end'] - cur_row['beg']) // 5, x=(cur_row['beg'] // 5 - start_from // 5, 0))
+            cooling_process = make_cooling_process(boiling_model=boiling_model, cooling_technology=cur_row['item'].default_cooling_technology, bff=cur_row['item'], size=(cur_row['end'] - cur_row['beg']) // 5, x=(cur_row['beg'] // 5 - start_from // 5, 0))
             make(cooling_process, push_func=add_push, bff=cur_row['item'])
         return maker.root
 
@@ -41,7 +42,7 @@ class boilings_dataframes_to_boilings:
         maker, make = init_block_maker('melting_and_packing')
 
         with make('melting'):
-            serving = make('serving', size=(boiling_model.meltings.serving_time // 5, 0), push_func=add_push).block
+            serving = make('serving', size=(boiling_model.line.serving_time // 5, 0), push_func=add_push).block
 
             line = self._make_line(boiling_dataframes['meltings'], 'meltings', 'melting_process', 'melting_configuration', 'bff')
             line.props.update({'x': (serving.size[0], 0)})

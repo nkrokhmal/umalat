@@ -1,28 +1,12 @@
 from app.schedule_maker.models import *
 from app.schedule_maker.calculation import *
-
-# todo: make properly
-def cast_bff(sku):
-    if sku == cast_sku(4):
-        return cast_boiling_form_factor(5)
-    elif sku == cast_sku(37):
-        return cast_boiling_form_factor(8)
-    elif sku == cast_sku(12):
-        return cast_boiling_form_factor(10)
-    else:
-        return sku.boiling_form_factors[0]
-
+from app.enum import LineName
 
 class boiling_group_to_schema:
-    def _calc_melting_speed(self, boiling_group_df):
-        boiling_type = boiling_group_df.iloc[0]['boiling'].boiling_type
-        return 900 if boiling_type == 'water' else 1020  # todo: make properly
-
     def _calc_boilings_meltings(self, boiling_group_df):
         df = boiling_group_df.copy()
+        boiling_model = df.iloc[0]['boiling']
 
-        # todo: take from boiling_plan
-        df['bff'] = df['sku'].apply(cast_bff)
         df['bff_id'] = df['bff'].apply(lambda bff: bff.id)
         df = df.reset_index()
 
@@ -31,8 +15,7 @@ class boiling_group_to_schema:
 
         iterator = SimpleBoundedIterator([[row['bff'], row['kg']] for bff_id, row in bff_kgs.iterrows()])
 
-        boiling_type = df.iloc[0]['boiling'].boiling_type
-        boiling_volume = 1000 if boiling_type == 'water' else 850  # todo: make properly
+        boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo: make properly
         total_kg = df['kg'].sum()
 
         assert total_kg % boiling_volume == 0
@@ -64,9 +47,6 @@ class boiling_group_to_schema:
     def _calc_packings(self, boiling_group_df):
         df = boiling_group_df.copy()
 
-        # todo: take from boiling_plan
-        df['bff'] = df['sku'].apply(cast_bff)
-
         df['sku_id'] = df['sku'].apply(lambda sku: sku.id)
         df = df.reset_index()
 
@@ -83,6 +63,6 @@ class boiling_group_to_schema:
         return res
 
     def __call__(self, boiling_group_df):
-        return self._calc_boilings_meltings(boiling_group_df), self._calc_packings(boiling_group_df), self._calc_melting_speed(boiling_group_df)
+        return self._calc_boilings_meltings(boiling_group_df), self._calc_packings(boiling_group_df)
 
 

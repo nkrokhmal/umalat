@@ -14,7 +14,7 @@ def test():
     mark_consecutive_groups(df, 'boiling', 'boiling_group')
     boiling_group_df = df[df['boiling_group'] == 2]
 
-    for boiling in make_flow_water_boilings(boiling_group_df):
+    for boiling in make_flow_water_boilings(boiling_group_df, start_from_id=1):
         print(boiling)
 
 if __name__ == '__main__':
