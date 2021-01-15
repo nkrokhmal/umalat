@@ -35,7 +35,7 @@ class schema_to_boilings_dataframes:
 
     def _calc_packing_queues(self, packings):
         # generate packing queues
-        packing_queues = []
+        packing_queues = {}
         for packing_team_id, grp in sorted(packings.items(), key=lambda v: v[0]):
             processors = []
 
@@ -47,7 +47,7 @@ class schema_to_boilings_dataframes:
                                       limits=[kg, None])
                 processors.append(processor)
             packing_queue = Queue(f'PackingQueue{packing_team_id}', processors, break_funcs={'in': lambda old, new: 1 / 12})
-            packing_queues.append(packing_queue)
+            packing_queues[packing_team_id] = packing_queue
         return packing_queues
 
     def _calc_boilings_dataframes(self, melting_actors_by_boiling, packing_queues, round=True):
@@ -62,8 +62,8 @@ class schema_to_boilings_dataframes:
             pipe_connect(melting_queue, cooling_queue, 'melting-cooling')
             pipe_connect(cooling_queue, packing_hub, 'cooling-hub')
 
-            for i, packing_queue in enumerate(packing_queues):
-                pipe_connect(packing_hub, packing_queue, f'hub-packing_queue{i}')
+            for packing_team_id, packing_queue in packing_queues.items():
+                pipe_connect(packing_hub, packing_queue, f'hub-packing_queue{packing_team_id}')
 
             flow = FluidFlow(drenator, verbose=False)
             run_flow(flow)
@@ -81,12 +81,13 @@ class schema_to_boilings_dataframes:
 
             boiling_dataframes['meltings'] = pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end'])
             boiling_dataframes['coolings'] = pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end'])
-            # todo: make as dictionary
-            boiling_dataframes['packings'] = [pd.DataFrame(packing_queue.active_periods('out'), columns=['item', 'beg', 'end']) for packing_queue in packing_queues]
+
+            boiling_dataframes['packings'] = {packing_team_id: pd.DataFrame(queue.active_periods('out'), columns=['item', 'beg', 'end']) for packing_team_id, queue in packing_queues.items()}
 
             boiling_dataframes['meltings'] = self._post_process_dataframe(boiling_dataframes['meltings'], round=round)
             boiling_dataframes['coolings'] = self._post_process_dataframe(boiling_dataframes['coolings'], fix_small_intervals=False, round=round)
-            boiling_dataframes['packings'] = [self._post_process_dataframe(df, round=round) for df in boiling_dataframes['packings']]
+
+            boiling_dataframes['packings'] = {packing_team_id: self._post_process_dataframe(df, round=round) for packing_team_id, df in boiling_dataframes['packings'].items()}
 
             res.append(boiling_dataframes)
 
@@ -95,7 +96,7 @@ class schema_to_boilings_dataframes:
                 node.reset()
 
             # remove packers from current boiling
-            for packing_queue in packing_queues:
+            for packing_queue in packing_queues.values():
                 pipe_disconnect(packing_hub, packing_queue)
         return res
 

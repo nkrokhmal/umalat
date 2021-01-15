@@ -52,7 +52,7 @@ class boilings_dataframes_to_boilings:
             line.props.update({'x': (serving.size[0], 0)})
             push(maker.root['melting'], line, push_func=add_push)
 
-        for packing_team_id, df in enumerate(boiling_dataframes['packings'], 1):
+        for packing_team_id, df in boiling_dataframes['packings'].items():
             line = self._make_line(df, 'packing', 'packing_process', 'packing_configuration', 'sku')
             line.props.update({'x': (serving.size[0] + line.x[0], 0), 'packing_team_id': int(packing_team_id)})
             push(maker.root, line, push_func=add_push)
