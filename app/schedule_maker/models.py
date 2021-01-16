@@ -64,8 +64,6 @@ def cast_line(obj):
 
 
 def cast_packer(obj):
-    if isinstance(obj, SKU):
-        return obj.packer
     return cast_model(Packer, obj)
 
 

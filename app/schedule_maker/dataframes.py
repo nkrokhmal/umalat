@@ -52,5 +52,3 @@ def read_boiling_plan(wb_obj):
     df['bff'] = df['bff'].fillna(method='bfill')
 
     return df.reset_index(drop=True)
-
-

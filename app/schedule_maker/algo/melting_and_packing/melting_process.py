@@ -11,7 +11,7 @@ def fill_configurations(maker, mpps, boiling_model):
         configuration_blocks = make_configuration_blocks(mpp1, mpp2, maker, boiling_model.line.name)
         for b in configuration_blocks:
             # reset x position
-            b.props['x'] = [0, 0]
+            b.props.update(x=[0, 0])
         res += configuration_blocks
         res.append(mpp2)
     return res

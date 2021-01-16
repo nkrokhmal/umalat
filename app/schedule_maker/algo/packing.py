@@ -4,9 +4,10 @@ from app.enum import LineName
 
 def get_configuration_time(line_name, sku1, sku2):
     if all([line_name == LineName.SALT,
-            sku1.form_factor != sku2.form_factor,
-            cast_packer(sku1) == cast_packer(sku2),
-            cast_packer(sku1).name == 'Ульма']):
+            sku1.form_factor.relative_weight != sku2.form_factor.relative_weight, # todo: better to compare form factors? Делаю так, потому что у палочек бывают разные фф, хотя это одни и те же палочки
+            sku1.packer == sku2.packer,
+            sku1.packer.name == 'Ульма',
+            sku2.packer.name == 'Ульма']):
         return 25
     elif sku1 == sku2:
         return 0
