@@ -33,6 +33,6 @@ def make_configuration_blocks(b1, b2, maker, line_name):
 
         conf_time_size = get_configuration_time(line_name, sku1, sku2)
         if conf_time_size:
-            conf_block = maker.create_block('packing_configuration', size=[conf_time_size // 5, 0], packing_team_id=packing_team_id)
+            conf_block = maker.create_block('packing_configuration', size=[conf_time_size // 5, 0], packing_team_id=packing_team_id, x=[packing1.y[0], 0])
             res.append(conf_block)
     return res

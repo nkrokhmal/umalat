@@ -1,10 +1,12 @@
 from utils_ak.interactive_imports import *
 from app.schedule_maker.time import *
+from app.schedule_maker.algo.packing import *
 from itertools import product
 
 from app.enum import LineName
 
 class_validator = ClassValidator(window=10)
+
 
 def validate(b1, b2):
     validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2['pouring']['first']['termizator'])  # [termizator.basic]
@@ -27,6 +29,18 @@ def validate(b1, b2):
     b1, b2 = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, cleaning
     validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2)
 class_validator.add('boiling', 'cleaning', validate)
+
+
+def validate(b1, b2):
+    boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, packing_configuration
+    for p1 in boiling.iter({'class': 'packing', 'packing_team_id': packing_configuration.props['packing_team_id']}):
+        validate_disjoint_by_axis(p1, b2)
+class_validator.add('boiling', 'packing_configuration', validate)
+def validate(b1, b2):
+    boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, packing_configuration
+    for p1 in boiling.iter({'class': 'packing', 'packing_team_id': packing_configuration.props['packing_team_id']}):
+        validate_disjoint_by_axis(b1, p1)
+class_validator.add('packing_configuration', 'boiling', validate)
 
 
 def make_termizator_cleaning_block(cleaning_type, **kwargs):
@@ -72,10 +86,10 @@ def make_schedule(boilings, start_times=None):
             start_from = lines_df.at[line_name, 'latest_boiling'].x[0]
 
         # add configuration if needed
-        # if lines_df.at[line_name, 'latest_boiling']:
-
-
-
+        if lines_df.at[line_name, 'latest_boiling']:
+            configuration_blocks = make_configuration_blocks(lines_df.at[line_name, 'latest_boiling'], boiling, maker, line_name)
+            for b in configuration_blocks:
+                push(schedule, b, push_func=dummy_push, validator=class_validator, start_from='beg')
 
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
         lines_df.at[line_name, 'latest_boiling'] = boiling
