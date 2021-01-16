@@ -26,9 +26,14 @@ class_validator.add('boiling', 'boiling', validate)
 
 
 def validate(b1, b2):
-    b1, b2 = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, cleaning
-    validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2)
+    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, cleaning
+    validate_disjoint_by_axis(boiling['pouring']['first']['termizator'], cleaning)
 class_validator.add('boiling', 'cleaning', validate)
+
+def validate(b1, b2):
+    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, cleaning
+    validate_disjoint_by_axis(cleaning, boiling['pouring']['first']['termizator'])
+class_validator.add('cleaning', 'boiling', validate)
 
 
 def validate(b1, b2):
@@ -69,8 +74,6 @@ def make_schedule(boilings, start_times=None):
     lines_df.at[LineName.WATER, 'start_time'] = cast_time(start_times[LineName.WATER])
     lines_df.at[LineName.SALT, 'start_time'] = cast_time(start_times[LineName.SALT])
 
-    make('cleanings', push_func=add_push)
-
     # generate boilings
     lines_df['boilings_left'] = [[], []]
     for line_name in [LineName.WATER, LineName.SALT]:
@@ -98,6 +101,17 @@ def make_schedule(boilings, start_times=None):
             for conf in configuration_blocks:
                 conf.props.update(line_name=line_name)
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
+
+        # add cleanings for non-lactose cheese
+
+        if not boiling.props['boiling_model'].is_lactose:
+            min_latest_boiling = min(df['latest_boiling'], key=lambda b: b.x[0])
+            start_from = min_latest_boiling.x[0]
+            latest_boiling = lines_df.at[line_name, 'latest_boiling']
+            if latest_boiling and line_name == LineName.SALT and latest_boiling.props['boiling_model'].is_lactose:
+                # full cleaning needed
+                cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
+                push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
 
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
         lines_df.at[line_name, 'latest_boiling'] = boiling
@@ -132,30 +146,26 @@ def make_schedule(boilings, start_times=None):
     boilings = list(schedule.iter({'class': 'boiling'}))
     boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
-    for i in range(len(boilings) - 1):
-        a, b = list(boilings[i: i + 2])
+    cleanings = list(schedule.iter({'class': 'cleaning'}))
 
+    for a, b in SimpleIterator(boilings).iter_sequences(2):
         rest = b['pouring']['first']['termizator'].x[0] - a['pouring']['first']['termizator'].y[0]
 
-        if 12 <= rest < 18:
-            cleaning = make_termizator_cleaning_block('short', text='Перерыв от часа до 80 минут')
-            cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
-            push(schedule['cleanings'], cleaning, push_func=add_push)
+        in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
 
-        if rest >= 18:
-            cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
-            cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
-            push(schedule['cleanings'], cleaning, push_func=add_push)
+        if not in_between_cleanings:
+            if 12 <= rest < 18:
+                cleaning = make_termizator_cleaning_block('short', text='Перерыв от часа до 80 минут')
+                cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
+                push(schedule, cleaning, push_func=add_push)
 
-        # print(b['pouring'][0]['termizator'].y[0], last_full_cleaning_y1)
-        # # add full cleaning if working more than 12 hours
-        # if b['pouring'][0]['termizator'].y[0] - last_full_cleaning_y1  > cast_t('12:00'):
-        #     # [termizator.cleaning.3]
-        #     cleaning = make_termizator_cleaning_block('full', x1=b['pouring']['first']['termizator'].y[0], text='Работает больше 12 часов')
-        #     push(schedule['cleanings'], cleaning, method='add')
+            if rest >= 18:
+                cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
+                cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
+                push(schedule, cleaning, push_func=add_push)
 
     last_boiling = list(schedule.iter({'class': 'boiling'}))[-1]
     cleaning = make_termizator_cleaning_block('full', x=(last_boiling['pouring']['first']['termizator'].y[0] + 1, 0))  # add five extra minutes
-    push(schedule['cleanings'], cleaning, push_func=add_push)
+    push(schedule, cleaning, push_func=add_push)
 
     return schedule

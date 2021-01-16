@@ -76,10 +76,11 @@ def make_cheese_makers(schedule, rng):
 
 def make_cleanings(schedule):
     maker, make = init_block_maker('cleanings_row', axis=1)
-    make(maker.copy(schedule['cleanings'], with_props=True))
-    for cleaning in listify(maker.root['cleanings']['cleaning']):
-        cleaning.props.update(size=(cleaning.size[0], 2))
-    return maker.root['cleanings']
+    for cleaning in schedule.iter({'class': 'cleaning'}):
+        b = maker.copy(cleaning, with_props=True)
+        b.props.update(size=(b.props['size'][0], 2))
+        make(b, push_func=add_push)
+    return maker.root
 
 
 def make_water_meltings(schedule, draw_all_coolings=True):
