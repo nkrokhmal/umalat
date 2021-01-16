@@ -12,7 +12,7 @@ def test():
     df = read_boiling_plan(os.path.join(basedir, r"app/schedule_maker/data/sample_boiling_plan.xlsx"))
     mark_consecutive_groups(df, 'boiling', 'boiling_group')
     boiling_group_df = df[df['boiling_group'] == 2]
-    transformer = boiling_group_to_schema()
+    transformer = BoilingGroupToSchema()
     boilings_meltings, packings = transformer(boiling_group_df)
     print(boilings_meltings, packings)
 

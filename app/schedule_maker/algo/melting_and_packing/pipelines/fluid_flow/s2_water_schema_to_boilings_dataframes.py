@@ -2,7 +2,7 @@ from utils_ak.fluid_flow import *
 from utils_ak.numeric import *
 
 
-class schema_to_boilings_dataframes:
+class SchemaToBoilingsDataframes:
     def _calc_melting_actors_by_boiling(self, boilings_meltings, melting_speed):
         # generate meltings by boilings
         res = []
@@ -68,17 +68,6 @@ class schema_to_boilings_dataframes:
             flow = FluidFlow(drenator, verbose=False)
             run_flow(flow)
 
-            # debug
-            #         maker, make = init_block_maker('root', axis=1)
-            #         for node in drenator.iterate('down'):
-            #             if node.active_periods():
-            #                 for period in node.active_periods():
-            #                     label = '-'.join([str(node.id), str(period[0])])
-            #                     beg, end = period[1:]
-            #                     beg, end = custom_round(beg * 60, 5, 'ceil') // 5, custom_round(end * 60, 5, 'ceil') // 5
-            #                     make(label, x=[beg, 0], size=(end - beg, 1))
-            #         print(maker.root.tabular())
-
             df = pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end'])
             df['name'] = 'melting_process'
             boiling_dataframes['meltings'] = df
@@ -120,10 +109,6 @@ class schema_to_boilings_dataframes:
         # move to minutes
         df['beg'] = df['beg'] * 60
         df['end'] = df['end'] * 60
-
-        # # round last end up?
-        # #         df.at[df.index[-1], 'end'] = custom_round(df.at[df.index[-1], 'end'], 5, 'ceil')
-        #
 
         if round:
             # round to five-minute intervals

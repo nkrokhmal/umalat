@@ -5,7 +5,10 @@ from itertools import product
 
 from app.enum import LineName
 
-class_validator = ClassValidator(window=10)
+# todo: make sure this is enough
+class_validator = ClassValidator(window=10, window_by_classes={'boiling': {'boiling': 4, 'cleaning': 1, 'packing_configuration': 2},
+                                                               'cleaning': {'boiling': 1, 'cleaning': 1},
+                                                               'packing_configuration': {'boiling': 4}})
 
 
 def validate(b1, b2):
@@ -17,40 +20,39 @@ def validate(b1, b2):
 
     if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
         validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
-
-        for p1, p2 in product(b1.iter({'class': 'packing'}), b2.iter({'class': 'packing'})):
+        for p1, p2 in product(listify(b1['melting_and_packing']['packing']), listify(b2['melting_and_packing']['packing'])):
+            # for p1, p2 in product(b1.iter(cls='packing'), b2.iter(cls='packing')):
             if p1.props['packing_team_id'] != p2.props['packing_team_id']:
                 continue
             validate_disjoint_by_axis(p1, p2)
+
 class_validator.add('boiling', 'boiling', validate)
 
-
 def validate(b1, b2):
-    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, cleaning
+    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # boiling, cleaning
     validate_disjoint_by_axis(boiling['pouring']['first']['termizator'], cleaning)
 class_validator.add('boiling', 'cleaning', validate)
 
 def validate(b1, b2):
-    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, cleaning
+    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # boiling, cleaning
     validate_disjoint_by_axis(cleaning, boiling['pouring']['first']['termizator'])
 class_validator.add('cleaning', 'boiling', validate)
 
-
 def validate(b1, b2):
-    boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, packing_configuration
+    boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # boiling, packing_configuration
     if boiling.props['boiling_model'].line.name != packing_configuration.props['line_name']:
         return
 
-    for p1 in boiling.iter({'class': 'packing', 'packing_team_id': packing_configuration.props['packing_team_id']}):
+    for p1 in boiling.iter(cls='packing', packing_team_id=packing_configuration.props['packing_team_id']):
         validate_disjoint_by_axis(p1, b2)
 class_validator.add('boiling', 'packing_configuration', validate)
 
 def validate(b1, b2):
-    boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, packing_configuration
+    boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # boiling, packing_configuration
     if boiling.props['boiling_model'].line.name != packing_configuration.props['line_name']:
         return
 
-    for p1 in boiling.iter({'class': 'packing', 'packing_team_id': packing_configuration.props['packing_team_id']}):
+    for p1 in boiling.iter(cls='packing', packing_team_id=packing_configuration.props['packing_team_id']):
         validate_disjoint_by_axis(b1, p1)
 class_validator.add('packing_configuration', 'boiling', validate)
 
@@ -60,7 +62,7 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
     maker, make = init_block_maker('cleaning', size=(cleaning_duration // 5, 0), cleaning_type=cleaning_type, **kwargs)
     return maker.root
 
-
+@clockify()
 def make_schedule(boilings, start_times=None):
     start_times = start_times or {LineName.WATER: '', LineName.SALT: '07:00'}
 
@@ -84,6 +86,7 @@ def make_schedule(boilings, start_times=None):
     if not lines_df['start_time'].any():
         raise Exception('Укажите время начала варок')
 
+    @clockify()
     def add_one_block_from_line(line_name):
         boiling = lines_df.at[line_name, 'boilings_left'].pop(0)
         if not lines_df.at[line_name, 'latest_boiling']:
@@ -103,16 +106,18 @@ def make_schedule(boilings, start_times=None):
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
 
         # add cleanings for non-lactose cheese
-
         if not boiling.props['boiling_model'].is_lactose:
-            min_latest_boiling = min(df['latest_boiling'], key=lambda b: b.x[0])
-            start_from = min_latest_boiling.x[0]
-            latest_boiling = lines_df.at[line_name, 'latest_boiling']
-            if latest_boiling and line_name == LineName.SALT and latest_boiling.props['boiling_model'].is_lactose:
-                # full cleaning needed
-                cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
-                push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
-
+            latest_boilings = list(lines_df['latest_boiling'])
+            latest_boilings = [b for b in latest_boilings if b]
+            if latest_boilings:
+                min_latest_boiling = min(latest_boilings, key=lambda b: b.x[0])
+                if min_latest_boiling:
+                    start_from = min_latest_boiling.x[0]
+                    latest_boiling = lines_df.at[line_name, 'latest_boiling']
+                    if latest_boiling and line_name == LineName.SALT and latest_boiling.props['boiling_model'].is_lactose:
+                        # full cleaning needed
+                        cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
+                        push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
         lines_df.at[line_name, 'latest_boiling'] = boiling
         return boiling
@@ -143,10 +148,11 @@ def make_schedule(boilings, start_times=None):
         add_one_block_from_line(line_name)
 
     # add cleanings if necessary
-    boilings = list(schedule.iter({'class': 'boiling'}))
+    # todo: refactor
+    boilings = list(schedule.iter(cls='boiling'))
     boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
-    cleanings = list(schedule.iter({'class': 'cleaning'}))
+    cleanings = list(schedule.iter(cls='cleaning'))
 
     for a, b in SimpleIterator(boilings).iter_sequences(2):
         rest = b['pouring']['first']['termizator'].x[0] - a['pouring']['first']['termizator'].y[0]
@@ -164,7 +170,7 @@ def make_schedule(boilings, start_times=None):
                 cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
                 push(schedule, cleaning, push_func=add_push)
 
-    last_boiling = list(schedule.iter({'class': 'boiling'}))[-1]
+    last_boiling = list(schedule.iter(cls='boiling'))[-1]
     cleaning = make_termizator_cleaning_block('full', x=(last_boiling['pouring']['first']['termizator'].y[0] + 1, 0))  # add five extra minutes
     push(schedule, cleaning, push_func=add_push)
 
