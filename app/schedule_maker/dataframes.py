@@ -51,4 +51,7 @@ def read_boiling_plan(wb_obj):
     df['bff'] = df['bff'].fillna(method='ffill')
     df['bff'] = df['bff'].fillna(method='bfill')
 
+    for _, grp in df.groupby('batch_id'):
+        assert len(grp['boiling'].unique()) == 1, "Only one boiling allowed inside a group"
+
     return df.reset_index(drop=True)
