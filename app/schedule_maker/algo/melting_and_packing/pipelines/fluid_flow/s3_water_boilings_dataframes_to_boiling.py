@@ -23,7 +23,7 @@ class boilings_dataframes_to_boilings:
         maker, make = init_block_maker('coolings', x=(start_from // 5, 0))
 
         for i, row in df.iterrows():
-            cooling_process = make_cooling_process(boiling_model=boiling_model, cooling_technology=row['item'].default_cooling_technology, bff=row['item'], size=(row['end'] - row['beg']) // 5, x=(row['beg'] // 5 - start_from // 5, 0))
+            cooling_process = make_cooling_process(boiling_model.line.name, cooling_technology=row['item'].default_cooling_technology, bff=row['item'], size=(row['end'] - row['beg']) // 5, x=(row['beg'] // 5 - start_from // 5, 0))
             make(cooling_process, push_func=add_push, bff=row['item'])
         return maker.root
 
