@@ -144,7 +144,9 @@ def build_plan_sku(date, df, request_list, plan_path=None):
         )
         if is_lactose:
             cur_row += space_rows
+
     wb.active = 1
+    wb[current_app.config['SHEET_NAMES']['remainings']].views.sheetView[0].tabSelected = False
     wb.save(path)
     return filename
 

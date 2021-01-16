@@ -1,4 +1,7 @@
+import os
 from flask import session, url_for, render_template, flash, request, make_response, current_app, request, jsonify
+
+from .errors import internal_error
 from .. utils.excel_client import *
 from . import main
 from .. import db
@@ -41,5 +44,6 @@ def schedule():
         schedule_wb.save(path_schedule)
         os.remove(file_path)
         return render_template('schedule.html', form=form, filename=filename_schedule)
+
     filename_schedule = None
     return render_template('schedule.html', form=form, filename=filename_schedule)

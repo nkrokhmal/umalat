@@ -2,7 +2,7 @@ from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
 
 
 class ExcelBlock:
-    def __init__(self, sheet, colour='#FFFFFF', font_size=8, row_height=10):
+    def __init__(self, sheet, colour='#FFFFFF', font_size=8, row_height=8):
         self.sheet = sheet
         self.colour = colour
         self.font_size = font_size
