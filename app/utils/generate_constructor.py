@@ -170,8 +170,8 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                     first_cell_formula = '=IF(K{0}="-", "", {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
                 else:
-                    first_cell_formula = '=IF(K{0}="-", "-", MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
-                        cur_i, batch_number)
+                    first_cell_formula = '=IF(K{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
+                        cur_i)
                 draw_cell(boiling_sheet, 1, cur_i, first_cell_formula, font_size=8)
 
             else:
@@ -185,8 +185,8 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                     v[0] = '=IF(K{0}="-", "", {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
                 else:
-                    v[0] = '=IF(K{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
-                        cur_i, batch_number)
+                    v[0] = '=IF(K{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
+                        cur_i)
 
                 v[1] = '=IF(G{0}="","",IF(K{0}="-","",1+SUM(INDIRECT(ADDRESS(2,COLUMN(N{0}))&":"&ADDRESS(ROW(),COLUMN(N{0}))))))'.format(
                     cur_i)

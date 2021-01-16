@@ -55,11 +55,11 @@ class BaseClass:
 
 
 class DebugConfig(BaseClass):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH + '?check_same_thread=False'
 
 
 class ProductionConfig(BaseClass):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH + '?check_same_thread=False'
 
 
 config = {
