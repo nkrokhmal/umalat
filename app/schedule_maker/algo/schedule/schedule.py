@@ -102,15 +102,18 @@ def make_schedule(boilings, start_times=None):
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
 
         # add cleanings for non-lactose cheese
-
         if not boiling.props['boiling_model'].is_lactose:
-            min_latest_boiling = min(df['latest_boiling'], key=lambda b: b.x[0])
-            start_from = min_latest_boiling.x[0]
-            latest_boiling = lines_df.at[line_name, 'latest_boiling']
-            if latest_boiling and line_name == LineName.SALT and latest_boiling.props['boiling_model'].is_lactose:
-                # full cleaning needed
-                cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
-                push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
+            latest_boilings = list(lines_df['latest_boiling'])
+            latest_boilings = [b for b in latest_boilings if b]
+            if latest_boilings:
+                min_latest_boiling = min(latest_boilings, key=lambda b: b.x[0])
+                if min_latest_boiling:
+                    start_from = min_latest_boiling.x[0]
+                    latest_boiling = lines_df.at[line_name, 'latest_boiling']
+                    if latest_boiling and line_name == LineName.SALT and latest_boiling.props['boiling_model'].is_lactose:
+                        # full cleaning needed
+                        cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
+                        push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
 
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
         lines_df.at[line_name, 'latest_boiling'] = boiling

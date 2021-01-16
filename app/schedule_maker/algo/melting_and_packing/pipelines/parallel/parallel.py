@@ -121,8 +121,6 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
     boiling_volumes = [boiling_model.line.output_per_ton] * (boiling_group_df['kg'].sum() // boiling_model.line.output_per_ton)
 
-    print(boiling_group_df['kg'].sum(), boiling_volumes)
-
     # sum same skus for same teams
     boiling_group_df['sku_name'] = boiling_group_df['sku'].apply(lambda sku: sku.name)
     values = []
