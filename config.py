@@ -5,6 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 SQLITE_PATH = os.path.join(basedir, 'data.sqlite')
 
+
 class BaseClass:
     SECRET_KEY = 'Umalat'
     CHEESE_PER_PAGE = 10
