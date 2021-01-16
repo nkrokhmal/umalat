@@ -102,7 +102,7 @@ def make_mpp(boiling_df, left_boiling_volume):
     bff = boiling_df.iloc[0]['bff']
     make('melting_process', size=(packings_max_size, 0), bff=bff)
 
-    make(make_cooling_process(boiling_model, bff.default_cooling_technology, maker.root['melting_process'].size[0]))
+    make(make_cooling_process(boiling_model.line.name, bff.default_cooling_technology, maker.root['melting_process'].size[0]))
 
     for packing in maker.root['packing']:
         packing.props.update(x=[maker.root['cooling_process']['start'].y[0], 0])

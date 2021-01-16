@@ -37,7 +37,7 @@ def make_melting_and_packing_basic(boiling_plan):
                                                  bff=bff)
 
             push(meltings, melting_process)
-            cooling_process = make_cooling_process(boiling_model, ct, melting_process.size[0], x=melting_process.props['x_rel'])
+            cooling_process = make_cooling_process(boiling_model.line.name, ct, melting_process.size[0], x=melting_process.props['x_rel'])
             push(coolings, cooling_process, push_func=add_push)
 
     with make('packing',
