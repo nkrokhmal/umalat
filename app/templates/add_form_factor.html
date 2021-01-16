@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}Форм фактор плавления - Добавить форм фактор плавления{% endblock %}
+{% block page_content %}
+<div class="page-header">
+    <h1>Добавить форм фактор плавления</h1>
+</div>
+<div class="col-md-6">
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

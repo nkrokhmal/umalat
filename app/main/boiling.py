@@ -1,130 +1,128 @@
 from flask import session, url_for, render_template, flash, request, make_response, current_app, request
 from werkzeug.utils import redirect
 from . import main
+from .errors import internal_error
 from .. import db
 from .forms import BoilingForm
-from ..models import Boiling, Pouring, Melting
+from ..models_new import Boiling, BoilingTechnology
+from ..utils.form import *
 
 
 @main.route('/get_boiling', methods=['GET', 'POST'])
 def get_boiling():
-    boilings = db.session.query(Boiling).all()
-    return render_template('get_boiling.html', boilings=boilings, endpoints='.get_boiling')
+    try:
+        boilings = db.session.query(Boiling).all()
+        return render_template('get_boiling.html', boilings=boilings, endpoints='.get_boiling')
+    except Exception as e:
+        return internal_error(e)
 
 
 @main.route('/delete_boiling/<int:boiling_id>', methods=['DELETE'])
 def delete_boiling(boiling_id):
-    boiling_process = db.session.query(Boiling).get_or_404(boiling_id)
-    if boiling_process:
-        db.session.delete(boiling_process)
-        db.session.commit()
-        flash('Варка успешно удалена')
-    return redirect(url_for('.get_boiling'))
+    try:
+        boiling_process = db.session.query(Boiling).get_or_404(boiling_id)
+        if boiling_process:
+            db.session.delete(boiling_process)
+            db.session.commit()
+            flash('Варка успешно удалена')
+        return redirect(url_for('.get_boiling'))
+    except Exception as e:
+        return internal_error(e)
 
 
 @main.route('/edit_boiling/<int:boiling_id>',  methods=['GET', 'POST'])
 def edit_boiling(boiling_id):
-    form = BoilingForm()
-    with db.session.no_autoflush:
-        boiling_process = db.session.query(Boiling).get_or_404(boiling_id)
-        if form.validate_on_submit() and boiling_process is not None:
-            boiling_process.percent = form.percent.data
-            boiling_process.is_lactose = form.is_lactose.data
-            boiling_process.ferment = dict(form.ferment.choices).get(form.ferment.data)
+    try:
+        form = BoilingForm()
+        with db.session.no_autoflush:
+            boiling = db.session.query(Boiling).get_or_404(boiling_id)
+            if form.validate_on_submit() and boiling is not None:
+                boiling.percent = form.percent.data
+                boiling.is_lactose = form.is_lactose.data
+                boiling.ferment = get_choice_data(form.ferment)
 
-            pouring_process = Pouring(
-                pouring_time=form.pouring_time.data,
-                soldification_time=form.soldification_time.data,
-                cutting_time=form.cutting_time.data,
-                pouring_off_time=form.pouring_off_time.data,
-                extra_time=form.extra_time.data
-            )
-            boiling_process.pourings = pouring_process
+                boiling_technology = db.session.query(BoilingTechnology) \
+                    .filter_by(BoilingTechnology.pouring_time == form.pouring_time.data) \
+                    .filter_by(BoilingTechnology.soldification_time == form.soldification_time.data) \
+                    .filter_by(BoilingTechnology.cutting_time == form.cutting_time.data) \
+                    .filter_by(BoilingTechnology.pouring_off_time == form.pouring_off_time.data) \
+                    .filter_by(BoilingTechnology.extra_time == form.extra_time.data) \
+                    .first()
 
-            melting_process = Melting(
-                serving_time=form.serving_time.data,
-                melting_time=form.melting_time.data,
-                speed=form.speed.data,
-                first_cooling_time=form.first_cooling_time.data,
-                second_cooling_time=form.second_cooling_time.data,
-                salting_time=form.salting_time.data
-            )
-            boiling_process.meltings = melting_process
+                if boiling_technology is None:
+                    boiling_technology = BoilingTechnology(
+                        pouring_time=form.pouring_time.data,
+                        soldification_time=form.soldification_time.data,
+                        cutting_time=form.cutting_time.data,
+                        pouring_off_time=form.pouring_off_time.data,
+                        extra_time=form.extra_time.data
+                    )
+                boiling.boiling_technology = boiling_technology
 
-            if form.line.data != -1:
-                boiling_process.line_id = [x.id for x in form.lines if
-                                           x.name == dict(form.line.choices).get(form.line.data)][0]
+                if form.line.data != -1:
+                    boiling.line = [x for x in form.lines if x.name == get_choice_data(form.line)][0]
 
-            db.session.commit()
-            flash('Варка успешно изменена')
-            return redirect(url_for('.get_boiling'))
+                db.session.commit()
+                flash('Варка успешно изменена!')
+                return redirect(url_for('.get_boiling'))
 
-        for key, value in dict(form.ferment.choices).items():
-            if value == boiling_process.ferment:
-                form.ferment.default = key
+            if boiling.ferment is not None:
+                form.ferment.default = default_form_value(boiling.ferment)
 
-        if boiling_process.lines is not None:
-            generate_default_value(form.line, boiling_process.lines.name)
-        form.process()
+            if boiling.line is not None:
+                form.line.default = default_form_value(boiling.line.name)
 
-        form.percent.data = boiling_process.percent
-        form.is_lactose.data = boiling_process.is_lactose
+            form.process()
 
-        if boiling_process.pourings is not None:
-            form.pouring_time.data = boiling_process.pourings.pouring_time
-            form.soldification_time.data = boiling_process.pourings.soldification_time
-            form.cutting_time.data = boiling_process.pourings.cutting_time
-            form.pouring_off_time.data = boiling_process.pourings.pouring_off_time
-            form.extra_time.data = boiling_process.pourings.extra_time
+            form.percent.data = boiling.percent
+            form.is_lactose.data = boiling.is_lactose
 
-        if boiling_process.meltings is not None:
-            form.serving_time.data = boiling_process.meltings.serving_time
-            form.melting_time.data = boiling_process.meltings.melting_time
-            form.speed.data = boiling_process.meltings.speed
-            form.first_cooling_time.data = boiling_process.meltings.first_cooling_time
-            form.second_cooling_time.data = boiling_process.meltings.second_cooling_time
-            form.salting_time.data = boiling_process.meltings.salting_time
-        return render_template('edit_boiling.html', form=form)
+            if boiling.boiling_technology is not None:
+                form.pouring_time.data = boiling.boiling_technology.pouring_time
+                form.soldification_time.data = boiling.boiling_technology.soldification_time
+                form.cutting_time.data = boiling.boiling_technology.cutting_time
+                form.pouring_off_time.data = boiling.boiling_technology.pouring_off_time
+                form.extra_time.data = boiling.boiling_technology.extra_time
+            return render_template('edit_boiling.html', form=form)
+    except Exception as e:
+        return internal_error(e)
 
 
 @main.route('/add_boiling', methods=['GET', 'POST'])
 def add_boilings():
-    form = BoilingForm()
-    if form.validate_on_submit():
-        boiling = Boiling(
-            percent=form.percent.data,
-            is_lactose=form.is_lactose.data
-        )
-        pouring_process = Pouring(
-            pouring_time=form.pouring_time.data,
-            soldification_time=form.soldification_time.data,
-            cutting_time=form.cutting_time.data,
-            pouring_off_time=form.pouring_off_time.data,
-            extra_time=form.extra_time.data
-        )
-        melting_process = Melting(
-            serving_time=form.serving_time.data,
-            melting_time=form.melting_time.data,
-            speed=form.speed.data,
-            first_cooling_time=form.first_cooling_time.data,
-            second_cooling_time=form.second_cooling_time.data,
-            salting_time=form.salting_time.data
-        )
-        boiling.pourings = pouring_process
-        boiling.meltings = melting_process
+    try:
+        form = BoilingForm()
+        if form.validate_on_submit():
+            boiling = Boiling(
+                percent=form.percent.data,
+                is_lactose=form.is_lactose.data,
+                ferment=get_choice_data(form.ferment)
+            )
+            boiling_technology = db.session.query(BoilingTechnology)\
+                .filter_by(BoilingTechnology.pouring_time == form.pouring_time.data)\
+                .filter_by(BoilingTechnology.soldification_time == form.soldification_time.data)\
+                .filter_by(BoilingTechnology.cutting_time == form.cutting_time.data)\
+                .filter_by(BoilingTechnology.pouring_off_time == form.pouring_off_time.data)\
+                .filter_by(BoilingTechnology.extra_time == form.extra_time.data)\
+                .first()
 
-        if form.line.data != -1:
-            boiling.line_id = [x.id for x in form.lines if
-                               x.name == dict(form.line.choices).get(form.line.data)][0]
+            if boiling_technology is None:
+                boiling_technology = BoilingTechnology(
+                    pouring_time=form.pouring_time.data,
+                    soldification_time=form.soldification_time.data,
+                    cutting_time=form.cutting_time.data,
+                    pouring_off_time=form.pouring_off_time.data,
+                    extra_time=form.extra_time.data
+                )
+            boiling.boiling_technology = boiling_technology
 
-        db.session.add(boiling)
-        db.session.commit()
-        flash('Варка успешно добавлена')
-        return redirect(url_for('.get_boiling'))
-    return render_template('add_boiling.html', form=form)
+            if form.line.data != -1:
+                boiling.line = [x for x in form.lines if x.name == get_choice_data(form.line)][0]
 
-
-def generate_default_value(form, val):
-    for key, value in dict(form.choices).items():
-        if value == val:
-            form.default = key
+            db.session.add(boiling)
+            db.session.commit()
+            flash('Варка успешно добавлена')
+            return redirect(url_for('.get_boiling'))
+        return render_template('add_boiling.html', form=form)
+    except Exception as e:
+        return internal_error(e)

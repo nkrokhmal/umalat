@@ -6,13 +6,13 @@ from app.schedule_maker.time import *
 def draw_schedule(schedule, style, fn=None):
     # update styles
     for b in schedule.iter():
-        block_style = style.get(b.props['class'])
+        block_style = style.get(b.props['cls'])
 
         if block_style:
             block_style = {k: v(b) if callable(v) else v for k, v in block_style.items()}
-            b.props.update(block_style)
+            b.props.update(**block_style)
 
-    schedule.props.update({'index_width': 4})
+    schedule.props.update(index_width=4)
 
     wb = init_workbook(['Расписание'])
 

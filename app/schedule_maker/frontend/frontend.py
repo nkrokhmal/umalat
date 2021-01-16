@@ -1,29 +1,28 @@
 import openpyxl
 import pandas as pd
+from app.enum import LineName
 
 from app.schedule_maker.frontend.drawing import *
 from app.schedule_maker.frontend.style import *
 from utils_ak.interactive_imports import *
 
 
-def format_label(label_weights):
-    label_weights = remove_neighbor_duplicates(label_weights)
+def calc_form_factor_label(form_factors):
+    form_factors = remove_neighbor_duplicates(form_factors)
     cur_label = None
     values = []
-    for label, weight in label_weights:
+    for ff in form_factors:
+        label = ff.group.name
+
         s = ''
         if label != cur_label:
             s += label + ' '
             cur_label = label
 
-        # todo: make properly, this if-else if because of rubber. Should be something better
-        if weight:
-            if str(weight / 1000) == '0.03':
-                s += 'палочки'
-            else:
-                s += str(weight / 1000)
-        else:
-            s += 'терка'
+        if ff.name != 'Терка':
+            # in case of ff.name == 'Терка', ff.group.name == 'Терка' - hence don't repeat
+            s += ff.name
+
         values.append(s)
     return '/'.join(values)
 
@@ -51,7 +50,7 @@ def make_cheese_makers(schedule, rng):
             with make('header', index_width=0, start_time='00:00', push_func=add_push):
                 make('template', x=(1, 0), size=(3, 2), text=f'Сыроизготовитель №1 Poly {i + 1}', color=(183, 222, 232), push_func=add_push)
 
-            for boiling in schedule.iter({'class': 'boiling', 'pouring_line': str(i)}):
+            for boiling in schedule.iter(cls='boiling', pouring_line=str(i)):
                 boiling_model = boiling.props['boiling_model']
 
                 # todo: make properly
@@ -77,80 +76,72 @@ def make_cheese_makers(schedule, rng):
 
 def make_cleanings(schedule):
     maker, make = init_block_maker('cleanings_row', axis=1)
-    make(maker.copy(schedule['cleanings'], with_props=True))
-    for cleaning in listify(maker.root['cleanings']['cleaning']):
-        cleaning.props.update({'size': (cleaning.size[0], 2)})
-    return maker.root['cleanings']
+    for cleaning in schedule.iter(cls='cleaning'):
+        b = maker.copy(cleaning, with_props=True)
+        b.props.update(size=(b.props['size'][0], 2))
+        make(b, push_func=add_push)
+    return maker.root
 
 
-def make_water_meltings(schedule):
-    maker, make = init_block_maker('melting')
+def make_water_meltings(schedule, draw_all_coolings=True):
+    maker, make = init_block_maker('melting', axis=1)
 
     with make('header', start_time='00:00', push_func=add_push):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
+    with make('melting_row', push_func=add_push):
+        for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.WATER):
+            form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter(cls='melting_process')])
+
+            with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], push_func=add_push, form_factor_label=form_factor_label):
+                with make('serving_row'):
+                    make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0),
+                         size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), push_func=add_push)
+
+                with make('label_row'):
+                    make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), visible=False, push_func=add_push)
+                    make('melting_label', size=(4, 1))
+                    make('melting_name', size=(boiling['melting_and_packing']['melting']['meltings'].size[0] - 4, 1), form_factor_label=boiling.props['form_factor_label'])
+
+                with make('melting_row'):
+                    make('melting_process', x=(boiling['melting_and_packing']['melting']['meltings'].x[0], 0),
+                         size=(boiling['melting_and_packing']['melting']['meltings'].size[0], 1), speed=900, push_func=add_push)
+
     n_cooling_lines = 5
+    with make('cooling_row', axis=1):
+        cooling_lines = [make('cooling_line', is_parent_node=True, size=(0, 1)).block for _ in range(n_cooling_lines)]
 
-    for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'water'}):
+    for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.WATER):
+        class_validator = ClassValidator(window=10)
+        def validate(b1, b2):
+            validate_disjoint_by_axis(b1, b2)
+        class_validator.add('cooling_block', 'cooling_block', validate)
 
-        # todo: use bffs instead of skus
-        # bffs = [melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})]
-        # form_factor_label = format_label([('', bff.weight) for bff in bffs])
+        cur_cooling_size = None
+        for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
+            start_from = cooling_process['start']['cooling'][0].x[0]
+            cooling_block = maker.create_block('cooling_block', x=(start_from, 0))  # todo: create dynamic x calculation when empty block
+            for i in range(2):
+                block = maker.create_block('cooling',
+                             size=(cooling_process['start']['cooling'][i].size[0], 1),
+                             x=[cooling_process['start']['cooling'][i].x[0] - start_from, 0])
+                push(cooling_block, block, push_func=add_push)
 
-        boiling_skus = []
-        for packing in listify(boiling['melting_and_packing']['packing']):
-            boiling_skus += [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
-        values = [(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_skus]
-        if len(set(v[0] for v in values)) > 1:
-            values = [(sku.form_factor.short_name, sku.weight_form_factor) for sku in boiling_skus]
-        form_factor_label = format_label(values)
+            if not draw_all_coolings:
+                # do not draw cooling block if previous is same size
+                if cur_cooling_size == cooling_block.size[0]:
+                    continue
+                else:
+                    cur_cooling_size = cooling_block.size[0]
 
-        with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], push_func=add_push, form_factor_label=form_factor_label):
-            with make('serving_row'):
-                make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0),
-                     size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), push_func=add_push)
-
-            with make('label_row'):
-                make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), visible=False, push_func=add_push)
-                make('melting_label', size=(4, 1))
-                make('melting_name', size=(boiling['melting_and_packing']['melting']['meltings'].size[0] - 4, 1), form_factor_label=boiling.props['form_factor_label'])
-
-            with make('melting_row'):
-                make('melting_process', x=(boiling['melting_and_packing']['melting']['meltings'].x[0], 0),
-                     size=(boiling['melting_and_packing']['melting']['meltings'].size[0], 1), speed=900, push_func=add_push)
-
-            with make('cooling_row', axis=1):
-                cooling_lines = [make('cooling_line', is_parent_node=True).block for _ in range(n_cooling_lines)]
-
-                class_validator = ClassValidator()
-                def validate(b1, b2):
-                    validate_disjoint_by_axis(b1, b2)
-                class_validator.add('cooling_block', 'cooling_block', validate)
-
-                cur_cooling_size = None
-                for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
-                    beg = cooling_process['start']['cooling'][0].x[0]
-                    cooling_block = maker.create_block('cooling_block', x=(beg, 0))  # todo: create dynamic x calculation when empty block
-                    for i in range(2):
-                        block = maker.create_block('cooling',
-                                     size=(cooling_process['start']['cooling'][i].size[0], 1),
-                                     x=[cooling_process['start']['cooling'][i].x[0] - beg, 0])
-                        push(cooling_block, block, push_func=add_push)
-
-                    # do not draw cooling block if previous is same size
-                    if cur_cooling_size == cooling_block.size[0]:
-                        continue
-                    else:
-                        cur_cooling_size = cooling_block.size[0]
-
-                    # try to add to the earliest line as possible
-                    for j in range(n_cooling_lines):
-                        res = simple_push(cooling_lines[j], cooling_block, validator=class_validator)
-                        if isinstance(res, Block):
-                            # pushed block successfully
-                            break
-                        if j == 4:
-                            raise Exception("Failed to draw cooling block")
+            # try to add to the earliest line as possible
+            for j in range(n_cooling_lines):
+                res = simple_push(cooling_lines[j], cooling_block, validator=class_validator)
+                if isinstance(res, Block):
+                    # pushed block successfully
+                    break
+                if j == n_cooling_lines - 1:
+                    raise Exception("Failed to draw cooling block")
     return maker.root
 
 
@@ -166,17 +157,7 @@ def make_shifts(start_from, shifts):
 def make_salt_melting(boiling):
     maker, make = init_block_maker('meltings', axis=1)
 
-    # todo: use bffs instead of skus
-    # bffs = [melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})]
-    # form_factor_label = format_label([('', bff.weight) for bff in bffs])
-
-    boiling_skus = []
-    for packing in listify(boiling['melting_and_packing']['packing']):
-        boiling_skus += [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
-    values = [(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_skus]
-    if len(set(v[0] for v in values)) > 1:
-        values = [(sku.form_factor.short_name, sku.weight_form_factor) for sku in boiling_skus]
-    form_factor_label = format_label(values)
+    form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter(cls='melting_process')])
 
     with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], form_factor_label=form_factor_label, push_func=add_push):
         with make('label_row', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), push_func=add_push):
@@ -208,26 +189,21 @@ def make_salt_meltings(schedule):
 
     # todo: hardcode, add empty elements for drawing not to draw melting_line itself
 
-    for i, boiling in enumerate(schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == 'salt'})):
+    for i, boiling in enumerate(schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.SALT)):
         push(melting_lines[i % n_lines], make_salt_melting(boiling), push_func=add_push)
     return maker.root
 
 
-def make_packings(schedule, boiling_type):
+def make_packings(schedule, line_name):
     maker, make = init_block_maker('packing', axis=1)
 
     for packing_team_id in range(1, 3):
         with make('packing_team', size=(0, 3), axis=0, is_parent_node=True):
-            for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.boiling_type == boiling_type}):
-                for packing in boiling.iter({'class': 'packing', 'packing_team_id': packing_team_id}):
+            for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
+                for packing in boiling.iter(cls='packing', packing_team_id=packing_team_id):
+                    boiling_skus = [packing_process.props['sku'] for packing_process in packing.iter(cls='packing_process')]
 
-                    boiling_skus = [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
-
-                    # todo: take weight from boiling_form_factor
-                    values = [(sku.form_factor.name, sku.weight_form_factor) for sku in boiling_skus]
-                    if len(set(v[0] for v in values)) > 1:
-                        values = [(sku.form_factor.short_name, sku.weight_form_factor) for sku in boiling_skus]
-                    form_factor_label = format_label(values)
+                    form_factor_label = calc_form_factor_label([sku.form_factor for sku in boiling_skus])
 
                     brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in boiling_skus]))
                     with make('packing_block', x=(packing.x[0], 0), boiling_id=boiling.props['boiling_id'],
@@ -241,8 +217,17 @@ def make_packings(schedule, boiling_type):
                             make('packing_brand', size=(packing.size[0], 1))
 
                         with make(is_parent_node=True):
-                            for conf in packing.iter({'class': 'packing_configuration'}):
+                            for conf in packing.iter(cls='packing_configuration'):
                                 make('packing_configuration', x=(conf.props['x_rel'][0], 0), size=(conf.size[0], 1), push_func=add_push)
+            try:
+                for conf in listify(schedule['packing_configuration']):
+                    # first level only
+                    if conf.props['packing_team_id'] != packing_team_id or conf.props['line_name'] != line_name:
+                        continue
+                    make('packing_configuration', x=(conf.props['x'][0], 2), size=(conf.size[0], 1), push_func=add_push)
+            except:
+                # no packing_configuration in schedule first level
+                pass
     return maker.root
 
 
@@ -274,13 +259,13 @@ def make_frontend(schedule):
     with make('melting', start_time=start_time, axis=1):
         make(make_water_meltings(schedule))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
-        make(make_packings(schedule, 'water'))
+        make(make_packings(schedule, LineName.WATER))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
         make(make_salt_meltings(schedule))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
-        make(make_packings(schedule, 'salt'))
+        make(make_packings(schedule, LineName.SALT))
     return maker.root
 
 

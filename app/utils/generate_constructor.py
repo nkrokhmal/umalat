@@ -7,15 +7,14 @@ from copy import deepcopy
 
 
 def generate_constructor_df_v3(df_copy):
-    # todo: delete
     df = df_copy.copy()
     df['plan'] = df['plan'].apply(lambda x: round(x))
     df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
-    df['weight'] = df['sku'].apply(lambda x: x.boiling_form_factors[0].weight)
-    df['percent'] = df['sku'].apply(lambda x: x.boilings[0].percent)
-    df['is_lactose'] = df['sku'].apply(lambda x: x.boilings[0].is_lactose)
-    df['ferment'] = df['sku'].apply(lambda x: x.boilings[0].ferment)
-    df['form_factor'] = df['sku'].apply(lambda x: x.form_factor.name)
+    df['weight'] = df['sku'].apply(lambda x: x.form_factor.relative_weight)
+    df['percent'] = df['sku'].apply(lambda x: x.made_from_boilings[0].percent)
+    df['is_lactose'] = df['sku'].apply(lambda x: x.made_from_boilings[0].is_lactose)
+    df['ferment'] = df['sku'].apply(lambda x: x.made_from_boilings[0].ferment)
+    df['form_factor'] = df['sku'].apply(lambda x: x.form_factor.group.name)
 
     water, boiling_number = handle_water(df[df['boiling_type'] == 'water'])
     salt, boiling_number = handle_salt(df[df['boiling_type'] == 'salt'], boiling_number=boiling_number + 1)
@@ -24,8 +23,10 @@ def generate_constructor_df_v3(df_copy):
     result['boiling'] = result['boiling_id'].apply(lambda x: cast_boiling(x))
     result['name'] = result['sku'].apply(lambda sku: sku.name)
     result['boiling_name'] = result['boiling'].apply(lambda b: b.to_str())
-    result['boiling_volume'] = np.where(result['boiling_name'].str.contains('2.7'), 850, 1000)
-    result = result[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg', 'tag']]
+    result['boiling_volume'] = np.where(result['boiling_type'] == 'salt', 850, 1000)
+    result['group'] = result['sku'].apply(lambda sku: sku.form_factor.name)
+
+    result = result[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'group', 'name', 'kg', 'tag']]
     return result
 
 
@@ -45,6 +46,7 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
                        (df['ferment'] == order[2]) &
                        (order[3] is None or df['form_factor'] == order[3])]
         df_filter_dict = df_filter.sort_values(by='weight', ascending=False).to_dict('records')
+        print(df_filter_dict)
         boilings.add_group(df_filter_dict, is_lactose)
         is_lactose = order[0]
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
@@ -58,6 +60,7 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
             for form_factor, df_grouped in df_grouped_boiling_id.groupby('form_factor'):
                 boilings.add_group(df_grouped.to_dict('records'), new)
                 new = False
+    boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
 
 
@@ -90,12 +93,14 @@ class Boilings:
                 self.boiling_number += 1
                 self.cur_boiling = []
 
+    def finish(self):
+        if self.cur_boiling:
+            self.boilings += self.cur_boiling
+            self.boiling_number += 1
+            self.cur_boiling = []
+
     def add_remainings(self):
         if self.cur_boiling:
-            # last_boiling = deepcopy(self.cur_boiling[-1])
-            # last_boiling['plan'] = self.max_weight - self.cur_sum()
-            # last_boiling['tag'] = 'remainings'
-            # self.cur_boiling.append(last_boiling)
             self.boilings += self.cur_boiling
             self.boiling_number += 1
             self.cur_boiling = []
@@ -128,14 +133,14 @@ def draw_skus(wb, sheet_name, data_sku):
     cur_i = 2
 
     for group_sku in grouped_skus:
-        draw_row(sku_sheet, cur_i, [group_sku.name, group_sku.boilings[0].to_str()], font_size=8)
+        draw_row(sku_sheet, cur_i, [group_sku.name, group_sku.made_from_boilings[0].to_str()], font_size=8)
         cur_i += 1
 
 
 def draw_constructor_template(df, file_name, wb, batch_number=0):
     skus = db.session.query(SKU).all()
-    data_sku = {'Вода': [x for x in skus if x.boilings[0].cheese_types.name == 'Вода'],
-                'Соль': [x for x in skus if x.boilings[0].cheese_types.name == 'Соль']}
+    data_sku = {'Вода': [x for x in skus if x.made_from_boilings[0].boiling_type == 'water'],
+                'Соль': [x for x in skus if x.made_from_boilings[0].boiling_type == 'salt']}
 
     draw_boiling_names(wb)
 
@@ -157,48 +162,49 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
 
         for v in values:
             if v[0] == '-':
-                ids = [3, 4, 5, 6, 7, 9, 10]
+                ids = [3, 4, 5, 6, 7, 8, 10, 11]
                 for id in ids:
                     draw_cell(boiling_sheet, id, cur_i, v[0], font_size=8)
                     # draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
                 if sheet_name == 'Вода':
-                    first_cell_formula = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    first_cell_formula = '=IF(K{0}="-", "", {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
                 else:
-                    first_cell_formula = '=IF(J{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    first_cell_formula = '=IF(K{0}="-", "-", MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
                 draw_cell(boiling_sheet, 1, cur_i, first_cell_formula, font_size=8)
 
             else:
+                print(v)
                 if v[-1] == 'main':
-                    colour = get_colour_by_name(v[5], skus)
+                    colour = get_colour_by_name(v[6], skus)
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
 
                 if sheet_name == 'Вода':
-                    v[0] = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    v[0] = '=IF(K{0}="-", "", {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
                 else:
-                    v[0] = '=IF(J{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    v[0] = '=IF(K{0}="-", "-", MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
 
-                v[1] = '=IF(F{0}="","",IF(J{0}="-","",1+SUM(INDIRECT(ADDRESS(2,COLUMN(M{0}))&":"&ADDRESS(ROW(),COLUMN(M{0}))))))'.format(
+                v[1] = '=IF(G{0}="","",IF(K{0}="-","",1+SUM(INDIRECT(ADDRESS(2,COLUMN(N{0}))&":"&ADDRESS(ROW(),COLUMN(N{0}))))))'.format(
                     cur_i)
                 draw_row(boiling_sheet, cur_i, v[:-1], font_size=8, color=colour)
-                draw_cell(boiling_sheet, 9, cur_i, 1, font_size=8)
+                draw_cell(boiling_sheet, 10, cur_i, 1, font_size=8)
             cur_i += 1
+    new_file_name = '{} План по варкам'.format(file_name.split(' ')[0])
+    path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)
 
-    new_file_name = file_name.split(' ')[0]
-    path = '{}/{} План по варкам.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)
     wb.active = 0
     wb["Соль"].views.sheetView[0].tabSelected = False
     wb.save(path)
-    return '{} План по варкам.xlsx'.format(new_file_name)
+    return '{}.xlsx'.format(new_file_name)
 
 
 def get_colour_by_name(sku_name, skus):
     sku = [x for x in skus if x.name == sku_name]
     if len(sku) > 0:
-        return current_app.config['COLOURS'][sku[0].form_factor.name]
+        return current_app.config['COLOURS'][sku[0].form_factor.group.name]
     else:
         return current_app.config['COLOURS']['Default']

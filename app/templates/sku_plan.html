@@ -13,7 +13,7 @@
 <script type='text/javascript' src="static/js/jquery.min.js"></script>
 <script type='text/javascript' src="static/js/bootstrap.min.js"></script>
 <script type='text/javascript' src="static/js/mdb.min.js"></script>
-<script type='text/javascript' src="static/js/datatables2.min.js" defer></script>
+<script type='text/javascript' src="static/js/datatables2.min.js"></script>
 <script type='text/javascript' src="static/js/templates/parse_request.js"></script>
 
 
@@ -47,7 +47,7 @@
             var url = "download_sku_plan/" + "{{file_name}}";
             download(url,"{{file_name}}");
         </script>
-        <a href="{{url_for('main.generate_boiling_plan_full')}}"> <h4> Перейти к созданию плана варок </h4> </a>
+        <a href="{{url_for('main.boiling_plan_full')}}"> <h4> Перейти к созданию плана варок </h4> </a>
     </div>
 {% endif %}
 
@@ -69,9 +69,9 @@
         {% for d in result_list %}
             <tr>
                 <td> {{d["GroupSKU"][0]["SKU"].form_factor.name}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].boilings[0].percent}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].boilings[0].is_lactose}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].boilings[0].ferment}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].percent}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].is_lactose}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].ferment}} </td>
                 <td> {{d["BoilingCount"]|round|int}} </td>
             </tr>
         {% endfor %}
