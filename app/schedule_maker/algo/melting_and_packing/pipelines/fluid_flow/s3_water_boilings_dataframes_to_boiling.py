@@ -4,7 +4,7 @@ from app.schedule_maker.algo.boiling import make_boiling
 from app.schedule_maker.calculation import *
 
 
-class boilings_dataframes_to_boilings:
+class BoilingsDataframesToBoilings:
     def _make_line(self, df, line_name, item_name):
         if len(df) == 0:
             raise Exception('Should not happen')

@@ -15,8 +15,8 @@ def test():
     boiling_group_df = df[df['boiling_group'] == 2]
     print(boiling_group_df)
     boiling_model = boiling_group_df.iloc[0]['boiling']
-    boilings_meltings, packings = boiling_group_to_schema()(boiling_group_df)
-    boilings_dataframes = schema_to_boilings_dataframes()(boilings_meltings, packings, boiling_model.line.melting_speed, round=False)
+    boilings_meltings, packings = BoilingGroupToSchema()(boiling_group_df)
+    boilings_dataframes = SchemaToBoilingsDataframes()(boilings_meltings, packings, boiling_model.line.melting_speed, round=False)
     for boiling_dataframes in boilings_dataframes:
         print(boiling_dataframes['meltings'])
         print(boiling_dataframes['coolings'])
