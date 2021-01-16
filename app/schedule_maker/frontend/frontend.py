@@ -78,7 +78,7 @@ def make_cleanings(schedule):
     maker, make = init_block_maker('cleanings_row', axis=1)
     make(maker.copy(schedule['cleanings'], with_props=True))
     for cleaning in listify(maker.root['cleanings']['cleaning']):
-        cleaning.props.update({'size': (cleaning.size[0], 2)})
+        cleaning.props.update(size=(cleaning.size[0], 2))
     return maker.root['cleanings']
 
 
@@ -218,6 +218,12 @@ def make_packings(schedule, line_name):
                         with make(is_parent_node=True):
                             for conf in packing.iter({'class': 'packing_configuration'}):
                                 make('packing_configuration', x=(conf.props['x_rel'][0], 0), size=(conf.size[0], 1), push_func=add_push)
+            for conf in listify(schedule['packing_configuration']):
+                # first level only
+                if conf.props['packing_team_id'] != packing_team_id or conf.props['line_name'] != line_name:
+                    continue
+                make('packing_configuration', x=(conf.props['x'][0], 2), size=(conf.size[0], 1), push_func=add_push)
+
     return maker.root
 
 

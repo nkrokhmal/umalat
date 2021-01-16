@@ -20,7 +20,7 @@ def test1():
         boilings = make_boilings_parallel_dynamic(grp)
         for boiling in boilings:
             mp = boiling['melting_and_packing']
-            mp.props.update({'x': (0, 0)})
+            mp.props.update(x=(0, 0))
             display(mp)
 
 
@@ -37,7 +37,7 @@ def test2():
     for boiling in boilings:
         print(boiling.props['boiling_id'])
         mp = boiling['melting_and_packing']
-        mp.props.update({'x': (0, 0)})
+        mp.props.update(x=(0, 0))
         display(mp)
 
 

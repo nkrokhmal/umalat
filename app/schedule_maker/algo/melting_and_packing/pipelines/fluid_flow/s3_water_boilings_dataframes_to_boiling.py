@@ -34,16 +34,16 @@ class boilings_dataframes_to_boilings:
             serving = make('serving', size=(boiling_model.line.serving_time // 5, 0), push_func=add_push).block
 
             line = self._make_line(boiling_dataframes['meltings'], 'meltings', 'bff')
-            line.props.update({'x': (serving.size[0], 0)})
+            line.props.update(x=(serving.size[0], 0))
             push(maker.root['melting'], line, push_func=add_push)
 
             line = self._make_cooling_line(boiling_dataframes['coolings'], boiling_model)
-            line.props.update({'x': (serving.size[0], 0)})
+            line.props.update(x=(serving.size[0], 0))
             push(maker.root['melting'], line, push_func=add_push)
 
         for packing_team_id, df in boiling_dataframes['packings'].items():
             line = self._make_line(df, 'packing',  'sku')
-            line.props.update({'x': (serving.size[0] + line.x[0], 0), 'packing_team_id': int(packing_team_id)})
+            line.props.update(x=(serving.size[0] + line.x[0], 0), packing_team_id=int(packing_team_id))
             push(maker.root, line, push_func=add_push)
         return maker.root
 

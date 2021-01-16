@@ -105,9 +105,9 @@ def make_mpp(boiling_df, left_boiling_volume):
     make(make_cooling_process(boiling_model, bff.default_cooling_technology, maker.root['melting_process'].size[0]))
 
     for packing in maker.root['packing']:
-        packing.props.update({'x': [maker.root['cooling_process']['start'].y[0], 0]})
+        packing.props.update(x=[maker.root['cooling_process']['start'].y[0], 0])
 
-    maker.root.props.update({'kg': boiling_volume})
+    maker.root.props.update(kg=boiling_volume)
     return maker.root
 
 

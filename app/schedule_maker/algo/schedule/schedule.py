@@ -33,11 +33,18 @@ class_validator.add('boiling', 'cleaning', validate)
 
 def validate(b1, b2):
     boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, packing_configuration
+    if boiling.props['boiling_model'].line.name != packing_configuration.props['line_name']:
+        return
+
     for p1 in boiling.iter({'class': 'packing', 'packing_team_id': packing_configuration.props['packing_team_id']}):
         validate_disjoint_by_axis(p1, b2)
 class_validator.add('boiling', 'packing_configuration', validate)
+
 def validate(b1, b2):
     boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['class'])) # boiling, packing_configuration
+    if boiling.props['boiling_model'].line.name != packing_configuration.props['line_name']:
+        return
+
     for p1 in boiling.iter({'class': 'packing', 'packing_team_id': packing_configuration.props['packing_team_id']}):
         validate_disjoint_by_axis(b1, p1)
 class_validator.add('packing_configuration', 'boiling', validate)
@@ -88,8 +95,9 @@ def make_schedule(boilings, start_times=None):
         # add configuration if needed
         if lines_df.at[line_name, 'latest_boiling']:
             configuration_blocks = make_configuration_blocks(lines_df.at[line_name, 'latest_boiling'], boiling, maker, line_name)
-            for b in configuration_blocks:
-                push(schedule, b, push_func=dummy_push, validator=class_validator, start_from='beg')
+            for conf in configuration_blocks:
+                conf.props.update(line_name=line_name)
+                push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
 
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
         lines_df.at[line_name, 'latest_boiling'] = boiling
@@ -131,12 +139,12 @@ def make_schedule(boilings, start_times=None):
 
         if 12 <= rest < 18:
             cleaning = make_termizator_cleaning_block('short', text='Перерыв от часа до 80 минут')
-            cleaning.props.update({'x': (b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0)})
+            cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
             push(schedule['cleanings'], cleaning, push_func=add_push)
 
         if rest >= 18:
             cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
-            cleaning.props.update({'x': (b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0)})
+            cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
             push(schedule['cleanings'], cleaning, push_func=add_push)
 
         # print(b['pouring'][0]['termizator'].y[0], last_full_cleaning_y1)
