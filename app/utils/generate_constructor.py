@@ -24,7 +24,10 @@ def generate_constructor_df_v3(df_copy):
     result['name'] = result['sku'].apply(lambda sku: sku.name)
     result['boiling_name'] = result['boiling'].apply(lambda b: b.to_str())
     result['boiling_volume'] = np.where(result['boiling_type'] == 'salt', 850, 1000)
-    result = result[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'name', 'kg', 'tag']]
+    result['group'] = result['sku'].apply(lambda sku: sku.form_factor.name)
+
+    result = result[['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'form_factor', 'group', 'name', 'kg', 'tag']]
+    print(result)
     return result
 
 
@@ -160,35 +163,36 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
 
         for v in values:
             if v[0] == '-':
-                ids = [3, 4, 5, 6, 7, 9, 10]
+                ids = [3, 4, 5, 6, 7, 8, 10, 11]
                 for id in ids:
                     draw_cell(boiling_sheet, id, cur_i, v[0], font_size=8)
                     # draw_cell(boiling_sheet, id, cur_i, v[id - 1], font_size=8)
                 if sheet_name == 'Вода':
-                    first_cell_formula = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    first_cell_formula = '=IF(K{0}="-", "", {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
                 else:
-                    first_cell_formula = '=IF(J{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    first_cell_formula = '=IF(K{0}="-", "-", MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
                 draw_cell(boiling_sheet, 1, cur_i, first_cell_formula, font_size=8)
 
             else:
+                print(v)
                 if v[-1] == 'main':
-                    colour = get_colour_by_name(v[5], skus)
+                    colour = get_colour_by_name(v[6], skus)
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
 
                 if sheet_name == 'Вода':
-                    v[0] = '=IF(J{0}="-", "", 1 + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    v[0] = '=IF(K{0}="-", "", {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
                 else:
-                    v[0] = '=IF(J{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(M{0})) & ":" & ADDRESS(ROW(),COLUMN(M{0})))))'.format(
+                    v[0] = '=IF(K{0}="-", "-", MAX(\'Вода\'!$A$2:$A$100) + {1} + SUM(INDIRECT(ADDRESS(2,COLUMN(N{0})) & ":" & ADDRESS(ROW(),COLUMN(N{0})))))'.format(
                         cur_i, batch_number)
 
-                v[1] = '=IF(F{0}="","",IF(J{0}="-","",1+SUM(INDIRECT(ADDRESS(2,COLUMN(M{0}))&":"&ADDRESS(ROW(),COLUMN(M{0}))))))'.format(
+                v[1] = '=IF(G{0}="","",IF(K{0}="-","",1+SUM(INDIRECT(ADDRESS(2,COLUMN(N{0}))&":"&ADDRESS(ROW(),COLUMN(N{0}))))))'.format(
                     cur_i)
                 draw_row(boiling_sheet, cur_i, v[:-1], font_size=8, color=colour)
-                draw_cell(boiling_sheet, 9, cur_i, 1, font_size=8)
+                draw_cell(boiling_sheet, 10, cur_i, 1, font_size=8)
             cur_i += 1
     new_file_name = '{} План по варкам'.format(file_name.split(' ')[0])
     path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)

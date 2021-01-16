@@ -4,6 +4,8 @@ from pycel import ExcelCompiler
 from werkzeug.utils import redirect
 from . import main
 import pandas as pd
+
+from .errors import internal_error
 from .. import db
 from .forms import BoilingPlanForm, FileForm
 from ..models_new import SKU, Boiling
@@ -18,47 +20,50 @@ from .. utils.generate_constructor import *
 
 @main.route('/boiling_plan_full', methods=['POST', 'GET'])
 def boiling_plan_full():
-    form = BoilingPlanForm()
-    if request.method == 'POST' and form.validate_on_submit():
-        batch_number = form.batch_number.data
-        file = request.files['input_file']
-        file_path = os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename)
-        if file:
-            file.save(file_path)
+    try:
+        form = BoilingPlanForm()
+        if request.method == 'POST' and form.validate_on_submit():
+            batch_number = form.batch_number.data
+            file = request.files['input_file']
+            file_path = os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename)
+            if file:
+                file.save(file_path)
 
-        excel = ExcelCompiler(file_path)
-        wb = openpyxl.load_workbook(filename=os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename),
-                                    data_only=True)
-        sheet_name = current_app.config['SHEET_NAMES']['schedule_plan']
-        ws = wb[sheet_name]
-        values = []
-        for i in range(1, 200):
-            if ws.cell(i, 4).value:
-                values.append([excel.evaluate("'{}'!{}".format(
-                    sheet_name,
-                    ws.cell(i, j).coordinate)) for j in range(4, 8)])
+            excel = ExcelCompiler(file_path)
+            wb = openpyxl.load_workbook(filename=os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename),
+                                        data_only=True)
+            sheet_name = current_app.config['SHEET_NAMES']['schedule_plan']
+            ws = wb[sheet_name]
+            values = []
+            for i in range(1, 200):
+                if ws.cell(i, 4).value:
+                    values.append([excel.evaluate("'{}'!{}".format(
+                        sheet_name,
+                        ws.cell(i, j).coordinate)) for j in range(4, 8)])
 
-        df = pd.DataFrame(values[1:], columns=['sku', 'remainings - request', 'normative remainings', 'plan'])
-        df = df.fillna(0)
-        df = df[df['plan'] != 0]
-        df = df[df['plan'].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())]
-        path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
-        df[['sku', 'plan']].to_csv(path, index=False)
-        df = df[['sku', 'plan']]
-        os.remove(file_path)
+            df = pd.DataFrame(values[1:], columns=['sku', 'remainings - request', 'normative remainings', 'plan'])
+            df = df.fillna(0)
+            df = df[df['plan'] != 0]
+            df = df[df['plan'].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())]
+            path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
+            df[['sku', 'plan']].to_csv(path, index=False)
+            df = df[['sku', 'plan']]
+            os.remove(file_path)
 
-        df['sku'] = df['sku'].apply(cast_sku)
-        df = df.replace(to_replace='None', value=np.nan).dropna()
-        df['boiling_id'] = df['sku'].apply(lambda x: x.made_from_boilings[0].id)
-        df['sku_id'] = df['sku'].apply(lambda x: x.id)
-        df['plan'] = df['plan'].apply(lambda x: -float(x))
-        df = df[['boiling_id', 'sku_id', 'plan']]
-        df['sku'] = df['sku_id'].apply(cast_sku)
-        full_plan = generate_constructor_df_v3(df)
-        template_wb = openpyxl.load_workbook(current_app.config['TEMPLATE_BOILING_PLAN'])
-        new_file_name = draw_constructor_template(full_plan, file.filename, template_wb, batch_number=batch_number)
-        return render_template('boiling_plan_full.html', form=form, file_name=new_file_name)
-    file_name = None
-    return render_template('boiling_plan_full.html', form=form, file_name=file_name)
+            df['sku'] = df['sku'].apply(cast_sku)
+            df = df.replace(to_replace='None', value=np.nan).dropna()
+            df['boiling_id'] = df['sku'].apply(lambda x: x.made_from_boilings[0].id)
+            df['sku_id'] = df['sku'].apply(lambda x: x.id)
+            df['plan'] = df['plan'].apply(lambda x: abs(float(x)))
+            df = df[['boiling_id', 'sku_id', 'plan']]
+            df['sku'] = df['sku_id'].apply(cast_sku)
+            full_plan = generate_constructor_df_v3(df)
+            template_wb = openpyxl.load_workbook(current_app.config['TEMPLATE_BOILING_PLAN'])
+            new_file_name = draw_constructor_template(full_plan, file.filename, template_wb, batch_number=batch_number)
+            return render_template('boiling_plan_full.html', form=form, file_name=new_file_name)
+        file_name = None
+        return render_template('boiling_plan_full.html', form=form, file_name=file_name)
+    except Exception as e:
+        return internal_error(e)
 
 
