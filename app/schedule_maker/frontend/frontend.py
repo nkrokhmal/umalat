@@ -50,7 +50,7 @@ def make_cheese_makers(schedule, rng):
             with make('header', index_width=0, start_time='00:00', push_func=add_push):
                 make('template', x=(1, 0), size=(3, 2), text=f'Сыроизготовитель №1 Poly {i + 1}', color=(183, 222, 232), push_func=add_push)
 
-            for boiling in schedule.iter({'class': 'boiling', 'pouring_line': str(i)}):
+            for boiling in schedule.iter(cls='boiling', pouring_line=str(i)):
                 boiling_model = boiling.props['boiling_model']
 
                 # todo: make properly
@@ -76,7 +76,7 @@ def make_cheese_makers(schedule, rng):
 
 def make_cleanings(schedule):
     maker, make = init_block_maker('cleanings_row', axis=1)
-    for cleaning in schedule.iter({'class': 'cleaning'}):
+    for cleaning in schedule.iter(cls='cleaning'):
         b = maker.copy(cleaning, with_props=True)
         b.props.update(size=(b.props['size'][0], 2))
         make(b, push_func=add_push)
@@ -90,8 +90,8 @@ def make_water_meltings(schedule, draw_all_coolings=True):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
     with make('melting_row', push_func=add_push):
-        for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == LineName.WATER}):
-            form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})])
+        for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.WATER):
+            form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter(cls='melting_process')])
 
             with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], push_func=add_push, form_factor_label=form_factor_label):
                 with make('serving_row'):
@@ -111,7 +111,7 @@ def make_water_meltings(schedule, draw_all_coolings=True):
     with make('cooling_row', axis=1):
         cooling_lines = [make('cooling_line', is_parent_node=True, size=(0, 1)).block for _ in range(n_cooling_lines)]
 
-    for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == LineName.WATER}):
+    for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.WATER):
         class_validator = ClassValidator(window=10)
         def validate(b1, b2):
             validate_disjoint_by_axis(b1, b2)
@@ -157,7 +157,7 @@ def make_shifts(start_from, shifts):
 def make_salt_melting(boiling):
     maker, make = init_block_maker('meltings', axis=1)
 
-    form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter({'class': 'melting_process'})])
+    form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter(cls='melting_process')])
 
     with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], form_factor_label=form_factor_label, push_func=add_push):
         with make('label_row', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), push_func=add_push):
@@ -189,7 +189,7 @@ def make_salt_meltings(schedule):
 
     # todo: hardcode, add empty elements for drawing not to draw melting_line itself
 
-    for i, boiling in enumerate(schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == LineName.SALT})):
+    for i, boiling in enumerate(schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.SALT)):
         push(melting_lines[i % n_lines], make_salt_melting(boiling), push_func=add_push)
     return maker.root
 
@@ -199,9 +199,9 @@ def make_packings(schedule, line_name):
 
     for packing_team_id in range(1, 3):
         with make('packing_team', size=(0, 3), axis=0, is_parent_node=True):
-            for boiling in schedule.iter({'class': 'boiling', 'boiling_model': lambda bm: bm.line.name == line_name}):
-                for packing in boiling.iter({'class': 'packing', 'packing_team_id': packing_team_id}):
-                    boiling_skus = [packing_process.props['sku'] for packing_process in packing.iter({'class': 'packing_process'})]
+            for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
+                for packing in boiling.iter(cls='packing', packing_team_id=packing_team_id):
+                    boiling_skus = [packing_process.props['sku'] for packing_process in packing.iter(cls='packing_process')]
 
                     form_factor_label = calc_form_factor_label([sku.form_factor for sku in boiling_skus])
 
@@ -217,7 +217,7 @@ def make_packings(schedule, line_name):
                             make('packing_brand', size=(packing.size[0], 1))
 
                         with make(is_parent_node=True):
-                            for conf in packing.iter({'class': 'packing_configuration'}):
+                            for conf in packing.iter(cls='packing_configuration'):
                                 make('packing_configuration', x=(conf.props['x_rel'][0], 0), size=(conf.size[0], 1), push_func=add_push)
             for conf in listify(schedule['packing_configuration']):
                 # first level only

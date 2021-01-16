@@ -24,18 +24,18 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
     def validate(b1, b2):
         validate_disjoint_by_axis(b1['melting_process'], b2['melting_process'])
 
-        for p1, p2 in product(b1.iter({'class': 'packing_team'}), b2.iter({'class': 'packing_team'})):
+        for p1, p2 in product(b1.iter(cls='packing_team'), b2.iter(cls='packing_team')):
             if p1.props['packing_team_id'] != p2.props['packing_team_id']:
                 continue
             validate_disjoint_by_axis(p1, p2)
     class_validator.add('melting_and_packing_process', 'melting_and_packing_process', validate)
 
     def validate(b1, b2):
-        b1, b2 = list(sorted([b1, b2], key=lambda b: b.props['class'])) # melting_and_packing_process, packing_configuration
+        b1, b2 = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # melting_and_packing_process, packing_configuration
 
         if b1.props['packing_team_id'] != b2.props['packing_team_id']:
             return
-        packings = list(b1.iter({'class': "packing", 'packing_team_id': b2.props['packing_team_id']}))
+        packings = list(b1.iter(cls='packing', packing_team_id=b2.props['packing_team_id']))
         if not packings:
             return
         packing = packings[0]
@@ -64,24 +64,24 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                 make(block['cooling_process'], push_func=add_push)
 
     for packing_team_id in range(1, 3):
-        all_packing_processes = list(listify(mp['melting_and_packing_process'])[0].iter({'class': 'packing_process', 'packing_team_id': packing_team_id}))
+        all_packing_processes = list(listify(mp['melting_and_packing_process'])[0].iter(cls='packing_process', packing_team_id=packing_team_id))
 
         if all_packing_processes:
             with make('packing', x=(all_packing_processes[0].x[0] + maker.root['melting']['meltings'].x[0], 0),
                       packing_team_id=packing_team_id, push_func=add_push):
                 for block in mp.children:
-                    if block.props['class'] == 'packing_configuration':
+                    if block.props['cls'] == 'packing_configuration':
                         make('packing_configuration', size=(block.size[0], 0))
-                    elif block.props['class'] == 'melting_and_packing_process':
+                    elif block.props['cls'] == 'melting_and_packing_process':
                         # get our packing
-                        packings = list(block.iter({'class': 'packing', 'packing_team_id': packing_team_id}))
+                        packings = list(block.iter(cls='packing', packing_team_id=packing_team_id))
                         if not packings:
                             continue
                         packing = packings[0]
 
                         for b in packing.children:
-                            if b.props['class'] == 'packing_process':
-                                make(b.props['class'], size=(b.size[0], 0), sku=b.props['sku'])
-                            elif b.props['class'] == 'packing_configuration':
-                                make(b.props['class'], size=(b.size[0], 0))
+                            if b.props['cls'] == 'packing_process':
+                                make(b.props['cls'], size=(b.size[0], 0), sku=b.props['sku'])
+                            elif b.props['cls'] == 'packing_configuration':
+                                make(b.props['cls'], size=(b.size[0], 0))
     return maker.root
