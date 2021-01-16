@@ -1,7 +1,7 @@
-from ..models import *
+from ..models_new import *
 from flask import render_template, flash,  request, current_app, Markup
 from . import main
-from .forms import RequestForm
+from .forms import SkuPlanForm
 from io import BytesIO
 from .. utils.excel_client import *
 from urllib.parse import quote
@@ -16,13 +16,13 @@ COLUMNS = {
 
 @main.route('/sku_plan', methods=['GET', 'POST'])
 def sku_plan():
-    form = RequestForm()
+    form = SkuPlanForm()
     if request.method == 'POST' and form.validate_on_submit():
         result_list = []
         date = form.date.data
         skus = db.session.query(SKU).all()
 
-        group_items = [{'BoilingId': x.boilings[0].id} for x in skus.copy()]
+        group_items = [{'BoilingId': x.made_from_boilings[0].id} for x in skus.copy()]
         group_items = [dict(x) for x in set(frozenset(d.items()) for d in group_items)]
 
         file_bytes = request.files['input_file'].read()
@@ -51,17 +51,16 @@ def sku_plan():
 
         for group_item in group_items:
             group_sku = [x for x in full_list if
-                         x['SKU'].boilings[0].id == group_item['BoilingId']]
+                         x['SKU'].made_from_boilings[0].id == group_item['BoilingId']]
             if len(group_sku) > 0:
-                # todo: вынести выход с тонны в параметры линии
-                output_weight = group_sku[0]['SKU'].output_per_ton
+                output_weight = group_sku[0]['SKU'].line.output_per_ton
                 request_weight = sum([x['Request'] for x in group_sku if x['Request'] < 0])
                 result_list.append({
                     'GroupSKU': group_sku,
-                    'BoilingId': group_sku[0]['SKU'].boilings[0].id,
+                    'BoilingId': group_sku[0]['SKU'].made_from_boilings[0].id,
                     'BoilingCount': - request_weight / output_weight,
-                    'Volume': group_sku[0]['SKU'].output_per_ton,
-                    'IsLactose': group_sku[0]['SKU'].boilings[0].is_lactose
+                    'Volume': group_sku[0]['SKU'].line.output_per_ton,
+                    'IsLactose': group_sku[0]['SKU'].made_from_boilings[0].is_lactose
                 })
 
         file_name = build_plan_sku(date, df_save, request_list=result_list)

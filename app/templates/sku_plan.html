@@ -69,9 +69,9 @@
         {% for d in result_list %}
             <tr>
                 <td> {{d["GroupSKU"][0]["SKU"].form_factor.name}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].boilings[0].percent}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].boilings[0].is_lactose}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].boilings[0].ferment}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].percent}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].is_lactose}} </td>
+                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].ferment}} </td>
                 <td> {{d["BoilingCount"]|round|int}} </td>
             </tr>
         {% endfor %}

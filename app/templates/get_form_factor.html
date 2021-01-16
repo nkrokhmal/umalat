@@ -14,7 +14,7 @@
 
 <script type="text/javascript">
     $(function () {
-        $(".delete-current-bff").click(function () {
+        $(".delete-current-ff").click(function () {
             var id = $(this).data('id');
             $(".btn.btn-danger.btn-ok").attr("data-id", id);
         })
@@ -38,7 +38,7 @@
                 }
             });
         });
-        $(".delete-current-bff").click(function () {
+        $(".delete-current-ff").click(function () {
             var id = $(this).data('id');
             $(".btn.btn-danger.btn-ok").click(function(){
                 $.ajax(
@@ -59,51 +59,55 @@
 </script>
 
 <p>
-    <a href="{{ url_for('main.add_boiling_form_factor')}}"><big> Добавить новый форм фактор плавления </big> </a>
+    <a href="{{ url_for('main.add_form_factor')}}"><big> Добавить новый форм фактор плавления </big> </a>
 </p>
 
 <table class="table table-hover bff" id="bff">
     <thead>
         <tr>
             <th>Вес, г</th>
+            <th>Название форм фактора</th>
+            <th>Группа</th>
             <th>Время первого охлаждения, мин</th>
             <th>Время второго охлаждения, мин</th>
             <th>Время посолки, мин</th>
             <th> Действия </th>
         </tr>
     </thead>
-    {% for bff in bffs %}
+    {% for form_factor in form_factors %}
     <tr>
-        <td> {{bff.weight}} </td>
-        <td>
-            {% if bff.first_cooling_time %}
-                {{bff.first_cooling_time}}
+        <td align="center"> {{form_factor.relative_weight}} </td>
+        <td > {{form_factor.name}} </td>
+        <td> {{form_factor.group.name}} </td>
+        <td align="center">
+            {% if form_factor.default_cooling_technology.first_cooling_time %}
+                {{form_factor.default_cooling_technology.first_cooling_time}}
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </td>
+        <td align="center">
+            {% if form_factor.default_cooling_technology.second_cooling_time %}
+                {{form_factor.default_cooling_technology.second_cooling_time}}
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </td>
+        <td align="center">
+            {% if form_factor.default_cooling_technology.salting_time %}
+                {{form_factor.default_cooling_technology.salting_time}}
             {% else %}
                 &nbsp;
             {% endif %}
         </td>
         <td>
-            {% if bff.second_cooling_time %}
-                {{bff.second_cooling_time}}
-            {% else %}
-                &nbsp;
-            {% endif %}
-        </td>
-        <td>
-            {% if bff.salting_time %}
-                {{bff.salting_time}}
-            {% else %}
-                &nbsp;
-            {% endif %}
-        </td>
-        <td>
-            <a href="{{ url_for('main.edit_boiling_form_factor', bff_id = bff.id)}}" class="edit-bff">
+            <a href="{{ url_for('main.edit_form_factor', ff_id = form_factor.id)}}" class="edit-ff">
                 <i class="material-icons" style="color:green" title="Edit"> &#xe3c9; </i>
             </a>
-            <a href="#delete_bff" class="delete-current-bff" data-id={{bff.id}} data-toggle="modal">
+            <a href="#delete_ff" class="delete-current-ff" data-id={{form_factor.id}} data-toggle="modal">
                 <i class="material-icons" data-toggle="tooltip" style="color:red" title="Delete"> &#xE872; </i>
             </a>
-            <div id="delete_bff" class="modal fade" >
+            <div id="delete_ff" class="modal fade" >
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <form>
