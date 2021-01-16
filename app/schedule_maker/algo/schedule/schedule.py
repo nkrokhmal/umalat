@@ -6,7 +6,6 @@ from app.enum import LineName
 
 class_validator = ClassValidator(window=10)
 
-
 def validate(b1, b2):
     validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2['pouring']['first']['termizator'])  # [termizator.basic]
 
@@ -21,8 +20,6 @@ def validate(b1, b2):
             if p1.props['packing_team_id'] != p2.props['packing_team_id']:
                 continue
             validate_disjoint_by_axis(p1, p2)
-
-
 class_validator.add('boiling', 'boiling', validate)
 
 
@@ -63,7 +60,7 @@ def make_schedule(boilings, start_times=None):
     if not lines_df['start_time'].any():
         raise Exception('Укажите время начала варок')
 
-    def add_block(line_name):
+    def add_one_block_from_line(line_name):
         boiling = lines_df.at[line_name, 'boilings_left'].pop(0)
         if not lines_df.at[line_name, 'latest_boiling']:
             if lines_df.at[line_name, 'start_time']:
@@ -73,6 +70,12 @@ def make_schedule(boilings, start_times=None):
                 start_from = latest_boiling.x[0]
         else:
             start_from = lines_df.at[line_name, 'latest_boiling'].x[0]
+
+        # add configuration if needed
+        # if lines_df.at[line_name, 'latest_boiling']:
+
+
+
 
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
         lines_df.at[line_name, 'latest_boiling'] = boiling
@@ -101,7 +104,7 @@ def make_schedule(boilings, start_times=None):
         else:
             raise Exception('Should not happen')
 
-        add_block(line_name)
+        add_one_block_from_line(line_name)
 
     # add cleanings if necessary
     boilings = list(schedule.iter({'class': 'boiling'}))

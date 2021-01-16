@@ -92,7 +92,7 @@ def make_mpp(boiling_df, left_boiling_volume):
             for i, (_, row) in enumerate(df.iterrows()):
                 # add configuration
                 if i >= 1:
-                    conf_time_size = get_configuration_time(boiling_model, row['sku'], df.iloc[i - 1]['sku'])
+                    conf_time_size = get_configuration_time(boiling_model.line.name, row['sku'], df.iloc[i - 1]['sku'])
                     if conf_time_size:
                         make('packing_configuration', size=[conf_time_size // 5, 0])
                 make('packing_process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku'])

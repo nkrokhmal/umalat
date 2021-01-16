@@ -2,7 +2,6 @@ from utils_ak.interactive_imports import *
 
 from app.schedule_maker.algo.boiling import make_boiling
 from app.schedule_maker.algo.melting_and_packing import *
-
 from app.enum import LineName
 
 

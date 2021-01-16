@@ -13,7 +13,7 @@ class boiling_group_to_schema:
         bff_kgs = df.groupby('bff_id').agg({'kg': 'sum', 'bff': 'first', 'index': 'first'})
         bff_kgs = bff_kgs.sort_values(by='index')
 
-        iterator = SimpleBoundedIterator([[row['bff'], row['kg']] for bff_id, row in bff_kgs.iterrows()])
+        iterator = SimpleIterator([[row['bff'], row['kg']] for bff_id, row in bff_kgs.iterrows()])
 
         boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo: make properly
         total_kg = df['kg'].sum()
@@ -39,7 +39,9 @@ class boiling_group_to_schema:
                 boiling_meltings.append([bff, cur_value])
 
                 if abs(iterator.current()[-1]) < ERROR:
-                    iterator.next()
+                    next = iterator.next()
+                    if not next and left > ERROR:
+                        raise Exception('Could not collect schema')
 
             res.append(boiling_meltings)
         return res

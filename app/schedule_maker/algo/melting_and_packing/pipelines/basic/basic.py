@@ -52,7 +52,7 @@ def make_melting_and_packing_basic(boiling_plan):
 
             if i != len(boiling_plan) - 1:
                 # add configuration
-                conf_time_size = get_configuration_time(boiling_model, sku, boiling_plan.iloc[i + 1]['sku'])
+                conf_time_size = get_configuration_time(boiling_model.line.name, sku, boiling_plan.iloc[i + 1]['sku'])
 
                 if conf_time_size:
                     make('packing_configuration', size=[conf_time_size // 5, 0])

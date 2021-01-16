@@ -1,9 +1,18 @@
 from itertools import product
-from utils_ak.block_tree import *
-from utils_ak.builtin import listify
-from app.schedule_maker.algo.packing import get_configuration_time
+from utils_ak.interactive_imports import *
 
-# todo: refactor?
+from app.schedule_maker.algo.packing import get_configuration_time, make_configuration_blocks
+
+
+def fill_configurations(maker, mpps, boiling_model):
+    res = [mpps[0]]
+
+    for mpp1, mpp2 in SimpleIterator(mpps).iter_sequences(2):
+        res += make_configuration_blocks(mpp1, mpp2, maker, boiling_model.line.name)
+        res.append(mpp2)
+    return res
+
+
 def make_melting_and_packing_from_mpps(boiling_model, mpps):
     maker, make = init_block_maker('melting_and_packing', axis=0)
 
@@ -29,32 +38,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
         validate_disjoint_by_axis(packing, b2)
     class_validator.add('melting_and_packing_process', 'packing_configuration', validate, uni_direction=True)
 
-    # add configurations if necessary
-    blocks = [mpps[0]]
-    for i in range(len(mpps) - 1):
-        mpp1, mpp2 = mpps[i: i + 2]
-
-        for packing_team_id in range(1, 3):
-            packings = list(mpp1.iter({'class': "packing", 'packing_team_id': packing_team_id}))
-            if not packings:
-                continue
-            packing1 = packings[0]
-
-            packings = list(mpp2.iter({'class': "packing", 'packing_team_id': packing_team_id}))
-            if not packings:
-                continue
-            packing2 = packings[0]
-
-            sku1 = listify(packing1['packing_process'])[-1].props['sku']  # last sku
-            sku2 = listify(packing2['packing_process'])[0].props['sku']  # first sku
-
-            conf_time_size = get_configuration_time(boiling_model, sku1, sku2)
-            if conf_time_size:
-                conf_block = maker.create_block('packing_configuration', size=[conf_time_size // 5, 0], packing_team_id=packing_team_id)
-                blocks.append(conf_block)
-
-        # add right block
-        blocks.append(mpp2)
+    blocks = fill_configurations(maker, mpps, boiling_model)
 
     for c in blocks:
         push(maker.root, c, push_func=lambda parent, block: dummy_push(parent, block, start_from='last_beg', validator=class_validator))
@@ -76,7 +60,6 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                 make(block['cooling_process'], push_func=add_push)
 
     for packing_team_id in range(1, 3):
-        # todo: hardcode
         all_packing_processes = list(listify(mp['melting_and_packing_process'])[0].iter({'class': 'packing_process', 'packing_team_id': packing_team_id}))
 
         if all_packing_processes:
