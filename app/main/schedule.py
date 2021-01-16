@@ -3,13 +3,13 @@ from .. utils.excel_client import *
 from . import main
 from .. import db
 from .forms import ScheduleForm
-from ..models import SKU
 import io
 import openpyxl
 from pycel import ExcelCompiler
 
 from utils_ak.interactive_imports import *
 from app.schedule_maker import *
+from app.enum import LineName
 
 from config import basedir
 
@@ -31,7 +31,8 @@ def schedule():
 
         boiling_plan_df = read_boiling_plan(wb)
         boilings = make_boilings_by_groups(boiling_plan_df)
-        schedule = make_schedule(boilings, start_times={'water': form.water_beg_time.data, 'salt': form.salt_beg_time.data})
+
+        schedule = make_schedule(boilings, start_times={LineName.WATER: form.water_beg_time.data, LineName.SALT: form.salt_beg_time.data})
         frontend = make_frontend(schedule)
         schedule_wb = draw_excel_frontend(frontend, open_file=True, fn=None)
 
