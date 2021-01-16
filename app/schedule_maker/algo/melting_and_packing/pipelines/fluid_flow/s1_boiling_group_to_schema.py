@@ -2,6 +2,7 @@ from app.schedule_maker.models import *
 from app.schedule_maker.calculation import *
 from app.enum import LineName
 
+
 class BoilingGroupToSchema:
     def _calc_boilings_meltings(self, boiling_group_df):
         df = boiling_group_df.copy()
