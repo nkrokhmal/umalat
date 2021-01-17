@@ -4,6 +4,7 @@ from app.schedule_maker.algo.schedule.boilings import *
 from app.schedule_maker.algo.stats import *
 from pprint import pprint
 
+
 def make_schedule_with_boiling_inside_a_day(boiling_plan_df):
     res = {}
     boilings = make_boilings_by_groups(boiling_plan_df)

@@ -10,7 +10,7 @@ from app.enum import LineName
 #                                                                'cleaning': {'boiling': 1, 'cleaning': 1},
 #                                                                'packing_configuration': {'boiling': 4}})
 
-class_validator = ClassValidator(window=10)
+class_validator = ClassValidator(window=20)
 
 
 def validate(b1, b2):
