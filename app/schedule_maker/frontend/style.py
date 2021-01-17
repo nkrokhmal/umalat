@@ -28,6 +28,10 @@ STYLE = {
                  # 'text': lambda b: 'полная мойка термизатора' if b.props['cleaning_type'] == 'full' else 'короткая мойка\nтермизатора'
                  },
 
+    'multihead_cleaning': {'color': 'yellow',
+                 'text': 'Мойка мультиголовы'
+                 },
+
     'template': {'visible': True},
     'time': {'visible': True},
     'stub': {'visible': False}

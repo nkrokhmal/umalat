@@ -27,16 +27,21 @@ def validate(b1, b2):
             if p1.props['packing_team_id'] != p2.props['packing_team_id']:
                 continue
             validate_disjoint_by_axis(p1, p2)
-
 class_validator.add('boiling', 'boiling', validate)
 
 def validate(b1, b2):
-    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # boiling, cleaning
+    boiling, multihead_cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, multihead_cleaning
+    for b in boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'):
+        validate_disjoint_by_axis(multihead_cleaning, b)
+class_validator.add('multihead_cleaning', 'boiling', validate)
+
+def validate(b1, b2):
+    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, cleaning
     validate_disjoint_by_axis(boiling['pouring']['first']['termizator'], cleaning)
 class_validator.add('boiling', 'cleaning', validate)
 
 def validate(b1, b2):
-    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # boiling, cleaning
+    boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, cleaning
     validate_disjoint_by_axis(cleaning, boiling['pouring']['first']['termizator'])
 class_validator.add('cleaning', 'boiling', validate)
 
@@ -107,6 +112,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                 conf.props.update(line_name=line_name)
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
 
+        # add cleaning if needed
         if cleaning_boiling and cleaning_boiling == boiling:
             # full cleaning needed
             # todo: code duplicate
@@ -133,6 +139,27 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                         # full cleaning needed
                         cleaning = make_termizator_cleaning_block('full', text='ПМ перед безлактозкой')
                         push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
+
+        if lines_df['latest_boiling'].notnull().any():  # todo: make better check for any boilings present
+            # find last multihead packing
+            last_multihead_boiling = None
+            for b in reversed(sorted(listify(schedule.children), key=lambda b: b.y[0])):
+                if b.props['cls'] not in ['boiling', 'multihead_cleaning']:
+                    continue
+
+                if b.props['cls'] == 'multihead_cleaning':
+                    # previously already head multihead_cleaning
+                    break
+
+                if list(b.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова')):
+                    last_multihead_boiling = b
+                    break
+
+            if last_multihead_boiling and last_multihead_boiling.props['boiling_model'].line.name != boiling.props['boiling_model'].line.name:
+                # multihead cleaning needed
+                last_packing_process = list(last_multihead_boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'))[-1]
+                push(schedule, maker.create_block('multihead_cleaning', x=(last_packing_process.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
+
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
         lines_df.at[line_name, 'latest_boiling'] = boiling
         return boiling

@@ -75,10 +75,20 @@ def make_cheese_makers(schedule, rng):
 
 
 def make_cleanings(schedule):
-    maker, make = init_block_maker('cleanings_row', axis=1)
+    maker, make = init_block_maker('cleanings_row', is_parent_node=True, axis=1)
     for cleaning in schedule.iter(cls='cleaning'):
         b = maker.copy(cleaning, with_props=True)
         b.props.update(size=(b.props['size'][0], 2))
+        make(b, push_func=add_push)
+    return maker.root
+
+
+
+def make_multihead_cleanings(schedule):
+    maker, make = init_block_maker('multihead_cleanings_row', is_parent_node=True, axis=1)
+    for multihead_cleaning in schedule.iter(cls='multihead_cleaning'):
+        b = maker.copy(multihead_cleaning, with_props=True)
+        b.props.update(size=(b.props['size'][0], 1))
         make(b, push_func=add_push)
     return maker.root
 
@@ -257,6 +267,7 @@ def make_frontend(schedule):
     make(make_header(start_time=start_time))
 
     with make('melting', start_time=start_time, axis=1):
+        make(make_multihead_cleanings(schedule))
         make(make_water_meltings(schedule))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
         make(make_packings(schedule, LineName.WATER))
