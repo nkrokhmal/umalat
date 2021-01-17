@@ -74,7 +74,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
             cur_row += space_rows
         is_lactose = group_skus['GroupSKU'][0]['SKU'].made_from_boilings[0].is_lactose
         beg_row = cur_row
-        block = ExcelBlock(sheet=sheet_plan, row_height=24)
+        block = ExcelBlock(sheet=sheet_plan, row_height=18)
         group_formula = []
 
         for form_factor in current_app.config['ORDER']:
