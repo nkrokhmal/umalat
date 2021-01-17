@@ -69,6 +69,7 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
     maker, make = init_block_maker('cleaning', size=(cleaning_duration // 5, 0), cleaning_type=cleaning_type, **kwargs)
     return maker.root
 
+
 @clockify()
 def make_schedule(boilings, cleaning_boiling=None, start_times=None):
     start_times = start_times or {LineName.WATER: '', LineName.SALT: '07:00'}
@@ -113,21 +114,11 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
 
         # add cleaning if needed
-        if cleaning_boiling and cleaning_boiling == boiling:
-            # full cleaning needed
-            # todo: code duplicate
-            latest_boilings = list(lines_df['latest_boiling'])
-            latest_boilings = [b for b in latest_boilings if b]
-            if not latest_boilings:
-                start_from = 0
-            else:
-                min_latest_boiling = min(latest_boilings, key=lambda b: b.x[0])
-                start_from = min_latest_boiling.x[0]
-
-            cleaning = make_termizator_cleaning_block('full', text='ПМ в середине дня')
-            push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
+        if cleaning_boiling and lines_df.at[line_name, 'latest_boiling'] == cleaning_boiling:
+            # already added cleaning
+            pass
         else:
-            # # add cleanings for non-lactose cheese
+            # add cleanings for non-lactose cheese
             if not boiling.props['boiling_model'].is_lactose:
                 latest_boilings = list(lines_df['latest_boiling'])
                 latest_boilings = [b for b in latest_boilings if b]
@@ -161,6 +152,12 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                 push(schedule, maker.create_block('multihead_cleaning', x=(last_packing_process.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
 
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
+
+        if cleaning_boiling and cleaning_boiling == boiling:
+            start_from = boiling['pouring']['first']['termizator'].y[0]
+            cleaning = make_termizator_cleaning_block('full', x=(boiling['pouring']['first']['termizator'].y[0], 0), text='ПМ в середине дня')
+            push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
+
         lines_df.at[line_name, 'latest_boiling'] = boiling
         return boiling
 
@@ -220,7 +217,8 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                 push(schedule, cleaning, push_func=add_push)
 
     last_boiling = list(schedule.iter(cls='boiling'))[-1]
-    cleaning = make_termizator_cleaning_block('full', x=(last_boiling['pouring']['first']['termizator'].y[0] + 1, 0), text='ПМ в конце дня')  # add five extra minutes
-    push(schedule, cleaning, push_func=add_push)
+    start_from = last_boiling['pouring']['first']['termizator'].y[0] + 1
+    cleaning = make_termizator_cleaning_block('full', text='ПМ в конце дня')  # add five extra minutes
+    push(schedule, cleaning, push_func=dummy_push, start_from=start_from, validator=class_validator)
 
     return schedule

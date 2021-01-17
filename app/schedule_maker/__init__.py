@@ -1,3 +1,7 @@
+import warnings
+warnings.filterwarnings("ignore")
+
+
 from .dataframes import *
 from .models import *
 from .time import *
