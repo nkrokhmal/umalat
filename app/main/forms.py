@@ -21,7 +21,7 @@ class BoilingPlanForm(FlaskForm):
     validators = [
         FileRequired(message='Отсутствует файл!')
     ]
-    batch_number = IntegerField('Введите номер первой партии в текущем дне', default=0, validators=[Optional()])
+    batch_number = IntegerField('Введите номер первой партии в текущем дне', default=1, validators=[Optional()])
     input_file = FileField('', validators=validators)
     submit = SubmitField(label="Отправить")
 

@@ -35,11 +35,12 @@ class BaseClass:
         'Чильеджина': '#E5DFEC',
         'Качокавалло': '#F1DADA',
         'Сулугуни': '#F1DADA',
+        'Терка': '#FFEBE0',
         'Default': '#FFFFFF',
         'DefaultGray': '#D9DDDC',
         'Remainings': '#F3F3C0'
     }
-    ORDER = ['Фиор Ди Латте', 'Чильеджина', 'Моцарелла', 'Сулугуни', 'Для пиццы', 'Качокавалло']
+    ORDER = ['Фиор Ди Латте', 'Чильеджина', 'Моцарелла', 'Сулугуни', 'Для пиццы', 'Качокавалло', 'Терка']
     BOILING_VOLUME_LIMITS = {
         'MIN': 6000,
         'MAX': 8000
@@ -56,11 +57,11 @@ class BaseClass:
 
 
 class DebugConfig(BaseClass):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH + '?check_same_thread=False'
 
 
 class ProductionConfig(BaseClass):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///' + SQLITE_PATH + '?check_same_thread=False'
 
 
 config = {
