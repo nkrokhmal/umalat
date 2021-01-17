@@ -37,7 +37,12 @@ def schedule():
             boilings = make_boilings_by_groups(boiling_plan_df)
 
             schedule = make_schedule(boilings, start_times={LineName.WATER: form.water_beg_time.data, LineName.SALT: form.salt_beg_time.data})
-            frontend = make_frontend(schedule)
+
+            try:
+                frontend = make_frontend(schedule)
+            except Exception as e:
+                raise Exception('Ошибка при построении расписания.')
+
             schedule_wb = draw_excel_frontend(frontend, open_file=True, fn=None)
 
             filename_schedule = '{}_{}.xlsx'.format(date.strftime('%Y-%m-%d'), 'Расписание')

@@ -53,11 +53,11 @@ def read_boiling_plan(wb_obj):
 
     # validate single boiling
     for _, grp in df.groupby('batch_id'):
-        assert len(grp['boiling'].unique()) == 1, "Only one boiling allowed inside a group"
+        assert len(grp['boiling'].unique()) == 1, "В одной объединенной группе варок должен быть только один тип варки."
 
     # validate kilograms
     for _, grp in df.groupby('batch_id'):
         boiling_model = grp.iloc[0]['boiling']
-        assert grp['kg'].sum() % boiling_model.line.output_per_ton == 0, "Fill enough kilograms for the boiling"
+        assert grp['kg'].sum() % boiling_model.line.output_per_ton == 0, "Одна из варок имеет неверное количество килограмм."
 
     return df.reset_index(drop=True)

@@ -124,6 +124,8 @@ class SchemaToBoilingsDataframes:
 
                     while df.at[i, 'beg'] >= df.at[i, 'end']:
                         df.at[i, 'end'] += 5
+        df['beg'] = df['beg'].astype(int)
+        df['end'] = df['end'].astype(int)
         return df
 
     def __call__(self, boilings_meltings, packings, melting_speed, round=True):

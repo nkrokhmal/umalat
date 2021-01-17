@@ -27,13 +27,13 @@ def draw_schedule(schedule, style, fn=None):
             color = cast_color(b.props.get('color', 'white'))
 
             try:
-                text = text.format(**b.props.get_all_props())
+                text = text.format(**b.props.all())
                 text = text.replace('<', '{')
                 text = text.replace('>', '}')
                 text = eval(f'f{text!r}')
 
                 x1 = b.x[0]
-                if 'start_time' in b.props.get_all_props():
+                if 'start_time' in b.props.all():
                     x1 -= cast_t(b.props['start_time'])  # shift of timeline
                 x1 += b.props['index_width']  # first index columns
                 x1 += 1  # indexing starts with 1 in excel
