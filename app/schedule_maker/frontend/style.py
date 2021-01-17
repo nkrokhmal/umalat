@@ -21,6 +21,7 @@ STYLE = {
     'packing_name': {'text': '{form_factor_label}'},
     'packing_brand': {'color': '#f2dcdb', 'text': '{brand_label}'},  # pink color
     'packing_configuration': {'color': 'red'},
+    'packing_process': {'color': '#f2dcdb'},
 
     'salting': {'color': (0, 176, 240), 'text': 'посолка'},  # light-blue color
 

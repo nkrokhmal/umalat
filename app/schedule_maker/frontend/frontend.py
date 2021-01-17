@@ -99,7 +99,7 @@ def make_water_meltings(schedule, draw_all_coolings=True):
     with make('header', start_time='00:00', push_func=add_push):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text='Линия плавления моцареллы в воде №1', push_func=add_push)
 
-    with make('melting_row', push_func=add_push):
+    with make('melting_row', push_func=add_push, is_parent_node=True):
         for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.WATER):
             form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter(cls='melting_process')])
 
@@ -227,6 +227,8 @@ def make_packings(schedule, line_name):
                             make('packing_brand', size=(packing.size[0], 1))
 
                         with make(is_parent_node=True):
+                            for packing_process in packing.iter(cls='packing_process'):
+                                make('packing_process', x=(packing_process.props['x_rel'][0], 0), size=(packing_process.size[0], 1), push_func=add_push)
                             for conf in packing.iter(cls='packing_configuration'):
                                 make('packing_configuration', x=(conf.props['x_rel'][0], 0), size=(conf.size[0], 1), push_func=add_push)
             try:
