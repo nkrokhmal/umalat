@@ -65,7 +65,7 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
     return maker.root
 
 @clockify()
-def make_schedule(boilings, start_times=None):
+def make_schedule(boilings, cleaning_boiling=None, start_times=None):
     start_times = start_times or {LineName.WATER: '', LineName.SALT: '07:00'}
 
     maker, make = init_block_maker('schedule')
@@ -107,18 +107,31 @@ def make_schedule(boilings, start_times=None):
                 conf.props.update(line_name=line_name)
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
 
-        # add cleanings for non-lactose cheese
-        if not boiling.props['boiling_model'].is_lactose:
+        if cleaning_boiling and cleaning_boiling == boiling:
+            # full cleaning needed
+            # todo: code duplicate
             latest_boilings = list(lines_df['latest_boiling'])
             latest_boilings = [b for b in latest_boilings if b]
-            if latest_boilings:
+            if not latest_boilings:
+                start_from = 0
+            else:
                 min_latest_boiling = min(latest_boilings, key=lambda b: b.x[0])
-                if min_latest_boiling:
+                start_from = min_latest_boiling.x[0]
+
+            cleaning = make_termizator_cleaning_block('full', text='ПМ в середине дня')
+            push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
+        else:
+            # # add cleanings for non-lactose cheese
+            if not boiling.props['boiling_model'].is_lactose:
+                latest_boilings = list(lines_df['latest_boiling'])
+                latest_boilings = [b for b in latest_boilings if b]
+                if latest_boilings:
+                    min_latest_boiling = min(latest_boilings, key=lambda b: b.x[0])
                     start_from = min_latest_boiling.x[0]
                     latest_boiling = lines_df.at[line_name, 'latest_boiling']
                     if latest_boiling and line_name == LineName.SALT and latest_boiling.props['boiling_model'].is_lactose:
                         # full cleaning needed
-                        cleaning = make_termizator_cleaning_block('full', text='Перерыв больше 80 минут')
+                        cleaning = make_termizator_cleaning_block('full', text='ПМ перед безлактозкой')
                         push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
         lines_df.at[line_name, 'latest_boiling'] = boiling
@@ -167,20 +180,20 @@ def make_schedule(boilings, start_times=None):
 
         if not in_between_cleanings:
             if 12 <= rest < 18:
-                cleaning = make_termizator_cleaning_block('short', text='1ч-80м')
+                cleaning = make_termizator_cleaning_block('short', text='КМ')
                 cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
                 push(schedule, cleaning, push_func=add_push)
 
             if rest >= 18:
                 if previous_cleaning and (a.x[0] - previous_cleaning.x[0]) < cast_t('04:00'):
-                    cleaning = make_termizator_cleaning_block('short', text='1ч-80м, правило 4 часов')
+                    cleaning = make_termizator_cleaning_block('short', text='КМ, 4 часа')
                 else:
-                    cleaning = make_termizator_cleaning_block('full', text='>80м')
+                    cleaning = make_termizator_cleaning_block('full', text='ПМ')
                 cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
                 push(schedule, cleaning, push_func=add_push)
 
     last_boiling = list(schedule.iter(cls='boiling'))[-1]
-    cleaning = make_termizator_cleaning_block('full', x=(last_boiling['pouring']['first']['termizator'].y[0] + 1, 0), text='Конец дня')  # add five extra minutes
+    cleaning = make_termizator_cleaning_block('full', x=(last_boiling['pouring']['first']['termizator'].y[0] + 1, 0), text='ПМ в конце дня')  # add five extra minutes
     push(schedule, cleaning, push_func=add_push)
 
     return schedule
