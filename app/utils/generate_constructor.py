@@ -10,7 +10,8 @@ def generate_constructor_df_v3(df_copy):
     df = df_copy.copy()
     df['plan'] = df['plan'].apply(lambda x: round(x))
     df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
-    df['weight'] = df['sku'].apply(lambda x: x.form_factor.relative_weight)
+    # todo: исправить костыль с терками
+    df['weight'] = df['sku'].apply(lambda x: x.form_factor.relative_weight if x.form_factor.group.name != 'Терка' else x.form_factor.relative_weight + 30)
     df['percent'] = df['sku'].apply(lambda x: x.made_from_boilings[0].percent)
     df['is_lactose'] = df['sku'].apply(lambda x: x.made_from_boilings[0].is_lactose)
     df['ferment'] = df['sku'].apply(lambda x: x.made_from_boilings[0].ferment)
@@ -46,7 +47,6 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
                        (df['ferment'] == order[2]) &
                        (order[3] is None or df['form_factor'] == order[3])]
         df_filter_dict = df_filter.sort_values(by='weight', ascending=False).to_dict('records')
-        print(df_filter_dict)
         boilings.add_group(df_filter_dict, is_lactose)
         is_lactose = order[0]
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
@@ -175,7 +175,6 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
                 draw_cell(boiling_sheet, 1, cur_i, first_cell_formula, font_size=8)
 
             else:
-                print(v)
                 if v[-1] == 'main':
                     colour = get_colour_by_name(v[6], skus)
                 else:

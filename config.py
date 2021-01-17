@@ -34,7 +34,7 @@ class BaseClass:
         'Чильеджина': '#E5DFEC',
         'Качокавалло': '#F1DADA',
         'Сулугуни': '#F1DADA',
-        'Терка': '#FFFFDF',
+        'Терка': '#FFEBE0',
         'Default': '#FFFFFF',
         'DefaultGray': '#D9DDDC',
         'Remainings': '#F3F3C0'
