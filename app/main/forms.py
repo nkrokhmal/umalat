@@ -57,6 +57,7 @@ class SKUForm(FlaskForm):
     pack_type = SelectField('Выберите тип упаковки', coerce=int, default=-1)
     form_factor = SelectField('Выберите тип форм фактора', coerce=int, default=-1)
     boiling = SelectField('Выберите тип варки', coerce=int, default=-1)
+    group = SelectField('Выберите название форм фактора', coerce=int, default=-1)
 
     submit = SubmitField(label='Сохранить')
 
@@ -83,6 +84,10 @@ class SKUForm(FlaskForm):
 
         self.boiling.choices = list(enumerate(set([x.to_str() for x in self.boilings])))
         self.boiling.choices.append((-1, ''))
+
+        self.groups = db.session.query(Group).all()
+        self.group.choices = list(enumerate(set([x.name for x in self.groups])))
+        self.group.choices.append((-1, ''))
 
     @staticmethod
     def validate_sku(self, name):
@@ -128,16 +133,9 @@ class BoilingForm(FlaskForm):
 
 class FormFactorForm(FlaskForm):
     relative_weight = StringField('Введите вес форм фактора', validators=[Required()])
-    group = SelectField('Выберите название форм фактора', coerce=int, default=-1)
     first_cooling_time = IntegerField('Введите первое время охлаждения', validators=[Optional()])
-    seconds_cooling_time = IntegerField('Введите второе время охлаждения', validators=[Optional()])
+    second_cooling_time = IntegerField('Введите второе время охлаждения', validators=[Optional()])
     salting_time = IntegerField('Введите время посолки', validators=[Optional()])
-
-    def __init__(self, *args, **kwargs):
-        super(FormFactorForm, self).__init__(*args, **kwargs)
-        self.groups = db.session.query(Group).all()
-        self.group.choices = list(enumerate(set([x.name for x in self.groups])))
-        self.group.choices.append((-1, ''))
 
     def validate_form_factor(self, percent, ferment, is_lactose, line):
         boiling = db.session.query(Boiling) \

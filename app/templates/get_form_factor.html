@@ -67,7 +67,6 @@
         <tr>
             <th>Вес, г</th>
             <th>Название форм фактора</th>
-            <th>Группа</th>
             <th>Время первого охлаждения, мин</th>
             <th>Время второго охлаждения, мин</th>
             <th>Время посолки, мин</th>
@@ -78,7 +77,6 @@
     <tr>
         <td align="center"> {{form_factor.relative_weight}} </td>
         <td > {{form_factor.name}} </td>
-        <td> {{form_factor.group.name}} </td>
         <td align="center">
             {% if form_factor.default_cooling_technology.first_cooling_time %}
                 {{form_factor.default_cooling_technology.first_cooling_time}}
