@@ -80,7 +80,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
         group_formula = []
 
         for form_factor in current_app.config['ORDER']:
-            block_skus = [x for x in group_skus['GroupSKU'] if x['SKU'].form_factor.group.name == form_factor]
+            block_skus = [x for x in group_skus['GroupSKU'] if x['SKU'].group.name == form_factor]
             beg_ff_row = cur_row
             for sku in block_skus:
                 formula_plan = "=INDEX('{0}'!$A$5:$DK$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0))".format(
@@ -89,7 +89,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                     current_app.config['SHEET_NAMES']['remainings'], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
 
                 print(sku["SKU"].name, cur_row)
-                block.colour = current_app.config['COLOURS'][sku['SKU'].form_factor.group.name][1:]
+                block.colour = current_app.config['COLOURS'][sku['SKU'].group.name][1:]
                 block.cell_value(row=cur_row, col=CELLS['Brand'].column, value=sku["SKU"].brand_name)
                 block.cell_value(row=cur_row, col=CELLS['SKU'].column, value=sku["SKU"].name)
                 block.cell_value(row=cur_row, col=CELLS['FactRemains'].column, value=formula_plan)

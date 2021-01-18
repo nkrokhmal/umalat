@@ -44,7 +44,8 @@ def schedule():
             try:
                 frontend = make_frontend(schedule)
             except Exception as e:
-                raise Exception('Ошибка при построении расписания.')
+                return internal_error(e)
+                # raise Exception('Ошибка при построении расписания.')
 
             schedule_wb = draw_excel_frontend(frontend, open_file=True, fn=None)
 
@@ -56,6 +57,7 @@ def schedule():
 
         filename_schedule = None
         return render_template('schedule.html', form=form, filename=filename_schedule)
+
     except Exception as e:
         db.session.rollback()
-        internal_error(e)
+        return internal_error(e)

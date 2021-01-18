@@ -11,11 +11,11 @@ def generate_constructor_df_v3(df_copy):
     df['plan'] = df['plan'].apply(lambda x: round(x))
     df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
     # todo: исправить костыль с терками
-    df['weight'] = df['sku'].apply(lambda x: x.form_factor.relative_weight if x.form_factor.group.name != 'Терка' else x.form_factor.relative_weight + 30)
+    df['weight'] = df['sku'].apply(lambda x: x.form_factor.relative_weight if x.group.name != 'Терка' else x.form_factor.relative_weight + 30)
     df['percent'] = df['sku'].apply(lambda x: x.made_from_boilings[0].percent)
     df['is_lactose'] = df['sku'].apply(lambda x: x.made_from_boilings[0].is_lactose)
     df['ferment'] = df['sku'].apply(lambda x: x.made_from_boilings[0].ferment)
-    df['form_factor'] = df['sku'].apply(lambda x: x.form_factor.group.name)
+    df['form_factor'] = df['sku'].apply(lambda x: x.group.name)
 
     water, boiling_number = handle_water(df[df['boiling_type'] == 'water'])
     salt, boiling_number = handle_salt(df[df['boiling_type'] == 'salt'], boiling_number=boiling_number + 1)
@@ -204,6 +204,6 @@ def draw_constructor_template(df, file_name, wb, batch_number=0):
 def get_colour_by_name(sku_name, skus):
     sku = [x for x in skus if x.name == sku_name]
     if len(sku) > 0:
-        return current_app.config['COLOURS'][sku[0].form_factor.group.name]
+        return current_app.config['COLOURS'][sku[0].group.name]
     else:
         return current_app.config['COLOURS']['Default']
