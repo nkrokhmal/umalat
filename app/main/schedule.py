@@ -49,7 +49,7 @@ def schedule():
 
             schedule_wb = draw_excel_frontend(frontend, open_file=True, fn=None)
 
-            filename_schedule = '{}_{}.xlsx'.format(date.strftime('%Y-%m-%d'), 'Расписание')
+            filename_schedule = '{} {}.xlsx'.format(date.strftime('%Y-%m-%d'), 'Расписание')
             path_schedule = '{}/{}'.format('app/data/schedule_plan', filename_schedule)
             schedule_wb.save(path_schedule)
             os.remove(file_path)

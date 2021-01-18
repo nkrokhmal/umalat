@@ -17,9 +17,6 @@ def add_form_factor():
             form_factor = FormFactor(
                 relative_weight=form.relative_weight.data)
 
-            if form.group.data != -1:
-                form_factor.group = [x for x in form.groups if x.name == get_choice_data(form.group)]
-
             cooling_technology = db.session.query(CoolingTechnology)\
                 .filter_by(or_(form.first_cooling_time.data is None, CoolingTechnology.first_cooling_time == form.first_cooling_time.data))\
                 .filter_by(or_(form.second_cooling_time.data is None, CoolingTechnology.second_cooling_time == form.second_cooling_time.data)) \
@@ -70,8 +67,6 @@ def edit_form_factor(ff_id):
         form_factor = db.session.query(FormFactor).get_or_404(ff_id)
         if form.validate_on_submit() and form_factor is not None:
             form_factor.weight = form.relative_weight.data
-            if form.group.data != -1:
-                form_factor.group = [x for x in form.groups if x.name == get_choice_data(form.group)]
 
             cooling_technology = db.session.query(CoolingTechnology) \
                 .filter_by(or_(form.first_cooling_time.data is None,
@@ -91,11 +86,6 @@ def edit_form_factor(ff_id):
             db.session.commit()
             flash('Форм фактор успешно изменен!')
             return redirect(url_for('.get_form_factor'))
-
-        if form_factor.group is not None:
-            form.group.default = default_form_value(form_factor.group.name)
-
-        form.process()
 
         form.relative_weight.data = form_factor.relative_weight
         form.first_cooling_time.data = form_factor.default_cooling_technology.first_cooling_time

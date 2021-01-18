@@ -247,8 +247,8 @@ class FormFactor(db.Model):
     def add_made_from(self, ff):
         if ff not in self.made_from:
             self.made_from.append(ff)
-    #
-    # @property
-    # def full_name(self):
-    #     return '{}, {}'.format(self.group.name, self.name)
+
+    @property
+    def full_name(self):
+        return '{}, {}'.format('Форм фактор', self.name)
 
