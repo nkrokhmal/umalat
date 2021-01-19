@@ -137,12 +137,17 @@ def draw_skus(wb, sheet_name, data_sku):
         cur_i += 1
 
 
-def draw_constructor_template(df, file_name, wb, batch_number=0):
+def draw_constructor_template(df, file_name, wb, df_extra_packing, batch_number=0):
     skus = db.session.query(SKU).all()
     data_sku = {'Вода': [x for x in skus if x.made_from_boilings[0].boiling_type == 'water'],
                 'Соль': [x for x in skus if x.made_from_boilings[0].boiling_type == 'salt']}
 
     draw_boiling_names(wb)
+    extra_packing_sheet = wb['Дополнительная фасовка']
+    cur_i = 2
+    for value in df_extra_packing.values:
+        draw_row(extra_packing_sheet, cur_i, value, font_size=8)
+        cur_i += 1
 
     for sheet_name in ['Соль', 'Вода']:
         boiling_sheet = wb[sheet_name]

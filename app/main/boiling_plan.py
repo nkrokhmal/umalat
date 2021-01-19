@@ -39,9 +39,10 @@ def boiling_plan_full():
                 if ws.cell(i, 4).value:
                     values.append([excel.evaluate("'{}'!{}".format(
                         sheet_name,
-                        ws.cell(i, j).coordinate)) for j in range(4, 8)])
+                        ws.cell(i, j).coordinate)) for j in range(4, 9)])
 
-            df = pd.DataFrame(values[1:], columns=['sku', 'remainings - request', 'normative remainings', 'plan'])
+            df = pd.DataFrame(values[1:], columns=['sku', 'remainings - request', 'normative remainings', 'plan', 'extra_packing'])
+            df_extra_packing = df[['sku', 'extra_packing']].copy()
             df = df.fillna(0)
             df = df[df['plan'] != 0]
             df = df[df['plan'].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())]
@@ -59,7 +60,7 @@ def boiling_plan_full():
             df['sku'] = df['sku_id'].apply(cast_sku)
             full_plan = generate_constructor_df_v3(df)
             template_wb = openpyxl.load_workbook(current_app.config['TEMPLATE_BOILING_PLAN'])
-            new_file_name = draw_constructor_template(full_plan, file.filename, template_wb, batch_number=batch_number)
+            new_file_name = draw_constructor_template(full_plan, file.filename, template_wb, df_extra_packing, batch_number=batch_number)
             return render_template('boiling_plan_full.html', form=form, file_name=new_file_name)
         file_name = None
         return render_template('boiling_plan_full.html', form=form, file_name=file_name)
