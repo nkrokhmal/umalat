@@ -36,7 +36,7 @@ def read_boiling_plan(wb_obj):
         df['boiling_params'] = (LineName.WATER if ws_name == 'Вода' else LineName.SALT) + ',' + df['boiling_params']
         dfs.append(df)
 
-    df = pd.concat(dfs)
+    df = pd.concat(dfs).reset_index(drop=True)
     df['sku'] = df['sku'].apply(cast_sku)
 
     df['boiling'] = df['boiling_params'].apply(cast_boiling)
@@ -48,15 +48,22 @@ def read_boiling_plan(wb_obj):
     df['bff'] = df['ff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
 
     # fill Терка empty form factor values
-    df['bff'] = df['bff'].fillna(method='ffill')
-    df['bff'] = df['bff'].fillna(method='bfill')
+    for idx, grp in df.copy().groupby('batch_id'):
+        if grp['bff'].isnull().all():
+            # todo: hardcode for rubber
+            df.loc[grp.index, 'bff'] = cast_form_factor(2) # Сулугуни "Умалат", 45%, 0,2 кг, т/ф, (9 шт)
+        else:
+            filled_grp = grp.copy()
+            filled_grp = filled_grp.fillna(method='ffill')
+            filled_grp = filled_grp.fillna(method='bfill')
+            df.loc[grp.index, 'bff'] = filled_grp['bff']
 
     # validate single boiling
-    for _, grp in df.groupby('batch_id'):
+    for idx, grp in df.groupby('batch_id'):
         assert len(grp['boiling'].unique()) == 1, "В одной объединенной группе варок должен быть только один тип варки."
 
     # validate kilograms
-    for _, grp in df.groupby('batch_id'):
+    for idx, grp in df.groupby('batch_id'):
         boiling_model = grp.iloc[0]['boiling']
         assert grp['kg'].sum() % boiling_model.line.output_per_ton == 0, "Одна из варок имеет неверное количество килограмм."
 

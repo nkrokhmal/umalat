@@ -28,7 +28,6 @@ def make_configuration_blocks(b1, b2, maker, line_name):
         if not packings:
             continue
         packing2 = packings[0]
-
         sku1 = listify(packing1['packing_process'])[-1].props['sku']  # last sku
         sku2 = listify(packing2['packing_process'])[0].props['sku']  # first sku
 

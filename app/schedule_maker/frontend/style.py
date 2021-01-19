@@ -18,7 +18,7 @@ STYLE = {
     'cooling': {'text': 'охлаждение'},
 
     'packing_label': {'text': '{boiling_id}', 'bold': True},
-    'packing_name': {'text': '{form_factor_label}'},
+    'packing_name': {'text': '{group_form_factor_label}'},
     'packing_brand': {'color': '#f2dcdb', 'text': '{brand_label}'},  # pink color
     'packing_configuration': {'color': 'red'},
     'packing_process': {'color': '#f2dcdb'},

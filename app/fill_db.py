@@ -2,7 +2,7 @@ from .models_new import *
 from .enum import LineName
 
 
-def read_params(fn='app/data/params.xlsx'):
+def read_params(fn='app/data/params_1020.xlsx'):
     df = pd.read_excel(fn, index_col=0)
     return df
 
@@ -93,16 +93,18 @@ def fill_boilings():
 
 
 def fill_form_factors():
+    lines = db.session.query(Line).all()
     df = read_params()
     mass_ff = FormFactor(name='Масса')
     db.session.add(mass_ff)
     db.session.commit()
 
-    columns = ['Вес форм фактора', 'Название форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
+    columns = ['Вес форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки', 'Линия']
     df = df[columns]
     df = df.drop_duplicates()
     values = df.to_dict('records')
     for value in values:
+        line_name = LineName.SALT if value['Линия'] == 'Соль' else LineName.WATER
         if value['Вес форм фактора'] == 1:
             name = 'Терка'
         elif value['Вес форм фактора'] == 30:
@@ -111,6 +113,7 @@ def fill_form_factors():
             name = str(value['Вес форм фактора'] / 1000)
 
         form_factor = FormFactor(name=name, relative_weight=value['Вес форм фактора'])
+        form_factor.line = [x for x in lines if x.name == line_name][0]
         cooling_technologies = db.session.query(CoolingTechnology).all()
         if name != 'Терка':
             form_factor.default_cooling_technology = [x for x in cooling_technologies if all([x.first_cooling_time == _cast_non_nan(value['Охлаждение 1(для воды)']),
@@ -173,7 +176,7 @@ def fill_sku():
                    (x.line_id == add_sku.line.id)]
 
         add_sku.group = [x for x in groups if x.name == sku['Название форм фактора']][0]
-        add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора']][0]
+        add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора'] and x.line.name == line_name][0]
 
         db.session.add(add_sku)
     db.session.commit()

@@ -7,7 +7,7 @@ class SchemaToBoilingsDataframes:
         # generate meltings by boilings
         res = []
         for boiling_meltings in boilings_meltings:
-            boiling_volume = sum(x[1] for x in boiling_meltings)
+            boiling_volume = sum(kg for bff, kg in boiling_meltings)
 
             drenator = Container('Drenator', value=boiling_volume, max_pressures=[None, None])
 
@@ -37,16 +37,17 @@ class SchemaToBoilingsDataframes:
         # generate packing queues
         packing_queues = {}
         for packing_team_id, grp in sorted(packings.items(), key=lambda v: v[0]):
-            processors = []
+            sequences = []
 
             for j, (sku, bff, kg) in enumerate(grp):
-                processor = Processor(f'Packing{j}',
+                container = Container(f'Container{j}', item=bff, limits=[kg, None], max_pressures=[sku.packing_speed, None])
+                processor = Processor(f'Processor{j}',
                                       items=[bff, sku],
-                                      max_pressures=[sku.packing_speed, None],
-                                      processing_time=0,
-                                      limits=[kg, None])
-                processors.append(processor)
-            packing_queue = Queue(f'PackingQueue{packing_team_id}', processors, break_funcs={'in': lambda old, new: 1 / 12})
+                                      max_pressures=[sku.packing_speed, None],  # todo: use second packing speed
+                                      processing_time=0)
+                seq = Sequence(f'Packing{j}', [container, processor])
+                sequences.append(seq)
+            packing_queue = Queue(f'PackingQueue{packing_team_id}', sequences, break_funcs={'in': lambda old, new: 1 / 12})
             packing_queues[packing_team_id] = packing_queue
         return packing_queues
 

@@ -68,6 +68,7 @@ class Line(db.Model):
 
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
     skus = db.relationship('SKU', backref=backref('line', uselist=False))
+    form_factors = db.relationship('FormFactor', backref=backref('line', uselist=False))
     boilings = db.relationship('Boiling', backref=backref('line', uselist=False))
 
     def serialize(self):
@@ -235,6 +236,7 @@ class FormFactor(db.Model):
     relative_weight = db.Column(db.Integer)
     default_cooling_technology_id = db.Column(db.Integer, db.ForeignKey('cooling_technologies.id'), nullable=True)
     skus = db.relationship('SKU', backref=backref('form_factor', uselist=False))
+    line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
 
     made_from = relationship(
         'FormFactor',

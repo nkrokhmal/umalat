@@ -2,7 +2,7 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
 from app.schedule_maker.algo.packing import *
 from app.schedule_maker.algo.cooling import *
-
+from app.schedule_maker.algo.boiling import make_boiling
 
 def make_melting_and_packing_basic(boiling_plan):
     boiling_plan = boiling_plan.copy()
@@ -60,3 +60,7 @@ def make_melting_and_packing_basic(boiling_plan):
     return maker.root
 
 
+
+def make_boiling_basic(boiling_model, boiling_id, grp):
+    melting_and_packing = make_melting_and_packing_basic(grp)
+    return make_boiling(boiling_model, boiling_id, melting_and_packing)
