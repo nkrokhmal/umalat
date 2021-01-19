@@ -37,16 +37,17 @@ class SchemaToBoilingsDataframes:
         # generate packing queues
         packing_queues = {}
         for packing_team_id, grp in sorted(packings.items(), key=lambda v: v[0]):
-            processors = []
+            sequences = []
 
             for j, (sku, bff, kg) in enumerate(grp):
-                processor = Processor(f'Packing{j}',
+                container = Container(f'Container{j}', item=bff, limits=[kg, None], max_pressures=[sku.packing_speed, None])
+                processor = Processor(f'Processor{j}',
                                       items=[bff, sku],
-                                      max_pressures=[sku.packing_speed, None],
-                                      processing_time=0,
-                                      limits=[kg, None])
-                processors.append(processor)
-            packing_queue = Queue(f'PackingQueue{packing_team_id}', processors, break_funcs={'in': lambda old, new: 1 / 12})
+                                      max_pressures=[sku.packing_speed, None],  # todo: use second packing speed
+                                      processing_time=0)
+                seq = Sequence(f'Packing{j}', [container, processor])
+                sequences.append(seq)
+            packing_queue = Queue(f'PackingQueue{packing_team_id}', sequences, break_funcs={'in': lambda old, new: 1 / 12})
             packing_queues[packing_team_id] = packing_queue
         return packing_queues
 
@@ -65,7 +66,7 @@ class SchemaToBoilingsDataframes:
             for packing_team_id, packing_queue in packing_queues.items():
                 pipe_connect(packing_hub, packing_queue, f'hub-packing_queue{packing_team_id}')
 
-            flow = FluidFlow(drenator, verbose=False)
+            flow = FluidFlow(drenator, verbose=True)
             run_flow(flow)
 
             df = pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end'])

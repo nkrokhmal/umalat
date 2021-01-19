@@ -86,16 +86,17 @@ def make_mpp(boiling_df, left_boiling_volume):
 
     # create packing blocks
     for packing_team_id in packing_team_ids:
-        with make('packing', packing_team_id=packing_team_id):
-            df = boiling_df[boiling_df['packing_team_id'] == packing_team_id]
-            df = df[~df['beg_ts'].isnull()]
-            for i, (_, row) in enumerate(df.iterrows()):
-                # add configuration
-                if i >= 1:
-                    conf_time_size = get_configuration_time(boiling_model.line.name, row['sku'], df.iloc[i - 1]['sku'])
-                    if conf_time_size:
-                        make('packing_configuration', size=[conf_time_size // 5, 0])
-                make('packing_process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku'])
+        df = boiling_df[boiling_df['packing_team_id'] == packing_team_id]
+        df = df[~df['beg_ts'].isnull()]
+        if len(df) > 0:
+            with make('packing', packing_team_id=packing_team_id):
+                for i, (_, row) in enumerate(df.iterrows()):
+                    # add configuration
+                    if i >= 1:
+                        conf_time_size = get_configuration_time(boiling_model.line.name, row['sku'], df.iloc[i - 1]['sku'])
+                        if conf_time_size:
+                            make('packing_configuration', size=[conf_time_size // 5, 0])
+                    make('packing_process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku'])
     # get packings max size
     packings_max_size = max([packing.size[0] for packing in listify(maker.root['packing'])])
 
