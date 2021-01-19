@@ -115,7 +115,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
 
         # add configuration if needed
         if lines_df.at[line_name, 'latest_boiling']:
-            configuration_blocks = make_configuration_blocks(lines_df.at[line_name, 'latest_boiling'], boiling, maker, line_name)
+            configuration_blocks = make_configuration_blocks(lines_df.at[line_name, 'latest_boiling'], boiling, maker, line_name, between_boilings=True)
             for conf in configuration_blocks:
                 conf.props.update(line_name=line_name)
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
@@ -212,7 +212,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
         if not in_between_cleanings:
             if 12 <= rest < 18:
                 cleaning = make_termizator_cleaning_block('short', text='КМ')
-                cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
+                cleaning.props.update(x=(a['pouring']['first']['termizator'].y[0], 0))
                 push(schedule, cleaning, push_func=add_push)
 
             if rest >= 18:
@@ -220,7 +220,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                     cleaning = make_termizator_cleaning_block('short', text='КМ, 4 часа')
                 else:
                     cleaning = make_termizator_cleaning_block('full', text='ПМ')
-                cleaning.props.update(x=(b['pouring']['first']['termizator'].x[0] - cleaning.size[0], 0))
+                cleaning.props.update(x=(a['pouring']['first']['termizator'].y[0], 0))
                 push(schedule, cleaning, push_func=add_push)
 
     last_boiling = list(schedule.iter(cls='boiling'))[-1]

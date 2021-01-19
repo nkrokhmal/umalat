@@ -140,7 +140,7 @@ def make_water_meltings(schedule, draw_all_coolings=True):
                          size=(boiling['melting_and_packing']['melting']['meltings'].size[0], 1), speed=900, push_func=add_push)
 
     n_cooling_lines = 0
-    make('cooling_row', axis=1)
+    make('cooling_row', axis=1, is_parent_node=True)
     cooling_lines = []
 
     for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.WATER):
