@@ -98,7 +98,7 @@ def fill_form_factors():
     db.session.add(mass_ff)
     db.session.commit()
 
-    columns = ['Вес форм фактора', 'Название форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
+    columns = ['Вес форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
     df = df[columns]
     df = df.drop_duplicates()
     values = df.to_dict('records')
