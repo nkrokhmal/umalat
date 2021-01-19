@@ -36,6 +36,8 @@ def make_mpp(boiling_df, left_boiling_volume):
         packing_speed_left = boiling_model.line.melting_speed
         for i, cur_sku in cur_skus_df.iterrows():
             cur_speed = min(packing_speed_left, cur_sku['packing_speed'])
+            if not cur_speed:
+                continue
             boiling_df.at[cur_sku.name, 'cur_speed'] = cur_speed
             packing_speed_left -= cur_speed
 
@@ -89,7 +91,7 @@ def make_mpp(boiling_df, left_boiling_volume):
         df = boiling_df[boiling_df['packing_team_id'] == packing_team_id]
         df = df[~df['beg_ts'].isnull()]
         if len(df) > 0:
-            with make('packing', packing_team_id=packing_team_id):
+            with make('packing', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push):
                 for i, (_, row) in enumerate(df.iterrows()):
                     # add configuration
                     if i >= 1:
@@ -97,18 +99,17 @@ def make_mpp(boiling_df, left_boiling_volume):
                         if conf_time_size:
                             make('packing_configuration', size=[conf_time_size // 5, 0])
                     make('packing_process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku'])
-    # get packings max size
-    packings_max_size = max([packing.size[0] for packing in listify(maker.root['packing'])])
 
     bff = boiling_df.iloc[0]['bff']
-    make('melting_process', size=(packings_max_size, 0), bff=bff)
+    make('melting_process', size=(maker.root.size[0], 0), bff=bff)
 
-    make(make_cooling_process(boiling_model.line.name, bff.default_cooling_technology, maker.root['melting_process'].size[0]))
+    make(make_cooling_process(boiling_model.line.name, bff.default_cooling_technology, maker.root.size[0]))
 
     for packing in maker.root['packing']:
-        packing.props.update(x=[maker.root['cooling_process']['start'].y[0], 0])
+        packing.props.update(x=[packing.props['x'][0] + maker.root['cooling_process']['start'].y[0], 0])
 
     maker.root.props.update(kg=boiling_volume)
+
     return maker.root
 
 

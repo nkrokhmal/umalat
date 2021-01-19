@@ -12,19 +12,37 @@ def calc_form_factor_label(form_factors):
     cur_label = None
     values = []
     for ff in form_factors:
-        label = ff.group.name
+        label = ''
 
         s = ''
         if label != cur_label:
             s += label + ' '
             cur_label = label
 
-        if ff.name != 'Терка':
-            # in case of ff.name == 'Терка', ff.group.name == 'Терка' - hence don't repeat
-            s += ff.name
+        s += ff.name
 
         values.append(s)
     return '/'.join(values)
+
+
+def calc_group_form_factor_label(skus):
+    skus = remove_neighbor_duplicates(skus)
+    cur_label = None
+    values = []
+    for sku in skus:
+        label = sku.group.name
+
+        s = ''
+        if label != cur_label:
+            s += label + ' '
+            cur_label = label
+
+        if sku.group.name != 'Терка':
+            s += sku.form_factor.name
+
+        values.append(s)
+    return '/'.join(values)
+
 
 
 def make_header(start_time='01:00'):
@@ -212,12 +230,11 @@ def make_packings(schedule, line_name):
             for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
                 for packing in boiling.iter(cls='packing', packing_team_id=packing_team_id):
                     boiling_skus = [packing_process.props['sku'] for packing_process in packing.iter(cls='packing_process')]
-
-                    form_factor_label = calc_form_factor_label([sku.form_factor for sku in boiling_skus])
-
+                    group_form_factor_label = calc_group_form_factor_label(boiling_skus)
                     brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in boiling_skus]))
+
                     with make('packing_block', x=(packing.x[0], 0), boiling_id=boiling.props['boiling_id'],
-                              push_func=add_push, axis=1, brand_label=brand_label, form_factor_label=form_factor_label):
+                              push_func=add_push, axis=1, brand_label=brand_label, group_form_factor_label=group_form_factor_label):
                         with make():
                             make('packing_label', size=(3, 1))
                             # use different labels for water and salt
