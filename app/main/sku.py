@@ -77,6 +77,9 @@ def edit_sku(sku_id):
         if sku.line is not None:
             default_form_value(form.line, sku.line.name)
 
+        if sku.group is not None:
+            default_form_value(form.group, sku.group.name)
+
         if sku.pack_type is not None:
             default_form_value(form.pack_type, sku.pack_types.name)
 

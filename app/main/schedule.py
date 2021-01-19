@@ -44,11 +44,12 @@ def schedule():
             try:
                 frontend = make_frontend(schedule)
             except Exception as e:
-                raise Exception('Ошибка при построении расписания.')
+                return internal_error(e)
+                # raise Exception('Ошибка при построении расписания.')
 
             schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
 
-            filename_schedule = '{}_{}.xlsx'.format(date.strftime('%Y-%m-%d'), 'Расписание')
+            filename_schedule = '{} {}.xlsx'.format(date.strftime('%Y-%m-%d'), 'Расписание')
             path_schedule = '{}/{}'.format('app/data/schedule_plan', filename_schedule)
             schedule_wb.save(path_schedule)
             os.remove(file_path)
@@ -56,6 +57,7 @@ def schedule():
 
         filename_schedule = None
         return render_template('schedule.html', form=form, filename=filename_schedule)
+
     except Exception as e:
         db.session.rollback()
-        internal_error(e)
+        return internal_error(e)

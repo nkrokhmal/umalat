@@ -49,6 +49,7 @@ class SKU(db.Model):
     shelf_life = db.Column(db.Integer)
     packing_speed = db.Column(db.Integer, nullable=True)
 
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
     packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
@@ -192,7 +193,7 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     short_name = db.Column(db.String)
-    form_factors = db.relationship('FormFactor', backref='group')
+    form_factors = db.relationship('SKU', backref='group')
 
     @staticmethod
     def generate_group():
@@ -232,7 +233,6 @@ class FormFactor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     relative_weight = db.Column(db.Integer)
-    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
     default_cooling_technology_id = db.Column(db.Integer, db.ForeignKey('cooling_technologies.id'), nullable=True)
     skus = db.relationship('SKU', backref=backref('form_factor', uselist=False))
 
@@ -250,5 +250,5 @@ class FormFactor(db.Model):
 
     @property
     def full_name(self):
-        return '{}, {}'.format(self.group.name, self.name)
+        return '{}, {}'.format('Форм фактор', self.name)
 

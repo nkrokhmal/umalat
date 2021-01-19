@@ -94,12 +94,7 @@ def fill_boilings():
 
 def fill_form_factors():
     df = read_params()
-    groups = db.session.query(Group).all()
-    mass = [x for x in groups if x.name == 'Масса'][0].id
-    mass_ff = FormFactor(
-        name='Масса',
-        group_id=mass
-    )
+    mass_ff = FormFactor(name='Масса')
     db.session.add(mass_ff)
     db.session.commit()
 
@@ -108,8 +103,6 @@ def fill_form_factors():
     df = df.drop_duplicates()
     values = df.to_dict('records')
     for value in values:
-        group_id = [x for x in groups if x.name == value['Название форм фактора']][0].id
-
         if value['Вес форм фактора'] == 1:
             name = 'Терка'
         elif value['Вес форм фактора'] == 30:
@@ -117,8 +110,7 @@ def fill_form_factors():
         else:
             name = str(value['Вес форм фактора'] / 1000)
 
-        form_factor = FormFactor(name=name, relative_weight=value['Вес форм фактора'], group_id=group_id)
-
+        form_factor = FormFactor(name=name, relative_weight=value['Вес форм фактора'])
         cooling_technologies = db.session.query(CoolingTechnology).all()
         if name != 'Терка':
             form_factor.default_cooling_technology = [x for x in cooling_technologies if all([x.first_cooling_time == _cast_non_nan(value['Охлаждение 1(для воды)']),
@@ -151,6 +143,7 @@ def fill_sku():
     packer = db.session.query(Packer).all()
     boilings = db.session.query(Boiling).all()
     form_factors = db.session.query(FormFactor).all()
+    groups = db.session.query(Group).all()
 
     columns = ['Название SKU', 'Процент', 'Наличие лактозы', 'Тип закваски', 'Имя бренда', 'Вес нетто', 'Срок хранения',
                'Является ли SKU теркой', 'Упаковщик', 'Скорость упаковки', 'Линия', 'Вес форм фактора', 'Название форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
@@ -179,7 +172,8 @@ def fill_sku():
                    (x.ferment == sku['Тип закваски']) &
                    (x.line_id == add_sku.line.id)]
 
-        add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора'] and x.group.name == sku['Название форм фактора']][0]
+        add_sku.group = [x for x in groups if x.name == sku['Название форм фактора']][0]
+        add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора']][0]
 
         db.session.add(add_sku)
     db.session.commit()
