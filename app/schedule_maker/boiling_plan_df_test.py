@@ -1,7 +1,7 @@
 import os
 os.environ['environment'] = 'interactive'
 
-from app.schedule_maker.dataframes import read_boiling_plan
+from app.schedule_maker.boiling_plan_df import read_boiling_plan
 
 
 def test_read_boiling_plan():

@@ -66,5 +66,71 @@ def read_boiling_plan(wb_obj):
     for idx, grp in df.groupby('batch_id'):
         boiling_model = grp.iloc[0]['boiling']
         assert grp['kg'].sum() % boiling_model.line.output_per_ton == 0, "Одна из варок имеет неверное количество килограмм."
+    df = df[['batch_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff']]
 
     return df.reset_index(drop=True)
+
+
+class RandomBoilingPlanGenerator:
+    def _gen_random_boiling_plan(self, batch_id, line_name):
+        skus = db.session.query(SKU).all()
+        skus = [sku for sku in skus if sku.line.name == line_name]
+        values = []
+
+        boiling_volume = 1000 if line_name == LineName.WATER else 850
+
+        left = boiling_volume
+
+        while left > ERROR:
+            sku = random.choice(skus)
+
+            boiling = random.choice(sku.made_from_boilings)
+
+            if random.randint(0, 1) == 0:
+                kg = left
+            else:
+                kg = random.randint(1, left)
+
+            if random.randint(0, 4) != 0:
+                packing_team_id = 1
+            else:
+                packing_team_id = 2
+
+            if sku.form_factor:
+                bff = sku.form_factor
+            else:
+                # rubber
+                bff = cast_form_factor(2)
+
+            values.append([batch_id, sku, boiling, kg, packing_team_id, bff])
+
+            left -= kg
+        return pd.DataFrame(values, columns=['batch_id', 'sku', 'boiling', 'kg', 'packing_team_id', 'bff'])
+
+    def __call__(self, *args, **kwargs):
+        dfs = []
+
+        cur_batch_id = 0
+        for _ in range(random.randint(0, 20)):
+            dfs.append(self._gen_random_boiling_plan(cur_batch_id, LineName.WATER))
+            cur_batch_id += 1
+        for _ in range(random.randint(0, 20)):
+            dfs.append(self._gen_random_boiling_plan(cur_batch_id, LineName.SALT))
+            cur_batch_id += 1
+        return pd.concat(dfs)
+
+
+class BoilingPlanDfSerializer:
+    def write(self, df):
+        df = df.copy()
+        df['sku'] = df['sku'].apply(lambda sku: sku.id)
+        df['boiling'] = df['boiling'].apply(lambda boiling: boiling.id)
+        df['bff'] = df['bff'].apply(lambda bff: bff.id)
+        df.to_csv('boiling_plan_df.csv', index=False)
+
+    def read(self, fn):
+        df = pd.read_csv(fn)
+        df['sku'] = df['sku'].apply(cast_sku)
+        df['boiling'] = df['boiling'].apply(cast_boiling)
+        df['bff'] = df['bff'].apply(cast_form_factor)
+        return df
