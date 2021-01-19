@@ -139,9 +139,9 @@ def make_water_meltings(schedule, draw_all_coolings=True):
                     make('melting_process', x=(boiling['melting_and_packing']['melting']['meltings'].x[0], 0),
                          size=(boiling['melting_and_packing']['melting']['meltings'].size[0], 1), speed=900, push_func=add_push)
 
-    n_cooling_lines = 5
-    with make('cooling_row', axis=1):
-        cooling_lines = [make('cooling_line', is_parent_node=True, size=(0, 1)).block for _ in range(n_cooling_lines)]
+    n_cooling_lines = 0
+    make('cooling_row', axis=1)
+    cooling_lines = []
 
     for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == LineName.WATER):
         class_validator = ClassValidator(window=10)
@@ -167,13 +167,23 @@ def make_water_meltings(schedule, draw_all_coolings=True):
                     cur_cooling_size = cooling_block.size[0]
 
             # try to add to the earliest line as possible
-            for j in range(n_cooling_lines):
+            j = 0
+            while True:
+                if j == n_cooling_lines:
+                    n_cooling_lines += 1
+                    new_cooling_line = make('cooling_line', is_parent_node=True, size=(0, 1)).block
+                    cooling_lines.append(new_cooling_line)
+                    push(maker.root['cooling_row'], new_cooling_line)
+
                 res = simple_push(cooling_lines[j], cooling_block, validator=class_validator)
                 if isinstance(res, Block):
                     # pushed block successfully
                     break
-                if j == n_cooling_lines - 1:
-                    raise Exception("Failed to draw cooling block")
+                j += 1
+
+                if n_cooling_lines == 100:
+                    raise AssertionError('Создано слишком много линий охлаждения.')
+
     return maker.root
 
 

@@ -16,5 +16,14 @@ def test():
     boilings_meltings, packings = transformer(boiling_group_df)
     print(boilings_meltings, packings)
 
+# todo: del
+def test2():
+    df = read_boiling_plan(r"C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\research\akadaner\Реальные расписания\2021-01-19 План по варкам.xlsx")
+    boiling_group_df = df[df['batch_id'] == 1]
+    print(boiling_group_df)
+    transformer = BoilingGroupToSchema()
+    boilings_meltings, packings = transformer(boiling_group_df)
+    print(boilings_meltings, packings)
+
 if __name__ == '__main__':
-    test()
+    test2()

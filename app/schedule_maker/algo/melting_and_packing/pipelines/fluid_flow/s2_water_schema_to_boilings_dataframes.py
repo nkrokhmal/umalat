@@ -73,6 +73,9 @@ class SchemaToBoilingsDataframes:
             df['name'] = 'melting_process'
             boiling_dataframes['meltings'] = df
 
+            assert abs(drenator.value) < ERROR, 'Дренатор не был опустошен полностью во время плавления.'
+            assert all(abs(container.io_containers['out'].value) < ERROR for container in cooling_queue.lines), 'Некоторые SKU не были собраны полностью во время паковки'
+
             df = pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end'])
             df['name'] = 'cooling_process'
             boiling_dataframes['coolings'] = df
@@ -93,6 +96,7 @@ class SchemaToBoilingsDataframes:
                 boiling_dataframes['packings'][packing_team_id] = df
             boiling_dataframes['meltings'] = self._post_process_dataframe(boiling_dataframes['meltings'], round=round)
             boiling_dataframes['coolings'] = self._post_process_dataframe(boiling_dataframes['coolings'], fix_small_intervals=False, round=round)
+
             boiling_dataframes['packings'] = {packing_team_id: self._post_process_dataframe(df, round=round) for packing_team_id, df in boiling_dataframes['packings'].items()}
 
             res.append(boiling_dataframes)
@@ -125,8 +129,8 @@ class SchemaToBoilingsDataframes:
 
                     while df.at[i, 'beg'] >= df.at[i, 'end']:
                         df.at[i, 'end'] += 5
-        df['beg'] = df['beg'].astype(int)
-        df['end'] = df['end'].astype(int)
+            df['beg'] = df['beg'].astype(int)
+            df['end'] = df['end'].astype(int)
         return df
 
     def __call__(self, boilings_meltings, packings, melting_speed, round=True):

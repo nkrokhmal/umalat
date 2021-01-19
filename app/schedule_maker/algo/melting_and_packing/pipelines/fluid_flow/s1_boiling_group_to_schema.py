@@ -6,13 +6,14 @@ from app.enum import LineName
 class BoilingGroupToSchema:
     def _calc_boilings_meltings(self, boiling_group_df):
         df = boiling_group_df.copy()
-        boiling_model = df.iloc[0]['boiling']
-
-        df['bff_id'] = df['bff'].apply(lambda bff: bff.id)
         df = df.reset_index()
 
-        bff_kgs = df.groupby('bff_id').agg({'kg': 'sum', 'bff': 'first', 'index': 'first'})
-        bff_kgs = bff_kgs.sort_values(by='index')
+        boiling_model = df.iloc[0]['boiling']
+
+        mark_consecutive_groups(df, 'bff', 'bff_group')
+
+        bff_kgs = df.groupby('bff_group').agg({'kg': 'sum', 'bff': 'first', 'index': 'first'})
+        bff_kgs = bff_kgs.sort_values(by='index').reset_index(drop=True) # keep initial order
 
         iterator = SimpleIterator([[row['bff'], row['kg']] for bff_id, row in bff_kgs.iterrows()])
 
@@ -53,7 +54,10 @@ class BoilingGroupToSchema:
         df['sku_id'] = df['sku'].apply(lambda sku: sku.id)
         df = df.reset_index()
 
-        sku_kgs = df.groupby(['packing_team_id', 'sku_id']).agg({'kg': 'sum', 'sku': 'first', 'bff': 'first', 'index': 'first'})
+        df['key'] = df['packing_team_id'].astype(str) + df['sku_id'].astype(str)
+        mark_consecutive_groups(df, 'key', 'group')
+
+        sku_kgs = df.groupby('group').agg({'packing_team_id': 'first', 'kg': 'sum', 'sku': 'first', 'bff': 'first', 'index': 'first'})
         sku_kgs = sku_kgs.sort_values(by='index').reset_index()
 
         res = {}
