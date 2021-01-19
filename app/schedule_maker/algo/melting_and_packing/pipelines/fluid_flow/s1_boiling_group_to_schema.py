@@ -20,7 +20,7 @@ class BoilingGroupToSchema:
         boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo: make properly
         total_kg = df['kg'].sum()
 
-        assert total_kg % boiling_volume == 0
+        assert total_kg % boiling_volume == 0, f'Количество килограм в варке с номером партии {df.iloc[0]["batch_id"]} не бьется на ровные варки.'
 
         boiling_volumes = [boiling_volume] * int(total_kg // boiling_volume)
 

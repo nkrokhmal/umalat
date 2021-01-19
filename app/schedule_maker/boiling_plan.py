@@ -74,8 +74,10 @@ def read_boiling_plan(wb_obj):
 class RandomBoilingPlanGenerator:
     def _gen_random_boiling_plan(self, batch_id, line_name):
         boilings = db.session.query(Boiling).all()
+        boilings = [boiling for boiling in boilings if boiling.line.name == line_name]
         boiling = random.choice(boilings)
         skus = db.session.query(SKU).all()
+        skus = [sku for sku in skus if sku.packing_speed]
         skus = [sku for sku in skus if boiling in sku.made_from_boilings]
 
         values = []
@@ -97,7 +99,7 @@ class RandomBoilingPlanGenerator:
             else:
                 packing_team_id = 2
 
-            if sku.form_factor:
+            if sku.form_factor and sku.form_factor.default_cooling_technology:
                 bff = sku.form_factor
             else:
                 # rubber
@@ -118,16 +120,16 @@ class RandomBoilingPlanGenerator:
         for _ in range(random.randint(0, 20)):
             dfs.append(self._gen_random_boiling_plan(cur_batch_id, LineName.SALT))
             cur_batch_id += 1
-        return pd.concat(dfs)
+        return pd.concat(dfs).reset_index(drop=True)
 
 
 class BoilingPlanDfSerializer:
-    def write(self, df):
+    def write(self, df, fn):
         df = df.copy()
         df['sku'] = df['sku'].apply(lambda sku: sku.id)
         df['boiling'] = df['boiling'].apply(lambda boiling: boiling.id)
         df['bff'] = df['bff'].apply(lambda bff: bff.id)
-        df.to_csv('boiling_plan_df.csv', index=False)
+        df.to_csv(fn, index=False)
 
     def read(self, fn):
         df = pd.read_csv(fn)
