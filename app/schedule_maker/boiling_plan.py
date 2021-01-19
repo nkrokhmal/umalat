@@ -73,8 +73,11 @@ def read_boiling_plan(wb_obj):
 
 class RandomBoilingPlanGenerator:
     def _gen_random_boiling_plan(self, batch_id, line_name):
+        boilings = db.session.query(Boiling).all()
+        boiling = random.choice(boilings)
         skus = db.session.query(SKU).all()
-        skus = [sku for sku in skus if sku.line.name == line_name]
+        skus = [sku for sku in skus if boiling in sku.made_from_boilings]
+
         values = []
 
         boiling_volume = 1000 if line_name == LineName.WATER else 850
@@ -84,14 +87,12 @@ class RandomBoilingPlanGenerator:
         while left > ERROR:
             sku = random.choice(skus)
 
-            boiling = random.choice(sku.made_from_boilings)
-
             if random.randint(0, 1) == 0:
                 kg = left
             else:
                 kg = random.randint(1, left)
 
-            if random.randint(0, 4) != 0:
+            if random.randint(0, 10) != 0:
                 packing_team_id = 1
             else:
                 packing_team_id = 2

@@ -1,6 +1,6 @@
 from utils_ak.fluid_flow import *
 from utils_ak.numeric import *
-
+from app.enum import LineName
 
 class SchemaToBoilingsDataframes:
     def _calc_melting_actors_by_boiling(self, boilings_meltings, melting_speed):
@@ -66,15 +66,16 @@ class SchemaToBoilingsDataframes:
             for packing_team_id, packing_queue in packing_queues.items():
                 pipe_connect(packing_hub, packing_queue, f'hub-packing_queue{packing_team_id}')
 
-            flow = FluidFlow(drenator, verbose=True)
+            flow = FluidFlow(drenator, verbose=False)
             run_flow(flow)
 
             df = pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end'])
             df['name'] = 'melting_process'
             boiling_dataframes['meltings'] = df
 
-            assert abs(drenator.value) < ERROR, 'Дренатор не был опустошен полностью во время плавления.'
-            assert all(abs(container.io_containers['out'].value) < ERROR for container in cooling_queue.lines), 'Некоторые SKU не были собраны полностью во время паковки'
+            assert abs(drenator.value) < ERROR, f'Дренатор не был опустошен полностью во время плавления на линии {LineName.WATER} из-за невалидного плана варок. Поправьте план варок и повторите попытку. '
+            # todo: specify where exactly is the error
+            assert all(abs(container.io_containers['out'].value) < ERROR for container in cooling_queue.lines), f'Некоторые SKU не были собраны полностью во время паковки на линии {LineName.WATER} из-за невалидного плана варок. Поправьте план варок и повторите попытку. '
 
             df = pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end'])
             df['name'] = 'cooling_process'
