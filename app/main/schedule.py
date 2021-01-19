@@ -36,7 +36,7 @@ def schedule():
             boiling_plan_df = read_boiling_plan(wb)
             start_times = {LineName.WATER: form.water_beg_time.data, LineName.SALT: form.salt_beg_time.data}
 
-            # boilings = make_boilings_by_groups(boiling_plan_df)
+            # boilings = make_boilings(boiling_plan_df)
             # schedule = make_schedule(boilings, start_times=start_times)
 
             schedule = make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=start_times)
