@@ -218,6 +218,8 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             if rest >= 18:
                 if previous_cleaning and (a.x[0] - previous_cleaning.x[0]) < cast_t('04:00'):
                     cleaning = make_termizator_cleaning_block('short', text='КМ, 4 часа')
+                elif (a.x[0] - boilings[0].x[0]) < cast_t('04:00'):
+                    cleaning = make_termizator_cleaning_block('short', text='КМ, 4 часа')
                 else:
                     cleaning = make_termizator_cleaning_block('full', text='ПМ')
                 cleaning.props.update(x=(a['pouring']['first']['termizator'].y[0], 0))
