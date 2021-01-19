@@ -197,10 +197,10 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
     boilings = listify(schedule['boiling'])
     boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
-    cleanings = list(schedule.iter(cls='cleaning'))
-
     for a, b in SimpleIterator(boilings).iter_sequences(2):
         rest = b['pouring']['first']['termizator'].x[0] - a['pouring']['first']['termizator'].y[0]
+
+        cleanings = list(schedule.iter(cls='cleaning'))
 
         in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
         previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
