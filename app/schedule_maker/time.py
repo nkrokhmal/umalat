@@ -1,5 +1,5 @@
 import datetime
-
+import re
 
 def cast_t(obj):
     if isinstance(obj, int):
@@ -25,8 +25,10 @@ def cast_t(obj):
 def cast_time(obj):
     if isinstance(obj, str):
         if obj.count(':') == 1:
+            assert re.search(r'(\d\d):(\d\d)', obj)
             return '0:' + obj
         else:
+            assert re.search(r'(\d+):(\d\d):(\d\d)', obj)
             return obj
     elif isinstance(obj, datetime.time):
         return cast_time(f'0:{obj.hour}:{obj.minute}')
@@ -44,6 +46,18 @@ def test():
     print(cast_time(1))
     print(cast_time(0))
     print(cast_time(-1))
+
+    try:
+        print(cast_time('08:00'))
+        print(cast_time('08:0a'))
+    except AssertionError:
+        print('Wrong format')
+
+    try:
+        print(cast_time('0:08:00'))
+        print(cast_time('a:08:00'))
+    except AssertionError:
+        print('Wrong format')
 
 
 if __name__ == '__main__':

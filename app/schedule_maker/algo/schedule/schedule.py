@@ -72,7 +72,8 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
 
 @clockify()
 def make_schedule(boilings, cleaning_boiling=None, start_times=None):
-    start_times = start_times or {LineName.WATER: '', LineName.SALT: '07:00'}
+    start_times = start_times or {LineName.WATER: '08:00', LineName.SALT: '07:00'}
+    start_times = {k: v if v else None for k, v in start_times.items()}
 
     maker, make = init_block_maker('schedule')
     schedule = maker.root
@@ -81,8 +82,11 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
     lines_df.at[LineName.WATER, 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
     lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
 
-    lines_df.at[LineName.WATER, 'start_time'] = cast_time(start_times[LineName.WATER])
-    lines_df.at[LineName.SALT, 'start_time'] = cast_time(start_times[LineName.SALT])
+    for line_name in [LineName.WATER, LineName.SALT]:
+        try:
+            lines_df.at[line_name, 'start_time'] = cast_time(start_times[line_name])
+        except:
+            raise AssertionError(f'Неверно указано время первой подачи на линии {line_name}')
 
     # generate boilings
     lines_df['boilings_left'] = [[], []]
@@ -91,8 +95,11 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
 
     lines_df['latest_boiling'] = None
 
-    if not lines_df['start_time'].any():
-        raise Exception('Укажите время начала варок')
+    if lines_df['start_time'].isnull().any():
+        missing_lines = lines_df[lines_df['start_time'].isnull()].index
+        raise AssertionError(f'Укажите время начала подачи на следующих линиях: {", ".join(missing_lines)}')
+
+    assert lines_df['boilings_left'].apply(lambda lst: len(lst)).sum() >= 1, 'На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания.'
 
     @clockify()
     def add_one_block_from_line(line_name):
