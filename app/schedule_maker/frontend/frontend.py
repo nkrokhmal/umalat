@@ -129,6 +129,10 @@ def make_water_meltings(schedule, draw_all_coolings=True):
                 with make('label_row'):
                     make('serving', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), size=(boiling['melting_and_packing']['melting']['serving'].size[0], 1), visible=False, push_func=add_push)
                     make('melting_label', size=(4, 1))
+
+                    # todo: make properly
+                    assert boiling['melting_and_packing']['melting']['meltings'].size[0] >= 5, 'В расписании есть блок плавления меньше 5 блоков. Такой случай пока не обработан. '
+
                     make('melting_name', size=(boiling['melting_and_packing']['melting']['meltings'].size[0] - 4, 1), form_factor_label=boiling.props['form_factor_label'])
 
                 with make('melting_row'):
@@ -190,6 +194,7 @@ def make_salt_melting(boiling):
     with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], form_factor_label=form_factor_label, push_func=add_push):
         with make('label_row', x=(boiling['melting_and_packing']['melting']['serving'].x[0], 0), push_func=add_push):
             make('melting_label', size=(4, 1), block_front_id=boiling.props['block_front_id'])
+            assert boiling['melting_and_packing']['melting'].size[0] >= 5, 'В расписании есть блок плавления меньше 5 блоков. Такой случай пока не обработан. '
             make('melting_name', size=(boiling['melting_and_packing']['melting'].size[0] - 4, 1), form_factor_label=boiling.props['form_factor_label'])
 
         with make('melting_row'):
@@ -236,9 +241,13 @@ def make_packings(schedule, line_name):
                     with make('packing_block', x=(packing.x[0], 0), boiling_id=boiling.props['boiling_id'],
                               push_func=add_push, axis=1, brand_label=brand_label, group_form_factor_label=group_form_factor_label):
                         with make():
-                            make('packing_label', size=(3, 1))
-                            # use different labels for water and salt
-                            make('packing_name', size=(packing.size[0] - 3, 1))
+
+                            if packing.size[0] >= 4:
+                                make('packing_label', size=(3, 1))
+                                make('packing_name', size=(packing.size[0] - 3, 1))
+                            else:
+                                # todo: make properly
+                                make('packing_name', size=(packing.size[0], 1))
 
                         with make():
                             make('packing_brand', size=(packing.size[0], 1))
