@@ -46,7 +46,7 @@ def schedule():
             except Exception as e:
                 raise Exception('Ошибка при построении расписания.')
 
-            schedule_wb = draw_excel_frontend(frontend, open_file=True, fn=None)
+            schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
 
             filename_schedule = '{}_{}.xlsx'.format(date.strftime('%Y-%m-%d'), 'Расписание')
             path_schedule = '{}/{}'.format('app/data/schedule_plan', filename_schedule)

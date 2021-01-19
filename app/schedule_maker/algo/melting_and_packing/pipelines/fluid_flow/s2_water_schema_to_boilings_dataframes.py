@@ -7,7 +7,7 @@ class SchemaToBoilingsDataframes:
         # generate meltings by boilings
         res = []
         for boiling_meltings in boilings_meltings:
-            boiling_volume = sum(x[1] for x in boiling_meltings)
+            boiling_volume = sum(kg for bff, kg in boiling_meltings)
 
             drenator = Container('Drenator', value=boiling_volume, max_pressures=[None, None])
 
@@ -66,7 +66,7 @@ class SchemaToBoilingsDataframes:
             for packing_team_id, packing_queue in packing_queues.items():
                 pipe_connect(packing_hub, packing_queue, f'hub-packing_queue{packing_team_id}')
 
-            flow = FluidFlow(drenator, verbose=True)
+            flow = FluidFlow(drenator, verbose=False)
             run_flow(flow)
 
             df = pd.DataFrame(melting_queue.active_periods('out'), columns=['item', 'beg', 'end'])
