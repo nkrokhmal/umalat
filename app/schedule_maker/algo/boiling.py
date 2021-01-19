@@ -1,4 +1,4 @@
-from app.schedule_maker.boiling_plan_df import *
+from app.schedule_maker.boiling_plan import *
 
 
 def make_boiling(boiling_model, boiling_id, melting_and_packing):

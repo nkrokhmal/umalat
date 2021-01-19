@@ -4,7 +4,7 @@ os.environ['environment'] = 'interactive'
 from config import basedir
 from app.schedule_maker.models import *
 from app.schedule_maker.algo import *
-from app.schedule_maker.boiling_plan_df import read_boiling_plan
+from app.schedule_maker.boiling_plan import read_boiling_plan
 
 import warnings
 warnings.filterwarnings('ignore')

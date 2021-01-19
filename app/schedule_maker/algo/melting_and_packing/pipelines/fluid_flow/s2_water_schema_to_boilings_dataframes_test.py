@@ -26,8 +26,10 @@ def test():
 
 # todo: del
 def test2():
-    df = read_boiling_plan(r"C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\research\akadaner\Реальные расписания\2021-01-19 План по варкам.xlsx")
-    boiling_group_df = df[df['batch_id'] == 1]
+    ser = BoilingPlanDfSerializer()
+    boiling_plan_df = ser.read(r"C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\research\akadaner\random\1.csv")
+    boiling_group_df = boiling_plan_df[boiling_plan_df['batch_id'] == 3]
+
     print(boiling_group_df)
     boiling_model = boiling_group_df.iloc[0]['boiling']
     boilings_meltings, packings = BoilingGroupToSchema()(boiling_group_df)
