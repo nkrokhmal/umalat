@@ -89,16 +89,17 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                 formula_remains = "=IFERROR(INDEX('{0}'!$A$5:$DK$265,MATCH($O$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0)), 0)".format(
                     current_app.config['SHEET_NAMES']['remainings'], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
 
-                print(sku["SKU"].name, cur_row)
                 block.colour = current_app.config['COLOURS'][sku['SKU'].group.name][1:]
                 block.cell_value(row=cur_row, col=CELLS['Brand'].column, value=sku["SKU"].brand_name)
                 block.cell_value(row=cur_row, col=CELLS['SKU'].column, value=sku["SKU"].name)
                 block.cell_value(row=cur_row, col=CELLS['FactRemains'].column, value=formula_plan)
                 block.cell_value(row=cur_row, col=CELLS['NormativeRemains'].column, value=formula_remains)
-                block.cell_value(row=cur_row, col=CELLS['ProductionPlan'].column,
-                                 value='=MIN({}, 0)'.format(
-                                     block.sheet.cell(cur_row, CELLS['FactRemains'].column).coordinate))
-                block.cell_value(row=cur_row, col=CELLS['ExtraPacking'].column, value=0)
+                block.cell_value(row=cur_row,
+                                 col=CELLS['ProductionPlan'].column,
+                                 value='=MIN({}, 0)'.format(block.sheet.cell(cur_row, CELLS['FactRemains'].column).coordinate) if sku['SKU'].production_by_request else 0)
+                block.cell_value(row=cur_row,
+                                 col=CELLS['ExtraPacking'].column,
+                                 value=0 if sku['SKU'].packing_by_request else '=MIN({}, 0)'.format(block.sheet.cell(cur_row, CELLS['FactRemains'].column).coordinate))
 
                 group_formula.append(block.sheet.cell(cur_row, CELLS['ProductionPlan'].column).coordinate)
                 cur_row += 1

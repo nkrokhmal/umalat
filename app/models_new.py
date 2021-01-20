@@ -48,6 +48,8 @@ class SKU(db.Model):
     weight_netto = db.Column(db.Float)
     shelf_life = db.Column(db.Integer)
     packing_speed = db.Column(db.Integer, nullable=True)
+    production_by_request = db.Column(db.Boolean)
+    packing_by_request = db.Column(db.Boolean)
 
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)

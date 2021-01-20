@@ -107,8 +107,10 @@ def fill_form_factors():
         line_name = LineName.SALT if value['Линия'] == 'Соль' else LineName.WATER
         if value['Вес форм фактора'] == 1:
             name = 'Терка'
+        elif value['Вес форм фактора'] == 15:
+            name = 'Палочки 15г'
         elif value['Вес форм фактора'] == 30:
-            name = 'Палочки'
+            name = 'Палочки 30г'
         else:
             name = str(value['Вес форм фактора'] / 1000)
 
@@ -176,6 +178,15 @@ def fill_sku():
                    (x.line_id == add_sku.line.id)]
 
         add_sku.group = [x for x in groups if x.name == sku['Название форм фактора']][0]
+        if add_sku.group.name != 'Качокавалло':
+            add_sku.production_by_request = True
+            add_sku.packing_by_request = True
+        elif add_sku.name == 'Качокавалло "Unagrande", 45%, 0,26 кг, в/у, (8 шт)':
+            add_sku.production_by_request = False
+            add_sku.packing_by_request = True
+        else:
+            add_sku.production_by_request = False
+            add_sku.packing_by_request = False
         add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора'] and x.line.name == line_name][0]
 
         db.session.add(add_sku)

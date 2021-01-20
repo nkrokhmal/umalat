@@ -49,6 +49,7 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
         df_filter_dict = df_filter.sort_values(by='weight', ascending=False).to_dict('records')
         boilings.add_group(df_filter_dict, is_lactose)
         is_lactose = order[0]
+    boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
 
 
