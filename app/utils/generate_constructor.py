@@ -147,8 +147,9 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing, batch_number=
     extra_packing_sheet = wb['Дополнительная фасовка']
     cur_i = 2
     for value in df_extra_packing.values:
-        draw_row(extra_packing_sheet, cur_i, value, font_size=8)
-        cur_i += 1
+        if value[0] in [sku.name for sku in skus if sku.packing_by_request == False]:
+            draw_row(extra_packing_sheet, cur_i, value, font_size=8)
+            cur_i += 1
 
     for sheet_name in ['Соль', 'Вода']:
         boiling_sheet = wb[sheet_name]
