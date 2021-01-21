@@ -52,27 +52,29 @@ def generate_title(sheet):
     sheet.column_dimensions[get_column_letter(CELLS['Boiling'].column)].width = 3 * 5
 
 
-# todo: build plan -> build sku plan
 def build_plan_sku(date, df, request_list, plan_path=None):
+    template_wb = openpyxl.load_workbook(current_app.config['TEMPLATE_BOILING_PLAN'])
     filename = '{} План по SKU.xlsx'.format(date.strftime('%Y-%m-%d'))
     if plan_path is None:
         path = '{}/{}'.format(current_app.config['SKU_PLAN_FOLDER'], filename)
     else:
         path = plan_path
-    with pd.ExcelWriter(path) as writer:
+    template_wb.save(path)
+    with pd.ExcelWriter(path, engine='openpyxl') as writer:
+        writer.book = template_wb
+        writer.sheets = dict((ws.title, ws) for ws in template_wb.worksheets)
         df.to_excel(writer, sheet_name=current_app.config['SHEET_NAMES']['remainings'])
         writer.save()
 
     wb = openpyxl.load_workbook(filename=path)
-    sheet_plan = wb.create_sheet(current_app.config['SHEET_NAMES']['schedule_plan'])
+    sheet_plan = wb[current_app.config['SHEET_NAMES']['schedule_plan']]
+    # sheet_plan = wb.create_sheet(current_app.config['SHEET_NAMES']['schedule_plan'])
     generate_title(sheet=sheet_plan)
 
     cur_row, space_rows = 2, 2
     request_list = sorted(request_list, key=lambda k: (k['IsLactose'], k['GroupSKU'][0]['SKU'].made_from_boilings[0].percent))
     is_lactose = False
     for group_skus in request_list:
-        print('Group names')
-        print([x['SKU'].name for x in group_skus['GroupSKU']])
         if group_skus['GroupSKU'][0]['SKU'].made_from_boilings[0].is_lactose != is_lactose:
             cur_row += space_rows
         is_lactose = group_skus['GroupSKU'][0]['SKU'].made_from_boilings[0].is_lactose

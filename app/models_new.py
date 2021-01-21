@@ -82,7 +82,7 @@ class Line(db.Model):
     @staticmethod
     def generate_lines():
         mozzarella_department = Department.query.filter_by(name='Моцарельный цех').first()
-        for params in [(LineName.SALT, 180, 850, 1020, 30, 30), (LineName.WATER, 240, 1000, 800, 30, 30)]:
+        for params in [(LineName.SALT, 180, 850, 1020, 30, 30), (LineName.WATER, 240, 1000, 900, 30, 30)]:
             line = Line(
                 name=params[0],
                 chedderization_time=params[1],

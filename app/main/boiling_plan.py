@@ -20,7 +20,7 @@ from .. utils.generate_constructor import *
 
 @main.route('/boiling_plan_full', methods=['POST', 'GET'])
 def boiling_plan_full():
-    try:
+    # try:
         form = BoilingPlanForm()
         if request.method == 'POST' and form.validate_on_submit():
             batch_number = form.batch_number.data
@@ -49,7 +49,6 @@ def boiling_plan_full():
             path = '{}/{}.csv'.format(current_app.config['STATS_FOLDER'], os.path.splitext(file.filename)[0])
             df[['sku', 'plan']].to_csv(path, index=False)
             df = df[['sku', 'plan']]
-            os.remove(file_path)
 
             df['sku'] = df['sku'].apply(cast_sku)
             df = df.replace(to_replace='None', value=np.nan).dropna()
@@ -59,12 +58,15 @@ def boiling_plan_full():
             df = df[['boiling_id', 'sku_id', 'plan']]
             df['sku'] = df['sku_id'].apply(cast_sku)
             full_plan = generate_constructor_df_v3(df)
-            template_wb = openpyxl.load_workbook(current_app.config['TEMPLATE_BOILING_PLAN'])
+            # template_wb = openpyxl.load_workbook(current_app.config['TEMPLATE_BOILING_PLAN'])
+            # previous_wb = openpyxl.load_workbook(file_path)
+            template_wb = openpyxl.load_workbook(file_path)
             new_file_name = draw_constructor_template(full_plan, file.filename, template_wb, df_extra_packing, batch_number=batch_number)
+            # os.remove(file_path)
             return render_template('boiling_plan_full.html', form=form, file_name=new_file_name)
         file_name = None
         return render_template('boiling_plan_full.html', form=form, file_name=file_name)
-    except Exception as e:
-        return internal_error(e)
+    # except Exception as e:
+    #     return internal_error(e)
 
 

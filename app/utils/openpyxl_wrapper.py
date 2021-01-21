@@ -1,4 +1,6 @@
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
+import openpyxl
+from copy import copy
 
 
 class ExcelBlock:
@@ -51,6 +53,29 @@ class ExcelBlock:
         self.default_colour(beg_row, beg_col, set_colour)
         self.default_font(beg_row, beg_col, set_font)
 
+
+def merge_workbooks(wb1, wb2):
+    print(wb1.sheetnames)
+    for i, sheet_name in enumerate(wb1.sheetnames):
+        print(sheet_name)
+        ws1 = wb1[sheet_name]
+        max_row = ws1.max_row
+        max_col = ws1.max_column
+        ws2 = wb2.create_sheet(sheet_name, i)
+
+        for i in range(1, max_col + 1):
+            ws2.column_dimensions[openpyxl.utils.get_column_letter(i)].hidden = ws1.column_dimensions[openpyxl.utils.get_column_letter(i)].hidden
+            ws2.column_dimensions[openpyxl.utils.get_column_letter(i)].width = ws1.column_dimensions[openpyxl.utils.get_column_letter(i)].width
+
+        for i in range(1, max_row + 1):
+            for j in range(1, max_col + 1):
+                ws2.cell(row=i, column=j).value = ws1.cell(row=i, column=j).value
+                if ws1.cell(row=i, column=j).has_style:
+                    ws2.cell(row=i, column=j).fill = copy(ws1.cell(row=i, column=j).fill)
+                    ws2.cell(row=i, column=j).font = copy(ws1.cell(row=i, column=j).font)
+                    ws2.cell(row=i, column=j).border = copy(ws1.cell(row=i, column=j).border)
+                    ws2.cell(row=i, column=j).alignment = copy(ws1.cell(row=i, column=j).alignment)
+    return ws2
 
 
 

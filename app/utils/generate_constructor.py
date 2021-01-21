@@ -5,6 +5,8 @@ from flask import current_app
 import math
 from copy import deepcopy
 
+from app.utils.openpyxl_wrapper import merge_workbooks
+
 
 def generate_constructor_df_v3(df_copy):
     df = df_copy.copy()
@@ -192,8 +194,10 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing, batch_number=
     new_file_name = '{} План по варкам'.format(file_name.split(' ')[0])
     path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)
 
-    wb.active = 0
+    # merge_workbooks(previous_wb, wb)
+    wb.active = 2
     wb["Соль"].views.sheetView[0].tabSelected = False
+    wb["планирование суточное"].views.sheetView[0].tabSelected = False
     wb.save(path)
     return '{}.xlsx'.format(new_file_name)
 
