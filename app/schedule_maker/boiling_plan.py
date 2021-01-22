@@ -2,8 +2,8 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
 from app.enum import LineName
 
-
-def read_boiling_plan(wb_obj):
+# todo: delete
+def read_boiling_plan_old(wb_obj):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -69,6 +69,93 @@ def read_boiling_plan(wb_obj):
     df = df[['batch_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff']]
 
     return df.reset_index(drop=True)
+
+
+def read_boiling_plan_new(wb_obj):
+    """
+    :param wb_obj: str or openpyxl.Workbook
+    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
+    """
+    wb = cast_workbook(wb_obj)
+
+    dfs = []
+
+    for ws_name in ['Вода', 'Соль']:
+        ws = wb[ws_name]
+        values = []
+
+        # collect header
+        header = [ws.cell(1, i).value for i in range(1, 100) if ws.cell(1, i).value]
+
+        for i in range(2, 200):
+            if not ws.cell(i, 1).value:
+                continue
+            values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
+
+        df = pd.DataFrame(values, columns=header)
+        df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варок', 'Вес объединенной варки']]
+        df.columns = ['boiling_params', 'boiling_volume', 'sku', 'kg', 'packing_team_id', 'configuration', 'total_volume']
+
+        df['total_volume'] = df['total_volume'].fillna(method='bfill')
+        df['batch_id'] = (df['boiling_params'] == '-').astype(int).cumsum() + 1
+        boiling_volume = df.iloc[0]['boiling_volume']  # todo: take first non-nan or take from parameters
+
+        # todo: optimize
+        df['configuration'] = np.where(df['configuration'].notnull(), df['configuration'], df['total_volume'].apply(lambda total_volume: ','.join(['8000'] * int(total_volume // boiling_volume))))
+        df['configuration'] = np.where(df['sku'] != '-', np.nan, df['configuration'])
+        df['configuration'] = df['configuration'].fillna(method='bfill')
+
+        # remove separators and empty lines
+        df = df[df['sku'] != '-']
+        df = df[~df['kg'].isnull()]
+
+        # add line name to boiling_params
+        df['boiling_params'] = (LineName.WATER if ws_name == 'Вода' else LineName.SALT) + ',' + df['boiling_params']
+        dfs.append(df)
+
+    # update batch_ids
+    dfs[1]['batch_id'] += dfs[0].iloc[-1]['batch_id']
+
+    df = pd.concat(dfs).reset_index(drop=True)
+    df['sku'] = df['sku'].apply(cast_sku)
+
+    df['boiling'] = df['boiling_params'].apply(cast_boiling)
+
+    # set boiling form factors
+    df['ff'] = df['sku'].apply(lambda sku: sku.form_factor)
+
+    # remove Терка from form_factors
+    df['bff'] = df['ff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
+
+    # fill Терка empty form factor values
+    for idx, grp in df.copy().groupby('batch_id'):
+        if grp['bff'].isnull().all():
+            # todo: hardcode for rubber
+            df.loc[grp.index, 'bff'] = cast_form_factor(2) # Сулугуни "Умалат", 45%, 0,2 кг, т/ф, (9 шт)
+        else:
+            filled_grp = grp.copy()
+            filled_grp = filled_grp.fillna(method='ffill')
+            filled_grp = filled_grp.fillna(method='bfill')
+            df.loc[grp.index, 'bff'] = filled_grp['bff']
+
+    # validate single boiling
+    for idx, grp in df.groupby('batch_id'):
+        assert len(grp['boiling'].unique()) == 1, "В одной объединенной группе варок должен быть только один тип варки."
+
+    # validate kilograms
+    for idx, grp in df.groupby('batch_id'):
+        assert abs(grp['kg'].sum() - grp.iloc[0]['total_volume']) < 1e-5, "Одна из групп варок имеет неверное количество килограмм."
+
+    df = df[['batch_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff', 'configuration']]
+    return df.reset_index(drop=True)
+
+
+def read_boiling_plan(wb_obj):
+    try:
+        return read_boiling_plan_new(wb_obj)
+    except:
+        pass
+    return read_boiling_plan_old(wb_obj)
 
 
 class RandomBoilingPlanGenerator:

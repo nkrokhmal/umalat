@@ -47,10 +47,10 @@ class BoilingsDataframesToBoilings:
             push(maker.root, line, push_func=add_push)
         return maker.root
 
-    def __call__(self, boilings_dataframes, boiling_model, start_from_id):
+    def __call__(self, boiling_volumes, boilings_dataframes, boiling_model, start_from_id):
         res = []
-        for i, boiling_dataframes in enumerate(boilings_dataframes):
-            mp = self._make_melting_and_packing(boiling_dataframes, boiling_model)
-            boiling = make_boiling(boiling_model, start_from_id + i, mp)
+        for i in range(len(boiling_volumes)):
+            mp = self._make_melting_and_packing(boilings_dataframes[i], boiling_model)
+            boiling = make_boiling(boiling_model, start_from_id + i, boiling_volumes[i], mp)
             res.append(boiling)
         return res

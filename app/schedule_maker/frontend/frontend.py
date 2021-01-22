@@ -71,11 +71,11 @@ def make_cheese_makers(schedule, rng):
             for boiling in schedule.iter(cls='boiling', pouring_line=str(i)):
                 boiling_model = boiling.props['boiling_model']
 
-                # todo: make properly
-                boiling_volume = 8000
+                standard_boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850 # todo: make properly
+                boiling_size = int(round(8000 * boiling.props.relative_props.get('boiling_volume', standard_boiling_volume) / standard_boiling_volume)) # todo: make properly
 
                 # [cheesemakers.boiling_params]
-                boiling_label = '{} {} {} {}кг'.format(boiling_model.percent, boiling_model.ferment, '' if boiling_model.is_lactose else 'безлактозная', boiling_volume)
+                boiling_label = '{} {} {} {}кг'.format(boiling_model.percent, boiling_model.ferment, '' if boiling_model.is_lactose else 'безлактозная', boiling_size)
 
                 with make('pouring_block', boiling_label=boiling_label,
                           boiling_id=boiling.props['boiling_id'], x=(boiling['pouring'].x[0], 0),

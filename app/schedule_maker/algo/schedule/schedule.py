@@ -141,12 +141,12 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                         cleaning = make_termizator_cleaning_block('full', text='ПМ перед безлактозкой')
                         push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
 
-        # add multihead boiling after all water boilings if multihead was present
-        if last_multihead_water_boiling:
-            if boiling == last_multihead_water_boiling:
-                push(schedule, maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
-
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
+
+        # todo: put to the place of last multihead usage!
+        # add multihead boiling after all water boilings if multihead was present
+        if boiling == last_multihead_water_boiling:
+            push(schedule, maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
 
         if cleaning_boiling and cleaning_boiling == boiling:
             start_from = boiling['pouring']['first']['termizator'].y[0]

@@ -47,5 +47,5 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
 
 
 def boiling_has_multihead_packing(boiling):
-    return len(list(boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'))) > 0
+    return len(list(boiling.iter(cls='packing_process', sku=lambda sku: 'Мультиголова' in sku.packer.name))) > 0
 

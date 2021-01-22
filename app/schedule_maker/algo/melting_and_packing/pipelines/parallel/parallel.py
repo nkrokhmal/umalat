@@ -121,7 +121,14 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
     boiling_group_df['packing_speed'] = boiling_group_df['sku'].apply(lambda sku: sku.packing_speed)
 
-    boiling_volumes = [boiling_model.line.output_per_ton] * (boiling_group_df['kg'].sum() // boiling_model.line.output_per_ton)
+    # todo: code duplicate, make properly
+    boiling_model = boiling_group_df.iloc[0]['boiling']
+    boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo: make properly
+    configuration = [float(x.strip()) for x in boiling_group_df.iloc[0]['configuration'].split(',')]  # "8000, 7000, 8000"
+    boiling_volumes = [x * boiling_volume / 8000 for x in configuration]
+
+    # todo: del, legacy
+    # boiling_volumes = [boiling_model.line.output_per_ton] * int(boiling_group_df['kg'].sum() // boiling_model.line.output_per_ton)
 
     # sum same skus for same teams
     boiling_group_df['sku_name'] = boiling_group_df['sku'].apply(lambda sku: sku.name)
@@ -158,6 +165,6 @@ def make_boilings_parallel_dynamic(boiling_group_df):
             left -= mpp.props['kg']
 
         melting_and_packing = make_melting_and_packing_from_mpps(boiling_model, mpps)
-        boiling = make_boiling(boiling_model, ids[0] + i, melting_and_packing)
+        boiling = make_boiling(boiling_model, ids[0] + i, boiling_volume, melting_and_packing)
         boilings.append(boiling)
     return boilings

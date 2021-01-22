@@ -5,7 +5,7 @@ from app.schedule_maker.algo.melting_and_packing.pipelines.fluid_flow.s3_water_b
 
 def make_flow_water_boilings(boiling_group_df, start_from_id):
     boiling_model = boiling_group_df.iloc[0]['boiling']
-    boilings_meltings, packings = BoilingGroupToSchema()(boiling_group_df)
+    boiling_volumes, boilings_meltings, packings = BoilingGroupToSchema()(boiling_group_df)
     boilings_dataframes = SchemaToBoilingsDataframes()(boilings_meltings, packings, boiling_model.line.melting_speed)
-    boilings = BoilingsDataframesToBoilings()(boilings_dataframes, boiling_group_df.iloc[0]['boiling'], start_from_id)
+    boilings = BoilingsDataframesToBoilings()(boiling_volumes, boilings_dataframes, boiling_group_df.iloc[0]['boiling'], start_from_id)
     return boilings
