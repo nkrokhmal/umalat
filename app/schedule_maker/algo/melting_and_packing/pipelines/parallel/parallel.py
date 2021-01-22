@@ -68,8 +68,8 @@ def make_mpp(boiling_df, left_boiling_volume):
         # df.at[df[~df['end_ts'].isnull()].index[-1], 'end_ts'] = custom_round(df.at[df[~df['end_ts'].isnull()].index[-1], 'end_ts'], 5, 'ceil')
 
         # round to five-minute intervals
-        df['beg_ts'] = df['beg_ts'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
-        df['end_ts'] = df['end_ts'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
+        df['beg_ts'] = df['beg_ts'].apply(lambda ts: None if ts is None else custom_round(ts, 5, 'nearest_half_down'))
+        df['end_ts'] = df['end_ts'].apply(lambda ts: None if ts is None else custom_round(ts, 5, 'nearest_half_down'))
 
         # fix small intervals (like beg_ts and end_ts: 5, 5 -> 5, 10)
         for packing_team_id in packing_team_ids:
