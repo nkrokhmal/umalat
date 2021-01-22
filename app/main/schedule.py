@@ -25,6 +25,8 @@ def schedule():
     try:
         form = ScheduleForm()
         if request.method == 'POST' and form.validate_on_submit():
+            # todo: add batch number to schedule
+            batch_number = form.batch_number.data
             date = form.date.data
             file = request.files['input_file']
             file_path = os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename)

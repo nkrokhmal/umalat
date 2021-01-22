@@ -28,12 +28,13 @@ def generate_constructor_df_v3(df_copy):
     result['name'] = result['sku'].apply(lambda sku: sku.name)
     result['boiling_name'] = result['boiling'].apply(lambda b: b.to_str())
     result['boiling_volume'] = np.where(result['boiling_type'] == 'salt', 850, 1000)
+    result['packer'] = result['sku'].apply(lambda sku: sku.packer.name)
     result['form_factor'] = result['sku'].apply(lambda sku: sku.form_factor.name)
     result['boiling_form_factor'] = result['sku'].apply(lambda sku: get_boiling_form_factor(sku))
 
     result = result[
-        ['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'group', 'form_factor', 'boiling_form_factor', 'name',
-         'kg', 'tag']]
+        ['id', 'boiling_id', 'boiling_name', 'boiling_volume', 'group', 'form_factor', 'boiling_form_factor', 'packer',
+         'name', 'kg', 'tag']]
     return result
 
 
@@ -136,7 +137,7 @@ def draw_skus(wb, sheet_name, data_sku):
         cur_i += 1
 
 
-def draw_constructor_template(df, file_name, wb, df_extra_packing, batch_number=0):
+def draw_constructor_template(df, file_name, wb, df_extra_packing):
     skus = db.session.query(SKU).all()
     data_sku = {'Вода': [x for x in skus if x.made_from_boilings[0].boiling_type == 'water'],
                 'Соль': [x for x in skus if x.made_from_boilings[0].boiling_type == 'salt']}
@@ -169,35 +170,34 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing, batch_number=
         volume = 0
         for v in values:
             if v[0] == '-':
-                ids = [1, 2, 3, 4, 5, 6, 7, 12]
+                ids = [1, 2, 3, 4, 5, 6, 7, 13]
                 for id in ids:
                     draw_cell(boiling_sheet, id, cur_i, v[0], font_size=8)
 
                 boiling_count = sum // volume + 1
-                draw_cell(boiling_sheet, 10, cur_i, '8000, ' * boiling_count, font_size=7)
+                draw_cell(boiling_sheet, 11, cur_i, '8000, ' * boiling_count, font_size=7)
                 sum = 0
             else:
                 # add to sum plan
-                sum += int(v[8])
+                sum += int(v[9])
                 volume = int(v[3])
 
                 if v[-1] == 'main':
-                    colour = get_colour_by_name(v[7], skus)
+                    colour = get_colour_by_name(v[8], skus)
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
                 draw_row(boiling_sheet, cur_i, v[2:-1], font_size=8, color=colour)
                 if v[4] == 'Терка':
-                    draw_cell(boiling_sheet, 9, cur_i, 2, font_size=8)
+                    draw_cell(boiling_sheet, 10, cur_i, 2, font_size=8)
                 else:
-                    draw_cell(boiling_sheet, 9, cur_i, 1, font_size=8)
+                    draw_cell(boiling_sheet, 10, cur_i, 1, font_size=8)
             cur_i += 1
     new_file_name = '{} План по варкам'.format(file_name.split(' ')[0])
     path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)
 
-    # merge_workbooks(previous_wb, wb)
+    for sheet in wb.sheetnames:
+        wb[sheet].views.sheetView[0].tabSelected = False
     wb.active = 2
-    wb["Соль"].views.sheetView[0].tabSelected = False
-    wb["планирование суточное"].views.sheetView[0].tabSelected = False
     wb.save(path)
     return '{}.xlsx'.format(new_file_name)
 

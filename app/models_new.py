@@ -101,7 +101,7 @@ class Packer(db.Model):
     __tablename__ = 'packers'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    skus = db.relationship('SKU', backref=backref('packer', uselist=False))
+    skus = db.relationship('SKU', backref=backref('packer', uselist=False, lazy='subquery'))
 
     @staticmethod
     def generate_packer():

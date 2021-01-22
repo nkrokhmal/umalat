@@ -6,6 +6,7 @@ import re
 from .openpyxl_wrapper import ExcelBlock
 import pandas as pd
 from flask import current_app
+import json
 
 
 class Cell:
@@ -152,8 +153,10 @@ def build_plan_sku(date, df, request_list, plan_path=None):
         if is_lactose:
             cur_row += space_rows
 
+    for sheet in wb.sheetnames:
+        wb[sheet].views.sheetView[0].tabSelected = False
     wb.active = 1
-    wb[current_app.config['SHEET_NAMES']['remainings']].views.sheetView[0].tabSelected = False
+    # wb[current_app.config['SHEET_NAMES']['remainings']].views.sheetView[0].tabSelected = False
     wb.save(path)
     return filename
 
@@ -198,6 +201,5 @@ def parse_plan_cell(date, wb, excel, skus):
                 "BoilingWeights": boiling_weights,
                 "SKUVolumes": sku_volumes
             })
-
     response['Boilings'] = [x for x in response['Boilings'] if x['BoilingCount'] > 0]
     return response
