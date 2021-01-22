@@ -175,7 +175,7 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
                     draw_cell(boiling_sheet, id, cur_i, v[0], font_size=8)
 
                 boiling_count = sum // volume + 1
-                draw_cell(boiling_sheet, 11, cur_i, '8000, ' * boiling_count, font_size=7)
+                # draw_cell(boiling_sheet, 11, cur_i, '8000, ' * boiling_count, font_size=7)
                 sum = 0
             else:
                 # add to sum plan
