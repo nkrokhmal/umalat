@@ -117,15 +117,21 @@ def make_boilings_parallel_dynamic(boiling_group_df):
     boilings = []
 
     boiling_group_df = boiling_group_df.copy()
-    boiling_model = boiling_group_df.iloc[0]['boiling']
 
     boiling_group_df['packing_speed'] = boiling_group_df['sku'].apply(lambda sku: sku.packing_speed)
 
-    # todo: code duplicate, make properly
+    # todo: code duplicate, make properly with s1 file
     boiling_model = boiling_group_df.iloc[0]['boiling']
     boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo: make properly
-    configuration = [float(x.strip()) for x in boiling_group_df.iloc[0]['configuration'].split(',')]  # "8000, 7000, 8000"
-    boiling_volumes = [x * boiling_volume / 8000 for x in configuration]
+
+    if 'configuration' in boiling_group_df.columns:
+        configuration = [float(x.strip()) for x in boiling_group_df.iloc[0]['configuration'].split(',')]  # "8000, 7000, 8000"
+        boiling_volumes = [x * boiling_volume / 8000 for x in configuration]
+    else:
+        # todo: del, legacy
+        total_kg = boiling_group_df['kg'].sum()
+        assert total_kg % boiling_volume == 0, f'Количество килограм в варке с номером партии {boiling_group_df.iloc[0]["batch_id"]} не бьется на ровные варки.'
+        boiling_volumes = [boiling_volume] * int(total_kg // boiling_volume)
 
     # todo: del, legacy
     # boiling_volumes = [boiling_model.line.output_per_ton] * int(boiling_group_df['kg'].sum() // boiling_model.line.output_per_ton)

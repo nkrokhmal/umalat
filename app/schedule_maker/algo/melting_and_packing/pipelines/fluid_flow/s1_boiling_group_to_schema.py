@@ -7,8 +7,15 @@ class BoilingGroupToSchema:
     def _calc_boiling_volumes(self, boiling_group_df):
         boiling_model = boiling_group_df.iloc[0]['boiling']
         boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo: make properly
-        configuration = [float(x.strip()) for x in boiling_group_df.iloc[0]['configuration'].split(',')]  # "8000, 7000, 8000"
-        boiling_volumes = [x * boiling_volume / 8000 for x in configuration]
+
+        if 'configuration' in boiling_group_df.columns:
+            configuration = [float(x.strip()) for x in boiling_group_df.iloc[0]['configuration'].split(',')]  # "8000, 7000, 8000"
+            boiling_volumes = [x * boiling_volume / 8000 for x in configuration]
+        else:
+            # todo: del, legacy
+            total_kg = boiling_group_df['kg'].sum()
+            assert total_kg % boiling_volume == 0, f'Количество килограм в варке с номером партии {boiling_group_df.iloc[0]["batch_id"]} не бьется на ровные варки.'
+            boiling_volumes = [boiling_volume] * int(total_kg // boiling_volume)
         return boiling_volumes
 
     def _calc_boilings_meltings(self, boiling_group_df):
@@ -23,10 +30,6 @@ class BoilingGroupToSchema:
 
         boiling_volumes = self._calc_boiling_volumes(boiling_group_df)
 
-        # # todo: del, legacy
-        # total_kg = df['kg'].sum()
-        # assert total_kg % boiling_volume == 0, f'Количество килограм в варке с номером партии {df.iloc[0]["batch_id"]} не бьется на ровные варки.'
-        # boiling_volumes = [boiling_volume] * int(total_kg // boiling_volume)
 
         res = []
         for boiling_volume in boiling_volumes:
