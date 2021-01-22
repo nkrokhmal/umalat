@@ -118,8 +118,8 @@ class SchemaToBoilingsDataframes:
 
         if round:
             # round to five-minute intervals
-            df['beg'] = df['beg'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
-            df['end'] = df['end'].apply(lambda ts: None if ts is None else custom_round(ts, 5))
+            df['beg'] = df['beg'].apply(lambda ts: None if ts is None else custom_round(ts, 5, 'nearest_half_down'))
+            df['end'] = df['end'].apply(lambda ts: None if ts is None else custom_round(ts, 5, 'nearest_half_down'))
 
             # fix small intervals (like beg and end: 5, 5 -> 5, 10)
             if fix_small_intervals:

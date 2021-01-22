@@ -27,8 +27,9 @@ def test():
 # todo: del
 def test2():
     ser = BoilingPlanDfSerializer()
-    boiling_plan_df = ser.read(r"C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\research\akadaner\random\1.csv")
-    boiling_group_df = boiling_plan_df[boiling_plan_df['batch_id'] == 3]
+    # boiling_plan_df = ser.read(r"C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\research\akadaner\random\1.csv")
+    boiling_plan_df = read_boiling_plan(r"C:\Users\Mi\Downloads\2021-01-19 План по варкам.xlsx")
+    boiling_group_df = boiling_plan_df[boiling_plan_df['batch_id'] == 2]
 
     print(boiling_group_df)
     boiling_model = boiling_group_df.iloc[0]['boiling']
