@@ -44,3 +44,8 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
             conf_block = maker.create_block('packing_configuration', size=[conf_time_size // 5, 0], packing_team_id=packing_team_id, x=[packing1.y[0], 0])
             res.append(conf_block)
     return res
+
+
+def boiling_has_multihead_packing(boiling):
+    return len(list(boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'))) > 0
+

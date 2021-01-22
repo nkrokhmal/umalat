@@ -29,11 +29,12 @@ def validate(b1, b2):
             validate_disjoint_by_axis(p1, p2)
 class_validator.add('boiling', 'boiling', validate)
 
-def validate(b1, b2):
-    boiling, multihead_cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, multihead_cleaning
-    for b in boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'):
-        validate_disjoint_by_axis(multihead_cleaning, b)
-class_validator.add('multihead_cleaning', 'boiling', validate)
+# todo: make properly
+# def validate(b1, b2):
+#     boiling, multihead_cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, multihead_cleaning
+#     for b in boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'):
+#         validate_disjoint_by_axis(multihead_cleaning, b)
+# class_validator.add('multihead_cleaning', 'boiling', validate)
 
 def validate(b1, b2):
     boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, cleaning
@@ -101,6 +102,8 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
 
     assert lines_df['boilings_left'].apply(lambda lst: len(lst)).sum() >= 1, 'На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания.'
 
+    last_multihead_water_boiling = list_get([boiling for boiling in lines_df.at[LineName.WATER, 'boilings_left'] if boiling_has_multihead_packing(boiling)], -1)
+
     @clockify()
     def add_one_block_from_line(line_name):
         boiling = lines_df.at[line_name, 'boilings_left'].pop(0)
@@ -138,25 +141,10 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                         cleaning = make_termizator_cleaning_block('full', text='ПМ перед безлактозкой')
                         push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
 
-        if lines_df['latest_boiling'].notnull().any():  # todo: make better check for any boilings present
-            # find last multihead packing
-            last_multihead_boiling = None
-            for b in reversed(sorted(listify(schedule.children), key=lambda b: b.y[0])):
-                if b.props['cls'] not in ['boiling', 'multihead_cleaning']:
-                    continue
-
-                if b.props['cls'] == 'multihead_cleaning':
-                    # previously already head multihead_cleaning
-                    break
-
-                if list(b.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова')):
-                    last_multihead_boiling = b
-                    break
-
-            if last_multihead_boiling and last_multihead_boiling.props['boiling_model'].line.name != boiling.props['boiling_model'].line.name:
-                # multihead cleaning needed
-                last_packing_process = list(last_multihead_boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'))[-1]
-                push(schedule, maker.create_block('multihead_cleaning', x=(last_packing_process.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
+        # add multihead boiling after all water boilings if multihead was present
+        if last_multihead_water_boiling:
+            if boiling == last_multihead_water_boiling:
+                push(schedule, maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
 
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
 
