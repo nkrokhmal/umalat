@@ -82,7 +82,7 @@ class Line(db.Model):
     @staticmethod
     def generate_lines():
         mozzarella_department = Department.query.filter_by(name='Моцарельный цех').first()
-        for params in [(LineName.SALT, 180, 850, 1020, 30, 30), (LineName.WATER, 240, 1000, 800, 30, 30)]:
+        for params in [(LineName.SALT, 180, 850, 1020, 30, 30), (LineName.WATER, 240, 1000, 900, 30, 30)]:
             line = Line(
                 name=params[0],
                 chedderization_time=params[1],
@@ -101,7 +101,7 @@ class Packer(db.Model):
     __tablename__ = 'packers'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    skus = db.relationship('SKU', backref=backref('packer', uselist=False))
+    skus = db.relationship('SKU', backref=backref('packer', uselist=False, lazy='subquery'))
 
     @staticmethod
     def generate_packer():
