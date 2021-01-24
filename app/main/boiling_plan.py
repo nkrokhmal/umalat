@@ -12,7 +12,7 @@ from ..models_new import SKU, Boiling
 from sqlalchemy import or_, and_
 from flask_restplus import reqparse
 import openpyxl
-from app.generic_imports import *
+from app.interactive_imports import *
 import re
 import numpy as np
 from .. utils.generate_constructor import *

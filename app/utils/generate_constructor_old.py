@@ -1,4 +1,4 @@
-from app.generic_imports import *
+from app.interactive_imports import *
 import pandas as pd
 import numpy as np
 from flask import current_app
