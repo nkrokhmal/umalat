@@ -5,8 +5,6 @@ from flask import current_app
 import math
 from copy import deepcopy
 
-from app.utils.openpyxl_wrapper import merge_workbooks
-
 
 def generate_constructor_df_v3(df_copy):
     df = df_copy.copy()
@@ -39,7 +37,7 @@ def generate_constructor_df_v3(df_copy):
 
 
 def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
-    boilings = MergedBoilings(max_weight=max_weight, min_weight=min_weight, boiling_number=boiling_number)
+    boilings = Boilings(max_weight=max_weight, min_weight=min_weight, boiling_number=boiling_number)
     orders = [(False, 3.3, 'Альче', None),
               (True, 3.3, 'Альче', 'Фиор Ди Латте'),
               (True, 3.3, 'Сакко', 'Фиор Ди Латте'),
@@ -58,7 +56,7 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
             df_filter_chl = df_filter[df_filter['group'] == 'Чильеджина'].sort_values(by='weight', ascending=False)
             df_filter_fdl = df_filter[df_filter['group'] == 'Фиор Ди Латте'].sort_values(by='weight', ascending=False)
 
-            if df_filter_chl['weight'].sum() < 100:
+            if df_filter_chl['weight'].sum() < 200:
                 df_filter_dict = pd.concat([df_filter_chl, df_filter_fdl])
             else:
                 df_filter_dict = pd.concat([df_filter_fdl, df_filter_chl])
@@ -66,22 +64,78 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
         else:
             df_filter_dict = df_filter.sort_values(by='weight', ascending=False).to_dict('records')
 
-        boilings.add_group(df_filter_dict)
-        # is_lactose = order[0]
+        boilings.add_group(df_filter_dict, is_lactose)
+        is_lactose = order[0]
     boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
 
 
 def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
-    boilings = MergedBoilings(max_weight=850, min_weight=850, boiling_number=boiling_number)
+    salted_rubber = ['Сулугуни "Умалат" (для хачапури), 45%, 0,12 кг, ф/п']
+    boilings = Boilings(max_weight=850, min_weight=850, boiling_number=boiling_number)
     for weight, df_grouped_weight in df.groupby('weight'):
         for boiling_id, df_grouped_boiling_id in df_grouped_weight.groupby('boiling_id'):
             new = True
             for form_factor, df_grouped in df_grouped_boiling_id.groupby('group'):
-                boilings.add_group(df_grouped.to_dict('records'), new)
-                new = False
+                # todo: пофикить костыль с соленностью терки
+                if form_factor != 'Терка':
+                    boilings.add_group(df_grouped.to_dict('records'), new)
+                    new = False
+                else:
+                    salted = [x for x in df_grouped.to_dict('records') if x['sku'].name in salted_rubber]
+                    not_salted = [x for x in df_grouped.to_dict('records') if x['sku'].name not in salted_rubber]
+                    boilings.add_group(salted, True)
+                    boilings.add_group(not_salted, True)
+
     boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
+
+
+class Boilings:
+    def __init__(self, max_weight=1000, min_weight=1000, boiling_number=0):
+        self.max_weight = max_weight
+        self.min_weight = min_weight
+        self.boiling_number = boiling_number
+        self.boilings = []
+        self.cur_boiling = []
+
+    def cur_sum(self):
+        if self.cur_boiling:
+            return sum([x['plan'] for x in self.cur_boiling])
+        return 0
+
+    def add(self, sku):
+        while sku['plan'] > 0:
+            remainings = self.max_weight - self.cur_sum()
+            boiling_weight = min(remainings, sku['plan'])
+            new_boiling = deepcopy(sku)
+            new_boiling['plan'] = boiling_weight
+            new_boiling['tag'] = 'main'
+            new_boiling['id'] = self.boiling_number
+            sku['plan'] -= boiling_weight
+            self.cur_boiling.append(new_boiling)
+            if boiling_weight == remainings:
+                self.boilings += self.cur_boiling
+                self.boiling_number += 1
+                self.cur_boiling = []
+
+    def finish(self):
+        if self.cur_boiling:
+            self.boilings += self.cur_boiling
+            self.boiling_number += 1
+            self.cur_boiling = []
+
+    def add_remainings(self):
+        if self.cur_boiling:
+            self.boilings += self.cur_boiling
+            self.boiling_number += 1
+            self.cur_boiling = []
+
+    def add_group(self, skus, new=True):
+        if new:
+            self.add_remainings()
+        for sku in skus:
+            self.add(sku)
 
 
 class MergedBoilings:
@@ -139,6 +193,7 @@ def draw_skus(wb, sheet_name, data_sku):
 
 def draw_constructor_template(df, file_name, wb, df_extra_packing):
     skus = db.session.query(SKU).all()
+    form_factors = db.session.query(FormFactor).all()
     data_sku = {'Вода': [x for x in skus if x.made_from_boilings[0].boiling_type == 'water'],
                 'Соль': [x for x in skus if x.made_from_boilings[0].boiling_type == 'salt']}
 
@@ -149,6 +204,12 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
         if value[0] in [sku.name for sku in skus if not sku.packing_by_request]:
             draw_row(extra_packing_sheet, cur_i, value, font_size=8)
             cur_i += 1
+
+    boiling_form_factor_sheet = wb['Форм фактор плавления']
+    cur_i = 1
+    for value in sorted(form_factors, key=lambda x: x.name):
+        draw_row(boiling_form_factor_sheet, cur_i, [value.name], font_size=8)
+        cur_i += 1
 
     for sheet_name in ['Соль', 'Вода']:
         boiling_sheet = wb[sheet_name]
@@ -166,31 +227,37 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
                 values.append(v[:-1])
             values.append(['-'] * (len(df_filter.columns) + 1))
 
-        sum = 0
-        volume = 0
         for v in values:
             if v[0] == '-':
-                ids = [1, 2, 3, 4, 5, 6, 7, 13]
+                # ids = [1, 2, 3, 4, 5, 6, 7, 13]
+                ids = [2, 3, 4, 5, 6, 7, 8, 14]
                 for id in ids:
                     draw_cell(boiling_sheet, id, cur_i, v[0], font_size=8)
+                if sheet_name == 'Вода':
+                    first_cell_formula = '=IF(N{0}="-", "", SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                        cur_i)
+                else:
+                    first_cell_formula = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                        cur_i)
+                draw_cell(boiling_sheet, 1, cur_i, first_cell_formula, font_size=8)
 
-                boiling_count = sum // volume + 1
-                # draw_cell(boiling_sheet, 11, cur_i, '8000, ' * boiling_count, font_size=7)
-                sum = 0
             else:
                 # add to sum plan
-                sum += int(v[9])
-                volume = int(v[3])
-
                 if v[-1] == 'main':
                     colour = get_colour_by_name(v[8], skus)
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
-                draw_row(boiling_sheet, cur_i, v[2:-1], font_size=8, color=colour)
-                if v[4] == 'Терка':
-                    draw_cell(boiling_sheet, 10, cur_i, 2, font_size=8)
+                if sheet_name == 'Вода':
+                    v[1] = '=IF(N{0}="-", "", SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                        cur_i)
                 else:
-                    draw_cell(boiling_sheet, 10, cur_i, 1, font_size=8)
+                    v[1] = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                        cur_i)
+                draw_row(boiling_sheet, cur_i, v[1:-1], font_size=8, color=colour)
+                if v[4] == 'Терка':
+                    draw_cell(boiling_sheet, 11, cur_i, 2, font_size=8)
+                else:
+                    draw_cell(boiling_sheet, 11, cur_i, 1, font_size=8)
             cur_i += 1
     new_file_name = '{} План по варкам'.format(file_name.split(' ')[0])
     path = '{}/{}.xlsx'.format(current_app.config['BOILING_PLAN_FOLDER'], new_file_name)

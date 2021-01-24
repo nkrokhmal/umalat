@@ -16,7 +16,7 @@ def get_db(environment=None):
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 
-        engine = create_engine(f"sqlite:///{SQLITE_PATH}")
+        engine = create_engine(f"sqlite:///{SQLITE_PATH}?check_same_thread=False")
         Session = sessionmaker()
         Session.configure(bind=engine)
         session = Session()

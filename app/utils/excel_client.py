@@ -49,7 +49,7 @@ def generate_title(sheet):
     sheet.freeze_panes = sheet['A2']
 
     sheet.column_dimensions[get_column_letter(CELLS['Brand'].column)].width = 2 * 5
-    sheet.column_dimensions[get_column_letter(CELLS['SKU'].column)].width = 10 * 5
+    sheet.column_dimensions[get_column_letter(CELLS['SKU'].column)].width = 12 * 5
     sheet.column_dimensions[get_column_letter(CELLS['Boiling'].column)].width = 3 * 5
 
 
@@ -70,7 +70,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
     wb = openpyxl.load_workbook(filename=path)
     sheet_plan = wb[current_app.config['SHEET_NAMES']['schedule_plan']]
     # sheet_plan = wb.create_sheet(current_app.config['SHEET_NAMES']['schedule_plan'])
-    generate_title(sheet=sheet_plan)
+    # generate_title(sheet=sheet_plan)
 
     cur_row, space_rows = 2, 2
     request_list = sorted(request_list, key=lambda k: (k['IsLactose'], k['GroupSKU'][0]['SKU'].made_from_boilings[0].percent))
@@ -80,7 +80,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
             cur_row += space_rows
         is_lactose = group_skus['GroupSKU'][0]['SKU'].made_from_boilings[0].is_lactose
         beg_row = cur_row
-        block = ExcelBlock(sheet=sheet_plan, row_height=18)
+        block = ExcelBlock(sheet=sheet_plan, row_height=13.8)
         group_formula = []
 
         for form_factor in current_app.config['ORDER']:
@@ -153,10 +153,10 @@ def build_plan_sku(date, df, request_list, plan_path=None):
         if is_lactose:
             cur_row += space_rows
 
-    for sheet in wb.sheetnames:
-        wb[sheet].views.sheetView[0].tabSelected = False
+    for i, sheet in enumerate(wb.sheetnames):
+        if i != 1:
+            wb[sheet].views.sheetView[0].tabSelected = False
     wb.active = 1
-    # wb[current_app.config['SHEET_NAMES']['remainings']].views.sheetView[0].tabSelected = False
     wb.save(path)
     return filename
 

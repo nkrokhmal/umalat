@@ -116,7 +116,6 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
     boiling_group_df = boiling_group_df.copy()
 
-    # todo: code duplicate, make properly with s1 file
     boiling_model = boiling_group_df.iloc[0]['boiling']
     boiling_volumes = boiling_group_df.iloc[0]['boiling_volumes']
 
