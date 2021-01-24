@@ -54,7 +54,7 @@ def make_header(start_time='01:00'):
 
     with make('header', size=(0, 1), index_width=3):
         make(size=(1, 1), text='График наливов', push_func=add_push)
-        for i in range(288):
+        for i in range(566):
             cur_time = cast_time(i + cast_t(start_time))
             days, hours, minutes = cur_time.split(':')
             if cur_time[-2:] == '00':
@@ -295,10 +295,10 @@ def make_frontend(schedule):
 
     with make('pouring', start_time=start_time, axis=1):
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
-                             {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
+                             {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         make(make_cheese_makers(schedule, range(2)))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
-                             {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
+                             {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         make(make_cleanings(schedule))
         make(make_cheese_makers(schedule, range(2, 4)))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
@@ -317,7 +317,7 @@ def make_frontend(schedule):
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
         make(make_salt_meltings(schedule))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
-                             {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
+                             {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
         make(make_packings(schedule, LineName.SALT))
     return maker.root
 
