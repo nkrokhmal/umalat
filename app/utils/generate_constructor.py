@@ -198,6 +198,7 @@ def draw_skus(wb, sheet_name, data_sku):
 
 def draw_constructor_template(df, file_name, wb, df_extra_packing):
     skus = db.session.query(SKU).all()
+    form_factors = db.session.query(FormFactor).all()
     data_sku = {'Вода': [x for x in skus if x.made_from_boilings[0].boiling_type == 'water'],
                 'Соль': [x for x in skus if x.made_from_boilings[0].boiling_type == 'salt']}
 
@@ -208,6 +209,12 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
         if value[0] in [sku.name for sku in skus if not sku.packing_by_request]:
             draw_row(extra_packing_sheet, cur_i, value, font_size=8)
             cur_i += 1
+
+    boiling_form_factor_sheet = wb['Форм фактор плавления']
+    cur_i = 1
+    for value in sorted(form_factors, key=lambda x: x.name):
+        draw_row(boiling_form_factor_sheet, cur_i, [value.name], font_size=8)
+        cur_i += 1
 
     for sheet_name in ['Соль', 'Вода']:
         boiling_sheet = wb[sheet_name]
