@@ -73,13 +73,25 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
 
 
 def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
+    salted_rubber = ['Сулугуни "Умалат" (для хачапури), 45%, 0,12 кг, ф/п']
     boilings = Boilings(max_weight=850, min_weight=850, boiling_number=boiling_number)
     for weight, df_grouped_weight in df.groupby('weight'):
         for boiling_id, df_grouped_boiling_id in df_grouped_weight.groupby('boiling_id'):
             new = True
             for form_factor, df_grouped in df_grouped_boiling_id.groupby('group'):
-                boilings.add_group(df_grouped.to_dict('records'), new)
-                new = False
+                # todo: пофикить костыль с соленностью терки
+                if form_factor != 'Терка':
+                    boilings.add_group(df_grouped.to_dict('records'), new)
+                    new = False
+                else:
+                    salted = [x for x in df_grouped.to_dict('records') if x['sku'].name in salted_rubber]
+                    not_salted = [x for x in df_grouped.to_dict('records') if x['sku'].name not in salted_rubber]
+                    print(boilings.boiling_number)
+                    boilings.add_group(salted, True)
+                    print(boilings.boiling_number)
+                    boilings.add_group(not_salted, True)
+                    print(boilings.boiling_number)
+
     boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
 
