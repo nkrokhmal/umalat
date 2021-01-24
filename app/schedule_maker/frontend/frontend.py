@@ -30,7 +30,11 @@ def calc_group_form_factor_label(skus):
     cur_label = None
     values = []
     for sku in skus:
-        label = sku.group.name
+
+        if len(skus) == 1:
+            label = sku.group.name
+        else:
+            label = sku.group.short_name
 
         s = ''
         if label != cur_label:

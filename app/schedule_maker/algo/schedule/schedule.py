@@ -16,17 +16,28 @@ class_validator = ClassValidator(window=20)
 def validate(b1, b2):
     validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2['pouring']['first']['termizator'])  # [termizator.basic]
 
+    wl1 = LineName.WATER if b1['pouring'].props['pouring_line'] in ['0', '1'] else LineName.SALT
+    wl2 = LineName.WATER if b2['pouring'].props['pouring_line'] in ['0', '1'] else LineName.SALT
+
     # cannot make two boilings on same line at the same time
     if b1['pouring'].props['pouring_line'] == b2['pouring'].props['pouring_line']:
         validate_disjoint_by_axis(b1['pouring'], b2['pouring'])
 
-    if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
-        validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
-        for p1, p2 in product(listify(b1['melting_and_packing']['packing']), listify(b2['melting_and_packing']['packing'])):
-            # for p1, p2 in product(b1.iter(cls='packing'), b2.iter(cls='packing')):
-            if p1.props['packing_team_id'] != p2.props['packing_team_id']:
-                continue
-            validate_disjoint_by_axis(p1, p2)
+    if wl1 == wl2:
+        if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
+            # same line type
+            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
+            for p1, p2 in product(listify(b1['melting_and_packing']['packing']), listify(b2['melting_and_packing']['packing'])):
+                # for p1, p2 in product(b1.iter(cls='packing'), b2.iter(cls='packing')):
+                if p1.props['packing_team_id'] != p2.props['packing_team_id']:
+                    continue
+                validate_disjoint_by_axis(p1, p2)
+        else:
+            # salt and water on the same working line - due to salt switching to the first pouring_line
+            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
+            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
+            assert b2['melting_and_packing']['melting']['meltings'].x[0] - b1['melting_and_packing']['melting']['meltings'].y[0] > 6 # todo: optimize - add straight to validate disjoint
+
 class_validator.add('boiling', 'boiling', validate)
 
 # todo: make properly
