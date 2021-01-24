@@ -120,24 +120,31 @@ def make_boilings_parallel_dynamic(boiling_group_df):
     boiling_model = boiling_group_df.iloc[0]['boiling']
     boiling_volumes = boiling_group_df.iloc[0]['boiling_volumes']
 
-    # sum same skus for same teams
-    boiling_group_df['sku_name'] = boiling_group_df['sku'].apply(lambda sku: sku.name)
     values = []
     for _, grp in boiling_group_df.groupby(['packing_team_id', 'sku_name']):
         value = grp.iloc[0]
         value['kg'] = grp['kg'].sum()
         values.append(value)
-    boiling_group_df = pd.DataFrame(values)
-    boiling_group_df.pop('sku_name')
-    boiling_group_df = boiling_group_df.sort_values(by='group_id')
 
-    boiling_group_df['left'] = boiling_group_df['kg']
+    grouped_df = pd.DataFrame(values)
 
-    ids = remove_duplicates(boiling_group_df['group_id'].sort_values())
-    form_factors = remove_duplicates(boiling_group_df['bff'])
+    def get_original_index(sku):
+        for i, row in boiling_group_df.iterrows():
+            if row['sku'] == sku:
+                return i
+        raise Exception('Sould not happen. Did not find sku in original boiling_group_id.')
+
+    grouped_df['original_index'] = grouped_df['sku'].apply(get_original_index)
+    grouped_df = grouped_df.sort_values('original_index')
+    grouped_df.pop('original_index')
+
+    grouped_df['left'] = grouped_df['kg']
+
+    group_id = grouped_df.iloc[0]['group_id']
+    form_factors = remove_duplicates(grouped_df['bff'])
 
     cur_form_factor = form_factors[0]
-    cur_boiling_df = boiling_group_df[boiling_group_df['bff'] == cur_form_factor]
+    cur_boiling_df = grouped_df[grouped_df['bff'] == cur_form_factor]
     for i, boiling_volume in enumerate(boiling_volumes):
         mpps = []
 
@@ -148,13 +155,12 @@ def make_boilings_parallel_dynamic(boiling_group_df):
             if cur_boiling_df['left'].sum() < ERROR:
                 assert form_factors.index(cur_form_factor) + 1 < len(form_factors)  # check there are form factors left
                 cur_form_factor = form_factors[form_factors.index(cur_form_factor) + 1]
-                cur_boiling_df = boiling_group_df[boiling_group_df['bff'] == cur_form_factor]
-
+                cur_boiling_df = grouped_df[grouped_df['bff'] == cur_form_factor]
             mpp = make_mpp(cur_boiling_df, left)
             mpps.append(mpp)
             left -= mpp.props['kg']
 
         melting_and_packing = make_melting_and_packing_from_mpps(boiling_model, mpps)
-        boiling = make_boiling(boiling_model, ids[0] + i, boiling_volume, melting_and_packing)
+        boiling = make_boiling(boiling_model, group_id + i, boiling_volume, melting_and_packing)
         boilings.append(boiling)
     return boilings
