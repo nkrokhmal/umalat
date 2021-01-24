@@ -5,8 +5,6 @@ from flask import current_app
 import math
 from copy import deepcopy
 
-from app.utils.openpyxl_wrapper import merge_workbooks
-
 
 def generate_constructor_df_v3(df_copy):
     df = df_copy.copy()
@@ -86,11 +84,8 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
                 else:
                     salted = [x for x in df_grouped.to_dict('records') if x['sku'].name in salted_rubber]
                     not_salted = [x for x in df_grouped.to_dict('records') if x['sku'].name not in salted_rubber]
-                    print(boilings.boiling_number)
                     boilings.add_group(salted, True)
-                    print(boilings.boiling_number)
                     boilings.add_group(not_salted, True)
-                    print(boilings.boiling_number)
 
     boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
