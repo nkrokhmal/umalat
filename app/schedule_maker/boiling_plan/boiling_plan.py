@@ -14,7 +14,7 @@ def read_boiling_plan(wb_obj, saturate=True):
 
     for ws_name in ['Вода', 'Соль']:
         line = cast_line(LineName.WATER) if ws_name == 'Вода' else cast_line(LineName.SALT)
-        default_boiling_volume = line.output_per_ton
+        default_boiling_volume = line.output_ton
 
         ws = wb[ws_name]
         values = []
@@ -28,7 +28,7 @@ def read_boiling_plan(wb_obj, saturate=True):
             values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
         df = pd.DataFrame(values, columns=header)
-        df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варок', 'Вес варок']]
+        df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варки', 'Вес варки']]
         df.columns = ['boiling_params', 'boiling_volume', 'sku', 'kg', 'packing_team_id', 'configuration', 'total_volume']
 
         # fill group id

@@ -5,7 +5,7 @@ def saturate_boiling_plan(boiling_plan_df):
     # fill boiling volumes
     values = []
     for i, row in df.iterrows():
-        values.append([float(x.strip()) * row['line'].output_per_ton / 8000 for x in row['configuration'].split(',')])
+        values.append([float(x.strip()) * row['line'].output_ton / 8000 for x in row['configuration'].split(',')])
     df['boiling_volumes'] = values
 
     df['sku_name'] = df['sku'].apply(lambda sku: sku.name)

@@ -13,7 +13,7 @@ class RandomBoilingPlanGenerator:
 
         values = []
 
-        default_boiling_volume = cast_line(line_name).output_per_ton
+        default_boiling_volume = cast_line(line_name).output_ton
 
         left = default_boiling_volume
 
