@@ -65,7 +65,7 @@ def read_boiling_plan(wb_obj):
     # validate kilograms
     for idx, grp in df.groupby('batch_id'):
         boiling_model = grp.iloc[0]['boiling']
-        assert grp['kg'].sum() % boiling_model.line.output_per_ton == 0, "Одна из варок имеет неверное количество килограмм."
+        assert grp['kg'].sum() % boiling_model.line.output_ton == 0, "Одна из варок имеет неверное количество килограмм."
     df = df[['batch_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff']]
 
     return df.reset_index(drop=True)

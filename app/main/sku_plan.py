@@ -55,13 +55,13 @@ def sku_plan():
                 group_sku = [x for x in full_list if
                              x['SKU'].made_from_boilings[0].id == group_item['BoilingId']]
                 if len(group_sku) > 0:
-                    output_weight = group_sku[0]['SKU'].line.output_per_ton
+                    output_weight = group_sku[0]['SKU'].line.output_ton
                     request_weight = sum([x['Request'] for x in group_sku if x['Request'] < 0])
                     result_list.append({
                         'GroupSKU': group_sku,
                         'BoilingId': group_sku[0]['SKU'].made_from_boilings[0].id,
                         'BoilingCount': - request_weight / output_weight,
-                        'Volume': group_sku[0]['SKU'].line.output_per_ton,
+                        'Volume': group_sku[0]['SKU'].line.output_ton,
                         'IsLactose': group_sku[0]['SKU'].made_from_boilings[0].is_lactose
                     })
 

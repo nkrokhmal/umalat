@@ -62,7 +62,7 @@ class Line(db.Model):
     __tablename__ = 'lines'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    output_per_ton = db.Column(db.Integer)
+    output_ton = db.Column(db.Integer)
     pouring_time = db.Column(db.Integer)
     serving_time = db.Column(db.Integer)
     melting_speed = db.Column(db.Integer)
@@ -86,7 +86,7 @@ class Line(db.Model):
             line = Line(
                 name=params[0],
                 chedderization_time=params[1],
-                output_per_ton=params[2],
+                output_ton=params[2],
                 melting_speed=params[3],
                 serving_time=params[4],
                 pouring_time=params[5],
