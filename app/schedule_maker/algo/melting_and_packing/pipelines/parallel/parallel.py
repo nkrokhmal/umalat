@@ -9,6 +9,8 @@ from app.schedule_maker.algo.melting_and_packing.melting_process import make_mel
 
 
 def make_mpp(boiling_df, left_boiling_volume):
+    boiling_df = boiling_df.copy()
+    boiling_df['packing_speed'] = boiling_df['sku'].apply(lambda sku: sku.packing_speed)
     boiling_df['cur_speed'] = 0
     boiling_df['beg_ts'] = None
     boiling_df['end_ts'] = None
@@ -63,10 +65,6 @@ def make_mpp(boiling_df, left_boiling_volume):
     boiling_df['end_ts'] = np.where((~boiling_df['beg_ts'].isnull()) & boiling_df['end_ts'].isnull(), cur_ts, boiling_df['end_ts'])
 
     def round_timestamps(df, packing_team_ids):
-        # todo: hardcode
-        # round last end_ts up
-        # df.at[df[~df['end_ts'].isnull()].index[-1], 'end_ts'] = custom_round(df.at[df[~df['end_ts'].isnull()].index[-1], 'end_ts'], 5, 'ceil')
-
         # round to five-minute intervals
         df['beg_ts'] = df['beg_ts'].apply(lambda ts: None if ts is None else custom_round(ts, 5, 'nearest_half_down'))
         df['end_ts'] = df['end_ts'].apply(lambda ts: None if ts is None else custom_round(ts, 5, 'nearest_half_down'))
@@ -118,23 +116,9 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
     boiling_group_df = boiling_group_df.copy()
 
-    boiling_group_df['packing_speed'] = boiling_group_df['sku'].apply(lambda sku: sku.packing_speed)
-
     # todo: code duplicate, make properly with s1 file
     boiling_model = boiling_group_df.iloc[0]['boiling']
-    boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo: make properly
-
-    if 'configuration' in boiling_group_df.columns:
-        configuration = [float(x.strip()) for x in boiling_group_df.iloc[0]['configuration'].split(',')]  # "8000, 7000, 8000"
-        boiling_volumes = [x * boiling_volume / 8000 for x in configuration]
-    else:
-        # todo: del, legacy
-        total_kg = boiling_group_df['kg'].sum()
-        assert total_kg % boiling_volume == 0, f'Количество килограм в варке с номером партии {boiling_group_df.iloc[0]["batch_id"]} не бьется на ровные варки.'
-        boiling_volumes = [boiling_volume] * int(total_kg // boiling_volume)
-
-    # todo: del, legacy
-    # boiling_volumes = [boiling_model.line.output_per_ton] * int(boiling_group_df['kg'].sum() // boiling_model.line.output_per_ton)
+    boiling_volumes = boiling_group_df.iloc[0]['boiling_volumes']
 
     # sum same skus for same teams
     boiling_group_df['sku_name'] = boiling_group_df['sku'].apply(lambda sku: sku.name)
@@ -145,11 +129,11 @@ def make_boilings_parallel_dynamic(boiling_group_df):
         values.append(value)
     boiling_group_df = pd.DataFrame(values)
     boiling_group_df.pop('sku_name')
-    boiling_group_df = boiling_group_df.sort_values(by='batch_id')
+    boiling_group_df = boiling_group_df.sort_values(by='group_id')
 
     boiling_group_df['left'] = boiling_group_df['kg']
 
-    ids = remove_duplicates(boiling_group_df['batch_id'].sort_values())
+    ids = remove_duplicates(boiling_group_df['group_id'].sort_values())
     form_factors = remove_duplicates(boiling_group_df['bff'])
 
     cur_form_factor = form_factors[0]

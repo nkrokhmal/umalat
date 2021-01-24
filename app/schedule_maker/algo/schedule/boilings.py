@@ -10,12 +10,12 @@ def make_boilings(boiling_plan_df):
 
     res = []
 
-    for boiling_id, grp in boiling_plan_df.groupby('batch_id'):
+    for boiling_id, grp in boiling_plan_df.groupby('group_id'):
         boiling_model = grp.iloc[0]['boiling']
 
         if boiling_model.line.name == LineName.WATER:
             res += make_flow_water_boilings(grp, start_from_id=len(res) + 1)
         else:
-            grp['batch_id'] = [len(res) + 1] * len(grp)
+            grp['group_id'] = [len(res) + 1] * len(grp)
             res += make_boilings_parallel_dynamic(grp)
     return res
