@@ -1,7 +1,7 @@
 import os
 os.environ['environment'] = 'interactive'
 
-from app.schedule_maker.boiling_plan import read_boiling_plan
+from app.schedule_maker.boiling_plan import *
 
 
 def test_read_boiling_plan():

@@ -16,24 +16,36 @@ class_validator = ClassValidator(window=20)
 def validate(b1, b2):
     validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2['pouring']['first']['termizator'])  # [termizator.basic]
 
+    wl1 = LineName.WATER if b1['pouring'].props['pouring_line'] in ['0', '1'] else LineName.SALT
+    wl2 = LineName.WATER if b2['pouring'].props['pouring_line'] in ['0', '1'] else LineName.SALT
+
     # cannot make two boilings on same line at the same time
     if b1['pouring'].props['pouring_line'] == b2['pouring'].props['pouring_line']:
         validate_disjoint_by_axis(b1['pouring'], b2['pouring'])
 
-    if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
-        validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
-        for p1, p2 in product(listify(b1['melting_and_packing']['packing']), listify(b2['melting_and_packing']['packing'])):
-            # for p1, p2 in product(b1.iter(cls='packing'), b2.iter(cls='packing')):
-            if p1.props['packing_team_id'] != p2.props['packing_team_id']:
-                continue
-            validate_disjoint_by_axis(p1, p2)
+    if wl1 == wl2:
+        if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
+            # same line type
+            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
+            for p1, p2 in product(listify(b1['melting_and_packing']['packing']), listify(b2['melting_and_packing']['packing'])):
+                # for p1, p2 in product(b1.iter(cls='packing'), b2.iter(cls='packing')):
+                if p1.props['packing_team_id'] != p2.props['packing_team_id']:
+                    continue
+                validate_disjoint_by_axis(p1, p2)
+        else:
+            # salt and water on the same working line - due to salt switching to the first pouring_line
+            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
+            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
+            assert b2['melting_and_packing']['melting']['meltings'].x[0] - b1['melting_and_packing']['melting']['meltings'].y[0] > 6 # todo: optimize - add straight to validate disjoint
+
 class_validator.add('boiling', 'boiling', validate)
 
-def validate(b1, b2):
-    boiling, multihead_cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, multihead_cleaning
-    for b in boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'):
-        validate_disjoint_by_axis(multihead_cleaning, b)
-class_validator.add('multihead_cleaning', 'boiling', validate)
+# todo: make properly
+# def validate(b1, b2):
+#     boiling, multihead_cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, multihead_cleaning
+#     for b in boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'):
+#         validate_disjoint_by_axis(multihead_cleaning, b)
+# class_validator.add('multihead_cleaning', 'boiling', validate)
 
 def validate(b1, b2):
     boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, cleaning
@@ -101,6 +113,8 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
 
     assert lines_df['boilings_left'].apply(lambda lst: len(lst)).sum() >= 1, 'На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания.'
 
+    last_multihead_water_boiling = list_get([boiling for boiling in lines_df.at[LineName.WATER, 'boilings_left'] if boiling_has_multihead_packing(boiling)], -1)
+
     @clockify()
     def add_one_block_from_line(line_name):
         boiling = lines_df.at[line_name, 'boilings_left'].pop(0)
@@ -138,27 +152,12 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                         cleaning = make_termizator_cleaning_block('full', text='ПМ перед безлактозкой')
                         push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
 
-        if lines_df['latest_boiling'].notnull().any():  # todo: make better check for any boilings present
-            # find last multihead packing
-            last_multihead_boiling = None
-            for b in reversed(sorted(listify(schedule.children), key=lambda b: b.y[0])):
-                if b.props['cls'] not in ['boiling', 'multihead_cleaning']:
-                    continue
-
-                if b.props['cls'] == 'multihead_cleaning':
-                    # previously already head multihead_cleaning
-                    break
-
-                if list(b.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова')):
-                    last_multihead_boiling = b
-                    break
-
-            if last_multihead_boiling and last_multihead_boiling.props['boiling_model'].line.name != boiling.props['boiling_model'].line.name:
-                # multihead cleaning needed
-                last_packing_process = list(last_multihead_boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'))[-1]
-                push(schedule, maker.create_block('multihead_cleaning', x=(last_packing_process.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
-
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
+
+        # todo: put to the place of last multihead usage!
+        # add multihead boiling after all water boilings if multihead was present
+        if boiling == last_multihead_water_boiling:
+            push(schedule, maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
 
         if cleaning_boiling and cleaning_boiling == boiling:
             start_from = boiling['pouring']['first']['termizator'].y[0]
@@ -177,7 +176,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             line_name = are_boilings_left[are_boilings_left].index[0]
 
             # start working on 3 line for salt
-            lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [1, 2, 3]]
+            lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3, 1]]
 
         elif are_boilings_left.sum() == 2:
             df = lines_df[~lines_df['latest_boiling'].isnull()]

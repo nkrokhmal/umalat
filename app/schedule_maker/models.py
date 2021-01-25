@@ -12,6 +12,7 @@ def get_db(environment=None):
     if environment == 'flask_app':
         from app import db
     elif environment == 'interactive':
+        print('WORKING IN INTERACTIVE MODE')
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 

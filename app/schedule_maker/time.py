@@ -31,7 +31,7 @@ def cast_time(obj):
             assert re.search(r'(\d+):(\d\d):(\d\d)', obj)
             return obj
     elif isinstance(obj, datetime.time):
-        return cast_time(f'0:{obj.hour}:{obj.minute}')
+        return cast_time('0:' + str(obj.hour).zfill(2) + ':' + str(obj.minute).zfill(2))
     elif isinstance(obj, int):
         days = obj // 288
         hours = (obj // 12) % 24

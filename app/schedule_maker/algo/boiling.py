@@ -1,10 +1,10 @@
 from app.schedule_maker.boiling_plan import *
 
 
-def make_boiling(boiling_model, boiling_id, melting_and_packing):
+def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing):
     maker, make = init_block_maker('root')
 
-    with make('boiling', boiling_id=boiling_id, boiling_model=boiling_model):
+    with make('boiling', boiling_id=boiling_id, boiling_volume=boiling_volume, boiling_model=boiling_model):
         with make('pouring'):
             with make('first'):
                 make('termizator', size=(boiling_model.line.pouring_time // 5, 0))
