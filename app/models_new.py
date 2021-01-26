@@ -69,8 +69,8 @@ class Line(db.Model):
     chedderization_time = db.Column(db.Integer)
 
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
-    skus = db.relationship('SKU', backref=backref('line', uselist=False))
-    form_factors = db.relationship('FormFactor', backref=backref('line', uselist=False))
+    skus = db.relationship('SKU', backref=backref('line', uselist=False, lazy='subquery'))
+    form_factors = db.relationship('FormFactor', backref=backref('line', uselist=False, lazy='subquery'))
     boilings = db.relationship('Boiling', backref=backref('line', uselist=False))
 
     def serialize(self):
@@ -78,6 +78,15 @@ class Line(db.Model):
             "id": self.id,
             "name": self.name
         }
+
+    @property
+    def name_short(self):
+        if self.name == LineName.SALT:
+            return 'Соль'
+        elif self.name == LineName.WATER:
+            return 'Вода'
+        else:
+            return None
 
     @staticmethod
     def generate_lines():
@@ -237,7 +246,7 @@ class FormFactor(db.Model):
     name = db.Column(db.String)
     relative_weight = db.Column(db.Integer)
     default_cooling_technology_id = db.Column(db.Integer, db.ForeignKey('cooling_technologies.id'), nullable=True)
-    skus = db.relationship('SKU', backref=backref('form_factor', uselist=False))
+    skus = db.relationship('SKU', backref=backref('form_factor', uselist=False, lazy='subquery'))
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
 
     made_from = relationship(
@@ -251,6 +260,13 @@ class FormFactor(db.Model):
     def add_made_from(self, ff):
         if ff not in self.made_from:
             self.made_from.append(ff)
+
+    @property
+    def weight_with_line(self):
+        if self.line:
+            return '{}: {}'.format(self.line.name_short, self.relative_weight)
+        else:
+            return '{}'.format(self.name)
 
     @property
     def full_name(self):

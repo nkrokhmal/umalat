@@ -27,7 +27,7 @@ def generate_constructor_df_v3(df_copy):
     result['boiling_name'] = result['boiling'].apply(lambda b: b.to_str())
     result['boiling_volume'] = np.where(result['boiling_type'] == 'salt', 850, 1000)
     result['packer'] = result['sku'].apply(lambda sku: sku.packer.name)
-    result['form_factor'] = result['sku'].apply(lambda sku: sku.form_factor.name)
+    result['form_factor'] = result['sku'].apply(lambda sku: sku.form_factor.weight_with_line)
     result['boiling_form_factor'] = result['sku'].apply(lambda sku: get_boiling_form_factor(sku))
 
     result = result[
@@ -207,8 +207,8 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
 
     boiling_form_factor_sheet = wb['Форм фактор плавления']
     cur_i = 1
-    for value in sorted(form_factors, key=lambda x: x.name):
-        draw_row(boiling_form_factor_sheet, cur_i, [value.name], font_size=8)
+    for value in sorted(form_factors, key=lambda x: x.weight_with_line):
+        draw_row(boiling_form_factor_sheet, cur_i, [value.weight_with_line], font_size=8)
         cur_i += 1
 
     for sheet_name in ['Соль', 'Вода']:
@@ -279,8 +279,8 @@ def get_colour_by_name(sku_name, skus):
 
 def get_boiling_form_factor(sku):
     if sku.form_factor.name != 'Терка':
-        return sku.form_factor.name
+        return sku.form_factor.weight_with_line
     elif 'хачапури' in sku.name:
-        return 0.37
+        return '{}: {}'.format(sku.line.name_short, 0.37)
     else:
-        return 0.46
+        return '{}: {}'.format(sku.line.name_short, 0.46)

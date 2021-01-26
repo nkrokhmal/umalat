@@ -33,6 +33,7 @@ def set_global_db(environment=None):
 
 set_global_db()
 
+
 def query_exactly_one(cls, key, value):
     query = db.session.query(cls).filter(getattr(cls, key) == value)
     res = query.all()
