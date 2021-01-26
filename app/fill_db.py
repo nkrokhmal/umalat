@@ -166,7 +166,9 @@ def fill_sku():
             packing_speed=sku['Скорость упаковки']
         )
 
-        add_sku.packer = [x for x in packer if x.name == sku['Упаковщик']][0]
+        sku_packers = [x for x in packer if x.name in sku['Упаковщик'].split('/')]
+        print(sku_packers)
+        add_sku.packers += sku_packers
 
         line_name = LineName.SALT if sku['Линия'] == 'Соль' else LineName.WATER
         add_sku.line = [x for x in lines if x.name == line_name][0]
