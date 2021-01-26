@@ -26,7 +26,7 @@ def generate_constructor_df_v3(df_copy):
     result['name'] = result['sku'].apply(lambda sku: sku.name)
     result['boiling_name'] = result['boiling'].apply(lambda b: b.to_str())
     result['boiling_volume'] = np.where(result['boiling_type'] == 'salt', 850, 1000)
-    result['packer'] = result['sku'].apply(lambda sku: sku.packer.name)
+    result['packer'] = result['sku'].apply(lambda sku: sku.packers_str)
     result['form_factor'] = result['sku'].apply(lambda sku: sku.form_factor.weight_with_line)
     result['boiling_form_factor'] = result['sku'].apply(lambda sku: get_boiling_form_factor(sku))
 
@@ -234,7 +234,7 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
                 for id in ids:
                     draw_cell(boiling_sheet, id, cur_i, v[0], font_size=8)
                 if sheet_name == 'Вода':
-                    first_cell_formula = '=IF(N{0}="-", "", SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                    first_cell_formula = '=IF(N{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
                         cur_i)
                 else:
                     first_cell_formula = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
@@ -248,7 +248,7 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
                 if sheet_name == 'Вода':
-                    v[1] = '=IF(N{0}="-", "", SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                    v[1] = '=IF(N{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
                         cur_i)
                 else:
                     v[1] = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(

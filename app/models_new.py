@@ -17,6 +17,10 @@ sku_boiling = db.Table('sku_boiling',
                        db.Column('boiling_id', db.Integer, db.ForeignKey('boilings.id'), primary_key=True),
                        db.Column('sku_id', db.Integer, db.ForeignKey('skus.id'), primary_key=True))
 
+sku_packer = db.Table('sku_packer',
+                       db.Column('packer_id', db.Integer, db.ForeignKey('packers.id'), primary_key=True),
+                       db.Column('sku_id', db.Integer, db.ForeignKey('skus.id'), primary_key=True))
+
 
 class Department(db.Model):
     __tablename__ = 'departments'
@@ -53,9 +57,12 @@ class SKU(db.Model):
 
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
-    packer_id = db.Column(db.Integer, db.ForeignKey('packers.id'), nullable=True)
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
     form_factor_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
+
+    @property
+    def packers_str(self):
+        return '/'.join([x.name for x in self.packers])
 
 
 class Line(db.Model):
@@ -110,11 +117,14 @@ class Packer(db.Model):
     __tablename__ = 'packers'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    skus = db.relationship('SKU', backref=backref('packer', uselist=False, lazy='subquery'))
+    skus = db.relationship('SKU', secondary=sku_packer, backref=backref('packers', lazy='subquery'))
+    # skus = db.relationship('SKU', backref=backref('packer', uselist=False, lazy='subquery'))
 
     @staticmethod
     def generate_packer():
-        for name in ['Ульма', 'Мультиголова', 'Техновак', 'Мультиголова/Комет', 'малый Комет', 'САККАРДО',
+        # for name in ['Ульма', 'Мультиголова', 'Техновак', 'Мультиголова/Комет', 'малый Комет', 'САККАРДО',
+        #              'САККАРДО другой цех', 'ручная работа']:
+        for name in ['Ульма', 'Мультиголова', 'Техновак', 'Комет', 'малый Комет', 'САККАРДО',
                      'САККАРДО другой цех', 'ручная работа']:
             packer = Packer(name=name)
             db.session.add(packer)
