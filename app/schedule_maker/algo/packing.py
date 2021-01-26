@@ -3,11 +3,11 @@ from app.enum import LineName
 
 
 def get_configuration_time(line_name, sku1, sku2):
-    if all([line_name == LineName.SALT,
+    if all([
+        line_name == LineName.SALT,
             sku1.form_factor.relative_weight != sku2.form_factor.relative_weight, # todo: better to compare form factors? Делаю так, потому что у палочек бывают разные фф, хотя это одни и те же палочки
-            sku1.packer == sku2.packer,
-            sku1.packer.name == 'Ульма',
-            sku2.packer.name == 'Ульма']):
+            sku1.packers[0].name == sku2.packers[0].name == 'Ульма'
+            ]):
         return 25
     elif sku1 == sku2:
         return 0
@@ -47,5 +47,5 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
 
 
 def boiling_has_multihead_packing(boiling):
-    return len(list(boiling.iter(cls='packing_process', sku=lambda sku: 'Мультиголова' in sku.packer.name))) > 0
+    return len(list(boiling.iter(cls='packing_process', sku=lambda sku: 'Мультиголова' in sku.packers[0].name))) > 0
 
