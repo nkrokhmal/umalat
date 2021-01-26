@@ -38,34 +38,45 @@ def generate_constructor_df_v3(df_copy):
 
 def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
     boilings = Boilings(max_weight=max_weight, min_weight=min_weight, boiling_number=boiling_number)
-    orders = [(False, 3.3, 'Альче', None),
-              (True, 3.3, 'Альче', 'Фиор Ди Латте'),
-              (True, 3.3, 'Сакко', 'Фиор Ди Латте'),
-              (True, 3.6, 'Альче', 'Фиор Ди Латте'),
-              (True, 3.6, 'Альче', 'Чильеджина'),
-              (True, 3.3, 'Альче', 'Чильеджина'),
-              (True, 3.3, 'Сакко', 'Чильеджина')]
-    is_lactose = False
+    orders = [
+        # (False, 3.3, 'Альче', None),
+        # (True, 3.3, 'Альче', 'Фиор Ди Латте'),
+        (None, 3.3, 'Альче', None),
+        (True, 3.3, 'Сакко', 'Фиор Ди Латте'),
+        (True, 3.6, 'Альче', 'Фиор Ди Латте'),
+        (True, 3.6, 'Альче', 'Чильеджина'),
+        (True, 3.3, 'Альче', 'Чильеджина'),
+        (True, 3.3, 'Сакко', 'Чильеджина')]
+    # is_lactose = False
     for order in orders:
-        df_filter = df[(df['is_lactose'] == order[0]) &
+        df_filter = df[(order[0] is None or df['is_lactose'] == order[0]) &
                        (df['percent'] == order[1]) &
                        (df['ferment'] == order[2]) &
                        (order[3] is None or df['group'] == order[3])]
 
         if not order[0]:
-            df_filter_chl = df_filter[df_filter['group'] == 'Чильеджина'].sort_values(by='weight', ascending=False)
-            df_filter_fdl = df_filter[df_filter['group'] == 'Фиор Ди Латте'].sort_values(by='weight', ascending=False)
+            df_filter_chl = df_filter[(df_filter['group'] == 'Чильеджина') &
+                                      (df_filter['is_lactose'] == False)].sort_values(by='weight', ascending=False)
+            df_filter_fdl = df_filter[(df_filter['group'] == 'Фиор Ди Латте') &
+                                      (df_filter['is_lactose'] == False)].sort_values(by='weight', ascending=False)
+            df_filter_oth = df_filter[df_filter['is_lactose']].sort_values(by='weight', ascending=False)
 
-            if df_filter_chl['weight'].sum() < 200:
-                df_filter_dict = pd.concat([df_filter_chl, df_filter_fdl])
+            if (df_filter_chl['plan'].sum() < 100) and (df_filter_oth['plan'].sum() < 100):
+                df_filter_dict = pd.concat([df_filter_chl, df_filter_oth, df_filter_fdl])
+            elif (df_filter_chl['plan'].sum() < 100) and (df_filter_oth['plan'].sum() > 100):
+                df_filter_dict = pd.concat([df_filter_chl, df_filter_fdl, df_filter_oth])
+            elif (df_filter_chl['plan'].sum() > 100) and (df_filter_oth['plan'].sum() < 100):
+                df_filter_dict = pd.concat([df_filter_oth, df_filter_fdl, df_filter_chl])
             else:
-                df_filter_dict = pd.concat([df_filter_fdl, df_filter_chl])
+                df_filter_dict = pd.concat([df_filter_fdl, df_filter_chl, df_filter_oth])
+
             df_filter_dict = df_filter_dict.to_dict('records')
         else:
             df_filter_dict = df_filter.sort_values(by='weight', ascending=False).to_dict('records')
 
-        boilings.add_group(df_filter_dict, is_lactose)
-        is_lactose = order[0]
+        # boilings.add_group(df_filter_dict, is_lactose)
+        boilings.add_group(df_filter_dict)
+        # is_lactose = order[0]
     boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
 
@@ -248,10 +259,12 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
                 else:
                     colour = current_app.config['COLOURS']['Remainings']
                 if sheet_name == 'Вода':
-                    v[1] = '=IF(N{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                    v[
+                        1] = '=IF(N{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
                         cur_i)
                 else:
-                    v[1] = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                    v[
+                        1] = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
                         cur_i)
                 draw_row(boiling_sheet, cur_i, v[1:-1], font_size=8, color=colour)
                 if v[4] == 'Терка':
