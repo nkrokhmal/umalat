@@ -151,7 +151,7 @@ def fill_sku():
     groups = db.session.query(Group).all()
 
     columns = ['Название SKU', 'Процент', 'Наличие лактозы', 'Тип закваски', 'Имя бренда', 'Вес нетто', 'Срок хранения',
-               'Является ли SKU теркой', 'Упаковщик', 'Скорость упаковки', 'Линия', 'Вес форм фактора', 'Название форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
+               'Является ли SKU теркой', 'Упаковщик', 'Скорость упаковки', 'Скорость сборки', 'Линия', 'Вес форм фактора', 'Название форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
 
     sku_data = df[columns]
     sku_data = sku_data.drop_duplicates()
@@ -163,11 +163,11 @@ def fill_sku():
             brand_name=sku['Имя бренда'],
             weight_netto=sku['Вес нетто'],
             shelf_life=sku['Срок хранения'],
+            collecting_speed=_cast_non_nan(sku['Скорость сборки']) or _cast_non_nan(sku['Скорость упаковки']),
             packing_speed=sku['Скорость упаковки']
         )
 
         sku_packers = [x for x in packer if x.name in sku['Упаковщик'].split('/')]
-        print(sku_packers)
         add_sku.packers += sku_packers
 
         line_name = LineName.SALT if sku['Линия'] == 'Соль' else LineName.WATER
@@ -178,7 +178,6 @@ def fill_sku():
                    (x.is_lactose == is_lactose) &
                    (x.ferment == sku['Тип закваски']) &
                    (x.line_id == add_sku.line.id)]
-
         add_sku.group = [x for x in groups if x.name == sku['Название форм фактора']][0]
         if add_sku.group.name != 'Качокавалло':
             add_sku.production_by_request = True
