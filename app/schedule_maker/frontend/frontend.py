@@ -287,11 +287,12 @@ def make_packings(schedule, line_name):
 
 
 def make_frontend(schedule):
+    schedule_master = schedule['master']
     maker, make = init_block_maker('root', axis=1)
 
     make('stub', size=(0, 1))
 
-    start_t = min([boiling.x[0] for boiling in listify(schedule['boiling'])]) # first pouring time
+    start_t = min([boiling.x[0] for boiling in listify(schedule_master['boiling'])]) # first pouring time
     start_t = int(custom_round(start_t, 12, 'floor')) # round to last hour
     start_time = cast_time(start_t)
     make(make_header(start_time=start_time))
@@ -299,31 +300,31 @@ def make_frontend(schedule):
     with make('pouring', start_time=start_time, axis=1):
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
-        make(make_cheese_makers(schedule, range(2)))
+        make(make_cheese_makers(schedule_master, range(2)))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
-        make(make_cleanings(schedule))
-        make(make_cheese_makers(schedule, range(2, 4)))
+        make(make_cleanings(schedule_master))
+        make(make_cheese_makers(schedule_master, range(2, 4)))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
 
-    start_t = min([boiling['melting_and_packing'].x[0] for boiling in listify(schedule['boiling'])])  # first melting time
+    start_t = min([boiling['melting_and_packing'].x[0] for boiling in listify(schedule_master['boiling'])])  # first melting time
     start_t = int(custom_round(start_t, 12, 'floor'))  # round to last hour
     start_time = cast_time(start_t)
     make(make_header(start_time=start_time))
 
     with make('melting', start_time=start_time, axis=1):
-        make(make_multihead_cleanings(schedule))
-        make(make_meltings_1(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
+        make(make_multihead_cleanings(schedule_master))
+        make(make_meltings_1(schedule_master, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
-        make(make_packings(schedule, LineName.WATER))
+        make(make_packings(schedule_master, LineName.WATER))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
         # make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
-        make(make_meltings_2(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
+        make(make_meltings_2(schedule_master, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
-        make(make_packings(schedule, LineName.SALT))
+        make(make_packings(schedule_master, LineName.SALT))
     return maker.root
 
 

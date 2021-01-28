@@ -88,6 +88,10 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
     start_times = {k: v if v else None for k, v in start_times.items()}
 
     maker, make = init_block_maker('schedule')
+
+    make('master', push_func=add_push)
+    make('extra', push_func=add_push)
+
     schedule = maker.root
 
     lines_df = pd.DataFrame(index=[LineName.WATER, LineName.SALT], columns=['iter_props', 'start_time', 'boilings_left', 'latest_boiling'])
@@ -132,19 +136,19 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             configuration_blocks = make_configuration_blocks(lines_df.at[line_name, 'latest_boiling'], boiling, maker, line_name, between_boilings=True)
             for conf in configuration_blocks:
                 conf.props.update(line_name=line_name)
-                push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
+                push(schedule['master'], conf, push_func=dummy_push, validator=class_validator, start_from='beg')
 
-        push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
+        push(schedule['master'], boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
 
         # todo: put to the place of last multihead usage!
         # add multihead boiling after all water boilings if multihead was present
         if boiling == last_multihead_water_boiling:
-            push(schedule, maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
+            push(schedule['master'], maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
 
         if cleaning_boiling and cleaning_boiling == boiling:
             start_from = boiling['pouring']['first']['termizator'].y[0]
             cleaning = make_termizator_cleaning_block('full', x=(boiling['pouring']['first']['termizator'].y[0], 0), text='ПМ в середине дня')
-            push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
+            push(schedule['master'], cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
 
         lines_df.at[line_name, 'latest_boiling'] = boiling
         return boiling
@@ -175,13 +179,13 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
         add_one_block_from_line(line_name)
 
     # add cleanings if necessary
-    boilings = listify(schedule['boiling'])
+    boilings = listify(schedule['master']['boiling'])
     boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
     for a, b in SimpleIterator(boilings).iter_sequences(2):
         rest = b['pouring']['first']['termizator'].x[0] - a['pouring']['first']['termizator'].y[0]
 
-        cleanings = list(schedule.iter(cls='cleaning'))
+        cleanings = list(schedule['master'].iter(cls='cleaning'))
 
         in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
         previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
@@ -194,7 +198,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             if 12 <= rest < 18:
                 cleaning = make_termizator_cleaning_block('short', text='КМ')
                 cleaning.props.update(x=(a['pouring']['first']['termizator'].y[0], 0))
-                push(schedule, cleaning, push_func=add_push)
+                push(schedule['master'], cleaning, push_func=add_push)
 
             if rest >= 18:
                 if previous_cleaning and (a.x[0] - previous_cleaning.x[0]) < cast_t('04:00'):
@@ -204,11 +208,11 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                 else:
                     cleaning = make_termizator_cleaning_block('full', text='ПМ')
                 cleaning.props.update(x=(a['pouring']['first']['termizator'].y[0], 0))
-                push(schedule, cleaning, push_func=add_push)
+                push(schedule['master'], cleaning, push_func=add_push)
 
-    last_boiling = list(schedule.iter(cls='boiling'))[-1]
+    last_boiling = list(schedule['master'].iter(cls='boiling'))[-1]
     start_from = last_boiling['pouring']['first']['termizator'].y[0] + 1
     cleaning = make_termizator_cleaning_block('full', text='ПМ в конце дня')  # add five extra minutes
-    push(schedule, cleaning, push_func=dummy_push, start_from=start_from, validator=class_validator)
+    push(schedule['master'], cleaning, push_func=dummy_push, start_from=start_from, validator=class_validator)
 
     return schedule

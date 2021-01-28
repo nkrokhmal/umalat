@@ -107,6 +107,7 @@ def make_mpp(boiling_df, left_boiling_volume):
                     if row['collecting_speed'] == row['packing_speed']:
                         packing_size = block.size[0]
                     else:
+                        # Терка
                         packing_size = custom_round(row['collected'] / row['packing_speed'] * 60, 5, 'ceil') // 5
 
                     push(packing, maker.create_block('packing_process', size=[packing_size, 0], x=list(block.props['x_rel']), sku=row['sku']), push_func=add_push)
