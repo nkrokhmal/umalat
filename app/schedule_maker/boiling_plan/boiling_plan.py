@@ -64,7 +64,7 @@ def read_boiling_plan(wb_obj, saturate=True):
 
     # remove Терка from form_factors
     # todo: take from boiling_plan directly!
-    df['bff'] = df['ff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
+    df['bff'] = df['ff'].apply(lambda ff: ff if 'Терка' not in ff.name else None)
 
     # fill Терка empty form factor values
     for idx, grp in df.copy().groupby('group_id'):

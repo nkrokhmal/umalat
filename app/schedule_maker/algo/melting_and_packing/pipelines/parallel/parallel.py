@@ -10,7 +10,7 @@ from app.schedule_maker.algo.melting_and_packing.melting_process import make_mel
 
 def make_mpp(boiling_df, left_boiling_volume):
     boiling_df = boiling_df.copy()
-    boiling_df['packing_speed'] = boiling_df['sku'].apply(lambda sku: sku.packing_speed)
+    boiling_df['collecting_speed'] = boiling_df['sku'].apply(lambda sku: sku.collecting_speed)
     boiling_df['cur_speed'] = 0
     boiling_df['beg_ts'] = None
     boiling_df['end_ts'] = None
@@ -33,15 +33,15 @@ def make_mpp(boiling_df, left_boiling_volume):
             team_df = boiling_df[(boiling_df['packing_team_id'] == packing_team_id) & (boiling_df['left'] > ERROR)]
             if len(team_df) > 0:
                 cur_skus_values.append(team_df.iloc[0])
-        cur_skus_df = pd.DataFrame(cur_skus_values).sort_values(by='packing_speed')  # two rows for next packing skus
+        cur_skus_df = pd.DataFrame(cur_skus_values).sort_values(by='collecting_speed')  # two rows for next packing skus
 
-        packing_speed_left = boiling_model.line.melting_speed
+        collecting_speed_left = boiling_model.line.melting_speed
         for i, cur_sku in cur_skus_df.iterrows():
-            cur_speed = min(packing_speed_left, cur_sku['packing_speed'])
+            cur_speed = min(collecting_speed_left, cur_sku['collecting_speed'])
             if not cur_speed:
                 continue
             boiling_df.at[cur_sku.name, 'cur_speed'] = cur_speed
-            packing_speed_left -= cur_speed
+            collecting_speed_left -= cur_speed
 
             # set start of packing
             if cur_sku['beg_ts'] is None:
