@@ -314,12 +314,12 @@ def make_frontend(schedule):
     with make('melting', start_time=start_time, axis=1):
         make(make_multihead_cleanings(schedule))
         make(make_meltings_1(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
-        # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
+        make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
         make(make_packings(schedule, LineName.WATER))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
-        # make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
+        make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
         make(make_meltings_2(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))

@@ -133,6 +133,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             for conf in configuration_blocks:
                 conf.props.update(line_name=line_name)
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
+
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
 
         # todo: put to the place of last multihead usage!
