@@ -56,8 +56,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
 
         with make('meltings', x=(serving.size[0], 0), push_func=add_push):
             for i, block in enumerate(listify(mp['melting_and_packing_process'])):
-                make('melting_process', size=(block['melting_process'].size[0], 0),
-                     bff=block['melting_process'].props['bff'])
+                make('melting_process', size=(block['melting_process'].size[0], 0), bff=block['melting_process'].props['bff'])
 
         with make('coolings', x=(serving.size[0], 0), push_func=add_push):
             for i, block in enumerate(listify(mp['melting_and_packing_process'])):
