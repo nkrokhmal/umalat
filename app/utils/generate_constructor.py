@@ -12,11 +12,11 @@ def generate_constructor_df_v3(df_copy):
     df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
     # todo: исправить костыль с терками
     df['weight'] = df['sku'].apply(
-        lambda x: x.form_factor.relative_weight if x.group.type != 'Терка' else x.form_factor.relative_weight + 30)
+        lambda x: x.form_factor.relative_weight if x.group.name != 'Терка' else x.form_factor.relative_weight + 30)
     df['percent'] = df['sku'].apply(lambda x: x.made_from_boilings[0].percent)
     df['is_lactose'] = df['sku'].apply(lambda x: x.made_from_boilings[0].is_lactose)
     df['ferment'] = df['sku'].apply(lambda x: x.made_from_boilings[0].ferment)
-    df['group'] = df['sku'].apply(lambda x: x.group.type)
+    df['group'] = df['sku'].apply(lambda x: x.group.name)
 
     water, boiling_number = handle_water(df[df['boiling_type'] == 'water'])
     salt, boiling_number = handle_salt(df[df['boiling_type'] == 'salt'], boiling_number=boiling_number + 1)
@@ -88,14 +88,15 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
         for boiling_id, df_grouped_boiling_id in df_grouped_weight.groupby('boiling_id'):
             new = True
             for form_factor, df_grouped in df_grouped_boiling_id.groupby('group'):
+                # todo: пофикить костыль с соленностью терки
                 if form_factor != 'Терка':
                     boilings.add_group(df_grouped.to_dict('records'), new)
                     new = False
                 else:
-                    sul_rubber = [x for x in df_grouped.to_dict('records') if x['sku'].group.name == 'Терка Сулугуни']
-                    moz_rubber = [x for x in df_grouped.to_dict('records') if x['sku'].group.name == 'Терка Моцареллы']
-                    boilings.add_group(sul_rubber, True)
-                    boilings.add_group(moz_rubber, True)
+                    salted = [x for x in df_grouped.to_dict('records') if x['sku'].name in salted_rubber]
+                    not_salted = [x for x in df_grouped.to_dict('records') if x['sku'].name not in salted_rubber]
+                    boilings.add_group(salted, True)
+                    boilings.add_group(not_salted, True)
 
     boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
@@ -284,7 +285,7 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
 def get_colour_by_name(sku_name, skus):
     sku = [x for x in skus if x.name == sku_name]
     if len(sku) > 0:
-        return current_app.config['COLOURS'][sku[0].group.type]
+        return current_app.config['COLOURS'][sku[0].group.name]
     else:
         return current_app.config['COLOURS']['Default']
 

@@ -134,24 +134,6 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                 conf.props.update(line_name=line_name)
                 push(schedule, conf, push_func=dummy_push, validator=class_validator, start_from='beg')
 
-        # add cleaning if needed
-        if cleaning_boiling and lines_df.at[line_name, 'latest_boiling'] == cleaning_boiling:
-            # already added cleaning
-            pass
-        else:
-            # add cleanings for non-lactose cheese
-            if not boiling.props['boiling_model'].is_lactose:
-                latest_boilings = list(lines_df['latest_boiling'])
-                latest_boilings = [b for b in latest_boilings if b]
-                if latest_boilings:
-                    min_latest_boiling = min(latest_boilings, key=lambda b: b.x[0])
-                    start_from = min_latest_boiling.x[0]
-                    latest_boiling = lines_df.at[line_name, 'latest_boiling']
-                    if latest_boiling and line_name == LineName.SALT and latest_boiling.props['boiling_model'].is_lactose:
-                        # full cleaning needed
-                        cleaning = make_termizator_cleaning_block('full', text='ПМ перед безлактозкой')
-                        push(schedule, cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
-
         push(schedule, boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
 
         # todo: put to the place of last multihead usage!

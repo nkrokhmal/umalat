@@ -55,16 +55,16 @@ def read_boiling_plan(wb_obj, saturate=True):
         dfs[1]['group_id'] += dfs[0].iloc[-1]['group_id']
 
     df = pd.concat(dfs).reset_index(drop=True)
+    df['sku'] = df['sku'].apply(cast_sku)
 
     df['boiling'] = df['boiling_params'].apply(cast_boiling)
-    df['sku'] = df['sku'].apply(cast_sku)
 
     # set boiling form factors
     df['ff'] = df['sku'].apply(lambda sku: sku.form_factor)
 
     # remove Терка from form_factors
     # todo: take from boiling_plan directly!
-    df['bff'] = df['ff'].apply(lambda ff: ff if 'Терка' not in ff.name else None)
+    df['bff'] = df['ff'].apply(lambda ff: ff if ff.name != 'Терка' else None)
 
     # fill Терка empty form factor values
     for idx, grp in df.copy().groupby('group_id'):
@@ -91,5 +91,4 @@ def read_boiling_plan(wb_obj, saturate=True):
 
     if saturate:
         df = saturate_boiling_plan(df)
-
     return df

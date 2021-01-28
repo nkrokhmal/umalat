@@ -15,7 +15,6 @@ def fill_db():
     fill_form_factors()
     fill_sku()
     fill_termizator()
-    fill_made_from()
 
 
 def fill_simple_data():
@@ -100,15 +99,14 @@ def fill_form_factors():
     db.session.add(mass_ff)
     db.session.commit()
 
-    columns = ['Название форм фактора', 'Вес форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки', 'Линия']
+    columns = ['Вес форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки', 'Линия']
     df = df[columns]
-    df['Название форм фактора'] = df['Название форм фактора'].apply(lambda x: x if 'Терка' in x else None)
     df = df.drop_duplicates()
     values = df.to_dict('records')
     for value in values:
         line_name = LineName.SALT if value['Линия'] == 'Соль' else LineName.WATER
         if value['Вес форм фактора'] == 1:
-            name = value['Название форм фактора']
+            name = 'Терка'
         elif value['Вес форм фактора'] == 15:
             name = 'Палочки 15г'
         elif value['Вес форм фактора'] == 30:
@@ -119,12 +117,10 @@ def fill_form_factors():
         form_factor = FormFactor(name=name, relative_weight=value['Вес форм фактора'])
         form_factor.line = [x for x in lines if x.name == line_name][0]
         cooling_technologies = db.session.query(CoolingTechnology).all()
-        if 'Терка' not in name:
-            form_factor.default_cooling_technology = [
-                x for x in cooling_technologies if
-                all([x.first_cooling_time == _cast_non_nan(value['Охлаждение 1(для воды)']),
-                     x.second_cooling_time == _cast_non_nan(value['Охлаждение 2(для воды)']),
-                     x.salting_time == _cast_non_nan(value['Время посолки'])])][0]
+        if name != 'Терка':
+            form_factor.default_cooling_technology = [x for x in cooling_technologies if all([x.first_cooling_time == _cast_non_nan(value['Охлаждение 1(для воды)']),
+                                                                              x.second_cooling_time == _cast_non_nan(value['Охлаждение 2(для воды)']),
+                                                                              x.salting_time == _cast_non_nan(value['Время посолки'])])][0]
 
         db.session.add(form_factor)
     db.session.commit()
@@ -155,23 +151,23 @@ def fill_sku():
     groups = db.session.query(Group).all()
 
     columns = ['Название SKU', 'Процент', 'Наличие лактозы', 'Тип закваски', 'Имя бренда', 'Вес нетто', 'Срок хранения',
-               'Является ли SKU теркой', 'Упаковщик', 'Скорость сборки', 'Скорость упаковки', 'Линия', 'Вес форм фактора', 'Название форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
+               'Является ли SKU теркой', 'Упаковщик', 'Скорость упаковки', 'Линия', 'Вес форм фактора', 'Название форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']
 
     sku_data = df[columns]
     sku_data = sku_data.drop_duplicates()
     sku_data = sku_data.to_dict('records')
     for sku in sku_data:
-        is_lactose = sku['Наличие лактозы'] == 'Да'
+        is_lactose = True if sku['Наличие лактозы'] == 'Да' else False
         add_sku = SKU(
             name=sku['Название SKU'],
             brand_name=sku['Имя бренда'],
             weight_netto=sku['Вес нетто'],
             shelf_life=sku['Срок хранения'],
-            collecting_speed=_cast_non_nan(sku['Скорость сборки']) or _cast_non_nan(sku['Скорость упаковки']),
             packing_speed=sku['Скорость упаковки']
         )
 
         sku_packers = [x for x in packer if x.name in sku['Упаковщик'].split('/')]
+        print(sku_packers)
         add_sku.packers += sku_packers
 
         line_name = LineName.SALT if sku['Линия'] == 'Соль' else LineName.WATER
@@ -182,6 +178,7 @@ def fill_sku():
                    (x.is_lactose == is_lactose) &
                    (x.ferment == sku['Тип закваски']) &
                    (x.line_id == add_sku.line.id)]
+
         add_sku.group = [x for x in groups if x.name == sku['Название форм фактора']][0]
         if add_sku.group.name != 'Качокавалло':
             add_sku.production_by_request = True
@@ -205,18 +202,3 @@ def fill_termizator():
     termizator.long_cleaning_time = 80
     db.session.add(termizator)
     db.session.commit()
-
-
-def fill_made_from():
-    skus = db.session.query(SKU).all()
-    form_factors = db.session.query(FormFactor).all()
-    sul_rubber = [x for x in form_factors if x.name == 'Терка Сулугуни'][0]
-    moz_rubber = [x for x in form_factors if x.name == 'Терка Моцареллы'][0]
-    sul_ffs = set([x.form_factor for x in skus if 'сулугуни' in x.name.lower()])
-    moz_ffs = set([x.form_factor for x in skus if 'моцарелла' in x.name.lower()])
-    for sul_ff in sul_ffs:
-        sul_rubber.add_made_from(sul_ff)
-    for moz_ff in moz_ffs:
-        moz_rubber.add_made_from(moz_ff)
-    db.session.commit()
-
