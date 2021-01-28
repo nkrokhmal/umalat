@@ -13,6 +13,7 @@ def make_mpp(boiling_df, left_boiling_volume):
     boiling_df['collecting_speed'] = boiling_df['sku'].apply(lambda sku: sku.collecting_speed)
     boiling_df['packing_speed'] = boiling_df['sku'].apply(lambda sku: sku.packing_speed)
     boiling_df['cur_speed'] = 0
+    boiling_df['collected'] = 0
     boiling_df['beg_ts'] = None
     boiling_df['end_ts'] = None
 
@@ -55,6 +56,7 @@ def make_mpp(boiling_df, left_boiling_volume):
 
         # update collected kgs
         boiling_df['left'] -= (cur_ts - old_ts) * boiling_df['cur_speed'] / 60
+        boiling_df['collected'] += (cur_ts - old_ts) * boiling_df['cur_speed'] / 60
         left -= (cur_ts - old_ts) * boiling_df['cur_speed'].sum() / 60
         boiling_df['cur_speed'] = 0
 
@@ -101,7 +103,14 @@ def make_mpp(boiling_df, left_boiling_volume):
                             block = make('packing_configuration', size=[conf_time_size // 5, 0]).block
                             push(packing, maker.copy(block), push_func=add_push)
                     block = make('collecting_process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku']).block
-                    push(packing, maker.create_block('packing_process', size=list(block.size), x=list(block.props['x_rel']), sku=row['sku']), push_func=add_push)
+
+                    if row['collecting_speed'] == row['packing_speed']:
+                        packing_size = block.size[0]
+                    else:
+                        packing_size = custom_round(row['collected'] / row['packing_speed'] * 60, 5, 'ceil') // 5
+
+                    push(packing, maker.create_block('packing_process', size=[packing_size, 0], x=list(block.props['x_rel']), sku=row['sku']), push_func=add_push)
+
 
     bff = boiling_df.iloc[0]['bff']
     make('melting_process', size=(maker.root.size[0], 0), bff=bff)
