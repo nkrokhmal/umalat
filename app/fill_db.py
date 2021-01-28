@@ -161,13 +161,13 @@ def fill_sku():
     sku_data = sku_data.drop_duplicates()
     sku_data = sku_data.to_dict('records')
     for sku in sku_data:
-        is_lactose = True if sku['Наличие лактозы'] == 'Да' else False
+        is_lactose = sku['Наличие лактозы'] == 'Да'
         add_sku = SKU(
             name=sku['Название SKU'],
             brand_name=sku['Имя бренда'],
             weight_netto=sku['Вес нетто'],
             shelf_life=sku['Срок хранения'],
-            collecting_speed=sku['Скорость сборки'] or sku['Скорость упаковки'],
+            collecting_speed=_cast_non_nan(sku['Скорость сборки']) or _cast_non_nan(sku['Скорость упаковки']),
             packing_speed=sku['Скорость упаковки']
         )
 
