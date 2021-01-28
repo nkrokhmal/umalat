@@ -11,6 +11,7 @@ from app.schedule_maker.algo.melting_and_packing.melting_process import make_mel
 def make_mpp(boiling_df, left_boiling_volume):
     boiling_df = boiling_df.copy()
     boiling_df['collecting_speed'] = boiling_df['sku'].apply(lambda sku: sku.collecting_speed)
+    boiling_df['packing_speed'] = boiling_df['sku'].apply(lambda sku: sku.packing_speed)
     boiling_df['cur_speed'] = 0
     boiling_df['beg_ts'] = None
     boiling_df['end_ts'] = None
@@ -89,14 +90,18 @@ def make_mpp(boiling_df, left_boiling_volume):
         df = boiling_df[boiling_df['packing_team_id'] == packing_team_id]
         df = df[~df['beg_ts'].isnull()]
         if len(df) > 0:
-            with make('packing', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push):
+            packing = make('packing', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push).block
+
+            with make('collecting', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push):
                 for i, (_, row) in enumerate(df.iterrows()):
                     # add configuration
                     if i >= 1:
                         conf_time_size = get_configuration_time(boiling_model.line.name, row['sku'], df.iloc[i - 1]['sku'])
                         if conf_time_size:
-                            make('packing_configuration', size=[conf_time_size // 5, 0])
-                    make('packing_process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku'])
+                            block = make('packing_configuration', size=[conf_time_size // 5, 0]).block
+                            push(packing, maker.copy(block), push_func=add_push)
+                    block = make('collecting_process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku']).block
+                    push(packing, maker.create_block('packing_process', size=list(block.size), x=list(block.props['x_rel']), sku=row['sku']), push_func=add_push)
 
     bff = boiling_df.iloc[0]['bff']
     make('melting_process', size=(maker.root.size[0], 0), bff=bff)
