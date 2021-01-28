@@ -157,7 +157,7 @@ def fill_sku():
     sku_data = sku_data.drop_duplicates()
     sku_data = sku_data.to_dict('records')
     for sku in sku_data:
-        is_lactose = True if sku['Наличие лактозы'] == 'Да' else False
+        is_lactose = sku['Наличие лактозы'] == 'Да'
         add_sku = SKU(
             name=sku['Название SKU'],
             brand_name=sku['Имя бренда'],

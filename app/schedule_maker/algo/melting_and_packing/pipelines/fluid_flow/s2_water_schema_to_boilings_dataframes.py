@@ -40,10 +40,12 @@ class SchemaToBoilingsDataframes:
             sequences = []
 
             for j, (sku, bff, kg) in enumerate(grp):
-                container = Container(f'Container{packing_team_id}-{j}', item=bff, limits=[kg, None], max_pressures=[sku.packing_speed, None])
+                assert sku.packing_speed == sku.collecting_speed, f'SKU {sku.name} имеет разные скорости сборки и фасовки. На линии воды позволяются только одинаковые скорости сборки и фасовки.'
+
+                container = Container(f'Container{packing_team_id}-{j}', item=bff, limits=[kg, None], max_pressures=[sku.collecting_speed, None])
                 processor = Processor(f'Processor{packing_team_id}-{j}',
                                       items=[bff, sku],
-                                      max_pressures=[sku.packing_speed, None],  # todo: use second packing speed
+                                      max_pressures=[sku.packing_speed, None],
                                       processing_time=0)
                 seq = Sequence(f'Sequence{packing_team_id}-{j}', [container, processor])
                 sequences.append(seq)
@@ -74,12 +76,17 @@ class SchemaToBoilingsDataframes:
             boiling_dataframes['meltings'] = df
 
             assert abs(drenator.value) < ERROR, f'Дренатор не был опустошен полностью во время плавления на линии {LineName.WATER} из-за невалидного плана варок. Поправьте план варок и повторите попытку. '
-            # todo: specify where exactly is the error
             assert all(abs(container.io_containers['out'].value) < ERROR for container in cooling_queue.lines), f'Некоторые SKU не были собраны полностью во время паковки на линии {LineName.WATER} из-за невалидного плана варок. Поправьте план варок и повторите попытку. '
 
             df = pd.DataFrame(cooling_queue.active_periods(), columns=['item', 'beg', 'end'])
             df['name'] = 'cooling_process'
             boiling_dataframes['coolings'] = df
+
+            boiling_dataframes['collectings'] = {}
+            for packing_team_id, queue in packing_queues.items():
+                df = pd.DataFrame(queue.active_periods('in'), columns=['item', 'beg', 'end'])
+                df['name'] = 'collecting_process'
+                boiling_dataframes['collectings'][packing_team_id] = df
 
             boiling_dataframes['packings'] = {}
             for packing_team_id, queue in packing_queues.items():
@@ -91,6 +98,7 @@ class SchemaToBoilingsDataframes:
                 df2['item'] = None
                 df = pd.concat([df1, df2]).sort_values(by='beg').reset_index(drop=True)
 
+                # remove last packing configuration if needed
                 if df.iloc[-1]['name'] == 'packing_configuration':
                     df = df.iloc[:-1]
 
@@ -98,6 +106,7 @@ class SchemaToBoilingsDataframes:
             boiling_dataframes['meltings'] = self._post_process_dataframe(boiling_dataframes['meltings'], round=round)
             boiling_dataframes['coolings'] = self._post_process_dataframe(boiling_dataframes['coolings'], fix_small_intervals=False, round=round)
 
+            boiling_dataframes['collectings'] = {packing_team_id: self._post_process_dataframe(df, round=round) for packing_team_id, df in boiling_dataframes['collectings'].items()}
             boiling_dataframes['packings'] = {packing_team_id: self._post_process_dataframe(df, round=round) for packing_team_id, df in boiling_dataframes['packings'].items()}
 
             res.append(boiling_dataframes)
