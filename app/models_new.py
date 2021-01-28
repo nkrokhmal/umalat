@@ -51,6 +51,7 @@ class SKU(db.Model):
     brand_name = db.Column(db.String)
     weight_netto = db.Column(db.Float)
     shelf_life = db.Column(db.Integer)
+    collecting_speed = db.Column(db.Integer, nullable=True)
     packing_speed = db.Column(db.Integer, nullable=True)
     production_by_request = db.Column(db.Boolean)
     packing_by_request = db.Column(db.Boolean)
