@@ -84,7 +84,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
         group_formula = []
 
         for form_factor in current_app.config['ORDER']:
-            block_skus = [x for x in group_skus['GroupSKU'] if x['SKU'].group.name == form_factor]
+            block_skus = [x for x in group_skus['GroupSKU'] if x['SKU'].group.type == form_factor]
             beg_ff_row = cur_row
             for sku in block_skus:
                 formula_plan = "=IFERROR(INDEX('{0}'!$A$5:$DK$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0)), 0)".format(
@@ -92,7 +92,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                 formula_remains = "=IFERROR(INDEX('{0}'!$A$5:$DK$265,MATCH($O$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0)), 0)".format(
                     current_app.config['SHEET_NAMES']['remainings'], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
 
-                block.colour = current_app.config['COLOURS'][sku['SKU'].group.name][1:]
+                block.colour = current_app.config['COLOURS'][sku['SKU'].group.type][1:]
                 block.cell_value(row=cur_row, col=CELLS['Brand'].column, value=sku["SKU"].brand_name)
                 block.cell_value(row=cur_row, col=CELLS['SKU'].column, value=sku["SKU"].name)
                 block.cell_value(row=cur_row, col=CELLS['FactRemains'].column, value=formula_plan)

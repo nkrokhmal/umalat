@@ -122,10 +122,14 @@ class Packer(db.Model):
 
     @staticmethod
     def generate_packer():
-        # for name in ['Ульма', 'Мультиголова', 'Техновак', 'Мультиголова/Комет', 'малый Комет', 'САККАРДО',
-        #              'САККАРДО другой цех', 'ручная работа']:
-        for name in ['Ульма', 'Мультиголова', 'Техновак', 'Комет', 'малый Комет', 'САККАРДО',
-                     'САККАРДО другой цех', 'ручная работа']:
+        for name in [
+            'Ульма',
+            'Мультиголова',
+            'Техновак',
+            'малый Комет',
+            'САККАРДО',
+            'ручная работа',
+        ]:
             packer = Packer(name=name)
             db.session.add(packer)
         db.session.commit()
@@ -215,7 +219,14 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     short_name = db.Column(db.String)
-    form_factors = db.relationship('SKU', backref='group')
+    skus = db.relationship('SKU', backref='group')
+
+    @property
+    def type(self):
+        if "Терка" in self.name:
+            return "Терка"
+        else:
+            return self.name
 
     @staticmethod
     def generate_group():
@@ -228,7 +239,8 @@ class Group(db.Model):
                 'Моцарелла': 'МОЦ',
                 'Качокавалло': 'КАЧКВ',
                 'Масса': 'МАССА',
-                'Терка': 'ТЕРКА'
+                'Терка Сулугуни': 'ТЕРКА СУЛГ',
+                'Терка Моцареллы': 'ТЕРКА МОЦ'
             }
             for name, short_name in groups.items():
                 ff = Group(
@@ -266,6 +278,13 @@ class FormFactor(db.Model):
         secondaryjoin=id == parent_child.c.ParentId,
         backref=backref('made_to')
     )
+
+    @property
+    def type(self):
+        if "Терка" in self.name:
+            return "Терка"
+        else:
+            return self.name
 
     def add_made_from(self, ff):
         if ff not in self.made_from:
