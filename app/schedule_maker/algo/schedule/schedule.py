@@ -14,7 +14,7 @@ master_validator = ClassValidator(window=20)
 
 
 def validate(b1, b2):
-    validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2['pouring']['first']['termizator'])  # [termizator.basic]
+    validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2['pouring']['first']['termizator'])
 
     wl1 = LineName.WATER if b1['pouring'].props['pouring_line'] in ['0', '1'] else LineName.SALT
     wl2 = LineName.WATER if b2['pouring'].props['pouring_line'] in ['0', '1'] else LineName.SALT
@@ -31,11 +31,18 @@ def validate(b1, b2):
                 if p1.props['packing_team_id'] != p2.props['packing_team_id']:
                     continue
                 validate_disjoint_by_axis(p1, p2)
+
         else:
             # salt and water on the same working line - due to salt switching to the first pouring_line
             validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
             validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
             assert b2['melting_and_packing']['melting']['meltings'].x[0] - b1['melting_and_packing']['melting']['meltings'].y[0] > 6 # todo: optimize - add straight to validate disjoint
+
+        # add 15 minutes for non-lactose for cleaning of melting-space
+        if b2.props['boiling_model'].line.name == LineName.SALT:
+            if b1.props['boiling_model'].is_lactose and not b2.props['boiling_model'].is_lactose:
+                assert b1['melting_and_packing']['melting']['meltings'].y[0] + 3 <= b2['melting_and_packing']['melting']['meltings'].x[0]
+
 master_validator.add('boiling', 'boiling', validate)
 
 
