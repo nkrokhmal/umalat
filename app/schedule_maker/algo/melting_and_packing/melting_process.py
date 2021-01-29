@@ -63,24 +63,25 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                 make(block['cooling_process'], push_func=add_push)
 
     for packing_team_id in range(1, 3):
-        all_packing_processes = list(listify(mp['melting_and_packing_process'])[0].iter(cls='packing_process', packing_team_id=packing_team_id))
+        all_packing_processes = list(listify(mp['melting_and_packing_process'])[0].iter(cls='process', packing_team_id=packing_team_id))
 
         if all_packing_processes:
-            with make('packing', x=(all_packing_processes[0].x[0] + maker.root['melting']['meltings'].x[0], 0),
-                      packing_team_id=packing_team_id, push_func=add_push):
-                for block in mp.children:
-                    if block.props['cls'] == 'packing_configuration':
-                        make('packing_configuration', size=(block.size[0], 0))
-                    elif block.props['cls'] == 'melting_and_packing_process':
-                        # get our packing
-                        packings = list(block.iter(cls='packing', packing_team_id=packing_team_id))
-                        if not packings:
-                            continue
-                        packing = packings[0]
+            for group_key in ['packing', 'collecting']:
+                with make(group_key, x=(all_packing_processes[0].x[0] + maker.root['melting']['meltings'].x[0], 0),
+                          packing_team_id=packing_team_id, push_func=add_push):
+                    for block in mp.children:
+                        if block.props['cls'] == 'packing_configuration':
+                            make('packing_configuration', size=(block.size[0], 0))
+                        elif block.props['cls'] == 'melting_and_packing_process':
+                            # get our packing
+                            packings = list(block.iter(cls=group_key, packing_team_id=packing_team_id))
+                            if not packings:
+                                continue
+                            packing = packings[0]
 
-                        for b in packing.children:
-                            if b.props['cls'] == 'packing_process':
-                                make(b.props['cls'], size=(b.size[0], 0), sku=b.props['sku'])
-                            elif b.props['cls'] == 'packing_configuration':
-                                make(b.props['cls'], size=(b.size[0], 0))
+                            for b in packing.children:
+                                if b.props['cls'] == 'process':
+                                    make(b.props['cls'], size=(b.size[0], 0), sku=b.props['sku'])
+                                elif b.props['cls'] == 'packing_configuration':
+                                    make(b.props['cls'], size=(b.size[0], 0))
     return maker.root

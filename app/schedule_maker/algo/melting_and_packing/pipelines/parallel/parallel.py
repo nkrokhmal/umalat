@@ -102,7 +102,7 @@ def make_mpp(boiling_df, left_boiling_volume):
                         if conf_time_size:
                             block = make('packing_configuration', size=[conf_time_size // 5, 0]).block
                             push(packing, maker.copy(block), push_func=add_push)
-                    block = make('collecting_process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku']).block
+                    block = make('process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku']).block
 
                     if row['collecting_speed'] == row['packing_speed']:
                         packing_size = block.size[0]
@@ -110,7 +110,7 @@ def make_mpp(boiling_df, left_boiling_volume):
                         # Терка
                         packing_size = custom_round(row['collected'] / row['packing_speed'] * 60, 5, 'ceil') // 5
 
-                    push(packing, maker.create_block('packing_process', size=[packing_size, 0], x=list(block.props['x_rel']), sku=row['sku']), push_func=add_push)
+                    push(packing, maker.create_block('process', size=[packing_size, 0], x=list(block.props['x_rel']), sku=row['sku']), push_func=add_push)
 
 
     bff = boiling_df.iloc[0]['bff']

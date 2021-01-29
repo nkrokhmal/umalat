@@ -33,8 +33,8 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
                 res.append(conf_block)
             continue
         packing2 = packings[0]
-        sku1 = listify(packing1['packing_process'])[-1].props['sku']  # last sku
-        sku2 = listify(packing2['packing_process'])[0].props['sku']  # first sku
+        sku1 = listify(packing1['process'])[-1].props['sku']  # last sku
+        sku2 = listify(packing2['process'])[0].props['sku']  # first sku
 
         conf_time_size = get_configuration_time(line_name, sku1, sku2)
         if between_boilings:
@@ -47,5 +47,11 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
 
 
 def boiling_has_multihead_packing(boiling):
-    return len(list(boiling.iter(cls='packing_process', sku=lambda sku: 'Мультиголова' in sku.packers[0].name))) > 0
+    packings = list(boiling.iter(cls='packing'))
+    processes = []
+    for packing in packings:
+        processes += list(packing.iter(cls='process', sku=lambda sku: 'Мультиголова' in sku.packers[0].name))
+        if processes:
+            return True
+    return False
 

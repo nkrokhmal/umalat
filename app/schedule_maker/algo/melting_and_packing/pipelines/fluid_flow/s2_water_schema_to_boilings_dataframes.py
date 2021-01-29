@@ -85,13 +85,13 @@ class SchemaToBoilingsDataframes:
             boiling_dataframes['collectings'] = {}
             for packing_team_id, queue in packing_queues.items():
                 df = pd.DataFrame(queue.active_periods('in'), columns=['item', 'beg', 'end'])
-                df['name'] = 'collecting_process'
+                df['name'] = 'process'
                 boiling_dataframes['collectings'][packing_team_id] = df
 
             boiling_dataframes['packings'] = {}
             for packing_team_id, queue in packing_queues.items():
                 df1 = pd.DataFrame(queue.active_periods('out'), columns=['item', 'beg', 'end'])
-                df1['name'] = 'packing_process'
+                df1['name'] = 'process'
 
                 df2 = pd.DataFrame(queue.breaks, columns=['beg', 'end'])
                 df2['name'] = 'packing_configuration'
