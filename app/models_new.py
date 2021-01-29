@@ -51,6 +51,7 @@ class SKU(db.Model):
     brand_name = db.Column(db.String)
     weight_netto = db.Column(db.Float)
     shelf_life = db.Column(db.Integer)
+    collecting_speed = db.Column(db.Integer, nullable=True)
     packing_speed = db.Column(db.Integer, nullable=True)
     production_by_request = db.Column(db.Boolean)
     packing_by_request = db.Column(db.Boolean)
@@ -63,6 +64,22 @@ class SKU(db.Model):
     @property
     def packers_str(self):
         return '/'.join([x.name for x in self.packers])
+
+    @property
+    def colour(self):
+        COLOURS = {
+            'Для пиццы': '#E5B7B6',
+            'Моцарелла': '#DAE5F1',
+            'Фиор Ди Латте': '#CBC0D9',
+            'Чильеджина': '#E5DFEC',
+            'Качокавалло': '#F1DADA',
+            'Сулугуни': '#F1DADA',
+            'Терка': '#FFEBE0',
+        }
+        if 'Терка' not in self.form_factor.name:
+            return COLOURS[self.group.name]
+        else:
+            return COLOURS['Терка']
 
 
 class Line(db.Model):
@@ -228,7 +245,7 @@ class Group(db.Model):
                 'Моцарелла': 'МОЦ',
                 'Качокавалло': 'КАЧКВ',
                 'Масса': 'МАССА',
-                'Терка': 'ТЕРКА'
+                # 'Терка': 'ТЕРКА'
             }
             for name, short_name in groups.items():
                 ff = Group(
