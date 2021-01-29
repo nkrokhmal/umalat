@@ -250,17 +250,8 @@ def make_packings(schedule, line_name):
     for packing_team_id in range(1, 3):
         with make('packing_team', size=(0, 3), axis=0, is_parent_node=True):
             for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
-                collecting_iter = boiling.iter(cls='collecting', packing_team_id=packing_team_id)
-                packing_iter = boiling.iter(cls='packing', packing_team_id=packing_team_id)
-                for collecting, packing in zip(collecting_iter, packing_iter):
-                    skus = [packing_process.props['sku'] for packing_process in packing.iter(cls='process')]
-
-                    # draw collecting instead of packing for special kind of rubber
-                    if any(sku.name == 'Сулугуни "Умалат" (для хачапури), 45%, 0,12 кг, ф/п' for sku in skus):
-                        packing_block = collecting
-                    else:
-                        packing_block = packing
-
+                for packing_block in boiling.iter(cls='collecting', packing_team_id=packing_team_id):
+                    skus = [packing_process.props['sku'] for packing_process in packing_block.iter(cls='process')]
                     group_form_factor_label = calc_group_form_factor_label(skus)
                     brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in skus]))
 

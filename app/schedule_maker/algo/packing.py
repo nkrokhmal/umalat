@@ -32,6 +32,7 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
                 conf_block = maker.create_block('packing_configuration', size=[1, 0], packing_team_id=packing_team_id, x=[packing1.y[0], 0])
                 res.append(conf_block)
             continue
+
         packing2 = packings[0]
         sku1 = listify(packing1['process'])[-1].props['sku']  # last sku
         sku2 = listify(packing2['process'])[0].props['sku']  # first sku

@@ -132,8 +132,11 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             start_from = lines_df.at[line_name, 'latest_boiling'].x[0]
 
         # take rubber packing to extras
-        # for packing in
 
+        for packing in boiling.iter(cls='packing', sku=lambda sku: False if not sku else 'Терка' == sku.form_factor.name):
+            packing_copy = maker.copy(packing, with_props=True)
+            packing.disconnect()
+            push(schedule['extra'], packing_copy, push_func=add_push)
 
         # add configuration if needed
         if lines_df.at[line_name, 'latest_boiling']:
