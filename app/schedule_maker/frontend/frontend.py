@@ -237,8 +237,6 @@ def make_meltings_2(schedule, line_name, title):
 
     make('template', index_width=0, x=(1, melting_lines[0].x[1]), size=(3, 6), start_time='00:00', text=title, push_func=add_push)
 
-    # todo: hardcode, add empty elements for drawing not to draw melting_line itself
-
     for i, boiling in enumerate(schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name)):
         push(melting_lines[i % n_lines], make_melting(boiling, line_name), push_func=add_push)
     return maker.root
@@ -320,7 +318,7 @@ def make_frontend(schedule):
         make(make_packings(schedule_master, LineName.WATER))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
-        # make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
+        make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
         make(make_meltings_2(schedule_master, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))

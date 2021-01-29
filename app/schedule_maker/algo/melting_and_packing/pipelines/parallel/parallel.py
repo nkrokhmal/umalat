@@ -88,13 +88,14 @@ def make_mpp(boiling_df, left_boiling_volume):
     maker, make = init_block_maker('melting_and_packing_process', axis=1)
 
     # create packing blocks
+    last_collecting_process_y = 0 # todo: redundant?
     for packing_team_id in packing_team_ids:
         df = boiling_df[boiling_df['packing_team_id'] == packing_team_id]
         df = df[~df['beg_ts'].isnull()]
         if len(df) > 0:
             packing = make('packing', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push).block
 
-            with make('collecting', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push):
+            with make('collecting', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push) as collecting:
                 for i, (_, row) in enumerate(df.iterrows()):
                     if row['collecting_speed'] == row['packing_speed']:
                         # add configuration if needed
@@ -104,17 +105,20 @@ def make_mpp(boiling_df, left_boiling_volume):
                                 block = make('packing_configuration', size=[conf_time_size // 5, 0]).block
                                 push(packing, maker.copy(block), push_func=add_push)
                         block = make('process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku']).block
+                        last_collecting_process_y = max(last_collecting_process_y, block.y[0])
                         push(packing, maker.create_block('process', size=block.props['size'], x=list(block.props['x_rel']), sku=row['sku']), push_func=add_push)
                     else:
                         # rubber
                         block = make('process', size=(custom_round(row['end_ts'] - row['beg_ts'], 5, 'ceil') // 5, 0), sku=row['sku']).block
+                        last_collecting_process_y = max(last_collecting_process_y, block.y[0])
                         packing_size = custom_round(row['collected'] / row['packing_speed'] * 60, 5, 'ceil') // 5
                         push(packing, maker.create_block('process', size=[packing_size, 0], x=list(block.props['x_rel']), sku=row['sku']), push_func=add_push)
 
     bff = boiling_df.iloc[0]['bff']
-    make('melting_process', size=(maker.root.size[0], 0), bff=bff)
 
-    make(make_cooling_process(boiling_model.line.name, bff.default_cooling_technology, maker.root.size[0]))
+    make('melting_process', size=(last_collecting_process_y, 0), bff=bff)
+
+    make(make_cooling_process(boiling_model.line.name, bff.default_cooling_technology, last_collecting_process_y))
 
     for packing in maker.root['packing']:
         packing.props.update(x=[packing.props['x'][0] + maker.root['cooling_process']['start'].y[0], 0])

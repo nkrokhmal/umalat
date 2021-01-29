@@ -27,8 +27,7 @@ def validate(b1, b2):
         if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
             # same line type
             validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
-            for p1, p2 in product(listify(b1['melting_and_packing']['packing']), listify(b2['melting_and_packing']['packing'])):
-                # for p1, p2 in product(b1.iter(cls='packing'), b2.iter(cls='packing')):
+            for p1, p2 in product(listify(b1['melting_and_packing']['collecting']), listify(b2['melting_and_packing']['collecting'])):
                 if p1.props['packing_team_id'] != p2.props['packing_team_id']:
                     continue
                 validate_disjoint_by_axis(p1, p2)
@@ -62,7 +61,7 @@ def validate(b1, b2):
     if boiling.props['boiling_model'].line.name != packing_configuration.props['line_name']:
         return
 
-    for p1 in boiling.iter(cls='packing', packing_team_id=packing_configuration.props['packing_team_id']):
+    for p1 in boiling.iter(cls='collecting', packing_team_id=packing_configuration.props['packing_team_id']):
         validate_disjoint_by_axis(p1, b2)
 class_validator.add('boiling', 'packing_configuration', validate)
 
@@ -71,7 +70,7 @@ def validate(b1, b2):
     if boiling.props['boiling_model'].line.name != packing_configuration.props['line_name']:
         return
 
-    for p1 in boiling.iter(cls='packing', packing_team_id=packing_configuration.props['packing_team_id']):
+    for p1 in boiling.iter(cls='collecting', packing_team_id=packing_configuration.props['packing_team_id']):
         validate_disjoint_by_axis(b1, p1)
 class_validator.add('packing_configuration', 'boiling', validate)
 
@@ -132,8 +131,9 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             start_from = lines_df.at[line_name, 'latest_boiling'].x[0]
 
         # take rubber packing to extras
-
-        for packing in boiling.iter(cls='packing', sku=lambda sku: False if not sku else 'Терка' == sku.form_factor.name):
+        for packing in boiling.iter(cls='packing'):
+            if not list(packing.iter(cls='process', sku=lambda sku: sku.form_factor.name == 'Терка')):
+                continue
             packing_copy = maker.copy(packing, with_props=True)
             packing.disconnect()
             push(schedule['extra'], packing_copy, push_func=add_push)
