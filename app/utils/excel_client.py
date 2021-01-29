@@ -69,8 +69,6 @@ def build_plan_sku(date, df, request_list, plan_path=None):
 
     wb = openpyxl.load_workbook(filename=path)
     sheet_plan = wb[current_app.config['SHEET_NAMES']['schedule_plan']]
-    # sheet_plan = wb.create_sheet(current_app.config['SHEET_NAMES']['schedule_plan'])
-    # generate_title(sheet=sheet_plan)
 
     cur_row, space_rows = 2, 2
     request_list = sorted(request_list, key=lambda k: (k['IsLactose'], k['GroupSKU'][0]['SKU'].made_from_boilings[0].percent))
@@ -83,8 +81,9 @@ def build_plan_sku(date, df, request_list, plan_path=None):
         block = ExcelBlock(sheet=sheet_plan, row_height=13.8)
         group_formula = []
 
-        for form_factor in current_app.config['ORDER']:
-            block_skus = [x for x in group_skus['GroupSKU'] if x['SKU'].group.name == form_factor]
+        for group in current_app.config['ORDER']:
+            block_skus = [x for x in group_skus['GroupSKU'] if x['SKU'].group.name == group]
+            block_skus = sorted(block_skus, key=lambda k: k['SKU'].form_factor.relative_weight)
             beg_ff_row = cur_row
             for sku in block_skus:
                 formula_plan = "=IFERROR(INDEX('{0}'!$A$5:$DK$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0)), 0)".format(
@@ -92,7 +91,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                 formula_remains = "=IFERROR(INDEX('{0}'!$A$5:$DK$265,MATCH($O$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0)), 0)".format(
                     current_app.config['SHEET_NAMES']['remainings'], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
 
-                block.colour = current_app.config['COLOURS'][sku['SKU'].group.name][1:]
+                block.colour = sku['SKU'].colour[1:]
                 block.cell_value(row=cur_row, col=CELLS['Brand'].column, value=sku["SKU"].brand_name)
                 block.cell_value(row=cur_row, col=CELLS['SKU'].column, value=sku["SKU"].name)
                 block.cell_value(row=cur_row, col=CELLS['FactRemains'].column, value=formula_plan)
@@ -113,7 +112,7 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                     end_row=end_ff_row,
                     beg_col=CELLS['FormFactor'].column,
                     end_col=CELLS['FormFactor'].column,
-                    value=form_factor,
+                    value=group,
                     alignment=Alignment(horizontal='center', vertical='center', wrapText=True)
                 )
         end_row = cur_row - 1

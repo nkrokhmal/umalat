@@ -10,12 +10,13 @@ def generate_constructor_df_v3(df_copy):
     df = df_copy.copy()
     df['plan'] = df['plan'].apply(lambda x: round(x))
     df['boiling_type'] = df['boiling_id'].apply(lambda boiling_id: cast_boiling(boiling_id).boiling_type)
-    # todo: исправить костыль с терками
-    df['weight'] = df['sku'].apply(
-        lambda x: x.form_factor.relative_weight if x.group.name != 'Терка' else x.form_factor.relative_weight + 30)
+    df['weight'] = df['sku'].apply(lambda x:
+                                   x.form_factor.relative_weight + 30 if 'Терка' in x.form_factor.name else
+                                   x.form_factor.relative_weight)
     df['percent'] = df['sku'].apply(lambda x: x.made_from_boilings[0].percent)
     df['is_lactose'] = df['sku'].apply(lambda x: x.made_from_boilings[0].is_lactose)
     df['ferment'] = df['sku'].apply(lambda x: x.made_from_boilings[0].ferment)
+    df['pack_weight'] = df['sku'].apply(lambda x: x.weight_netto)
     df['group'] = df['sku'].apply(lambda x: x.group.name)
 
     water, boiling_number = handle_water(df[df['boiling_type'] == 'water'])
@@ -47,7 +48,7 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
         (True, 3.6, 'Альче', 'Чильеджина'),
         (True, 3.3, 'Альче', 'Чильеджина'),
         (True, 3.3, 'Сакко', 'Чильеджина')]
-    # is_lactose = False
+
     for order in orders:
         df_filter = df[(order[0] is None or df['is_lactose'] == order[0]) &
                        (df['percent'] == order[1]) &
@@ -55,48 +56,77 @@ def handle_water(df, max_weight=1000, min_weight=1000, boiling_number=1):
                        (order[3] is None or df['group'] == order[3])]
 
         if not order[0]:
-            df_filter_chl = df_filter[(df_filter['group'] == 'Чильеджина') &
-                                      (df_filter['is_lactose'] == False)].sort_values(by='weight', ascending=False)
-            df_filter_fdl = df_filter[(df_filter['group'] == 'Фиор Ди Латте') &
-                                      (df_filter['is_lactose'] == False)].sort_values(by='weight', ascending=False)
-            df_filter_oth = df_filter[df_filter['is_lactose']].sort_values(by='weight', ascending=False)
+            df_filter_chl = df_filter[
+                (df_filter['group'] == 'Чильеджина') &
+                (~df_filter['is_lactose'])]\
+                    .sort_values(by='weight', ascending=False)
 
-            if (df_filter_chl['plan'].sum() < 100) and (df_filter_oth['plan'].sum() < 100):
-                df_filter_dict = pd.concat([df_filter_chl, df_filter_oth, df_filter_fdl])
-            elif (df_filter_chl['plan'].sum() < 100) and (df_filter_oth['plan'].sum() > 100):
-                df_filter_dict = pd.concat([df_filter_chl, df_filter_fdl, df_filter_oth])
-            elif (df_filter_chl['plan'].sum() > 100) and (df_filter_oth['plan'].sum() < 100):
-                df_filter_dict = pd.concat([df_filter_oth, df_filter_fdl, df_filter_chl])
+            df_filter_fdl = df_filter[
+                (df_filter['group'] == 'Фиор Ди Латте') &
+                (~df_filter['is_lactose'])].sort_values(by='weight', ascending=False)
+
+            df_filter_oth = df_filter[
+                df_filter['is_lactose']].sort_values(by='weight', ascending=False)
+
+            total_sum_without_lactose = df_filter[(~df_filter['is_lactose'])]['plan'].sum()
+            total_sum = df_filter['plan'].sum()
+
+            if total_sum // max_weight == total_sum_without_lactose // max_weight:
+                if (df_filter_chl['plan'].sum() < 100) and (df_filter_oth['plan'].sum() < 100):
+                    order = [df_filter_chl, df_filter_oth, df_filter_fdl]
+                elif (df_filter_chl['plan'].sum() < 100) and (df_filter_oth['plan'].sum() > 100):
+                    order = [df_filter_chl, df_filter_fdl, df_filter_oth]
+                elif (df_filter_chl['plan'].sum() > 100) and (df_filter_oth['plan'].sum() < 100):
+                    order = [df_filter_oth, df_filter_fdl, df_filter_chl]
+                else:
+                    order = [df_filter_fdl, df_filter_chl, df_filter_oth]
+                df_filter_dict = pd.concat(order).to_dict('records')
+                boilings.add_group(df_filter_dict)
             else:
-                df_filter_dict = pd.concat([df_filter_fdl, df_filter_chl, df_filter_oth])
+                if df_filter_chl['plan'].sum() < 100:
+                    order = [df_filter_chl, df_filter_fdl]
+                else:
+                    order = [df_filter_fdl, df_filter_chl]
 
-            df_filter_dict = df_filter_dict.to_dict('records')
+                df_filter_dict = pd.concat(order).to_dict('records')
+                df_filter_dict_lactose = df_filter_oth.to_dict('records')
+                boilings.add_group(df_filter_dict)
+                boilings.add_group(df_filter_dict_lactose)
         else:
-            df_filter_dict = df_filter.sort_values(by='weight', ascending=False).to_dict('records')
+            df_filter_dict = df_filter.sort_values(by=['weight', 'pack_weight'], ascending=[False, False])\
+                .to_dict('records')
+            boilings.add_group(df_filter_dict)
 
         # boilings.add_group(df_filter_dict, is_lactose)
-        boilings.add_group(df_filter_dict)
+        # boilings.add_group(df_filter_dict)
         # is_lactose = order[0]
     boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
 
 
 def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
-    salted_rubber = ['Сулугуни "Умалат" (для хачапури), 45%, 0,12 кг, ф/п']
     boilings = Boilings(max_weight=850, min_weight=850, boiling_number=boiling_number)
+
     for weight, df_grouped_weight in df.groupby('weight'):
         for boiling_id, df_grouped_boiling_id in df_grouped_weight.groupby('boiling_id'):
             new = True
-            for form_factor, df_grouped in df_grouped_boiling_id.groupby('group'):
-                # todo: пофикить костыль с соленностью терки
-                if form_factor != 'Терка':
-                    boilings.add_group(df_grouped.to_dict('records'), new)
-                    new = False
+            for group, df_grouped in df_grouped_boiling_id.groupby('group'):
+                rubber_sku_exist = any([x for x in df_grouped.to_dict('records')
+                                        if 'Терка' in x['sku'].form_factor.name])
+                if rubber_sku_exist:
+                    df_grouped_sul = [x for x in df_grouped.to_dict('records')
+                                      if x['sku'].form_factor.name == 'Терка Сулугуни']
+                    df_grouped_moz = [x for x in df_grouped.to_dict('records')
+                                      if x['sku'].form_factor.name == 'Терка Моцарелла']
+
+                    boilings.add_group(df_grouped_sul, True)
+                    boilings.add_group(df_grouped_moz, True)
+                    new = True
                 else:
-                    salted = [x for x in df_grouped.to_dict('records') if x['sku'].name in salted_rubber]
-                    not_salted = [x for x in df_grouped.to_dict('records') if x['sku'].name not in salted_rubber]
-                    boilings.add_group(salted, True)
-                    boilings.add_group(not_salted, True)
+                    df_grouped_dict = df_grouped.sort_values(by=['weight', 'pack_weight'], ascending=[True, False]) \
+                        .to_dict('records')
+                    boilings.add_group(df_grouped_dict, new)
+                    new = False
 
     boilings.finish()
     return pd.DataFrame(boilings.boilings), boilings.boiling_number
@@ -251,20 +281,13 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
                     first_cell_formula = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
                         cur_i)
                 draw_cell(boiling_sheet, 1, cur_i, first_cell_formula, font_size=8)
-
             else:
-                # add to sum plan
-                if v[-1] == 'main':
-                    colour = get_colour_by_name(v[8], skus)
-                else:
-                    colour = current_app.config['COLOURS']['Remainings']
+                colour = get_colour_by_name(v[8], skus)
                 if sheet_name == 'Вода':
-                    v[
-                        1] = '=IF(N{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                    v[1] = '=IF(N{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
                         cur_i)
                 else:
-                    v[
-                        1] = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
+                    v[1] = '=IF(N{0}="-", "-", 1 + MAX(\'Вода\'!$A$2:$A$100) + SUM(INDIRECT(ADDRESS(2,COLUMN(Q{0})) & ":" & ADDRESS(ROW(),COLUMN(Q{0})))))'.format(
                         cur_i)
                 draw_row(boiling_sheet, cur_i, v[1:-1], font_size=8, color=colour)
                 if v[4] == 'Терка':
@@ -285,7 +308,7 @@ def draw_constructor_template(df, file_name, wb, df_extra_packing):
 def get_colour_by_name(sku_name, skus):
     sku = [x for x in skus if x.name == sku_name]
     if len(sku) > 0:
-        return current_app.config['COLOURS'][sku[0].group.name]
+        return sku[0].colour
     else:
         return current_app.config['COLOURS']['Default']
 

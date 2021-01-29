@@ -15,6 +15,7 @@ def fill_db():
     fill_form_factors()
     fill_sku()
     fill_termizator()
+    fill_form_factors_made_from()
 
 
 def fill_simple_data():
@@ -99,25 +100,34 @@ def fill_form_factors():
     db.session.add(mass_ff)
     db.session.commit()
 
-    columns = ['Вес форм фактора', 'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки', 'Линия']
+    columns = [
+        'Название форм фактора',
+        'Вес форм фактора',
+        'Охлаждение 1(для воды)',
+        'Охлаждение 2(для воды)',
+        'Время посолки',
+        'Линия',
+    ]
     df = df[columns]
+    df['Название форм фактора'] = df.apply(lambda x: x['Название форм фактора'] if x['Вес форм фактора'] == 1 else None,
+                                           axis=1)
     df = df.drop_duplicates()
     values = df.to_dict('records')
     for value in values:
         line_name = LineName.SALT if value['Линия'] == 'Соль' else LineName.WATER
         if value['Вес форм фактора'] == 1:
-            name = 'Терка'
-        elif value['Вес форм фактора'] == 15:
-            name = 'Палочки 15г'
-        elif value['Вес форм фактора'] == 30:
-            name = 'Палочки 30г'
+            name = 'Терка {}'.format(value['Название форм фактора'])
+        elif (value['Вес форм фактора'] == 7.5) or \
+                (value['Вес форм фактора'] == 15) or \
+                (value['Вес форм фактора'] == 30):
+            name = 'Палочки {}г'.format(value['Вес форм фактора'])
         else:
             name = str(value['Вес форм фактора'] / 1000)
 
         form_factor = FormFactor(name=name, relative_weight=value['Вес форм фактора'])
         form_factor.line = [x for x in lines if x.name == line_name][0]
         cooling_technologies = db.session.query(CoolingTechnology).all()
-        if name != 'Терка':
+        if 'Терка' not in name:
             form_factor.default_cooling_technology = [x for x in cooling_technologies if all([x.first_cooling_time == _cast_non_nan(value['Охлаждение 1(для воды)']),
                                                                               x.second_cooling_time == _cast_non_nan(value['Охлаждение 2(для воды)']),
                                                                               x.salting_time == _cast_non_nan(value['Время посолки'])])][0]
@@ -188,7 +198,11 @@ def fill_sku():
         else:
             add_sku.production_by_request = False
             add_sku.packing_by_request = False
-        add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора'] and x.line.name == line_name][0]
+        if sku['Вес форм фактора'] != 1:
+            add_sku.form_factor = [x for x in form_factors if x.relative_weight == sku['Вес форм фактора'] and
+                                   x.line.name == line_name][0]
+        else:
+            add_sku.form_factor = [x for x in form_factors if x.name == 'Терка {}'.format(sku['Название форм фактора'])][0]
 
         db.session.add(add_sku)
     db.session.commit()
@@ -200,4 +214,18 @@ def fill_termizator():
     termizator.short_cleaning_time = 40
     termizator.long_cleaning_time = 80
     db.session.add(termizator)
+    db.session.commit()
+
+
+def fill_form_factors_made_from():
+    skus = db.session.query(SKU).all()
+    form_factors = db.session.query(FormFactor).all()
+    sul_ff = [x for x in form_factors if x.name == 'Терка Сулугуни'][0]
+    moz_ff = [x for x in form_factors if x.name == 'Терка Моцарелла'][0]
+    sul_ffs = set([x.form_factor for x in skus if 'сулугуни' in x.name.lower() and x.line.name == LineName.SALT])
+    moz_ffs = set([x.form_factor for x in skus if 'моцарелла' in x.name.lower() and x.line.name == LineName.SALT])
+    for sul in sul_ffs:
+        sul_ff.add_made_from(sul)
+    for moz in moz_ffs:
+        moz_ff.add_made_from(moz)
     db.session.commit()
