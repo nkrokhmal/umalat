@@ -135,6 +135,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             if not list(packing.iter(cls='process', sku=lambda sku: sku.form_factor.name == 'Терка')):
                 continue
             packing_copy = maker.copy(packing, with_props=True)
+            packing_copy.props.update(extra_props={'start_from': packing_copy.x[0]})
             packing.disconnect()
             push(schedule['extra'], packing_copy, push_func=add_push)
 

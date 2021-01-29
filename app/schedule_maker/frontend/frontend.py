@@ -242,6 +242,34 @@ def make_meltings_2(schedule, line_name, title):
     return maker.root
 
 
+def make_packing_block(packing_block, boiling_id):
+    maker, make = init_block_maker('packing_block')
+    skus = [packing_process.props['sku'] for packing_process in packing_block.iter(cls='process')]
+    group_form_factor_label = calc_group_form_factor_label(skus)
+    brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in skus]))
+
+    with make('packing_block', x=(packing_block.x[0], 0), boiling_id=boiling_id,
+              push_func=add_push, axis=1, brand_label=brand_label, group_form_factor_label=group_form_factor_label):
+        with make():
+
+            if packing_block.size[0] >= 4:
+                make('packing_label', size=(3, 1))
+                make('packing_name', size=(packing_block.size[0] - 3, 1))
+            else:
+                # todo: make properly
+                make('packing_name', size=(packing_block.size[0], 1))
+
+        with make():
+            make('packing_brand', size=(packing_block.size[0], 1))
+
+        with make(is_parent_node=True):
+            for packing_process in packing_block.iter(cls='process'):
+                make('packing_process', x=(packing_process.props['x_rel'][0], 0), size=(packing_process.size[0], 1), push_func=add_push)
+            for conf in packing_block.iter(cls='packing_configuration'):
+                make('packing_configuration', x=(conf.props['x_rel'][0], 0), size=(conf.size[0], 1), push_func=add_push)
+    return maker.root
+
+
 def make_packings(schedule, line_name):
     maker, make = init_block_maker('packing', axis=1)
 
@@ -249,29 +277,7 @@ def make_packings(schedule, line_name):
         with make('packing_team', size=(0, 3), axis=0, is_parent_node=True):
             for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
                 for packing_block in boiling.iter(cls='collecting', packing_team_id=packing_team_id):
-                    skus = [packing_process.props['sku'] for packing_process in packing_block.iter(cls='process')]
-                    group_form_factor_label = calc_group_form_factor_label(skus)
-                    brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in skus]))
-
-                    with make('packing_block', x=(packing_block.x[0], 0), boiling_id=boiling.props['boiling_id'],
-                              push_func=add_push, axis=1, brand_label=brand_label, group_form_factor_label=group_form_factor_label):
-                        with make():
-
-                            if packing_block.size[0] >= 4:
-                                make('packing_label', size=(3, 1))
-                                make('packing_name', size=(packing_block.size[0] - 3, 1))
-                            else:
-                                # todo: make properly
-                                make('packing_name', size=(packing_block.size[0], 1))
-
-                        with make():
-                            make('packing_brand', size=(packing_block.size[0], 1))
-
-                        with make(is_parent_node=True):
-                            for packing_process in packing_block.iter(cls='process'):
-                                make('packing_process', x=(packing_process.props['x_rel'][0], 0), size=(packing_process.size[0], 1), push_func=add_push)
-                            for conf in packing_block.iter(cls='packing_configuration'):
-                                make('packing_configuration', x=(conf.props['x_rel'][0], 0), size=(conf.size[0], 1), push_func=add_push)
+                    make(make_packing_block(packing_block, boiling.props['boiling_id']), push_func=add_push)
             try:
                 for conf in listify(schedule['packing_configuration']):
                     # first level only
