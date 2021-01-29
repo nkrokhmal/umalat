@@ -10,7 +10,7 @@ def calc_schedule_stats(schedule):
     full_cleanings = list(schedule.iter(cls='cleaning', cleaning_type='full'))
     full_cleanings = list(sorted(full_cleanings, key=lambda c: c.x[0]))
 
-    beg = listify(schedule['boiling'])[0].x[0]
+    beg = listify(schedule['master']['boiling'])[0].x[0]
 
     values = []
 

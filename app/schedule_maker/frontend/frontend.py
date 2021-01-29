@@ -64,7 +64,7 @@ def make_header(start_time='01:00'):
     return maker.root['header']
 
 
-def make_cheese_makers(schedule, rng):
+def make_cheese_makers(master, rng):
     maker, make = init_block_maker('cheese_makers', axis=1)
 
     for i in rng:
@@ -72,7 +72,7 @@ def make_cheese_makers(schedule, rng):
             with make('header', index_width=0, start_time='00:00', push_func=add_push):
                 make('template', x=(1, 0), size=(3, 2), text=f'Сыроизготовитель №1 Poly {i + 1}', color=(183, 222, 232), push_func=add_push)
 
-            for boiling in schedule.iter(cls='boiling', pouring_line=str(i)):
+            for boiling in master.iter(cls='boiling', pouring_line=str(i)):
                 boiling_model = boiling.props['boiling_model']
 
                 standard_boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850 # todo: make properly
@@ -96,9 +96,9 @@ def make_cheese_makers(schedule, rng):
     return maker.root
 
 
-def make_cleanings(schedule):
+def make_cleanings(master):
     maker, make = init_block_maker('cleanings_row', is_parent_node=True, axis=1)
-    for cleaning in schedule.iter(cls='cleaning'):
+    for cleaning in master.iter(cls='cleaning'):
         b = maker.copy(cleaning, with_props=True)
         b.props.update(size=(b.props['size'][0], 2))
         make(b, push_func=add_push)
@@ -106,23 +106,22 @@ def make_cleanings(schedule):
 
 
 
-def make_multihead_cleanings(schedule):
+def make_multihead_cleanings(master):
     maker, make = init_block_maker('multihead_cleanings_row', is_parent_node=True, axis=1)
-    for multihead_cleaning in schedule.iter(cls='multihead_cleaning'):
+    for multihead_cleaning in master.iter(cls='multihead_cleaning'):
         b = maker.copy(multihead_cleaning, with_props=True)
         b.props.update(size=(b.props['size'][0], 1))
         make(b, push_func=add_push)
     return maker.root
 
-
-def make_meltings_1(schedule, line_name, title, draw_all_coolings=True):
+def make_meltings_1(master, line_name, title, draw_all_coolings=True):
     maker, make = init_block_maker('melting', axis=1)
 
     with make('header', start_time='00:00', push_func=add_push):
         make('template', index_width=0, x=(1, 0), size=(3, 2), text=title, push_func=add_push)
 
     with make('melting_row', push_func=add_push, is_parent_node=True):
-        for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
+        for boiling in master.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
             form_factor_label = calc_form_factor_label([melting_process.props['bff'] for melting_process in boiling.iter(cls='melting_process')])
 
             with make('melting_block', axis=1, boiling_id=boiling.props['boiling_id'], push_func=add_push, form_factor_label=form_factor_label):
@@ -147,7 +146,7 @@ def make_meltings_1(schedule, line_name, title, draw_all_coolings=True):
     make('cooling_row', axis=1, is_parent_node=True)
     cooling_lines = []
 
-    for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
+    for boiling in master.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
         class_validator = ClassValidator(window=10)
         def validate(b1, b2):
             validate_disjoint_by_axis(b1, b2)
@@ -228,7 +227,7 @@ def make_melting(boiling, line_name):
     return maker.root
 
 
-def make_meltings_2(schedule, line_name, title):
+def make_meltings_2(master, line_name, title):
     # todo: make dynamic lines
     maker, make = init_block_maker('melting', axis=1)
 
@@ -237,43 +236,45 @@ def make_meltings_2(schedule, line_name, title):
 
     make('template', index_width=0, x=(1, melting_lines[0].x[1]), size=(3, 6), start_time='00:00', text=title, push_func=add_push)
 
-    for i, boiling in enumerate(schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name)):
+    for i, boiling in enumerate(master.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name)):
         push(melting_lines[i % n_lines], make_melting(boiling, line_name), push_func=add_push)
     return maker.root
 
 
-def make_packings(schedule, line_name):
+def make_packing_block(packing_block, boiling_id):
+    skus = [packing_process.props['sku'] for packing_process in packing_block.iter(cls='process')]
+    group_form_factor_label = calc_group_form_factor_label(skus)
+    brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in skus]))
+    maker, make = init_block_maker('packing_block', x=(packing_block.x[0], 0), boiling_id=boiling_id, push_func=add_push, axis=1, brand_label=brand_label, group_form_factor_label=group_form_factor_label)
+    with make():
+        if packing_block.size[0] >= 4:
+            make('packing_label', size=(3, 1))
+            make('packing_name', size=(packing_block.size[0] - 3, 1))
+        else:
+            # todo: make properly
+            make('packing_name', size=(packing_block.size[0], 1))
+
+    with make():
+        make('packing_brand', size=(packing_block.size[0], 1))
+
+    with make(is_parent_node=True):
+        for packing_process in packing_block.iter(cls='process'):
+            make('packing_process', x=(packing_process.props['x_rel'][0], 0), size=(packing_process.size[0], 1), push_func=add_push)
+        for conf in packing_block.iter(cls='packing_configuration'):
+            make('packing_configuration', x=(conf.props['x_rel'][0], 0), size=(conf.size[0], 1), push_func=add_push)
+    return maker.root
+
+
+def make_packings(master, line_name):
     maker, make = init_block_maker('packing', axis=1)
 
     for packing_team_id in range(1, 3):
         with make('packing_team', size=(0, 3), axis=0, is_parent_node=True):
-            for boiling in schedule.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
+            for boiling in master.iter(cls='boiling', boiling_model=lambda bm: bm.line.name == line_name):
                 for packing_block in boiling.iter(cls='collecting', packing_team_id=packing_team_id):
-                    skus = [packing_process.props['sku'] for packing_process in packing_block.iter(cls='process')]
-                    group_form_factor_label = calc_group_form_factor_label(skus)
-                    brand_label = '/'.join(remove_neighbor_duplicates([sku.brand_name for sku in skus]))
-
-                    with make('packing_block', x=(packing_block.x[0], 0), boiling_id=boiling.props['boiling_id'],
-                              push_func=add_push, axis=1, brand_label=brand_label, group_form_factor_label=group_form_factor_label):
-                        with make():
-
-                            if packing_block.size[0] >= 4:
-                                make('packing_label', size=(3, 1))
-                                make('packing_name', size=(packing_block.size[0] - 3, 1))
-                            else:
-                                # todo: make properly
-                                make('packing_name', size=(packing_block.size[0], 1))
-
-                        with make():
-                            make('packing_brand', size=(packing_block.size[0], 1))
-
-                        with make(is_parent_node=True):
-                            for packing_process in packing_block.iter(cls='process'):
-                                make('packing_process', x=(packing_process.props['x_rel'][0], 0), size=(packing_process.size[0], 1), push_func=add_push)
-                            for conf in packing_block.iter(cls='packing_configuration'):
-                                make('packing_configuration', x=(conf.props['x_rel'][0], 0), size=(conf.size[0], 1), push_func=add_push)
+                    make(make_packing_block(packing_block, boiling.props['boiling_id']), push_func=add_push)
             try:
-                for conf in listify(schedule['packing_configuration']):
+                for conf in listify(master['packing_configuration']):
                     # first level only
                     if conf.props['packing_team_id'] != packing_team_id or conf.props['line_name'] != line_name:
                         continue
@@ -284,13 +285,22 @@ def make_packings(schedule, line_name):
     return maker.root
 
 
+def make_extra_packings(extra_packings):
+    maker, make = init_block_maker('packing', axis=1, is_parent_node=True)
+    for packing_block in extra_packings.iter(cls='packing'):
+        make(make_packing_block(packing_block, packing_block.props['boiling_id']), push_func=add_push)
+    return maker.root
+
+
 def make_frontend(schedule):
-    schedule_master = schedule['master']
+    master = schedule['master']
+    extra_packings = schedule['extra_packings']
+
     maker, make = init_block_maker('root', axis=1)
 
     make('stub', size=(0, 1))
 
-    start_t = min([boiling.x[0] for boiling in listify(schedule_master['boiling'])]) # first pouring time
+    start_t = min([boiling.x[0] for boiling in listify(master['boiling'])]) # first pouring time
     start_t = int(custom_round(start_t, 12, 'floor')) # round to last hour
     start_time = cast_time(start_t)
     make(make_header(start_time=start_time))
@@ -298,31 +308,33 @@ def make_frontend(schedule):
     with make('pouring', start_time=start_time, axis=1):
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
-        make(make_cheese_makers(schedule_master, range(2)))
+        make(make_cheese_makers(master, range(2)))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
-        make(make_cleanings(schedule_master))
-        make(make_cheese_makers(schedule_master, range(2, 4)))
+        make(make_cleanings(master))
+        make(make_cheese_makers(master, range(2, 4)))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
 
-    start_t = min([boiling['melting_and_packing'].x[0] for boiling in listify(schedule_master['boiling'])])  # first melting time
+    start_t = min([boiling['melting_and_packing'].x[0] for boiling in listify(master['boiling'])])  # first melting time
     start_t = int(custom_round(start_t, 12, 'floor'))  # round to last hour
     start_time = cast_time(start_t)
     make(make_header(start_time=start_time))
 
     with make('melting', start_time=start_time, axis=1):
-        make(make_multihead_cleanings(schedule_master))
-        make(make_meltings_1(schedule_master, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
+        make(make_multihead_cleanings(master))
+        make(make_meltings_1(master, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
-        make(make_packings(schedule_master, LineName.WATER))
+        make(make_packings(master, LineName.WATER))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена оператор + помощник'},
                              {'size': (cast_t('23:55') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '1 оператор + помощник'}]))
-        make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
-        make(make_meltings_2(schedule_master, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
+        # make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
+        make(make_meltings_2(master, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': 'Бригадир упаковки +5 рабочих упаковки + наладчик'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': 'бригадир + наладчик + 5 рабочих'}]))
-        make(make_packings(schedule_master, LineName.SALT))
+        make(make_packings(master, LineName.SALT))
+        make(make_extra_packings(extra_packings))
+
     return maker.root
 
 

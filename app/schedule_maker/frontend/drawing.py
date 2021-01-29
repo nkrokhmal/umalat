@@ -32,6 +32,8 @@ def draw_schedule(schedule, style, fn=None):
                 text = text.replace('>', '}')
                 text = eval(f'f{text!r}')
 
+                # print(b.props['cls'], b.x, b.y)
+
                 x1 = b.x[0]
                 if 'start_time' in b.props.all():
                     x1 -= cast_t(b.props['start_time'])  # shift of timeline
@@ -39,6 +41,8 @@ def draw_schedule(schedule, style, fn=None):
                 x1 += 1  # indexing starts with 1 in excel
 
                 bold = b.props['bold']
+
+                # print(b.props['cls'], x1, b.x[1], b.size[0], b.size[1])
 
                 draw_block(wb.worksheets[0],
                            x1,
