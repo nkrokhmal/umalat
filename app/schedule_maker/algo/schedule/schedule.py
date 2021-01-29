@@ -10,7 +10,7 @@ from app.enum import LineName
 #                                                                'cleaning': {'boiling': 1, 'cleaning': 1},
 #                                                                'packing_configuration': {'boiling': 4}})
 
-class_validator = ClassValidator(window=20)
+master_validator = ClassValidator(window=20)
 
 
 def validate(b1, b2):
@@ -36,25 +36,20 @@ def validate(b1, b2):
             validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
             validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
             assert b2['melting_and_packing']['melting']['meltings'].x[0] - b1['melting_and_packing']['melting']['meltings'].y[0] > 6 # todo: optimize - add straight to validate disjoint
+master_validator.add('boiling', 'boiling', validate)
 
-class_validator.add('boiling', 'boiling', validate)
-
-# todo: make properly
-# def validate(b1, b2):
-#     boiling, multihead_cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, multihead_cleaning
-#     for b in boiling.iter(cls='packing_process', sku=lambda sku: sku.packer.name == 'Мультиголова'):
-#         validate_disjoint_by_axis(multihead_cleaning, b)
-# class_validator.add('multihead_cleaning', 'boiling', validate)
 
 def validate(b1, b2):
     boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, cleaning
     validate_disjoint_by_axis(boiling['pouring']['first']['termizator'], cleaning)
-class_validator.add('boiling', 'cleaning', validate)
+master_validator.add('boiling', 'cleaning', validate)
+
 
 def validate(b1, b2):
     boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, cleaning
     validate_disjoint_by_axis(cleaning, boiling['pouring']['first']['termizator'])
-class_validator.add('cleaning', 'boiling', validate)
+master_validator.add('cleaning', 'boiling', validate)
+
 
 def validate(b1, b2):
     boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # boiling, packing_configuration
@@ -63,7 +58,8 @@ def validate(b1, b2):
 
     for p1 in boiling.iter(cls='collecting', packing_team_id=packing_configuration.props['packing_team_id']):
         validate_disjoint_by_axis(p1, b2)
-class_validator.add('boiling', 'packing_configuration', validate)
+master_validator.add('boiling', 'packing_configuration', validate)
+
 
 def validate(b1, b2):
     boiling, packing_configuration = list(sorted([b1, b2], key=lambda b: b.props['cls'])) # boiling, packing_configuration
@@ -72,7 +68,7 @@ def validate(b1, b2):
 
     for p1 in boiling.iter(cls='collecting', packing_team_id=packing_configuration.props['packing_team_id']):
         validate_disjoint_by_axis(b1, p1)
-class_validator.add('packing_configuration', 'boiling', validate)
+master_validator.add('packing_configuration', 'boiling', validate)
 
 
 def make_termizator_cleaning_block(cleaning_type, **kwargs):
@@ -90,6 +86,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
 
     make('master', push_func=add_push)
     make('extra', push_func=add_push)
+    make('extra_packings', push_func=add_push)
 
     schedule = maker.root
 
@@ -130,33 +127,34 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
         else:
             start_from = lines_df.at[line_name, 'latest_boiling'].x[0]
 
-        # take rubber packing to extras
-        for packing in boiling.iter(cls='packing'):
-            if not list(packing.iter(cls='process', sku=lambda sku: sku.form_factor.name == 'Терка')):
-                continue
-            packing_copy = maker.copy(packing, with_props=True)
-            packing_copy.props.update(extra_props={'start_from': packing_copy.x[0]})
-            packing.disconnect()
-            push(schedule['extra'], packing_copy, push_func=add_push)
-
         # add configuration if needed
         if lines_df.at[line_name, 'latest_boiling']:
             configuration_blocks = make_configuration_blocks(lines_df.at[line_name, 'latest_boiling'], boiling, maker, line_name, between_boilings=True)
             for conf in configuration_blocks:
                 conf.props.update(line_name=line_name)
-                push(schedule['master'], conf, push_func=dummy_push, validator=class_validator, start_from='beg')
+                push(schedule['master'], conf, push_func=dummy_push, validator=master_validator, start_from='beg')
 
-        push(schedule['master'], boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=class_validator, start_from=start_from, max_tries=100)
+        push(schedule['master'], boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=master_validator, start_from=start_from, max_tries=100)
+
+        # take rubber packing to extras
+        for packing in boiling.iter(cls='packing'):
+            if not list(packing.iter(cls='process', sku=lambda sku: sku.form_factor.name == 'Терка')):
+                continue
+            packing_copy = maker.copy(packing, with_props=True)
+            packing_copy.props.update(extra_props={'start_from': packing.x[0]})
+            packing.disconnect()
+            push(schedule['extra'], packing_copy, push_func=add_push)
 
         # todo: put to the place of last multihead usage!
         # add multihead boiling after all water boilings if multihead was present
         if boiling == last_multihead_water_boiling:
             push(schedule['master'], maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
+            push(schedule['extra'], maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
 
         if cleaning_boiling and cleaning_boiling == boiling:
             start_from = boiling['pouring']['first']['termizator'].y[0]
             cleaning = make_termizator_cleaning_block('full', x=(boiling['pouring']['first']['termizator'].y[0], 0), text='ПМ в середине дня')
-            push(schedule['master'], cleaning, start_from=start_from, push_func=dummy_push, validator=class_validator)
+            push(schedule['master'], cleaning, start_from=start_from, push_func=dummy_push, validator=master_validator)
 
         lines_df.at[line_name, 'latest_boiling'] = boiling
         return boiling
@@ -185,6 +183,28 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
             raise Exception('Should not happen')
 
         add_one_block_from_line(line_name)
+
+
+    # push extra packings
+    extra_packings_validator = ClassValidator(window=10)
+    extra_packings_validator.add('packing', 'packing', validate_disjoint_by_axis)
+
+    def validate(b1, b2):
+        multihead_cleaning, packing = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # boiling, cleaning
+        for process in packing.iter(cls='process'):
+            # todo: switch
+            # if process.props['sku'].packer.name == 'Мультиголова'
+            if process.props['sku'].name == 'Сулугуни "Умалат" (для хачапури), 45%, 0,12 кг, ф/п':
+                validate_disjoint_by_axis(multihead_cleaning, process)
+                assert multihead_cleaning.y[0] + 1 <= process.x[0]
+
+    extra_packings_validator.add('multihead_cleaning', 'packing', validate)
+
+    for multihead_cleaning in schedule['extra'].iter(cls='multihead_cleaning'):
+        push(schedule['extra_packings'], multihead_cleaning, push_func=add_push)
+
+    for packing in schedule['extra'].iter(cls='packing'):
+        push(schedule['extra_packings'], packing, push_func=dummy_push, validator=extra_packings_validator, start_from=int(packing.props['extra_props']['start_from']))
 
     # add cleanings if necessary
     boilings = listify(schedule['master']['boiling'])
@@ -221,6 +241,6 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
     last_boiling = list(schedule['master'].iter(cls='boiling'))[-1]
     start_from = last_boiling['pouring']['first']['termizator'].y[0] + 1
     cleaning = make_termizator_cleaning_block('full', text='ПМ в конце дня')  # add five extra minutes
-    push(schedule['master'], cleaning, push_func=dummy_push, start_from=start_from, validator=class_validator)
+    push(schedule['master'], cleaning, push_func=dummy_push, start_from=start_from, validator=master_validator)
 
     return schedule
