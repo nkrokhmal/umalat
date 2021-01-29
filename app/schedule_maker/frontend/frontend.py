@@ -286,7 +286,7 @@ def make_packings(master, line_name):
 
 
 def make_extra_packings(extra_packings):
-    maker, make = init_block_maker('packing', axis=1)
+    maker, make = init_block_maker('packing', axis=1, is_parent_node=True)
     for packing_block in extra_packings.iter(cls='packing'):
         make(make_packing_block(packing_block, packing_block.props['boiling_id']), push_func=add_push)
     return maker.root

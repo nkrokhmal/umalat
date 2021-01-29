@@ -32,7 +32,7 @@ def draw_schedule(schedule, style, fn=None):
                 text = text.replace('>', '}')
                 text = eval(f'f{text!r}')
 
-                print(b.props['cls'], b.x, b.y)
+                # print(b.props['cls'], b.x, b.y)
 
                 x1 = b.x[0]
                 if 'start_time' in b.props.all():
@@ -42,7 +42,7 @@ def draw_schedule(schedule, style, fn=None):
 
                 bold = b.props['bold']
 
-                print(b.props['cls'], x1, b.x[1], b.size[0], b.size[1])
+                # print(b.props['cls'], x1, b.x[1], b.size[0], b.size[1])
 
                 draw_block(wb.worksheets[0],
                            x1,
