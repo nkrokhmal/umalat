@@ -83,11 +83,6 @@ class SchemaToBoilingsDataframes:
             boiling_dataframes['coolings'] = df
 
             boiling_dataframes['collectings'] = {}
-            for packing_team_id, queue in packing_queues.items():
-                df = pd.DataFrame(queue.active_periods('in'), columns=['item', 'beg', 'end'])
-                df['name'] = 'process'
-                boiling_dataframes['collectings'][packing_team_id] = df
-
             boiling_dataframes['packings'] = {}
             for packing_team_id, queue in packing_queues.items():
                 df1 = pd.DataFrame(queue.active_periods('out'), columns=['item', 'beg', 'end'])
@@ -103,6 +98,8 @@ class SchemaToBoilingsDataframes:
                     df = df.iloc[:-1]
 
                 boiling_dataframes['packings'][packing_team_id] = df
+                boiling_dataframes['collectings'][packing_team_id] = df.copy()
+
             boiling_dataframes['meltings'] = self._post_process_dataframe(boiling_dataframes['meltings'], round=round)
             boiling_dataframes['coolings'] = self._post_process_dataframe(boiling_dataframes['coolings'], fix_small_intervals=False, round=round)
 

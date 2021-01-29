@@ -131,6 +131,10 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
         else:
             start_from = lines_df.at[line_name, 'latest_boiling'].x[0]
 
+        # take rubber packing to extras
+        # for packing in
+
+
         # add configuration if needed
         if lines_df.at[line_name, 'latest_boiling']:
             configuration_blocks = make_configuration_blocks(lines_df.at[line_name, 'latest_boiling'], boiling, maker, line_name, between_boilings=True)
