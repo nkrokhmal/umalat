@@ -41,26 +41,28 @@ def calc_group_form_factor_label(skus):
             s += label + ' '
             cur_label = label
 
-        if sku.group.name != 'Терка':
+        if 'Терка' in sku.form_factor.name:
+            s += 'Терка'
+        else:
             s += sku.form_factor.name
 
         values.append(s)
     return '/'.join(values)
 
 
-
-def make_header(start_time='01:00'):
+def make_header(date, start_time='01:00'):
     maker, make = init_block_maker('header', axis=1)
 
-    with make('header', size=(0, 1), index_width=3):
-        make(size=(1, 1), text='График наливов', push_func=add_push)
+    with make('header', size=(0, 1), index_width=2):
+        make(size=(1, 1), text='График наливов')
+        make(size=(1, 1), text=cast_str(date, '%d.%m.%Y'), bold=True)
         for i in range(566):
             cur_time = cast_time(i + cast_t(start_time))
             days, hours, minutes = cur_time.split(':')
             if cur_time[-2:] == '00':
-                make(x=(1 + i, 0), size=(1, 1), text=str(int(hours)), color=(218, 150, 148), text_rotation=90, push_func=add_push)
+                make(size=(1, 1), text=str(int(hours)), color=(218, 150, 148), text_rotation=90, font_size=9)
             else:
-                make(x=(1 + i, 0), size=(1, 1), text=minutes, color=(204, 255, 255), text_rotation=90, push_func=add_push)
+                make(size=(1, 1), text=minutes, color=(204, 255, 255), text_rotation=90, font_size=9)
     return maker.root['header']
 
 
@@ -87,7 +89,7 @@ def make_cheese_makers(master, rng):
                     with make():
                         make('termizator', size=(boiling['pouring']['first']['termizator'].size[0], 1))
                         make('pouring_name', size=(boiling['pouring'].size[0] - boiling['pouring']['first']['termizator'].size[0], 1), boiling_label=boiling_label)
-                    with make():
+                    with make(font_size=8):
                         make('pouring_and_fermenting', size=(boiling['pouring']['first']['termizator'].size[0] + boiling['pouring']['first']['fermenting'].size[0], 1), push_func=add_push)
                         make('soldification', size=(boiling['pouring']['first']['soldification'].size[0], 1))
                         make('cutting', size=(boiling['pouring']['first']['cutting'].size[0], 1))
@@ -98,6 +100,10 @@ def make_cheese_makers(master, rng):
 
 def make_cleanings(master):
     maker, make = init_block_maker('cleanings_row', is_parent_node=True, axis=1)
+
+    with make('header', index_width=0, start_time='00:00', push_func=add_push):
+        make('template', x=(1, 0), size=(3, 2), text='Мойка термизатора', color='white', bold=True, push_func=add_push)
+
     for cleaning in master.iter(cls='cleaning'):
         b = maker.copy(cleaning, with_props=True)
         b.props.update(size=(b.props['size'][0], 2))
@@ -114,7 +120,7 @@ def make_multihead_cleanings(master):
         make(b, push_func=add_push)
     return maker.root
 
-def make_meltings_1(master, line_name, title, draw_all_coolings=True):
+def make_meltings_1(master, line_name, title, coolings_mode='all'):
     maker, make = init_block_maker('melting', axis=1)
 
     with make('header', start_time='00:00', push_func=add_push):
@@ -155,7 +161,7 @@ def make_meltings_1(master, line_name, title, draw_all_coolings=True):
         cooling_label = 'cooling' if line_name == LineName.WATER else 'salting'
 
         cur_cooling_size = None
-        for cooling_process in listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process']):
+        for i, cooling_process in enumerate(listify(boiling['melting_and_packing']['melting']['coolings']['cooling_process'])):
             start_from = listify(cooling_process['start']['cooling'])[0].x[0]
             cooling_block = maker.create_block('cooling_block', x=(start_from, 0))  # todo: create dynamic x calculation when empty block
 
@@ -165,12 +171,14 @@ def make_meltings_1(master, line_name, title, draw_all_coolings=True):
                              x=[cooling.x[0] - start_from, 0])
                 push(cooling_block, block, push_func=add_push)
 
-            if not draw_all_coolings:
-                # do not draw cooling block if previous is same size
+            if coolings_mode == 'all':
+                cur_cooling_size = cooling_block.size[0]
+            elif coolings_mode == 'unique':
                 if cur_cooling_size == cooling_block.size[0]:
                     continue
-                else:
-                    cur_cooling_size = cooling_block.size[0]
+            elif coolings_mode == 'first':
+                if i >= 1:
+                    continue
 
             # try to add to the earliest line as possible
             j = 0
@@ -303,14 +311,14 @@ def make_frontend(schedule):
     start_t = min([boiling.x[0] for boiling in listify(master['boiling'])]) # first pouring time
     start_t = int(custom_round(start_t, 12, 'floor')) # round to last hour
     start_time = cast_time(start_t)
-    make(make_header(start_time=start_time))
+    make(make_header(schedule.props['date'], start_time=start_time))
 
     with make('pouring', start_time=start_time, axis=1):
         make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
                              {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         make(make_cheese_makers(master, range(2)))
-        make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
-                             {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
+        # make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
+        #                      {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         make(make_cleanings(master))
         make(make_cheese_makers(master, range(2, 4)))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'Оператор + Помощник'}]))
@@ -318,11 +326,11 @@ def make_frontend(schedule):
     start_t = min([boiling['melting_and_packing'].x[0] for boiling in listify(master['boiling'])])  # first melting time
     start_t = int(custom_round(start_t, 12, 'floor'))  # round to last hour
     start_time = cast_time(start_t)
-    make(make_header(start_time=start_time))
+    make(make_header(schedule.props['date'], start_time=start_time))
 
     with make('melting', start_time=start_time, axis=1):
         make(make_multihead_cleanings(master))
-        make(make_meltings_1(master, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
+        make(make_meltings_1(master, LineName.WATER, 'Линия плавления моцареллы в воде №1', coolings_mode='first'))
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
         make(make_packings(master, LineName.WATER))

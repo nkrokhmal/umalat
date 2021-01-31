@@ -28,12 +28,16 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None):
     suitable = {k: v for k, v in res.items() if cast_t(v['max_non_full_cleaning_time']) < cast_t('12:00')}
 
     # todo: uncom
-    assert len(suitable) > 0, 'Не получилось вставить мойку термизатора с учетом правила отсутствия непрерывной работы термизатора на протяжении 12 часов подряд. '
+    # assert len(suitable) > 0, 'Не получилось вставить мойку термизатора с учетом правила отсутствия непрерывной работы термизатора на протяжении 12 часов подряд. '
     # todo: delete
-    # if suitable:
-    #     res = suitable
+    if suitable:
+        res = suitable
+        best = min(res.items(), key=lambda v: v[1]['total_time'])
+    else:
+        # did not find any suitable - remove no cleaning suitable
+        res.pop(0)
+        best = min(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time'])
 
-    best = min(res.items(), key=lambda v: v[1]['total_time'])
     boilings = make_boilings(boiling_plan_df)
     cleaning_boilings = [None] + boilings[0:len(boilings) - 1]
     cleaning_boiling = cleaning_boilings[best[0]]
