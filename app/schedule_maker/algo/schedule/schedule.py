@@ -23,25 +23,23 @@ def validate(b1, b2):
     if b1['pouring'].props['pouring_line'] == b2['pouring'].props['pouring_line']:
         validate_disjoint_by_axis(b1['pouring'], b2['pouring'])
 
-    if wl1 == wl2:
-        if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
-            # same line type
-            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
-            for p1, p2 in product(listify(b1['melting_and_packing']['collecting']), listify(b2['melting_and_packing']['collecting'])):
-                if p1.props['packing_team_id'] != p2.props['packing_team_id']:
-                    continue
-                validate_disjoint_by_axis(p1, p2)
+    if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
+        # same line
+        validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
+        for p1, p2 in product(listify(b1['melting_and_packing']['collecting']), listify(b2['melting_and_packing']['collecting'])):
+            if p1.props['packing_team_id'] != p2.props['packing_team_id']:
+                continue
+            validate_disjoint_by_axis(p1, p2)
+    elif wl1 == wl2:
+        # salt and water on the same working line - due to salt switching to the first pouring_line
+        validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
+        validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
+        assert b2['melting_and_packing']['melting']['meltings'].x[0] - b1['melting_and_packing']['melting']['meltings'].y[0] > 6 # todo: optimize - add straight to validate disjoint
 
-        else:
-            # salt and water on the same working line - due to salt switching to the first pouring_line
-            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
-            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
-            assert b2['melting_and_packing']['melting']['meltings'].x[0] - b1['melting_and_packing']['melting']['meltings'].y[0] > 6 # todo: optimize - add straight to validate disjoint
-
-        # add 15 minutes for non-lactose for cleaning of melting-space
-        if b2.props['boiling_model'].line.name == LineName.SALT:
-            if b1.props['boiling_model'].is_lactose and not b2.props['boiling_model'].is_lactose:
-                assert b1['melting_and_packing']['melting']['meltings'].y[0] + 3 <= b2['melting_and_packing']['melting']['meltings'].x[0]
+    # add 15 minutes for non-lactose for cleaning of melting-space
+    if b2.props['boiling_model'].line.name == LineName.SALT:
+        if b1.props['boiling_model'].is_lactose and not b2.props['boiling_model'].is_lactose:
+            assert b1['melting_and_packing']['melting']['meltings'].y[0] + 3 <= b2['melting_and_packing']['melting']['meltings'].x[0]
 
 master_validator.add('boiling', 'boiling', validate)
 
@@ -145,7 +143,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
 
         # take rubber packing to extras
         for packing in boiling.iter(cls='packing'):
-            if not list(packing.iter(cls='process', sku=lambda sku: sku.form_factor.name == 'Терка')):
+            if not list(packing.iter(cls='process', sku=lambda sku: 'Терка' in sku.form_factor.name)):
                 continue
             packing_copy = maker.copy(packing, with_props=True)
             packing_copy.props.update(extra_props={'start_from': packing.x[0]})
@@ -205,6 +203,7 @@ def make_schedule(boilings, cleaning_boiling=None, start_times=None):
                 validate_disjoint_by_axis(multihead_cleaning, process)
                 assert multihead_cleaning.y[0] + 1 <= process.x[0]
 
+    logger.debug('Extra', block=schedule['extra'])
     extra_packings_validator.add('multihead_cleaning', 'packing', validate)
 
     for multihead_cleaning in schedule['extra'].iter(cls='multihead_cleaning'):
