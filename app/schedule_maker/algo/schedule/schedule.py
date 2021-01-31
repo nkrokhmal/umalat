@@ -27,8 +27,8 @@ def validate(b1, b2):
         # same line
         validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
         for p1, p2 in product(listify(b1['melting_and_packing']['collecting']), listify(b2['melting_and_packing']['collecting'])):
-            if p1.props['packing_team_id'] != p2.props['packing_team_id']:
-                continue
+            # if p1.props['packing_team_id'] != p2.props['packing_team_id']:
+            #     continue
             validate_disjoint_by_axis(p1, p2)
     elif wl1 == wl2:
         # salt and water on the same working line - due to salt switching to the first pouring_line
