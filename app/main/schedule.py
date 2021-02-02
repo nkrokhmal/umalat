@@ -46,7 +46,7 @@ def schedule():
         schedule_wb = schedule_task(schedule_wb, boiling_plan_df, date)
 
         schedule_wb = schedule_task(schedule_wb, boiling_plan_df, date)
-        schedule_wb = schedule_task_boilings(schedule_wb, boiling_plan_df, date, batch_number)
+        schedule_wb = schedule_task_boilings(schedule_wb, boiling_plan_df, date, form.batch_number.data)
 
         path_schedule = '{}/{}'.format('app/data/schedule_plan', filename_schedule)
         schedule_wb.save(path_schedule)
