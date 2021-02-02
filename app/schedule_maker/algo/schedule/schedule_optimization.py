@@ -36,6 +36,7 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None):
     else:
         # did not find any suitable - remove no cleaning suitable
         res.pop(0)
+        # res_items = list(sorted(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time']))[:12]
         best = min(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time'])
 
     boilings = make_boilings(boiling_plan_df)
