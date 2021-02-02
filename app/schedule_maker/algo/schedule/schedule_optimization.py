@@ -9,8 +9,18 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None, f
     res = {}
 
     boilings = make_boilings(boiling_plan_df)
+    # cleaning_boilings = [None] + boilings[0: len(boilings) - 1]
 
     for i in tqdm(range(len(boilings))):
+        # small optimization. # todo: del
+        # a = cleaning_boilings[1]['pouring']['first']['termizator'].y[0]
+        # b = cleaning_boilings[i]['pouring']['first']['termizator'].y[0]
+        # c = cleaning_boilings[-1]['pouring']['first']['termizator'].x[0]
+        #
+        # if cleaning_boilings[i] and c - b > cast_t('14:00') or b - a > cast_t('14:00')
+        #     logger.info(f'Skipping boiling {i}')
+        #     continue
+
         boilings = make_boilings(boiling_plan_df)
         cleaning_boilings = [None] + boilings[0:len(boilings) - 1]
         cleaning_boiling = cleaning_boilings[i]
