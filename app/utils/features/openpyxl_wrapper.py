@@ -8,9 +8,9 @@ class ExcelBlock:
         self.sheet = sheet
         self.colour = colour
         self.font_size = font_size
-        # self.row_height = row_height
-        # for i in range(2, 100):
-        #     self.sheet.row_dimensions[i].height = self.row_height
+
+    def raw_dimension(self, row, row_height):
+        self.sheet.row_dimensions[row].height = row_height
 
     def default_colour(self, row, col, set_colour):
         if set_colour:
@@ -27,13 +27,18 @@ class ExcelBlock:
                                                   top=Side(style='thin'),
                                                   bottom=Side(style='thin'))
 
-    def draw_cell(self, row, col, value, alignment=None, set_colour=True, set_font=True, set_border=True):
+    def draw_cell(self, row, col, value, alignment=None, set_colour=True, set_font=True, set_border=True,
+                  font_size=None, is_bold=False):
         self.sheet.cell(row, col).value = value
         self.default_colour(row, col, set_colour)
         self.default_font(row, col, set_font)
 
         if set_border:
             self.default_border(row, col)
+
+        if font_size:
+            self.sheet.cell(row, col).font = Font(size=self.font_size, bold=is_bold)
+
         if alignment is not None:
             self.sheet.cell(row, col).alignment = alignment
 
@@ -44,21 +49,20 @@ class ExcelBlock:
                            set_font=set_font, set_border=set_border)
 
     def merge_cells(self, beg_row, end_row, beg_col, end_col, value, alignment=None, set_colour=True, set_font=True,
-                    set_border=True):
-        if set_border:
-            for row in range(beg_row + 1, end_row + 1):
-                self.sheet.cell(end_row, end_col).border = Border(left=Side(style='thin'),
-                                                                  right=Side(style='thin'))
-            if end_row != beg_row:
-                self.sheet.cell(end_row, end_col).border = Border(bottom=Side(style='thin'))
+                    set_border=True, font_size=None, is_bold=False):
         self.sheet.merge_cells(start_row=beg_row,
                                end_row=end_row,
                                start_column=beg_col,
                                end_column=end_col)
-        self.draw_cell(row=beg_row, col=beg_col, value=value, alignment=alignment, set_colour=set_colour,
-                       set_font=set_font, set_border=set_border)
-        self.default_colour(beg_row, beg_col, set_colour)
+        self\
+            .default_colour(beg_row, beg_col, set_colour)
         self.default_font(beg_row, beg_col, set_font)
+        self.draw_cell(row=beg_row, col=beg_col, value=value, alignment=alignment, set_colour=set_colour,
+                       set_font=set_font, set_border=set_border, font_size=font_size, is_bold=is_bold)
+        if set_border:
+            for row in range(beg_row, end_row + 1):
+                for col in range(beg_col, end_col + 1):
+                    self.default_border(row, col)
 
 
 def merge_workbooks(wb1, wb2):
