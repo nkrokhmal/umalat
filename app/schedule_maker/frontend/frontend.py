@@ -28,6 +28,7 @@ def calc_form_factor_label(form_factors):
 def calc_group_form_factor_label(skus):
     skus = remove_neighbor_duplicates(skus)
     cur_label = None
+    cur_form_factor = None
     values = []
     for sku in skus:
 
@@ -40,13 +41,19 @@ def calc_group_form_factor_label(skus):
         if label != cur_label:
             s += label + ' '
             cur_label = label
+            # reset form factor also
+            cur_form_factor = None
 
         if 'Терка' in sku.form_factor.name:
-            s += 'Терка'
+            form_factor = 'Терка'
         else:
-            s += sku.form_factor.name
+            form_factor = sku.form_factor.name
 
-        values.append(s)
+        if cur_form_factor != form_factor:
+            s += form_factor
+            cur_form_factor = form_factor
+        if s:
+            values.append(s)
     return '/'.join(values)
 
 
