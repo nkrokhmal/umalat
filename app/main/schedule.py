@@ -10,6 +10,7 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker import *
 
 from app.schedule_maker.frontend import *
+from ..utils.schedule_task import schedule_task, schedule_task_boilings
 
 
 @main.route('/schedule', methods=['GET', 'POST'])
@@ -41,8 +42,15 @@ def schedule():
         schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
 
         filename_schedule = '{} {}.xlsx'.format(date.strftime('%Y-%m-%d'), 'Расписание')
+
+        schedule_wb = schedule_task(schedule_wb, boiling_plan_df, date)
+
+        schedule_wb = schedule_task(schedule_wb, boiling_plan_df, date)
+        schedule_wb = schedule_task_boilings(schedule_wb, boiling_plan_df, date, batch_number)
+
         path_schedule = '{}/{}'.format('app/data/schedule_plan', filename_schedule)
         schedule_wb.save(path_schedule)
+
         os.remove(file_path)
         return render_template('schedule.html', form=form, filename=filename_schedule)
 

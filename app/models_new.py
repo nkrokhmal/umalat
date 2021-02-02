@@ -55,11 +55,13 @@ class SKU(db.Model):
     packing_speed = db.Column(db.Integer, nullable=True)
     production_by_request = db.Column(db.Boolean)
     packing_by_request = db.Column(db.Boolean)
+    boxes = db.Column(db.Integer)
 
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
     pack_type_id = db.Column(db.Integer, db.ForeignKey('pack_types.id'), nullable=True)
     form_factor_id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), nullable=True)
+
 
     @property
     def packers_str(self):
