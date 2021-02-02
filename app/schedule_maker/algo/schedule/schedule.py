@@ -39,7 +39,7 @@ def validate(b1, b2):
     # add 15 minutes for non-lactose for cleaning of melting-space
     if b2.props['boiling_model'].line.name == LineName.SALT:
         if b1.props['boiling_model'].is_lactose and not b2.props['boiling_model'].is_lactose:
-            assert b1['melting_and_packing']['melting']['meltings'].y[0] + 3 <= b2['melting_and_packing']['melting']['meltings'].x[0]
+            assert b1['melting_and_packing']['melting']['meltings'].y[0] + 3 <= b2['melting_and_packing']['melting']['serving'].x[0]
 
 master_validator.add('boiling', 'boiling', validate)
 
