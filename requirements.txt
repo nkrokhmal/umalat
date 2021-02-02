@@ -46,3 +46,4 @@ pyyaml
 pyperclip
 xlrd==1.2.0
 sortedcollections
+loguru
