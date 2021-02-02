@@ -102,7 +102,7 @@ def draw_task_new(excel_client, df, date, cur_row, line_name, task_name, batch_n
     for boiling_group_id, grp in df_filter.groupby('group_id'):
         for i, row in grp.iterrows():
             excel_client.colour = COLOR[1:]
-            excel_client.draw_cell(col=COLUMNS['index'].col, row=cur_row, value=boiling_group_id + batch_number)
+            excel_client.draw_cell(col=COLUMNS['index'].col, row=cur_row, value=boiling_group_id + batch_number - 1)
             excel_client.colour = None
             excel_client.merge_cells(
                 beg_col=COLUMNS['sku'].col,
