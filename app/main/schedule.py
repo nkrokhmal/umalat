@@ -44,8 +44,6 @@ def schedule():
         filename_schedule = '{} {}.xlsx'.format(date.strftime('%Y-%m-%d'), 'Расписание')
 
         schedule_wb = schedule_task(schedule_wb, boiling_plan_df, date)
-
-        schedule_wb = schedule_task(schedule_wb, boiling_plan_df, date)
         schedule_wb = schedule_task_boilings(schedule_wb, boiling_plan_df, date, form.batch_number.data)
 
         path_schedule = '{}/{}'.format('app/data/schedule_plan', filename_schedule)
