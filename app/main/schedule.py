@@ -16,8 +16,6 @@ from app.schedule_maker.frontend import *
 def schedule():
     form = ScheduleForm()
     if request.method == 'POST' and form.validate_on_submit():
-        # todo: add batch number to schedule
-        batch_number = form.batch_number.data
         date = form.date.data
         file = request.files['input_file']
         file_path = os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename)
@@ -27,13 +25,12 @@ def schedule():
                                     data_only=True)
 
         boiling_plan_df = read_boiling_plan(wb)
-        print(boiling_plan_df)
         start_times = {LineName.WATER: form.water_beg_time.data, LineName.SALT: form.salt_beg_time.data}
 
         # boilings = make_boilings(boiling_plan_df)
         # schedule = make_schedule(boilings, start_times=start_times)
 
-        schedule = make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=start_times)
+        schedule = make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=start_times, first_group_id=form.batch_number.data)
 
         try:
             frontend = make_frontend(schedule)

@@ -4,7 +4,7 @@ from app.schedule_maker.algo.schedule.boilings import *
 from app.schedule_maker.algo.stats import *
 
 # todo: refactor
-def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None):
+def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None, first_group_id=None):
     start_times = start_times or {LineName.WATER: '08:00', LineName.SALT: '07:00'}
     res = {}
 
@@ -39,7 +39,7 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None):
         # res_items = list(sorted(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time']))[:12]
         best = min(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time'])
 
-    boilings = make_boilings(boiling_plan_df)
+    boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
     cleaning_boilings = [None] + boilings[0:len(boilings) - 1]
     cleaning_boiling = cleaning_boilings[best[0]]
     return make_schedule(boilings, cleaning_boiling=cleaning_boiling, start_times=start_times)
