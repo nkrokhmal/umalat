@@ -26,6 +26,11 @@ def validate(b1, b2):
     if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
         # same line
         validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
+
+        # if water and different boilings - cannot intersect serving
+        if b1.props['boiling_model'].line.name == LineName.WATER and b1.props['boiling_model'] != b2.props['boiling_model']:
+            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
+
         for p1, p2 in product(listify(b1['melting_and_packing']['collecting']), listify(b2['melting_and_packing']['collecting'])):
             # if p1.props['packing_team_id'] != p2.props['packing_team_id']:
             #     continue
