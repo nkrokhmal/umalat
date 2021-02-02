@@ -35,7 +35,7 @@ def make_mpp(boiling_df, left_boiling_volume):
             team_df = boiling_df[(boiling_df['packing_team_id'] == packing_team_id) & (boiling_df['left'] > ERROR)]
             if len(team_df) > 0:
                 cur_skus_values.append(team_df.iloc[0])
-        cur_skus_df = pd.DataFrame(cur_skus_values).sort_values(by='collecting_speed')  # two rows for next packing skus
+        cur_skus_df = pd.DataFrame(cur_skus_values).sort_values(by=['collecting_speed', 'packing_team_id'])  # two rows for next packing skus
 
         collecting_speed_left = boiling_model.line.melting_speed
         for i, cur_sku in cur_skus_df.iterrows():

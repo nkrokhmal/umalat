@@ -21,9 +21,9 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None):
             # no further search needed
             break
 
-        # todo: del, for faster result only - find first one only
-        if cast_t(res[i]['max_non_full_cleaning_time']) < cast_t('12:00'):
-            break
+        # # todo: del, for faster result only - find first one only
+        # if cast_t(res[i]['max_non_full_cleaning_time']) < cast_t('12:00'):
+        #     break
 
     suitable = {k: v for k, v in res.items() if cast_t(v['max_non_full_cleaning_time']) < cast_t('12:00')}
 
@@ -32,8 +32,12 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None):
     # todo: delete
     if suitable:
         res = suitable
+        best = min(res.items(), key=lambda v: v[1]['total_time'])
+    else:
+        # did not find any suitable - remove no cleaning suitable
+        res.pop(0)
+        best = min(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time'])
 
-    best = min(res.items(), key=lambda v: v[1]['total_time'])
     boilings = make_boilings(boiling_plan_df)
     cleaning_boilings = [None] + boilings[0:len(boilings) - 1]
     cleaning_boiling = cleaning_boilings[best[0]]
