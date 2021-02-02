@@ -18,8 +18,7 @@ def create_app():
     bootstrap.init_app(app)
     page_down.init_app(app)
 
-    from .main import main as main_bluepint
-
-    app.register_blueprint(main_bluepint)
+    from .main import main as main_bp
+    app.register_blueprint(main_bp)
 
     return app, db

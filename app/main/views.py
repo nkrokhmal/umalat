@@ -18,14 +18,12 @@ def index():
 
 @main.route('/get_general_params')
 def get_general_params():
-    try:
-        lines = db.session.query(Line).all()
-        packers = db.session.query(Packer).all()
-        termizators = db.session.query(Termizator).all()
-        departments = db.session.query(Department).all()
-        return render_template('get_general_params.html', lines=lines, packers=packers, termizators=termizators, departments=departments)
-    except Exception as e:
-        return internal_error(e)
+    lines = db.session.query(Line).all()
+    packers = db.session.query(Packer).all()
+    termizators = db.session.query(Termizator).all()
+    departments = db.session.query(Department).all()
+    return render_template('get_general_params.html', lines=lines, packers=packers, termizators=termizators,
+                           departments=departments)
 
 
 @main.route('/get_packings/<int:boiling_id>', methods=['GET', 'POST'])
@@ -46,36 +44,22 @@ def get_lines():
 
 @main.route('/get_packer', methods=['GET', 'POST'])
 def get_packer():
-    try:
-        packers = db.session.query(Packer).all()
-        return jsonify([x.serialize() for x in packers])
-    except Exception as e:
-        return internal_error(e)
+    packers = db.session.query(Packer).all()
+    return jsonify([x.serialize() for x in packers])
 
 
 @main.route('//.', methods=['GET', 'POST'])
 def get_termizator():
-    try:
-        termizator = db.session.query(Termizator).all()
-        return jsonify([x.serialize() for x in termizator])
-    except Exception as e:
-        return internal_error(e)
+    termizator = db.session.query(Termizator).all()
+    return jsonify([x.serialize() for x in termizator])
 
 
 @main.route('/get_department', methods=['GET', 'POST'])
 def get_department():
-    try:
-        departments = db.session.query(Department).all()
-        return jsonify([x.serialize() for x in departments])
-    except Exception as e:
-        return internal_error(e)
+    departments = db.session.query(Department).all()
+    return jsonify([x.serialize() for x in departments])
 
 
 @main.route('/data/<path:path>')
 def send_js(path):
-    try:
-        return send_from_directory('data', path)
-    except Exception as e:
-        return internal_error(e)
-
-
+    return send_from_directory('data', path)

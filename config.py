@@ -7,6 +7,7 @@ SQLITE_PATH = os.path.join(basedir, 'data.sqlite')
 
 
 class BaseClass:
+    PROPAGATE_EXCEPTIONS = False
     SECRET_KEY = 'Umalat'
     CHEESE_PER_PAGE = 10
     CHEESE_MAKER_PER_PAGE = 10

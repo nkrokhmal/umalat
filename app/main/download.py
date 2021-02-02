@@ -1,6 +1,6 @@
 from flask import send_from_directory
 from . import main
-from .. utils.generate_constructor import *
+from app.utils.old.generate_constructor import *
 
 
 @main.route('/download_boiling_plan/<file_name>', methods=['POST', 'GET'])

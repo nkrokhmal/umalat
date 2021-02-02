@@ -1,25 +1,12 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% import "_macros.html" as macros %}
 
 {% block title %} План по SKU {% endblock %}
 {% block page_content %}
 
-<link rel="stylesheet" type="text/css" href="static/css/templates/parse_request.css" />
-<link href="static/css/datatables2.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
-
-<script type='text/javascript' src="static/js/jquery.min.js"></script>
-<script type='text/javascript' src="static/js/bootstrap.min.js"></script>
-<script type='text/javascript' src="static/js/mdb.min.js"></script>
-<script type='text/javascript' src="static/js/datatables2.min.js"></script>
-<script type='text/javascript' src="static/js/templates/parse_request.js"></script>
-
-
 <main>
     <div class="header-img">
-         <img src= "{{ url_for('static', filename='parse_request.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+         <img src= "{{ url_for('static', filename='sku_plan.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
     </div>
 </main>
 
@@ -30,7 +17,7 @@
     {{ wtf.quick_form(form) }}
 </div>
 
-{% if file_name %}
+{% if filename %}
     <div class="col-md-6" style="margin-bottom: 20px;">
         <script>
             function download(url, filename) {
@@ -44,84 +31,11 @@
                 );
             });
             }
-            var url = "download_sku_plan/" + "{{file_name}}";
-            download(url,"{{file_name}}");
+            var url = "download_sku_plan/" + "{{filename}}";
+            download(url,"{{filename}}");
         </script>
-        <a href="{{url_for('main.boiling_plan_full')}}"> <h4> Перейти к созданию плана варок </h4> </a>
+        <a href="{{url_for('main.boiling_plan')}}"> <h4> Перейти к созданию плана варок </h4> </a>
     </div>
 {% endif %}
 
-
-<div id="display_result" class="col-md-12" style="margin-bottom: 20px;">
-    {% if result_list is not none %}
-    <h1> Количество варок по запросу </h1>
-    <table id="result_table" class="table table-hover result request">
-        <thead>
-            <tr>
-                <th> Форм фактор </th>
-                <th> Процент </th>
-                <th> Наличие лактозы </th>
-                <th> Закваска </th>
-                <th> Количество варок </th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for d in result_list %}
-            <tr>
-                <td> {{d["GroupSKU"][0]["SKU"].form_factor.name}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].percent}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].is_lactose}} </td>
-                <td> {{d["GroupSKU"][0]["SKU"].made_from_boilings[0].ferment}} </td>
-                <td> {{d["BoilingCount"]|round|int}} </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-</div>
-
-
-{% if data is not none %}
-    <div class="col-md-12" style="margin-bottom: 20px;">
-        <h1> Заявка </h1>
-        <input type="button" id="show_table" value="Показать/Свернуть">
-    </div>
-{% endif %}
-
-
-{% if data is not none %}
-<div id="display_table" class="col-md-12" style="margin-bottom: 20px;">
-    <table id="sku_table" class="table table-hover sku request" style="display:none">
-        <thead>
-            <tr>
-                <th> Название SKU  </th>
-                <th> Заявлено всего </th>
-                <th> Фактические остатки </th>
-                <th> Нормативные остатки </th>
-            </tr>
-        </thead>
-        {% for d in data %}
-        <tr>
-            <td> {{d[0]}} </td>
-            <td> {{d[1]|round|int}} </td>
-            <td> {{d[2]|round|int}} </td>
-            <td> {{d[3]|round|int}} </td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
-{% endif %}
-
-<script type="text/javascript">
-document.getElementById("show_table").addEventListener("click", function(button) {
-    if (document.getElementById("sku_table").style.display === "none") {
-        console.log("Element is none");
-        document.getElementById("sku_table").style.display = "block";
-    }
-    else {
-        console.log("Element is not none");
-        document.getElementById("sku_table").style.display = "none";
-    }
-});
-</script>
 {% endblock %}

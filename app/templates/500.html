@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% import "_macros.html" as macros %}
-
 {% block title %} 500 Ошибка {% endblock %}
 {% block page_content %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -42,11 +40,12 @@
 </head>
 
 
-<h1>Произошла ошибка.</h1>
+<h1> Произошла ошибка </h1>
+
 <div class="col-md-12 col-sm-12 col-xs-12">
-    <button class="accordion" style="font-size: 18px;">Показать полностью ошибку</button>
+    <button class="accordion" style="font-size: 18px;">Показать полностью всю ошибку. </button>
     <div class="panel">
-        {{ error}}
+        {{ trace }}
     </div>
 </div>
 <p><a href="{{ url_for('main.index') }}">Вернуться на главную страницу</a></p>

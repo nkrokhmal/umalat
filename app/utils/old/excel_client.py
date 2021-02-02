@@ -3,7 +3,7 @@ import openpyxl
 from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
 import re
-from .openpyxl_wrapper import ExcelBlock
+from app.utils.features.openpyxl_wrapper import ExcelBlock
 import pandas as pd
 from flask import current_app
 import json
@@ -92,14 +92,14 @@ def build_plan_sku(date, df, request_list, plan_path=None):
                     current_app.config['SHEET_NAMES']['remainings'], block.sheet.cell(cur_row, CELLS['SKU'].column).coordinate)
 
                 block.colour = sku['SKU'].colour[1:]
-                block.cell_value(row=cur_row, col=CELLS['Brand'].column, value=sku["SKU"].brand_name)
-                block.cell_value(row=cur_row, col=CELLS['SKU'].column, value=sku["SKU"].name)
-                block.cell_value(row=cur_row, col=CELLS['FactRemains'].column, value=formula_plan)
-                block.cell_value(row=cur_row, col=CELLS['NormativeRemains'].column, value=formula_remains)
-                block.cell_value(row=cur_row,
+                block.draw_value(row=cur_row, col=CELLS['Brand'].column, value=sku["SKU"].brand_name)
+                block.draw_value(row=cur_row, col=CELLS['SKU'].column, value=sku["SKU"].name)
+                block.draw_value(row=cur_row, col=CELLS['FactRemains'].column, value=formula_plan)
+                block.draw_value(row=cur_row, col=CELLS['NormativeRemains'].column, value=formula_remains)
+                block.draw_value(row=cur_row,
                                  col=CELLS['ProductionPlan'].column,
                                  value='=MIN({}, 0)'.format(block.sheet.cell(cur_row, CELLS['FactRemains'].column).coordinate) if sku['SKU'].production_by_request else 0)
-                block.cell_value(row=cur_row,
+                block.draw_value(row=cur_row,
                                  col=CELLS['ExtraPacking'].column,
                                  value=0 if sku['SKU'].packing_by_request else '=MIN({}, 0)'.format(block.sheet.cell(cur_row, CELLS['FactRemains'].column).coordinate))
 
@@ -129,22 +129,22 @@ def build_plan_sku(date, df, request_list, plan_path=None):
             ),
             alignment=Alignment(horizontal='center', vertical='center', wrapText=True)
         )
-        block.cell_value(row=beg_row, col=CELLS['Volume'].column, value=group_skus['Volume'])
+        block.draw_value(row=beg_row, col=CELLS['Volume'].column, value=group_skus['Volume'])
         formula_boiling_count = '{}'.format(str(group_formula).strip('[]').replace(',', ' +').replace('\'', "").upper())
-        block.cell_value(row=beg_row,
+        block.draw_value(row=beg_row,
                          col=CELLS['Estimation'].column,
                          value='=-({}) / {}'.format(
                             formula_boiling_count,
                             block.sheet.cell(beg_row, CELLS['Volume'].column).coordinate.upper()))
 
-        block.cell_value(row=beg_row, col=CELLS['Plan'].column, value='=ROUND({}, 0)'
+        block.draw_value(row=beg_row, col=CELLS['Plan'].column, value='=ROUND({}, 0)'
                          .format(block.sheet.cell(beg_row, CELLS['Estimation'].column).coordinate.upper()))
-        block.cell_value(
+        block.draw_value(
             row=beg_row,
             col=COLUMNS['SKUS_ID'],
             value=str([x["SKU"].id for x in group_skus["GroupSKU"]])
         )
-        block.cell_value(
+        block.draw_value(
             row=beg_row,
             col=COLUMNS['BOILING_ID'],
             value=group_skus['BoilingId']
