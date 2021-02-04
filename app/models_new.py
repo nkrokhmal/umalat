@@ -196,6 +196,7 @@ class Boiling(db.Model):
 class BoilingTechnology(db.Model):
     __tablename__ = 'boiling_technologies'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
     pouring_time = db.Column(db.Integer)
     soldification_time = db.Column(db.Integer)
     cutting_time = db.Column(db.Integer)
@@ -204,10 +205,17 @@ class BoilingTechnology(db.Model):
 
     boilings = db.relationship('Boiling', backref=backref('boiling_technology', uselist=False))
 
+    @staticmethod
+    def create_name(line, percent, ferment, is_lactose):
+        boiling_name = [percent, ferment, '' if is_lactose else 'без лактозы']
+        boiling_name = ', '.join([str(v) for v in boiling_name if v])
+        return 'Линия {}, {}'.format(line, boiling_name)
+
 
 class CoolingTechnology(db.Model):
     __tablename__ = 'cooling_technologies'
     id = db.Column(db.Integer, primary_key=True)
+    # name = db.Column(db.String)
     first_cooling_time = db.Column(db.Integer)
     second_cooling_time = db.Column(db.Integer)
     salting_time = db.Column(db.Integer)
@@ -219,6 +227,13 @@ class CoolingTechnology(db.Model):
         values = [self.first_cooling_time, self.second_cooling_time, self.salting_time]
         values = [v if v is not None else np.nan for v in values]
         return np.nansum(values)
+
+    @staticmethod
+    def create_name(form_factor_name):
+        return 'Технология охлаждения форм фактора {}'.format(form_factor_name)
+
+    def __repr__(self):
+        return 'CoolingTechnology({}, {}, {})'.format(self.first_cooling_time, self.second_cooling_time, self.salting_time)
 
 
 class Termizator(db.Model):

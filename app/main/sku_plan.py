@@ -44,6 +44,8 @@ def get_skus(skus_req, skus):
 
 def group_skus(skus_req, boilings):
     result = []
+    for sku in skus_req:
+        print(sku.sku.name, sku.sku.made_from_boilings)
     for boiling in boilings:
         sku_grouped = [x for x in skus_req if x.sku.made_from_boilings[0].id == boiling.id]
         if any(sku_grouped):
