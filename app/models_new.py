@@ -192,10 +192,15 @@ class Boiling(db.Model):
         values = [str(v) for v in values if v]
         return ', '.join(values)
 
+    def create_boiling_technology_name(self):
+        name = 'Линия {}, {}'.format(self.line.name, self.to_str())
+        return name
+
 
 class BoilingTechnology(db.Model):
     __tablename__ = 'boiling_technologies'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
     pouring_time = db.Column(db.Integer)
     soldification_time = db.Column(db.Integer)
     cutting_time = db.Column(db.Integer)
@@ -203,6 +208,12 @@ class BoilingTechnology(db.Model):
     extra_time = db.Column(db.Integer)
 
     boilings = db.relationship('Boiling', backref=backref('boiling_technology', uselist=False))
+
+    @staticmethod
+    def create_name(line, percent, ferment, is_lactose):
+        boiling_name = [percent, ferment, '' if is_lactose else 'без лактозы']
+        boiling_name = ', '.join([str(v) for v in boiling_name if v])
+        return 'Линия {}, {}'.format(line, boiling_name)
 
 
 class CoolingTechnology(db.Model):

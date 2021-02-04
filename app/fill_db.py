@@ -28,12 +28,19 @@ def fill_simple_data():
 
 def fill_boiling_technologies():
     df = read_params()
-    boiling_technologies_columns = ['Время налива', 'Время отвердевания', 'Время нарезки', 'Время слива', 'Дополнительное время']
+    boiling_technologies_columns = [
+        'Время налива', 'Время отвердевания', 'Время нарезки',
+        'Время слива', 'Дополнительное время', 'Линия', 'Процент',
+        'Наличие лактозы', 'Тип закваски']
     bt_data = df[boiling_technologies_columns]
+    bt_data['Наличие лактозы'] = bt_data['Наличие лактозы'].apply(lambda x: True if x == 'Да' else False)
     bt_data = bt_data.drop_duplicates()
     bt_data = bt_data.to_dict('records')
     for bt in bt_data:
+        line_name = LineName.SALT if bt['Линия'] == 'Соль' else LineName.WATER
         technology = BoilingTechnology(
+            name=BoilingTechnology.create_name(line=line_name, percent=bt['Процент'],
+                                               ferment=bt['Тип закваски'], is_lactose=bt['Наличие лактозы']),
             pouring_time=bt['Время налива'],
             soldification_time=bt['Время отвердевания'],
             cutting_time=bt['Время нарезки'],
@@ -70,9 +77,11 @@ def fill_boilings():
                'Время налива', 'Время отвердевания', 'Время нарезки', 'Время слива',
                'Дополнительное время']
     b_data = df[columns]
+    b_data['Наличие лактозы'] = b_data['Наличие лактозы'].apply(lambda x: True if x == 'Да' else False)
     b_data = b_data.drop_duplicates()
     b_data = b_data.to_dict('records')
     for b in b_data:
+        line_name = LineName.SALT if b['Линия'] == 'Соль' else LineName.WATER
         if b['Линия'] == 'Соль':
             line_id = [x for x in lines if x.name == LineName.SALT][0].id
         else:
@@ -81,7 +90,10 @@ def fill_boilings():
                  (x.soldification_time == b['Время отвердевания']) &
                  (x.cutting_time == b['Время нарезки']) &
                  (x.pouring_off_time == b['Время слива']) &
-                 (x.extra_time == b['Дополнительное время'])][0].id
+                 (x.extra_time == b['Дополнительное время']) &
+                 (x.name == BoilingTechnology.create_name(
+                     line=line_name, percent=b['Процент'],
+                     ferment=b['Тип закваски'], is_lactose=b['Наличие лактозы']))][0].id
         boiling = Boiling(
             percent=b['Процент'],
             is_lactose=True if b['Наличие лактозы'] == 'Да' else False,
