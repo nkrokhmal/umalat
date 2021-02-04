@@ -96,7 +96,7 @@ def fill_boilings():
                      ferment=b['Тип закваски'], is_lactose=b['Наличие лактозы']))][0].id
         boiling = Boiling(
             percent=b['Процент'],
-            is_lactose=True if b['Наличие лактозы'] == 'Да' else False,
+            is_lactose=b['Наличие лактозы'],
             ferment=b['Тип закваски'],
             boiling_technology_id=bt_id,
             line_id=line_id

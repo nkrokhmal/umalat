@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} План по варкам {% endblock %}
+
+{% block page_content %}
+<main>
+    <div class="header-img">
+         <img src= "{{ url_for('static', filename='boiling_plan.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+    </div>
+</main>
+
+<div class="page-header">
+    <h1> Загрузите файл плана по sku </h1>
+</div>
+<div class="col-md-6">
+    {{ wtf.quick_form(form) }}
+</div>
+
+{% if filename %}
+    <div class="col-md-6" style="margin-bottom: 20px;">
+        <script>
+            function download(url, filename) {
+            fetch(url).then(function(t) {
+                return t.blob().then((b)=>{
+                    var a = document.createElement("a");
+                    a.href = URL.createObjectURL(b);
+                    a.setAttribute("download", filename);
+                    a.click();
+                }
+                );
+            });
+            }
+            var url = "download_boiling_plan/" + "{{filename}}";
+            download(url,"{{filename}}");
+        </script>
+        <a href="{{url_for('main.schedule')}}"> <h4> Перейти к созданию расписания </h4> </a>
+    </div>
+{% endif %}
+{% endblock %}

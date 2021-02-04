@@ -192,10 +192,6 @@ class Boiling(db.Model):
         values = [str(v) for v in values if v]
         return ', '.join(values)
 
-    def create_boiling_technology_name(self):
-        name = 'Линия {}, {}'.format(self.line.name, self.to_str())
-        return name
-
 
 class BoilingTechnology(db.Model):
     __tablename__ = 'boiling_technologies'
@@ -219,6 +215,7 @@ class BoilingTechnology(db.Model):
 class CoolingTechnology(db.Model):
     __tablename__ = 'cooling_technologies'
     id = db.Column(db.Integer, primary_key=True)
+    # name = db.Column(db.String)
     first_cooling_time = db.Column(db.Integer)
     second_cooling_time = db.Column(db.Integer)
     salting_time = db.Column(db.Integer)
@@ -230,6 +227,13 @@ class CoolingTechnology(db.Model):
         values = [self.first_cooling_time, self.second_cooling_time, self.salting_time]
         values = [v if v is not None else np.nan for v in values]
         return np.nansum(values)
+
+    @staticmethod
+    def create_name(form_factor_name):
+        return 'Технология охлаждения форм фактора {}'.format(form_factor_name)
+
+    def __repr__(self):
+        return 'CoolingTechnology({}, {}, {})'.format(self.first_cooling_time, self.second_cooling_time, self.salting_time)
 
 
 class Termizator(db.Model):
