@@ -330,7 +330,6 @@ def make_frontend(schedule, coolings_mode='first'):
     start_t = int(custom_round(start_t, 12, 'floor')) # round to last hour
     # add two extra hours
     start_t -= 24
-    start_time = cast_time(start_t)
     make(make_header(schedule.props['date'], start_time=start_time))
 
     with make('pouring', start_time=start_time, axis=1):
@@ -346,6 +345,7 @@ def make_frontend(schedule, coolings_mode='first'):
     start_t = min([boiling['melting_and_packing'].x[0] for boiling in listify(master['boiling'])])  # first melting time
     start_t = int(custom_round(start_t, 12, 'floor'))  # round to last hour
     # add two extra hours
+    start_time = cast_time(start_t)
     start_t -= 24
     start_time = cast_time(start_t)
     make(make_header(schedule.props['date'], start_time=start_time))

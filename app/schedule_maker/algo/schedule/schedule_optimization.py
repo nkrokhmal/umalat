@@ -11,6 +11,12 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None, f
     boilings = make_boilings(boiling_plan_df)
     # cleaning_boilings = [None] + boilings[0: len(boilings) - 1]
 
+    water_boilings = [boiling for boiling in boilings if boiling.props['boiling_model'].line.name == LineName.WATER]
+    if not water_boilings:
+        start_from = 1
+    else:
+        start_from = boilings.index(water_boilings[-1]) + 1
+
     for i in tqdm(range(len(boilings))):
         # small optimization. # todo: del
         # a = cleaning_boilings[1]['pouring']['first']['termizator'].y[0]
@@ -20,6 +26,10 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None, f
         # if cleaning_boilings[i] and c - b > cast_t('14:00') or b - a > cast_t('14:00')
         #     logger.info(f'Skipping boiling {i}')
         #     continue
+
+        if i != 0 and i < start_from:
+            # start from water boilings
+            continue
 
         boilings = make_boilings(boiling_plan_df)
         cleaning_boilings = [None] + boilings[0:len(boilings) - 1]
