@@ -307,7 +307,7 @@ def make_extra_packings(extra_packings):
     return maker.root
 
 
-def make_frontend(schedule):
+def make_frontend(schedule, coolings_mode='first'):
     master = schedule['master']
     extra_packings = schedule['extra_packings']
 
@@ -337,7 +337,7 @@ def make_frontend(schedule):
 
     with make('melting', start_time=start_time, axis=1):
         make(make_multihead_cleanings(master))
-        make(make_meltings_1(master, LineName.WATER, 'Линия плавления моцареллы в воде №1', coolings_mode='first'))
+        make(make_meltings_1(master, LineName.WATER, 'Линия плавления моцареллы в воде №1', coolings_mode=coolings_mode))
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
         make(make_packings(master, LineName.WATER))
