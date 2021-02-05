@@ -154,7 +154,7 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
         # remove boiling from parent for now
         if line_name == LineName.WATER and lines_df.at[LineName.WATER, 'latest_boiling']:
             boiling.disconnect()
-            push(schedule['master'], boiling, push_func=AwaitingPusher(max_awaiting_period=12), validator=master_validator, max_tries=12)
+            push(schedule['master'], boiling, push_func=AwaitingPusher(max_awaiting_period=8), validator=master_validator, max_tries=9)
 
         # take rubber packing to extras
         for packing in boiling.iter(cls='packing'):
