@@ -12,10 +12,12 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None, f
     # cleaning_boilings = [None] + boilings[0: len(boilings) - 1]
 
     water_boilings = [boiling for boiling in boilings if boiling.props['boiling_model'].line.name == LineName.WATER]
-    if not water_boilings:
-        start_from = 1
-    else:
-        start_from = boilings.index(water_boilings[-1]) + 1
+    # if not water_boilings:
+    #     start_from = 1
+    # else:
+    #     start_from = boilings.index(water_boilings[-1]) + 1
+    # todo: hardcode
+    start_from = 10 + 1
 
     for i in tqdm(range(len(boilings))):
         # small optimization. # todo: del
