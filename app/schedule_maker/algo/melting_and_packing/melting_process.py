@@ -45,7 +45,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
     blocks = fill_configurations(maker, mpps, boiling_model)
 
     for c in blocks:
-        push(maker.root, c, push_func=lambda parent, block: dummy_push(parent, block, start_from='last_beg', validator=class_validator))
+        push(maker.root, c, push_func=lambda parent, block: AxisPusher(start_from='last_beg')(parent, block, validator=class_validator))
 
     mp = maker.root
 

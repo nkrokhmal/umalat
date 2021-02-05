@@ -1,14 +1,17 @@
+from itertools import product
 from utils_ak.interactive_imports import *
+
 from app.schedule_maker.time import *
 from app.schedule_maker.algo.packing import *
-from itertools import product
-
 from app.enum import LineName
+
+from app.schedule_maker.algo.schedule.awaiting_pusher import AwaitingPusher
 
 # todo: optimize
 # class_validator = ClassValidator(window=10, window_by_classes={'boiling': {'boiling': 4, 'cleaning': 1, 'packing_configuration': 2},
 #                                                                'cleaning': {'boiling': 1, 'cleaning': 1},
 #                                                                'packing_configuration': {'boiling': 4}})
+
 
 master_validator = ClassValidator(window=20)
 
@@ -143,9 +146,15 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
             configuration_blocks = make_configuration_blocks(lines_df.at[line_name, 'latest_boiling'], boiling, maker, line_name, between_boilings=True)
             for conf in configuration_blocks:
                 conf.props.update(line_name=line_name)
-                push(schedule['master'], conf, push_func=dummy_push, validator=master_validator, start_from='beg')
+                push(schedule['master'], conf, push_func=AxisPusher(start_from='beg'), validator=master_validator)
 
-        push(schedule['master'], boiling, push_func=dummy_push, iter_props=lines_df.at[line_name, 'iter_props'], validator=master_validator, start_from=start_from, max_tries=100)
+        push(schedule['master'], boiling, push_func=AxisPusher(start_from=start_from), iter_props=lines_df.at[line_name, 'iter_props'], validator=master_validator, max_tries=100)
+
+        # try to push water before - allowing awaiting in line
+        # remove boiling from parent for now
+        if line_name == LineName.WATER and lines_df.at[LineName.WATER, 'latest_boiling']:
+            boiling.disconnect()
+            push(schedule['master'], boiling, push_func=AwaitingPusher(max_awaiting_period=8), validator=master_validator, max_tries=9)
 
         # take rubber packing to extras
         for packing in boiling.iter(cls='packing'):
@@ -165,7 +174,7 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
         if cleaning_boiling and cleaning_boiling == boiling:
             start_from = boiling['pouring']['first']['termizator'].y[0]
             cleaning = make_termizator_cleaning_block('full', x=(boiling['pouring']['first']['termizator'].y[0], 0), text='Полная мойка')
-            push(schedule['master'], cleaning, start_from=start_from, push_func=dummy_push, validator=master_validator)
+            push(schedule['master'], cleaning, push_func=AxisPusher(start_from=start_from), validator=master_validator)
 
         lines_df.at[line_name, 'latest_boiling'] = boiling
         return boiling
@@ -216,7 +225,7 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
         push(schedule['extra_packings'], multihead_cleaning, push_func=add_push)
 
     for packing in schedule['extra'].iter(cls='packing'):
-        push(schedule['extra_packings'], packing, push_func=dummy_push, validator=extra_packings_validator, start_from=int(packing.props['extra_props']['start_from']))
+        push(schedule['extra_packings'], packing, push_func=AxisPusher(start_from=int(packing.props['extra_props']['start_from'])), validator=extra_packings_validator)
 
     # add cleanings if necessary
     boilings = listify(schedule['master']['boiling'])
@@ -253,6 +262,6 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
     last_boiling = list(schedule['master'].iter(cls='boiling'))[-1]
     start_from = last_boiling['pouring']['first']['termizator'].y[0] + 1
     cleaning = make_termizator_cleaning_block('full', text='Полная мойка')  # add five extra minutes
-    push(schedule['master'], cleaning, push_func=dummy_push, start_from=start_from, validator=master_validator)
+    push(schedule['master'], cleaning, push_func=AxisPusher(start_from=start_from),  validator=master_validator)
 
     return schedule

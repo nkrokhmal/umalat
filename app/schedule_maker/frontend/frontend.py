@@ -102,6 +102,9 @@ def make_cheese_makers(master, rng):
                         make('cutting', size=(boiling['pouring']['first']['cutting'].size[0], 1))
                         make('pouring_off', size=(boiling['pouring']['second']['pouring_off'].size[0], 1))
                         make('extra', size=(boiling['pouring']['second']['extra'].size[0], 1))
+        # add two lines for "Расход пара"
+        make('stub', size=(0, 2))
+
     return maker.root
 
 
@@ -115,8 +118,9 @@ def make_cleanings(master):
         b = maker.copy(cleaning, with_props=True)
         b.props.update(size=(b.props['size'][0], 2))
         make(b, push_func=add_push)
+    # add two lines for "Расход пара"
+    make('stub', size=(0, 2))
     return maker.root
-
 
 
 def make_multihead_cleanings(master):
@@ -205,6 +209,8 @@ def make_meltings_1(master, line_name, title, coolings_mode='all'):
                 if n_cooling_lines == 100:
                     raise AssertionError('Создано слишком много линий охлаждения.')
 
+    # add two lines for "Расход пара"
+    make('stub', size=(0, 2))
     return maker.root
 
 
@@ -247,7 +253,12 @@ def make_meltings_2(master, line_name, title):
     maker, make = init_block_maker('melting', axis=1)
 
     n_lines = 5
-    melting_lines = [make(f'salt_melting_{i}', size=(0, 3), is_parent_node=True).block for i in range(n_lines)]
+
+    melting_lines = []
+    for i in range(n_lines):
+        melting_lines.append(make(f'salt_melting_{i}', size=(0, 3), is_parent_node=True).block)
+        # add line for "Расход пара"
+        make('stub', size=(0, 1))
 
     make('template', index_width=0, x=(1, melting_lines[0].x[1]), size=(3, 6), start_time='00:00', text=title, push_func=add_push)
 
@@ -307,7 +318,7 @@ def make_extra_packings(extra_packings):
     return maker.root
 
 
-def make_frontend(schedule):
+def make_frontend(schedule, coolings_mode='first'):
     master = schedule['master']
     extra_packings = schedule['extra_packings']
 
@@ -337,7 +348,7 @@ def make_frontend(schedule):
 
     with make('melting', start_time=start_time, axis=1):
         make(make_multihead_cleanings(master))
-        make(make_meltings_1(master, LineName.WATER, 'Линия плавления моцареллы в воде №1', coolings_mode='first'))
+        make(make_meltings_1(master, LineName.WATER, 'Линия плавления моцареллы в воде №1', coolings_mode=coolings_mode))
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         make(make_shifts(0, [{'size': (cast_t('19:05') - cast_t('07:00'), 1), 'text': 'бригадир упаковки + 5 рабочих'}]))
         make(make_packings(master, LineName.WATER))

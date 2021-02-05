@@ -14,7 +14,6 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
             with make('second'):
                 make('pouring_off', size=(boiling_model.boiling_technology.pouring_off_time // 5, 0))
                 make('extra', size=(boiling_model.boiling_technology.extra_time // 5, 0))
-
         make('drenator',
              x=(maker.root['boiling']['pouring']['first'].y[0], 0),
              size=(boiling_model.line.chedderization_time // 5, 0),
