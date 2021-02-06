@@ -201,6 +201,7 @@ class BoilingTechnology(db.Model):
     soldification_time = db.Column(db.Integer)
     cutting_time = db.Column(db.Integer)
     pouring_off_time = db.Column(db.Integer)
+    pumping_out_time = db.Column(db.Integer)
     extra_time = db.Column(db.Integer)
 
     boilings = db.relationship('Boiling', backref=backref('boiling_technology', uselist=False))

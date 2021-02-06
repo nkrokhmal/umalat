@@ -30,7 +30,7 @@ def fill_boiling_technologies():
     df = read_params()
     boiling_technologies_columns = [
         'Время налива', 'Время отвердевания', 'Время нарезки',
-        'Время слива', 'Дополнительное время', 'Линия', 'Процент',
+        'Время слива', 'Дополнительное время', 'Линия', 'Процент', 'Откачка',
         'Наличие лактозы', 'Тип закваски']
     bt_data = df[boiling_technologies_columns]
     bt_data['Наличие лактозы'] = bt_data['Наличие лактозы'].apply(lambda x: True if x == 'Да' else False)
@@ -45,7 +45,8 @@ def fill_boiling_technologies():
             soldification_time=bt['Время отвердевания'],
             cutting_time=bt['Время нарезки'],
             pouring_off_time=bt['Время слива'],
-            extra_time=bt['Дополнительное время']
+            pumping_out_time=bt['Откачка'],
+            extra_time=bt['Дополнительное время'],
         )
 
         db.session.add(technology)
