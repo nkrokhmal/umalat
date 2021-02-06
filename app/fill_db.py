@@ -16,6 +16,7 @@ def fill_db():
     fill_sku()
     fill_termizator()
     fill_form_factors_made_from()
+    fill_steam_consumption()
 
 
 def fill_simple_data():
@@ -245,3 +246,66 @@ def fill_form_factors_made_from():
     for moz in moz_ffs:
         moz_ff.add_made_from(moz)
     db.session.commit()
+
+
+def fill_steam_consumption():
+    lines = db.session.query(Line).all()
+    water_params = {
+        'boiling': {
+            'pouring': {
+                'time': 25,
+                'steam_consumption': 1100,
+                'start_from_beginning': True,
+            }
+        },
+        'melting': {
+            'beg': {
+                'time': 25,
+                'steam_consumption': 300,
+                'start_from_beginning': False,
+            },
+            'melting': {
+                'time': 0,
+                'steam_consumption': 250,
+                'start_from_beginning': True,
+            }
+        }
+    }
+    salt_params = {
+        'boiling': {
+            'pouring': {
+                'time': 25,
+                'steam_consumption': 1100,
+                'start_from_beginning': True,
+            },
+            'cutting': {
+                'time': 15,
+                'steam_consumption': 700,
+                'start_from_beginning': False,
+            }
+        },
+        'melting': {
+            'beg': {
+                'time': 25,
+                'steam_consumption': 2000,
+                'start_from_beginning': False,
+            },
+            'melting': {
+                'time': 0,
+                'steam_consumption': 1200,
+                'start_from_beginning': True,
+            }
+        }
+    }
+    for line in lines:
+        if line.name == LineName.SALT:
+            steam_consumption = SteamConsumption(
+                params=json.dumps(salt_params),
+            )
+        else:
+            steam_consumption = SteamConsumption(
+                params=json.dumps(water_params),
+            )
+        steam_consumption.line = line
+        db.session.add(steam_consumption)
+        db.session.commit()

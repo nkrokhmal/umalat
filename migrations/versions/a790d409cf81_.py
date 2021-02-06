@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: c5edce0c782b
+Revision ID: a790d409cf81
 Revises: 
-Create Date: 2021-02-06 21:41:15.462428
+Create Date: 2021-02-06 22:00:29.315924
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c5edce0c782b'
+revision = 'a790d409cf81'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -97,6 +97,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('steam_consumption',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('params', sa.String(), nullable=True),
+    sa.Column('line_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('FormFactorMadeFromMadeTo',
     sa.Column('ParentChildId', sa.Integer(), nullable=False),
     sa.Column('ParentId', sa.Integer(), nullable=True),
@@ -149,6 +156,7 @@ def downgrade():
     op.drop_table('sku_boiling')
     op.drop_table('skus')
     op.drop_table('FormFactorMadeFromMadeTo')
+    op.drop_table('steam_consumption')
     op.drop_table('form_factors')
     op.drop_table('boilings')
     op.drop_table('lines')

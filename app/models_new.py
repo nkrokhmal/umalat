@@ -98,6 +98,7 @@ class Line(db.Model):
     skus = db.relationship('SKU', backref=backref('line', uselist=False, lazy='subquery'))
     form_factors = db.relationship('FormFactor', backref=backref('line', uselist=False, lazy='subquery'))
     boilings = db.relationship('Boiling', backref=backref('line', uselist=False))
+    steam_consumption = db.relationship('SteamConsumption', backref=backref('line', uselist=False, lazy='subquery'))
 
     def serialize(self):
         return {
@@ -317,3 +318,9 @@ class FormFactor(db.Model):
     def full_name(self):
         return '{}, {}'.format('Форм фактор', self.name)
 
+
+class SteamConsumption(db.Model):
+    __tablename__ = 'steam_consumption'
+    id = db.Column(db.Integer, primary_key=True)
+    params = db.Column(db.String)
+    line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
