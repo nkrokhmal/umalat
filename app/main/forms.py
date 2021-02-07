@@ -42,6 +42,7 @@ class ScheduleForm(FlaskForm):
     date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
     salt_beg_time = TimeField('Начало первой подачи на линии "Пицца Чиз"', validators=[Optional()], default=datetime.time(7, 0))
     water_beg_time = TimeField('Начало первой подачи на линии "Моцарелла в воде"', validators=[Optional()], default=datetime.time(8, 0))
+    add_full_boiling = BooleanField('Вставить полную мойку внутри дня по правилу 12 часов', validators=[Optional()])
     submit = SubmitField(label='Отправить')
 
 
