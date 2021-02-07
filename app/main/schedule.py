@@ -18,6 +18,8 @@ def schedule():
     form = ScheduleForm()
     if request.method == 'POST' and form.validate_on_submit():
         date = form.date.data
+        add_full_boiling = form.add_full_boiling.data
+
         file = request.files['input_file']
         file_path = os.path.join(current_app.config['UPLOAD_TMP_FOLDER'], file.filename)
         if file:

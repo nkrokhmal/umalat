@@ -87,8 +87,14 @@ def draw_task_original(excel_client, df, date, cur_row, line_name, task_name):
             value=sku_name
         )
         excel_client.draw_cell(col=COLUMNS['boxes'].col, row=cur_row, value=grp.iloc[0]['sku'].boxes)
-        excel_client.draw_cell(col=COLUMNS['kg'].col, row=cur_row, value=grp['kg'].sum())
-        excel_client.draw_cell(col=COLUMNS['boxes_count'].col, row=cur_row, value=math.ceil(1000 * grp['kg'].sum()/grp.iloc[0]['sku'].boxes/grp.iloc[0]['sku'].weight_netto))
+        if grp.iloc[0]['sku'].group.name != 'Качокавалло':
+            kg = grp['kg'].sum()
+            boxes_count = math.ceil(1000 * grp['kg'].sum()/grp.iloc[0]['sku'].boxes/grp.iloc[0]['sku'].weight_netto)
+        else:
+            kg = ''
+            boxes_count = ''
+        excel_client.draw_cell(col=COLUMNS['kg'].col, row=cur_row, value=kg)
+        excel_client.draw_cell(col=COLUMNS['boxes_count'].col, row=cur_row, value=boxes_count)
         excel_client.draw_cell(col=COLUMNS['priority'].col, row=cur_row, value='')
         cur_row += 1
         index += 1
@@ -112,11 +118,16 @@ def draw_task_new(excel_client, df, date, cur_row, line_name, task_name, batch_n
                 value=row['sku_name']
             )
             excel_client.draw_cell(col=COLUMNS['boxes'].col, row=cur_row, value=row['sku'].boxes)
-            excel_client.draw_cell(col=COLUMNS['kg'].col, row=cur_row, value=row['kg'])
-            excel_client.draw_cell(
-                col=COLUMNS['boxes_count'].col,
-                row=cur_row,
-                value=math.ceil(1000 * row['kg']/row['sku'].boxes/row['sku'].weight_netto))
+
+            if row['sku'].group.name != 'Качокавалло':
+                kg = row['kg']
+                boxes_count = math.ceil(1000 * row['kg']/row['sku'].boxes/row['sku'].weight_netto)
+            else:
+                kg = ''
+                boxes_count = ''
+
+            excel_client.draw_cell(col=COLUMNS['kg'].col, row=cur_row, value=kg)
+            excel_client.draw_cell(col=COLUMNS['boxes_count'].col, row=cur_row, value=boxes_count)
             excel_client.draw_cell(col=COLUMNS['priority'].col, row=cur_row, value='')
             cur_row += 1
 

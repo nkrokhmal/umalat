@@ -43,8 +43,12 @@
 <h1> Произошла ошибка </h1>
 
 <div class="col-md-12 col-sm-12 col-xs-12">
-    <button class="accordion" style="font-size: 18px;">Показать полностью всю ошибку. </button>
-    <div class="panel">
+    <button class="accordion" style="font-size: 18px;">Показать ошибку. </button>
+    <div class="panel" style="white-space: pre-wrap;">
+        {{ error }}
+    </div>
+    <button class="accordion" style="font-size: 18px;">Показать полностью всю ошибку (для разработчиков). </button>
+    <div class="panel" style="white-space: pre-wrap;">
         {{ trace }}
     </div>
 </div>

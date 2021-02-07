@@ -39,4 +39,4 @@ def not_found_error(error):
 def internal_error(error):
     original = getattr(error, "original_exception", None)
     trace = traceback.format_exc()
-    return render_template('500.html', error=original, trace=trace), 500
+    return render_template('500.html', error=error, trace=trace), 500

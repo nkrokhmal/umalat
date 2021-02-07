@@ -21,10 +21,11 @@ COLUMNS = {
     'kg': Cell(column_index_from_string('I'), 'I'),
     'remainings': Cell(column_index_from_string('J'), 'J'),
     'team_number': Cell(column_index_from_string('K'), 'K'),
-    'boiling_configuration': Cell(column_index_from_string('L'), 'L'),
-    'total_boiling_volume': Cell(column_index_from_string('M'), 'M'),
-    'delimiter': Cell(column_index_from_string('N'), 'N'),
-    'delimiter_int': Cell(column_index_from_string('Q'), 'Q')
+    'washing': Cell(column_index_from_string('L'), 'L'),
+    'boiling_configuration': Cell(column_index_from_string('M'), 'M'),
+    'total_boiling_volume': Cell(column_index_from_string('N'), 'N'),
+    'delimiter': Cell(column_index_from_string('O'), 'O'),
+    'delimiter_int': Cell(column_index_from_string('R'), 'R')
 }
 
 

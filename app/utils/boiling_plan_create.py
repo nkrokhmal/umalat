@@ -53,19 +53,20 @@ def handle_water(df, max_weight=1000, min_weight=1000, portion=100, boiling_numb
                        (df['percent'] == order[1]) &
                        (df['ferment'] == order[2]) &
                        (order[3] is None or df['group'] == order[3])]
+        # df_filter = df_filter.sort_values(by='plan', ascending=True)
 
         if not order[0]:
             df_filter_chl = df_filter[
                 (df_filter['group'] == 'Чильеджина') &
                 (~df_filter['is_lactose'])]\
-                    .sort_values(by='weight', ascending=False)
+                    .sort_values(by=['weight', 'plan'], ascending=[False, True])
 
             df_filter_fdl = df_filter[
                 (df_filter['group'] == 'Фиор Ди Латте') &
-                (~df_filter['is_lactose'])].sort_values(by='weight', ascending=False)
+                (~df_filter['is_lactose'])].sort_values(by=['weight', 'plan'], ascending=[False, True])
 
             df_filter_oth = df_filter[
-                df_filter['is_lactose']].sort_values(by='weight', ascending=False)
+                df_filter['is_lactose']].sort_values(by=['weight', 'plan'], ascending=[False, True])
 
             total_sum_without_lactose = df_filter[(~df_filter['is_lactose'])]['plan'].sum()
             total_sum = df_filter['plan'].sum()
@@ -92,7 +93,8 @@ def handle_water(df, max_weight=1000, min_weight=1000, portion=100, boiling_numb
                 boilings_water.add_group(df_filter_dict)
                 boilings_water.add_group(df_filter_dict_lactose)
         else:
-            df_filter_dict = df_filter.sort_values(by=['weight', 'pack_weight'], ascending=[False, False])\
+            df_filter_dict = df_filter.sort_values(by=['weight', 'pack_weight', 'plan'],
+                                                   ascending=[False, False, True])\
                 .to_dict('records')
             boilings_water.add_group(df_filter_dict)
 
@@ -119,7 +121,8 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
                     boilings.add_group(df_grouped_moz, True)
                     new = True
                 else:
-                    df_grouped_dict = df_grouped.sort_values(by=['weight', 'pack_weight'], ascending=[True, False]) \
+                    df_grouped_dict = df_grouped.sort_values(by=['weight', 'pack_weight', 'plan'],
+                                                             ascending=[True, False, True]) \
                         .to_dict('records')
                     boilings.add_group(df_grouped_dict, new)
                     new = False
