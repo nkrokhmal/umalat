@@ -28,8 +28,6 @@ def schedule():
                                     data_only=True)
 
         boiling_plan_df = read_boiling_plan(wb)
-        print(boiling_plan_df.columns)
-        print(boiling_plan_df.head())
         start_times = {LineName.WATER: form.water_beg_time.data, LineName.SALT: form.salt_beg_time.data}
 
         # boilings = make_boilings(boiling_plan_df)
