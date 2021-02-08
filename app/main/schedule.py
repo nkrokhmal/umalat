@@ -33,7 +33,7 @@ def schedule():
         # boilings = make_boilings(boiling_plan_df)
         # schedule = make_schedule(boilings, start_times=start_times)
 
-        schedule = make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=start_times, first_group_id=form.batch_number.data)
+        schedule = make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=start_times, first_group_id=form.batch_number.data, date=date)
 
         try:
             frontend = make_frontend(schedule)

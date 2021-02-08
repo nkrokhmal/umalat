@@ -205,7 +205,6 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
             # lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3, 1]]
             lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v1), 'drenator_num': str(v2)} for v1, v2 in itertools.product([2, 3, 1], [0, 1])]
 
-
         elif are_boilings_left.sum() == 2:
             df = lines_df[~lines_df['latest_boiling'].isnull()]
             if len(df) == 0:
