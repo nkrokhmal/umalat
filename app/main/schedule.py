@@ -35,7 +35,7 @@ def schedule():
         else:
             boilings = make_boilings(boiling_plan_df, first_group_id=form.batch_number.data)
             cleanings = boiling_plan_df.groupby('group_id').agg({'cleaning': 'first'}).to_dict()['cleaning']
-            cleanings = {k: v for k, v in cleanings.items() if v}
+            cleanings = {k + int(form.batch_number.data) - 1: v for k, v in cleanings.items() if v}
             schedule = make_schedule(boilings, cleanings=cleanings, start_times=start_times, date=date)
 
         try:
