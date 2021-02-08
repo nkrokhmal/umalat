@@ -5,7 +5,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 SQLITE_PATH = os.path.join(basedir, 'data.sqlite')
 
-
 class BaseClass:
     PROPAGATE_EXCEPTIONS = False
     SECRET_KEY = 'Umalat'
