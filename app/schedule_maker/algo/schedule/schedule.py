@@ -28,6 +28,9 @@ def validate(b1, b2):
     if b1['pouring'].props['pouring_line'] == b2['pouring'].props['pouring_line']:
         validate_disjoint_by_axis(b1['pouring'], b2['pouring'])
 
+        # five minutes between boilings
+        assert b1['pouring'].y[0] + 1 <= b2['pouring'].x[0]
+
         # check drenator
         if b1.props['drenator_num'] == b2.props['drenator_num']:
             validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['drenator'])
