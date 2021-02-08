@@ -41,7 +41,7 @@ def read_boiling_plan(wb_obj, saturate=True):
         # fill cleaning
         df['cleaning'] = np.where((df['sku'] == '-') & (df['cleaning'].isnull()), '', df['cleaning'])
         df['cleaning'] = df['cleaning'].fillna(method='bfill')
-        df['cleaning'] = df['cleaning'].apply(lambda cleaning_type: {'Короткая мойка': 'short', 'Длинная мойка': 'full', '': ''}[cleaning_type])
+        df['cleaning'] = df['cleaning'].apply(lambda cleaning_type: {'Короткая мойка': 'short', 'Длинная мойка': 'full'}.get(cleaning_type, ''))
 
         # fill configuration
         df['configuration'] = np.where((df['sku'] == '-') & (df['configuration'].isnull()), '8000', df['configuration'])

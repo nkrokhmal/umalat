@@ -33,8 +33,10 @@ def schedule():
         if add_full_boiling:
             schedule = make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=start_times, first_group_id=form.batch_number.data, date=date)
         else:
-            boilings = make_boilings(boiling_plan_df)
-            schedule = make_schedule(boilings, start_times=start_times, date=date)
+            boilings = make_boilings(boiling_plan_df, first_group_id=form.batch_number.data)
+            cleanings = boiling_plan_df.groupby('group_id').agg({'cleaning': 'first'}).to_dict()['cleaning']
+            cleanings = {k: v for k, v in cleanings.items() if v}
+            schedule = make_schedule(boilings, cleanings=cleanings, start_times=start_times, date=date)
 
         try:
             frontend = make_frontend(schedule)
