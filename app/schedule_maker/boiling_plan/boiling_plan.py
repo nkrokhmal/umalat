@@ -28,8 +28,8 @@ def read_boiling_plan(wb_obj, saturate=True):
             values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
         df = pd.DataFrame(values, columns=header)
-        df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варки', 'Вес варки']]
-        df.columns = ['boiling_params', 'boiling_volume', 'sku', 'kg', 'packing_team_id', 'configuration', 'total_volume']
+        df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варки', 'Вес варки', 'Мойка']]
+        df.columns = ['boiling_params', 'boiling_volume', 'sku', 'kg', 'packing_team_id', 'configuration', 'total_volume', 'cleaning']
 
         # fill group id
         df['group_id'] = (df['boiling_params'] == '-').astype(int).cumsum() + 1
@@ -37,6 +37,11 @@ def read_boiling_plan(wb_obj, saturate=True):
         # fill total_volume
         df['total_volume'] = np.where((df['sku'] == '-') & (df['total_volume'].isnull()), default_boiling_volume, df['total_volume'])
         df['total_volume'] = df['total_volume'].fillna(method='bfill')
+
+        # fill cleaning
+        df['cleaning'] = np.where((df['sku'] == '-') & (df['cleaning'].isnull()), '', df['cleaning'])
+        df['cleaning'] = df['cleaning'].fillna(method='bfill')
+        df['cleaning'] = df['cleaning'].apply(lambda cleaning_type: {'Короткая мойка': 'short', 'Длинная мойка': 'full', '': ''}[cleaning_type])
 
         # fill configuration
         df['configuration'] = np.where((df['sku'] == '-') & (df['configuration'].isnull()), '8000', df['configuration'])
@@ -93,7 +98,7 @@ def read_boiling_plan(wb_obj, saturate=True):
                 # all fine
                 pass
 
-    df = df[['group_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff', 'configuration']]
+    df = df[['group_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff', 'configuration', 'cleaning']]
 
     df = df.reset_index(drop=True)
 

@@ -97,10 +97,11 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
 
 
 @clockify()
-def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
+def make_schedule(boilings, date=None, cleanings=None, start_times=None):
     date = date or datetime.now()
     start_times = start_times or {LineName.WATER: '08:00', LineName.SALT: '07:00'}
     start_times = {k: v if v else None for k, v in start_times.items()}
+    cleanings = cleanings or {}  # {boiling_id: cleaning}
 
     maker, make = init_block_maker('schedule', date=date)
 
@@ -185,9 +186,11 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
             push(schedule['master'], maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
             push(schedule['extra'], maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
 
-        if cleaning_boiling and cleaning_boiling == boiling:
+        cleaning_type = cleanings.get(boiling.props['boiling_id'])
+        if cleaning_type:
             start_from = boiling['pouring']['first']['termizator'].y[0]
-            cleaning = make_termizator_cleaning_block('full', x=(boiling['pouring']['first']['termizator'].y[0], 0), text='Полная мойка')
+            text = 'Полная мойка' if cleaning_type == 'full' else 'Короткая мойка'  # todo: refactor
+            cleaning = make_termizator_cleaning_block(cleaning_type, x=(boiling['pouring']['first']['termizator'].y[0], 0), text=text)
             push(schedule['master'], cleaning, push_func=AxisPusher(start_from=start_from), validator=master_validator)
 
         lines_df.at[line_name, 'latest_boiling'] = boiling
