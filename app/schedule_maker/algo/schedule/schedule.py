@@ -47,16 +47,18 @@ def validate(b1, b2):
             # if p1.props['packing_team_id'] != p2.props['packing_team_id']:
             #     continue
             validate_disjoint_by_axis(p1, p2)
+
+        # add 15 minutes for non-lactose for cleaning of melting-space
+        if b2.props['boiling_model'].line.name == LineName.SALT:
+            if b1.props['boiling_model'].is_lactose and not b2.props['boiling_model'].is_lactose:
+                assert b1['melting_and_packing']['melting']['meltings'].y[0] + 2 <= b2['melting_and_packing']['melting']['serving'].x[0]
+
     elif wl1 == wl2:
         # salt and water on the same working line - due to salt switching to the first pouring_line
         validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
         validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
         assert b2['melting_and_packing']['melting']['meltings'].x[0] - b1['melting_and_packing']['melting']['meltings'].y[0] > 6 # todo: optimize - add straight to validate disjoint
 
-    # add 15 minutes for non-lactose for cleaning of melting-space
-    if b2.props['boiling_model'].line.name == LineName.SALT:
-        if b1.props['boiling_model'].is_lactose and not b2.props['boiling_model'].is_lactose:
-            assert b1['melting_and_packing']['melting']['meltings'].y[0] + 3 <= b2['melting_and_packing']['melting']['serving'].x[0]
 
 master_validator.add('boiling', 'boiling', validate)
 
