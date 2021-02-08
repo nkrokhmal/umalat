@@ -100,6 +100,7 @@ def make_cheese_makers(master, rng):
                         make('pouring_and_fermenting', size=(boiling['pouring']['first']['termizator'].size[0] + boiling['pouring']['first']['fermenting'].size[0], 1), push_func=add_push)
                         make('soldification', size=(boiling['pouring']['first']['soldification'].size[0], 1))
                         make('cutting', size=(boiling['pouring']['first']['cutting'].size[0], 1))
+                        make('pumping_out', size=(boiling['pouring']['first']['pumping_out'].size[0], 1))
                         make('pouring_off', size=(boiling['pouring']['second']['pouring_off'].size[0], 1))
                         make('extra', size=(boiling['pouring']['second']['extra'].size[0], 1))
         # add two lines for "Расход пара"

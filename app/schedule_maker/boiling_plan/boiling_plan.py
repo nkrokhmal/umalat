@@ -28,8 +28,8 @@ def read_boiling_plan(wb_obj, saturate=True):
             values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
         df = pd.DataFrame(values, columns=header)
-        df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варки', 'Вес варки']]
-        df.columns = ['boiling_params', 'boiling_volume', 'sku', 'kg', 'packing_team_id', 'configuration', 'total_volume']
+        df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варки', 'Вес варки', 'Мойка']]
+        df.columns = ['boiling_params', 'boiling_volume', 'sku', 'kg', 'packing_team_id', 'configuration', 'total_volume', 'cleaning']
 
         # fill group id
         df['group_id'] = (df['boiling_params'] == '-').astype(int).cumsum() + 1
@@ -37,6 +37,11 @@ def read_boiling_plan(wb_obj, saturate=True):
         # fill total_volume
         df['total_volume'] = np.where((df['sku'] == '-') & (df['total_volume'].isnull()), default_boiling_volume, df['total_volume'])
         df['total_volume'] = df['total_volume'].fillna(method='bfill')
+
+        # fill cleaning
+        df['cleaning'] = np.where((df['sku'] == '-') & (df['cleaning'].isnull()), '', df['cleaning'])
+        df['cleaning'] = df['cleaning'].fillna(method='bfill')
+        df['cleaning'] = df['cleaning'].apply(lambda cleaning_type: {'Короткая мойка': 'short', 'Длинная мойка': 'full'}.get(cleaning_type, ''))
 
         # fill configuration
         df['configuration'] = np.where((df['sku'] == '-') & (df['configuration'].isnull()), '8000', df['configuration'])
@@ -83,9 +88,17 @@ def read_boiling_plan(wb_obj, saturate=True):
 
     # validate kilograms
     for idx, grp in df.groupby('group_id'):
-        assert abs(grp['kg'].sum() - grp.iloc[0]['total_volume']) < 1e-5, "Одна из групп варок имеет неверное количество килограмм."
+        if abs(grp['kg'].sum() - grp.iloc[0]['total_volume']) / grp.iloc[0]['total_volume'] > 0.03:
+            raise AssertionError("Одна из групп варок имеет неверное количество килограмм.")
+        else:
+            if abs(grp['kg'].sum() - grp.iloc[0]['total_volume']) > 1e-5:
+                # todo: warning message
+                df.loc[grp.index, 'kg'] *= grp.iloc[0]['total_volume'] / grp['kg'].sum()  # scale to total_volume
+            else:
+                # all fine
+                pass
 
-    df = df[['group_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff', 'configuration']]
+    df = df[['group_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff', 'configuration', 'cleaning']]
 
     df = df.reset_index(drop=True)
 

@@ -1,4 +1,6 @@
-from itertools import product
+import itertools
+
+
 from utils_ak.interactive_imports import *
 
 from app.schedule_maker.time import *
@@ -26,6 +28,10 @@ def validate(b1, b2):
     if b1['pouring'].props['pouring_line'] == b2['pouring'].props['pouring_line']:
         validate_disjoint_by_axis(b1['pouring'], b2['pouring'])
 
+        # check drenator
+        if b1.props['drenator_num'] == b2.props['drenator_num']:
+            validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['drenator'])
+
     if b1.props['boiling_model'].line.name == b2.props['boiling_model'].line.name:
         # same line
         validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['meltings'])
@@ -34,7 +40,7 @@ def validate(b1, b2):
         if b1.props['boiling_model'].line.name == LineName.WATER and b1.props['boiling_model'] != b2.props['boiling_model']:
             validate_disjoint_by_axis(b1['melting_and_packing']['melting']['meltings'], b2['melting_and_packing']['melting']['serving'])
 
-        for p1, p2 in product(listify(b1['melting_and_packing']['collecting']), listify(b2['melting_and_packing']['collecting'])):
+        for p1, p2 in itertools.product(listify(b1['melting_and_packing']['collecting']), listify(b2['melting_and_packing']['collecting'])):
             # if p1.props['packing_team_id'] != p2.props['packing_team_id']:
             #     continue
             validate_disjoint_by_axis(p1, p2)
@@ -91,10 +97,11 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
 
 
 @clockify()
-def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
+def make_schedule(boilings, date=None, cleanings=None, start_times=None):
     date = date or datetime.now()
     start_times = start_times or {LineName.WATER: '08:00', LineName.SALT: '07:00'}
     start_times = {k: v if v else None for k, v in start_times.items()}
+    cleanings = cleanings or {}  # {boiling_id: cleaning}
 
     maker, make = init_block_maker('schedule', date=date)
 
@@ -105,8 +112,10 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
     schedule = maker.root
 
     lines_df = pd.DataFrame(index=[LineName.WATER, LineName.SALT], columns=['iter_props', 'start_time', 'boilings_left', 'latest_boiling'])
-    lines_df.at[LineName.WATER, 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
-    lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
+    # lines_df.at[LineName.WATER, 'iter_props'] = [{'pouring_line': str(v)} for v in [0, 1]]
+    # lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3]]
+    lines_df.at[LineName.WATER, 'iter_props'] = [{'pouring_line': str(v1), 'drenator_num': str(v2)} for v1, v2 in itertools.product([0, 1], [0, 1])]
+    lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v1), 'drenator_num': str(v2)} for v1, v2 in itertools.product([2, 3], [0, 1])]
 
     for line_name in [LineName.WATER, LineName.SALT]:
         try:
@@ -148,7 +157,13 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
                 conf.props.update(line_name=line_name)
                 push(schedule['master'], conf, push_func=AxisPusher(start_from='beg'), validator=master_validator)
 
-        push(schedule['master'], boiling, push_func=AxisPusher(start_from=start_from), iter_props=lines_df.at[line_name, 'iter_props'], validator=master_validator, max_tries=100)
+        # no two boilings allowed sequentially on the same pouring line
+        iter_props = lines_df.at[line_name, 'iter_props']
+        if lines_df.at[line_name, 'latest_boiling']:
+            current_pouring_line = lines_df.at[line_name, 'latest_boiling'].props['pouring_line']
+            iter_props = [props for props in iter_props if props['pouring_line'] != current_pouring_line]
+
+        push(schedule['master'], boiling, push_func=AxisPusher(start_from=start_from), iter_props=iter_props, validator=master_validator, max_tries=100)
 
         # try to push water before - allowing awaiting in line
         # remove boiling from parent for now
@@ -171,9 +186,11 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
             push(schedule['master'], maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
             push(schedule['extra'], maker.create_block('multihead_cleaning', x=(boiling.y[0], 0), size=(cast_t('03:00'), 0)), push_func=add_push)
 
-        if cleaning_boiling and cleaning_boiling == boiling:
+        cleaning_type = cleanings.get(boiling.props['boiling_id'])
+        if cleaning_type:
             start_from = boiling['pouring']['first']['termizator'].y[0]
-            cleaning = make_termizator_cleaning_block('full', x=(boiling['pouring']['first']['termizator'].y[0], 0), text='Полная мойка')
+            text = 'Полная мойка' if cleaning_type == 'full' else 'Короткая мойка'  # todo: refactor
+            cleaning = make_termizator_cleaning_block(cleaning_type, x=(boiling['pouring']['first']['termizator'].y[0], 0), text=text)
             push(schedule['master'], cleaning, push_func=AxisPusher(start_from=start_from), validator=master_validator)
 
         lines_df.at[line_name, 'latest_boiling'] = boiling
@@ -188,7 +205,8 @@ def make_schedule(boilings, date=None, cleaning_boiling=None, start_times=None):
             line_name = are_boilings_left[are_boilings_left].index[0]
 
             # start working on 3 line for salt
-            lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3, 1]]
+            # lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3, 1]]
+            lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v1), 'drenator_num': str(v2)} for v1, v2 in itertools.product([2, 3, 1], [0, 1])]
 
         elif are_boilings_left.sum() == 2:
             df = lines_df[~lines_df['latest_boiling'].isnull()]
