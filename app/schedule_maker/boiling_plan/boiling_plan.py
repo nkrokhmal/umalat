@@ -83,7 +83,15 @@ def read_boiling_plan(wb_obj, saturate=True):
 
     # validate kilograms
     for idx, grp in df.groupby('group_id'):
-        assert abs(grp['kg'].sum() - grp.iloc[0]['total_volume']) < 1e-5, "Одна из групп варок имеет неверное количество килограмм."
+        if abs(grp['kg'].sum() - grp.iloc[0]['total_volume']) / grp.iloc[0]['total_volume'] > 0.03:
+            raise AssertionError("Одна из групп варок имеет неверное количество килограмм.")
+        else:
+            if abs(grp['kg'].sum() - grp.iloc[0]['total_volume']) > 1e-5:
+                # todo: warning message
+                df.loc[grp.index, 'kg'] *= grp.iloc[0]['total_volume'] / grp['kg'].sum()  # scale to total_volume
+            else:
+                # all fine
+                pass
 
     df = df[['group_id', 'sku', 'kg', 'packing_team_id', 'boiling', 'bff', 'configuration']]
 
