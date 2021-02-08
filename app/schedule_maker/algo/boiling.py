@@ -11,6 +11,7 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
                 make('fermenting', size=(boiling_model.boiling_technology.pouring_time // 5 - boiling_model.line.pouring_time // 5, 0))
                 make('soldification', size=(boiling_model.boiling_technology.soldification_time // 5, 0))
                 make('cutting', size=(boiling_model.boiling_technology.cutting_time // 5, 0))
+                make('pumping_out', size=(boiling_model.boiling_technology.pumping_out_time // 5, 0))
             with make('second'):
                 make('pouring_off', size=(boiling_model.boiling_technology.pouring_off_time // 5, 0))
                 make('extra', size=(boiling_model.boiling_technology.extra_time // 5, 0))
