@@ -3,7 +3,7 @@ from flask_wtf.file import FileRequired, FileField
 from wtforms import StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField, DateTimeField, TimeField
 from wtforms.validators import Required, Optional
 from flask_wtf import FlaskForm
-from ..models_new import Packer, Boiling, Line, PackType, FormFactor, SKU, BoilingTechnology, Group
+from ..models_new import Packer, Boiling, Line, PackType, FormFactor, SKU, BoilingTechnology, Group, BatchNumber
 from .. import db
 import datetime
 
@@ -13,7 +13,10 @@ class SkuPlanForm(FlaskForm):
         FileRequired(message='There was no file!')
     ]
     input_file = FileField('', validators=validators)
-    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
+    date = DateTimeField('Введите дату',
+                         format="%Y-%m-%d",
+                         default=datetime.datetime.today() + datetime.timedelta(days=1),
+                         validators=[Required()])
     submit = SubmitField(label='Отправить')
 
 
@@ -34,16 +37,26 @@ class FileForm(FlaskForm):
 
 
 class ScheduleForm(FlaskForm):
+    # default_date = datetime.datetime.today() + datetime.timedelta(days=1)
+    # default_batch_number = BatchNumber.last_batch_number(
+    #                                 datetime.datetime.today() + datetime.timedelta(days=1)
+    #                             )
     validators = [
         FileRequired(message='Отсутствует файл!')
     ]
     input_file = FileField('', validators=validators)
-    batch_number = IntegerField('Введите номер первой партии в текущем дне', default=1, validators=[Optional()])
-    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
-    salt_beg_time = TimeField('Начало первой подачи на линии "Пицца Чиз"', validators=[Optional()], default=datetime.time(7, 0))
-    water_beg_time = TimeField('Начало первой подачи на линии "Моцарелла в воде"', validators=[Optional()], default=datetime.time(8, 0))
-    add_full_boiling = BooleanField('Вставить полную мойку внутри дня по правилу 12 часов', validators=[Optional()])
+    batch_number = IntegerField('Введите номер первой партии в текущем дне',
+                                validators=[Optional()])
+    date = DateTimeField('Введите дату', format="%Y-%m-%d",
+                         validators=[Required()])
+    salt_beg_time = TimeField('Начало первой подачи на линии "Пицца Чиз"',
+                              validators=[Optional()], default=datetime.time(7, 0))
+    water_beg_time = TimeField('Начало первой подачи на линии "Моцарелла в воде"',
+                               validators=[Optional()], default=datetime.time(8, 0))
+    add_full_boiling = BooleanField('Вставить полную мойку внутри дня по правилу 12 часов',
+                                    validators=[Optional()], default=True)
     submit = SubmitField(label='Отправить')
+
 
 
 class SKUForm(FlaskForm):
