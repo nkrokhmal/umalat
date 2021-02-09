@@ -1,14 +1,10 @@
 from . import db
-import json
 import numpy as np
-import pandas as pd
-
-from sqlalchemy.orm import backref
+import datetime
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base
-
-
 from .enum import LineName
+from  sqlalchemy import func, extract
+
 
 # Base = declarative_base()
 
@@ -324,3 +320,41 @@ class SteamConsumption(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     params = db.Column(db.String)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
+
+
+class BatchNumber(db.Model):
+    __tablename__ = 'batch_number'
+    id = db.Column(db.Integer, primary_key=True)
+    datetime = db.Column(db.Date)
+    beg_number = db.Column(db.Integer)
+    end_number = db.Column(db.Integer)
+
+    @property
+    def date(self):
+        return self.datetime.date()
+
+    @property
+    def year_month(self):
+        return self.datetime.year, self.datetime.month
+
+    @staticmethod
+    def last_batch_number(date):
+        last_batch = db.session.query(BatchNumber)\
+            .filter(func.DATE(BatchNumber.datetime) < date.date())\
+            .filter(extract('month', BatchNumber.datetime) == date.month)\
+            .filter(extract('year', BatchNumber.datetime) == date.year)\
+            .order_by(BatchNumber.datetime.desc())\
+            .first()
+        if last_batch is not None:
+            return last_batch.end_number
+        else:
+            return 0
+
+    @staticmethod
+    def get_batch_by_date(date):
+        return db.session.query(BatchNumber)\
+            .filter(func.DATE(BatchNumber.datetime) == date.date())\
+            .first()
+
+
+

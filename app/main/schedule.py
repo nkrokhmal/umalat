@@ -13,6 +13,21 @@ from app.schedule_maker.frontend import *
 from ..utils.schedule_task import schedule_task, schedule_task_boilings
 
 
+def add_batch(date, beg_number, end_number):
+    batch = BatchNumber.get_batch_by_date(date)
+    if batch is not None:
+        batch.beg_number = beg_number
+        batch.end_number = end_number
+    else:
+        batch = BatchNumber(
+            datetime=date,
+            beg_number=beg_number,
+            end_number=end_number,
+        )
+        db.session.add(batch)
+    db.session.commit()
+
+
 @main.route('/schedule', methods=['GET', 'POST'])
 def schedule():
     form = ScheduleForm()
@@ -28,6 +43,7 @@ def schedule():
                                     data_only=True)
 
         boiling_plan_df = read_boiling_plan(wb)
+        add_batch(date, form.batch_number.data, form.batch_number.data + int(boiling_plan_df['group_id'].max()))
         start_times = {LineName.WATER: form.water_beg_time.data, LineName.SALT: form.salt_beg_time.data}
 
         if add_full_boiling:
@@ -57,5 +73,9 @@ def schedule():
         os.remove(file_path)
         return render_template('schedule.html', form=form, filename=filename_schedule)
 
+    form.date.data = datetime.datetime.today() + datetime.timedelta(days=1)
+    form.batch_number.data = BatchNumber.last_batch_number(
+        datetime.datetime.today() + datetime.timedelta(days=1)
+    ) + 1
     filename_schedule = None
     return render_template('schedule.html', form=form, filename=filename_schedule)
