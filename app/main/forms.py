@@ -13,7 +13,10 @@ class SkuPlanForm(FlaskForm):
         FileRequired(message='There was no file!')
     ]
     input_file = FileField('', validators=validators)
-    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
+    date = DateTimeField('Введите дату',
+                         format="%Y-%m-%d",
+                         default=datetime.datetime.today() + datetime.timedelta(days=1),
+                         validators=[Required()])
     submit = SubmitField(label='Отправить')
 
 
@@ -38,11 +41,18 @@ class ScheduleForm(FlaskForm):
         FileRequired(message='Отсутствует файл!')
     ]
     input_file = FileField('', validators=validators)
-    batch_number = IntegerField('Введите номер первой партии в текущем дне', default=1, validators=[Optional()])
-    date = DateTimeField('Введите дату', format="%Y-%m-%d", default=datetime.datetime.today, validators=[Required()])
-    salt_beg_time = TimeField('Начало первой подачи на линии "Пицца Чиз"', validators=[Optional()], default=datetime.time(7, 0))
-    water_beg_time = TimeField('Начало первой подачи на линии "Моцарелла в воде"', validators=[Optional()], default=datetime.time(8, 0))
-    add_full_boiling = BooleanField('Вставить полную мойку внутри дня по правилу 12 часов', validators=[Optional()])
+    batch_number = IntegerField('Введите номер первой партии в текущем дне',
+                                default=1,
+                                validators=[Optional()])
+    date = DateTimeField('Введите дату', format="%Y-%m-%d",
+                         default=datetime.datetime.today() + datetime.timedelta(days=1),
+                         validators=[Required()])
+    salt_beg_time = TimeField('Начало первой подачи на линии "Пицца Чиз"',
+                              validators=[Optional()], default=datetime.time(7, 0))
+    water_beg_time = TimeField('Начало первой подачи на линии "Моцарелла в воде"',
+                               validators=[Optional()], default=datetime.time(8, 0))
+    add_full_boiling = BooleanField('Вставить полную мойку внутри дня по правилу 12 часов',
+                                    validators=[Optional()], default=True)
     submit = SubmitField(label='Отправить')
 
 
