@@ -21,6 +21,8 @@ master_validator = ClassValidator(window=20)
 def validate(b1, b2):
     validate_disjoint_by_axis(b1['pouring']['first']['termizator'], b2['pouring']['first']['termizator'])
     validate_disjoint_by_axis(b1['pouring']['second']['pouring_off'], b2['pouring']['second']['pouring_off'])
+    validate_disjoint_by_axis(b1['pouring']['first']['pumping_out'], b2['pouring']['second']['pouring_off'])
+    validate_disjoint_by_axis(b1['pouring']['second']['pouring_off'], b2['pouring']['first']['pumping_out'])
 
     wl1 = LineName.WATER if b1['pouring'].props['pouring_line'] in ['0', '1'] else LineName.SALT
     wl2 = LineName.WATER if b2['pouring'].props['pouring_line'] in ['0', '1'] else LineName.SALT
