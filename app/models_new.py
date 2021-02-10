@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 from sqlalchemy.orm import relationship, backref
 from .enum import LineName
-from  sqlalchemy import func, extract
+from sqlalchemy import func, extract
 
 
 # Base = declarative_base()
