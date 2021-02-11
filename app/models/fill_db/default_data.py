@@ -1,4 +1,5 @@
-from . import *
+from app.models import *
+from collections import namedtuple
 
 
 def generate_departments():
@@ -50,3 +51,41 @@ def generate_pack_types():
         )
         db.session.add(pack_type)
     db.session.commit()
+
+
+def generate_mozzarella_lines():
+    mozzarella_department = Department.query.filter_by(name='Моцарельный цех').first()
+    for params in [(LineName.SALT, 180, 850, 1020, 30, 30), (LineName.WATER, 240, 1000, 900, 30, 30)]:
+        line = MozzarellaLine(
+            name=params[0],
+            chedderization_time=params[1],
+            output_ton=params[2],
+            melting_speed=params[3],
+            serving_time=params[4],
+            pouring_time=params[5],
+        )
+        if mozzarella_department is not None:
+            line.department_id = mozzarella_department.id
+        db.session.add(line)
+    db.session.commit()
+
+
+def generate_washer():
+    WasherData = namedtuple('WasherData', 'name, time')
+    for data in [WasherData('Короткая мойка термизатора', 40),
+                 WasherData('Длинная мойка термизатора', 80)]:
+        washer = Washer(
+            name=data.name,
+            time=data.time,
+        )
+        db.session.add(washer)
+    db.session.commit()
+
+
+def generate_all():
+    generate_departments()
+    generate_group()
+    generate_packer()
+    generate_pack_types()
+    generate_mozzarella_lines()
+    generate_washer()

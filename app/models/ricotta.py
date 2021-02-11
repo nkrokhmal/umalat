@@ -42,7 +42,7 @@ class RicottaBoilingTechnology(BoilingTechnology):
     heating_time = db.Column(db.Integer)
     delay_time = db.Column(db.Integer)
     protein_harvest_time = db.Column(db.Integer)
-    pumping_out_time = db.Column(db.Intger)
+    pumping_out_time = db.Column(db.Integer)
 
 
 class RicottaAnalysis(db.Model):
@@ -52,7 +52,7 @@ class RicottaAnalysis(db.Model):
     analysis = db.Column(db.Integer)
     pumping = db.Column(db.Integer)
 
-    boiling_id = db.Column(db.Integer, db.ForeignKey('ricotta_boilings.id', nullable=True))
+    boiling_id = db.Column(db.Integer, db.ForeignKey('ricotta_boilings.id'), nullable=True)
 
 
 
