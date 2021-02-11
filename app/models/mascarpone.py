@@ -1,6 +1,4 @@
-from .. import db
-from sqlalchemy.orm import relationship, backref
-from . import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from . import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology, db
 
 
 class MascarponeSKU(SKU):

@@ -7,7 +7,8 @@ class Department(db.Model):
     __tablename__ = 'departments'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    batches = db.relationship('BatchNumber', backref=backref('department', uselist=False,),)
+
+    batch_numbers = db.relationship('BatchNumber', backref=backref('department', uselist=False,),)
     lines = db.relationship('Line', backref=backref('department', uselist=False,),)
 
     def serialize(self):
@@ -55,7 +56,7 @@ class Line(db.Model):
     form_factors = db.relationship('FormFactor', backref=backref('line', uselist=False, lazy='subquery'))
     boilings = db.relationship('Boiling', backref=backref('line', uselist=False))
     steam_consumption = db.relationship('SteamConsumption', backref=backref('line', uselist=False))
-    washer = db.relationship('Washer', backref('line', uselist=False, lazy='subquery'))
+    washer = db.relationship('Washer', backref=backref('line', uselist=False, lazy='subquery'))
 
     type = db.Column(db.String)
     __mapper_args__ = {
@@ -72,6 +73,7 @@ class Line(db.Model):
 
 class Washer(db.Model):
     __tablename__ = 'washer'
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     time = db.Column(db.Integer)
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
@@ -90,7 +92,7 @@ parent_child = db.Table(
     'FormFactorMadeFromMadeTo',
     db.Column('ParentChildId', db.Integer, primary_key=True),
     db.Column('ParentId', db.Integer, db.ForeignKey('form_factors.id')),
-    db.Column('ChildId', db.Integer, db.ForeignKey('form_factors.id'))
+    db.Column('ChildId', db.Integer, db.ForeignKey('form_factors.id')),
 )
 
 
@@ -168,11 +170,12 @@ class BoilingTechnology(db.Model):
 
 sku_packer = db.Table('sku_packer',
                        db.Column('packer_id', db.Integer, db.ForeignKey('packers.id'), primary_key=True),
-                       db.Column('sku_id', db.Integer, db.ForeignKey('mozzarella_skus.id'), primary_key=True))
+                       db.Column('sku_id', db.Integer, db.ForeignKey('skus.id'), primary_key=True))
 
 
 class Packer(db.Model):
     __tablename__ = 'packers'
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     skus = db.relationship('SKU', secondary=sku_packer, backref=backref('packers', lazy='subquery'))
@@ -227,6 +230,6 @@ class BatchNumber(db.Model):
 
 
 from .mozzarella import *
-from .ricotta import *
-from .mascarpone import *
+# from .ricotta import *
+# from .mascarpone import *
 

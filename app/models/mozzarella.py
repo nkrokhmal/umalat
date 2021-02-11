@@ -1,10 +1,6 @@
-from .. import db
 import numpy as np
-import datetime
-from sqlalchemy.orm import relationship, backref
 from ..enum import LineName
-from sqlalchemy import func, extract
-from .__init__ import SKU, Line, FormFactor, Boiling, BoilingTechnology
+from . import db, SKU, Line, FormFactor, Boiling, BoilingTechnology, backref
 
 
 class MozzarellaSKU(SKU):
@@ -42,8 +38,6 @@ class MozzarellaLine(Line):
     melting_speed = db.Column(db.Integer)
     chedderization_time = db.Column(db.Integer)
 
-    steam_consumption = db.relationship('SteamConsumption', backref=backref('line', uselist=False, lazy='subquery'))
-
     @property
     def name_short(self):
         if self.name == LineName.SALT:
@@ -59,7 +53,7 @@ class MozzarellaFormFactor(FormFactor):
     __mapper_args__ = {'polymorphic_identity': 'mozzarella_form_factor'}
 
     id = db.Column(db.Integer, db.ForeignKey('form_factors.id'), primary_key=True)
-    default_cooling_technology_id = db.Column(db.Integer, db.ForeignKey('cooling_technologies.id'), nullable=True)
+    default_cooling_technology_id = db.Column(db.Integer, db.ForeignKey('mozzarella_cooling_technologies.id'), nullable=True)
 
 
 class MozzarellaBoiling(Boiling):
@@ -121,13 +115,3 @@ class MozzarellaCoolingTechnology(db.Model):
 
     def __repr__(self):
         return 'CoolingTechnology({}, {}, {})'.format(self.first_cooling_time, self.second_cooling_time, self.salting_time)
-
-
-class MozzarellaTermizator(db.Model):
-    __tablename__ = 'termizators'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    short_cleaning_time = db.Column(db.Integer)
-    long_cleaning_time = db.Column(db.Integer)
-
-
