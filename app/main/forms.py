@@ -3,21 +3,24 @@ from flask_wtf.file import FileRequired, FileField
 from wtforms import StringField, SubmitField, BooleanField, SelectField, IntegerField, FloatField, DateTimeField, TimeField
 from wtforms.validators import Required, Optional
 from flask_wtf import FlaskForm
-from ..models_new import Packer, Boiling, Line, PackType, FormFactor, SKU, BoilingTechnology, Group, BatchNumber
+from ..models import Packer, Boiling, Line, PackType, FormFactor, SKU, BoilingTechnology, Group, BatchNumber
 from .. import db
 import datetime
 
 
-class SkuPlanForm(FlaskForm):
+class BoilingPlanFastForm(FlaskForm):
     validators = [
-        FileRequired(message='There was no file!')
+        FileRequired(message='Файл не выбран!')
     ]
-    input_file = FileField('', validators=validators)
+    input_file = FileField(
+        label='Выберите файл',
+        validators=validators,
+
+        )
     date = DateTimeField('Введите дату',
                          format="%Y-%m-%d",
                          default=datetime.datetime.today() + datetime.timedelta(days=1),
                          validators=[Required()])
-    submit = SubmitField(label='Отправить')
 
 
 class BoilingPlanForm(FlaskForm):
@@ -37,10 +40,6 @@ class FileForm(FlaskForm):
 
 
 class ScheduleForm(FlaskForm):
-    # default_date = datetime.datetime.today() + datetime.timedelta(days=1)
-    # default_batch_number = BatchNumber.last_batch_number(
-    #                                 datetime.datetime.today() + datetime.timedelta(days=1)
-    #                             )
     validators = [
         FileRequired(message='Отсутствует файл!')
     ]
@@ -55,8 +54,6 @@ class ScheduleForm(FlaskForm):
                                validators=[Optional()], default=datetime.time(8, 0))
     add_full_boiling = BooleanField('Вставить полную мойку внутри дня по правилу 12 часов',
                                     validators=[Optional()], default=True)
-    submit = SubmitField(label='Отправить')
-
 
 
 class SKUForm(FlaskForm):

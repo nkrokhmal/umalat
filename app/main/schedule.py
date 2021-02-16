@@ -30,8 +30,8 @@ def add_batch(date, beg_number, end_number):
 
 @main.route('/schedule', methods=['GET', 'POST'])
 def schedule():
-    form = ScheduleForm()
-    if request.method == 'POST' and form.validate_on_submit():
+    form = ScheduleForm(request.form)
+    if request.method == 'POST' and 'submit' in request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
 

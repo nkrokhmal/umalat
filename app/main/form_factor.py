@@ -3,7 +3,7 @@ from werkzeug.utils import redirect
 from . import main
 from .. import db
 from .forms import FormFactorForm
-from ..models_new import CoolingTechnology, FormFactor
+from ..models import CoolingTechnology, FormFactor
 from sqlalchemy import or_
 
 

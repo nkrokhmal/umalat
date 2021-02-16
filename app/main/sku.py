@@ -3,7 +3,7 @@ from werkzeug.utils import redirect
 from . import main
 from .. import db
 from .forms import SKUForm
-from ..models_new import SKU
+from ..models import SKU
 from app.utils.features.form_utils import *
 
 

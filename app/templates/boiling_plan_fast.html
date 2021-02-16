@@ -4,21 +4,39 @@
 {% block title %} План по варкам {% endblock %}
 
 {% block page_content %}
-<main>
-    <div class="header-img">
-         <img src= "{{ url_for('static', filename='boiling_plan.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+
+<main class="content">
+    <main>
+        <div class="header-img">
+            <img src= "{{ url_for('static', filename='boiling_plan.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+        </div>
+    </main>
+    <div class="row">
+        <div class="card card-body bg-white border-light shadow-sm mb-4">
+            <h4 class="h5 mb-4">Загрузите файл остатков</h4>
+            <div class="row">
+                <form method="post" action="/boiling_plan_fast" enctype="multipart/form-data" class="mt-4">
+                    {{ form.hidden_tag() }}
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Выберите файл остатков</label>
+                            {{form.input_file(place_holder='InputFile', class='form-control')}}
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите дату</label>
+                            {{form.date(place_holder='Date', class='form-control')}}
+                        </div>
+                    </div>
+                    <button type="submit" name="submit" class="btn btn-block btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
     </div>
-</main>
 
-<div class="page-header">
-    <h1> Загрузите файл плана по sku </h1>
-</div>
-<div class="col-md-6">
-    {{ wtf.quick_form(form) }}
-</div>
-
-{% if filename %}
-    <div class="col-md-6" style="margin-bottom: 20px;">
+    {% if filename %}
         <script>
             function download(url, filename) {
             fetch(url).then(function(t) {
@@ -34,7 +52,6 @@
             var url = "download_boiling_plan/" + "{{filename}}";
             download(url,"{{filename}}");
         </script>
-        <a href="{{url_for('main.schedule')}}"> <h4> Перейти к созданию расписания </h4> </a>
-    </div>
-{% endif %}
+    {% endif %}
+</main>
 {% endblock %}

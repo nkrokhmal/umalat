@@ -3,7 +3,7 @@ from werkzeug.utils import redirect
 from . import main
 from .. import db
 from .forms import BoilingForm
-from ..models_new import Boiling, BoilingTechnology
+from ..models import Boiling, BoilingTechnology
 from app.utils.features.form_utils import *
 
 

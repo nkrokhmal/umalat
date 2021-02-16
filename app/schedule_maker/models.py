@@ -1,4 +1,4 @@
-from app.models_new import *
+from app.models import *
 
 from app.enum import LineName
 
@@ -25,6 +25,7 @@ def get_db(environment=None):
     else:
         raise Exception(f'Enviroment {environment} not supported')
     return db
+
 
 db = None
 def set_global_db(environment=None):

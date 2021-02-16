@@ -4,7 +4,7 @@ from werkzeug.utils import redirect
 from . import main
 from .errors import internal_error
 from .. import db
-from ..models_new import SKU, Boiling, Line, Termizator, Packer, Department
+from ..models import SKU, Boiling, Line, Packer, Department
 import pandas as pd
 from io import BytesIO
 import os
@@ -16,15 +16,15 @@ def index():
     return render_template('index.html')
 
 
-@main.route('/get_general_params')
-def get_general_params():
-    lines = db.session.query(Line).all()
-    packers = db.session.query(Packer).all()
-    termizators = db.session.query(Termizator).all()
-    departments = db.session.query(Department).all()
-    return render_template('get_general_params.html', lines=lines, packers=packers, termizators=termizators,
-                           departments=departments)
-
+# @main.route('/get_general_params')
+# def get_general_params():
+#     lines = db.session.query(Line).all()
+#     packers = db.session.query(Packer).all()
+#     termizators = db.session.query(Termizator).all()
+#     departments = db.session.query(Department).all()
+#     return render_template('get_general_params.html', lines=lines, packers=packers, termizators=termizators,
+#                            departments=departments)
+#
 
 @main.route('/get_packings/<int:boiling_id>', methods=['GET', 'POST'])
 def get_packings(boiling_id):
@@ -48,10 +48,10 @@ def get_packer():
     return jsonify([x.serialize() for x in packers])
 
 
-@main.route('//.', methods=['GET', 'POST'])
-def get_termizator():
-    termizator = db.session.query(Termizator).all()
-    return jsonify([x.serialize() for x in termizator])
+# @main.route('//.', methods=['GET', 'POST'])
+# def get_termizator():
+#     termizator = db.session.query(Termizator).all()
+#     return jsonify([x.serialize() for x in termizator])
 
 
 @main.route('/get_department', methods=['GET', 'POST'])
