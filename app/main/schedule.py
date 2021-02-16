@@ -43,7 +43,7 @@ def schedule():
                                     data_only=True)
 
         boiling_plan_df = read_boiling_plan(wb)
-        add_batch(date, form.batch_number.data, form.batch_number.data + int(boiling_plan_df['group_id'].max()))
+        add_batch(date, form.batch_number.data, form.batch_number.data + int(boiling_plan_df['group_id'].max()) - 1)
         start_times = {LineName.WATER: form.water_beg_time.data, LineName.SALT: form.salt_beg_time.data}
 
         if add_full_boiling:

@@ -138,6 +138,8 @@ def draw_boiling_plan(df, df_extra, wb):
                                        set_border=False, set_colour=False)
             elif v[COLUMNS['name']] == '-':
                 excel_client.draw_cell(row=cur_row, col=COLUMNS['team_number'].col, value='', set_border=False)
+                excel_client.draw_cell(row=cur_row, col=COLUMNS['boiling_configuration'].col,
+                                       value=8000, set_border=False)
             else:
                 excel_client.draw_cell(row=cur_row, col=COLUMNS['team_number'].col, value=1,
                                        set_border=False, set_colour=False)
