@@ -25,7 +25,19 @@ def read_boiling_plan(wb_obj, saturate=True):
         for i in range(2, 200):
             if not ws.cell(i, 2).value:
                 continue
-            values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
+
+            cur_value = []
+
+            for j in range(1, len(header) + 1):
+                if header[j - 1] == 'Конфигурация варки':
+                    value = ws.cell(i, j).value
+                    if not value:
+                        cur_value.append(value)
+                    else:
+                        cur_value.append(str(value))
+                else:
+                    cur_value.append(ws.cell(i, j).value)
+            values.append(cur_value)
 
         df = pd.DataFrame(values, columns=header)
         df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варки', 'Вес варки', 'Мойка']]
