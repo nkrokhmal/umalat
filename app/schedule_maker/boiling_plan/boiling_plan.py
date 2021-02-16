@@ -28,6 +28,7 @@ def read_boiling_plan(wb_obj, saturate=True):
 
             cur_value = []
 
+            # todo: make properly, hardcode
             for j in range(1, len(header) + 1):
                 if header[j - 1] == 'Конфигурация варки':
                     value = ws.cell(i, j).value

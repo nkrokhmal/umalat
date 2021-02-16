@@ -9,7 +9,6 @@ from app.schedule_maker.algo.melting_and_packing.melting_process import make_mel
 
 
 def make_mpp(boiling_df, left_boiling_volume):
-    boiling_df = boiling_df.copy()
     boiling_df['collecting_speed'] = boiling_df['sku'].apply(lambda sku: sku.collecting_speed)
     boiling_df['packing_speed'] = boiling_df['sku'].apply(lambda sku: sku.packing_speed)
     boiling_df['cur_speed'] = 0
@@ -161,6 +160,7 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
     cur_form_factor = form_factors[0]
     cur_boiling_df = grouped_df[grouped_df['bff'] == cur_form_factor]
+
     for i, boiling_volume in enumerate(boiling_volumes):
         mpps = []
 
@@ -179,4 +179,5 @@ def make_boilings_parallel_dynamic(boiling_group_df):
         melting_and_packing = make_melting_and_packing_from_mpps(boiling_model, mpps)
         boiling = make_boiling(boiling_model, group_id + i, boiling_volume, melting_and_packing)
         boilings.append(boiling)
+
     return boilings

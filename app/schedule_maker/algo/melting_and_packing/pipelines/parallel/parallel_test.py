@@ -6,23 +6,26 @@ from app.schedule_maker.models import *
 from app.schedule_maker.algo import *
 from app.schedule_maker.boiling_plan import read_boiling_plan
 
+from utils_ak.interactive_imports import *
 import warnings
 warnings.filterwarnings('ignore')
 
 
 def test1():
-    boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
+    boiling_plan_df = read_boiling_plan(r"C:\Users\Mi\Desktop\master\code\git\2020.10-umalat\umalat\app\data\inputs\2021-02-17 План по варкам.xlsx")
+    boiling_plan_df = boiling_plan_df[boiling_plan_df['boiling'].apply(lambda b: b.line.name == LineName.SALT)]
+
     mark_consecutive_groups(boiling_plan_df, 'boiling', 'boiling_group')
 
     for _, grp in boiling_plan_df.groupby('boiling_group'):
         grp['packing_speed'] = grp['sku'].apply(lambda sku: sku.packing_speed)
-        display(grp)
+        print(grp)
         boilings = make_boilings_parallel_dynamic(grp)
         for boiling in boilings:
             mp = boiling['melting_and_packing']
             mp.props.update(x=(0, 0))
-            display(mp)
-
+            print(mp)
+        break
 
 def test2():
     boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
