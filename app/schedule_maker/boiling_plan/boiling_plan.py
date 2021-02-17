@@ -26,19 +26,7 @@ def read_boiling_plan(wb_obj, saturate=True):
             if not ws.cell(i, 2).value:
                 continue
 
-            cur_value = []
-
-            # todo: make properly, hardcode
-            for j in range(1, len(header) + 1):
-                if header[j - 1] == 'Конфигурация варки':
-                    value = ws.cell(i, j).value
-                    if not value:
-                        cur_value.append(value)
-                    else:
-                        cur_value.append(str(value))
-                else:
-                    cur_value.append(ws.cell(i, j).value)
-            values.append(cur_value)
+            values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
         df = pd.DataFrame(values, columns=header)
         df = df[['Тип варки', 'Объем варки', 'SKU', 'КГ', 'Номер команды', 'Конфигурация варки', 'Вес варки', 'Мойка']]
@@ -57,6 +45,18 @@ def read_boiling_plan(wb_obj, saturate=True):
         df['cleaning'] = df['cleaning'].apply(lambda cleaning_type: {'Короткая мойка': 'short', 'Длинная мойка': 'full'}.get(cleaning_type, ''))
 
         # fill configuration
+        def format_configuration(value):
+            if is_int_like(value):
+                return str(int(value))
+            elif value is None:
+                return None
+            elif np.isnan(value):
+                return None
+            elif isinstance(value, str):
+                return value
+            else:
+                raise AssertionError('Unknown format')
+        df['configuration'] = df['configuration'].apply(format_configuration)
         df['configuration'] = np.where((df['sku'] == '-') & (df['configuration'].isnull()), '8000', df['configuration'])
         df['configuration'] = df['configuration'].fillna(method='bfill')
 
