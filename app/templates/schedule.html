@@ -18,42 +18,49 @@
             <div class="row">
                 <form method="post" action="/schedule" enctype="multipart/form-data" class="mt-4">
                     {{ form.hidden_tag() }}
-                    <div class="col-md-12 mb-3">
-                        <div class="form-group">
-                            <label>Выберите файл плана варки</label>
-                            {{form.input_file(place_holder='InputFile', class='form-control')}}
+                    <div class="row mb-4">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Выберите файл плана варки</label>
+                                {{form.input_file(place_holder='InputFile', class='form-control')}}
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <div class="form-group">
-                            <label>Введите дату</label>
-                            {{form.date(place_holder='Date', class='form-control')}}
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label>Введите дату</label>
+                                    {{form.date(place_holder='Date', class='form-control')}}
+                                </div>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label>Введите время первой подачи на линии "Пицца чиз" </label>
+                                    {{form.salt_beg_time(place_holder='SaltBegTime', class='form-control')}}
+                                </div>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label>Вставить полную мойку внутри дня по правилу 12 часов </label>
+                                    {{form.add_full_boiling(place_holder='AddFullBoiling', checked=True)}}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <div class="form-group">
-                            <label>Введите номер первой партии в текущем дне</label>
-                            {{form.batch_number(place_holder='BatchNumber', class='form-control')}}
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label>Введите номер первой партии в текущем дне</label>
+                                    {{form.batch_number(place_holder='BatchNumber', class='form-control')}}
+                                </div>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label>Введите время первой подачи на линии "Моцарелла в воде" </label>
+                                    {{form.water_beg_time(place_holder='WaterBegTime', class='form-control')}}
+                                </div>
+                            </div>
                         </div>
+                        <button type="submit" name="submit" class="btn btn-block btn-primary">Отправить</button>
                     </div>
-                    <div class="col-md-12 mb-3">
-                        <div class="form-group">
-                            <label>Введите время первой подачи на линии "Пицца чиз" </label>
-                            {{form.salt_beg_time(place_holder='SaltBegTime', class='form-control')}}
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <div class="form-group">
-                            <label>Введите время первой подачи на линии "Моцарелла в воде" </label>
-                            {{form.water_beg_time(place_holder='WaterBegTime', class='form-control')}}
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <div class="form-group">
-                            <label>Вставить полную мойку внутри дня по правилу 12 часов </label> {{form.add_full_boiling()}}
-                        </div>
-                    </div>
-                    <button type="submit" name="submit" class="btn btn-block btn-primary">Отправить</button>
                 </form>
             </div>
         </div>
