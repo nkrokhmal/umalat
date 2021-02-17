@@ -63,48 +63,35 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
         with make('meltings', x=(serving.size[0], 0), push_func=add_push):
             for i, block in enumerate(listify(mp['melting_and_packing_process'])):
 
-                # make('melting_process', size=(block['melting_process'].size[0], 0), bff=block['melting_process'].props['bff'])
                 make(maker.copy(block['melting_process'], with_props=True), bff=block['melting_process'].props['bff'], push_func=add_push)
 
         with make('coolings', x=(serving.size[0], 0), push_func=add_push):
             for i, block in enumerate(listify(mp['melting_and_packing_process'])):
                 make(maker.copy(block['cooling_process'], with_props=True), push_func=add_push)
 
-    for mpp in listify(mp['melting_and_packing_process']):
+    for packing_team_id in range(1, 3): # todo: specify number of teams somewhere
         for key in ['packing', 'collecting']:
-            for block in listify(mpp[key]):
-                new_block = maker.copy(block, with_props=True)
-                # shift for serving time
-                new_block.props.update(x=(new_block.x[0] + boiling_model.line.serving_time // 5, 0))
-                make(new_block, push_func=add_push)
+            blocks = []
 
-    if 'packing_configuration' in [block.props['cls'] for block in mp.children]:  # todo: refactor
-        for block in listify(mp['packing_configuration']):
-            new_block = maker.copy(block, with_props=True)
-            # shift for serving time
-            new_block.props.update(x=(new_block.x[0] + boiling_model.line.serving_time // 5, 0))
-            make(new_block, push_func=add_push)
+            for mpp in listify(mp['melting_and_packing_process']):
+                for block in listify(mpp[key]):
+                    for child_block in block.children:
+                        if child_block.props['packing_team_id'] != packing_team_id:
+                            continue
+                        blocks.append(maker.copy(child_block, with_props=True))
 
-    # for packing_team_id in range(1, 3):
-    #     all_packing_processes = list(listify(mp['melting_and_packing_process'])[0].iter(cls='process', packing_team_id=packing_team_id))
-    #
-    #     if all_packing_processes:
-    #         for group_key in ['packing', 'collecting']:
-    #             with make(group_key, x=(all_packing_processes[0].x[0] + maker.root['melting']['meltings'].x[0], 0),
-    #                       packing_team_id=packing_team_id, push_func=add_push):
-    #                 for block in mp.children:
-    #                     if block.props['cls'] == 'packing_configuration':
-    #                         make('packing_configuration', size=(block.size[0], 0))
-    #                     elif block.props['cls'] == 'melting_and_packing_process':
-    #                         # get our packing
-    #                         packings = list(block.iter(cls=group_key, packing_team_id=packing_team_id))
-    #                         if not packings:
-    #                             continue
-    #                         packing = packings[0]
-    #
-    #                         for b in packing.children:
-    #                             if b.props['cls'] == 'process':
-    #                                 make(b.props['cls'], size=(b.size[0], 0), sku=b.props['sku'])
-    #                             elif b.props['cls'] == 'packing_configuration':
-    #                                 make(b.props['cls'], size=(b.size[0], 0))
+            if 'packing_configuration' in [block.props['cls'] for block in mp.children]:  # todo: refactor
+                for block in [b for b in listify(mp['packing_configuration']) if b.props['packing_team_id'] == packing_team_id]:
+                    blocks.append(maker.copy(block, with_props=True))
+
+            if blocks:
+                shift = blocks[0].x[0]
+                with make(key, x=(boiling_model.line.serving_time // 5 + shift, 0), packing_team_id=packing_team_id, push_func=add_push):
+                    for block in blocks:
+                        # fix start with coolings
+                        block.props.update(x=(block.props['x_rel'][0] - shift, 0))
+                        make(block, push_func=add_push)
+
+
+
     return maker.root
