@@ -94,7 +94,7 @@ def make_mpp(boiling_df, left_boiling_volume):
         if len(df) > 0:
             packing = make('packing', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push).block
 
-            with make('collecting', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push) as collecting:
+            with make('collecting', packing_team_id=packing_team_id, x=(df.iloc[0]['beg_ts'] // 5, 0), push_func=add_push):
                 for i, (_, row) in enumerate(df.iterrows()):
                     if row['collecting_speed'] == row['packing_speed']:
                         # add configuration if needed
@@ -119,8 +119,11 @@ def make_mpp(boiling_df, left_boiling_volume):
 
     make(make_cooling_process(boiling_model.line.name, bff.default_cooling_technology, last_collecting_process_y))
 
-    for packing in maker.root['packing']:
+    # shift packing and collecting for cooling
+    for packing in listify(maker.root['packing']):
         packing.props.update(x=[packing.props['x'][0] + maker.root['cooling_process']['start'].y[0], 0])
+    for collecting in listify(maker.root['collecting']):
+        collecting.props.update(x=[collecting.props['x'][0] + maker.root['cooling_process']['start'].y[0], 0])
 
     maker.root.props.update(kg=boiling_volume)
 

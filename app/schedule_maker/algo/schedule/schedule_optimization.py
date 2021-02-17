@@ -38,8 +38,10 @@ def make_schedule_with_boiling_inside_a_day(boiling_plan_df, start_times=None, f
 
         best = min(res.items(), key=lambda v: v[1]['total_time'])
     else:
-        res.pop(None)
-        best = min(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time'])
+        # todo: make properly
+        raise AssertionError('Для правила 12 часов необходимо вставить две полные варки внутридня. Укажите эти полные варки в ручном режиме в плане варок и не используйте автоматическое вставление полной варки по правилу 12 часов.')
+        # res.pop(None)
+        # best = min(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time'])
 
     logger.info(f'Best cleaning_boiling: {best}')
 
