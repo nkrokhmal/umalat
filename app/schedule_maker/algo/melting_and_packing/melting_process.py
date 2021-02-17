@@ -23,11 +23,13 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
     class_validator = ClassValidator(window=3)
     def validate(b1, b2):
         validate_disjoint_by_axis(b1['melting_process'], b2['melting_process'])
+        validate_disjoint_by_axis(b1['cooling_process']['start'], b2['cooling_process']['start'])
 
         for p1, p2 in product(b1.iter(cls='packing_team'), b2.iter(cls='packing_team')):
             if p1.props['packing_team_id'] != p2.props['packing_team_id']:
                 continue
             validate_disjoint_by_axis(p1, p2)
+
     class_validator.add('melting_and_packing_process', 'melting_and_packing_process', validate)
 
     def validate(b1, b2):
@@ -39,14 +41,18 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
 
         for packing in packings:
             validate_disjoint_by_axis(packing, b2)
-
     class_validator.add('melting_and_packing_process', 'packing_configuration', validate, uni_direction=True)
 
     blocks = fill_configurations(maker, mpps, boiling_model)
 
+    start_from = 0
     for c in blocks:
-        # start_from 0 - since there are not so many different meltings and packings and there might be configuration between them
-        push(maker.root, c, push_func=lambda parent, block: AxisPusher(start_from=0)(parent, block, validator=class_validator))
+        if c.props['cls'] == 'packing_configuration':
+            push(maker.root, c, push_func=lambda parent, block: AxisPusher(start_from='last_end')(parent, block, validator=class_validator))
+        else:
+            push(maker.root, c, push_func=lambda parent, block: AxisPusher(start_from=start_from)(parent, block, validator=class_validator))
+        if c.props['cls'] == 'melting_and_packing_process':
+            start_from = c['melting_process'].y[0]
 
     mp = maker.root
 
