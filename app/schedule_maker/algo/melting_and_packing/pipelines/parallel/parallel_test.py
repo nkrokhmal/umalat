@@ -28,6 +28,7 @@ def test1():
             mp.props.update(x=(0, 0))
             print(mp)
 
+
 def test2():
     boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
 

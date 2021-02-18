@@ -55,7 +55,6 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
             start_from = c['melting_process'].y[0]
 
     mp = maker.root
-    # print(mp)
     melting_processes = [block['melting_process'] for block in listify(mp['melting_and_packing_process'])]
     melting_processes = sorted(melting_processes, key=lambda b: b.x[0])
 
