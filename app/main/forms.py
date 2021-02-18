@@ -62,6 +62,7 @@ class SKUForm(FlaskForm):
     weight_netto = FloatField('Введите вес нетто', validators=[Optional()])
     packing_speed = IntegerField('Введите скорость фасовки', validators=[Optional()])
     shelf_life = IntegerField('Введите время хранения, д', validators=[Optional()])
+    in_box = IntegerField('Введите количество упаковок в коробке, шт', validators=[Optional()])
 
     line = SelectField('Выберите линию', coerce=int, default=-1)
     packer = SelectField('Выберите тип фасовщика', coerce=int, default=-1)

@@ -94,6 +94,7 @@
 
 body {
     margin: 0;
+    margin-top: 40px;
     font-family: var(--bs-font-sans-serif);
     font-size: 1rem;
     font-weight: 400;

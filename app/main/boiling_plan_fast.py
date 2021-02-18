@@ -65,8 +65,7 @@ def group_skus(skus_req, boilings):
 
 
 def convert_sku(sku):
-    return Markup('В базе нет следующих SKU: <br> <br>' +
-                  ' '.join(['<a href="/add_sku?name={0}">{1}</a> <br>'.format(quote(x), x) for x in sku]))
+    return Markup(' '.join(['<a href="/add_sku?name={0}">{1}</a> <br>'.format(quote(x), x) for x in sku]))
 
 
 def parse_sheet(ws, sheet_name, excel_compiler):

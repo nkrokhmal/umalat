@@ -6,12 +6,11 @@
 {% block page_content %}
 
 <main class="content">
-    <main>
+    <div class="row", style="padding:20px">
         <div class="header-img">
-            <img src= "{{ url_for('static', filename='schedule.jpg') }}"
-                 style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+            <img src= "{{ url_for('static', filename='schedule.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
         </div>
-    </main>
+    </div>
     <div class="row">
         <div class="card card-body bg-white border-light shadow-sm mb-4">
             <h4 class="h5 mb-4">Загрузите файл плана по варкам и выберите дату</h4>

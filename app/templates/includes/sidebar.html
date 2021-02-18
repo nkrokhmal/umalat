@@ -9,29 +9,31 @@
             </div>
             <ul class="nav flex-column">
             <li class="nav-item  {% if 'dashboard' in segment %} active {% endif %}">
-                <a href="/" class="nav-link">
-                    <div style="text-align: center">
-                        <img src="/static/icons/data/logo.svg" height="100" width="100" alt="Umalat">
-                    </div>
-                </a>
+                <span>
+                    <span class="sidebar-icon">
+                        <a href="/" class="nav-link" style="text-align: center;">
+                            <img src="/static/icons/data/logo.svg" height=40" alt="Umalat">
+                        </a>
+                    </span>
+                </span>
             <li role="separator" class="dropdown-divider mt-4 mb-3 border-black"></li>
             <li class="nav-item">
                 <span class="nav-link  collapsed  d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#submenu-app">
-                <span>
-                    <span class="sidebar-icon">
-                        <span>
-                            <img src="/static/icons/data/mozzarella.ico" height="20" width="20" alt="Mozzarella">
+                    <span>
+                        <span class="sidebar-icon">
+                            <span>
+                                <img src="/static/icons/data/mozzarella.ico" height="20" width="20" alt="Mozzarella">
+                            </span>
                         </span>
+                        Моцарелла
                     </span>
-                    Моцарелла
-                </span>
-                <span class="link-arrow"><span class="fas fa-chevron-right"></span></span> 
+                    <span class="link-arrow"><span class="fas fa-chevron-right"></span></span>
                 </span>
                 <div class="multi-level collapse " role="list" id="submenu-app" aria-expanded="false">
                     <ul class="flex-column nav">
                         <li class="nav-item "><a class="nav-link" href="{{url_for('main.boiling_plan_fast')}}"><span>План варок</span></a></li>
                         <li class="nav-item "><a class="nav-link" href="{{url_for('main.schedule')}}"><span>Расписание</span></a></li>
-                        <li class="nav-item "><a class="nav-link"><span>Параметры</span></a></li>
+                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.mozzarella_params')}}"><span>Параметры</span></a></li>
                     </ul>
                 </div>
             </li>
