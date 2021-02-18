@@ -23,7 +23,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
     class_validator = ClassValidator(window=3)
     def validate(b1, b2):
         validate_disjoint_by_axis(b1['melting_process'], b2['melting_process'])
-        validate_disjoint_by_axis(b1['cooling_process']['start'], b2['cooling_process']['start'])
+        # validate_disjoint_by_axis(b1['cooling_process']['start'], b2['cooling_process']['start'])
 
         for p1, p2 in product(b1.iter(cls='packing_team'), b2.iter(cls='packing_team')):
             if p1.props['packing_team_id'] != p2.props['packing_team_id']:
@@ -55,7 +55,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
             start_from = c['melting_process'].y[0]
 
     mp = maker.root
-
+    # print(mp)
     melting_processes = [block['melting_process'] for block in listify(mp['melting_and_packing_process'])]
     melting_processes = sorted(melting_processes, key=lambda b: b.x[0])
 
