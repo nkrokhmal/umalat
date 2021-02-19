@@ -41,7 +41,19 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
 
         for packing in packings:
             validate_disjoint_by_axis(packing, b2)
-    class_validator.add('melting_and_packing_process', 'packing_configuration', validate, uni_direction=True)
+    class_validator.add('melting_and_packing_process', 'packing_configuration', validate)
+
+    def validate(b1, b2):
+        b1, b2 = list(sorted([b1, b2], key=lambda b: b.props['cls']))  # melting_and_packing_process, packing_configuration
+
+        packings = list(b1.iter(cls='packing', packing_team_id=b2.props['packing_team_id']))
+        if not packings:
+            return
+
+        for packing in packings:
+            validate_disjoint_by_axis(b2, packing)
+    class_validator.add('packing_configuration', 'melting_and_packing_process', validate)
+
 
     blocks = fill_configurations(maker, mpps, boiling_model)
 
@@ -55,11 +67,15 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
             start_from = c['melting_process'].y[0]
 
     mp = maker.root
-    melting_processes = [block['melting_process'] for block in listify(mp['melting_and_packing_process'])]
-    melting_processes = sorted(melting_processes, key=lambda b: b.x[0])
 
-    for m1, m2 in SimpleIterator(melting_processes).iter_sequences(2):
-        assert m1.y[0] == m2.x[0], 'В одной из варок на линии "пицца-чиз" происходит пересол. Это происходит из-за того, что в одной варке подряд стоят форм-факторы разного времени охлаждения: в порядке от большего к меньшему. Чтобы не было пересола нужно указать порядок от меньшего к большему.'
+    # logger.info('MP', mp=str(mp))
+    # print(mp)
+
+    # todo: create warning
+    # melting_processes = [block['melting_process'] for block in listify(mp['melting_and_packing_process'])]
+    # melting_processes = sorted(melting_processes, key=lambda b: b.x[0])
+    # for m1, m2 in SimpleIterator(melting_processes).iter_sequences(2):
+    #     assert m1.y[0] == m2.x[0], 'В одной из варок на линии "пицца-чиз" происходит пересол. Это происходит из-за того, что в одной варке подряд стоят форм-факторы разного времени охлаждения: в порядке от большего к меньшему. Чтобы не было пересола нужно указать порядок от меньшего к большему.'
 
     maker, make = init_block_maker('melting_and_packing', axis=0, make_with_copy_cut=True)
     with make('melting'):

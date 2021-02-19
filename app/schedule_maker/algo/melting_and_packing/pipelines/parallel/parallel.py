@@ -137,7 +137,6 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
     boiling_model = boiling_group_df.iloc[0]['boiling']
     boiling_volumes = boiling_group_df.iloc[0]['boiling_volumes']
-
     values = []
     for _, grp in boiling_group_df.groupby(['packing_team_id', 'sku_name']):
         value = grp.iloc[0]
