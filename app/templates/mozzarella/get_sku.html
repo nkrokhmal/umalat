@@ -47,10 +47,10 @@
                                 <td class="border-0"><a class="small">{{sku.packers[0].name}}</a></td>
                                 <td class="border-0">
                                     <a href="{{ url_for('main.edit_sku', sku_id = sku.id)}}" class="edit-sku">
-                                        <i class="material-icons" style="color:green" title="Изменить"> &#xe3c9; </i>
+                                        <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>
                                     </a>
                                     <a href="#delete_sku" class="delete-current-sku" data-id={{sku.id}} data-toggle="modal">
-                                        <i class="material-icons" data-toggle="tooltip" style="color:red" title="Delete"> &#xE872; </i>
+                                        <i class="material-icons" data-toggle="tooltip" style="color:red" title="Удалить"> <span class="fas fa-trash"> </i>
                                     </a>
                                     <div id="delete_sku" class="modal fade" >
                                         <div class="modal-dialog">

@@ -24,22 +24,6 @@ class BoilingPlanFastForm(FlaskForm):
                          validators=[Required()])
 
 
-class BoilingPlanForm(FlaskForm):
-    validators = [
-        FileRequired(message='Отсутствует файл!')
-    ]
-    input_file = FileField('', validators=validators)
-    submit = SubmitField(label="Отправить")
-
-
-class FileForm(FlaskForm):
-    validators = [
-        FileRequired(message='Отсутствует файл!')
-    ]
-    input_file = FileField('', validators=validators)
-    submit = SubmitField(label="Отправить")
-
-
 class ScheduleForm(FlaskForm):
     validators = [
         FileRequired(message='Отсутствует файл!')
@@ -104,44 +88,27 @@ class SKUForm(FlaskForm):
 
     @staticmethod
     def validate_sku(self, name):
-        sku = db.session.query(SKU).filter_by(SKU.name == name.data).first()
+        sku = db.session.query(MozzarellaSKU).filter_by(MozzarellaSKU.name == name.data).first()
         if sku is not None:
             raise ValidationError('SKU с таким именем уже существует')
 
 
-class BoilingForm(FlaskForm):
-    percent = FloatField('Введите процент жирности', validators=[Optional()])
-    is_lactose = BooleanField('Укажите наличие лактозы', validators=[Optional()])
-    ferment = SelectField('Выберите тип закваски', coerce=int, default=-1)
+class BoilingTechnologyForm(FlaskForm):
+    name = StringField('Название варки', validators=[Optional()])
     pouring_time = IntegerField('Введите время налива', validators=[Optional()])
     soldification_time = IntegerField('Введите время схватки', validators=[Optional()])
     cutting_time = IntegerField('Введите время резки и обсушки', validators=[Optional()])
     pouring_off_time = IntegerField('Введите время слива', validators=[Optional()])
     extra_time = IntegerField('Введите время на дополнительные затраты', validators=[Optional()])
-
     line = SelectField('Выберите линию', coerce=int, default=-1)
 
     submit = SubmitField(label='Сохранить')
 
     def __init__(self, *args, **kwargs):
-        super(BoilingForm, self).__init__(*args, **kwargs)
-        self.boiling_technologies = db.session.query(BoilingTechnology).all()
-        self.ferment.choices = list(enumerate(['Альче', 'Сакко']))
-        self.ferment.choices.append((-1, ''))
-
-        self.lines = db.session.query(Line).all()
+        super(BoilingTechnologyForm, self).__init__(*args, **kwargs)
+        self.lines = db.session.query(MozzarellaLine).all()
         self.line.choices = list(enumerate(set([x.name for x in self.lines])))
         self.line.choices.append((-1, ''))
-
-    def validate_boiling(self, percent, ferment, is_lactose, line):
-        boiling = db.session.query(Boiling)\
-            .filter_by(Boiling.percent == percent.data)\
-            .filter_by(Boiling.is_lactose == is_lactose.data)\
-            .filter_by(Boiling.ferment == ferment.data)\
-            .filter_by(Boiling.line.name == line.data)\
-            .first()
-        if boiling is not None:
-            raise ValidationError('Варка с такими параметрами уже существует!')
 
 
 class FormFactorForm(FlaskForm):
