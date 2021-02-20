@@ -24,6 +24,7 @@
                 <table class="table table-centered table-nowrap mb-0 rounded">
                     <thead class="thead-light">
                         <tr>
+                            <th class="border-0">#</th>
                             <th class="border-0">Название SKU</th>
                             <th class="border-0">Тип варки</th>
                             <th class="border-0">Группа</th>
@@ -34,8 +35,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for sku in skus %}
+                        {% for sku in pagination.items %}
                             <tr>
+                                <td class="border-0">{{loop.index + (page - 1) * per_page}}</td>
                                 <td class="border-0"><a class="small">{{sku.name}}</a></td>
                                 <td class="border-0"><a class="small">{{sku.made_from_boilings[0].to_str()}}</a></td>
                                 <td class="border-0"><a class="small">{{sku.group.name}}</a></td>
@@ -62,7 +64,7 @@
                                                     </div>
                                                     <div class="modal-footer">
                                                         <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-                                                        <input type="submit" class="btn btn-danger btn-ok" value= Delete>
+                                                        <input type="submit" class="btn btn-danger btn-ok" value= Удалить>
                                                     </div>
                                                 </form>
                                             </div>
@@ -73,6 +75,22 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <div class="card-footer px-3 border-0 d-flex align-items-center justify-content-between">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination mb-0">
+                            {% if pagination.has_prev %}
+                              <li class="page-item"> <a class="page-link" href="{{ url_for('main.get_sku', page=pagination.prev_num) }}">Следующие</a></li>
+                            {% else %}
+                              <li class="page-item"><a class="page-link btn disabled" href="#">Previous</a></li>
+                            {% endif %}
+                            {% if pagination.has_next %}
+                              <li class="page-item"> <a class="page-link" href="{{ url_for('main.get_sku', page=pagination.next_num) }}">Предыдущие</a></li>
+                            {% else %}
+                              <li class="page-item"><a class="page-link btn disabled" href="#">Next</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>

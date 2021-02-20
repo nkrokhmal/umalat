@@ -13,10 +13,10 @@ def fill_sku_from_form(sku, form):
         sku.made_from_boilings += [x for x in form.boilings if x.to_str() == get_choice_data(form.boiling)]
 
     if form.group.data != -1:
-        sku.group = [x for x in form.groups if x.name == get_choice_data(form.group)]
+        sku.group = [x for x in form.groups if x.name == get_choice_data(form.group)][0]
 
     if form.packer.data != -1:
-        sku.packer = [x for x in form.packers if x.name == get_choice_data(form.packer)][0]
+        sku.packers = [x for x in form.packers if x.name == get_choice_data(form.packer)]
 
     if form.pack_type.data != -1:
         sku.pack_type = [x for x in form.pack_types if x.name == get_choice_data(form.pack_type)][0]

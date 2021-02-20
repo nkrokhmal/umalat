@@ -8,12 +8,11 @@
         <div class="py-4">
             <div class="d-flex justify-content-between w-100 flex-wrap">
                 <div class="mb-3 mb-lg-0">
-                    <h1 class="h4">Добавление нового sku в базу данных <br></h1>
-                    <h7>Постарайтесь заполнить максимальное количество параметров, чтобы избежать ошибок при построении расписания</h7>
+                    <h1 class="h4">Изменение параметров sku <br></h1>
                 </div>
             </div>
         </div>
-        <form method="post" action="/mozzarella/add_sku" class="mt-4">
+        <form method="post" action="/mozzarella/edit_sku/{{sku_id}}" class="mt-4">
             {{ form.hidden_tag() }}
             <div class="row mb-4">
                 <div class="col-lg-6 col-sm-6">

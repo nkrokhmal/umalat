@@ -49,3 +49,4 @@ sortedcollections
 loguru
 stackprinter
 mongoengine
+flask_paginate
