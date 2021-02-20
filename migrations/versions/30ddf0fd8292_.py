@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d8ec8ed7d2af
+Revision ID: 30ddf0fd8292
 Revises: 
-Create Date: 2021-02-11 22:00:43.359288
+Create Date: 2021-02-19 11:32:08.894812
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd8ec8ed7d2af'
+revision = '30ddf0fd8292'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -95,6 +95,7 @@ def upgrade():
     sa.Column('heating_time', sa.Integer(), nullable=True),
     sa.Column('delay_time', sa.Integer(), nullable=True),
     sa.Column('protein_harvest_time', sa.Integer(), nullable=True),
+    sa.Column('abandon_time', sa.Integer(), nullable=True),
     sa.Column('pumping_out_time', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -188,7 +189,8 @@ def upgrade():
     )
     op.create_table('ricotta_boilings',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('boiling_type', sa.String(), nullable=True),
+    sa.Column('flavoring_agent', sa.String(), nullable=True),
+    sa.Column('percent', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['boilings.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -229,11 +231,11 @@ def upgrade():
     sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('ricotta_analyses',
+    op.create_table('ricotta_analyses_technology',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('preparation', sa.Integer(), nullable=True),
-    sa.Column('analysis', sa.Integer(), nullable=True),
-    sa.Column('pumping', sa.Integer(), nullable=True),
+    sa.Column('preparation_time', sa.Integer(), nullable=True),
+    sa.Column('analysis_time', sa.Integer(), nullable=True),
+    sa.Column('pumping_time', sa.Integer(), nullable=True),
     sa.Column('boiling_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['boiling_id'], ['ricotta_boilings.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -265,7 +267,7 @@ def downgrade():
     op.drop_table('sku_packer')
     op.drop_table('sku_boiling')
     op.drop_table('ricotta_skus')
-    op.drop_table('ricotta_analyses')
+    op.drop_table('ricotta_analyses_technology')
     op.drop_table('mozzarella_skus')
     op.drop_table('mascarpone_skus')
     op.drop_table('skus')

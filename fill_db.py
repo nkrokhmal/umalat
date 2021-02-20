@@ -25,7 +25,9 @@ if __name__ == '__main__':
     # with app.app_context():
     #     fill_db()
     from app.models.fill_db.default_data import generate_all
-    from app.models.fill_db.fill_mozzarella import fill_db
+    from app.models.fill_db.fill_mozzarella import fill_db as mozzarella_fill_db
+    from app.models.fill_db.fill_ricotta import fill_db as ricotta_fill_db
     with app.app_context():
         generate_all()
-        fill_db()
+        mozzarella_fill_db()
+        ricotta_fill_db()

@@ -67,6 +67,15 @@ def generate_mozzarella_lines():
         if mozzarella_department is not None:
             line.department_id = mozzarella_department.id
         db.session.add(line)
+
+    ricotta_department = Department.query.filter_by(name='Рикоттный цех').first()
+    line = RicottaLine(
+        name='Рикотта',
+        output_ton=1650,
+    )
+    line.department_id = ricotta_department.id
+    db.session.add(line)
+
     db.session.commit()
 
 

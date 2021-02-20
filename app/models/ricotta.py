@@ -29,9 +29,10 @@ class RicottaBoiling(Boiling):
     __mapper_args__ = {'polymorphic_identity': 'ricotta_boiling'}
 
     id = db.Column(db.Integer, db.ForeignKey('boilings.id'), primary_key=True)
-    boiling_type = db.Column(db.String)
+    flavoring_agent = db.Column(db.String)
+    percent = db.Column(db.Integer)
 
-    analysis = db.relationship('RicottaAnalysis', backref=backref('boiling', uselist=False, lazy='subquery'))
+    analysis = db.relationship('RicottaAnalysisTechnology', backref=backref('boiling', uselist=False, lazy='subquery'))
 
 
 class RicottaBoilingTechnology(BoilingTechnology):
@@ -42,15 +43,22 @@ class RicottaBoilingTechnology(BoilingTechnology):
     heating_time = db.Column(db.Integer)
     delay_time = db.Column(db.Integer)
     protein_harvest_time = db.Column(db.Integer)
+    abandon_time = db.Column(db.Integer)
     pumping_out_time = db.Column(db.Integer)
 
+    @staticmethod
+    def create_name(line, percent, flavoring_agent):
+        boiling_name = [percent, flavoring_agent]
+        boiling_name = ', '.join([str(v) for v in boiling_name if v])
+        return 'Линия {}, {}'.format(line, boiling_name)
 
-class RicottaAnalysis(db.Model):
-    __tablename__ = 'ricotta_analyses'
+
+class RicottaAnalysisTechnology(db.Model):
+    __tablename__ = 'ricotta_analyses_technology'
     id = db.Column(db.Integer, primary_key=True)
-    preparation = db.Column(db.Integer)
-    analysis = db.Column(db.Integer)
-    pumping = db.Column(db.Integer)
+    preparation_time = db.Column(db.Integer)
+    analysis_time = db.Column(db.Integer)
+    pumping_time = db.Column(db.Integer)
 
     boiling_id = db.Column(db.Integer, db.ForeignKey('ricotta_boilings.id'), nullable=True)
 

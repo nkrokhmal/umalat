@@ -69,7 +69,7 @@ def fill_cooling_technologies():
 def fill_boilings():
     df = read_params()
     lines = db.session.query(Line).all()
-    bts = db.session.query(BoilingTechnology).all()
+    bts = db.session.query(MozzarellaBoilingTechnology).all()
     columns = ['Тип закваски', 'Процент', 'Наличие лактозы', 'Линия',
                'Время налива', 'Время отвердевания', 'Время нарезки', 'Время слива',
                'Дополнительное время']

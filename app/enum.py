@@ -4,6 +4,7 @@ LineName = dotdict(
     {
         'WATER': 'Моцарелла в воде',
         'SALT': 'Пицца чиз',
+        'RICOTTA': 'Рикотта'
     }
 )
 DepartmentName = dotdict(
