@@ -23,6 +23,10 @@ def generate_group():
             'Масса': 'МАССА',
             'Рикотта': 'РКТ',
             'Маскарпоне': 'МСКП',
+            'Кремчиз': 'КРМ',
+            'Творожный': 'ТВР',
+            'Робиола': 'РБЛ',
+
         }
         for name, short_name in groups.items():
             ff = Group(
@@ -69,12 +73,19 @@ def generate_mozzarella_lines():
         db.session.add(line)
 
     ricotta_department = Department.query.filter_by(name='Рикоттный цех').first()
-    line = RicottaLine(
+    ricotta_line = RicottaLine(
         name='Рикотта',
         output_ton=1650,
     )
-    line.department_id = ricotta_department.id
-    db.session.add(line)
+    ricotta_line.department_id = ricotta_department.id
+    db.session.add(ricotta_line)
+
+    mascarpone_department = Department.query.filter_by(name='Маскарпоновый цех').first()
+    mascarpone_line = MascarponeLine(
+        name='Маскарпоне'
+    )
+    mascarpone_line.department_id = mascarpone_department.id
+    db.session.add(mascarpone_line)
 
     db.session.commit()
 

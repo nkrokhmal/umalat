@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 30ddf0fd8292
+Revision ID: ad2ef520db40
 Revises: 
-Create Date: 2021-02-19 11:32:08.894812
+Create Date: 2021-02-20 13:28:31.134897
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '30ddf0fd8292'
+revision = 'ad2ef520db40'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -61,6 +61,15 @@ def upgrade():
     sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('cream_cheese_boiling_technologies',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('cooling_time', sa.Integer(), nullable=True),
+    sa.Column('separation_time', sa.Integer(), nullable=True),
+    sa.Column('salting_time', sa.Integer(), nullable=True),
+    sa.Column('p_time', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('lines',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
@@ -107,6 +116,12 @@ def upgrade():
     sa.Column('type', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['boiling_technology_id'], ['boiling_technologies.id'], ),
     sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('cream_cheese_lines',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('params', sa.String(), nullable=True),
+    sa.ForeignKeyConstraint(['id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('form_factors',
@@ -161,9 +176,22 @@ def upgrade():
     sa.ForeignKeyConstraint(['ParentId'], ['form_factors.id'], ),
     sa.PrimaryKeyConstraint('ParentChildId')
     )
+    op.create_table('cream_cheese_boilings',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('percent', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id'], ['boilings.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('cream_cheese_form_factors',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['form_factors.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('mascarpone_boilings',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('boiling_type', sa.String(), nullable=True),
+    sa.Column('flavoring_agent', sa.String(), nullable=True),
+    sa.Column('percent', sa.Integer(), nullable=True),
+    sa.Column('weight', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['boilings.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -219,6 +247,11 @@ def upgrade():
     sa.ForeignKeyConstraint(['pack_type_id'], ['pack_types.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('cream_cheese_skus',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('mascarpone_skus',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
@@ -270,6 +303,7 @@ def downgrade():
     op.drop_table('ricotta_analyses_technology')
     op.drop_table('mozzarella_skus')
     op.drop_table('mascarpone_skus')
+    op.drop_table('cream_cheese_skus')
     op.drop_table('skus')
     op.drop_table('ricotta_form_factors')
     op.drop_table('ricotta_boilings')
@@ -277,6 +311,8 @@ def downgrade():
     op.drop_table('mozzarella_boilings')
     op.drop_table('mascarpone_form_factors')
     op.drop_table('mascarpone_boilings')
+    op.drop_table('cream_cheese_form_factors')
+    op.drop_table('cream_cheese_boilings')
     op.drop_table('FormFactorMadeFromMadeTo')
     op.drop_table('washer')
     op.drop_table('steam_consumption')
@@ -284,11 +320,13 @@ def downgrade():
     op.drop_table('mozzarella_lines')
     op.drop_table('mascarpone_lines')
     op.drop_table('form_factors')
+    op.drop_table('cream_cheese_lines')
     op.drop_table('boilings')
     op.drop_table('ricotta_boiling_technologies')
     op.drop_table('mozzarella_boiling_technologies')
     op.drop_table('mascarpone_boiling_technologies')
     op.drop_table('lines')
+    op.drop_table('cream_cheese_boiling_technologies')
     op.drop_table('batch_number')
     op.drop_table('packers')
     op.drop_table('pack_types')

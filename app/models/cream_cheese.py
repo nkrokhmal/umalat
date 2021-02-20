@@ -28,7 +28,7 @@ class CreamCheeseBoiling(Boiling):
     __mapper_args__ = {'polymorphic_identity': 'cream_cheese_boiling'}
 
     id = db.Column(db.Integer, db.ForeignKey('boilings.id'), primary_key=True)
-    boiling_type = db.Column(db.String)
+    percent = db.Column(db.Integer)
 
 
 class CreamCheeseBoilingTechnology(BoilingTechnology):
@@ -37,9 +37,15 @@ class CreamCheeseBoilingTechnology(BoilingTechnology):
 
     id = db.Column(db.Integer, db.ForeignKey('boiling_technologies.id'), primary_key=True)
     cooling_time = db.Column(db.Integer)
-    heating_time = db.Column(db.Integer)
-    adding_lactic_acid_time = db.Column(db.Integer)
     separation_time = db.Column(db.Integer)
+    salting_time = db.Column(db.Integer)
+    p_time = db.Column(db.Integer)
+
+    @staticmethod
+    def create_name(line, percent):
+        boiling_name = [percent]
+        boiling_name = ', '.join([str(v) for v in boiling_name if v])
+        return 'Линия {}, {}'.format(line, boiling_name)
 
 
 

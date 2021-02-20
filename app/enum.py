@@ -4,14 +4,15 @@ LineName = dotdict(
     {
         'WATER': 'Моцарелла в воде',
         'SALT': 'Пицца чиз',
-        'RICOTTA': 'Рикотта'
+        'RICOTTA': 'Рикотта',
+        'MASCARPONE': 'Маскарпоне',
     }
 )
 DepartmentName = dotdict(
     {
         'MOZZ': 'Моцарельный цех',
         'RIC': 'Рикоттный цех',
-        'MASC': 'Маскарпоновый цех'
+        'MASC': 'Маскарпоновый цех',
     }
 )
 

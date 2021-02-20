@@ -28,7 +28,9 @@ class MascarponeBoiling(Boiling):
     __mapper_args__ = {'polymorphic_identity': 'mascarpone_boiling'}
 
     id = db.Column(db.Integer, db.ForeignKey('boilings.id'), primary_key=True)
-    boiling_type = db.Column(db.String)
+    flavoring_agent = db.Column(db.String)
+    percent = db.Column(db.Integer)
+    weight = db.Column(db.Integer)
 
 
 class MascarponeBoilingTechnology(BoilingTechnology):
@@ -40,6 +42,12 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     heating_time = db.Column(db.Integer)
     adding_lactic_acid_time = db.Column(db.Integer)
     separation_time = db.Column(db.Integer)
+
+    @staticmethod
+    def create_name(line, weight, percent, flavoring_agent):
+        boiling_name = ['{} кг'.format(weight), percent, flavoring_agent]
+        boiling_name = ', '.join([str(v) for v in boiling_name if v])
+        return 'Линия {}, {}'.format(line, boiling_name)
 
 
 
