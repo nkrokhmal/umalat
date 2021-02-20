@@ -3,6 +3,7 @@
 
 {% block title %}SKU - Add SKU{% endblock %}
 {% block page_content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <main class="content">
     <div class="py-4">
         <div class="d-flex justify-content-between w-100 flex-wrap">
@@ -96,3 +97,27 @@
     </div>
 </main>
 {% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    $(function () {
+        $(".delete-current-sku").click(function () {
+            var id = $(this).data('id');
+            $(".btn.btn-danger.btn-ok").click(function(){
+                $.ajax(
+                {
+                    url: '/mozzarella/delete_sku/' + id,
+                    type: 'DELETE',
+                    success: function(res)
+                    {
+                        console.log(res)
+                    },
+                    error: function(error) {
+                          console.log(error);
+                    }
+                });
+            });
+        })
+    });
+</script>
+{% endblock javascripts %}

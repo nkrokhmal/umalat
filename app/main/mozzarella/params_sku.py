@@ -3,7 +3,7 @@ from werkzeug.utils import redirect
 from .. import main
 from ... import db
 from .forms import SKUForm
-from ...models import MozzarellaSKU
+from ...models import MozzarellaSKU, SKU
 from app.utils.features.form_utils import *
 
 
@@ -99,12 +99,12 @@ def edit_sku(sku_id):
 
 @main.route('/mozzarella/delete_sku/<int:sku_id>', methods=['DELETE'])
 def delete_sku(sku_id):
-    sku = db.session.query(MozzarellaSKU).get_or_404(sku_id)
+    sku = db.session.query(SKU).get_or_404(sku_id)
     if sku:
-        for boiling in sku.made_from_boilings:
-            sku.made_from_boilings.remove(boiling)
+        # for boiling in sku.made_from_boilings:
+        #     sku.made_from_boilings.remove(boiling)
         db.session.commit()
         db.session.delete(sku)
         db.session.commit()
         flash('SKU успешно удалено')
-    return redirect(url_for('.get_sku'))
+    return redirect(url_for('.get_sku', page=1))
