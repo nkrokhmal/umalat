@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: b2829c28b336
+Revision ID: 0b328c48c0e5
 Revises: 
-Create Date: 2021-02-20 16:39:45.739312
+Create Date: 2021-02-24 11:58:26.291371
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b2829c28b336'
+revision = '0b328c48c0e5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -109,6 +109,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('washer',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('time', sa.Integer(), nullable=True),
+    sa.Column('department_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('boilings',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('line_id', sa.Integer(), nullable=True),
@@ -156,14 +164,6 @@ def upgrade():
     op.create_table('steam_consumption',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('params', sa.String(), nullable=True),
-    sa.Column('line_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('washer',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
-    sa.Column('time', sa.Integer(), nullable=True),
     sa.Column('line_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -314,7 +314,6 @@ def downgrade():
     op.drop_table('cream_cheese_form_factors')
     op.drop_table('cream_cheese_boilings')
     op.drop_table('FormFactorMadeFromMadeTo')
-    op.drop_table('washer')
     op.drop_table('steam_consumption')
     op.drop_table('ricotta_lines')
     op.drop_table('mozzarella_lines')
@@ -322,6 +321,7 @@ def downgrade():
     op.drop_table('form_factors')
     op.drop_table('cream_cheese_lines')
     op.drop_table('boilings')
+    op.drop_table('washer')
     op.drop_table('ricotta_boiling_technologies')
     op.drop_table('mozzarella_boiling_technologies')
     op.drop_table('mascarpone_boiling_technologies')

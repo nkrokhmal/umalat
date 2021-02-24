@@ -93,6 +93,14 @@ class SKUForm(FlaskForm):
             raise ValidationError('SKU с таким именем уже существует')
 
 
+class LineForm(FlaskForm):
+    name = StringField('Введите название линии', validators=[Required()])
+    pouring_time = IntegerField('Введите время налива', validators=[Required()])
+    serving_time = IntegerField('Введите время подачи и вымешивания', validators=[Required()])
+    chedderization_time = IntegerField('Введите время чеддеризации', validators=[Required()])
+    melting_speed = IntegerField('Введите скорость плавления', validators=[Required()])
+
+
 class BoilingTechnologyForm(FlaskForm):
     name = StringField('Название варки', validators=[Optional()])
     pouring_time = IntegerField('Введите время налива', validators=[Optional()])
@@ -112,17 +120,29 @@ class BoilingTechnologyForm(FlaskForm):
 
 
 class FormFactorForm(FlaskForm):
-    relative_weight = StringField('Введите вес форм фактора', validators=[Required()])
-    first_cooling_time = IntegerField('Введите первое время охлаждения', validators=[Optional()])
-    second_cooling_time = IntegerField('Введите второе время охлаждения', validators=[Optional()])
+    name = StringField('Название форм фактора', validators=[Optional()])
+    line = StringField('Название линии', validators=[Optional()])
+    first_cooling_time = IntegerField('Введите время первого охлаждения', validators=[Optional()])
+    second_cooling_time = IntegerField('Введите время второго охлаждения', validators=[Optional()])
     salting_time = IntegerField('Введите время посолки', validators=[Optional()])
 
-    def validate_form_factor(self, percent, ferment, is_lactose, line):
-        boiling = db.session.query(Boiling) \
-            .filter_by(Boiling.percent == percent.data) \
-            .filter_by(Boiling.is_lactose == is_lactose.data) \
-            .filter_by(Boiling.ferment == ferment.data) \
-            .filter_by(Boiling.line.name == line.data) \
-            .first()
-        if boiling is not None:
-            raise ValidationError('Варка с такими параметрами уже существует!')
+
+class WasherForm(FlaskForm):
+    name = StringField('Название', validators=[Optional()])
+    time = IntegerField('Введите время мойки', validators=[Optional()])
+
+# class FormFactorForm(FlaskForm):
+#     relative_weight = StringField('Введите вес форм фактора', validators=[Required()])
+#     first_cooling_time = IntegerField('Введите первое время охлаждения', validators=[Optional()])
+#     second_cooling_time = IntegerField('Введите второе время охлаждения', validators=[Optional()])
+#     salting_time = IntegerField('Введите время посолки', validators=[Optional()])
+#
+#     def validate_form_factor(self, percent, ferment, is_lactose, line):
+#         boiling = db.session.query(Boiling) \
+#             .filter_by(Boiling.percent == percent.data) \
+#             .filter_by(Boiling.is_lactose == is_lactose.data) \
+#             .filter_by(Boiling.ferment == ferment.data) \
+#             .filter_by(Boiling.line.name == line.data) \
+#             .first()
+#         if boiling is not None:
+#             raise ValidationError('Варка с такими параметрами уже существует!')

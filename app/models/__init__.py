@@ -10,6 +10,7 @@ class Department(db.Model):
 
     batch_numbers = db.relationship('BatchNumber', backref=backref('department', uselist=False,),)
     lines = db.relationship('Line', backref=backref('department', uselist=False,),)
+    washer = db.relationship('Washer', backref=backref('department', uselist=False))
 
     def serialize(self):
         return {
@@ -56,7 +57,6 @@ class Line(db.Model):
     form_factors = db.relationship('FormFactor', backref=backref('line', uselist=False, lazy='subquery'))
     boilings = db.relationship('Boiling', backref=backref('line', uselist=False))
     steam_consumption = db.relationship('SteamConsumption', backref=backref('line', uselist=False))
-    washer = db.relationship('Washer', backref=backref('line', uselist=False, lazy='subquery'))
 
     type = db.Column(db.String)
     __mapper_args__ = {
@@ -76,7 +76,7 @@ class Washer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     time = db.Column(db.Integer)
-    line_id = db.Column(db.Integer, db.ForeignKey('lines.id'), nullable=True)
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
 
 
 class Group(db.Model):

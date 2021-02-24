@@ -92,11 +92,13 @@ def generate_mozzarella_lines():
 
 def generate_washer():
     WasherData = namedtuple('WasherData', 'name, time')
+    mozzarella_department = Department.query.filter_by(name='Моцарельный цех').first()
     for data in [WasherData('Короткая мойка термизатора', 40),
                  WasherData('Длинная мойка термизатора', 80)]:
         washer = Washer(
             name=data.name,
             time=data.time,
+            department_id=mozzarella_department.id,
         )
         db.session.add(washer)
     db.session.commit()

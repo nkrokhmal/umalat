@@ -11,7 +11,7 @@ def read_params(fn='app/data/params/mozzarella.xlsx'):
 
 def fill_db():
     fill_boiling_technologies()
-    fill_cooling_technologies()
+    # fill_cooling_technologies()
     fill_boilings()
     fill_form_factors()
     fill_sku()
@@ -51,7 +51,10 @@ def fill_boiling_technologies():
 
 def fill_cooling_technologies():
     df = read_params()
-    data = df[['Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки']]
+    data = df[[
+        'Название форм фактора',
+        'Вес форм фактора',
+        'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки', 'Линия']]
     data = data.drop_duplicates()
     data = data.to_dict('records')
     for value in data:
@@ -135,11 +138,16 @@ def fill_form_factors():
 
         form_factor = MozzarellaFormFactor(name=name, relative_weight=value['Вес форм фактора'])
         form_factor.line = [x for x in lines if x.name == line_name][0]
-        cooling_technologies = db.session.query(MozzarellaCoolingTechnology).all()
+        # cooling_technologies = db.session.query(MozzarellaCoolingTechnology).all()
         if 'Терка' not in name:
-            form_factor.default_cooling_technology = [x for x in cooling_technologies if all([x.first_cooling_time == _cast_non_nan(value['Охлаждение 1(для воды)']),
-                                                                              x.second_cooling_time == _cast_non_nan(value['Охлаждение 2(для воды)']),
-                                                                              x.salting_time == _cast_non_nan(value['Время посолки'])])][0]
+            cooling_technology = MozzarellaCoolingTechnology(
+                first_cooling_time=value['Охлаждение 1(для воды)'],
+                second_cooling_time=value['Охлаждение 2(для воды)'],
+                salting_time=value['Время посолки']
+            )
+            db.session.add(cooling_technology)
+            db.session.commit()
+            form_factor.default_cooling_technology = cooling_technology
 
         db.session.add(form_factor)
     db.session.commit()
