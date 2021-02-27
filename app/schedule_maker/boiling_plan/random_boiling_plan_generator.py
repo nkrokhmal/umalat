@@ -2,6 +2,7 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
 from app.enum import LineName
 
+
 class RandomBoilingPlanGenerator:
     def _gen_random_boiling_plan(self, group_id, line_name):
         boilings = db.session.query(Boiling).all()
@@ -36,13 +37,26 @@ class RandomBoilingPlanGenerator:
                 # rubber
                 bff = cast_form_factor(2)
 
-            configuration = '8000'
+            configuration = "8000"
 
-            values.append([group_id, sku, boiling, kg, packing_team_id, bff, configuration])
+            values.append(
+                [group_id, sku, boiling, kg, packing_team_id, bff, configuration]
+            )
 
             left -= kg
 
-        return pd.DataFrame(values, columns=['group_id', 'sku', 'boiling', 'kg', 'packing_team_id', 'bff', 'configuration'])
+        return pd.DataFrame(
+            values,
+            columns=[
+                "group_id",
+                "sku",
+                "boiling",
+                "kg",
+                "packing_team_id",
+                "bff",
+                "configuration",
+            ],
+        )
 
     def __call__(self, *args, **kwargs):
         dfs = []
@@ -60,14 +74,14 @@ class RandomBoilingPlanGenerator:
 class BoilingPlanDfSerializer:
     def write(self, df, fn):
         df = df.copy()
-        df['sku'] = df['sku'].apply(lambda sku: sku.id)
-        df['boiling'] = df['boiling'].apply(lambda boiling: boiling.id)
-        df['bff'] = df['bff'].apply(lambda bff: bff.id)
+        df["sku"] = df["sku"].apply(lambda sku: sku.id)
+        df["boiling"] = df["boiling"].apply(lambda boiling: boiling.id)
+        df["bff"] = df["bff"].apply(lambda bff: bff.id)
         df.to_csv(fn, index=False)
 
     def read(self, fn):
         df = pd.read_csv(fn)
-        df['sku'] = df['sku'].apply(cast_sku)
-        df['boiling'] = df['boiling'].apply(cast_boiling)
-        df['bff'] = df['bff'].apply(cast_form_factor)
+        df["sku"] = df["sku"].apply(cast_sku)
+        df["boiling"] = df["boiling"].apply(cast_boiling)
+        df["bff"] = df["bff"].apply(cast_form_factor)
         return df

@@ -14,7 +14,7 @@ class dotdict(dict):
         super().__init__()
 
         if dic is not None and not is_dict_instance(dic):
-            raise Exception('Bad dic input')
+            raise Exception("Bad dic input")
 
         self._as_default_dict = as_default_dict
 
@@ -27,7 +27,7 @@ class dotdict(dict):
 
     @property
     def sys_attrs(self):
-        return ['_as_default_dict', '_dic']
+        return ["_as_default_dict", "_dic"]
 
     def __delattr__(self, item):
         return self.__delitem__(item)
@@ -67,7 +67,7 @@ class dotdict(dict):
         if not super().__contains__(first) or not is_dict_instance(self[first]):
             return False
 
-        return '.'.join(split_keys[1:]) in self[first]
+        return ".".join(split_keys[1:]) in self[first]
 
     def _set(self, key, value):
         obj = self
@@ -77,7 +77,7 @@ class dotdict(dict):
         for key in split_keys[:-1]:
             obj = obj.setdefault(key, self._cls())
             if not is_dict_instance(obj):
-                raise Exception('Cannot assign new value, internal obj is not dict')
+                raise Exception("Cannot assign new value, internal obj is not dict")
 
         if len(split_keys) == 1:
             super().__setitem__(split_keys[-1], value)
@@ -91,7 +91,7 @@ class dotdict(dict):
         Delete provided compound key from `dotdict`
         """
         obj = self
-        split_keys = key.split('.')
+        split_keys = key.split(".")
         for key in split_keys:
             if key == split_keys[-1]:
                 del obj[key]
@@ -116,7 +116,7 @@ class dotdict(dict):
                 return obj
 
             if is_dict_instance(obj):
-                return obj.get('.'.join(split_keys[1:]))
+                return obj.get(".".join(split_keys[1:]))
             else:
                 return default
         else:
@@ -134,27 +134,27 @@ class dotdict(dict):
     @staticmethod
     def _split_key(key):
         if hasattr(key, "split"):
-            return key.split('.')
+            return key.split(".")
         return [key]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dd = dotdict({0: 1})
 
     print(dd[0])
 
-    dd = dotdict({'a': {'b': 1, 'c': [1, 2]}}, as_default_dict=False)
+    dd = dotdict({"a": {"b": 1, "c": [1, 2]}}, as_default_dict=False)
     print(dd)
     print(dict(dd))
-    print(dd['a.c'])
-    print(dd.get('a.c.does_not_exist'))
+    print(dd["a.c"])
+    print(dd.get("a.c.does_not_exist"))
 
     try:
-        dd['a.c.does_not_exist']
+        dd["a.c.does_not_exist"]
     except KeyError as e:
-        print('error', e)
+        print("error", e)
 
-    dd['x.y.z'] = 1
+    dd["x.y.z"] = 1
     print(dd)
     print(dd.x.y.z)
 
@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
     print(isinstance(dd, collections.Mapping))
 
-    print(dd.a['c'])
+    print(dd.a["c"])
 
     """
     Output:
@@ -182,7 +182,7 @@ if __name__ == '__main__':
     print(pickle.dumps(dd))
 
     dd = dotdict(as_default_dict=True)
-    dd['d']['e']['f.g'] = 1
+    dd["d"]["e"]["f.g"] = 1
     print(dd)
 
     dd.foo.bar = 2
