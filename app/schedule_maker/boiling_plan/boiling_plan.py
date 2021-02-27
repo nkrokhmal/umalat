@@ -28,6 +28,7 @@ def read_boiling_plan(wb_obj, saturate=True):
         for i in range(2, 200):
             if not ws.cell(i, 2).value:
                 continue
+
             values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
         df = pd.DataFrame(values, columns=header)
@@ -78,6 +79,19 @@ def read_boiling_plan(wb_obj, saturate=True):
         )
 
         # fill configuration
+        def format_configuration(value):
+            if is_int_like(value):
+                return str(int(value))
+            elif value is None:
+                return None
+            elif np.isnan(value):
+                return None
+            elif isinstance(value, str):
+                return value
+            else:
+                raise AssertionError("Unknown format")
+
+        df["configuration"] = df["configuration"].apply(format_configuration)
         df["configuration"] = np.where(
             (df["sku"] == "-") & (df["configuration"].isnull()),
             "8000",

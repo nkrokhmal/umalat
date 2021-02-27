@@ -1,4 +1,4 @@
-from utils.dict import dotdict
+from utils_ak.dict import dotdict
 
 LineName = dotdict({"WATER": "Моцарелла в воде", "SALT": "Пицца чиз"})
 

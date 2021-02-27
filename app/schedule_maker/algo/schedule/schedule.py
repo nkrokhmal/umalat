@@ -82,7 +82,7 @@ def validate(b1, b2):
             validate_disjoint_by_axis(p1, p2)
 
         # add 15 minutes for non-lactose for cleaning of melting-space
-        if b2.props["boiling_model"].line.name == LineName.SALT:
+        if b1.props["boiling_model"].line.name == LineName.SALT:
             if (
                 b1.props["boiling_model"].is_lactose
                 and not b2.props["boiling_model"].is_lactose
@@ -92,6 +92,14 @@ def validate(b1, b2):
                     <= b2["melting_and_packing"]["melting"]["serving"].x[0]
                 )
 
+            if (
+                not b1.props["boiling_model"].is_lactose
+                and b2.props["boiling_model"].is_lactose
+            ):
+                assert (
+                    b1["melting_and_packing"]["melting"]["meltings"].y[0] - 2
+                    <= b2["melting_and_packing"]["melting"]["serving"].x[0]
+                )
     elif wl1 == wl2:
         # salt and water on the same working line - due to salt switching to the first pouring_line
         validate_disjoint_by_axis(
@@ -242,7 +250,7 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         lines_df["boilings_left"].apply(lambda lst: len(lst)).sum() >= 1
     ), "На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания."
 
-    last_multihead_water_boiling = list_get(
+    last_multihead_water_boiling = iter_get(
         [
             boiling
             for boiling in lines_df.at[LineName.WATER, "boilings_left"]

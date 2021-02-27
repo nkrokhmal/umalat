@@ -7,25 +7,31 @@ from app.schedule_maker.models import *
 from app.schedule_maker.algo import *
 from app.schedule_maker.boiling_plan import read_boiling_plan
 
+from utils_ak.interactive_imports import *
 import warnings
 
 warnings.filterwarnings("ignore")
+from utils_ak.loguru import configure_loguru_stdout
 
 
 def test1():
-    boiling_plan_df = read_boiling_plan(
-        os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
-    )
-    mark_consecutive_groups(boiling_plan_df, "boiling", "boiling_group")
+    configure_loguru_stdout("DEBUG")
 
-    for _, grp in boiling_plan_df.groupby("boiling_group"):
+    boiling_plan_df = read_boiling_plan(
+        r"C:\Users\Mi\Desktop\master\code\git\2020.10-umalat\umalat\app\data\inputs\2021-02-19 План по варкам.xlsx"
+    )
+    boiling_plan_df = boiling_plan_df[
+        boiling_plan_df["boiling"].apply(lambda b: b.line.name == LineName.SALT)
+    ]
+
+    for _, grp in boiling_plan_df.groupby("group_id"):
         grp["packing_speed"] = grp["sku"].apply(lambda sku: sku.packing_speed)
-        display(grp)
+        print(grp[["sku_name", "kg"]])
         boilings = make_boilings_parallel_dynamic(grp)
         for boiling in boilings:
+            print(boiling)
             mp = boiling["melting_and_packing"]
             mp.props.update(x=(0, 0))
-            display(mp)
 
 
 def test2():
