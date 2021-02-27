@@ -92,14 +92,14 @@ def validate(b1, b2):
                     <= b2["melting_and_packing"]["melting"]["serving"].x[0]
                 )
 
-            # if (
-            #     not b1.props["boiling_model"].is_lactose
-            #     and b2.props["boiling_model"].is_lactose
-            # ):
-            #     assert (
-            #         b1["melting_and_packing"]["melting"]["meltings"].y[0] - 2
-            #         <= b2["melting_and_packing"]["melting"]["serving"].x[0]
-            #     )
+            if (
+                not b1.props["boiling_model"].is_lactose
+                and b2.props["boiling_model"].is_lactose
+            ):
+                assert (
+                    b1["melting_and_packing"]["melting"]["meltings"].y[0] - 2
+                    <= b2["melting_and_packing"]["melting"]["serving"].x[0]
+                )
     elif wl1 == wl2:
         # salt and water on the same working line - due to salt switching to the first pouring_line
         validate_disjoint_by_axis(
