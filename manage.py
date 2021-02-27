@@ -20,5 +20,6 @@ for name, obj in inspect.getmembers(umalat_models):
     if inspect.isclass(obj):
         admin.add_view(ModelView(obj, db.session))
 
+
 if __name__ == "__main__":
     manager.run()
