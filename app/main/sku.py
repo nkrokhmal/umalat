@@ -7,47 +7,54 @@ from ..models_new import SKU
 from app.utils.features.form_utils import *
 
 
-@main.route('/add_sku', methods=['POST', 'GET'])
+@main.route("/add_sku", methods=["POST", "GET"])
 def add_sku():
     form = SKUForm()
-    name = request.args.get('name')
+    name = request.args.get("name")
     if form.validate_on_submit():
         sku = SKU(
             name=form.name.data,
             brand_name=form.brand_name.data,
             weight_netto=form.weight_netto.data,
             shelf_life=form.shelf_life.data,
-            packing_speed=form.packing_speed.data
+            packing_speed=form.packing_speed.data,
         )
         sku = fill_sku_from_form(sku, form)
         db.session.add(sku)
         try:
             db.session.commit()
-            flash('SKU успешно добавлено')
+            flash("SKU успешно добавлено")
         except Exception as e:
-            flash('Exception occurred in get_sku request. Error: {}.'.format(e), 'error')
+            flash(
+                "Exception occurred in get_sku request. Error: {}.".format(e), "error"
+            )
             db.session.rollback()
-        return redirect(url_for('.get_sku'))
+        return redirect(url_for(".get_sku"))
     if name:
         form.name.data = name
-    return render_template('add_sku.html', form=form)
+    return render_template("add_sku.html", form=form)
 
 
-@main.route('/get_sku', methods=['GET'])
+@main.route("/get_sku", methods=["GET"])
 def get_sku():
     form = SKUForm()
-    page = request.args.get('page', 1, type=int)
-    pagination = db.session.query(SKU) \
-        .order_by(SKU.name) \
-        .paginate(
-        page, per_page=current_app.config['SKU_PER_PAGE'],
-        error_out=False
+    page = request.args.get("page", 1, type=int)
+    pagination = (
+        db.session.query(SKU)
+        .order_by(SKU.name)
+        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     skus = pagination.items
-    return render_template('get_sku.html', form=form, skus=skus, paginations=pagination, endopoints='.get_sku')
+    return render_template(
+        "get_sku.html",
+        form=form,
+        skus=skus,
+        paginations=pagination,
+        endopoints=".get_sku",
+    )
 
 
-@main.route('/edit_sku/<int:sku_id>', methods=['GET', 'POST'])
+@main.route("/edit_sku/<int:sku_id>", methods=["GET", "POST"])
 def edit_sku(sku_id):
     form = SKUForm()
     sku = db.session.query(SKU).get_or_404(sku_id)
@@ -60,8 +67,8 @@ def edit_sku(sku_id):
         sku = fill_sku_from_form(sku, form)
 
         db.session.commit()
-        flash('SKU успешно изменено')
-        return redirect(url_for('.get_sku'))
+        flash("SKU успешно изменено")
+        return redirect(url_for(".get_sku"))
 
     if len(sku.made_from_boilings) > 0:
         default_form_value(form.boiling, sku.made_from_boilings[0].to_str())
@@ -89,10 +96,10 @@ def edit_sku(sku_id):
     form.shelf_life.data = sku.shelf_life
     form.packing_speed.data = sku.packing_speed
 
-    return render_template('edit_sku.html', form=form)
+    return render_template("edit_sku.html", form=form)
 
 
-@main.route('/delete_sku/<int:sku_id>', methods=['DELETE'])
+@main.route("/delete_sku/<int:sku_id>", methods=["DELETE"])
 def delete_sku(sku_id):
     sku = db.session.query(SKU).get_or_404(sku_id)
     if sku:
@@ -101,5 +108,5 @@ def delete_sku(sku_id):
         db.session.commit()
         db.session.delete(sku)
         db.session.commit()
-        flash('SKU успешно удалено')
-    return redirect(url_for('.get_sku'))
+        flash("SKU успешно удалено")
+    return redirect(url_for(".get_sku"))
