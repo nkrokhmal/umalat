@@ -49,3 +49,6 @@ sortedcollections
 loguru
 stackprinter
 mongoengine
+ujson
+better_exceptions
+
