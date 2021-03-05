@@ -177,9 +177,9 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
 
 
 def get_boiling_form_factor(sku):
-    if sku.form_factor.name != "Терка":
+    if "терка" not in sku.form_factor.name.lower():
         return sku.form_factor.weight_with_line
-    elif "хачапури" in sku.name:
-        return "{}: {}".format(sku.line.name_short, 0.37)
+    elif "хачапури" in sku.name.lower():
+        return "{}: {}".format(sku.line.name_short, 370)
     else:
-        return "{}: {}".format(sku.line.name_short, 0.46)
+        return "{}: {}".format(sku.line.name_short, 460)
