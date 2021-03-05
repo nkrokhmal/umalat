@@ -38,6 +38,7 @@ def read_boiling_plan(wb_obj, saturate=True):
                 "Объем варки",
                 "SKU",
                 "КГ",
+                "Форм фактор плавления",
                 "Номер команды",
                 "Конфигурация варки",
                 "Вес варки",
@@ -49,6 +50,7 @@ def read_boiling_plan(wb_obj, saturate=True):
             "boiling_volume",
             "sku",
             "kg",
+            "bff",
             "packing_team_id",
             "configuration",
             "total_volume",
@@ -119,22 +121,22 @@ def read_boiling_plan(wb_obj, saturate=True):
     # set boiling form factors
     df["ff"] = df["sku"].apply(lambda sku: sku.form_factor)
 
+    df["bff"] = df["bff"].apply(cast_form_factor)
+
     # remove Терка from form_factors
-    # todo: take from boiling_plan directly!
-    df["bff"] = df["ff"].apply(lambda ff: ff if "Терка" not in ff.name else None)
+    df["_bff"] = df["ff"].apply(lambda ff: ff if "Терка" not in ff.name else None)
 
     # fill Терка empty form factor values
     for idx, grp in df.copy().groupby("group_id"):
-        if grp["bff"].isnull().all():
-            # todo: hardcode for rubber
-            df.loc[grp.index, "bff"] = cast_form_factor(
-                2
-            )  # Сулугуни "Умалат", 45%, 0,2 кг, т/ф, (9 шт)
+        if grp["_bff"].isnull().all():
+            # take from bff input if not specified
+            df.loc[grp.index, "_bff"] = grp["bff"]
         else:
             filled_grp = grp.copy()
             filled_grp = filled_grp.fillna(method="ffill")
             filled_grp = filled_grp.fillna(method="bfill")
-            df.loc[grp.index, "bff"] = filled_grp["bff"]
+            df.loc[grp.index, "_bff"] = filled_grp["_bff"]
+    df["bff"] = df["_bff"]
 
     # validate single boiling
     for idx, grp in df.groupby("group_id"):

@@ -92,7 +92,28 @@ def cast_group(obj):
 
 
 def cast_form_factor(obj):
-    return cast_model(FormFactor, obj)
+    if isinstance(obj, str):
+        # 'Вода: 200'
+        short_line_name, relative_weight = obj.split(":")
+        relative_weight = relative_weight.strip()
+        short_line_names_map = {"Вода": "Моцарелла в воде", "Соль": "Пицца чиз"}
+
+        form_factors = db.session.query(FormFactor).all()
+        form_factors = [
+            ff
+            for ff in form_factors
+            if str(ff.relative_weight) == relative_weight
+            and ff.line.name == short_line_names_map[short_line_name]
+        ]
+        assert (
+            len(form_factors) <= 1
+        ), f"Найдены сразу несколько форм-факторов для форм-фактора плавления для {short_line_name} {relative_weight}"
+        assert (
+            len(form_factors) != 0
+        ), f"Не найдено ни одного форм-фактора плавления для {short_line_name} {relative_weight}"
+        return form_factors[0]
+    else:
+        return cast_model(FormFactor, obj)
 
 
 def cast_boiling(obj):
