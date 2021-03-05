@@ -121,7 +121,13 @@ def read_boiling_plan(wb_obj, saturate=True):
     # set boiling form factors
     df["ff"] = df["sku"].apply(lambda sku: sku.form_factor)
 
-    df["bff"] = df["bff"].apply(cast_form_factor)
+    # # todo: hardcode, make properly
+    # def _safe_cast_form_factor(obj):
+    #     try:
+    #         return cast_form_factor(obj)
+    #     except:
+    #         return None
+    # df["bff"] = df["bff"].apply(_safe_cast_form_factor)
 
     # remove Терка from form_factors
     df["_bff"] = df["ff"].apply(lambda ff: ff if "Терка" not in ff.name else None)
@@ -130,7 +136,8 @@ def read_boiling_plan(wb_obj, saturate=True):
     for idx, grp in df.copy().groupby("group_id"):
         if grp["_bff"].isnull().all():
             # take from bff input if not specified
-            df.loc[grp.index, "_bff"] = grp["bff"]
+            # todo: hardcode, make properly
+            df.loc[grp.index, "_bff"] = cast_form_factor(8)  # 460
         else:
             filled_grp = grp.copy()
             filled_grp = filled_grp.fillna(method="ffill")
