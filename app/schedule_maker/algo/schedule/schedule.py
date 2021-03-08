@@ -203,6 +203,7 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
     make("master", push_func=add_push)
     make("extra", push_func=add_push)
     make("extra_packings", push_func=add_push)
+    make("steam_consumptions", push_func=add_push)
 
     schedule = maker.root
 
@@ -505,5 +506,44 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         push_func=AxisPusher(start_from=start_from),
         validator=master_validator,
     )
+
+    # add steam consumption
+    for boiling in list(
+        schedule["master"].iter(
+            cls="boiling", boiling_model=lambda bm: bm.line.name == LineName.WATER
+        )
+    ):
+        push(
+            schedule["steam_consumptions"],
+            maker.create_block(
+                "SteamConsumption", x=(boiling.x[0], 0), size=(5, 0), value=1100
+            ),
+        )
+
+    for boiling in list(schedule["master"].iter(cls="boiling")):
+        push(
+            schedule["steam_consumptions"],
+            maker.create_block(
+                "steam_consumption",
+                x=(boiling.x[0], 0),
+                size=(6, 0),
+                value=1100,
+                pouring_line=boiling.props["pouring_line"],
+            ),
+            push_func=add_push,
+        )
+
+        if boiling.props["boiling_model"].line.name == LineName.SALT:
+            push(
+                schedule["steam_consumptions"],
+                maker.create_block(
+                    "steam_consumption",
+                    x=(boiling["pouring"]["second"]["pouring_off"].x[0] - 3, 0),
+                    size=(3, 0),
+                    value=700,
+                    pouring_line=boiling.props["pouring_line"],
+                ),
+                push_func=add_push,
+            )
 
     return schedule

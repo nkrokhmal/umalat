@@ -1,3 +1,8 @@
+import pandas as pd
+
+pd.set_option("mode.chained_assignment", None)
+
+
 from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
 

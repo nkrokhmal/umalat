@@ -85,7 +85,7 @@ def make_header(date, start_time="01:00"):
     return maker.root["header"]
 
 
-def make_cheese_makers(master, rng):
+def make_cheese_makers(schedule, rng):
     maker, make = init_block_maker("cheese_makers", axis=1)
 
     for i in rng:
@@ -100,7 +100,7 @@ def make_cheese_makers(master, rng):
                     push_func=add_push,
                 )
 
-            for boiling in master.iter(cls="boiling", pouring_line=str(i)):
+            for boiling in schedule["master"].iter(cls="boiling", pouring_line=str(i)):
                 boiling_model = boiling.props["boiling_model"]
 
                 standard_boiling_volume = (
@@ -185,9 +185,21 @@ def make_cheese_makers(master, rng):
                             "extra",
                             size=(boiling["pouring"]["second"]["extra"].size[0], 1),
                         )
-        # add two lines for "Расход пара"
-        make("stub", size=(0, 2))
-
+        with make("steam_consumption", is_parent_node=True):
+            for sc in schedule["steam_consumptions"].iter(
+                cls="steam_consumption", pouring_line=str(i)
+            ):
+                for j in range(sc.x[0], sc.y[0]):
+                    make(
+                        x=(j, 0),
+                        size=(1, 1),
+                        text=str(sc.props["value"]),
+                        text_rotation=90,
+                        font_size=9,
+                        push_func=add_push,
+                    )
+        # add one line break
+        make("stub", size=(0, 1))
     return maker.root
 
 
@@ -209,7 +221,6 @@ def make_cleanings(master):
         b = maker.copy(cleaning, with_props=True)
         b.props.update(size=(b.props["size"][0], 2))
         make(b, push_func=add_push)
-    # add two lines for "Расход пара"
     make("stub", size=(0, 2))
     return maker.root
 
@@ -391,8 +402,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                 if n_cooling_lines == 100:
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
-    # add two lines for "Расход пара"
-    make("stub", size=(0, 2))
+    make("stub", size=(0, 1))
     return maker.root
 
 
@@ -649,11 +659,11 @@ def make_frontend(schedule, coolings_mode="first"):
                 ],
             )
         )
-        make(make_cheese_makers(master, range(2)))
+        make(make_cheese_makers(schedule, range(2)))
         # make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
         #                      {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         make(make_cleanings(master))
-        make(make_cheese_makers(master, range(2, 4)))
+        make(make_cheese_makers(schedule, range(2, 4)))
         make(
             make_shifts(
                 0,
