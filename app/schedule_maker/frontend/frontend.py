@@ -751,6 +751,7 @@ def draw_excel_frontend(frontend, open_file=False, fn="schedule.xlsx"):
     if fn:
         sf = SplitFile(fn)
         fn = sf.get_new()
+        makedirs(fn)
         wb.save(fn)
 
         if open_file:
