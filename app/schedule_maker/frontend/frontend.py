@@ -186,7 +186,7 @@ def make_cheese_makers(schedule, rng):
                             size=(boiling["pouring"]["second"]["extra"].size[0], 1),
                         )
         with make("steam_consumption", is_parent_node=True):
-            for sc in schedule["steam_consumptions"].iter(
+            for sc in schedule.iter(
                 cls="steam_consumption", pouring_line=str(i), type="boiling"
             ):
                 for j in range(sc.x[0], sc.y[0]):
@@ -404,7 +404,7 @@ def make_meltings_1(schedule, line_name, title, coolings_mode="all"):
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
     with make("steam_consumption", is_parent_node=True):
-        for sc in schedule["steam_consumptions"].iter(
+        for sc in schedule.iter(
             cls="steam_consumption",
             type="melting",
             line_name=line_name,
@@ -554,6 +554,23 @@ def make_meltings_2(schedule, line_name, title):
             make_melting(boiling, line_name),
             push_func=add_push,
         )
+
+        sc = iter_get(
+            (boiling.iter(cls="steam_consumption", type="melting", line_name=line_name))
+        )
+        for j in range(int(sc.x[0]), int(sc.y[0])):
+            push(
+                melting_lines[i % n_lines],
+                maker.create_block(
+                    "steam_consumption",
+                    x=(j, 3),
+                    size=(1, 1),
+                    text=str(sc.props["value"]),
+                    text_rotation=90,
+                    font_size=9,
+                ),
+                push_func=add_push,
+            )
     return maker.root
 
 

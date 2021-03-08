@@ -510,10 +510,10 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
     # add steam consumption
     for boiling in list(schedule["master"].iter(cls="boiling")):
         push(
-            schedule["steam_consumptions"],
+            boiling,
             maker.create_block(
                 "steam_consumption",
-                x=(boiling.x[0], 0),
+                x=(0, 0),
                 size=(6, 0),
                 value=1100,
                 pouring_line=boiling.props["pouring_line"],
@@ -524,13 +524,19 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
 
         if boiling.props["boiling_model"].line.name == LineName.SALT:
             push(
-                schedule["steam_consumptions"],
+                boiling,
                 maker.create_block(
                     "steam_consumption",
-                    x=(boiling["pouring"]["second"]["pouring_off"].x[0] - 3, 0),
+                    x=(
+                        boiling["pouring"]["second"]["pouring_off"].x[0]
+                        - boiling.x[0]
+                        - 3,
+                        0,
+                    ),
                     size=(3, 0),
                     value=700,
                     pouring_line=boiling.props["pouring_line"],
+                    type="boiling",
                 ),
                 push_func=add_push,
             )
@@ -552,10 +558,10 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
             if not b1:
                 first_value = 300 if line_name == LineName.WATER else 2000
                 push(
-                    schedule["steam_consumptions"],
+                    b2,
                     maker.create_block(
                         "steam_consumption",
-                        x=(b2["melting_and_packing"].x[0] - 5, 0),
+                        x=(b2["melting_and_packing"].x[0] - b2.x[0] - 5, 0),
                         size=(5, 0),
                         value=first_value,
                         type="melting",
@@ -564,21 +570,28 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                     push_func=add_push,
                 )
 
-            # fill in-between
-            if b1 and b2 and line_name == LineName.SALT:
-                pass  # not implemented for make_meltings_1 because of possible impositions
-
-            #
             value = 250 if line_name == LineName.WATER else 1200
 
+            delay = 0
+            if (
+                b1
+                and b2
+                and b1["melting_and_packing"]["melting"]["meltings"].y[0]
+                > b2["melting_and_packing"]["melting"].x[0]
+                and line_name == LineName.SALT
+            ):
+                delay = 4
+
+            # start block
             push(
-                schedule["steam_consumptions"],
+                b2,
                 maker.create_block(
                     "steam_consumption",
-                    x=(b2["melting_and_packing"].x[0], 0),
+                    x=(b2["melting_and_packing"].x[0] + delay - b2.x[0], 0),
                     size=(
                         b2["melting_and_packing"]["melting"]["serving"].size[0]
-                        + b2["melting_and_packing"]["melting"]["meltings"].size[0],
+                        + b2["melting_and_packing"]["melting"]["meltings"].size[0]
+                        - delay,
                         0,
                     ),
                     value=value,
@@ -587,13 +600,5 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                 ),
                 push_func=add_push,
             )
-
-            #
-            # push(
-            #     schedule["steam_consumptions"],
-            #     maker.create_block(
-            #         "steam_consumption", x=(boiling.x[0], 0), size=(5, 0), value=1100
-            #     ),
-            # )
 
     return schedule
