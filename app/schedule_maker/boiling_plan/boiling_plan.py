@@ -120,7 +120,6 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
 
     # set boiling form factors
     df["ff"] = df["sku"].apply(lambda sku: sku.form_factor)
-
     # # todo: hardcode, make properly
     # def _safe_cast_form_factor(obj):
     #     try:
