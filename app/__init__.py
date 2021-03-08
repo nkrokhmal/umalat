@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from config import config
 
+from .init import *
+
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 page_down = PageDown()
