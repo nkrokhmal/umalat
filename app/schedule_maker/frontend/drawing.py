@@ -60,7 +60,9 @@ def draw_schedule(schedule, style, fn=None):
                     text,
                     color,
                     bold=bold,
-                    border={"border_style": "thin", "color": "000000"},
+                    border=b.props.relative_props.get(
+                        "border", {"border_style": "thin", "color": "000000"}
+                    ),
                     text_rotation=b.props.get("text_rotation"),
                     font_size=font_size,
                     alignment="center",

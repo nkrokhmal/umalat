@@ -187,7 +187,7 @@ def make_cheese_makers(schedule, rng):
                         )
         with make("steam_consumption", is_parent_node=True):
             for sc in schedule["steam_consumptions"].iter(
-                cls="steam_consumption", pouring_line=str(i)
+                cls="steam_consumption", pouring_line=str(i), type="boiling"
             ):
                 for j in range(sc.x[0], sc.y[0]):
                     make(
@@ -197,6 +197,7 @@ def make_cheese_makers(schedule, rng):
                         text_rotation=90,
                         font_size=9,
                         push_func=add_push,
+                        # border=None,
                     )
         # add one line break
         make("stub", size=(0, 1))
@@ -236,7 +237,7 @@ def make_multihead_cleanings(master):
     return maker.root
 
 
-def make_meltings_1(master, line_name, title, coolings_mode="all"):
+def make_meltings_1(schedule, line_name, title, coolings_mode="all"):
     maker, make = init_block_maker("melting", axis=1)
 
     with make("header", start_time="00:00", push_func=add_push):
@@ -250,7 +251,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
         )
 
     with make("melting_row", push_func=add_push, is_parent_node=True):
-        for boiling in master.iter(
+        for boiling in schedule["master"].iter(
             cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
         ):
             form_factor_label = calc_form_factor_label(
@@ -340,7 +341,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
     make("cooling_row", axis=1, is_parent_node=True)
     cooling_lines = []
 
-    for boiling in master.iter(
+    for boiling in schedule["master"].iter(
         cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
     ):
         class_validator = ClassValidator(window=10)
@@ -401,6 +402,23 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
 
                 if n_cooling_lines == 100:
                     raise AssertionError("Создано слишком много линий охлаждения.")
+
+    with make("steam_consumption", is_parent_node=True):
+        for sc in schedule["steam_consumptions"].iter(
+            cls="steam_consumption",
+            type="melting",
+            line_name=line_name,
+        ):
+            for j in range(sc.x[0], sc.y[0]):
+                make(
+                    x=(j, 0),
+                    size=(1, 1),
+                    text=str(sc.props["value"]),
+                    text_rotation=90,
+                    font_size=9,
+                    push_func=add_push,
+                    # border=None,
+                )
 
     make("stub", size=(0, 1))
     return maker.root
@@ -502,7 +520,7 @@ def make_melting(boiling, line_name):
     return maker.root
 
 
-def make_meltings_2(master, line_name, title):
+def make_meltings_2(schedule, line_name, title):
     # todo: make dynamic lines
     maker, make = init_block_maker("melting", axis=1)
 
@@ -527,7 +545,9 @@ def make_meltings_2(master, line_name, title):
     )
 
     for i, boiling in enumerate(
-        master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == line_name)
+        schedule["master"].iter(
+            cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
+        )
     ):
         push(
             melting_lines[i % n_lines],
@@ -688,7 +708,7 @@ def make_frontend(schedule, coolings_mode="first"):
         make(make_multihead_cleanings(master))
         make(
             make_meltings_1(
-                master,
+                schedule,
                 LineName.WATER,
                 "Линия плавления моцареллы в воде №1",
                 coolings_mode=coolings_mode,
@@ -728,7 +748,7 @@ def make_frontend(schedule, coolings_mode="first"):
         # make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
         make(
             make_meltings_2(
-                master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"
+                schedule, LineName.SALT, "Линия плавления моцареллы в рассоле №2"
             )
         )
         make(

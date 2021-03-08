@@ -508,18 +508,6 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
     )
 
     # add steam consumption
-    for boiling in list(
-        schedule["master"].iter(
-            cls="boiling", boiling_model=lambda bm: bm.line.name == LineName.WATER
-        )
-    ):
-        push(
-            schedule["steam_consumptions"],
-            maker.create_block(
-                "SteamConsumption", x=(boiling.x[0], 0), size=(5, 0), value=1100
-            ),
-        )
-
     for boiling in list(schedule["master"].iter(cls="boiling")):
         push(
             schedule["steam_consumptions"],
@@ -529,6 +517,7 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                 size=(6, 0),
                 value=1100,
                 pouring_line=boiling.props["pouring_line"],
+                type="boiling",
             ),
             push_func=add_push,
         )
@@ -545,5 +534,66 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                 ),
                 push_func=add_push,
             )
+
+    for line_name in [LineName.WATER, LineName.SALT]:
+        # add steam consumption
+        for b1, b2 in SimpleIterator(
+            list(
+                schedule["master"].iter(
+                    cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
+                )
+            )
+        ).iter_sequences(2, method="any"):
+            # last iteration
+            if not b2:
+                continue
+
+            # first element
+            if not b1:
+                first_value = 300 if line_name == LineName.WATER else 2000
+                push(
+                    schedule["steam_consumptions"],
+                    maker.create_block(
+                        "steam_consumption",
+                        x=(b2["melting_and_packing"].x[0] - 5, 0),
+                        size=(5, 0),
+                        value=first_value,
+                        type="melting",
+                        line_name=line_name,
+                    ),
+                    push_func=add_push,
+                )
+
+            # fill in-between
+            if b1 and b2 and line_name == LineName.SALT:
+                pass  # not implemented for make_meltings_1 because of possible impositions
+
+            #
+            value = 250 if line_name == LineName.WATER else 1200
+
+            push(
+                schedule["steam_consumptions"],
+                maker.create_block(
+                    "steam_consumption",
+                    x=(b2["melting_and_packing"].x[0], 0),
+                    size=(
+                        b2["melting_and_packing"]["melting"]["serving"].size[0]
+                        + b2["melting_and_packing"]["melting"]["meltings"].size[0],
+                        0,
+                    ),
+                    value=value,
+                    type="melting",
+                    line_name=line_name,
+                ),
+                push_func=add_push,
+            )
+
+            #
+            # push(
+            #     schedule["steam_consumptions"],
+            #     maker.create_block(
+            #         "steam_consumption", x=(boiling.x[0], 0), size=(5, 0), value=1100
+            #     ),
+            # )
 
     return schedule
