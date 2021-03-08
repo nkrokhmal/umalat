@@ -8,7 +8,7 @@ from flask_admin.contrib.sqla import ModelView
 os.environ["environment"] = "flask_app"
 
 from app import create_app
-import app.models_new as umalat_models
+import app.models as umalat_models
 
 app, db = create_app()
 manager = Manager(app)

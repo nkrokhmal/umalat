@@ -11,7 +11,7 @@ class BaseClass:
     SECRET_KEY = "Umalat"
     CHEESE_PER_PAGE = 10
     CHEESE_MAKER_PER_PAGE = 10
-    SKU_PER_PAGE = 100
+    SKU_PER_PAGE = 10
 
     UPLOAD_TMP_FOLDER = "app/data/tmp"
     STATS_FOLDER = "app/data/stats"

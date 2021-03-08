@@ -8,7 +8,7 @@ from flask_admin.contrib.sqla import ModelView
 os.environ["environment"] = "flask_app"
 
 from app import create_app
-import app.models_new as umalat_models
+import app.models as umalat_models
 
 app, db = create_app()
 manager = Manager(app)
@@ -21,7 +21,18 @@ for name, obj in inspect.getmembers(umalat_models):
         admin.add_view(ModelView(obj, db.session))
 
 if __name__ == "__main__":
-    from app.fill_db import fill_db
+    # from app.fill_db import fill_db
+    # with app.app_context():
+    #     fill_db()
+    from app.models.fill_db.default_data import generate_all
+    from app.models.fill_db.fill_mozzarella import fill_db as mozzarella_fill_db
+    from app.models.fill_db.fill_ricotta import fill_db as ricotta_fill_db
+    from app.models.fill_db.fill_mascarpone import fill_db as mascarpone_fill_db
+    from app.models.fill_db.fill_cream_cheese import fill_db as cream_cheese_fill_db
 
     with app.app_context():
-        fill_db()
+        generate_all()
+        mozzarella_fill_db()
+        ricotta_fill_db()
+        mascarpone_fill_db()
+        cream_cheese_fill_db()
