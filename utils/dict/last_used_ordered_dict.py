@@ -14,12 +14,12 @@ class LastUsedOrderedDict(OrderedDict):
         return self[key]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     d = LastUsedOrderedDict()
-    d['1'] = 1
-    d['2'] = 2
+    d["1"] = 1
+    d["2"] = 2
     print(d)
-    print(d.pick('1'))
+    print(d.pick("1"))
     print(d)
-    d['2'] = 3
+    d["2"] = 3
     print(d)
