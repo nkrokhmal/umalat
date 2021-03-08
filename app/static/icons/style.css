@@ -1,0 +1,21 @@
+.mozzarella_icon {
+    background: url('static/icons/data/mozzarella.ico');
+    height: 20px;
+    width: 20px;
+    display: block;
+
+}
+.ricotta_icon {
+    background:  url('static/icons/data/ricotta.ico');
+    height: 20px;
+    width: 20px;
+    display: block;
+
+}
+.mascarpone_icon {
+    background: url_for('static/icons/data/mascarpone.ico');
+    height: 20px;
+    width: 20px;
+    display: block;
+
+}

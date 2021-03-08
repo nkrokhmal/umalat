@@ -15,12 +15,12 @@ def fill_sku_from_form(sku, form):
         ]
 
     if form.group.data != -1:
-        sku.group = [x for x in form.groups if x.name == get_choice_data(form.group)]
+        sku.group = [x for x in form.groups if x.name == get_choice_data(form.group)][0]
 
     if form.packer.data != -1:
-        sku.packer = [
+        sku.packers = [
             x for x in form.packers if x.name == get_choice_data(form.packer)
-        ][0]
+        ]
 
     if form.pack_type.data != -1:
         sku.pack_type = [

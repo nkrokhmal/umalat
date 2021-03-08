@@ -1,4 +1,4 @@
-from app.models_new import *
+from app.models import *
 
 from app.enum import LineName
 

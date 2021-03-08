@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Линии - Изменить линию{% endblock %}
+{% block page_content %}
+<main class="content">
+    <div class="row">
+        <div class="py-4">
+            <div class="d-flex justify-content-between w-100 flex-wrap">
+                <div class="mb-3 mb-lg-0">
+                    <h1 class="h4">Изменение параметров линии <br></h1>
+                </div>
+            </div>
+        </div>
+        <form method="post" action="/mozzarella/edit_line/{{line_id}}" class="mt-4">
+            {{ form.hidden_tag() }}
+            <div class="row mb-4">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Название линии</label>
+                        {{form.name(place_holder='Name', class='form-control', readonly=true)}}
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите время налива, мин</label>
+                            {{form.pouring_time(place_holder='Pouring', class='form-control')}}
+                        </div>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите время подачи и вымешивания, мин</label>
+                            {{form.serving_time(place_holder='Serving', class='form-control')}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите время чеддеризации, мин</label>
+                            {{form.chedderization_time(place_holder='Chedderization', class='form-control')}}
+                        </div>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите скорость плавления, кг/ч</label>
+                            {{form.melting_speed(place_holder='Melting', class='form-control')}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3" style="margin-top:30px;">
+                    <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}

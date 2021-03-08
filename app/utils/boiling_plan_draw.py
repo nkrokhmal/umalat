@@ -30,9 +30,9 @@ COLUMNS = {
 
 
 def draw_boiling_names(wb):
-    excel_client = ExcelBlock(wb["Типы варок"])
-    boiling_names = list(set([x.to_str() for x in db.session.query(Boiling).all()]))
-    excel_client.draw_row(1, ["-"])
+    excel_client = ExcelBlock(wb['Типы варок'])
+    boiling_names = list(set([x.to_str() for x in db.session.query(MozzarellaBoiling).all()]))
+    excel_client.draw_row(1, ['-'])
     cur_i = 2
     for boiling_name in boiling_names:
         excel_client.draw_row(cur_i, [boiling_name], set_border=False)
@@ -81,12 +81,19 @@ def get_colour_by_name(sku_name, skus):
 
 
 def draw_boiling_plan(df, df_extra, wb):
+<<<<<<< HEAD
     skus = db.session.query(SKU).all()
     form_factors = db.session.query(FormFactor).all()
     data_sku = {
         "Вода": [x for x in skus if x.made_from_boilings[0].boiling_type == "water"],
         "Соль": [x for x in skus if x.made_from_boilings[0].boiling_type == "salt"],
     }
+=======
+    skus = db.session.query(MozzarellaSKU).all()
+    form_factors = db.session.query(MozzarellaFormFactor).all()
+    data_sku = {'Вода': [x for x in skus if x.made_from_boilings[0].boiling_type == 'water'],
+                'Соль': [x for x in skus if x.made_from_boilings[0].boiling_type == 'salt']}
+>>>>>>> dev_nk
 
     draw_boiling_names(wb=wb)
     draw_extra_packing(wb=wb, df=df_extra, skus=skus)
