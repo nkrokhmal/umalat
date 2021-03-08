@@ -2,7 +2,7 @@ import os
 
 os.environ["environment"] = "interactive"
 
-from config import basedir
+from config import DebugConfig
 from app.schedule_maker import mark_consecutive_groups
 from app.schedule_maker.algo import *
 
@@ -13,13 +13,15 @@ warnings.filterwarnings("ignore")
 
 def test():
     df = read_boiling_plan(
-        os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
+        DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
     )
     mark_consecutive_groups(df, "boiling", "boiling_group")
     boiling_group_df = df[df["boiling_group"] == 2]
     print(boiling_group_df)
     boiling_model = boiling_group_df.iloc[0]["boiling"]
-    boilings_meltings, packings = BoilingGroupToSchema()(boiling_group_df)
+    boiling_volume, boilings_meltings, packings = BoilingGroupToSchema()(
+        boiling_group_df
+    )
     boilings_dataframes = SchemaToBoilingsDataframes()(
         boilings_meltings, packings, boiling_model.line.melting_speed, round=False
     )
@@ -31,28 +33,5 @@ def test():
         print()
 
 
-# todo: del
-def test2():
-    ser = BoilingPlanDfSerializer()
-    # boiling_plan_df = ser.read(r"C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\research\akadaner\random\1.csv")
-    boiling_plan_df = read_boiling_plan(
-        r"C:\Users\Mi\Downloads\2021-01-19 План по варкам.xlsx"
-    )
-    boiling_group_df = boiling_plan_df[boiling_plan_df["batch_id"] == 2]
-
-    print(boiling_group_df)
-    boiling_model = boiling_group_df.iloc[0]["boiling"]
-    boilings_meltings, packings = BoilingGroupToSchema()(boiling_group_df)
-    boilings_dataframes = SchemaToBoilingsDataframes()(
-        boilings_meltings, packings, boiling_model.line.melting_speed, round=True
-    )
-    for boiling_dataframes in boilings_dataframes:
-        print(boiling_dataframes["meltings"])
-        print(boiling_dataframes["coolings"])
-        for packing_team_id, df in boiling_dataframes["packings"].items():
-            print(df)
-        print()
-
-
 if __name__ == "__main__":
-    test2()
+    test()

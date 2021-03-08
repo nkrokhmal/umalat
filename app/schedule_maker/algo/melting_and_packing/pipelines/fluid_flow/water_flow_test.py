@@ -2,7 +2,7 @@ import os
 
 os.environ["environment"] = "interactive"
 
-from config import basedir
+from config import DebugConfig
 from app.schedule_maker import mark_consecutive_groups
 from app.schedule_maker.algo import *
 
@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 
 def test():
     df = read_boiling_plan(
-        os.path.join(basedir, r"app\data\inputs\2021-02-03 План по варкам.xlsx")
+        DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
     )
     mark_consecutive_groups(df, "boiling", "boiling_group")
     boiling_group_df = df[df["boiling_group"] == 1]

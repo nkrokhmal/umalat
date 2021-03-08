@@ -2,7 +2,7 @@ import os
 
 os.environ["environment"] = "interactive"
 
-from config import basedir
+from config import DebugConfig
 from app.schedule_maker.models import *
 from app.schedule_maker.algo import *
 from app.schedule_maker.boiling_plan import read_boiling_plan
@@ -18,7 +18,7 @@ def test1():
     configure_loguru_stdout("DEBUG")
 
     boiling_plan_df = read_boiling_plan(
-        r"C:\Users\Mi\Desktop\master\code\git\2020.10-umalat\umalat\app\data\inputs\2021-02-19 План по варкам.xlsx"
+        DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
     )
     boiling_plan_df = boiling_plan_df[
         boiling_plan_df["boiling"].apply(lambda b: b.line.name == LineName.SALT)
@@ -36,7 +36,7 @@ def test1():
 
 def test2():
     boiling_plan_df = read_boiling_plan(
-        os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
+        DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
     )
 
     mark_consecutive_groups(boiling_plan_df, "boiling", "boiling_group")
@@ -55,7 +55,7 @@ def test2():
 
 def test3():
     boiling_plan_df = read_boiling_plan(
-        os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
+        DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
     )
 
     boiling_df = boiling_plan_df[
