@@ -15,6 +15,7 @@ def make_schedule_with_boiling_inside_a_day(
     schedule = make_schedule(boilings, start_times=start_times)
     res[None] = calc_schedule_stats(schedule)
 
+    start_from = None
     if cast_t(res[None]["max_non_full_cleaning_time"]) >= cast_t("12:00"):
         boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
         water_boilings = [
@@ -34,11 +35,11 @@ def make_schedule_with_boiling_inside_a_day(
                 ),
             )
         )
-        start_from = boilings.index(water_boilings[-1])
+
+        if water_boilings:
+            start_from = boilings.index(water_boilings[-1])
 
         for i in tqdm(range(len(boilings) - 1)):
-            if i < start_from:
-                continue
             boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
             boilings = list(
                 sorted(
@@ -66,11 +67,21 @@ def make_schedule_with_boiling_inside_a_day(
     }
 
     if suitable:
-        res = suitable
+        if start_from:
+            res = {k: v for k, v in suitable.items() if k is None or k >= start_from}
+            if not res:
+                res = suitable
+        else:
+            res = suitable
+
         best = min(res.items(), key=lambda v: v[1]["total_time"])
     else:
-        res.pop(0)
-        best = min(res.items(), key=lambda v: v[1]["max_non_full_cleaning_time"])
+        # todo: make properly
+        raise AssertionError(
+            "Для правила 12 часов необходимо вставить две полные варки внутридня. Укажите эти полные варки в ручном режиме в плане варок и не используйте автоматическое вставление полной варки по правилу 12 часов."
+        )
+        # res.pop(None)
+        # best = min(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time'])
 
     logger.info(f"Best cleaning_boiling: {best}")
 

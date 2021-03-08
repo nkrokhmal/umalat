@@ -11,7 +11,6 @@ from app.schedule_maker.algo.melting_and_packing.melting_process import (
 
 
 def make_mpp(boiling_df, left_boiling_volume):
-    boiling_df = boiling_df.copy()
     boiling_df["collecting_speed"] = boiling_df["sku"].apply(
         lambda sku: sku.collecting_speed
     )
@@ -137,7 +136,7 @@ def make_mpp(boiling_df, left_boiling_volume):
                 packing_team_id=packing_team_id,
                 x=(df.iloc[0]["beg_ts"] // 5, 0),
                 push_func=add_push,
-            ) as collecting:
+            ):
                 for i, (_, row) in enumerate(df.iterrows()):
                     if row["collecting_speed"] == row["packing_speed"]:
                         # add configuration if needed
@@ -218,9 +217,17 @@ def make_mpp(boiling_df, left_boiling_volume):
         )
     )
 
-    for packing in maker.root["packing"]:
+    # shift packing and collecting for cooling
+    for packing in listify(maker.root["packing"]):
         packing.props.update(
             x=[packing.props["x"][0] + maker.root["cooling_process"]["start"].y[0], 0]
+        )
+    for collecting in listify(maker.root["collecting"]):
+        collecting.props.update(
+            x=[
+                collecting.props["x"][0] + maker.root["cooling_process"]["start"].y[0],
+                0,
+            ]
         )
 
     maker.root.props.update(kg=boiling_volume)
@@ -235,7 +242,6 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
     boiling_model = boiling_group_df.iloc[0]["boiling"]
     boiling_volumes = boiling_group_df.iloc[0]["boiling_volumes"]
-
     values = []
     for _, grp in boiling_group_df.groupby(["packing_team_id", "sku_name"]):
         value = grp.iloc[0]
@@ -285,4 +291,5 @@ def make_boilings_parallel_dynamic(boiling_group_df):
             boiling_model, group_id + i, boiling_volume, melting_and_packing
         )
         boilings.append(boiling)
+
     return boilings

@@ -123,7 +123,7 @@ class Line(db.Model):
         ).first()
         for params in [
             (LineName.SALT, 180, 850, 1020, 30, 30),
-            (LineName.WATER, 240, 1000, 900, 30, 30),
+            (LineName.WATER, 240, 1000, 850, 30, 30),
         ]:
             line = Line(
                 name=params[0],

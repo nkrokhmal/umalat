@@ -50,7 +50,7 @@ def schedule():
         add_batch(
             date,
             form.batch_number.data,
-            form.batch_number.data + int(boiling_plan_df["group_id"].max()),
+            form.batch_number.data + int(boiling_plan_df["group_id"].max()) - 1,
         )
         start_times = {
             LineName.WATER: form.water_beg_time.data,

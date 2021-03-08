@@ -163,6 +163,15 @@ def draw_boiling_plan(df, df_extra, wb):
                     value="",
                     set_border=False,
                 )
+<<<<<<< HEAD
+=======
+                excel_client.draw_cell(
+                    row=cur_row,
+                    col=COLUMNS["boiling_configuration"].col,
+                    value=8000,
+                    set_border=False,
+                )
+>>>>>>> master
             else:
                 excel_client.draw_cell(
                     row=cur_row,
