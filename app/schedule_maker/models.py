@@ -63,35 +63,11 @@ def cast_model(cls, obj, int_attribute="id", str_attribute="name"):
         raise Exception(f"Unknown {cls} type")
 
 
-def cast_sku(obj):
-    return cast_model(SKU, obj)
-
-
-def cast_line(obj):
-    return cast_model(Line, obj)
-
-
-def cast_packer(obj):
-    return cast_model(Packer, obj)
-
-
-def cast_pack_type(obj):
-    return cast_model(PackType, obj)
-
-
-def cast_boiling_technology(obj):
-    return cast_model(BoilingTechnology, obj)
-
-
 def get_termizator():
     return db.session.query(Termizator).first()
 
 
-def cast_group(obj):
-    return cast_model(Group, obj)
-
-
-def cast_form_factor(obj):
+def cast_mozarella_form_factor(obj):
     if isinstance(obj, str):
         # 'Вода: 200'
         short_line_name, relative_weight = obj.split(":")
@@ -113,10 +89,10 @@ def cast_form_factor(obj):
         ), f"Не найдено ни одного форм-фактора плавления для {short_line_name} {relative_weight}"
         return form_factors[0]
     else:
-        return cast_model(FormFactor, obj)
+        return cast_model(MozzarellaFormFactor, obj)
 
 
-def cast_boiling(obj):
+def cast_mozarella_boiling(obj):
     if isinstance(obj, str):
         try:
             # water, 2.7, Альче
@@ -126,10 +102,10 @@ def cast_boiling(obj):
             ferment = re.sub(spaces_on_edge("beg"), "", ferment)
             ferment = re.sub(spaces_on_edge("end"), "", ferment)
             is_lactose = len(values) < 4
-            query = db.session.query(Boiling).filter(
-                (Boiling.percent == percent)
-                & (Boiling.is_lactose == is_lactose)
-                & (Boiling.ferment == ferment)
+            query = db.session.query(MozzarellaBoiling).filter(
+                (MozzarellaBoiling.percent == percent)
+                & (MozzarellaBoiling.is_lactose == is_lactose)
+                & (MozzarellaBoiling.ferment == ferment)
             )
             boilings = query.all()
             boilings = [b for b in boilings if b.line.name == line_name]
@@ -143,4 +119,4 @@ def cast_boiling(obj):
 
         return boilings[0]
 
-    return cast_model(Boiling, obj)
+    return cast_model(MozzarellaBoiling, obj)

@@ -61,6 +61,10 @@ class BaseClass:
     # cache files for 30 seconds
     CACHE_FILE_MAX_AGE = 30
 
+    @staticmethod
+    def abs_path(local_path):
+        return os.path.join(basedir, local_path)
+
 
 class DebugConfig(BaseClass):
     SQLALCHEMY_DATABASE_URI = (

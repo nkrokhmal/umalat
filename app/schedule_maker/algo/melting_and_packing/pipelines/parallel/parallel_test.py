@@ -58,7 +58,9 @@ def test3():
         os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
     )
 
-    boiling_df = boiling_plan_df[boiling_plan_df["bff"] == cast_form_factor(14)]
+    boiling_df = boiling_plan_df[
+        boiling_plan_df["bff"] == cast_mozarella_form_factor(14)
+    ]
     boiling_df["sku_name"] = boiling_df["sku"].apply(lambda sku: sku.name)
 
     values = []

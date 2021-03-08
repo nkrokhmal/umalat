@@ -15,7 +15,9 @@ def read_boiling_plan(wb_obj, saturate=True):
 
     for ws_name in ["Вода", "Соль"]:
         line = (
-            cast_line(LineName.WATER) if ws_name == "Вода" else cast_line(LineName.SALT)
+            cast_model(MozzarellaLine, LineName.WATER)
+            if ws_name == "Вода"
+            else cast_model(MozzarellaLine, LineName.SALT)
         )
         default_boiling_volume = line.output_ton
 
@@ -114,9 +116,9 @@ def read_boiling_plan(wb_obj, saturate=True):
         dfs[1]["group_id"] += dfs[0].iloc[-1]["group_id"]
 
     df = pd.concat(dfs).reset_index(drop=True)
-    df["sku"] = df["sku"].apply(cast_sku)
+    df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
 
-    df["boiling"] = df["boiling_params"].apply(cast_boiling)
+    df["boiling"] = df["boiling_params"].apply(cast_mozarella_boiling)
 
     # set boiling form factors
     df["ff"] = df["sku"].apply(lambda sku: sku.form_factor)
@@ -136,7 +138,7 @@ def read_boiling_plan(wb_obj, saturate=True):
         if grp["_bff"].isnull().all():
             # take from bff input if not specified
             # todo: hardcode, make properly
-            df.loc[grp.index, "_bff"] = cast_form_factor(8)  # 460
+            df.loc[grp.index, "_bff"] = cast_mozarella_form_factor(8)  # 460
         else:
             filled_grp = grp.copy()
             filled_grp = filled_grp.fillna(method="ffill")

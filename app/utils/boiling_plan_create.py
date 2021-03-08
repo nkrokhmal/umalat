@@ -8,7 +8,7 @@ from .features.merge_boiling_utils import Boilings
 def boiling_plan_create(df):
     df["plan"] = df["plan"].apply(lambda x: round(x))
     df["boiling_type"] = df["boiling_id"].apply(
-        lambda boiling_id: cast_boiling(boiling_id).boiling_type
+        lambda boiling_id: cast_mozarella_boiling(boiling_id).boiling_type
     )
     df["weight"] = df["sku"].apply(
         lambda x: x.form_factor.relative_weight + 30
@@ -28,7 +28,7 @@ def boiling_plan_create(df):
 
     result = pd.concat([water, salt])
     result["kg"] = result["plan"]
-    result["boiling"] = result["boiling_id"].apply(lambda x: cast_boiling(x))
+    result["boiling"] = result["boiling_id"].apply(lambda x: cast_mozarella_boiling(x))
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result["boiling_name"] = result["boiling"].apply(lambda b: b.to_str())
     result["boiling_volume"] = np.where(result["boiling_type"] == "salt", 850, 1000)

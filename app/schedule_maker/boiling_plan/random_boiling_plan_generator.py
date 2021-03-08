@@ -35,7 +35,7 @@ class RandomBoilingPlanGenerator:
                 bff = sku.form_factor
             else:
                 # rubber
-                bff = cast_form_factor(2)
+                bff = cast_mozarella_form_factor(2)
 
             configuration = "8000"
 
@@ -81,7 +81,7 @@ class BoilingPlanDfSerializer:
 
     def read(self, fn):
         df = pd.read_csv(fn)
-        df["sku"] = df["sku"].apply(cast_sku)
-        df["boiling"] = df["boiling"].apply(cast_boiling)
-        df["bff"] = df["bff"].apply(cast_form_factor)
+        df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
+        df["boiling"] = df["boiling"].apply(cast_mozarella_boiling)
+        df["bff"] = df["bff"].apply(cast_mozarella_form_factor)
         return df

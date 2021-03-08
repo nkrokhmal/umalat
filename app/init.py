@@ -1,8 +1,14 @@
 import os
 from utils_ak.os import makedirs
-from config import basedir
+from config import DebugConfig
 
-data_path = os.path.join(basedir, "app", "data")
-
-makedirs(os.path.join(data_path, "sku_plan/"))
-makedirs(os.path.join(data_path, "schedule_plan/"))
+for local_path in [
+    DebugConfig.UPLOAD_TMP_FOLDER,
+    DebugConfig.STATS_FOLDER,
+    DebugConfig.BOILING_PLAN_FOLDER,
+    DebugConfig.SKU_PLAN_FOLDER,
+    DebugConfig.SCHEDULE_PLAN_FOLDER,
+    DebugConfig.TEMPLATE_BOILING_PLAN,
+    DebugConfig.IGNORE_SKU_FILE,
+]:
+    makedirs(DebugConfig.abs_path(local_path))
