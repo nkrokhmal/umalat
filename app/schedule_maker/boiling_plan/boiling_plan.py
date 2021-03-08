@@ -4,7 +4,7 @@ from app.enum import LineName
 from .saturate import saturate_boiling_plan
 
 
-def read_boiling_plan(wb_obj, saturate=True):
+def read_boiling_plan(wb_obj, saturate=True, normalization=True):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -162,14 +162,15 @@ def read_boiling_plan(wb_obj, saturate=True):
                 "Одна из групп варок имеет неверное количество килограмм."
             )
         else:
-            if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
-                # todo: warning message
-                df.loc[grp.index, "kg"] *= (
-                    grp.iloc[0]["total_volume"] / grp["kg"].sum()
-                )  # scale to total_volume
-            else:
-                # all fine
-                pass
+            if normalization:
+                if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
+                    # todo: warning message
+                    df.loc[grp.index, "kg"] *= (
+                        grp.iloc[0]["total_volume"] / grp["kg"].sum()
+                    )  # scale to total_volume
+                else:
+                    # all fine
+                    pass
 
     df = df[
         [
