@@ -10,11 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-<<<<<<< HEAD:migrations/versions/61cd69313034_.py
-revision = "61cd69313034"
-=======
-revision = '063c1ab6c567'
->>>>>>> master:migrations/versions/063c1ab6c567_.py
+revision = "063c1ab6c567"
 down_revision = None
 branch_labels = None
 depends_on = None
