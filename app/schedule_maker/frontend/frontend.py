@@ -555,22 +555,22 @@ def make_meltings_2(schedule, line_name, title):
             push_func=add_push,
         )
 
-        sc = iter_get(
-            (boiling.iter(cls="steam_consumption", type="melting", line_name=line_name))
-        )
-        for j in range(int(sc.x[0]), int(sc.y[0])):
-            push(
-                melting_lines[i % n_lines],
-                maker.create_block(
-                    "steam_consumption",
-                    x=(j, 3),
-                    size=(1, 1),
-                    text=str(sc.props["value"]),
-                    text_rotation=90,
-                    font_size=9,
-                ),
-                push_func=add_push,
-            )
+        for sc in boiling.iter(
+            cls="steam_consumption", type="melting", line_name=line_name
+        ):
+            for j in range(int(sc.x[0]), int(sc.y[0])):
+                push(
+                    melting_lines[i % n_lines],
+                    maker.create_block(
+                        "steam_consumption",
+                        x=(j, 3),
+                        size=(1, 1),
+                        text=str(sc.props["value"]),
+                        text_rotation=90,
+                        font_size=7,
+                    ),
+                    push_func=add_push,
+                )
     return maker.root
 
 

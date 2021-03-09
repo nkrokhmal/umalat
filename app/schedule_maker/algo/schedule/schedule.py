@@ -542,7 +542,6 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
             )
 
     for line_name in [LineName.WATER, LineName.SALT]:
-        # add steam consumption
         for b1, b2 in SimpleIterator(
             list(
                 schedule["master"].iter(
