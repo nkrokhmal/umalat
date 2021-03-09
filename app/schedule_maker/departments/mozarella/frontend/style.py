@@ -1,4 +1,4 @@
-STYLE = {
+MOZARELLA_STYLE = {
     "termizator": {"text": "{boiling_id} налив", "bold": True},
     "pouring_name": {"text": "{boiling_label}"},
     "pouring_and_fermenting": {

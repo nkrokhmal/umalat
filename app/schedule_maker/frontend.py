@@ -1,3 +1,6 @@
+from utils_ak.split_file import *
+from utils_ak.os import *
+
 from utils_ak.color import *
 from utils_ak.openpyxl import *
 from app.schedule_maker.time import *
@@ -75,5 +78,20 @@ def draw_schedule(schedule, style, fn=None):
 
     if fn:
         wb.save(fn)
+
+    return wb
+
+
+def draw_excel_frontend(frontend, style, open_file=False, fn="schedule.xlsx"):
+    wb = draw_schedule(frontend, style)
+
+    if fn:
+        sf = SplitFile(fn)
+        fn = sf.get_new()
+        makedirs(fn)
+        wb.save(fn)
+
+        if open_file:
+            open_file_in_os(fn)
 
     return wb

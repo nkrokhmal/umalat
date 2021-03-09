@@ -1,7 +1,8 @@
 from utils_ak.interactive_imports import *
 from app.enum import *
 from app.schedule_maker.time import *
-from app.schedule_maker.departments.mozarella.frontend.drawing import *
+
+from app.schedule_maker.frontend import *
 from app.schedule_maker.departments.mozarella.frontend.style import *
 
 
@@ -788,18 +789,3 @@ def make_frontend(schedule, coolings_mode="first"):
         make(make_extra_packings(extra_packings))
 
     return maker.root
-
-
-def draw_excel_frontend(frontend, open_file=False, fn="schedule.xlsx"):
-    wb = draw_schedule(frontend, STYLE)
-
-    if fn:
-        sf = SplitFile(fn)
-        fn = sf.get_new()
-        makedirs(fn)
-        wb.save(fn)
-
-        if open_file:
-            open_file_in_os(fn)
-
-    return wb
