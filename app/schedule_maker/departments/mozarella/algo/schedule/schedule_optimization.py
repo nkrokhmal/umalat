@@ -1,7 +1,5 @@
-from utils_ak.interactive_imports import *
-from app.schedule_maker.algo.schedule.schedule import *
-from app.schedule_maker.algo.schedule.boilings import *
-from app.schedule_maker.algo.stats import *
+from app.schedule_maker.departments.mozarella.algo import *
+
 
 # todo: refactor
 def make_schedule_with_boiling_inside_a_day(

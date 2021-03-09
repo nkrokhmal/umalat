@@ -1,15 +1,13 @@
 import os
-import time
 
 os.environ["environment"] = "interactive"
 
 from config import DebugConfig
-from app.schedule_maker.boiling_plan import read_boiling_plan
-from app.schedule_maker.algo import *
+from app.schedule_maker.departments.mozarella.algo import *
 
 
 def test_melting_and_packing_basic_single():
-    from app.schedule_maker.boiling_plan import read_boiling_plan
+    from app.schedule_maker.departments.mozarella.boiling_plan import read_boiling_plan
 
     boiling_plan_df = read_boiling_plan(
         DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
@@ -20,7 +18,7 @@ def test_melting_and_packing_basic_single():
 
 
 def test_melting_and_packing_basic_many():
-    from app.schedule_maker.boiling_plan import read_boiling_plan
+    from app.schedule_maker.departments.mozarella.boiling_plan import read_boiling_plan
 
     boiling_plan_df = read_boiling_plan(
         DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")

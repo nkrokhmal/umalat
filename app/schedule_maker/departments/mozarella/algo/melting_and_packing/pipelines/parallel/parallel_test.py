@@ -3,9 +3,8 @@ import os
 os.environ["environment"] = "interactive"
 
 from config import DebugConfig
-from app.schedule_maker.models import *
-from app.schedule_maker.algo import *
-from app.schedule_maker.boiling_plan import read_boiling_plan
+from app.schedule_maker.departments.mozarella.algo import *
+from app.schedule_maker.departments.mozarella.boiling_plan import read_boiling_plan
 
 from utils_ak.interactive_imports import *
 import warnings

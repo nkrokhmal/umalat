@@ -1,6 +1,5 @@
 from flask import render_template, request
 from pycel import ExcelCompiler
-from . import main
 from .boiling_plan import parse_sheet
 from .forms import SkuPlanForm
 from .sku_plan import parse_file, get_skus, group_skus

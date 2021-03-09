@@ -3,8 +3,7 @@ import os
 os.environ["environment"] = "interactive"
 
 from config import DebugConfig
-from app.schedule_maker import mark_consecutive_groups
-from app.schedule_maker.algo import *
+from app.schedule_maker.departments.mozarella.algo import *
 
 import warnings
 

@@ -1,6 +1,5 @@
 from flask import render_template, request
 from pycel import ExcelCompiler
-from . import main
 from .forms import BoilingPlanForm
 from ..utils.boiling_plan_create import boiling_plan_create
 from ..utils.boiling_plan_draw import draw_boiling_plan

@@ -2,7 +2,7 @@ import os
 
 os.environ["environment"] = "interactive"
 
-from app.schedule_maker.boiling_plan import *
+from app.schedule_maker.departments.mozarella.boiling_plan import *
 from config import DebugConfig
 
 

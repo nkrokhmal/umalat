@@ -1,7 +1,6 @@
 from utils_ak.block_tree import *
-from app.schedule_maker.algo.cooling import make_cooling_process
-from app.schedule_maker.algo.boiling import make_boiling
-from app.schedule_maker.calculation import *
+from app.schedule_maker.departments.mozarella.algo.cooling import make_cooling_process
+from app.schedule_maker.departments.mozarella.algo import make_boiling
 
 
 class BoilingsDataframesToBoilings:

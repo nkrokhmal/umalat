@@ -1,18 +1,15 @@
-import itertools
-
-
-from utils_ak.interactive_imports import *
-
 from app.schedule_maker.time import *
-from app.schedule_maker.algo.packing import *
+from app.schedule_maker.departments.mozarella.algo import *
 from app.enum import LineName
 
-from app.schedule_maker.algo.schedule.awaiting_pusher import AwaitingPusher
+from app.schedule_maker.departments.mozarella.algo.schedule.awaiting_pusher import (
+    AwaitingPusher,
+)
 
 # todo: optimize
 # class_validator = ClassValidator(window=10, window_by_classes={'boiling': {'boiling': 4, 'cleaning': 1, 'packing_configuration': 2},
 #                                                                'cleaning': {'boiling': 1, 'cleaning': 1},
-#                                                                'packing_configuration': {'boiling': 4}})
+#                                              §                  'packing_configuration': {'boiling': 4}})
 
 
 master_validator = ClassValidator(window=20)
@@ -226,6 +223,7 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         try:
             lines_df.at[line_name, "start_time"] = cast_time(start_times[line_name])
         except:
+            raise
             raise AssertionError(
                 f"Неверно указано время первой подачи на линии {line_name}"
             )

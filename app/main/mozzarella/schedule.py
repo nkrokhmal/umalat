@@ -1,15 +1,12 @@
-import os
 from flask import render_template, request
 
 from ..errors import internal_error
 from app.utils.old.excel_client import *
-from .. import main
 from .forms import ScheduleForm
 
-from utils_ak.interactive_imports import *
 from app.schedule_maker import *
 
-from app.schedule_maker.frontend import *
+from app.schedule_maker.departments.mozarella.frontend import *
 from ...utils.schedule_task import schedule_task, schedule_task_boilings
 
 

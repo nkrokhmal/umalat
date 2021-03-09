@@ -1,5 +1,4 @@
 from flask import send_from_directory
-from . import main
 from app.utils.old.generate_constructor import *
 
 

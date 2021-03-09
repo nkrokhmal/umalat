@@ -1,8 +1,6 @@
-from io import BytesIO
 from urllib.parse import quote
 from flask import render_template, request, flash, Markup
 from pycel import ExcelCompiler
-from .. import main
 from .forms import BoilingPlanFastForm
 from ...utils.boiling_plan_create import boiling_plan_create
 from ...utils.boiling_plan_draw import draw_boiling_plan

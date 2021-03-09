@@ -1,10 +1,8 @@
-import openpyxl
-import pandas as pd
-from app.enum import LineName
-
-from app.schedule_maker.frontend.drawing import *
-from app.schedule_maker.frontend.style import *
 from utils_ak.interactive_imports import *
+from app.enum import *
+from app.schedule_maker.time import *
+from app.schedule_maker.departments.mozarella.frontend.drawing import *
+from app.schedule_maker.departments.mozarella.frontend.style import *
 
 
 def calc_form_factor_label(form_factors):
