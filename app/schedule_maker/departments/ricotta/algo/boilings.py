@@ -6,7 +6,9 @@ from app.schedule_maker.models import *
 
 
 def make_boiling(boiling_model):
-    maker, make = init_block_maker("boiling", boiling_label="рикотта")
+    maker, make = init_block_maker(
+        "boiling", boiling_model=boiling_model
+    )  # copy boiling_model for working tests
 
     bt = boiling_model.boiling_technology
     make("heating", size=(bt.heating_time // 5, 0))
@@ -53,12 +55,13 @@ def make_boiling_sequence(boiling_group_df):
 
 
 def make_boiling_group(boiling_group_df):
+    boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
     maker, make = init_block_maker(
         "boiling_group",
         skus=boiling_group_df["sku"].tolist(),
         boiling_id=boiling_group_df.iloc[0]["boiling_id"],
+        boiling_model=boiling_model,
     )
-    boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
 
     boiling_sequence = make_boiling_sequence(boiling_group_df)
     push(maker.root, boiling_sequence)

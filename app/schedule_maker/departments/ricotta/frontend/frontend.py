@@ -3,13 +3,19 @@ from utils_ak.builtin import *
 
 
 def make_frontend_boiling(boiling):
+    label_values = [
+        "{}%".format(boiling.props["boiling_model"].percent),
+        boiling.props["boiling_model"].flavoring_agent,
+    ]
+    label_values = [v for v in label_values if v]
+
     maker, make = init_block_maker(
         "boiling",
         axis=1,
         x=(boiling.x[0], 0),
         size=(0, 2),
         boiling_id=boiling.props["boiling_id"],
-        boiling_label=boiling.props["boiling_label"],
+        boiling_label=", ".join(label_values),
     )
 
     with make():
@@ -51,7 +57,6 @@ def make_frontend(schedule):
         for boiling_group in listify(schedule["boiling_group"]):
             with make("analysis_group", push_func=add_push):
                 for block in boiling_group["analysis_group"].children:
-                    print(block)
                     make(
                         block.props["cls"],
                         size=(block.size[0], 1),
