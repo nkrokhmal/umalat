@@ -30,7 +30,7 @@ def validate(b1, b2):
 validator.add("boiling_group", "boiling_group", validate)
 
 
-def make_schedule():
+def make_schedule(boiling_plan_df):
     maker, make = init_block_maker("schedule")
 
     sku = cast_model(RicottaSKU, 62)  # todo: take from input

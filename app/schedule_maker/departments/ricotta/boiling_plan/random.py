@@ -1,7 +1,10 @@
+import random
 from app.schedule_maker.models import *
 
 
-def generate_random_boiling_plan(n=24):
+def generate_random_boiling_plan(n=24, seed=12):
+    random.seed(seed)
+
     sku_ids = range(62, 82)  # todo: take from table properly
     boiling_model_ids = range(9, 16)  # todo: take from table properly
 

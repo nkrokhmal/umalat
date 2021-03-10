@@ -5,6 +5,7 @@ from app.schedule_maker.models import cast_model
 from app.models import *
 
 from app.schedule_maker.departments.ricotta.algo.boilings import *
+from app.schedule_maker.departments.ricotta.boiling_plan import *
 
 
 def test_make_boiling():
@@ -13,8 +14,9 @@ def test_make_boiling():
 
 
 def test_make_boiling_sequence():
-    sku = cast_model(RicottaSKU, 62)
-    print(make_boiling_sequence(sku))
+    boiling_plan_df = generate_random_boiling_plan()
+    boiling_group_df = boiling_plan_df[boiling_plan_df["boiling_id"] == 0]
+    print(make_boiling_sequence(boiling_group_df))
 
 
 def test_make_boiling_group():
@@ -25,4 +27,5 @@ def test_make_boiling_group():
 if __name__ == "__main__":
     test_make_boiling()
     test_make_boiling_sequence()
-    test_make_boiling_group()
+
+    # test_make_boiling_group()

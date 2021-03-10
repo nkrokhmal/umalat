@@ -7,9 +7,6 @@ from app.schedule_maker.departments.ricotta.boiling_plan.random import *
 
 
 def test():
-    import random
-
-    random.seed(12)
     print(generate_random_boiling_plan())
 
 
