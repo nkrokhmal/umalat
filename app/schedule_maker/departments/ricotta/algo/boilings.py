@@ -58,6 +58,8 @@ def make_boiling_group(boiling_group_df):
         skus=boiling_group_df["sku"].tolist(),
         boiling_id=boiling_group_df.iloc[0]["boiling_id"],
     )
+    boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
+
     boiling_sequence = make_boiling_sequence(boiling_group_df)
     push(maker.root, boiling_sequence)
     analysis_start = listify(boiling_sequence["boiling"])[-1]["abandon"].x[0]
@@ -65,10 +67,14 @@ def make_boiling_group(boiling_group_df):
         analysis = cast_model(
             RicottaAnalysisTechnology, 1
         )  # todo: take from boiling_model
-        make("preparation", size=(analysis.preparation_time // 5, 0))
-        make("analysis", size=(analysis.analysis_time // 5, 0))
-        make("pumping", size=(analysis.pumping_time // 5, 0))
-
+        if boiling_model.flavoring_agent:
+            make("analysis", size=(analysis.analysis_time // 5, 0))
+            make("preparation", size=(analysis.preparation_time // 5, 0))
+            make("pumping", size=(analysis.pumping_time // 5, 0))
+        else:
+            make("analysis", size=(analysis.analysis_time // 5, 0))
+            make("preparation", size=(analysis.preparation_time // 5, 0))
+            make("pumping", size=(analysis.pumping_time // 5, 0))
     packing_start = maker.root["analysis_group"]["pumping"].x[0] + 1
 
     # todo: pauses
