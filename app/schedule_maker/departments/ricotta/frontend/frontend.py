@@ -6,6 +6,7 @@ def make_frontend_boiling(boiling):
     maker, make = init_block_maker(
         "boiling",
         axis=1,
+        x=(boiling.x[0], 0),
         size=(0, 3),
         boiling_id=boiling.props["boiling_id"],
         boiling_label=boiling.props["boiling_label"],
@@ -14,6 +15,13 @@ def make_frontend_boiling(boiling):
     with make():
         make("boiling_num", size=(boiling["heating"].size[0], 1))
         make("boiling_name", size=(boiling.size[0] - boiling["heating"].size[0], 1))
+
+    with make():
+        make("heating", size=(boiling["heating"].size[0], 1), text="1900")
+        make("delay", size=(boiling["delay"].size[0], 1))
+        make("protein_harvest", size=(boiling["protein_harvest"].size[0], 1))
+        make("abandon", size=(boiling["abandon"].size[0], 1))
+        make("pumping_out", size=(boiling["pumping_out"].size[0], 1))
     return maker.root
 
 

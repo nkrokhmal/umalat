@@ -1,9 +1,8 @@
-from utils_ak.interactive_imports import *
-from app.enum import *
-from app.schedule_maker.time import *
+import openpyxl
+import pandas as pd
+from app.enum import LineName
 
-from app.schedule_maker.frontend import *
-from app.schedule_maker.departments.mozarella.frontend.style import *
+from utils_ak.interactive_imports import *
 
 
 def calc_form_factor_label(form_factors):
@@ -84,7 +83,7 @@ def make_header(date, start_time="01:00"):
     return maker.root["header"]
 
 
-def make_cheese_makers(schedule, rng):
+def make_cheese_makers(master, rng):
     maker, make = init_block_maker("cheese_makers", axis=1)
 
     for i in rng:
@@ -99,7 +98,7 @@ def make_cheese_makers(schedule, rng):
                     push_func=add_push,
                 )
 
-            for boiling in schedule["master"].iter(cls="boiling", pouring_line=str(i)):
+            for boiling in master.iter(cls="boiling", pouring_line=str(i)):
                 boiling_model = boiling.props["boiling_model"]
 
                 standard_boiling_volume = (
@@ -184,22 +183,9 @@ def make_cheese_makers(schedule, rng):
                             "extra",
                             size=(boiling["pouring"]["second"]["extra"].size[0], 1),
                         )
-        with make("steam_consumption", is_parent_node=True):
-            for sc in schedule.iter(
-                cls="steam_consumption", pouring_line=str(i), type="boiling"
-            ):
-                for j in range(sc.x[0], sc.y[0]):
-                    make(
-                        x=(j, 0),
-                        size=(1, 1),
-                        text=str(sc.props["value"]),
-                        text_rotation=90,
-                        font_size=9,
-                        push_func=add_push,
-                        # border=None,
-                    )
-        # add one line break
-        make("stub", size=(0, 1))
+        # add two lines for "Расход пара"
+        make("stub", size=(0, 2))
+
     return maker.root
 
 
@@ -221,6 +207,7 @@ def make_cleanings(master):
         b = maker.copy(cleaning, with_props=True)
         b.props.update(size=(b.props["size"][0], 2))
         make(b, push_func=add_push)
+    # add two lines for "Расход пара"
     make("stub", size=(0, 2))
     return maker.root
 
@@ -236,7 +223,7 @@ def make_multihead_cleanings(master):
     return maker.root
 
 
-def make_meltings_1(schedule, line_name, title, coolings_mode="all"):
+def make_meltings_1(master, line_name, title, coolings_mode="all"):
     maker, make = init_block_maker("melting", axis=1)
 
     with make("header", start_time="00:00", push_func=add_push):
@@ -250,7 +237,7 @@ def make_meltings_1(schedule, line_name, title, coolings_mode="all"):
         )
 
     with make("melting_row", push_func=add_push, is_parent_node=True):
-        for boiling in schedule["master"].iter(
+        for boiling in master.iter(
             cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
         ):
             form_factor_label = calc_form_factor_label(
@@ -340,7 +327,7 @@ def make_meltings_1(schedule, line_name, title, coolings_mode="all"):
     make("cooling_row", axis=1, is_parent_node=True)
     cooling_lines = []
 
-    for boiling in schedule["master"].iter(
+    for boiling in master.iter(
         cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
     ):
         class_validator = ClassValidator(window=10)
@@ -402,24 +389,8 @@ def make_meltings_1(schedule, line_name, title, coolings_mode="all"):
                 if n_cooling_lines == 100:
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
-    with make("steam_consumption", is_parent_node=True):
-        for sc in schedule.iter(
-            cls="steam_consumption",
-            type="melting",
-            line_name=line_name,
-        ):
-            for j in range(sc.x[0], sc.y[0]):
-                make(
-                    x=(j, 0),
-                    size=(1, 1),
-                    text=str(sc.props["value"]),
-                    text_rotation=90,
-                    font_size=9,
-                    push_func=add_push,
-                    # border=None,
-                )
-
-    make("stub", size=(0, 1))
+    # add two lines for "Расход пара"
+    make("stub", size=(0, 2))
     return maker.root
 
 
@@ -519,7 +490,7 @@ def make_melting(boiling, line_name):
     return maker.root
 
 
-def make_meltings_2(schedule, line_name, title):
+def make_meltings_2(master, line_name, title):
     # todo: make dynamic lines
     maker, make = init_block_maker("melting", axis=1)
 
@@ -544,32 +515,13 @@ def make_meltings_2(schedule, line_name, title):
     )
 
     for i, boiling in enumerate(
-        schedule["master"].iter(
-            cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
-        )
+        master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == line_name)
     ):
         push(
             melting_lines[i % n_lines],
             make_melting(boiling, line_name),
             push_func=add_push,
         )
-
-        for sc in boiling.iter(
-            cls="steam_consumption", type="melting", line_name=line_name
-        ):
-            for j in range(int(sc.x[0]), int(sc.y[0])):
-                push(
-                    melting_lines[i % n_lines],
-                    maker.create_block(
-                        "steam_consumption",
-                        x=(j, 3),
-                        size=(1, 1),
-                        text=str(sc.props["value"]),
-                        text_rotation=90,
-                        font_size=7,
-                    ),
-                    push_func=add_push,
-                )
     return maker.root
 
 
@@ -695,11 +647,11 @@ def make_frontend(schedule, coolings_mode="first"):
                 ],
             )
         )
-        make(make_cheese_makers(schedule, range(2)))
+        make(make_cheese_makers(master, range(2)))
         # make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
         #                      {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         make(make_cleanings(master))
-        make(make_cheese_makers(schedule, range(2, 4)))
+        make(make_cheese_makers(master, range(2, 4)))
         make(
             make_shifts(
                 0,
@@ -724,7 +676,7 @@ def make_frontend(schedule, coolings_mode="first"):
         make(make_multihead_cleanings(master))
         make(
             make_meltings_1(
-                schedule,
+                master,
                 LineName.WATER,
                 "Линия плавления моцареллы в воде №1",
                 coolings_mode=coolings_mode,
@@ -764,7 +716,7 @@ def make_frontend(schedule, coolings_mode="first"):
         # make(make_meltings_1(schedule, LineName.SALT, 'Линия плавления моцареллы в рассоле №2'))
         make(
             make_meltings_2(
-                schedule, LineName.SALT, "Линия плавления моцареллы в рассоле №2"
+                master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"
             )
         )
         make(
@@ -789,3 +741,17 @@ def make_frontend(schedule, coolings_mode="first"):
         make(make_extra_packings(extra_packings))
 
     return maker.root
+
+
+def draw_excel_frontend(frontend, open_file=False, fn="schedule.xlsx"):
+    wb = draw_schedule(frontend, STYLE)
+
+    if fn:
+        sf = SplitFile(fn)
+        fn = sf.get_new()
+        wb.save(fn)
+
+        if open_file:
+            open_file_in_os(fn)
+
+    return wb

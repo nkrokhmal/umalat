@@ -82,7 +82,7 @@ def draw_schedule(schedule, style, fn=None):
     return wb
 
 
-def draw_excel_frontend(frontend, style, open_file=False, fn="schedule.xlsx"):
+def draw_excel_frontend(frontend, style, open_file=False, fn="schedules/schedule.xlsx"):
     wb = draw_schedule(frontend, style)
 
     if fn:

@@ -35,7 +35,7 @@ def make_schedule():
 
     sku = cast_model(RicottaSKU, 62)  # todo: take from input
 
-    boiling_groups = [make_boiling_group(sku) for _ in range(2)]
+    boiling_groups = [make_boiling_group(sku) for _ in range(1)]
     for bg in boiling_groups:
         push(
             maker.root,
