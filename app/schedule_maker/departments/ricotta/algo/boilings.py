@@ -66,8 +66,8 @@ def make_boiling_group(boiling_group_df):
             RicottaAnalysisTechnology, 1
         )  # todo: take from boiling_model
         make("preparation", size=(analysis.preparation_time // 5, 0))
-        make("analysis", size=(analysis.preparation_time // 5, 0))
-        make("pumping", size=(analysis.preparation_time // 5, 0))
+        make("analysis", size=(analysis.analysis_time // 5, 0))
+        make("pumping", size=(analysis.pumping_time // 5, 0))
 
     packing_start = maker.root["analysis_group"]["pumping"].x[0] + 1
 

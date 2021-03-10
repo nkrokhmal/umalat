@@ -31,6 +31,11 @@ def validate(b1, b2):
 validator.add("boiling_group", "boiling_group", validate)
 
 
+def _equal_prefixes(lst1, lst2):
+    min_len = min(len(lst1), len(lst2))
+    return lst1[:min_len] == lst2[:min_len]
+
+
 def make_schedule(boiling_plan_df):
     maker, make = init_block_maker("schedule")
 
@@ -38,15 +43,25 @@ def make_schedule(boiling_plan_df):
     for boiling_id, grp in boiling_plan_df.groupby("boiling_id"):
         boiling_groups.append(make_boiling_group(grp))
 
-    for bg in boiling_groups:
+    prev_line_nums = None
+    for bg_prev, bg in SimpleIterator(boiling_groups).iter_sequences(2, method="any"):
+        if not bg:
+            # last iteration
+            continue
+
         n_boilings = len(listify(bg["boiling_sequence"]["boiling"]))
+
+        line_nums_props = [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
+        idx = 0
+        if bg_prev:
+            idx = bg_prev.props["line_nums"][-1]  # ended with number
+            idx = (idx + 1) % len(line_nums_props)  # next line_nums in circle
+        bg.props.update(line_nums=line_nums_props[idx][:n_boilings])
+
         push(
             maker.root,
             bg,
             push_func=AxisPusher(start_from="last_beg"),
             validator=validator,
-            iter_props=[
-                {"line_nums": v[:n_boilings]} for v in [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
-            ],
         )
     return maker.root
