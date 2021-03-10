@@ -27,6 +27,15 @@ def validate(b1, b2):
     validate_disjoint_by_axis(b1["analysis_group"], b2["analysis_group"])
     validate_disjoint_by_axis(b1["packing"], b2["packing"])
 
+    # five minute pause between bigger to smaller packing size
+    sku1 = b1.props["skus"][-1]
+    sku2 = b2.props["skus"][0]
+
+    # todo: del
+    if sku1.weight_netto and sku2.weight_netto:
+        if sku1.weight_netto > sku2.weight_netto:
+            assert b1["packing"].y[0] + 1 <= b2["packing"].x[0]
+
 
 validator.add("boiling_group", "boiling_group", validate)
 

@@ -68,7 +68,10 @@ def make_frontend(schedule):
         for boiling_group in listify(schedule["boiling_group"]):
             brand_label = "/".join(
                 remove_neighbor_duplicates(
-                    [sku.brand_name for sku in boiling_group.props["skus"]]
+                    [
+                        sku.brand_name + ":{}".format(sku.weight_netto)
+                        for sku in boiling_group.props["skus"]
+                    ]
                 )
             )
 

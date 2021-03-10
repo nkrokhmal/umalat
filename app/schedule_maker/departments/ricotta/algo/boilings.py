@@ -75,8 +75,8 @@ def make_boiling_group(boiling_group_df):
             make("preparation", size=(analysis.preparation_time // 5, 0))
             make("pumping", size=(analysis.pumping_time // 5, 0))
         else:
-            make("analysis", size=(analysis.analysis_time // 5, 0))
             make("preparation", size=(analysis.preparation_time // 5, 0))
+            make("analysis", size=(analysis.analysis_time // 5, 0))
             make("pumping", size=(analysis.pumping_time // 5, 0))
     packing_start = maker.root["analysis_group"]["pumping"].x[0] + 1
 
