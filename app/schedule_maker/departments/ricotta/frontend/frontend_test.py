@@ -11,13 +11,21 @@ def test_make_frontend_boiling():
 
 
 def test_make_frontend():
-    schedule = make_schedule()
+    from utils_ak.loguru import configure_loguru_stdout
+
+    configure_loguru_stdout("INFO")
+    boiling_plan_df = generate_random_boiling_plan()
+    schedule = make_schedule(boiling_plan_df)
     frontend = make_frontend(schedule)
     print(frontend)
 
 
 def test_drawing():
-    schedule = make_schedule()
+    from utils_ak.loguru import configure_loguru_stdout
+
+    configure_loguru_stdout("INFO")
+    boiling_plan_df = generate_random_boiling_plan()
+    schedule = make_schedule(boiling_plan_df)
     frontend = make_frontend(schedule)
     draw_excel_frontend(frontend, RICOTTA_STYLE, open_file=True)
 

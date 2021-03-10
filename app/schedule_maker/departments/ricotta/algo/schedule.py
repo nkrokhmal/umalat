@@ -12,6 +12,7 @@ def validate(b1, b2):
             line_num not in b1.props["line_nums"]
             or line_num not in b2.props["line_nums"]
         ):
+            # skip if no common line number is used
             continue
 
         boiling1 = listify(b1["boiling_sequence"]["boiling"])[
@@ -33,15 +34,19 @@ validator.add("boiling_group", "boiling_group", validate)
 def make_schedule(boiling_plan_df):
     maker, make = init_block_maker("schedule")
 
-    sku = cast_model(RicottaSKU, 62)  # todo: take from input
+    boiling_groups = []
+    for boiling_id, grp in boiling_plan_df.groupby("boiling_id"):
+        boiling_groups.append(make_boiling_group(grp))
 
-    boiling_groups = [make_boiling_group(sku) for _ in range(2)]
     for bg in boiling_groups:
+        n_boilings = len(listify(bg["boiling_sequence"]["boiling"]))
         push(
             maker.root,
             bg,
             push_func=AxisPusher(start_from="last_beg"),
             validator=validator,
-            iter_props=[{"line_nums": v} for v in [[0, 1, 2], [1, 2, 0], [2, 0, 1]]],
+            iter_props=[
+                {"line_nums": v[:n_boilings]} for v in [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
+            ],
         )
     return maker.root

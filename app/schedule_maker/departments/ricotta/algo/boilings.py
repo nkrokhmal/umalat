@@ -56,7 +56,9 @@ def make_boiling_sequence(boiling_group_df):
 
 def make_boiling_group(boiling_group_df):
     maker, make = init_block_maker(
-        "boiling_group", skus=boiling_group_df["sku"].tolist()
+        "boiling_group",
+        skus=boiling_group_df["sku"].tolist(),
+        boiling_id=boiling_group_df.iloc[0]["boiling_id"],
     )
     boiling_sequence = make_boiling_sequence(boiling_group_df)
     push(maker.root, boiling_sequence)
