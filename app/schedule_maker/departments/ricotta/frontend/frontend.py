@@ -61,17 +61,25 @@ def make_frontend(schedule):
 
     with make("packing", size=(0, 1), is_parent_node=True):
         for boiling_group in listify(schedule["boiling_group"]):
+            brand_label = "/".join(
+                remove_neighbor_duplicates(
+                    [sku.brand_name for sku in boiling.props["skus"]]
+                )
+            )
+
             make(
-                "packing",
+                "packing_num",
                 size=(2, 1),
                 x=(boiling_group["packing"].x[0], 0),
                 push_func=add_push,
+                boiling_id=boiling_group.props["boiling_id"],
             )
             make(
                 "packing",
                 size=(boiling_group["packing"].size[0] - 2, 1),
                 x=(boiling_group["packing"].x[0] + 2, 0),
                 push_func=add_push,
+                brand_label=brand_label,
             )
 
     return maker.root

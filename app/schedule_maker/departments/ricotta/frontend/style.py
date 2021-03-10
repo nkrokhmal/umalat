@@ -10,5 +10,6 @@ STYLE = {
     "preparation": {"color": "#00B0F0", "text": "1"},  # blue
     "analysis": {"color": "#00B0F0", "text": "2"},  # blue
     "pumping": {"color": "#00B0F0", "text": "3"},  # blue
-    "packing": {"color": "#FFC000"},  # orange
+    "packing_num": {"color": "#FFC000", "text": "{boiling_id}"},  # orange
+    "packing": {"color": "#FFC000", "text": "{brand_label}"},  # orange
 }

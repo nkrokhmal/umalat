@@ -6,9 +6,7 @@ from app.schedule_maker.models import *
 
 
 def make_boiling(boiling_model):
-    maker, make = init_block_maker(
-        "boiling", boiling_id=1, boiling_label="рикотта"
-    )  # todo: set boiling_id from inputs
+    maker, make = init_block_maker("boiling", boiling_label="рикотта")
 
     bt = boiling_model.boiling_technology
     make("heating", size=(bt.heating_time // 5, 0))
