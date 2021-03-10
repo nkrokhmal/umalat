@@ -54,10 +54,11 @@ def make_boiling_sequence(boiling_group_df):
     return maker.root
 
 
-def make_boiling_group(sku):
-    kg = 50  # todo: rake from input
-    maker, make = init_block_maker("boiling_group")
-    boiling_sequence = make_boiling_sequence(sku)
+def make_boiling_group(boiling_group_df):
+    maker, make = init_block_maker(
+        "boiling_group", skus=boiling_group_df["sku"].tolist()
+    )
+    boiling_sequence = make_boiling_sequence(boiling_group_df)
     push(maker.root, boiling_sequence)
     analysis_start = listify(boiling_sequence["boiling"])[-1]["abandon"].x[0]
     with make("analysis_group", x=(analysis_start, 0), push_func=add_push):
@@ -69,7 +70,15 @@ def make_boiling_group(sku):
         make("pumping", size=(analysis.preparation_time // 5, 0))
 
     packing_start = maker.root["analysis_group"]["pumping"].x[0] + 1
-    packing_time = custom_round(kg / sku.packing_speed * 60, 5, "ceil")
+
+    # todo: pauses
+    packing_time = sum(
+        [
+            row["kg"] / row["sku"].packing_speed * 60
+            for i, row in boiling_group_df.iterrows()
+        ]
+    )
+    packing_time = int(custom_round(packing_time, 5, "ceil"))
 
     make(
         "packing", x=(packing_start, 0), size=(packing_time // 5, 0), push_func=add_push

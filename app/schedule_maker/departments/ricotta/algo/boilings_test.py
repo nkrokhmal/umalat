@@ -20,12 +20,12 @@ def test_make_boiling_sequence():
 
 
 def test_make_boiling_group():
-    sku = cast_model(RicottaSKU, 62)
-    print(make_boiling_group(sku))
+    boiling_plan_df = generate_random_boiling_plan()
+    boiling_group_df = boiling_plan_df[boiling_plan_df["boiling_id"] == 0]
+    print(make_boiling_group(boiling_group_df))
 
 
 if __name__ == "__main__":
-    test_make_boiling()
-    test_make_boiling_sequence()
-
-    # test_make_boiling_group()
+    # test_make_boiling()
+    # test_make_boiling_sequence()
+    test_make_boiling_group()
