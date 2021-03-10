@@ -1,9 +1,10 @@
 from utils_ak.block_tree import *
 
 from app.schedule_maker.departments.ricotta.algo.boilings import *
+from app.schedule_maker.departments.ricotta.algo.cleanings import *
 from app.schedule_maker.models import *
 
-validator = ClassValidator(window=2)
+validator = ClassValidator(window=1)
 
 
 def validate(b1, b2):
@@ -40,6 +41,21 @@ def validate(b1, b2):
 validator.add("boiling_group", "boiling_group", validate)
 
 
+def validate(b1, b2):
+    for line_num in range(3):
+        bath_cleaning = listify(b2["bath_cleaning"])[line_num]
+        if line_num in b1.props["line_nums"]:
+            boiling = listify(b1["boiling_sequence"].children)[
+                b1.props["line_nums"].index(line_num)
+            ]
+            validate_disjoint_by_axis(boiling, bath_cleaning)
+
+            assert boiling.y[0] + 1 <= bath_cleaning.x[0]
+
+
+validator.add("boiling_group", "bath_cleaning_sequence", validate)
+
+
 def _equal_prefixes(lst1, lst2):
     min_len = min(len(lst1), len(lst2))
     return lst1[:min_len] == lst2[:min_len]
@@ -73,4 +89,14 @@ def make_schedule(boiling_plan_df):
             push_func=AxisPusher(start_from="last_beg"),
             validator=validator,
         )
+
+    # add cleanings
+    bath_cleaning_sequence = make_bath_cleaning_sequence()
+    push(
+        maker.root,
+        bath_cleaning_sequence,
+        push_func=AxisPusher(start_from="last_beg"),
+        validator=validator,
+    )
+
     return maker.root

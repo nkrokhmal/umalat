@@ -12,4 +12,9 @@ STYLE = {
     "pumping": {"color": "#00B0F0", "text": "3"},  # blue
     "packing_num": {"color": "#FFC000", "text": "{boiling_id}"},  # orange
     "packing": {"color": "#FFC000", "text": "{brand_label}"},  # orange
+    "bath_cleaning_1": {"color": "#4F81BD"},  # blue
+    "bath_cleaning_2": {"color": "#C0504D"},  # red
+    "bath_cleaning_3": {"color": "#4F81BD"},  # blue
+    "bath_cleaning_4": {"color": "#FCD5B4"},  # beige
+    "bath_cleaning_5": {"color": "#4F81BD"},  # blue
 }
