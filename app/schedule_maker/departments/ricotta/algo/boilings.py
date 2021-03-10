@@ -44,7 +44,7 @@ def make_boiling_group(sku):
     boiling_sequence = make_boiling_sequence(sku)
     push(maker.root, boiling_sequence)
     analysis_start = listify(boiling_sequence["boiling"])[-1]["abandon"].x[0]
-    with make("analysis", x=(analysis_start, 0), push_func=add_push):
+    with make("analysis_group", x=(analysis_start, 0), push_func=add_push):
         analysis = cast_model(
             RicottaAnalysisTechnology, 1
         )  # todo: take from boiling_model
@@ -52,7 +52,7 @@ def make_boiling_group(sku):
         make("analysis", size=(analysis.preparation_time // 5, 0))
         make("pumping", size=(analysis.preparation_time // 5, 0))
 
-    packing_start = maker.root["analysis"]["pumping"].x[0] + 1
+    packing_start = maker.root["analysis_group"]["pumping"].x[0] + 1
     packing_time = custom_round(kg / sku.packing_speed * 60, 5, "ceil")
 
     make(

@@ -88,6 +88,7 @@ def draw_excel_frontend(frontend, style, open_file=False, fn="schedules/schedule
     if fn:
         sf = SplitFile(fn)
         fn = sf.get_new()
+
         makedirs(fn)
         wb.save(fn)
 

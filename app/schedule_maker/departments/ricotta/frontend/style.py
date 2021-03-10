@@ -7,4 +7,8 @@ STYLE = {
     "abandon": {"color": "#00B050"},  # green
     "pumping_out": {"color": "#9ECBDB"},  # blue
     "stub": {"visible": False},
+    "preparation": {"color": "#00B0F0", "text": "1"},  # blue
+    "analysis": {"color": "#00B0F0", "text": "2"},  # blue
+    "pumping": {"color": "#00B0F0", "text": "3"},  # blue
+    "packing": {"color": "#FFC000"},  # orange
 }

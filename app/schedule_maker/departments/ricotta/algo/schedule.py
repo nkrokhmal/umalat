@@ -23,7 +23,7 @@ def validate(b1, b2):
 
         validate_disjoint_by_axis(boiling1, boiling2)
 
-    validate_disjoint_by_axis(b1["analysis"], b2["analysis"])
+    validate_disjoint_by_axis(b1["analysis_group"], b2["analysis_group"])
     validate_disjoint_by_axis(b1["packing"], b2["packing"])
 
 
@@ -35,7 +35,7 @@ def make_schedule():
 
     sku = cast_model(RicottaSKU, 62)  # todo: take from input
 
-    boiling_groups = [make_boiling_group(sku) for _ in range(1)]
+    boiling_groups = [make_boiling_group(sku) for _ in range(2)]
     for bg in boiling_groups:
         push(
             maker.root,

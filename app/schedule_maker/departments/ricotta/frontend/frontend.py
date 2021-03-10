@@ -7,7 +7,7 @@ def make_frontend_boiling(boiling):
         "boiling",
         axis=1,
         x=(boiling.x[0], 0),
-        size=(0, 3),
+        size=(0, 2),
         boiling_id=boiling.props["boiling_id"],
         boiling_label=boiling.props["boiling_label"],
     )
@@ -32,12 +32,46 @@ def make_frontend(schedule):
     boiling_lines = []
     for i in range(3):
         boiling_lines.append(
-            make(f"boiling_line_{i}", size=(0, 3), is_parent_node=True).block
+            make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
         )
-        make("stub", size=(0, 2))
+        if i <= 1:
+            make("stub", size=(0, 2))
 
     for boiling_group in listify(schedule["boiling_group"]):
         for i, line_num in enumerate(boiling_group.props["line_nums"]):
             boiling = listify(boiling_group["boiling_sequence"]["boiling"])[i]
-            push(boiling_lines[line_num], make_frontend_boiling(boiling))
+            push(
+                boiling_lines[line_num],
+                make_frontend_boiling(boiling),
+                push_func=add_push,
+            )
+
+    # make analysis line
+    with make("analysis", size=(0, 1), is_parent_node=True):
+        for boiling_group in listify(schedule["boiling_group"]):
+            with make("analysis_group", push_func=add_push):
+                for block in boiling_group["analysis_group"].children:
+                    print(block)
+                    make(
+                        block.props["cls"],
+                        size=(block.size[0], 1),
+                        x=(block.x[0], 0),
+                        push_func=add_push,
+                    )
+
+    with make("packing", size=(0, 1), is_parent_node=True):
+        for boiling_group in listify(schedule["boiling_group"]):
+            make(
+                "packing",
+                size=(2, 1),
+                x=(boiling_group["packing"].x[0], 0),
+                push_func=add_push,
+            )
+            make(
+                "packing",
+                size=(boiling_group["packing"].size[0] - 2, 1),
+                x=(boiling_group["packing"].x[0] + 2, 0),
+                push_func=add_push,
+            )
+
     return maker.root
