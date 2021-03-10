@@ -17,4 +17,7 @@ STYLE = {
     "bath_cleaning_3": {"color": "#4F81BD"},  # blue
     "bath_cleaning_4": {"color": "#FCD5B4"},  # beige
     "bath_cleaning_5": {"color": "#4F81BD"},  # blue
+    "container_cleaning_1": {"color": "yellow", "text": "Мойка бака №1"},
+    "container_cleaning_2": {"color": "yellow", "text": "Мойка бака №2"},
+    "container_cleaning_3": {"color": "yellow", "text": "Мойка бака №3 + фасовочник"},
 }

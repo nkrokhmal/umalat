@@ -52,9 +52,7 @@ def make_boiling_lines(schedule):
                 push_func=add_push,
             )
 
-    for i, cleaning in enumerate(
-        listify(schedule["bath_cleaning_sequence"]["bath_cleaning"])
-    ):
+    for i, cleaning in enumerate(listify(schedule["bath_cleanings"]["bath_cleaning"])):
         cleaning_block = maker.copy(cleaning, with_props=True)
         for block in cleaning_block.children:
             block.props.update(size=(block.size[0], 2))
@@ -109,10 +107,26 @@ def make_packing_line(schedule):
     return maker.root
 
 
+def make_container_cleanings(schedule):
+    maker, make = init_block_maker(
+        "container_cleanings", size=(0, 1), is_parent_node=True
+    )
+
+    for block in schedule["container_cleanings"].children:
+        make(
+            block.props["cls"],
+            size=(block.size[0], 1),
+            x=(block.x[0], 0),
+            push_func=add_push,
+        )
+    return maker.root
+
+
 def make_frontend(schedule):
     maker, make = init_block_maker("boiling_lines", axis=1)
     make("stub", size=(0, 1))  # start with 1
     make(make_boiling_lines(schedule))
-    # make(make_analysis_line(schedule))
-    # make(make_packing_line(schedule))
+    make(make_analysis_line(schedule))
+    make(make_packing_line(schedule))
+    make(make_container_cleanings(schedule))
     return maker.root

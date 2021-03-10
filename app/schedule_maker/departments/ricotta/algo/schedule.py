@@ -4,7 +4,7 @@ from app.schedule_maker.departments.ricotta.algo.boilings import *
 from app.schedule_maker.departments.ricotta.algo.cleanings import *
 from app.schedule_maker.models import *
 
-validator = ClassValidator(window=1)
+validator = ClassValidator(window=3)
 
 
 def validate(b1, b2):
@@ -53,7 +53,26 @@ def validate(b1, b2):
             assert boiling.y[0] + 1 <= bath_cleaning.x[0]
 
 
-validator.add("boiling_group", "bath_cleaning_sequence", validate)
+validator.add("boiling_group", "bath_cleanings", validate)
+
+
+def validate(b1, b2):
+    validate_disjoint_by_axis(
+        b1["analysis_group"]["preparation"], b2["container_cleaning_1"]
+    )
+    # add extra 5 minutes
+    assert (
+        b1["analysis_group"]["preparation"].y[0] + 1 <= b2["container_cleaning_1"].x[0]
+    )
+    validate_disjoint_by_axis(
+        b1["analysis_group"]["analysis"], b2["container_cleaning_2"]
+    )
+    validate_disjoint_by_axis(
+        b1["analysis_group"]["pumping"], b2["container_cleaning_3"]
+    )
+
+
+validator.add("boiling_group", "container_cleanings", validate)
 
 
 def _equal_prefixes(lst1, lst2):
@@ -90,12 +109,22 @@ def make_schedule(boiling_plan_df):
             validator=validator,
         )
 
-    # add cleanings
-    bath_cleaning_sequence = make_bath_cleaning_sequence()
+    # add bat cleanings
+    bath_cleanings = make_bath_cleanings()
     push(
         maker.root,
-        bath_cleaning_sequence,
+        bath_cleanings,
         push_func=AxisPusher(start_from="last_beg"),
+        validator=validator,
+    )
+
+    # add container cleanings
+    container_cleanings = make_container_cleanings()
+
+    push(
+        maker.root,
+        container_cleanings,
+        push_func=AxisPusher(start_from=boiling_groups[-1]["analysis_group"].x[0]),
         validator=validator,
     )
 

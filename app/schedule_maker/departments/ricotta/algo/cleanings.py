@@ -14,8 +14,8 @@ def make_bath_cleaning():
     return maker.root
 
 
-def make_bath_cleaning_sequence():
-    maker, make = init_block_maker("bath_cleaning_sequence")
+def make_bath_cleanings():
+    maker, make = init_block_maker("bath_cleanings")
 
     bath_cleanings = [make_bath_cleaning() for _ in range(3)]
 
@@ -23,4 +23,14 @@ def make_bath_cleaning_sequence():
         if b1:
             b2.props.update(x=(b1["bath_cleaning_3"].x[0], 0))
         push(maker.root, b2, push_func=add_push)
+    return maker.root
+
+
+def make_container_cleanings():
+    maker, make = init_block_maker("container_cleanings")
+    make("container_cleaning_1", size=(12, 0))
+    make("stub", size=(3, 0))
+    make("container_cleaning_2", size=(12, 0))
+    make("stub", size=(3, 0))
+    make("container_cleaning_3", size=(12, 0))
     return maker.root
