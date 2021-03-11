@@ -3,9 +3,7 @@ import os
 os.environ["environment"] = "interactive"
 
 from app.schedule_maker.departments.ricotta.algo.schedule import *
-from app.schedule_maker.departments.ricotta.boiling_plan import (
-    generate_random_boiling_plan,
-)
+from app.schedule_maker.departments.ricotta.boiling_plan import *
 
 
 def test():

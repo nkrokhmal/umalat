@@ -28,6 +28,5 @@ def generate_random_boiling_plan(n=24, seed=12):
         for sku in boiling_skus:
             values.append([i, sku, 1])
 
-    df = pd.DataFrame(values, columns=["boiling_id", "sku", "volume"])
-    df["kg"] = 16  # todo: make properly
+    df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
     return df

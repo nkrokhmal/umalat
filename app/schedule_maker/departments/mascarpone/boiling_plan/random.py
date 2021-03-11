@@ -24,5 +24,5 @@ def generate_random_boiling_plan(n=3, seed=12):
 
             values.append([i * 2 + j, sku, 10])
 
-    df = pd.DataFrame(values, columns=["boiling_id", "sku", "volume"])
+    df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
     return df

@@ -62,7 +62,9 @@ def make_mascarpone_boiling_group(boiling_group_df1, boiling_group_df2):
 
     validator.add("boiling", "boiling", validate)
 
-    maker, make = init_block_maker("boiling_group", boiling_model=boiling_model)
+    maker, make = init_block_maker(
+        "mascarpone_boiling_group", boiling_model=boiling_model
+    )
 
     b1 = make_mascorpone_boiling(boiling_group_df1)
     b2 = make_mascorpone_boiling(boiling_group_df2)
