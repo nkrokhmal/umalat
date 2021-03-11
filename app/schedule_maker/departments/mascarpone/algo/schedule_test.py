@@ -2,10 +2,8 @@ import os
 
 os.environ["environment"] = "interactive"
 
-from app.schedule_maker.departments.ricotta.algo.schedule import *
-from app.schedule_maker.departments.ricotta.boiling_plan import (
-    generate_random_boiling_plan,
-)
+from app.schedule_maker.departments.mascarpone.algo.schedule import *
+from app.schedule_maker.departments.mascarpone.boiling_plan import *
 
 
 def test():
@@ -13,6 +11,7 @@ def test():
 
     configure_loguru_stdout("INFO")
     boiling_plan_df = generate_random_boiling_plan()
+    print(boiling_plan_df)
     print(make_schedule(boiling_plan_df))
 
 

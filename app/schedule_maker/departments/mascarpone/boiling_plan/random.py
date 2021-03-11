@@ -17,16 +17,12 @@ def generate_random_boiling_plan(n=3, seed=12):
     for i in range(n):
         boiling_model = cast_model(MascarponeBoiling, random.choice(boiling_model_ids))
 
-        boiling_skus = []
-        for _ in range(2):
-            boiling_skus.append(
-                random.choice(
-                    [sku for sku in skus if boiling_model in sku.made_from_boilings]
-                )
+        for j in range(2):
+            sku = random.choice(
+                [sku for sku in skus if boiling_model in sku.made_from_boilings]
             )
 
-        for sku in boiling_skus:
-            values.append([i, sku, 10])
+            values.append([i * 2 + j, sku, 10])
 
     df = pd.DataFrame(values, columns=["boiling_id", "sku", "volume"])
     return df
