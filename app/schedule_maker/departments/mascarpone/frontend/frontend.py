@@ -38,10 +38,10 @@ def make_boiling_lines(schedule):
         )
         make("stub", size=(0, 1))
 
-    for mascarpone_boiling_group in listify(schedule["mascarpone_boiling_group"]):
-        line_nums = mascarpone_boiling_group.props["line_nums"]
+    for mbg in listify(schedule["mascarpone_boiling_group"]):
+        line_nums = mbg.props["line_nums"]
 
-        for i, boiling in enumerate(listify(mascarpone_boiling_group["boiling"])):
+        for i, boiling in enumerate(listify(mbg["boiling"])):
             frontend_boiling = make_frontend_mascarpone_boiling(
                 boiling["boiling_process"]
             )
@@ -49,8 +49,35 @@ def make_boiling_lines(schedule):
     return maker.root
 
 
+def make_packing_line(schedule):
+    maker, make = init_block_maker("packing_line", axis=1)
+
+    for mbg in listify(schedule["mascarpone_boiling_group"]):
+        p1, p2 = [b["packing_process"] for b in mbg["boiling"]]
+        batch_id = int(p1.props["boiling_id"]) // 2
+        make(
+            "packing_num",
+            size=(2, 1),
+            x=(p1["N"].x[0] + 1, 1),
+            batch_id=batch_id,
+            push_func=add_push,
+        )
+        for p in [p1, p2]:
+            make(
+                "packing",
+                size=(p["packing"].size[0], 1),
+                x=(p["packing"].x[0], 1),
+                push_func=add_push,
+            )
+            make("N", size=(p["N"].size[0], 1), x=(p["N"].x[0], 0), push_func=add_push)
+            make("P", size=(p["P"].size[0], 1), x=(p["P"].x[0], 0), push_func=add_push)
+
+    return maker.root
+
+
 def make_frontend(schedule):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
     make(make_boiling_lines(schedule))
+    make(make_packing_line(schedule))
     return maker.root

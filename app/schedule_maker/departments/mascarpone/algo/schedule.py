@@ -12,7 +12,7 @@ def validate(b1, b2):
     b2 = listify(b2["boiling"])[0]
 
     assert (
-        b1["packing_process"]["packing"].x[0] + 2
+        b1["packing_process"]["packing"].y[0] + 2
         <= b2["packing_process"]["packing"].x[0]
     )
     validate_disjoint_by_axis(
