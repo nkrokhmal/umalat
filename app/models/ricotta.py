@@ -34,6 +34,13 @@ class RicottaBoiling(Boiling):
 
     analysis = db.relationship('RicottaAnalysisTechnology', backref=backref('boiling', uselist=False, lazy='subquery'))
 
+    @property
+    def short_display_name(self):
+        if self.flavoring_agent:
+            return self.flavoring_agent
+        else:
+            return 'Рикотта'
+
 
 class RicottaBoilingTechnology(BoilingTechnology):
     __tablename__ = 'ricotta_boiling_technologies'
