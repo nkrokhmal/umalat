@@ -24,5 +24,5 @@ def test_make_mascarpone_boiling_group():
 
 
 if __name__ == "__main__":
-    test_make_mascarpone_boiling()
+    # test_make_mascarpone_boiling()
     test_make_mascarpone_boiling_group()

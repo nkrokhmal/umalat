@@ -82,8 +82,11 @@ def make_mascarpone_boiling_group(boiling_group_df1, boiling_group_df2):
     waiting_size = (
         b2["boiling_process"]["pouring"].x[0] - b1["boiling_process"]["pouring"].y[0]
     )
-    for key in ["pouring", "heating", "waiting"]:
-        b = b2["boiling_process"][key]
+
+    for b in [b2["boiling_process"]]:
         b.props.update(x=(b.props["x_rel"][0] - waiting_size, 0))
+    for key in ["adding_lactic_acid", "separation"]:
+        b = b2["boiling_process"][key]
+        b.props.update(x=(b.props["x_rel"][0] + waiting_size, 0))
     b2["boiling_process"]["waiting"].props.update(size=(waiting_size, 0))
     return maker.root

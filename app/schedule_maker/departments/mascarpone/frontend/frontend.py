@@ -52,10 +52,5 @@ def make_boiling_lines(schedule):
 def make_frontend(schedule):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
-    make(
-        make_frontend_mascarpone_boiling(
-            schedule["mascarpone_boiling_group"][0]["boiling"][1]["boiling_process"]
-        )
-    )
     make(make_boiling_lines(schedule))
     return maker.root
