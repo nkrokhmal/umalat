@@ -10,5 +10,9 @@ STYLE = {
     "packing": {"color": "#C0504D", "text": "фасовка"},  # brown
     "N": {"color": "#F79646", "text": "Н"},  # orange
     "P": {"color": "#948A54", "text": "П"},  # green-grey
+    "salting": {"color": "#92D050", "text": "посолка/нормализация"},  # green
+    "cream_cheese_boiling_label1": {"color": "white"},
+    "cream_cheese_boiling_label2": {"color": "white"},
+    "cooling": {"color": "#F79646", "text": "охлаждение"},  # orange
     "stub": {"visible": False},
 }

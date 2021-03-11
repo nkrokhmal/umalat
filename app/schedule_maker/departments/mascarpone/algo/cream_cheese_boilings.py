@@ -16,7 +16,7 @@ def make_cream_cheese_boiling(boiling_group_df):
     bt = boiling_model.boiling_technology
 
     with make("boiling_process"):
-        make("pouring", size=(bt.cooling_time // 5, 0))
+        make("cooling", size=(bt.cooling_time // 5, 0))
         make("separation", size=(bt.separation_time // 5, 0))
         make("salting", size=(bt.salting_time // 5, 0))
         make("separation", size=(bt.separation_time // 5, 0))

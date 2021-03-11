@@ -75,9 +75,51 @@ def make_packing_line(schedule):
     return maker.root
 
 
+def make_frontend_cream_cheese_boiling(boiling):
+    maker, make = init_block_maker(
+        "cream_cheese_boiling",
+        axis=1,
+        x=(boiling.x[0], 0),
+        size=(0, 2),
+        boiling_id=boiling.props["boiling_id"],
+    )
+
+    bp = boiling["boiling_process"]
+    pp = boiling["packing_process"]
+
+    with make():
+        make("cooling", size=(bp["cooling"].size[0], 1))
+        make("separation", size=(bp["separation"][0].size[0], 1))
+        make("salting", size=(bp["salting"][0].size[0], 1))
+        make("separation", size=(bp["separation"][1].size[0], 1))
+        make("salting", size=(bp["salting"][1].size[0], 1))
+        make("P", size=(bp["P"].size[0], 1))
+
+    with make():
+        make("cream_cheese_boiling_label1", size=(bp["cooling"].size[0], 1))
+        make("cream_cheese_boiling_label2", size=(bp["separation"][0].size[0], 1))
+        make("stub", size=(2, 1))
+        make("P", size=(pp["P"].size[0], 1))
+        make("packing", size=(pp["packing"].size[0], 1))
+
+    return maker.root
+
+
 def make_frontend(schedule):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
     make(make_boiling_lines(schedule))
     make(make_packing_line(schedule))
+
+    from app.schedule_maker.models import cast_model, CreamCheeseSKU
+    from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import (
+        make_cream_cheese_boiling,
+    )
+
+    # todo: del, test
+    sku = cast_model(CreamCheeseSKU, 91)
+    values = [[0, sku, 10]]
+    boiling_group_df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
+    boiling = make_cream_cheese_boiling(boiling_group_df)
+    make(make_frontend_cream_cheese_boiling(boiling))
     return maker.root
