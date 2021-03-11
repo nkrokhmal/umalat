@@ -10,6 +10,7 @@ def make_frontend_mascarpone_boiling(boiling_process):
         size=(0, 2),
         boiling_id=boiling_process.props["boiling_id"],
     )
+
     with make():
         make("boiling_num", size=(3, 1))
         make("boiling_name", size=(boiling_process.size[0] - 3, 1))
@@ -27,12 +28,34 @@ def make_frontend_mascarpone_boiling(boiling_process):
     return maker.root
 
 
+def make_boiling_lines(schedule):
+    maker, make = init_block_maker("boiling_lines", axis=1)
+
+    boiling_lines = []
+    for i in range(4):
+        boiling_lines.append(
+            make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
+        )
+        make("stub", size=(0, 1))
+
+    for mascarpone_boiling_group in listify(schedule["mascarpone_boiling_group"]):
+        line_nums = mascarpone_boiling_group.props["line_nums"]
+
+        for i, boiling in enumerate(listify(mascarpone_boiling_group["boiling"])):
+            frontend_boiling = make_frontend_mascarpone_boiling(
+                boiling["boiling_process"]
+            )
+            push(boiling_lines[line_nums[i]], frontend_boiling, push_func=add_push)
+    return maker.root
+
+
 def make_frontend(schedule):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
     make(
         make_frontend_mascarpone_boiling(
-            schedule["mascarpone_boiling_group"][0]["boiling"][0]["boiling_process"]
+            schedule["mascarpone_boiling_group"][0]["boiling"][1]["boiling_process"]
         )
     )
+    make(make_boiling_lines(schedule))
     return maker.root

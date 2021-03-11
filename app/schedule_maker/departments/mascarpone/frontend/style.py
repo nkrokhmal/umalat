@@ -1,10 +1,10 @@
 STYLE = {
     "boiling_num": {"text": "{boiling_id}"},
     "boiling_name": {"text": "{boiling_id}"},
-    "pouring": {"color": "yellow"},
-    "heating": {"color": "red"},
-    "waiting": {"color": "#00B0F0"},  # blue
-    "adding_lactic_acid": {"color": "#00B050"},  # green
-    "separation": {"color": "#9ECBDB"},  # blue
+    "pouring": {"color": "#B8CCE4", "text": "3"},  # blue
+    "heating": {"color": "red", "text": "нагрев"},
+    "waiting": {"color": "white", "text": "ожидание"},
+    "adding_lactic_acid": {"color": "yellow", "text": "4"},
+    "separation": {"color": "#00B0F0", "text": "сепарирование"},  # blue
     "stub": {"visible": False},
 }

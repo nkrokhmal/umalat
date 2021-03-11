@@ -1,5 +1,6 @@
-from app.schedule_maker import *
+from app.schedule_maker.departments.mozarella import *
 from app.enum import *
+from app.schedule_maker.frontend import *
 
 
 def main(fn, optimize=False, open_file=True, **kwargs):
@@ -22,7 +23,7 @@ def main(fn, optimize=False, open_file=True, **kwargs):
         schedule = make_schedule(boilings, cleanings=cleanings, start_times=start_times)
     frontend = make_frontend(schedule, coolings_mode="all")
     schedule_wb = draw_excel_frontend(
-        frontend, STYLE, open_file=open_file, fn="schedules/schedule.xlsx"
+        frontend, MOZARELLA_STYLE, open_file=open_file, fn="schedules/schedule.xlsx"
     )
 
 

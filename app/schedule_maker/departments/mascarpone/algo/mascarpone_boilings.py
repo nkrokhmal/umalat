@@ -7,7 +7,10 @@ from app.schedule_maker.models import *
 
 def make_mascorpone_boiling(boiling_group_df):
     boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
-    maker, make = init_block_maker("boiling", boiling_model=boiling_model)
+    boiling_id = boiling_group_df.iloc[0]["boiling_id"]
+    maker, make = init_block_maker(
+        "boiling", boiling_model=boiling_model, boiling_id=boiling_id
+    )
     bt = boiling_model.boiling_technology
 
     with make("boiling_process"):

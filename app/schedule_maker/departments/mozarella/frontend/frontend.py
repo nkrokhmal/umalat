@@ -2,6 +2,8 @@ import openpyxl
 import pandas as pd
 from app.enum import LineName
 
+from app.schedule_maker.time import *
+from app.schedule_maker.calculation import *
 from utils_ak.interactive_imports import *
 
 
