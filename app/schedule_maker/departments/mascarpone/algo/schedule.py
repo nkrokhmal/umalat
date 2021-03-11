@@ -12,11 +12,6 @@ def validate(b1, b2):
 validator.add("boiling_group", "boiling_group", validate)
 
 
-def _equal_prefixes(lst1, lst2):
-    min_len = min(len(lst1), len(lst2))
-    return lst1[:min_len] == lst2[:min_len]
-
-
 def make_schedule(boiling_plan_df):
     maker, make = init_block_maker("schedule")
 

@@ -2,123 +2,27 @@ from utils_ak.block_tree import *
 from utils_ak.builtin import *
 
 
-def make_frontend_boiling(boiling):
-    label_values = [
-        "{}%".format(boiling.props["boiling_model"].percent),
-        boiling.props["boiling_model"].flavoring_agent,
-    ]
-    label_values = [v for v in label_values if v]
-
+def make_frontend_mascarpone_boiling(boiling_process):
     maker, make = init_block_maker(
         "boiling",
         axis=1,
-        x=(boiling.x[0], 0),
+        x=(boiling_process.x[0], 0),
         size=(0, 2),
-        boiling_id=boiling.props["boiling_id"],
-        boiling_label=", ".join(label_values),
+        boiling_id=boiling_process.props["boiling_id"],
     )
+    with make():
+        make("boiling_num", size=(3, 1))
+        make("boiling_name", size=(boiling_process.size[0] - 3, 1))
 
     with make():
-        make("boiling_num", size=(boiling["heating"].size[0], 1))
-        make("boiling_name", size=(boiling.size[0] - boiling["heating"].size[0], 1))
-
-    with make():
-        make("heating", size=(boiling["heating"].size[0], 1), text="1900")
-        make("delay", size=(boiling["delay"].size[0], 1))
-        make("protein_harvest", size=(boiling["protein_harvest"].size[0], 1))
-        make("abandon", size=(boiling["abandon"].size[0], 1))
-        make("pumping_out", size=(boiling["pumping_out"].size[0], 1))
-
-    return maker.root
-
-
-def make_boiling_lines(schedule):
-    maker, make = init_block_maker("boiling_lines", axis=1)
-
-    boiling_lines = []
-    for i in range(3):
-        boiling_lines.append(
-            make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
-        )
-        if i <= 1:
-            make("stub", size=(0, 2))
-
-    for boiling_group in listify(schedule["boiling_group"]):
-        for i, line_num in enumerate(boiling_group.props["line_nums"]):
-            boiling = listify(boiling_group["boiling_sequence"]["boiling"])[i]
-            push(
-                boiling_lines[line_num],
-                make_frontend_boiling(boiling),
-                push_func=add_push,
-            )
-
-    for i, cleaning in enumerate(listify(schedule["bath_cleanings"]["bath_cleaning"])):
-        cleaning_block = maker.copy(cleaning, with_props=True)
-        for block in cleaning_block.children:
-            block.props.update(size=(block.size[0], 2))
-        push(boiling_lines[i], cleaning_block, push_func=add_push)
-
-    return maker.root
-
-
-def make_analysis_line(schedule):
-    maker, make = init_block_maker("analysis", size=(0, 1), is_parent_node=True)
-
-    for boiling_group in listify(schedule["boiling_group"]):
-        with make("analysis_group", push_func=add_push):
-            for block in boiling_group["analysis_group"].children:
-                make(
-                    block.props["cls"],
-                    size=(block.size[0], 1),
-                    x=(block.x[0], 0),
-                    push_func=add_push,
-                )
-    return maker.root
-
-
-def make_packing_line(schedule):
-    maker, make = init_block_maker("packing", size=(0, 1), is_parent_node=True)
-
-    for boiling_group in listify(schedule["boiling_group"]):
-        brand_label = "/".join(
-            remove_neighbor_duplicates(
-                [
-                    sku.brand_name + ":{}".format(sku.weight_netto)
-                    for sku in boiling_group.props["skus"]
-                ]
-            )
-        )
-
+        make("pouring", size=(boiling_process["pouring"].size[0], 1))
+        make("heating", size=(boiling_process["heating"].size[0], 1))
+        make("waiting", size=(boiling_process["waiting"].size[0], 1))
         make(
-            "packing_num",
-            size=(2, 1),
-            x=(boiling_group["packing"].x[0], 0),
-            push_func=add_push,
-            boiling_id=boiling_group.props["boiling_id"],
+            "adding_lactic_acid",
+            size=(boiling_process["adding_lactic_acid"].size[0], 1),
         )
-        make(
-            "packing",
-            size=(boiling_group["packing"].size[0] - 2, 1),
-            x=(boiling_group["packing"].x[0] + 2, 0),
-            push_func=add_push,
-            brand_label=brand_label,
-        )
-
-    return maker.root
-
-
-def make_container_cleanings(schedule):
-    maker, make = init_block_maker(
-        "container_cleanings", size=(0, 1), is_parent_node=True
-    )
-
-    for block in schedule["container_cleanings"].children:
-        make(
-            block.props["cls"],
-            size=(block.size[0], 1),
-            x=(block.x[0], 0),
-            push_func=add_push,
-        )
+        make("separation", size=(boiling_process["separation"].size[0], 1))
     return maker.root
 
 

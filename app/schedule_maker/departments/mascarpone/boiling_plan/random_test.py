@@ -3,7 +3,7 @@ import os
 os.environ["environment"] = "interactive"
 
 from app.schedule_maker import *
-from app.schedule_maker.departments.ricotta.boiling_plan.random import *
+from app.schedule_maker.departments.mascarpone.boiling_plan.random import *
 
 
 def test():
