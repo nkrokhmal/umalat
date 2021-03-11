@@ -1,4 +1,7 @@
 from app.schedule_maker.departments.mozarella import *
+from app.schedule_maker.departments.mozarella.algo.schedule.boilings import (
+    make_boilings,
+)  # todo: hardcode, for some reaosn not found
 from app.enum import *
 from app.schedule_maker.frontend import *
 
