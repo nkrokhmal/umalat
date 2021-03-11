@@ -2,7 +2,8 @@ import os
 
 os.environ["environment"] = "interactive"
 
-from app.schedule_maker import *
+from app.schedule_maker.departments.ricotta import *
+from app.schedule_maker import draw_excel_frontend
 
 
 def test_make_frontend_boiling():

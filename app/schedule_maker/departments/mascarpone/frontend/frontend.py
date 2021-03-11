@@ -17,7 +17,8 @@ def make_frontend_mascarpone_boiling(boiling_process):
     with make():
         make("pouring", size=(boiling_process["pouring"].size[0], 1))
         make("heating", size=(boiling_process["heating"].size[0], 1))
-        make("waiting", size=(boiling_process["waiting"].size[0], 1))
+        if boiling_process["waiting"].size[0]:
+            make("waiting", size=(boiling_process["waiting"].size[0], 1))
         make(
             "adding_lactic_acid",
             size=(boiling_process["adding_lactic_acid"].size[0], 1),
@@ -27,10 +28,11 @@ def make_frontend_mascarpone_boiling(boiling_process):
 
 
 def make_frontend(schedule):
-    maker, make = init_block_maker("boiling_lines", axis=1)
+    maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
-    make(make_boiling_lines(schedule))
-    make(make_analysis_line(schedule))
-    make(make_packing_line(schedule))
-    make(make_container_cleanings(schedule))
+    make(
+        make_frontend_mascarpone_boiling(
+            schedule["mascarpone_boiling_group"][0]["boiling"][0]["boiling_process"]
+        )
+    )
     return maker.root

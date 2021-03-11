@@ -33,7 +33,7 @@ def make_frontend_boiling(boiling):
 
 
 def make_boiling_lines(schedule):
-    maker, make = init_block_maker("boiling_lines", axis=1)
+    maker, make = init_block_maker("frontend", axis=1)
 
     boiling_lines = []
     for i in range(3):
