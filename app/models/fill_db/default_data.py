@@ -59,14 +59,15 @@ def generate_pack_types():
 
 def generate_mozzarella_lines():
     mozzarella_department = Department.query.filter_by(name='Моцарельный цех').first()
-    for params in [(LineName.SALT, 180, 850, 1020, 30, 30), (LineName.WATER, 240, 1000, 900, 30, 30)]:
+    for params in [(LineName.SALT, 180, 850, 8000, 1020, 30, 30), (LineName.WATER, 240, 1000, 8000, 900, 30, 30)]:
         line = MozzarellaLine(
             name=params[0],
             chedderization_time=params[1],
             output_ton=params[2],
-            melting_speed=params[3],
-            serving_time=params[4],
-            pouring_time=params[5],
+            input_ton=params[3],
+            melting_speed=params[4],
+            serving_time=params[5],
+            pouring_time=params[6],
         )
         if mozzarella_department is not None:
             line.department_id = mozzarella_department.id
@@ -75,7 +76,7 @@ def generate_mozzarella_lines():
     ricotta_department = Department.query.filter_by(name='Рикоттный цех').first()
     ricotta_line = RicottaLine(
         name='Рикотта',
-        output_ton=1650,
+        input_ton=1650,
     )
     ricotta_line.department_id = ricotta_department.id
     db.session.add(ricotta_line)

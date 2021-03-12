@@ -33,6 +33,8 @@ class MozzarellaLine(Line):
     __mapper_args__ = {'polymorphic_identity': 'mozzarella_lines'}
 
     id = db.Column(db.Integer, db.ForeignKey('lines.id'), primary_key=True)
+    input_ton = db.Column(db.Integer)
+    output_ton = db.Column(db.Integer)
     pouring_time = db.Column(db.Integer)
     serving_time = db.Column(db.Integer)
     melting_speed = db.Column(db.Integer)

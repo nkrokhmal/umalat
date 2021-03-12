@@ -14,6 +14,7 @@ def fill_db():
     fill_boilings()
     fill_form_factors()
     fill_sku()
+    fill_fermentators()
 
 
 def fill_boiling_technologies():
@@ -89,8 +90,6 @@ def _cast_non_nan(obj):
         return obj
 
 
-
-
 def fill_sku():
     df = read_params()
     lines = db.session.query(MascarponeLine).all()
@@ -125,3 +124,18 @@ def fill_sku():
         db.session.add(add_sku)
     db.session.commit()
 
+
+def fill_fermentators():
+    line_name = LineName.MASCARPONE
+    lines = db.session.query(MascarponeLine).all()
+    mascarpone_line = [x for x in lines if x.name == line_name][0]
+    for i in range(7):
+        output_ton = 255 if i == 0 else 225
+
+        fermentator = MascarponeFermentator(
+            name=f'Заквасочние {i + 1}',
+            output_ton=output_ton,
+        )
+        fermentator.line = mascarpone_line
+        db.session.add(fermentator)
+    db.session.commit()

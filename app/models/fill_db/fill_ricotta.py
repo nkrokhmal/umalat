@@ -48,7 +48,7 @@ def fill_boilings():
     bts = db.session.query(RicottaBoilingTechnology).all()
     columns = ['Вкусовая добавка', 'Процент', 'Линия',
                'Нагрев', 'Выдержка', 'Сбор белка', 'Заборс', 'Слив',
-               'Подготовка полуфабриката', 'Анализ', 'Перекачка']
+               'Подготовка полуфабриката', 'Анализ', 'Перекачка', 'Количество баков']
     b_data = df[columns]
     b_data['Вкусовая добавка'] = b_data['Вкусовая добавка'].fillna('')
     b_data = b_data.drop_duplicates()
@@ -66,6 +66,7 @@ def fill_boilings():
         boiling = RicottaBoiling(
             percent=b['Процент'],
             flavoring_agent=b['Вкусовая добавка'],
+            number_of_tanks=b['Количество баков'],
             boiling_technology_id=bt_id,
             line_id=line_id
         )
@@ -117,8 +118,9 @@ def fill_sku():
     form_factors = db.session.query(RicottaFormFactor).all()
     groups = db.session.query(Group).all()
 
-    columns = ['Название SKU', 'Процент', 'Вкусовая добавка', 'Имя бренда', 'Вес нетто', 'Срок хранения',
-               'Коробки', 'Скорость упаковки', 'Линия', 'Вес форм фактора', 'Название форм фактора']
+    columns = ['Название SKU', 'Процент', 'Вкусовая добавка', 'Имя бренда', 'Вес нетто',
+               'Коробки', 'Скорость упаковки', 'Линия', 'Вес форм фактора', 'Название форм фактора',
+               'Количество баков', 'Выход']
 
     sku_data = df[columns]
     sku_data['Вкусовая добавка'] = sku_data['Вкусовая добавка'].fillna('')
@@ -129,9 +131,9 @@ def fill_sku():
             name=sku['Название SKU'],
             brand_name=sku['Имя бренда'],
             weight_netto=sku['Вес нетто'],
-            shelf_life=sku['Срок хранения'],
-            packing_speed=sku['Скорость упаковки'],
+            packing_speed=60 / sku['Скорость упаковки'] * sku['Выход'] / sku['Количество баков'],
             in_box=sku['Коробки'],
+            output_per_tank=sku['Выход'] / sku['Количество баков'],
         )
 
         line_name = LineName.RICOTTA

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: eed46947c992
+Revision ID: 2a962e47c235
 Revises: 
-Create Date: 2021-03-11 11:29:20.840842
+Create Date: 2021-03-12 15:00:22.928793
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'eed46947c992'
+revision = '2a962e47c235'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -73,7 +73,6 @@ def upgrade():
     op.create_table('lines',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
-    sa.Column('output_ton', sa.Integer(), nullable=True),
     sa.Column('department_id', sa.Integer(), nullable=True),
     sa.Column('type', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
@@ -149,6 +148,8 @@ def upgrade():
     )
     op.create_table('mozzarella_lines',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('input_ton', sa.Integer(), nullable=True),
+    sa.Column('output_ton', sa.Integer(), nullable=True),
     sa.Column('pouring_time', sa.Integer(), nullable=True),
     sa.Column('serving_time', sa.Integer(), nullable=True),
     sa.Column('melting_speed', sa.Integer(), nullable=True),
@@ -158,6 +159,7 @@ def upgrade():
     )
     op.create_table('ricotta_lines',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('input_ton', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -195,6 +197,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['id'], ['boilings.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('mascarpone_fermentator',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('output_ton', sa.Integer(), nullable=True),
+    sa.Column('line_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['line_id'], ['mascarpone_lines.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('mascarpone_form_factors',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id'], ['form_factors.id'], ),
@@ -219,6 +229,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('flavoring_agent', sa.String(), nullable=True),
     sa.Column('percent', sa.Integer(), nullable=True),
+    sa.Column('number_of_tanks', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['boilings.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -275,6 +286,7 @@ def upgrade():
     )
     op.create_table('ricotta_skus',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('output_per_tank', sa.Float(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -310,6 +322,7 @@ def downgrade():
     op.drop_table('mozzarella_form_factors')
     op.drop_table('mozzarella_boilings')
     op.drop_table('mascarpone_form_factors')
+    op.drop_table('mascarpone_fermentator')
     op.drop_table('mascarpone_boilings')
     op.drop_table('cream_cheese_form_factors')
     op.drop_table('cream_cheese_boilings')
