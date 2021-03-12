@@ -45,6 +45,8 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     heating_time = db.Column(db.Integer)
     adding_lactic_acid_time = db.Column(db.Integer)
     separation_time = db.Column(db.Integer)
+    line_id = db.Column(db.Integer, db.ForeignKey('mascarpone_lines.id'), nullable=True)
+    fermentator_id = db.Column(db.Integer, db.ForeignKey('mascarpone_fermentators.id'), nullable=True)
 
     @staticmethod
     def create_name(line, weight, percent, flavoring_agent):
@@ -54,12 +56,15 @@ class MascarponeBoilingTechnology(BoilingTechnology):
 
 
 class MascarponeFermentator(db.Model):
-    __tablename__ = 'mascarpone_fermentator'
+    __tablename__ = 'mascarpone_fermentators'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     output_ton = db.Column(db.Integer)
     line_id = db.Column(db.Integer, db.ForeignKey('mascarpone_lines.id'), nullable=True)
+    boiling_technologies = db.relationship('MascarponeBoilingTechnology',
+                                           backref=backref('fermentator', uselist=False, lazy='subquery'))
+
 
 
 

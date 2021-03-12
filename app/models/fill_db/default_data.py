@@ -26,6 +26,7 @@ def generate_group():
             'Кремчиз': 'КРМ',
             'Творожный': 'ТВР',
             'Робиола': 'РБЛ',
+            'Сливки': 'СЛВ',
 
         }
         for name, short_name in groups.items():

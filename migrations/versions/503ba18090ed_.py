@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 2a962e47c235
+Revision ID: 503ba18090ed
 Revises: 
-Create Date: 2021-03-12 15:00:22.928793
+Create Date: 2021-03-12 15:58:39.047304
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2a962e47c235'
+revision = '503ba18090ed'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -76,15 +76,6 @@ def upgrade():
     sa.Column('department_id', sa.Integer(), nullable=True),
     sa.Column('type', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('mascarpone_boiling_technologies',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('pouring_time', sa.Integer(), nullable=True),
-    sa.Column('heating_time', sa.Integer(), nullable=True),
-    sa.Column('adding_lactic_acid_time', sa.Integer(), nullable=True),
-    sa.Column('separation_time', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('mozzarella_boiling_technologies',
@@ -205,6 +196,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['line_id'], ['mascarpone_lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('mascarpone_fermentators',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('output_ton', sa.Integer(), nullable=True),
+    sa.Column('line_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['line_id'], ['mascarpone_lines.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('mascarpone_form_factors',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id'], ['form_factors.id'], ),
@@ -263,6 +262,19 @@ def upgrade():
     sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('mascarpone_boiling_technologies',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('pouring_time', sa.Integer(), nullable=True),
+    sa.Column('heating_time', sa.Integer(), nullable=True),
+    sa.Column('adding_lactic_acid_time', sa.Integer(), nullable=True),
+    sa.Column('separation_time', sa.Integer(), nullable=True),
+    sa.Column('line_id', sa.Integer(), nullable=True),
+    sa.Column('fermentator_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['fermentator_id'], ['mascarpone_fermentators.id'], ),
+    sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),
+    sa.ForeignKeyConstraint(['line_id'], ['mascarpone_lines.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('mascarpone_skus',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
@@ -315,6 +327,7 @@ def downgrade():
     op.drop_table('ricotta_analyses_technology')
     op.drop_table('mozzarella_skus')
     op.drop_table('mascarpone_skus')
+    op.drop_table('mascarpone_boiling_technologies')
     op.drop_table('cream_cheese_skus')
     op.drop_table('skus')
     op.drop_table('ricotta_form_factors')
@@ -322,6 +335,7 @@ def downgrade():
     op.drop_table('mozzarella_form_factors')
     op.drop_table('mozzarella_boilings')
     op.drop_table('mascarpone_form_factors')
+    op.drop_table('mascarpone_fermentators')
     op.drop_table('mascarpone_fermentator')
     op.drop_table('mascarpone_boilings')
     op.drop_table('cream_cheese_form_factors')
@@ -337,7 +351,6 @@ def downgrade():
     op.drop_table('washer')
     op.drop_table('ricotta_boiling_technologies')
     op.drop_table('mozzarella_boiling_technologies')
-    op.drop_table('mascarpone_boiling_technologies')
     op.drop_table('lines')
     op.drop_table('cream_cheese_boiling_technologies')
     op.drop_table('batch_number')
