@@ -4,10 +4,9 @@ from app.schedule_maker.time import *
 from loguru import logger
 
 
-def make_steam_blocks(block):
-    maker, make = init_block_maker(
-        "steam_consumption_blocks", font_size=8, x=block.props.relative_props["x"]
-    )
+def make_steam_blocks(block, x=None):
+    x = x or block.x
+    maker, make = init_block_maker("steam_consumption_blocks", font_size=8, x=x)
 
     for j in range(block.size[0]):
         make(

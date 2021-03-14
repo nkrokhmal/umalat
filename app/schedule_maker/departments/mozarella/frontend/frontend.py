@@ -159,7 +159,10 @@ def _make_frontend_boiling(boiling):
             )
         with make():
             for b in listify(boiling["steams"]["steam_consumption"]):
-                make(make_steam_blocks(b), push_func=add_push)
+                make(
+                    make_steam_blocks(b, x=b.props.relative_props["x"]),
+                    push_func=add_push,
+                )
 
     return maker.root
 
@@ -388,21 +391,13 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
     # add one line for "Расход пара"
-    with make("steams", font_size=8):
+    with make(font_size=8):
         for b in master.iter(
             cls="steam_consumption",
             boiling_model=lambda bm: bm.line.name == line_name,
             type="melting",
         ):
-            for j in range(b.x[0], b.y[0]):
-                make(
-                    x=(j, 0),
-                    size=(1, 1),
-                    text=str(b.props["value"]),
-                    text_rotation=90,
-                    push_func=add_push,
-                    # border=None,
-                )
+            make(make_steam_blocks(b), push_func=add_push)
 
     make("stub", size=(0, 1))
     return maker.root

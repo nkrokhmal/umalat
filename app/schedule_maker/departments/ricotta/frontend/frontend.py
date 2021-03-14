@@ -39,13 +39,8 @@ def make_frontend_boiling(boiling):
         if not is_pumping_parallel:
             make("pumping_out", size=(boiling["pumping_out"].size[0], 1))
 
-    sc = boiling["steam_consumption"]
-    _steam_block = maker.create_block(
-        "_steam_consumption", x=(0, 0), size=sc.size, value=sc.props["value"]
-    )
-
     with make():
-        make(make_steam_blocks(_steam_block))
+        make(make_steam_blocks(boiling["steam_consumption"], x=(0, 0)))
 
     return maker.root
 
