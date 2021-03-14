@@ -58,7 +58,6 @@ class Line(db.Model):
     __tablename__ = "lines"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    output_ton = db.Column(db.Integer)
     department_id = db.Column(
         db.Integer, db.ForeignKey("departments.id"), nullable=True
     )

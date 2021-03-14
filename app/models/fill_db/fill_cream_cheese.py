@@ -10,10 +10,25 @@ def read_params(fn="app/data/params/creamcheese.xlsx"):
 
 
 def fill_db():
+    fill_fermentators()
     fill_boiling_technologies()
     fill_boilings()
     fill_form_factors()
     fill_sku()
+
+
+def fill_fermentators():
+    line_name = LineName.MASCARPONE
+    lines = db.session.query(MascarponeLine).all()
+    mascarpone_line = [x for x in lines if x.name == line_name][0]
+    for output_ton, name in [[400, "Big"], [400, "Small"]]:
+        fermentator = CreamCheeseFermentator(
+            name=name,
+            output_ton=output_ton,
+        )
+        fermentator.line = mascarpone_line
+        db.session.add(fermentator)
+    db.session.commit()
 
 
 def fill_boiling_technologies():

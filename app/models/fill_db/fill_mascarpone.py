@@ -10,10 +10,25 @@ def read_params(fn="app/data/params/mascarpone.xlsx"):
 
 
 def fill_db():
+    fill_fermentators()
     fill_boiling_technologies()
     fill_boilings()
     fill_form_factors()
     fill_sku()
+
+
+def fill_fermentators():
+    line_name = LineName.MASCARPONE
+    lines = db.session.query(MascarponeLine).all()
+    mascarpone_line = [x for x in lines if x.name == line_name][0]
+    for output_ton, name in [[255, "Big"], [225, "Small"]]:
+        fermentator = MascarponeFermentator(
+            name=name,
+            output_ton=output_ton,
+        )
+        fermentator.line = mascarpone_line
+        db.session.add(fermentator)
+    db.session.commit()
 
 
 def fill_boiling_technologies():
@@ -28,7 +43,9 @@ def fill_boiling_technologies():
         "Вес",
     ]
     bt_data = df[boiling_technologies_columns]
+
     bt_data = bt_data.drop_duplicates().fillna("")
+    fermentators = db.session.query(MascarponeFermentator).all()
     for column_name in ["Прием", "Нагрев", "Молочная кислота", "Сепарирование", "Вес"]:
         bt_data[column_name] = bt_data[column_name].apply(lambda x: json.loads(x))
     bt_data = bt_data.to_dict("records")
@@ -47,6 +64,7 @@ def fill_boiling_technologies():
                 adding_lactic_acid_time=bt["Молочная кислота"][i],
                 separation_time=bt["Сепарирование"][i],
             )
+            technology.fermentator = fermentators[i]
             db.session.add(technology)
     db.session.commit()
 
@@ -123,6 +141,8 @@ def fill_sku():
     boilings = db.session.query(MascarponeBoiling).all()
     form_factors = db.session.query(MascarponeFormFactor).all()
     groups = db.session.query(Group).all()
+    fermentators = db.session.query(MascarponeFermentator).all()
+    fermentator_small = [x for x in fermentators if x.name == "Small"][0]
 
     columns = [
         "Название SKU",
@@ -146,7 +166,7 @@ def fill_sku():
             brand_name=sku["Имя бренда"],
             weight_netto=sku["Вес нетто"],
             shelf_life=sku["Срок хранения"],
-            packing_speed=sku["Скорость упаковки"],
+            packing_speed=60 / sku["Скорость упаковки"] * fermentator_small.output_ton,
             in_box=sku["Коробки"],
         )
 

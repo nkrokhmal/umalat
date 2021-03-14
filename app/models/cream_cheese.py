@@ -48,3 +48,12 @@ class CreamCheeseBoilingTechnology(BoilingTechnology):
         boiling_name = [percent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
         return "Линия {}, {}".format(line, boiling_name)
+
+
+class CreamCheeseFermentator(db.Model):
+    __tablename__ = "mascarpone_fermentator"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    output_ton = db.Column(db.Integer)
+    line_id = db.Column(db.Integer, db.ForeignKey("mascarpone_lines.id"), nullable=True)

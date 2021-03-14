@@ -11,7 +11,7 @@ def read_params(fn="app/data/params/ricotta.xlsx"):
 
 def fill_db():
     fill_boiling_technologies()
-    fill_analysis_technology()
+    # fill_analysis_technology()
     fill_boilings()
     fill_form_factors()
     fill_sku()
@@ -51,26 +51,11 @@ def fill_boiling_technologies():
         db.session.commit()
 
 
-def fill_analysis_technology():
-    df = read_params()
-    data = df[["Подготовка полуфабриката", "Анализ", "Перекачка"]]
-    data = data.drop_duplicates()
-    data = data.to_dict("records")
-    for value in data:
-        if any([not np.isnan(x) for x in value.values()]):
-            technology = RicottaAnalysisTechnology(
-                preparation_time=value["Подготовка полуфабриката"],
-                analysis_time=value["Анализ"],
-                pumping_time=value["Перекачка"],
-            )
-            db.session.add(technology)
-    db.session.commit()
-
-
 def fill_boilings():
     df = read_params()
     lines = db.session.query(Line).all()
     bts = db.session.query(RicottaBoilingTechnology).all()
+
     columns = [
         "Вкусовая добавка",
         "Процент",
@@ -80,6 +65,10 @@ def fill_boilings():
         "Сбор белка",
         "Заборс",
         "Слив",
+        "Подготовка полуфабриката",
+        "Анализ",
+        "Перекачка",
+        "Количество баков",
     ]
     b_data = df[columns]
     b_data["Вкусовая добавка"] = b_data["Вкусовая добавка"].fillna("")
@@ -108,11 +97,35 @@ def fill_boilings():
         boiling = RicottaBoiling(
             percent=b["Процент"],
             flavoring_agent=b["Вкусовая добавка"],
+            number_of_tanks=b["Количество баков"],
             boiling_technology_id=bt_id,
             line_id=line_id,
         )
+        technology = RicottaAnalysisTechnology(
+            preparation_time=b["Подготовка полуфабриката"],
+            analysis_time=b["Анализ"],
+            pumping_time=b["Перекачка"],
+        )
+        technology.boiling = boiling
+        db.session.add(technology)
         db.session.add(boiling)
         db.session.commit()
+
+
+# def fill_analysis_technology():
+#     df = read_params()
+#     data = df[['Подготовка полуфабриката', 'Анализ', 'Перекачка']]
+#     data = data.drop_duplicates()
+#     data = data.to_dict('records')
+#     for value in data:
+#         if any([not np.isnan(x) for x in value.values()]):
+#             technology = RicottaAnalysisTechnology(
+#                 preparation_time=value['Подготовка полуфабриката'],
+#                 analysis_time=value['Анализ'],
+#                 pumping_time=value['Перекачка']
+#             )
+#             db.session.add(technology)
+#     db.session.commit()
 
 
 def fill_form_factors():
@@ -143,12 +156,13 @@ def fill_sku():
         "Вкусовая добавка",
         "Имя бренда",
         "Вес нетто",
-        "Срок хранения",
         "Коробки",
         "Скорость упаковки",
         "Линия",
         "Вес форм фактора",
         "Название форм фактора",
+        "Количество баков",
+        "Выход",
     ]
 
     sku_data = df[columns]
@@ -160,9 +174,12 @@ def fill_sku():
             name=sku["Название SKU"],
             brand_name=sku["Имя бренда"],
             weight_netto=sku["Вес нетто"],
-            shelf_life=sku["Срок хранения"],
-            packing_speed=sku["Скорость упаковки"],
+            packing_speed=60
+            / sku["Скорость упаковки"]
+            * sku["Выход"]
+            / sku["Количество баков"],
             in_box=sku["Коробки"],
+            output_per_tank=sku["Выход"] / sku["Количество баков"],
         )
 
         line_name = LineName.RICOTTA

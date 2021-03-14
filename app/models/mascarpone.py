@@ -1,3 +1,5 @@
+from sqlalchemy.orm import backref
+
 from . import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology, db
 
 
@@ -14,6 +16,9 @@ class MascarponeLine(Line):
 
     id = db.Column(db.Integer, db.ForeignKey("lines.id"), primary_key=True)
     params = db.Column(db.String)
+    fermentators = db.relationship(
+        "MascarponeFermentator", backref=backref("line", uselist=False, lazy="subquery")
+    )
 
 
 class MascarponeFormFactor(FormFactor):
@@ -44,9 +49,26 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     heating_time = db.Column(db.Integer)
     adding_lactic_acid_time = db.Column(db.Integer)
     separation_time = db.Column(db.Integer)
+    line_id = db.Column(db.Integer, db.ForeignKey("mascarpone_lines.id"), nullable=True)
+    fermentator_id = db.Column(
+        db.Integer, db.ForeignKey("mascarpone_fermentators.id"), nullable=True
+    )
 
     @staticmethod
     def create_name(line, weight, percent, flavoring_agent):
         boiling_name = ["{} кг".format(weight), percent, flavoring_agent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
         return "Линия {}, {}".format(line, boiling_name)
+
+
+class MascarponeFermentator(db.Model):
+    __tablename__ = "mascarpone_fermentators"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    output_ton = db.Column(db.Integer)
+    line_id = db.Column(db.Integer, db.ForeignKey("mascarpone_lines.id"), nullable=True)
+    boiling_technologies = db.relationship(
+        "MascarponeBoilingTechnology",
+        backref=backref("fermentator", uselist=False, lazy="subquery"),
+    )

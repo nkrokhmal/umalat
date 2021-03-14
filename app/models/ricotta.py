@@ -8,6 +8,7 @@ class RicottaSKU(SKU):
     __mapper_args__ = {"polymorphic_identity": "ricotta_skus"}
 
     id = db.Column(db.Integer, db.ForeignKey("skus.id"), primary_key=True)
+    output_per_tank = db.Column(db.Float)
 
 
 class RicottaLine(Line):
@@ -15,6 +16,7 @@ class RicottaLine(Line):
     __mapper_args__ = {"polymorphic_identity": "ricotta_lines"}
 
     id = db.Column(db.Integer, db.ForeignKey("lines.id"), primary_key=True)
+    input_ton = db.Column(db.Integer)
 
 
 class RicottaFormFactor(FormFactor):
@@ -31,11 +33,19 @@ class RicottaBoiling(Boiling):
     id = db.Column(db.Integer, db.ForeignKey("boilings.id"), primary_key=True)
     flavoring_agent = db.Column(db.String)
     percent = db.Column(db.Integer)
+    number_of_tanks = db.Column(db.Integer)
 
     analysis = db.relationship(
         "RicottaAnalysisTechnology",
         backref=backref("boiling", uselist=False, lazy="subquery"),
     )
+
+    @property
+    def short_display_name(self):
+        if self.flavoring_agent:
+            return self.flavoring_agent
+        else:
+            return "Рикотта"
 
 
 class RicottaBoilingTechnology(BoilingTechnology):
