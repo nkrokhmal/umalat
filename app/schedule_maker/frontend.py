@@ -1,11 +1,23 @@
-from utils_ak.split_file import *
-from utils_ak.os import *
-
-from utils_ak.color import *
-from utils_ak.openpyxl import *
+from utils_ak.interactive_imports import *
 from app.schedule_maker.time import *
 
 from loguru import logger
+
+
+def make_steam_blocks(block):
+    maker, make = init_block_maker(
+        "steam_consumption_blocks", font_size=8, x=block.props.relative_props["x"]
+    )
+
+    for j in range(block.size[0]):
+        make(
+            x=(j, 0),
+            size=(1, 1),
+            text=str(block.props["value"]),
+            text_rotation=90,
+            push_func=add_push,
+        )
+    return maker.root
 
 
 def draw_schedule(schedule, style, fn=None):

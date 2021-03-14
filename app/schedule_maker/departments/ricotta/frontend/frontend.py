@@ -1,6 +1,6 @@
 from utils_ak.interactive_imports import *
 from app.schedule_maker.time import *
-
+from app.schedule_maker.frontend import *
 from datetime import datetime
 
 
@@ -38,17 +38,15 @@ def make_frontend_boiling(boiling):
 
         if not is_pumping_parallel:
             make("pumping_out", size=(boiling["pumping_out"].size[0], 1))
-    with make(font_size=8):
-        sc = boiling["steam_consumption"]
-        for j in range(sc.size[0]):
-            make(
-                x=(j, 0),
-                size=(1, 1),
-                text=str(sc.props["value"]),
-                text_rotation=90,
-                push_func=add_push,
-                # border=None,
-            )
+
+    sc = boiling["steam_consumption"]
+    _steam_block = maker.create_block(
+        "_steam_consumption", x=(0, 0), size=sc.size, value=sc.props["value"]
+    )
+
+    with make():
+        make(make_steam_blocks(_steam_block))
+
     return maker.root
 
 

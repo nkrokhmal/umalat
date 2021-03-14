@@ -100,8 +100,6 @@ def make_boiling_group(boiling_group_df):
             make("pumping", size=(analysis.pumping_time // 5, 0))
     packing_start = maker.root["analysis_group"]["pumping"].x[0] + 1
 
-    for i, row in boiling_group_df.iterrows():
-        print(row["sku"].name, row["sku"].packing_speed)
     # todo: pauses
     packing_time = sum(
         [

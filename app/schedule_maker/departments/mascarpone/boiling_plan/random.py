@@ -21,8 +21,9 @@ def generate_random_boiling_plan(n=3, seed=12):
             sku = random.choice(
                 [sku for sku in skus if boiling_model in sku.made_from_boilings]
             )
-
-            values.append([i * 2 + j, sku, 10])
+            kg = sku.packing_speed * np.random.uniform(0.6, 0.8) / 2
+            kg = custom_round(kg, 10, "ceil")
+            values.append([i * 2 + j, sku, kg])
 
     df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
     return df

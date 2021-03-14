@@ -23,7 +23,7 @@ def test_drawing():
     boiling_plan_df = generate_random_boiling_plan()
     schedule = make_schedule(boiling_plan_df)
     frontend = make_frontend(schedule)
-    draw_excel_frontend(frontend, RICOTTA_STYLE, open_file=True)
+    draw_excel_frontend(frontend, MASCARPONE_STYLE, open_file=True)
 
 
 if __name__ == "__main__":

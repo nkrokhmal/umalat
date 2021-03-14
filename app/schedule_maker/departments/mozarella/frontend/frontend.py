@@ -4,6 +4,7 @@ from app.enum import LineName
 
 from app.schedule_maker.time import *
 from app.schedule_maker.calculation import *
+from app.schedule_maker.frontend import *
 
 from utils_ak.interactive_imports import *
 
@@ -156,20 +157,10 @@ def _make_frontend_boiling(boiling):
                 "extra",
                 size=(boiling["pouring"]["second"]["extra"].size[0], 1),
             )
-        with make(font_size=8):
+        with make():
             for b in listify(boiling["steams"]["steam_consumption"]):
-                for j in range(
-                    b.props.relative_props["x"][0],
-                    b.props.relative_props["x"][0] + b.size[0],
-                ):
-                    make(
-                        x=(j, 0),
-                        size=(1, 1),
-                        text=str(b.props["value"]),
-                        text_rotation=90,
-                        push_func=add_push,
-                        # border=None,
-                    )
+                make(make_steam_blocks(b), push_func=add_push)
+
     return maker.root
 
 
