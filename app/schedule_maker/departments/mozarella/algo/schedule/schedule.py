@@ -529,35 +529,22 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                     push_func=add_push,
                 )
 
-            # value = 250 if line_name == LineName.WATER else 1200
-            #
-            # delay = 0
-            # if (
-            #     b1
-            #     and b2
-            #     and b1["melting_and_packing"]["melting"]["meltings"].y[0]
-            #     > b2["melting_and_packing"]["melting"].x[0]
-            #     and line_name == LineName.SALT
-            # ):
-            #     delay = 4
-            #
-            # # start block
-            # push(
-            #     b2,
-            #     maker.create_block(
-            #         "steam_consumption",
-            #         x=(b2["melting_and_packing"].x[0] + delay - b2.x[0], 0),
-            #         size=(
-            #             b2["melting_and_packing"]["melting"]["serving"].size[0]
-            #             + b2["melting_and_packing"]["melting"]["meltings"].size[0]
-            #             - delay,
-            #             0,
-            #         ),
-            #         value=value,
-            #         type="melting",
-            #         line_name=line_name,
-            #     ),
-            #     push_func=add_push,
-            # )
+            if (
+                b1
+                and b2
+                and b1["melting_and_packing"]["melting"]["meltings"].y[0]
+                > b2["melting_and_packing"]["melting"].x[0]
+                and line_name == LineName.SALT
+            ):
+                sc = b2["melting_and_packing"]["steam_consumption"]
+                # start twenty minutes before melting
+                assert (
+                    b2["melting_and_packing"]["melting"]["serving"].size[0] > 4
+                ), "Время подачи и вымешивания не должно быть меньше 20 минут."
+                shift = b2["melting_and_packing"]["melting"]["serving"].size[0] - 4
+                sc.props.update(
+                    x=(sc.props.relative_props["x"][0] + shift, 0),
+                    size=(sc.size[0] - shift, 0),
+                )
 
     return schedule
