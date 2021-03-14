@@ -26,7 +26,8 @@ def generate_random_boiling_plan(n=24, seed=12):
 
         boiling_skus = list(sorted(boiling_skus, key=lambda sku: sku.name))
         for sku in boiling_skus:
-            values.append([i, sku, 1])
+            kg = random.choice(range(8, 13))
+            values.append([i, sku, kg])
 
     df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
     return df

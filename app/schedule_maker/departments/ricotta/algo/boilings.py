@@ -89,6 +89,8 @@ def make_boiling_group(boiling_group_df):
     )
     packing_time = int(custom_round(packing_time, 5, "ceil"))
 
+    assert packing_time >= 15, "Packing time less than 15 minutes is not supported"
+
     make(
         "packing", x=(packing_start, 0), size=(packing_time // 5, 0), push_func=add_push
     )

@@ -8,14 +8,16 @@ def make_frontend_boiling(boiling):
         boiling.props["boiling_model"].flavoring_agent,
     ]
     label_values = [v for v in label_values if v]
-
+    boiling_label = ", ".join(
+        label_values
+    )  # todo: use showrt boilign display name instead
     maker, make = init_block_maker(
         "boiling",
         axis=1,
         x=(boiling.x[0], 0),
         size=(0, 2),
         boiling_id=boiling.props["boiling_id"],
-        boiling_label=", ".join(label_values),
+        boiling_label=boiling_label,
     )
 
     with make():
@@ -96,6 +98,7 @@ def make_packing_line(schedule):
             push_func=add_push,
             boiling_id=boiling_group.props["boiling_id"],
         )
+
         make(
             "packing",
             size=(boiling_group["packing"].size[0] - 2, 1),

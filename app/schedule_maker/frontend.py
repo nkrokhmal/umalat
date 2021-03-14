@@ -5,6 +5,8 @@ from utils_ak.color import *
 from utils_ak.openpyxl import *
 from app.schedule_maker.time import *
 
+from loguru import logger
+
 
 def draw_schedule(schedule, style, fn=None):
     # update styles
@@ -71,11 +73,9 @@ def draw_schedule(schedule, style, fn=None):
                     alignment="center",
                 )
             except:
-                print("Failed to draw block")
-                print(b, x1, b.x[1], b.size[0], b.size[1])
-                print(b.props.relative_props, b.x, b.y)
+                logger.error("Failed to draw block", b=b, x=(x1, b.x[1]), size=b.size)
+                logger.error("Relative props", props=b.props.relative_props)
                 raise
-
     if fn:
         wb.save(fn)
 
