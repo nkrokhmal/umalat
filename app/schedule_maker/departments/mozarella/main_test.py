@@ -9,7 +9,8 @@ def test():
     from app.schedule_maker.departments.mozarella.main import main
     from config import DebugConfig
 
-    fn = DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
+    # fn = DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
+    fn = DebugConfig.abs_path("app/data/inputs/2021-02-28 План по варкам.xlsx")
     main(fn, optimize=False, open_file=True)
 
 

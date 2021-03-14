@@ -17,7 +17,6 @@ def main(fn, optimize=False, open_file=True, **kwargs):
     start_times = {LineName.WATER: "08:00", LineName.SALT: "07:00"}
     boilings = make_boilings(boiling_plan_df, first_group_id=1)
 
-    cleanings = {12: "full"}
     if optimize:
         schedule = make_schedule_with_boiling_inside_a_day(
             boiling_plan_df, start_times=start_times, first_group_id=1
