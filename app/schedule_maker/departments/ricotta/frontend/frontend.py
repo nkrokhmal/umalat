@@ -1,4 +1,7 @@
 from utils_ak.interactive_imports import *
+from app.schedule_maker.time import *
+
+from datetime import datetime
 
 
 def make_frontend_boiling(boiling):
@@ -148,9 +151,38 @@ def make_container_cleanings(schedule):
     return maker.root
 
 
-def make_frontend(schedule):
+def make_header(date, start_time="07:00"):
+    maker, make = init_block_maker("header", axis=1)
+
+    with make("header", size=(0, 1), index_width=2):
+        make(size=(1, 1), text="График наливов сыворотки")
+        make(size=(1, 1), text=cast_str(date, "%d.%m.%Y"), bold=True)
+        for i in range(566):
+            cur_time = cast_time(i + cast_t(start_time))
+            days, hours, minutes = cur_time.split(":")
+            if cur_time[-2:] == "00":
+                make(
+                    size=(1, 1),
+                    text=str(int(hours)),
+                    color=(218, 150, 148),
+                    text_rotation=90,
+                    font_size=9,
+                )
+            else:
+                make(
+                    size=(1, 1),
+                    text=minutes,
+                    color=(204, 255, 255),
+                    text_rotation=90,
+                    font_size=9,
+                )
+    return maker.root["header"]
+
+
+def make_frontend(schedule, start_time="07:00"):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
+    make(make_header(datetime.now(), start_time=start_time))
     make(make_boiling_lines(schedule))
     make(make_analysis_line(schedule))
     make(make_packing_line(schedule))
