@@ -505,39 +505,25 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         validator=master_validator,
     )
 
-    # add steam consumption
-    for boiling in list(schedule["master"].iter(cls="boiling")):
-        push(
-            boiling,
-            maker.create_block(
-                "steam_consumption",
-                x=(0, 0),
-                size=(6, 0),
-                value=1100,
-                pouring_line=boiling.props["pouring_line"],
-                type="boiling",
-            ),
-            push_func=add_push,
-        )
-
-        if boiling.props["boiling_model"].line.name == LineName.SALT:
-            push(
-                boiling,
-                maker.create_block(
-                    "steam_consumption",
-                    x=(
-                        boiling["pouring"]["second"]["pouring_off"].x[0]
-                        - boiling.x[0]
-                        - 3,
-                        0,
-                    ),
-                    size=(3, 0),
-                    value=700,
-                    pouring_line=boiling.props["pouring_line"],
-                    type="boiling",
-                ),
-                push_func=add_push,
-            )
+    #
+    # if boiling.props["boiling_model"].line.name == LineName.SALT:
+    #     push(
+    #         boiling,
+    #         maker.create_block(
+    #             "steam_consumption",
+    #             x=(
+    #                 boiling["pouring"]["second"]["pouring_off"].x[0]
+    #                 - boiling.x[0]
+    #                 - 3,
+    #                 0,
+    #             ),
+    #             size=(3, 0),
+    #             value=700,
+    #             pouring_line=boiling.props["pouring_line"],
+    #             type="boiling",
+    #         ),
+    #         push_func=add_push,
+    #     )
 
     for line_name in [LineName.WATER, LineName.SALT]:
         for b1, b2 in SimpleIterator(
@@ -546,11 +532,7 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                     cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
                 )
             )
-        ).iter_sequences(2, method="any"):
-            # last iteration
-            if not b2:
-                continue
-
+        ).iter_sequences(2, method="any_prefix"):
             # first element
             if not b1:
                 first_value = 300 if line_name == LineName.WATER else 2000

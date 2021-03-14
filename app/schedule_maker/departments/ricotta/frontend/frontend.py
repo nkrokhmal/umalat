@@ -60,6 +60,8 @@ def make_boiling_lines(schedule):
         )
         if i <= 1:
             make("stub", size=(0, 2))
+        else:
+            make("stub", size=(0, 1))
 
     for boiling_group in listify(schedule["boiling_group"]):
         for i, line_num in enumerate(boiling_group.props["line_nums"]):
