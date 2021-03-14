@@ -26,6 +26,17 @@ def make_boiling(boiling_model):
             x=(maker.root["abandon"].y[0] - bt.pumping_out_time // 5, 0),
             push_func=add_push,
         )
+
+    steam_value = (
+        900 if not boiling_model.flavoring_agent else 673
+    )  # todo: take from parameters
+    make(
+        "steam_consumption",
+        size=(maker.root["heating"].size[0], 0),
+        x=(0, 0),
+        value=steam_value,
+        push_func=add_push,
+    )
     return maker.root
 
 

@@ -2,17 +2,6 @@ from utils_ak.interactive_imports import *
 
 
 def make_frontend_boiling(boiling):
-    # old label
-    # todo: del
-    # label_values = [
-    #     "{}%".format(boiling.props["boiling_model"].percent),
-    #     boiling.props["boiling_model"].flavoring_agent,
-    # ]
-    # label_values = [v for v in label_values if v]
-    # old_boiling_label = ", ".join(
-    #     label_values
-    # )
-
     boiling_label = boiling.props["boiling_model"].short_display_name
 
     maker, make = init_block_maker(
@@ -46,7 +35,17 @@ def make_frontend_boiling(boiling):
 
         if not is_pumping_parallel:
             make("pumping_out", size=(boiling["pumping_out"].size[0], 1))
-
+    with make(font_size=8):
+        sc = boiling["steam_consumption"]
+        for j in range(sc.size[0]):
+            make(
+                x=(j, 0),
+                size=(1, 1),
+                text=str(sc.props["value"]),
+                text_rotation=90,
+                push_func=add_push,
+                # border=None,
+            )
     return maker.root
 
 
@@ -56,11 +55,9 @@ def make_boiling_lines(schedule):
     boiling_lines = []
     for i in range(3):
         boiling_lines.append(
-            make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
+            make(f"boiling_line_{i}", size=(0, 3), is_parent_node=True).block
         )
         if i <= 1:
-            make("stub", size=(0, 2))
-        else:
             make("stub", size=(0, 1))
 
     for boiling_group in listify(schedule["boiling_group"]):
