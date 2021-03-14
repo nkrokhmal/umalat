@@ -60,7 +60,7 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
                 make(
                     "steam_consumption",
                     x=(
-                        maker.root["boiling"]["pouring"]["second"]["pouring_off"].x[0]
+                        maker.root["boiling"]["pouring"]["first"]["pumping_out"].x[0]
                         - 3,
                         0,
                     ),

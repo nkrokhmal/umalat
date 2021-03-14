@@ -156,21 +156,21 @@ def _make_frontend_boiling(boiling):
                 "extra",
                 size=(boiling["pouring"]["second"]["extra"].size[0], 1),
             )
-
-    with make("steam_block"):
-        for b in listify(boiling["steams"]["steam_consumption"]):
-            for j in range(
-                b.x[0] - boiling["pouring"].x[0], b.y[0] - boiling["pouring"].x[0]
-            ):
-                make(
-                    x=(j, 0),
-                    size=(1, 1),
-                    text=str(b.props["value"]),
-                    text_rotation=90,
-                    font_size=9,
-                    push_func=add_push,
-                    # border=None,
-                )
+        with make(font_size=8):
+            for b in listify(boiling["steams"]["steam_consumption"]):
+                # todo: ugly, make properly
+                for j in range(
+                    b.props.relative_props["x"][0],
+                    b.props.relative_props["x"][0] + b.size[0],
+                ):
+                    make(
+                        x=(j, 0),
+                        size=(1, 1),
+                        text=str(b.props["value"]),
+                        text_rotation=90,
+                        push_func=add_push,
+                        # border=None,
+                    )
     return maker.root
 
 
