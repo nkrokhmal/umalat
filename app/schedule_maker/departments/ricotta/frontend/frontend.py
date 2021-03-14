@@ -1,16 +1,20 @@
-from utils_ak.block_tree import *
-from utils_ak.builtin import *
+from utils_ak.interactive_imports import *
 
 
 def make_frontend_boiling(boiling):
-    label_values = [
-        "{}%".format(boiling.props["boiling_model"].percent),
-        boiling.props["boiling_model"].flavoring_agent,
-    ]
-    label_values = [v for v in label_values if v]
-    boiling_label = ", ".join(
-        label_values
-    )  # todo: use showrt boilign display name instead
+    # old label
+    # todo: del
+    # label_values = [
+    #     "{}%".format(boiling.props["boiling_model"].percent),
+    #     boiling.props["boiling_model"].flavoring_agent,
+    # ]
+    # label_values = [v for v in label_values if v]
+    # old_boiling_label = ", ".join(
+    #     label_values
+    # )
+
+    boiling_label = boiling.props["boiling_model"].short_display_name
+
     maker, make = init_block_maker(
         "boiling",
         axis=1,
@@ -90,18 +94,26 @@ def make_analysis_line(schedule):
     return maker.root
 
 
+def calc_skus_label(skus):
+    values = []
+    for sku in skus:
+        values.append([sku.brand_name, str(sku.weight_netto)])
+
+    tree = df_to_ordered_tree(pd.DataFrame(values))
+
+    return "/".join(
+        [
+            group_label + " " + "/".join(form_factor_labels)
+            for group_label, form_factor_labels in tree
+        ]
+    )
+
+
 def make_packing_line(schedule):
     maker, make = init_block_maker("packing", size=(0, 1), is_parent_node=True)
 
     for boiling_group in listify(schedule["boiling_group"]):
-        brand_label = "/".join(
-            remove_neighbor_duplicates(
-                [
-                    sku.brand_name + ":{}".format(sku.weight_netto)
-                    for sku in boiling_group.props["skus"]
-                ]
-            )
-        )
+        brand_label = calc_skus_label(boiling_group.props["skus"])
 
         make(
             "packing_num",

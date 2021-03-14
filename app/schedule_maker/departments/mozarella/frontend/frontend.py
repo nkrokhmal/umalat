@@ -4,57 +4,41 @@ from app.enum import LineName
 
 from app.schedule_maker.time import *
 from app.schedule_maker.calculation import *
+
 from utils_ak.interactive_imports import *
 
 
 def calc_form_factor_label(form_factors):
-    form_factors = remove_neighbor_duplicates(form_factors)
-    cur_label = None
-    values = []
-    for ff in form_factors:
-        label = ""
-
-        s = ""
-        if label != cur_label:
-            s += label + " "
-            cur_label = label
-
-        s += ff.name
-
-        values.append(s)
+    values = [ff.name for ff in form_factors]
+    values = remove_neighbor_duplicates(values)
     return "/".join(values)
 
 
 def calc_group_form_factor_label(skus):
     skus = remove_neighbor_duplicates(skus)
-    cur_label = None
-    cur_form_factor = None
+
     values = []
     for sku in skus:
-
         if len(skus) == 1:
-            label = sku.group.name
+            group_label = sku.group.name
         else:
-            label = sku.group.short_name
-
-        s = ""
-        if label != cur_label:
-            s += label + " "
-            cur_label = label
-            # reset form factor also
-            cur_form_factor = None
+            group_label = sku.group.short_name
 
         if "Терка" in sku.form_factor.name:
-            form_factor = "Терка"
+            form_factor_label = "Терка"
         else:
-            form_factor = sku.form_factor.name
+            form_factor_label = sku.form_factor.name
 
-        if cur_form_factor != form_factor:
-            s += form_factor
-            cur_form_factor = form_factor
-        if s:
-            values.append(s)
-    return "/".join(values)
+        values.append([group_label, form_factor_label])
+
+    tree = df_to_ordered_tree(pd.DataFrame(values))
+
+    return "/".join(
+        [
+            group_label + " " + "/".join(form_factor_labels)
+            for group_label, form_factor_labels in tree
+        ]
+    )
 
 
 def make_header(date, start_time="01:00"):

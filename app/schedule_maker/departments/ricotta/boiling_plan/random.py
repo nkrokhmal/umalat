@@ -9,6 +9,7 @@ def generate_random_boiling_plan(n=24, seed=12):
     boiling_model_ids = range(9, 16)  # todo: take from table properly
 
     skus = [cast_model(RicottaSKU, sku_id) for sku_id in sku_ids]
+    skus = [sku for sku in skus if sku.weight_netto]
     skus
 
     values = []
