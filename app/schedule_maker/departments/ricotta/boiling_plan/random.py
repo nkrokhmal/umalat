@@ -5,17 +5,15 @@ from app.schedule_maker.models import *
 def generate_random_boiling_plan(n=24, seed=12):
     random.seed(seed)
 
-    sku_ids = range(62, 82)  # todo: take from table properly
-    boiling_model_ids = range(9, 16)  # todo: take from table properly
-
-    skus = [cast_model(RicottaSKU, sku_id) for sku_id in sku_ids]
+    skus = fetch_all(RicottaSKU)
     skus = [sku for sku in skus if sku.weight_netto]
-    skus
+
+    models = fetch_all(RicottaBoiling)
 
     values = []
     for i in range(n):
         boiling_skus = []
-        boiling_model = cast_model(RicottaBoiling, random.choice(boiling_model_ids))
+        boiling_model = random.choice(models)
 
         for _ in range(boiling_model.number_of_tanks):
             boiling_skus.append(

@@ -7,7 +7,7 @@ from app.schedule_maker.departments.mascarpone.boiling_plan.random import *
 
 
 def test():
-    print(generate_random_boiling_plan())
+    print(generate_random_boiling_plan_mascarpone())
 
 
 if __name__ == "__main__":
