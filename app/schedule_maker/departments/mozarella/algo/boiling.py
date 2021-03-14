@@ -48,7 +48,13 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
             push_func=add_push,
         )
         with make("steams"):
-            make("steam_consumption", x=(0, 0), size=(6, 0), value=1100)
+            make(
+                "steam_consumption",
+                x=(0, 0),
+                size=(6, 0),
+                value=1100,
+                push_func=add_push,
+            )
 
             if boiling_model.line.name == LineName.SALT:
                 make(
@@ -65,6 +71,4 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
 
     push(maker.root["boiling"], melting_and_packing)
 
-    # todo: make proper drenator
-    # push(maker.root['boiling'], maker.create_block('full_drenator', x=[maker.root['boiling']['pouring']['second']['pouring_off'].x[0], 0], size=[maker.root['drenator'].size[0] + melting_and_packing['melting']['serving'].size[0] + melting_and_packing['melting']['meltings'].size[0], 0]), push_func=add_push)
     return maker.root["boiling"]
