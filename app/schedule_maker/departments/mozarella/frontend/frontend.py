@@ -397,8 +397,40 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                 if n_cooling_lines == 100:
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
-    # add two lines for "Расход пара"
-    make("stub", size=(0, 2))
+    # add one line for "Расход пара"
+    with make("steams", font_size=8):
+        for b in master.iter(
+            cls="steam_consumption",
+            boiling_model=lambda bm: bm.line.name == line_name,
+            type="melting",
+        ):
+            # todo: ugly, make properly
+            for j in range(b.x[0], b.y[0]):
+                make(
+                    x=(j, 0),
+                    size=(1, 1),
+                    text=str(b.props["value"]),
+                    text_rotation=90,
+                    push_func=add_push,
+                    # border=None,
+                )
+
+        # for boiling in master.iter(
+        #     cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
+        # ):
+        #     for b in master.iter(cls="steam_consumption", line_name=line_name):
+        #         # todo: ugly, make properly
+        #         for j in range(b.x[0], b.y[0]):
+        #             make(
+        #                 x=(j, 0),
+        #                 size=(1, 1),
+        #                 text=str(b.props["value"]),
+        #                 text_rotation=90,
+        #                 push_func=add_push,
+        #                 # border=None,
+        #             )
+
+    make("stub", size=(0, 1))
     return maker.root
 
 

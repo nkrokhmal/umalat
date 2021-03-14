@@ -505,26 +505,6 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         validator=master_validator,
     )
 
-    #
-    # if boiling.props["boiling_model"].line.name == LineName.SALT:
-    #     push(
-    #         boiling,
-    #         maker.create_block(
-    #             "steam_consumption",
-    #             x=(
-    #                 boiling["pouring"]["second"]["pouring_off"].x[0]
-    #                 - boiling.x[0]
-    #                 - 3,
-    #                 0,
-    #             ),
-    #             size=(3, 0),
-    #             value=700,
-    #             pouring_line=boiling.props["pouring_line"],
-    #             type="boiling",
-    #         ),
-    #         push_func=add_push,
-    #     )
-
     for line_name in [LineName.WATER, LineName.SALT]:
         for b1, b2 in SimpleIterator(
             list(
@@ -549,35 +529,35 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                     push_func=add_push,
                 )
 
-            value = 250 if line_name == LineName.WATER else 1200
-
-            delay = 0
-            if (
-                b1
-                and b2
-                and b1["melting_and_packing"]["melting"]["meltings"].y[0]
-                > b2["melting_and_packing"]["melting"].x[0]
-                and line_name == LineName.SALT
-            ):
-                delay = 4
-
-            # start block
-            push(
-                b2,
-                maker.create_block(
-                    "steam_consumption",
-                    x=(b2["melting_and_packing"].x[0] + delay - b2.x[0], 0),
-                    size=(
-                        b2["melting_and_packing"]["melting"]["serving"].size[0]
-                        + b2["melting_and_packing"]["melting"]["meltings"].size[0]
-                        - delay,
-                        0,
-                    ),
-                    value=value,
-                    type="melting",
-                    line_name=line_name,
-                ),
-                push_func=add_push,
-            )
+            # value = 250 if line_name == LineName.WATER else 1200
+            #
+            # delay = 0
+            # if (
+            #     b1
+            #     and b2
+            #     and b1["melting_and_packing"]["melting"]["meltings"].y[0]
+            #     > b2["melting_and_packing"]["melting"].x[0]
+            #     and line_name == LineName.SALT
+            # ):
+            #     delay = 4
+            #
+            # # start block
+            # push(
+            #     b2,
+            #     maker.create_block(
+            #         "steam_consumption",
+            #         x=(b2["melting_and_packing"].x[0] + delay - b2.x[0], 0),
+            #         size=(
+            #             b2["melting_and_packing"]["melting"]["serving"].size[0]
+            #             + b2["melting_and_packing"]["melting"]["meltings"].size[0]
+            #             - delay,
+            #             0,
+            #         ),
+            #         value=value,
+            #         type="melting",
+            #         line_name=line_name,
+            #     ),
+            #     push_func=add_push,
+            # )
 
     return schedule

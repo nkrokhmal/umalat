@@ -69,6 +69,23 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
                     push_func=add_push,
                 )
 
+    # add steams to melting_and_packing
+    value = 250 if boiling_model.line.name == LineName.WATER else 1200
+    push(
+        melting_and_packing,
+        maker.create_block(
+            "steam_consumption",
+            size=(
+                melting_and_packing["melting"]["serving"].size[0]
+                + melting_and_packing["melting"]["meltings"].size[0],
+                0,
+            ),
+            value=value,
+            type="melting",
+        ),
+        push_func=add_push,
+    )
+
     push(maker.root["boiling"], melting_and_packing)
 
     return maker.root["boiling"]
