@@ -15,8 +15,17 @@ def make_boiling(boiling_model):
     make("delay", size=(bt.delay_time // 5, 0))
     make("protein_harvest", size=(bt.protein_harvest_time // 5, 0))
     make("abandon", size=(bt.abandon_time // 5, 0))
-    make("pumping_out", size=(bt.pumping_out_time // 5, 0))
 
+    if not boiling_model.flavoring_agent:
+        make("pumping_out", size=(bt.pumping_out_time // 5, 0))
+    else:
+        # make pumping_out parallel with abandon
+        make(
+            "pumping_out",
+            size=(bt.pumping_out_time // 5, 0),
+            x=(maker.root["abandon"].y[0] - bt.pumping_out_time // 5, 0),
+            push_func=add_push,
+        )
     return maker.root
 
 
@@ -80,6 +89,8 @@ def make_boiling_group(boiling_group_df):
             make("pumping", size=(analysis.pumping_time // 5, 0))
     packing_start = maker.root["analysis_group"]["pumping"].x[0] + 1
 
+    for i, row in boiling_group_df.iterrows():
+        print(row["sku"].name, row["sku"].packing_speed)
     # todo: pauses
     packing_time = sum(
         [
@@ -88,7 +99,6 @@ def make_boiling_group(boiling_group_df):
         ]
     )
     packing_time = int(custom_round(packing_time, 5, "ceil"))
-
     assert packing_time >= 15, "Packing time less than 15 minutes is not supported"
 
     make(

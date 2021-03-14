@@ -20,16 +20,28 @@ def make_frontend_boiling(boiling):
         boiling_label=boiling_label,
     )
 
+    is_pumping_parallel = boiling["pumping_out"].x[0] < boiling["abandon"].y[0]
+
     with make():
+        boiling_name_size = boiling.size[0] - boiling["heating"].size[0]
+
+        if is_pumping_parallel:
+            boiling_name_size -= boiling["pumping_out"].size[0]
+
         make("boiling_num", size=(boiling["heating"].size[0], 1))
-        make("boiling_name", size=(boiling.size[0] - boiling["heating"].size[0], 1))
+        make("boiling_name", size=(boiling_name_size, 1))
+
+        if is_pumping_parallel:
+            make("pumping_out", size=(boiling["pumping_out"].size[0], 1))
 
     with make():
         make("heating", size=(boiling["heating"].size[0], 1), text="1900")
         make("delay", size=(boiling["delay"].size[0], 1))
         make("protein_harvest", size=(boiling["protein_harvest"].size[0], 1))
         make("abandon", size=(boiling["abandon"].size[0], 1))
-        make("pumping_out", size=(boiling["pumping_out"].size[0], 1))
+
+        if not is_pumping_parallel:
+            make("pumping_out", size=(boiling["pumping_out"].size[0], 1))
 
     return maker.root
 
