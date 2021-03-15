@@ -108,18 +108,18 @@ def make_frontend_cream_cheese_boiling(boiling):
 def make_frontend(schedule):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
-    # make(make_boiling_lines(schedule))
-    # make(make_packing_line(schedule))
-
-    from app.schedule_maker.models import cast_model, CreamCheeseSKU
-    from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import (
-        make_cream_cheese_boiling,
-    )
-
-    # todo: del, test
-    sku = cast_model(CreamCheeseSKU, 93)
-    values = [[0, sku, 10]]
-    boiling_group_df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
-    boiling = make_cream_cheese_boiling(boiling_group_df)
-    make(make_frontend_cream_cheese_boiling(boiling))
+    make(make_boiling_lines(schedule))
+    make(make_packing_line(schedule))
+    #
+    # from app.schedule_maker.models import cast_model, CreamCheeseSKU
+    # from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import (
+    #     make_cream_cheese_boiling,
+    # )
+    #
+    # # todo: del, test
+    # sku = cast_model(CreamCheeseSKU, 93)
+    # values = [[0, sku, 10]]
+    # boiling_group_df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
+    # boiling = make_cream_cheese_boiling(boiling_group_df)
+    # make(make_frontend_cream_cheese_boiling(boiling))
     return maker.root
