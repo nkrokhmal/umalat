@@ -28,11 +28,11 @@ def make_frontend_mascarpone_boiling(boiling_process):
     return maker.root
 
 
-def make_boiling_lines(schedule):
-    maker, make = init_block_maker("boiling_lines", axis=1)
+def make_mascarpone_lines(schedule):
+    maker, make = init_block_maker("mascarpone_lines", axis=1)
 
     boiling_lines = []
-    for i in range(7):
+    for i in range(4):
         boiling_lines.append(
             make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
         )
@@ -47,11 +47,24 @@ def make_boiling_lines(schedule):
             )
             push(boiling_lines[line_nums[i]], frontend_boiling, push_func=add_push)
 
+    return maker.root
+
+
+def make_cream_cheese_lines(schedule, boiling_lines=None):
+    maker, make = init_block_maker("cream_cheese_lines", axis=1)
+
+    if not boiling_lines:
+        boiling_lines = []
+        for i in range(3):
+            boiling_lines.append(
+                make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
+            )
+            make("stub", size=(0, 1))
+
     for i, ccb in enumerate(list(schedule.iter(cls="cream_cheese_boiling"))):
-        boiling_line = boiling_lines[4 + i % 3]
+        boiling_line = boiling_lines[i % 3]
         block = make_frontend_cream_cheese_boiling(ccb)
         push(boiling_line, block, push_func=add_push)
-
     return maker.root
 
 
@@ -127,8 +140,10 @@ def make_cleanings_line(schedule):
 def make_frontend(schedule):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
-    make(make_boiling_lines(schedule))
+    make(make_mascarpone_lines(schedule))
     make(make_packing_line(schedule))
+    make("stub", size=(0, 1))
+    make(make_cream_cheese_lines(schedule))
     make("stub", size=(0, 1))
     make(make_cleanings_line(schedule))
     #
