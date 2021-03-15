@@ -32,7 +32,7 @@ def make_boiling_lines(schedule):
     maker, make = init_block_maker("boiling_lines", axis=1)
 
     boiling_lines = []
-    for i in range(4):
+    for i in range(7):
         boiling_lines.append(
             make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
         )
@@ -46,6 +46,12 @@ def make_boiling_lines(schedule):
                 boiling["boiling_process"]
             )
             push(boiling_lines[line_nums[i]], frontend_boiling, push_func=add_push)
+
+    for i, ccb in enumerate(listify(schedule["cream_cheese_boiling"])):
+        boiling_line = boiling_lines[4 + i % 3]
+        block = make_frontend_cream_cheese_boiling(ccb)
+        push(boiling_line, block, push_func=add_push)
+
     return maker.root
 
 

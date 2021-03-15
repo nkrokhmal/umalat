@@ -3,6 +3,7 @@ from utils_ak.block_tree import *
 from app.schedule_maker.models import *
 
 from app.schedule_maker.departments.mascarpone.algo.mascarpone_boilings import *
+from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import *
 
 validator = ClassValidator(window=3)
 
@@ -21,6 +22,26 @@ def validate(b1, b2):
 
 
 validator.add("mascarpone_boiling_group", "mascarpone_boiling_group", validate)
+
+
+def validate(b1, b2):
+    b = listify(b1["boiling"])[-1]
+    assert (
+        b["packing_process"].y[0] - 1
+        <= listify(b2["boiling_process"]["separation"])[0].x[0]
+    )
+
+
+validator.add("mascarpone_boiling_group", "cream_cheese_boiling", validate)
+
+
+def validate(b1, b2):
+    assert listify(b1["boiling_process"]["salting"][-1].y[0]) <= listify(
+        b2["boiling_process"]["separation"][0].y[0]
+    )
+
+
+validator.add("cream_cheese_boiling", "cream_cheese_boiling", validate)
 
 
 class BoilingPlanToSchedule:
@@ -50,6 +71,22 @@ class BoilingPlanToSchedule:
                 validator=validator,
             )
 
+    def _make_cream_cheese(self, boiling_plan_df):
+        boiling_group_dfs = [
+            grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
+        ]
+        cream_cheese_blocks = [
+            make_cream_cheese_boiling(grp) for grp in boiling_group_dfs
+        ]
+
+        for block in cream_cheese_blocks:
+            push(
+                self.maker.root,
+                block,
+                push_func=AxisPusher(start_from=0),
+                validator=validator,
+            )
+
     def __call__(self, boiling_plan_df):
         columns = boiling_plan_df.columns
         boiling_plan_df["sku_cls_name"] = boiling_plan_df["sku"].apply(
@@ -60,9 +97,10 @@ class BoilingPlanToSchedule:
 
         for group_cls_name, grp in df_to_ordered_tree(df, recursive=False):
             if "Mascarpone" in group_cls_name:
-                print(grp)
                 self._make_mascarpone(grp)
-
+            elif "CreamCheese" in group_cls_name:
+                self._make_cream_cheese(grp)
+                break
         return self.maker.root
 
 

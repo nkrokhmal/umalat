@@ -10,7 +10,7 @@ def make_cream_cheese_boiling(boiling_group_df):
 
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
     maker, make = init_block_maker(
-        "boiling", boiling_model=boiling_model, boiling_id=boiling_id
+        "cream_cheese_boiling", boiling_model=boiling_model, boiling_id=boiling_id
     )
 
     bt = boiling_model.boiling_technology
