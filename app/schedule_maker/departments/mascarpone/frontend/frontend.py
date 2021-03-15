@@ -129,6 +129,7 @@ def make_frontend(schedule):
     make("stub", size=(0, 1))  # start with 1
     make(make_boiling_lines(schedule))
     make(make_packing_line(schedule))
+    make("stub", size=(0, 1))
     make(make_cleanings_line(schedule))
     #
     # from app.schedule_maker.models import cast_model, CreamCheeseSKU

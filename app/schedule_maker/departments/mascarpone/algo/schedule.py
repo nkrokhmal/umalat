@@ -6,7 +6,7 @@ from app.schedule_maker.departments.mascarpone.algo.mascarpone_boilings import *
 from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import *
 from app.schedule_maker.departments.mascarpone.algo.cleanings import *
 
-validator = ClassValidator(window=3)
+validator = ClassValidator(window=20)
 
 
 def validate(b1, b2):
@@ -71,6 +71,25 @@ def validate(b1, b2):
 validator.add("cleaning", "mascarpone_boiling_group", validate)
 
 
+def validate(b1, b2):
+    if b1.props["entity"] == "separator":
+        assert b1.y[0] + 1 <= listify(b2["boiling_process"]["separation"])[0].x[0]
+
+    if b1.props["entity"] == "homogenizer":
+        assert b1.y[0] + 1 <= listify(b2["boiling_process"]["salting"])[0].x[0]
+
+
+validator.add("cleaning", "cream_cheese_boiling", validate)
+
+
+def validate(b1, b2):
+    if b2.props["entity"] == "separator":
+        assert listify(b1["boiling_process"]["separation"])[-1].y[0] <= b2.x[0]
+
+
+validator.add("cream_cheese_boiling", "cleaning", validate)
+
+
 class BoilingPlanToSchedule:
     def __init__(self):
         self.maker, self.make = init_block_maker("schedule")
@@ -99,7 +118,7 @@ class BoilingPlanToSchedule:
             )
 
         # cleanings
-        for entity in ["separator", "homogenizer", "heat_exchanger"]:
+        for entity in ["separator", "homogenizer"]:
             block = make_cleaning(entity)
             push(
                 self.maker.root,
@@ -124,6 +143,16 @@ class BoilingPlanToSchedule:
                 validator=validator,
             )
 
+        # cleanings
+        for entity in ["separator", "homogenizer", "heat_exchanger"]:
+            block = make_cleaning(entity)
+            push(
+                self.maker.root,
+                block,
+                push_func=AxisPusher(start_from="last_beg"),
+                validator=validator,
+            )
+
     def __call__(self, boiling_plan_df):
         columns = boiling_plan_df.columns
         boiling_plan_df["sku_cls_name"] = boiling_plan_df["sku"].apply(
@@ -135,9 +164,9 @@ class BoilingPlanToSchedule:
         for group_cls_name, grp in df_to_ordered_tree(df, recursive=False):
             if "Mascarpone" in group_cls_name:
                 self._make_mascarpone(grp)
-            # elif "CreamCheese" in group_cls_name:
-            #     self._make_cream_cheese(grp)
-            #     break
+            elif "CreamCheese" in group_cls_name:
+                self._make_cream_cheese(grp)
+                break
         return self.maker.root
 
 

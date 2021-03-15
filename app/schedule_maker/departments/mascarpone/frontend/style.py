@@ -17,7 +17,7 @@ STYLE = {
     "cleaning_separator": {"color": "yellow", "text": "Мойка сепаратора"},
     "cleaning_homogenizer": {
         "color": "yellow",
-        "text": "Мойка гомогенизатора + фасовочник",
+        "text": "Мойка гомогенизатора и фасовочника",
     },
     "cleaning_heat_exchanger": {"color": "yellow", "text": "Мойка теплообменника"},
     "stub": {"visible": False},
