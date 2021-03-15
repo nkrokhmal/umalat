@@ -14,5 +14,6 @@ STYLE = {
     "cream_cheese_boiling_label1": {"color": "white"},
     "cream_cheese_boiling_label2": {"color": "white"},
     "cooling": {"color": "#F79646", "text": "охлаждение"},  # orange
+    "cleaning_separator": {"color": "yellow", "text": "Мойка сепаратора"},
     "stub": {"visible": False},
 }

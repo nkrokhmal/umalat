@@ -11,9 +11,9 @@ def make_cleaning(entity, **kwargs):
         "heat_exchanger": 12,
         "homogenizer": 12,
     }
-    maker, make = init_block_maker(
-        "cleaning", entity=entity, size=(CLEANING_SIZES[entity], 0), **kwargs
-    )
+    maker, make = init_block_maker("cleaning", entity=entity, **kwargs)
+
+    make(f"cleaning_{entity}", size=(CLEANING_SIZES[entity], 0))
 
     # todo: add steam consumption
     return maker.root

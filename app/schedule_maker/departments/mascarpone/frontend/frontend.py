@@ -47,7 +47,7 @@ def make_boiling_lines(schedule):
             )
             push(boiling_lines[line_nums[i]], frontend_boiling, push_func=add_push)
 
-    for i, ccb in enumerate(listify(schedule["cream_cheese_boiling"])):
+    for i, ccb in enumerate(list(schedule.iter(cls="cream_cheese_boiling"))):
         boiling_line = boiling_lines[4 + i % 3]
         block = make_frontend_cream_cheese_boiling(ccb)
         push(boiling_line, block, push_func=add_push)
@@ -111,11 +111,25 @@ def make_frontend_cream_cheese_boiling(boiling):
     return maker.root
 
 
+def make_cleanings_line(schedule):
+    maker, make = init_block_maker("cleaning_line")
+
+    for cleaning in listify(schedule["cleaning"]):
+        make(
+            cleaning.children[0].props["cls"],
+            size=(cleaning.size[0], 2),
+            x=cleaning.x,
+            push_func=add_push,
+        )
+    return maker.root
+
+
 def make_frontend(schedule):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
     make(make_boiling_lines(schedule))
     make(make_packing_line(schedule))
+    make(make_cleanings_line(schedule))
     #
     # from app.schedule_maker.models import cast_model, CreamCheeseSKU
     # from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import (

@@ -4,6 +4,7 @@ from app.schedule_maker.models import *
 
 from app.schedule_maker.departments.mascarpone.algo.mascarpone_boilings import *
 from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import *
+from app.schedule_maker.departments.mascarpone.algo.cleanings import *
 
 validator = ClassValidator(window=3)
 
@@ -33,6 +34,15 @@ def validate(b1, b2):
 
 
 validator.add("mascarpone_boiling_group", "cream_cheese_boiling", validate)
+
+
+def validate(b1, b2):
+    for b in listify(b1["boiling"]):
+        validate_disjoint_by_axis(b["boiling_process"], b2)
+        assert b["boiling_process"].y[0] + 1 <= b2.x[0]
+
+
+validator.add("mascarpone_boiling_group", "cleaning", validate)
 
 
 def validate(b1, b2):
@@ -71,6 +81,16 @@ class BoilingPlanToSchedule:
                 validator=validator,
             )
 
+        # cleanings
+        for entity in ["separator"]:
+            block = make_cleaning(entity)
+            push(
+                self.maker.root,
+                block,
+                push_func=AxisPusher(start_from="last_beg"),
+                validator=validator,
+            )
+
     def _make_cream_cheese(self, boiling_plan_df):
         boiling_group_dfs = [
             grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
@@ -98,6 +118,7 @@ class BoilingPlanToSchedule:
         for group_cls_name, grp in df_to_ordered_tree(df, recursive=False):
             if "Mascarpone" in group_cls_name:
                 self._make_mascarpone(grp)
+                break
             elif "CreamCheese" in group_cls_name:
                 self._make_cream_cheese(grp)
                 break
