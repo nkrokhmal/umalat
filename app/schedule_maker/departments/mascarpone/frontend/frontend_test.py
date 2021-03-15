@@ -21,7 +21,7 @@ def test_drawing():
 
     configure_loguru_stdout("INFO")
     boiling_plan_df = generate_random_boiling_plan()
-    schedule = make_schedule(boiling_plan_df)
+    schedule = make_schedule(boiling_plan_df.iloc[:18])
     frontend = make_frontend(schedule)
     draw_excel_frontend(frontend, MASCARPONE_STYLE, open_file=True)
 

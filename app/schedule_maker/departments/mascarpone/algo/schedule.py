@@ -113,7 +113,7 @@ class BoilingPlanToSchedule:
             push(
                 self.maker.root,
                 bg,
-                push_func=AxisPusher(start_from=0),
+                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                 validator=validator,
             )
 
@@ -139,7 +139,7 @@ class BoilingPlanToSchedule:
             push(
                 self.maker.root,
                 block,
-                push_func=AxisPusher(start_from=0),
+                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                 validator=validator,
             )
 
@@ -166,7 +166,6 @@ class BoilingPlanToSchedule:
                 self._make_mascarpone(grp)
             elif "CreamCheese" in group_cls_name:
                 self._make_cream_cheese(grp)
-                break
         return self.maker.root
 
 
