@@ -47,6 +47,18 @@ class RicottaBoiling(Boiling):
         else:
             return "Рикотта"
 
+    @property
+    def is_cream(self):
+        if self.percent == 30 and self.flavoring_agent == "":
+            return True
+        else:
+            return False
+
+    def to_str(self):
+        values = [self.percent, self.flavoring_agent]
+        values = [str(v) for v in values if v]
+        return ", ".join(values)
+
 
 class RicottaBoilingTechnology(BoilingTechnology):
     __tablename__ = "ricotta_boiling_technologies"

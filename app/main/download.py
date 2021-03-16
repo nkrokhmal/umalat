@@ -1,5 +1,7 @@
 from flask import send_from_directory
-from app.utils.old.generate_constructor import *
+import os
+from flask import current_app
+from . import main
 
 
 @main.route("/download_boiling_plan/<file_name>", methods=["POST", "GET"])
@@ -45,8 +47,6 @@ def download_schedule_plan(file_name):
         os.path.dirname(current_app.root_path),
         current_app.config["SCHEDULE_PLAN_FOLDER"],
     )
-    print("Uploads is ")
-    print(uploads)
     response = send_from_directory(
         directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True
     )

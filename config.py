@@ -18,7 +18,8 @@ class BaseClass:
     BOILING_PLAN_FOLDER = "app/data/boiling_plan"
     SKU_PLAN_FOLDER = "app/data/sku_plan"
     SCHEDULE_PLAN_FOLDER = "app/data/schedule_plan"
-    TEMPLATE_BOILING_PLAN = "app/data/templates/constructor.xlsx"
+    TEMPLATE_BOILING_PLAN = "app/data/templates/constructor_mozzarella.xlsx"
+    TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/templates/constructor_ricotta.xlsx"
     IGNORE_SKU_FILE = "app/data/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:
         IGNORE_SKUS = json.load(json_file)
@@ -40,6 +41,7 @@ class BaseClass:
         "Default": "#FFFFFF",
         "DefaultGray": "#D9DDDC",
         "Remainings": "#F3F3C0",
+        "Рикотта": "#A3D5D2",
     }
     ORDER = [
         "Фиор Ди Латте",
@@ -49,6 +51,7 @@ class BaseClass:
         "Для пиццы",
         "Качокавалло",
         "Терка",
+        "Рикотта",
     ]
     BOILING_VOLUME_LIMITS = {"MIN": 6000, "MAX": 8000}
     CONSTRUCTOR_CELLS = {

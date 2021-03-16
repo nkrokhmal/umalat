@@ -53,6 +53,23 @@ class SKU(db.Model):
     def packers_str(self):
         return "/".join([x.name for x in self.packers])
 
+    @property
+    def colour(self):
+        COLOURS = {
+            "Для пиццы": "#E5B7B6",
+            "Моцарелла": "#DAE5F1",
+            "Фиор Ди Латте": "#CBC0D9",
+            "Чильеджина": "#E5DFEC",
+            "Качокавалло": "#F1DADA",
+            "Сулугуни": "#F1DADA",
+            "Рикотта": "#A3D5D2",
+            "Терка": "#FFEBE0",
+        }
+        if "Терка" not in self.form_factor.name:
+            return COLOURS[self.group.name]
+        else:
+            return COLOURS["Терка"]
+
 
 class Line(db.Model):
     __tablename__ = "lines"

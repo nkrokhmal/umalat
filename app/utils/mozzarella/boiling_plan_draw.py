@@ -83,7 +83,6 @@ def get_colour_by_name(sku_name, skus):
 
 
 def draw_boiling_plan(df, df_extra, wb):
-
     skus = db.session.query(MozzarellaSKU).all()
     form_factors = db.session.query(MozzarellaFormFactor).all()
     data_sku = {

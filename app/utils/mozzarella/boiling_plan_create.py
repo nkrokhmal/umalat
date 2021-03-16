@@ -1,8 +1,7 @@
 from app.interactive_imports import *
 import pandas as pd
 import numpy as np
-from flask import current_app
-from .features.merge_boiling_utils import Boilings
+from app.utils.features.merge_boiling_utils import Boilings
 
 
 def boiling_plan_create(df):
@@ -161,15 +160,15 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
                         if x["sku"].form_factor.name == "Терка Моцарелла"
                     ]
 
-                    boilings.add_group(df_grouped_sul, True)
-                    boilings.add_group(df_grouped_moz, True)
+                    boilings.add_group(df_grouped_sul, new=True)
+                    boilings.add_group(df_grouped_moz, new=True)
                     new = True
                 else:
                     df_grouped_dict = df_grouped.sort_values(
                         by=["weight", "pack_weight", "plan"],
                         ascending=[True, False, True],
                     ).to_dict("records")
-                    boilings.add_group(df_grouped_dict, new)
+                    boilings.add_group(df_grouped_dict, new=new)
                     new = False
 
     boilings.finish()
