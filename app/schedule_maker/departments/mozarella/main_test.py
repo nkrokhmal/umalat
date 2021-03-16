@@ -6,7 +6,7 @@ from utils_ak.loguru import configure_loguru_stdout
 def test():
     configure_loguru_stdout("INFO")
     os.environ["environment"] = "interactive"
-    from app.schedule_maker.departments.mozarella.main import main
+    from app.schedule_maker.departments.mozarella.make_schedule import main
     from config import DebugConfig
 
     # fn = DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
@@ -17,7 +17,7 @@ def test():
 def test_optimize():
     configure_loguru_stdout("INFO")
     os.environ["environment"] = "interactive"
-    from app.schedule_maker.departments.mozarella.main import main
+    from app.schedule_maker.departments.mozarella.make_schedule import main
     from config import DebugConfig
 
     fn = DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
