@@ -6,7 +6,7 @@ from app.enum import *
 from app.schedule_maker.frontend import *
 
 
-def main(fn, optimize=False, open_file=True, **kwargs):
+def run(fn, optimize=False, open_file=True, **kwargs):
     boiling_plan_df = read_boiling_plan(fn)
     cleanings = (
         boiling_plan_df.groupby("group_id")
