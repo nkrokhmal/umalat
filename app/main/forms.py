@@ -29,7 +29,8 @@ import datetime
 
 class SkuPlanForm(FlaskForm):
     validators = [FileRequired(message="There was no file!")]
-    input_file = FileField("", validators=validators)
+    input_file = FileField("Выберите файл остатков", validators=validators)
+    input_file_2 = FileField("Выберите файл плана варок за предыдущий день", validators=[Optional()])
     date = DateTimeField(
         "Введите дату",
         format="%Y-%m-%d",

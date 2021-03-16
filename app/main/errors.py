@@ -6,6 +6,7 @@ from . import main
 
 @main.errorhandler(400)
 def bad_request(message):
+    print(message)
     response = jsonify({"error": "bad request", "message": message})
     response.status_code = 400
     return response

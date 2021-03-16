@@ -87,11 +87,9 @@ def draw_boiling_plan(df, df_extra, wb):
         "Вода": [x for x in skus if x.made_from_boilings[0].boiling_type == "water"],
         "Соль": [x for x in skus if x.made_from_boilings[0].boiling_type == "salt"],
     }
-
     draw_boiling_names(wb=wb)
     draw_extra_packing(wb=wb, df=df_extra, skus=skus)
     draw_form_factors(wb=wb, form_factors=form_factors)
-
     for sheet_name in ["Соль", "Вода"]:
         draw_skus(wb, sheet_name, data_sku)
 
@@ -100,7 +98,6 @@ def draw_boiling_plan(df, df_extra, wb):
 
         sku_names = [x.name for x in data_sku[sheet_name]]
         df_filter = df[df["name"].isin(sku_names)].copy()
-
         for id, grp in df_filter.groupby("id", sort=False):
             for i, row in grp.iterrows():
                 columns = [x for x in row.index if x in COLUMNS.keys()]
@@ -118,7 +115,6 @@ def draw_boiling_plan(df, df_extra, wb):
                 COLUMNS["delimiter"],
             ]
             values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
-
         cur_row = 2
         for v in values:
             value = v.values()
@@ -135,7 +131,6 @@ def draw_boiling_plan(df, df_extra, wb):
                     COLUMNS["delimiter"].col_name,
                     COLUMNS["delimiter_int"].col_name,
                 )
-
             colour = get_colour_by_name(v[COLUMNS["name"]], skus)
             excel_client.colour = colour[1:]
 
@@ -178,7 +173,6 @@ def draw_boiling_plan(df, df_extra, wb):
                     set_colour=False,
                 )
             cur_row += 1
-
     for sheet in wb.sheetnames:
         wb[sheet].views.sheetView[0].tabSelected = False
     wb.active = 2
