@@ -18,7 +18,6 @@ COLUMNS = {
     "total_output": Cell(column_index_from_string("I"), "I"),
     "delimiter": Cell(column_index_from_string("J"), "J"),
     "delimiter_int": Cell(column_index_from_string("M"), "M"),
-    "total_output_general": Cell(column_index_from_string("S"), "S"),
 }
 
 
@@ -114,12 +113,6 @@ def draw_boiling_plan(df, df_extra, wb):
             excel_client.draw_cell(
                 row=cur_row,
                 col=COLUMNS["total_output"].col,
-                value=output,
-                set_border=False,
-            )
-            excel_client.draw_cell(
-                row=cur_row,
-                col=COLUMNS["total_output_general"].col,
                 value=output,
                 set_border=False,
             )
