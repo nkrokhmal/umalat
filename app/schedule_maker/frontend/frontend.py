@@ -374,9 +374,9 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
             while True:
                 if j == n_cooling_lines:
                     n_cooling_lines += 1
-                    new_cooling_line = make(
+                    new_cooling_line = maker.create_block(
                         "cooling_line", is_parent_node=True, size=(0, 1)
-                    ).block
+                    )
                     cooling_lines.append(new_cooling_line)
                     push(maker.root["cooling_row"], new_cooling_line)
 

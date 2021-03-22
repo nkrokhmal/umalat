@@ -11,11 +11,12 @@ from app.interactive_imports import *
 
 def test():
     makedirs("schedules/")
-    fn = r"C:\Users\Mi\Desktop\code\git\2020.10-umalat\umalat\app\schedule_maker\data\sample_boiling_plan.xlsx"
+    # fn = os.path.join(basedir, "app/data/inputs/2021-02-08 План по варкам.xlsx")
+    fn = os.path.join(basedir, "app/data/inputs/2021-02-17 План по варкам.xlsx")
     boiling_plan_df = read_boiling_plan(fn)
     start_times = {LineName.WATER: "08:00", LineName.SALT: "07:00"}
     boilings = make_boilings(boiling_plan_df)
-    schedule = make_schedule(boilings, cleaning_boiling=None, start_times=start_times)
+    schedule = make_schedule(boilings, start_times=start_times)
 
     try:
         frontend = make_frontend(schedule)

@@ -20,16 +20,20 @@ master_validator = ClassValidator(window=20)
 
 def validate(b1, b2):
     validate_disjoint_by_axis(
-        b1["pouring"]["first"]["termizator"], b2["pouring"]["first"]["termizator"]
+        b1["pouring"]["first"]["termizator"],
+        b2["pouring"]["first"]["termizator"],
     )
     validate_disjoint_by_axis(
-        b1["pouring"]["second"]["pouring_off"], b2["pouring"]["second"]["pouring_off"]
+        b1["pouring"]["second"]["pouring_off"],
+        b2["pouring"]["second"]["pouring_off"],
     )
     validate_disjoint_by_axis(
-        b1["pouring"]["first"]["pumping_out"], b2["pouring"]["second"]["pouring_off"]
+        b1["pouring"]["first"]["pumping_out"],
+        b2["pouring"]["second"]["pouring_off"],
     )
     validate_disjoint_by_axis(
-        b1["pouring"]["second"]["pouring_off"], b2["pouring"]["first"]["pumping_out"]
+        b1["pouring"]["second"]["pouring_off"],
+        b2["pouring"]["first"]["pumping_out"],
     )
 
     wl1 = (
@@ -53,7 +57,8 @@ def validate(b1, b2):
         # check drenator
         if b1.props["drenator_num"] == b2.props["drenator_num"]:
             validate_disjoint_by_axis(
-                b1["melting_and_packing"]["melting"]["meltings"], b2["drenator"]
+                b1["melting_and_packing"]["melting"]["meltings"],
+                b2["drenator"],
             )
 
     if b1.props["boiling_model"].line.name == b2.props["boiling_model"].line.name:
@@ -73,6 +78,26 @@ def validate(b1, b2):
                 b2["melting_and_packing"]["melting"]["serving"],
             )
 
+        # there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors
+        mp1 = listify(
+            b1["melting_and_packing"]["melting"]["meltings"]["melting_process"]
+        )[-1]
+
+        mp2 = listify(
+            b2["melting_and_packing"]["melting"]["meltings"]["melting_process"]
+        )[0]
+
+        bff1_name = mp1.props["bff"].name
+        bff2_name = mp2.props["bff"].name
+
+        sticks = ["Палочки 15.0г", "Палочки 7.5г"]
+        if bff1_name not in sticks and bff2_name in sticks:
+            assert (
+                b1["melting_and_packing"]["melting"]["meltings"].y[0] + 12
+                <= b2["melting_and_packing"]["melting"]["meltings"].x[0]
+            )
+
+        # collectings
         for p1, p2 in itertools.product(
             listify(b1["melting_and_packing"]["collecting"]),
             listify(b2["melting_and_packing"]["collecting"]),
@@ -191,7 +216,6 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
     return maker.root
 
 
-@clockify()
 def make_schedule(boilings, date=None, cleanings=None, start_times=None):
     date = date or datetime.now()
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
@@ -334,7 +358,8 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         for packing in boiling.iter(cls="packing"):
             if not list(
                 packing.iter(
-                    cls="process", sku=lambda sku: "Терка" in sku.form_factor.name
+                    cls="process",
+                    sku=lambda sku: "Терка" in sku.form_factor.name,
                 )
             ):
                 continue
@@ -349,14 +374,18 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
             push(
                 schedule["master"],
                 maker.create_block(
-                    "multihead_cleaning", x=(boiling.y[0], 0), size=(cast_t("03:00"), 0)
+                    "multihead_cleaning",
+                    x=(boiling.y[0], 0),
+                    size=(cast_t("03:00"), 0),
                 ),
                 push_func=add_push,
             )
             push(
                 schedule["extra"],
                 maker.create_block(
-                    "multihead_cleaning", x=(boiling.y[0], 0), size=(cast_t("03:00"), 0)
+                    "multihead_cleaning",
+                    x=(boiling.y[0], 0),
+                    size=(cast_t("03:00"), 0),
                 ),
                 push_func=add_push,
             )
