@@ -133,6 +133,7 @@ def make_cleanings_line(schedule):
             size=(cleaning.size[0], 2),
             x=cleaning.x,
             push_func=add_push,
+            line_nums=cleaning.props.get("line_nums"),
         )
     return maker.root
 

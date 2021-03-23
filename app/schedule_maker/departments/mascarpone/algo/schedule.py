@@ -37,9 +37,13 @@ validator.add("mascarpone_boiling_group", "cream_cheese_boiling", validate)
 
 
 def validate(b1, b2):
-    for b in listify(b1["boiling"]):
-        validate_disjoint_by_axis(b["boiling_process"], b2)
-        assert b["boiling_process"].y[0] + 1 <= b2.x[0]
+    if (
+        b2.children[0].props["cls"] != "cleaning_sourdough_mascarpone"
+        or b1.props["line_nums"] == b2.props["line_nums"]
+    ):
+        for b in listify(b1["boiling"]):
+            validate_disjoint_by_axis(b["boiling_process"], b2)
+            assert b["boiling_process"].y[0] + 1 <= b2.x[0]
 
 
 validator.add("mascarpone_boiling_group", "cleaning", validate)
@@ -56,7 +60,16 @@ validator.add("cream_cheese_boiling", "cream_cheese_boiling", validate)
 
 def validate(b1, b2):
     validate_disjoint_by_axis(b1, b2)
-    assert b1.y[0] + 3 <= b2.x[0]
+    subclasses = [b.children[0].props["cls"] for b in [b1, b2]]
+
+    a = all("sourdough" not in sub_cls for sub_cls in subclasses)
+    b = all("sourdough" in sub_cls for sub_cls in subclasses)
+
+    if a or b:
+        assert b1.y[0] + 3 <= b2.x[0]
+    else:
+        # validate with neighborhood
+        validate_disjoint_by_intervals((b1.x[0] - 3, b1.y[0] + 3), (b2.x[0], b2.y[0]))
 
 
 validator.add("cleaning", "cleaning", validate)
@@ -127,6 +140,15 @@ class BoilingPlanToSchedule:
                     push_func=AxisPusher(start_from="last_beg"),
                     validator=validator,
                 )
+
+        for line_nums in all_line_nums:
+            block = make_cleaning("sourdough_mascarpone", line_nums=line_nums)
+            push(
+                self.maker.root,
+                block,
+                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                validator=validator,
+            )
 
     def _make_cream_cheese(self, boiling_plan_df):
         boiling_group_dfs = [

@@ -15,6 +15,12 @@ STYLE = {
     "cream_cheese_boiling_label2": {"color": "white"},
     "cooling": {"color": "#F79646", "text": "охлаждение"},  # orange
     "cleaning_separator": {"color": "yellow", "text": "Мойка сепаратора"},
+    "cleaning_sourdough_mascarpone": {
+        "color": "yellow",
+        "text": lambda b: "Мойка заквасочников {}".format(
+            ", ".join([f"№{line_num + 1}" for line_num in b.props["line_nums"]])
+        ),
+    },
     "cleaning_homogenizer": {
         "color": "yellow",
         "text": "Мойка гомогенизатора и фасовочника",
