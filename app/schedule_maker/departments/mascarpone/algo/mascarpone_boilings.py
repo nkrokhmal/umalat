@@ -6,19 +6,21 @@ from app.schedule_maker.models import *
 
 
 def make_mascorpone_boiling(boiling_group_df):
-    boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
+    sku = boiling_group_df.iloc[0]["sku"]
+    boiling_model = sku.made_from_boilings[0]
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
+
     maker, make = init_block_maker(
         "boiling", boiling_model=boiling_model, boiling_id=boiling_id
     )
     bt = boiling_model.boiling_technology
 
     with make("boiling_process"):
-        make("pouring", size=(bt.heating_time // 5, 0))
+        make("pouring", size=(bt.pouring_time // 5, 0))
         make("heating", size=(bt.heating_time // 5, 0))
         make("waiting", size=[0, 0])
-        make("adding_lactic_acid", size=(bt.heating_time // 5, 0))
-        make("separation", size=(bt.heating_time // 5, 0))
+        make("adding_lactic_acid", size=(bt.adding_lactic_acid_time // 5, 0))
+        make("separation", size=(bt.separation_time // 5, 0))
     with make("packing_process", x=(maker.root["boiling_process"].x[0], 0)):
         make("N", size=(2, 0))
         make("P", size=(2, 0))
