@@ -8,6 +8,10 @@ for local_path in [
     DebugConfig.BOILING_PLAN_FOLDER,
     DebugConfig.SKU_PLAN_FOLDER,
     DebugConfig.SCHEDULE_PLAN_FOLDER,
+]:
+    makedirs(DebugConfig.abs_path(local_path) + "/")
+
+for local_path in [
     DebugConfig.TEMPLATE_BOILING_PLAN,
     DebugConfig.IGNORE_SKU_FILE,
 ]:
