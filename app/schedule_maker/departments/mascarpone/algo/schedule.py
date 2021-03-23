@@ -94,7 +94,7 @@ class BoilingPlanToSchedule:
     def __init__(self):
         self.maker, self.make = init_block_maker("schedule")
 
-    def _make_mascarpone(self, boiling_plan_df):
+    def _make_mascarpone(self, boiling_plan_df, is_last=False):
         boiling_group_dfs = [
             grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
         ]
@@ -118,14 +118,15 @@ class BoilingPlanToSchedule:
             )
 
         # cleanings
-        for entity in ["separator", "homogenizer"]:
-            block = make_cleaning(entity)
-            push(
-                self.maker.root,
-                block,
-                push_func=AxisPusher(start_from="last_beg"),
-                validator=validator,
-            )
+        if len(boiling_group_dfs) > 6 or is_last:
+            for entity in ["separator", "homogenizer"]:
+                block = make_cleaning(entity)
+                push(
+                    self.maker.root,
+                    block,
+                    push_func=AxisPusher(start_from="last_beg"),
+                    validator=validator,
+                )
 
     def _make_cream_cheese(self, boiling_plan_df):
         boiling_group_dfs = [
@@ -160,10 +161,11 @@ class BoilingPlanToSchedule:
         )
 
         df = boiling_plan_df[["sku_cls_name"] + list(columns)]
-
-        for group_cls_name, grp in df_to_ordered_tree(df, recursive=False):
+        ordered_groups = df_to_ordered_tree(df, recursive=False)
+        for i, (group_cls_name, grp) in enumerate(ordered_groups):
             if "Mascarpone" in group_cls_name:
-                self._make_mascarpone(grp)
+                is_last = i == len(ordered_groups) - 1
+                self._make_mascarpone(grp, is_last=is_last)
             elif "CreamCheese" in group_cls_name:
                 self._make_cream_cheese(grp)
         return self.maker.root
