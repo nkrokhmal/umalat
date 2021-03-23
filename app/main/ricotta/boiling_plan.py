@@ -28,7 +28,9 @@ def ricotta_boiling_plan():
         sku_plan_client.fill_ricotta_sku_plan()
 
         excel_compiler, wb, wb_data_only, filename, filepath = move_file(
-            sku_plan_client.filepath, sku_plan_client.filename, "рикотта",
+            sku_plan_client.filepath,
+            sku_plan_client.filename,
+            "рикотта",
         )
         sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]

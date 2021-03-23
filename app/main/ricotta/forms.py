@@ -28,6 +28,7 @@ from ...models import (
 from ... import db
 import datetime
 
+
 class BoilingPlanForm(FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
     input_file = FileField(

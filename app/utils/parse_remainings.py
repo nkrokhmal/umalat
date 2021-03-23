@@ -89,7 +89,7 @@ def cast_volume(obj):
     elif isinstance(obj, RicottaSKU):
         return obj.made_from_boilings[0].number_of_tanks * obj.output_per_tank
     else:
-        raise Exception('Unknown sku type')
+        raise Exception("Unknown sku type")
 
 
 def cast_sku_name(obj):
@@ -100,7 +100,7 @@ def cast_sku_name(obj):
         result = db.session.query(SKU).filter(SKU.name == obj).first()
         return result
     else:
-        raise Exception('Unknown sku type')
+        raise Exception("Unknown sku type")
 
 
 def convert_sku(sku):
@@ -151,12 +151,12 @@ def parse_sheet(ws, sheet_name, excel_compiler):
 
 
 def move_file(old_filepath, old_filename, department=""):
-    new_filename = "{} План по варкам {}.xlsx".format(old_filename.split(" ")[0], department)
+    new_filename = "{} План по варкам {}.xlsx".format(
+        old_filename.split(" ")[0], department
+    )
     filepath = os.path.join(current_app.config["BOILING_PLAN_FOLDER"], new_filename)
     copyfile(old_filepath, filepath)
     excel_compiler = ExcelCompiler(filepath)
     wb_data_only = openpyxl.load_workbook(filename=filepath, data_only=True)
     wb = openpyxl.load_workbook(filename=filepath)
     return excel_compiler, wb, wb_data_only, new_filename, filepath
-
-

@@ -16,7 +16,11 @@ class Boilings:
 
     def add(self, sku, max_weight=None):
         while sku["plan"] > 0:
-            remainings = self.max_weight - self.cur_sum() if not max_weight else max_weight - self.cur_sum()
+            remainings = (
+                self.max_weight - self.cur_sum()
+                if not max_weight
+                else max_weight - self.cur_sum()
+            )
             boiling_weight = min(remainings, sku["plan"])
             new_boiling = deepcopy(sku)
             new_boiling["plan"] = boiling_weight

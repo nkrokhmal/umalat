@@ -106,9 +106,7 @@ def draw_boiling_plan(df, df_extra, wb):
             value=formula,
             set_border=False,
         )
-        excel_client.draw_row(
-            row=cur_row, values=value, cols=column, set_border=False
-        )
+        excel_client.draw_row(row=cur_row, values=value, cols=column, set_border=False)
         if v[COLUMNS["name"]] == "-":
             excel_client.draw_cell(
                 row=cur_row,

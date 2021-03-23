@@ -71,13 +71,13 @@ class SkuPlanClient:
             return 0 if obj.packing_by_request else value
         return 0
 
-    def fill_skus(self, sku_grouped, excel_client, cur_row, space_factor, sorted_by_weight=False):
+    def fill_skus(
+        self, sku_grouped, excel_client, cur_row, space_factor, sorted_by_weight=False
+    ):
         beg_row = cur_row
         formula_group = []
         for group_name in current_app.config["ORDER"]:
-            block_skus = [
-                x for x in sku_grouped.skus if x.sku.group.name == group_name
-            ]
+            block_skus = [x for x in sku_grouped.skus if x.sku.group.name == group_name]
             if block_skus:
                 if sorted_by_weight:
                     block_skus = sorted(
@@ -118,19 +118,26 @@ class SkuPlanClient:
                     excel_client.draw_cell(
                         row=cur_row,
                         col=CELLS["ProductionPlan"].column,
-                        value=self._set_production_plan(block_sku.sku, "=MIN({}, 0)".format(
-                            excel_client.sheet.cell(
-                                cur_row, CELLS["FactRemains"].column
-                            ).coordinate))
+                        value=self._set_production_plan(
+                            block_sku.sku,
+                            "=MIN({}, 0)".format(
+                                excel_client.sheet.cell(
+                                    cur_row, CELLS["FactRemains"].column
+                                ).coordinate
+                            ),
+                        ),
                     )
                     excel_client.draw_cell(
                         row=cur_row,
                         col=CELLS["ExtraPacking"].column,
-                        value=self._set_extra_packing(block_sku.sku, "=MIN({}, 0)".format(
-                            excel_client.sheet.cell(
-                                cur_row, CELLS["FactRemains"].column
-                            ).coordinate
-                        ))
+                        value=self._set_extra_packing(
+                            block_sku.sku,
+                            "=MIN({}, 0)".format(
+                                excel_client.sheet.cell(
+                                    cur_row, CELLS["FactRemains"].column
+                                ).coordinate
+                            ),
+                        ),
                     )
 
                     formula_group.append(
@@ -159,19 +166,13 @@ class SkuPlanClient:
             beg_col=CELLS["Boiling"].column,
             end_col=CELLS["Boiling"].column,
             value=sku_grouped.boiling.to_str(),
-            alignment=Alignment(
-                horizontal="center", vertical="center", wrapText=True
-            ),
+            alignment=Alignment(horizontal="center", vertical="center", wrapText=True),
         )
         excel_client.draw_cell(
             row=beg_row, col=CELLS["Volume"].column, value=sku_grouped.volume
         )
         formula_boiling_count = "{}".format(
-            str(formula_group)
-                .strip("[]")
-                .replace(",", " +")
-                .replace("'", "")
-                .upper()
+            str(formula_group).strip("[]").replace(",", " +").replace("'", "").upper()
         )
 
         excel_client.draw_cell(
@@ -219,7 +220,9 @@ class SkuPlanClient:
                 cur_row += self.space_rows
             is_lactose = sku_grouped.boiling.is_lactose
             excel_client = ExcelBlock(sheet=sheet)
-            cur_row = self.fill_skus(sku_grouped, excel_client, cur_row, is_lactose, True)
+            cur_row = self.fill_skus(
+                sku_grouped, excel_client, cur_row, is_lactose, True
+            )
 
         for sheet_number, sheet_name in enumerate(self.wb.sheetnames):
             if sheet_number != 1:
