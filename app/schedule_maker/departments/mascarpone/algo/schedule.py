@@ -39,7 +39,7 @@ validator.add("mascarpone_boiling_group", "cream_cheese_boiling", validate)
 def validate(b1, b2):
     if (
         b2.children[0].props["cls"] != "cleaning_sourdough_mascarpone"
-        or b1.props["line_nums"] == b2.props["line_nums"]
+        or b1.props["line_nums"] == b2.props["sourdough_nums"]
     ):
         for b in listify(b1["boiling"]):
             validate_disjoint_by_axis(b["boiling_process"], b2)
@@ -142,7 +142,7 @@ class BoilingPlanToSchedule:
                 )
 
         for line_nums in all_line_nums:
-            block = make_cleaning("sourdough_mascarpone", line_nums=line_nums)
+            block = make_cleaning("sourdough_mascarpone", sourdough_nums=line_nums)
             push(
                 self.maker.root,
                 block,
@@ -155,7 +155,11 @@ class BoilingPlanToSchedule:
             grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
         ]
         cream_cheese_blocks = [
-            make_cream_cheese_boiling(grp) for grp in boiling_group_dfs
+            make_cream_cheese_boiling(
+                grp,
+                sourdough_num=i % 3 + 4,
+            )
+            for i, grp in enumerate(boiling_group_dfs)
         ]
 
         for block in cream_cheese_blocks:
@@ -167,6 +171,25 @@ class BoilingPlanToSchedule:
             )
 
         # cleanings
+        if len(cream_cheese_blocks) == 1:
+            groups = [[4]]
+        elif len(cream_cheese_blocks) == 2:
+            groups = [[4, 5]]
+        else:
+            # >= 3
+            groups = [[4, 5], [6]]
+
+        for group in groups:
+            block = make_cleaning(
+                "sourdough_mascarpone_cream_cheese", sourdough_nums=group
+            )
+            push(
+                self.maker.root,
+                block,
+                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                validator=validator,
+            )
+
         for entity in ["separator", "homogenizer", "heat_exchanger"]:
             block = make_cleaning(entity)
             push(

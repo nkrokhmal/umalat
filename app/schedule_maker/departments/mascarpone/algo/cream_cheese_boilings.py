@@ -5,12 +5,15 @@ from utils_ak.builtin import *
 from app.schedule_maker.models import *
 
 
-def make_cream_cheese_boiling(boiling_group_df):
+def make_cream_cheese_boiling(boiling_group_df, **props):
     boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
 
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
     maker, make = init_block_maker(
-        "cream_cheese_boiling", boiling_model=boiling_model, boiling_id=boiling_id
+        "cream_cheese_boiling",
+        boiling_model=boiling_model,
+        boiling_id=boiling_id,
+        **props
     )
 
     bt = boiling_model.boiling_technology
