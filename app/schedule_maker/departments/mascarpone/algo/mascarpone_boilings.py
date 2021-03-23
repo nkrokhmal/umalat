@@ -5,13 +5,13 @@ from utils_ak.builtin import *
 from app.schedule_maker.models import *
 
 
-def make_mascorpone_boiling(boiling_group_df):
+def make_mascorpone_boiling(boiling_group_df, **props):
     sku = boiling_group_df.iloc[0]["sku"]
     boiling_model = sku.made_from_boilings[0]
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
 
     maker, make = init_block_maker(
-        "boiling", boiling_model=boiling_model, boiling_id=boiling_id
+        "boiling", boiling_model=boiling_model, boiling_id=boiling_id, **props
     )
     bt = boiling_model.boiling_technology
 
@@ -19,7 +19,12 @@ def make_mascorpone_boiling(boiling_group_df):
         make("pouring", size=(bt.pouring_time // 5, 0))
         make("heating", size=(bt.heating_time // 5, 0))
         make("waiting", size=[0, 0])
-        make("adding_lactic_acid", size=(bt.adding_lactic_acid_time // 5, 0))
+
+        adding_lactic_acid_time = bt.adding_lactic_acid_time
+        # todo: hardcode, del
+        if adding_lactic_acid_time == 0:
+            adding_lactic_acid_time = 20
+        make("adding_lactic_acid", size=(adding_lactic_acid_time // 5, 0))
         make("separation", size=(bt.separation_time // 5, 0))
     with make("packing_process", x=(maker.root["boiling_process"].x[0], 0)):
         make("N", size=(2, 0))
@@ -71,8 +76,8 @@ def make_mascarpone_boiling_group(boiling_group_df1, boiling_group_df2):
         "mascarpone_boiling_group", boiling_model=boiling_model
     )
 
-    b1 = make_mascorpone_boiling(boiling_group_df1)
-    b2 = make_mascorpone_boiling(boiling_group_df2)
+    b1 = make_mascorpone_boiling(boiling_group_df1, n=0)
+    b2 = make_mascorpone_boiling(boiling_group_df2, n=1)
     for b in [b1, b2]:
         push(
             maker.root,

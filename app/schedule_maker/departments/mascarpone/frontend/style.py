@@ -1,6 +1,10 @@
 STYLE = {
     "boiling_num": {"text": "{boiling_id}"},
-    "boiling_name": {"text": "{boiling_id}"},
+    "boiling_name": {
+        "text": lambda b: """производство маскарпоне на линии/варка ({boiling_volume} литров)"""
+        if b.props["n"] == 0
+        else """производство маскарпоне на линии/produz. Mascarpone"""
+    },
     "pouring": {"color": "#B8CCE4", "text": "3"},  # blue
     "heating": {"color": "red", "text": "нагрев"},
     "waiting": {"color": "white", "text": "ожидание"},

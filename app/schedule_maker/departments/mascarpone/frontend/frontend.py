@@ -13,7 +13,12 @@ def make_frontend_mascarpone_boiling(boiling_process):
 
     with make():
         make("boiling_num", size=(3, 1))
-        make("boiling_name", size=(boiling_process.size[0] - 3, 1))
+        make(
+            "boiling_name",
+            size=(boiling_process.size[0] - 3, 1),
+            boiling_volume=boiling_process.props["boiling_volume"],
+            n=boiling_process.props["n"],
+        )
 
     with make():
         make("pouring", size=(boiling_process["pouring"].size[0], 1))

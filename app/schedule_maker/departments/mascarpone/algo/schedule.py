@@ -123,9 +123,11 @@ class BoilingPlanToSchedule:
             boiling_groups.append(make_mascarpone_boiling_group(b1, b2))
 
         all_line_nums = [[0, 1], [2, 3]]
+
+        boiling_volumes = [800, 600]
         for i, bg in enumerate(boiling_groups):
             line_nums = all_line_nums[i % 2]
-            bg.props.update(line_nums=line_nums)
+            bg.props.update(line_nums=line_nums, boiling_volume=boiling_volumes[i % 2])
             push(
                 self.maker.root,
                 bg,
