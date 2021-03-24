@@ -11,16 +11,14 @@
         </div>
     </div>
     <div class="row">
-        {% if get_flashed_messages() %}
-            <div class="card card-body shadow-sm mb-4" style="line-height: 0.9em;background-color:#d7edf8;">
-                <h2 class="h5 mb-4">В базе данных нет некоторых SKU из заявки. Добавьте их и загрузите заявку еще раз!</h2>
-                <p class="text-info mb-0" style="font-size:13px;">
-                    {% for mes in get_flashed_messages() %}
-                        {{ mes }}
-                    {% endfor %}
-                </p>
+        <div class="container">
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert" style="position:absolute; top:0; right:0;">&times;</button>
+                {{ message }}
             </div>
-        {% endif %}
+            {% endfor %}
+        </div>
         <div class="card card-body bg-white border-light shadow-sm mb-4">
             <h2 class="h5 mb-4">Загрузите файл остатков</h2>
             <div class="row">

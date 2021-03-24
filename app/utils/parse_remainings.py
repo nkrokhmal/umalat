@@ -105,7 +105,8 @@ def cast_sku_name(obj):
 
 def convert_sku(sku):
     return Markup(
-        " ".join(
+        "В базе нет следующих SKU: <br> <br>"
+        + " ".join(
             [
                 '<a href="/add_sku?name={0}">{1}</a> <br>'.format(quote(x), x)
                 for x in sku
