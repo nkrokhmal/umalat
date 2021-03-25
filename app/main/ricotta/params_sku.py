@@ -25,7 +25,11 @@ def ricotta_add_sku():
             output_per_tank=form.output_per_tank.data,
         )
         sku = fill_ricotta_sku_from_form(sku, form)
-        ricotta_line = db.session.query(RicottaLine).filter(RicottaLine.name == LineName.RICOTTA).first()
+        ricotta_line = (
+            db.session.query(RicottaLine)
+            .filter(RicottaLine.name == LineName.RICOTTA)
+            .first()
+        )
         sku.line = ricotta_line
 
         db.session.add(sku)
@@ -100,5 +104,5 @@ def ricotta_delete_sku(sku_id):
         db.session.delete(sku)
         db.session.commit()
         flash("SKU успешно удалено")
-    time.sleep(1.)
+    time.sleep(1.0)
     return redirect(url_for(".ricotta_get_sku", page=1))

@@ -106,5 +106,5 @@ def delete_sku(sku_id):
     if sku:
         db.session.delete(sku)
         db.session.commit()
-    time.sleep(1.)
+    time.sleep(1.0)
     return redirect(url_for(".get_sku", page=1))

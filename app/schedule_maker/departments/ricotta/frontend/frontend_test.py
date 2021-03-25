@@ -4,6 +4,9 @@ os.environ["environment"] = "interactive"
 
 from app.schedule_maker.departments.ricotta import *
 from app.schedule_maker import draw_excel_frontend
+from app.schedule_maker.departments.ricotta.algo.schedule import *
+from app.schedule_maker.departments.ricotta.boiling_plan import *
+from config import DebugConfig
 
 
 def test_make_frontend_boiling():
@@ -11,21 +14,19 @@ def test_make_frontend_boiling():
     print(make_frontend_boiling(make_boiling(boiling_model)))
 
 
-def test_make_frontend():
+def test_make_frontend(boiling_plan_df):
     from utils_ak.loguru import configure_loguru_stdout
 
     configure_loguru_stdout("INFO")
-    boiling_plan_df = generate_random_boiling_plan()
     schedule = make_schedule(boiling_plan_df)
     frontend = make_frontend(schedule)
     print(frontend)
 
 
-def test_drawing():
+def test_drawing(boiling_plan_df):
     from utils_ak.loguru import configure_loguru_stdout
 
     configure_loguru_stdout("INFO")
-    boiling_plan_df = generate_random_boiling_plan()
     schedule = make_schedule(boiling_plan_df)
     frontend = make_frontend(schedule)
     draw_excel_frontend(frontend, RICOTTA_STYLE, open_file=True)
@@ -33,6 +34,8 @@ def test_drawing():
 
 if __name__ == "__main__":
     test_make_frontend_boiling()
-    test_make_frontend()
-
-    test_drawing()
+    boiling_plan_df = read_boiling_plan(
+        DebugConfig.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx")
+    )
+    test_make_frontend(boiling_plan_df)
+    test_drawing(boiling_plan_df)

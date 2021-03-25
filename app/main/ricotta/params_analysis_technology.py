@@ -32,7 +32,7 @@ def ricotta_edit_analysis_technology(analysis_technology_id):
 
         db.session.commit()
         flash("Варка успешно изменена!")
-        print('Finished')
+        print("Finished")
         return redirect(url_for(".ricotta_get_analysis_technology"))
 
     form.preparation_time.data = analysis_technology.preparation_time

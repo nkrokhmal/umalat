@@ -18,8 +18,7 @@ def _generate_random_boiling_group(sku_model, boiling_model, n=3):
             kg = custom_round(kg, 10, "ceil")
             values.append([i * 2 + j, sku, kg])
 
-    df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
-    return df
+    return pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
 
 
 def generate_random_boiling_plan(n_groups=4, seed=3):

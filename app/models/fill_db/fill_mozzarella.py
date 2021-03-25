@@ -4,8 +4,7 @@ import json
 from app.models import *
 
 
-
-def read_params(fn='app/data/params/mozzarella.xlsx'):
+def read_params(fn="app/data/params/mozzarella.xlsx"):
     df = pd.read_excel(fn, index_col=0)
     return df
 
@@ -41,19 +40,20 @@ def fill_boiling_technologies():
     bt_data = bt_data.drop_duplicates()
     bt_data = bt_data.to_dict("records")
     for bt in bt_data:
-        line_name = LineName.SALT if bt['Линия'] == 'Соль' else LineName.WATER
+        line_name = LineName.SALT if bt["Линия"] == "Соль" else LineName.WATER
         technology = MozzarellaBoilingTechnology(
             name=MozzarellaBoilingTechnology.create_name(
                 line=line_name,
-                percent=bt['Процент'],
-                ferment=bt['Тип закваски'],
-                is_lactose=bt['Наличие лактозы']),
-            pouring_time=bt['Время налива'],
-            soldification_time=bt['Время отвердевания'],
-            cutting_time=bt['Время нарезки'],
-            pouring_off_time=bt['Время слива'],
-            pumping_out_time=bt['Откачка'],
-            extra_time=bt['Дополнительное время'],
+                percent=bt["Процент"],
+                ferment=bt["Тип закваски"],
+                is_lactose=bt["Наличие лактозы"],
+            ),
+            pouring_time=bt["Время налива"],
+            soldification_time=bt["Время отвердевания"],
+            cutting_time=bt["Время нарезки"],
+            pouring_off_time=bt["Время слива"],
+            pumping_out_time=bt["Откачка"],
+            extra_time=bt["Дополнительное время"],
         )
 
         db.session.add(technology)
@@ -62,18 +62,24 @@ def fill_boiling_technologies():
 
 def fill_cooling_technologies():
     df = read_params()
-    data = df[[
-        'Название форм фактора',
-        'Вес форм фактора',
-        'Охлаждение 1(для воды)', 'Охлаждение 2(для воды)', 'Время посолки', 'Линия']]
+    data = df[
+        [
+            "Название форм фактора",
+            "Вес форм фактора",
+            "Охлаждение 1(для воды)",
+            "Охлаждение 2(для воды)",
+            "Время посолки",
+            "Линия",
+        ]
+    ]
     data = data.drop_duplicates()
     data = data.to_dict("records")
     for value in data:
         if any([not np.isnan(x) for x in value.values()]):
             technology = MozzarellaCoolingTechnology(
-                first_cooling_time=value['Охлаждение 1(для воды)'],
-                second_cooling_time=value['Охлаждение 2(для воды)'],
-                salting_time=value['Время посолки']
+                first_cooling_time=value["Охлаждение 1(для воды)"],
+                second_cooling_time=value["Охлаждение 2(для воды)"],
+                salting_time=value["Время посолки"],
             )
 
             db.session.add(technology)
@@ -84,9 +90,17 @@ def fill_boilings():
     df = read_params()
     lines = db.session.query(Line).all()
     bts = db.session.query(MozzarellaBoilingTechnology).all()
-    columns = ['Тип закваски', 'Процент', 'Наличие лактозы', 'Линия',
-               'Время налива', 'Время отвердевания', 'Время нарезки', 'Время слива',
-               'Дополнительное время']
+    columns = [
+        "Тип закваски",
+        "Процент",
+        "Наличие лактозы",
+        "Линия",
+        "Время налива",
+        "Время отвердевания",
+        "Время нарезки",
+        "Время слива",
+        "Дополнительное время",
+    ]
     b_data = df[columns]
     b_data["Наличие лактозы"] = b_data["Наличие лактозы"].apply(
         lambda x: True if x == "Да" else False
@@ -99,18 +113,28 @@ def fill_boilings():
             line_id = [x for x in lines if x.name == LineName.SALT][0].id
         else:
             line_id = [x for x in lines if x.name == LineName.WATER][0].id
-        bt_id = [x for x in bts if (x.pouring_time == b['Время налива']) &
-                 (x.soldification_time == b['Время отвердевания']) &
-                 (x.cutting_time == b['Время нарезки']) &
-                 (x.pouring_off_time == b['Время слива']) &
-                 (x.extra_time == b['Дополнительное время']) &
-                 (x.name == MozzarellaBoilingTechnology.create_name(
-                     line=line_name, percent=b['Процент'],
-                     ferment=b['Тип закваски'], is_lactose=b['Наличие лактозы']))][0].id
+        bt_id = [
+            x
+            for x in bts
+            if (x.pouring_time == b["Время налива"])
+            & (x.soldification_time == b["Время отвердевания"])
+            & (x.cutting_time == b["Время нарезки"])
+            & (x.pouring_off_time == b["Время слива"])
+            & (x.extra_time == b["Дополнительное время"])
+            & (
+                x.name
+                == MozzarellaBoilingTechnology.create_name(
+                    line=line_name,
+                    percent=b["Процент"],
+                    ferment=b["Тип закваски"],
+                    is_lactose=b["Наличие лактозы"],
+                )
+            )
+        ][0].id
         boiling = MozzarellaBoiling(
-            percent=b['Процент'],
-            is_lactose=b['Наличие лактозы'],
-            ferment=b['Тип закваски'],
+            percent=b["Процент"],
+            is_lactose=b["Наличие лактозы"],
+            ferment=b["Тип закваски"],
             boiling_technology_id=bt_id,
             line_id=line_id,
         )
@@ -121,7 +145,7 @@ def fill_boilings():
 def fill_form_factors():
     lines = db.session.query(Line).all()
     df = read_params()
-    mass_ff = MozzarellaFormFactor(name='Масса')
+    mass_ff = MozzarellaFormFactor(name="Масса")
     db.session.add(mass_ff)
     db.session.commit()
 
@@ -153,14 +177,16 @@ def fill_form_factors():
         else:
             name = str(value["Вес форм фактора"] / 1000)
 
-        form_factor = MozzarellaFormFactor(name=name, relative_weight=value['Вес форм фактора'])
+        form_factor = MozzarellaFormFactor(
+            name=name, relative_weight=value["Вес форм фактора"]
+        )
         form_factor.line = [x for x in lines if x.name == line_name][0]
         # cooling_technologies = db.session.query(MozzarellaCoolingTechnology).all()
-        if 'Терка' not in name:
+        if "Терка" not in name:
             cooling_technology = MozzarellaCoolingTechnology(
-                first_cooling_time=value['Охлаждение 1(для воды)'],
-                second_cooling_time=value['Охлаждение 2(для воды)'],
-                salting_time=value['Время посолки']
+                first_cooling_time=value["Охлаждение 1(для воды)"],
+                second_cooling_time=value["Охлаждение 2(для воды)"],
+                salting_time=value["Время посолки"],
             )
             db.session.add(cooling_technology)
             db.session.commit()
@@ -168,7 +194,7 @@ def fill_form_factors():
         db.session.add(form_factor)
     db.session.commit()
     form_factors = db.session.query(MozzarellaFormFactor).all()
-    mass_ff = [x for x in form_factors if x.name == 'Масса'][0]
+    mass_ff = [x for x in form_factors if x.name == "Масса"][0]
     for form_factor in form_factors:
         form_factor.add_made_from(form_factor)
         form_factor.add_made_from(mass_ff)
@@ -218,15 +244,16 @@ def fill_sku():
     sku_data = sku_data.to_dict("records")
     for sku in sku_data:
 
-        is_lactose = sku['Наличие лактозы'] == 'Да'
+        is_lactose = sku["Наличие лактозы"] == "Да"
         add_sku = MozzarellaSKU(
-            name=sku['Название SKU'],
-            brand_name=sku['Имя бренда'],
-            weight_netto=sku['Вес нетто'],
-            shelf_life=sku['Срок хранения'],
-            collecting_speed=_cast_non_nan(sku['Скорость сборки']) or _cast_non_nan(sku['Скорость упаковки']),
-            packing_speed=sku['Скорость упаковки'],
-            in_box=sku['Коробки'],
+            name=sku["Название SKU"],
+            brand_name=sku["Имя бренда"],
+            weight_netto=sku["Вес нетто"],
+            shelf_life=sku["Срок хранения"],
+            collecting_speed=_cast_non_nan(sku["Скорость сборки"])
+            or _cast_non_nan(sku["Скорость упаковки"]),
+            packing_speed=sku["Скорость упаковки"],
+            in_box=sku["Коробки"],
         )
 
         sku_packers = [x for x in packer if x.name in sku["Упаковщик"].split("/")]
@@ -274,10 +301,22 @@ def fill_sku():
 def fill_form_factors_made_from():
     skus = db.session.query(MozzarellaSKU).all()
     form_factors = db.session.query(MozzarellaFormFactor).all()
-    sul_ff = [x for x in form_factors if x.name == 'Терка Сулугуни'][0]
-    moz_ff = [x for x in form_factors if x.name == 'Терка Моцарелла'][0]
-    sul_ffs = set([x.form_factor for x in skus if 'сулугуни' in x.name.lower() and x.line.name == LineName.SALT])
-    moz_ffs = set([x.form_factor for x in skus if 'моцарелла' in x.name.lower() and x.line.name == LineName.SALT])
+    sul_ff = [x for x in form_factors if x.name == "Терка Сулугуни"][0]
+    moz_ff = [x for x in form_factors if x.name == "Терка Моцарелла"][0]
+    sul_ffs = set(
+        [
+            x.form_factor
+            for x in skus
+            if "сулугуни" in x.name.lower() and x.line.name == LineName.SALT
+        ]
+    )
+    moz_ffs = set(
+        [
+            x.form_factor
+            for x in skus
+            if "моцарелла" in x.name.lower() and x.line.name == LineName.SALT
+        ]
+    )
     for sul in sul_ffs:
         sul_ff.add_made_from(sul)
     for moz in moz_ffs:
