@@ -6,22 +6,8 @@ from app.schedule_maker import *
 import os
 from app.schedule_maker.departments.mozarella.frontend import *
 from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boilings
+from app.utils.batches.batch import *
 import datetime
-
-
-def add_batch(date, beg_number, end_number):
-    batch = BatchNumber.get_batch_by_date(date)
-    if batch is not None:
-        batch.beg_number = beg_number
-        batch.end_number = end_number
-    else:
-        batch = BatchNumber(
-            datetime=date,
-            beg_number=beg_number,
-            end_number=end_number,
-        )
-        db.session.add(batch)
-    db.session.commit()
 
 
 @main.route("/schedule", methods=["GET", "POST"])
@@ -46,6 +32,7 @@ def schedule():
         boiling_plan_df = read_boiling_plan(wb)
         add_batch(
             date,
+            "Моцарельный цех",
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["group_id"].max()) - 1,
         )
@@ -106,7 +93,8 @@ def schedule():
     form.date.data = datetime.datetime.today() + datetime.timedelta(days=1)
     form.batch_number.data = (
         BatchNumber.last_batch_number(
-            datetime.datetime.today() + datetime.timedelta(days=1)
+            datetime.datetime.today() + datetime.timedelta(days=1),
+            "Моцарельный цех",
         )
         + 1
     )

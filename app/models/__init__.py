@@ -243,9 +243,11 @@ class BatchNumber(db.Model):
     )
 
     @staticmethod
-    def last_batch_number(date):
+    def last_batch_number(date, department_name):
+        department = db.session.query(Department).filter(Department.name == department_name).first()
         last_batch = (
             db.session.query(BatchNumber)
+            .filter(BatchNumber.department_id == department.id)
             .filter(func.DATE(BatchNumber.datetime) < date.date())
             .filter(extract("month", BatchNumber.datetime) == date.month)
             .filter(extract("year", BatchNumber.datetime) == date.year)
@@ -258,10 +260,11 @@ class BatchNumber(db.Model):
             return 0
 
     @staticmethod
-    def get_batch_by_date(date):
+    def get_batch_by_date(date, department_id):
         return (
             db.session.query(BatchNumber)
             .filter(func.DATE(BatchNumber.datetime) == date.date())
+            .filter(BatchNumber.department_id == department_id)
             .first()
         )
 
