@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} План по варкам {% endblock %}
+
+{% block header %}
+<div class="row", style="padding:20px">
+    <div class="header-img">
+        <img src= "{{ url_for('static', filename='schedule.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+    </div>
+</div>
+{% endblock %}
+
+
+{% block page_content %}
+<div class="row">
+    <div class="card card-body bg-white border-light shadow-sm mb-4">
+        <h4 class="h5 mb-4">Загрузите файл плана по варкам и выберите дату</h4>
+        <div class="row">
+            <form method="post" action="/ricotta_schedule" enctype="multipart/form-data" class="mt-4">
+                {{ form.hidden_tag() }}
+                <div class="row mb-4">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Выберите файл плана варки</label>
+                            {{form.input_file(place_holder='InputFile', class='form-control')}}
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Введите дату</label>
+                                {{form.date(place_holder='Date', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Введите время первой подачи </label>
+                                {{form.beg_time(place_holder='SaltBegTime', class='form-control')}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Введите номер первой партии в текущем дне</label>
+                                {{form.batch_number(place_holder='BatchNumber', class='form-control')}}
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" name="submit" class="btn btn-block btn-primary">Отправить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if filename %}
+    <script>
+        function download(url, filename) {
+        fetch(url).then(function(t) {
+            return t.blob().then((b)=>{
+                var a = document.createElement("a");
+                a.href = URL.createObjectURL(b);
+                a.setAttribute("download", filename);
+                a.click();
+            }
+            );
+        });
+        }
+        var url = "download_schedule_plan/" + "{{filename}}";
+        download(url,"{{filename}}");
+    </script>
+{% endif %}
+{% endblock %}

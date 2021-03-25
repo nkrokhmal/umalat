@@ -108,3 +108,19 @@ class AnalysisForm(FlaskForm):
     )
     boiling_name = StringField("Выберите варку", validators=[Optional()])
     submit = SubmitField(label="Сохранить")
+
+
+class ScheduleForm(FlaskForm):
+    validators = [FileRequired(message="Отсутствует файл!")]
+    input_file = FileField("", validators=validators)
+    batch_number = IntegerField(
+        "Введите номер первой партии в текущем дне", validators=[Optional()]
+    )
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    beg_time = TimeField(
+        'Начало первой подачи"',
+        validators=[Optional()],
+        default=datetime.time(7, 0),
+    )
+
+
