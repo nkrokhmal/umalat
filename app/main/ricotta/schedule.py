@@ -28,12 +28,15 @@ def ricotta_schedule():
             data_only=True,
         )
         boiling_plan_df = read_boiling_plan(wb)
+        print(boiling_plan_df)
         schedule = make_schedule(boiling_plan_df)
         frontend = make_frontend(schedule, date=date, start_time=beg_time)
         schedule_wb = draw_excel_frontend(
             frontend, RICOTTA_STYLE, open_file=False, fn=None
         )
-
-        return render_template("ricotta/schedule.html", form=form, filename=None)
+        filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"
+        path_schedule = "{}/{}".format("app/data/schedule_plan", filename_schedule)
+        schedule_wb.save(path_schedule)
+        return render_template("ricotta/schedule.html", form=form, filename=filename_schedule)
 
     return render_template("ricotta/schedule.html", form=form, filename=None)
