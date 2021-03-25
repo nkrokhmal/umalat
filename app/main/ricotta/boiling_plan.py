@@ -1,4 +1,3 @@
-import dbus
 from flask import render_template, request
 from .forms import BoilingPlanForm
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create
