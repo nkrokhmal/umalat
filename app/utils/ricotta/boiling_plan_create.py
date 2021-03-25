@@ -51,11 +51,15 @@ def handle_ricotta(df):
             )
         ]
         if not df_filter.empty:
-            max_weight = (
-                df_filter[["number_of_tanks", "output_per_tank"]].prod(axis=1).iloc[0]
+            df_filter["output"] = (
+                df_filter["number_of_tanks"] * df_filter["output_per_tank"]
             )
-            boilings_ricotta.add_group(
-                df_filter.to_dict("records"), max_weight=max_weight
-            )
+            df_filter["output"] = df_filter["output"].apply(lambda x: int(x))
+            df_filter_groups = [group for _, group in df_filter.groupby("output")]
+            for df_filter_group in df_filter_groups:
+                max_weight = df_filter_group["output"].iloc[0]
+                boilings_ricotta.add_group(
+                    df_filter_group.to_dict("records"), max_weight=max_weight
+                )
     boilings_ricotta.finish()
     return pd.DataFrame(boilings_ricotta.boilings), boilings_ricotta.boiling_number

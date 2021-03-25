@@ -4,47 +4,45 @@
 {% block title %}Технология варки - Список технологий варок{% endblock %}
 {% block page_content %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<main class="content">
-    <div class="py-4">
-        <div class="d-flex justify-content-between w-100 flex-wrap">
-            <div class="mb-3 mb-lg-0">
-                <h1 class="h4">Анализ технологии варок на линии Рикотты</h1>
-            </div>
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Анализ технологии варок на линии Рикотты</h1>
         </div>
     </div>
-    <div class="card border-light shadow-sm mb-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-centered table-nowrap mb-0 rounded">
-                    <thead class="thead-light">
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Название варки</th>
+                        <th class="border-0">Подготовка, мин</th>
+                        <th class="border-0">Анализ, мин</th>
+                        <th class="border-0">Закачка, мин</th>
+                        <th class="border-0">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bt in boiling_technologies %}
                         <tr>
-                            <th class="border-0">#</th>
-                            <th class="border-0">Название варки</th>
-                            <th class="border-0">Подготовка, мин</th>
-                            <th class="border-0">Анализ, мин</th>
-                            <th class="border-0">Закачка, мин</th>
-                            <th class="border-0">Действия</th>
+                            <td class="border-0">{{loop.index}}</td>
+                            <td class="border-0"><a class="small">{{bt.boiling.to_str() }}</a></td>
+                            <td class="border-0"><a class="small">{{bt.preparation_time}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.analysis_time}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.pumping_time}}</a></td>
+                            <td class="border-0">
+                                <a href="{{ url_for('main.ricotta_edit_analysis_technology', analysis_technology_id = bt.id)}}" class="edit-bt">
+                                    <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for bt in boiling_technologies %}
-                            <tr>
-                                <td class="border-0">{{loop.index}}</td>
-                                <td class="border-0"><a class="small">{{bt.boiling.to_str() }}</a></td>
-                                <td class="border-0"><a class="small">{{bt.preparation_time}}</a></td>
-                                <td class="border-0"><a class="small">{{bt.analysis_time}}</a></td>
-                                <td class="border-0"><a class="small">{{bt.pumping_time}}</a></td>
-                                <td class="border-0">
-                                    <a href="{{ url_for('main.ricotta_edit_analysis_technology', analysis_technology_id = bt.id)}}" class="edit-bt">
-                                        <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-</main>
+</div>
 {% endblock %}

@@ -38,6 +38,21 @@ def parse_file(file_bytes):
     return df.to_dict("records"), df_original
 
 
+def parse_file_path(path):
+    df = pd.read_excel(path, index_col=0)
+    df_original = df.copy()
+    df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
+    df = (
+        df.loc[
+            [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
+        ]
+        .fillna(0)
+        .T
+    )
+    df.columns = ["Name", "Total", "Fact", "Norm"]
+    return df.to_dict("records"), df_original
+
+
 def get_skus(skus_req, skus, total_skus):
     """
     :param skus_req: преобразованный словарь заявки

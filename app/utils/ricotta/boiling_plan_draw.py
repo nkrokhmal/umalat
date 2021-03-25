@@ -18,6 +18,11 @@ COLUMNS = {
     "total_output": Cell(column_index_from_string("I"), "I"),
     "delimiter": Cell(column_index_from_string("J"), "J"),
     "delimiter_int": Cell(column_index_from_string("M"), "M"),
+    "total_volume": Cell(column_index_from_string("R"), "R"),
+}
+
+ROWS = {
+    "total_volume": 4,
 }
 
 
@@ -57,7 +62,7 @@ def get_colour_by_name(sku_name, skus):
         return current_app.config["COLOURS"]["Default"]
 
 
-def draw_boiling_plan(df, df_extra, wb):
+def draw_boiling_plan(df, df_extra, wb, total_volume=0):
     skus = db.session.query(RicottaSKU).all()
     draw_boiling_names(wb=wb)
     sheet_name = "План варок"
@@ -72,7 +77,6 @@ def draw_boiling_plan(df, df_extra, wb):
     for id, grp in df_filter.groupby("id", sort=False):
         for i, row in grp.iterrows():
             columns = [x for x in row.index if x in COLUMNS.keys()]
-            print(columns)
             v = [row[column] for column in columns]
             c = [COLUMNS[column] for column in columns]
             values.append(dict(zip(c, v)))
@@ -117,6 +121,14 @@ def draw_boiling_plan(df, df_extra, wb):
         else:
             output = v[COLUMNS["output"]]
         cur_row += 1
+
+    excel_client.font_size = 10
+    excel_client.draw_cell(
+        row=ROWS["total_volume"],
+        col=COLUMNS["total_volume"].col,
+        value=total_volume,
+        set_border=False,
+    )
 
     for sheet in wb.sheetnames:
         wb[sheet].views.sheetView[0].tabSelected = False

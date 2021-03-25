@@ -66,20 +66,30 @@
     <div class="container-fluid bg-soft">
         <div class="row">
             <div class="col-12">
-
                 {% include 'includes/sidebar.html' %}
-
-                {% block page_content %}
-                {% endblock page_content %}
-
+                <main class="content">
+                    {% block header %}
+                    {% endblock header %}
+                    <div class="row">
+                        <div class="container">
+                            {% for message in get_flashed_messages() %}
+                            <div class="alert alert-warning">
+                                <button type="button" class="close" data-dismiss="alert" style="position:absolute; top:0; right:0;">&times;</button>
+                                {{ message }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% block page_content %}
+                    {% endblock page_content %}
+                </main>
             </div>
         </div>
     </div>
 
     {% include 'includes/scripts.html' %}
-
-    <!-- Specific Page JS goes HERE  -->
-    {% block javascripts %}{% endblock javascripts %}
+    {% block javascripts %}
+    {% endblock javascripts %}
 
 </body>
 </html>

@@ -3,37 +3,35 @@
 
 {% block title %}Группы - Список групп{% endblock %}
 {% block page_content %}
-<main class="content">
-    <div class="py-4">
-        <div class="d-flex justify-content-between w-100 flex-wrap">
-            <div class="mb-3 mb-lg-0">
-                <h1 class="h4">Параметры группы сыров</h1>
-            </div>
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Параметры группы сыров</h1>
         </div>
     </div>
-    <div class="row">
-        <div class="col-6 mb-4">
-            <div class="card border-light shadow-sm mb-4">
-                <div class="table-responsive">
-                    <table class="table table-centered table-nowrap mb-0 rounded">
-                        <thead class="thead-light">
+</div>
+<div class="row">
+    <div class="col-6 mb-4">
+        <div class="card border-light shadow-sm mb-4">
+            <div class="table-responsive">
+                <table class="table table-centered table-nowrap mb-0 rounded">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="border-0">#</th>
+                            <th class="border-0">Название</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group in groups %}
                             <tr>
-                                <th class="border-0">#</th>
-                                <th class="border-0">Название</th>
+                                <td class="border-0">{{loop.index}}</td>
+                                <td class="border-0"><a class="small">{{group.name}}</a></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {% for group in groups %}
-                                <tr>
-                                    <td class="border-0">{{loop.index}}</td>
-                                    <td class="border-0"><a class="small">{{group.name}}</a></td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</main>
+</div>
 {% endblock %}

@@ -17,7 +17,7 @@
     <div class="card card-body bg-white border-light shadow-sm mb-4">
         <h4 class="h5 mb-4">Загрузите файл плана по варкам и выберите дату</h4>
         <div class="row">
-            <form method="post" action="/schedule" enctype="multipart/form-data" class="mt-4">
+            <form method="post" action="/ricotta_schedule" enctype="multipart/form-data" class="mt-4">
                 {{ form.hidden_tag() }}
                 <div class="row mb-4">
                     <div class="col-md-12 mb-3">
@@ -35,14 +35,8 @@
                         </div>
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Введите время первой подачи на линии "Пицца чиз" </label>
-                                {{form.salt_beg_time(place_holder='SaltBegTime', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Вставить полную мойку внутри дня по правилу 12 часов </label>
-                                {{form.add_full_boiling(place_holder='AddFullBoiling', checked=True)}}
+                                <label>Введите время первой подачи </label>
+                                {{form.beg_time(place_holder='SaltBegTime', class='form-control')}}
                             </div>
                         </div>
                     </div>
@@ -51,12 +45,6 @@
                             <div class="form-group">
                                 <label>Введите номер первой партии в текущем дне</label>
                                 {{form.batch_number(place_holder='BatchNumber', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Введите время первой подачи на линии "Моцарелла в воде" </label>
-                                {{form.water_beg_time(place_holder='WaterBegTime', class='form-control')}}
                             </div>
                         </div>
                     </div>
