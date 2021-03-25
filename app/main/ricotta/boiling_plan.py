@@ -2,6 +2,7 @@ from flask import render_template, request
 from .forms import BoilingPlanForm
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create
 from app.utils.ricotta.boiling_plan_draw import draw_boiling_plan
+from app.schedule_maker.departments.mozarella.boiling_plan import read_boiling_plan as mozzarella_read_boiling_plan
 from ...utils.sku_plan import *
 from ...utils.parse_remainings import *
 from .. import main
@@ -32,7 +33,7 @@ def ricotta_boiling_plan():
             data_only=True,
         )
         if ("Вода" in wb.sheetnames) and ("Соль" in wb.sheetnames):
-            boiling_plan_df = read_boiling_plan(wb)
+            boiling_plan_df = mozzarella_read_boiling_plan(wb)
             boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(
                 lambda x: int(x)
             )
