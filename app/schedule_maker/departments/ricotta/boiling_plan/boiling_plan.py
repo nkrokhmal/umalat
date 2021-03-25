@@ -44,7 +44,7 @@ def read_boiling_plan(wb_obj):
     df["sku"] = df["sku"].apply(lambda sku: cast_model(RicottaSKU, sku))
 
     df["boiling"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0])
-
+    df["boiling_id"] = df["boiling_id"].astype(int)
     for idx, grp in df.groupby("boiling_id"):
         assert (
             len(grp["boiling"].unique()) == 1
