@@ -176,8 +176,7 @@ def fill_sku():
             weight_netto=sku["Вес нетто"],
             packing_speed=60
             / sku["Скорость упаковки"]
-            * sku["Выход"]
-            / sku["Количество баков"],
+            * sku["Выход"],
             in_box=sku["Коробки"],
             output_per_tank=sku["Выход"] / sku["Количество баков"],
         )

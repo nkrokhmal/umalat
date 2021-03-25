@@ -56,7 +56,6 @@ def handle_ricotta(df):
             df_filter_groups = [group for _, group in df_filter.groupby('output')]
             for df_filter_group in df_filter_groups:
                 max_weight = df_filter_group['output'].iloc[0]
-                print(max_weight)
                 boilings_ricotta.add_group(
                     df_filter_group.to_dict("records"), max_weight=max_weight
                 )

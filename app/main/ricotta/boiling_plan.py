@@ -1,3 +1,4 @@
+import dbus
 from flask import render_template, request
 from .forms import BoilingPlanForm
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create
@@ -15,7 +16,26 @@ def ricotta_boiling_plan():
         skus = db.session.query(RicottaSKU).all()
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(RicottaBoiling).all()
-        skus_req, remainings_df = parse_file(request.files["input_file"].read())
+        ricotta_line = db.session.query(RicottaLine).first()
+        total_volume = 0
+
+        file = request.files["input_file"]
+        tmp_file_path = os.path.join(current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
+
+        if file:
+            file.save(tmp_file_path)
+        wb = openpyxl.load_workbook(
+            filename=os.path.join(
+                current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+            ),
+            data_only=True,
+        )
+        if ('Вода' in wb.sheetnames) and ('Соль' in wb.sheetnames):
+            boiling_plan_df = read_boiling_plan(wb)
+            boiling_plan_df['configuration'] = boiling_plan_df['configuration'].apply(lambda x: int(x))
+            total_volume = boiling_plan_df['configuration'].sum() / 8000 * 3 * ricotta_line.input_ton
+
+        skus_req, remainings_df = parse_file_path(tmp_file_path)
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
         sku_plan_client = SkuPlanClient(
@@ -36,8 +56,9 @@ def ricotta_boiling_plan():
         ws = wb_data_only[sheet_name]
         df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler)
         df_plan = boiling_plan_create(df)
-        wb = draw_boiling_plan(df_plan, df_extra_packing, wb)
+        wb = draw_boiling_plan(df_plan, df_extra_packing, wb, total_volume)
         wb.save(filepath)
+        os.remove(tmp_file_path)
         return render_template(
             "ricotta/boiling_plan.html", form=form, filename=filename
         )
