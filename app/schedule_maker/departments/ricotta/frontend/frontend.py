@@ -172,10 +172,12 @@ def make_header(date, start_time="07:00"):
     return maker.root["header"]
 
 
-def make_frontend(schedule, start_time="07:00"):
+def make_frontend(schedule, date=None, start_time="07:00"):
+    date = date or datetime.now()
+
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
-    make(make_header(datetime.now(), start_time=start_time))
+    make(make_header(date=date, start_time=start_time))
     make(make_boiling_lines(schedule))
     make(make_analysis_line(schedule))
     make(make_packing_line(schedule))
