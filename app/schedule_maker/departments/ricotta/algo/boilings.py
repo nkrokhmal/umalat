@@ -43,24 +43,11 @@ def make_boiling(boiling_model):
 def make_boiling_sequence(boiling_group_df):
     maker, make = init_block_maker("boiling_sequence")
 
-    # check that only one boiling model is present in boiling_group_df
-    assert (
-        len(
-            set(
-                sum(
-                    [
-                        row["sku"].made_from_boilings
-                        for i, row in boiling_group_df.iterrows()
-                    ],
-                    [],
-                )
-            )
-        )
-        == 1
-    ), "В одной из групп варок возможно использование сразу нескольких типов варок."
     boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
 
-    boilings = [make_boiling(boiling_model) for _ in range(len(boiling_group_df))]
+    boilings = [
+        make_boiling(boiling_model) for _ in range(boiling_model.number_of_tanks)
+    ]
 
     for b_prev, b in SimpleIterator(boilings).iter_sequences(2, method="any"):
         if not b:
