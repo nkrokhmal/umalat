@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Технолония варки - Изменить технологию варки{% endblock %}
+{% block page_content %}
+<main class="content">
+    <div class="row">
+        <div class="py-4">
+            <div class="d-flex justify-content-between w-100 flex-wrap">
+                <div class="mb-3 mb-lg-0">
+                    <h1 class="h4">Изменение параметров технологии варки рикотты <br></h1>
+                </div>
+            </div>
+        </div>
+        <form method="post" action="/ricotta/edit_analysis_technology/{{analysis_technology_id}}" class="mt-4">
+            {{ form.hidden_tag() }}
+            <div class="row mb-4">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Название варки</label>
+                        {{form.name(place_holder='Name', class='form-control', readonly=true)}}
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите время нагрева, мин</label>
+                            {{form.heating_time(place_holder='Heating', class='form-control')}}
+                        </div>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите время выдержки, мин</label>
+                            {{form.delay_time(place_holder='Delay', class='form-control')}}
+                        </div>
+                    </div>
+                     <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите время сбора белка, мин</label>
+                            {{form.protein_harvest_time(place_holder='Protein', class='form-select', readonly=True)}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите время заброса в бак, мин</label>
+                            {{form.abandon_time(place_holder='Abandon', class='form-control')}}
+                        </div>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Введите время слива сыворотки, мин</label>
+                            {{form.pumping_out_time(place_holder='Pumping', class='form-control')}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3" style="margin-top:30px;">
+                    <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}
