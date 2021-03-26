@@ -13,7 +13,7 @@ COLOR = "#dce6f2"
 COLUMNS = {
     "index": Cell(column_index_from_string("B"), "B"),
     "sku": Cell(column_index_from_string("C"), "C"),
-    "boxes": Cell(column_index_from_string("I"), "I"),
+    "in_box": Cell(column_index_from_string("I"), "I"),
     "kg": Cell(column_index_from_string("J"), "J"),
     "boxes_count": Cell(column_index_from_string("K"), "K"),
     "priority": Cell(column_index_from_string("L"), "L"),
@@ -67,14 +67,14 @@ def draw_header(excel_client, date, cur_row, task_name, is_boiling=None):
     excel_client.merge_cells(
         beg_col=COLUMNS["sku"].col,
         beg_row=cur_row,
-        end_col=COLUMNS["boxes"].col - 1,
+        end_col=COLUMNS["in_box"].col - 1,
         end_row=cur_row,
         value="Номенклатура",
         alignment=alignment,
         font_size=FONTS["header"],
     )
     excel_client.draw_cell(
-        col=COLUMNS["boxes"].col,
+        col=COLUMNS["in_box"].col,
         row=cur_row,
         value="Вложение коробок",
         alignment=alignment,
@@ -115,21 +115,21 @@ def draw_task_new(excel_client, df, date, cur_row, task_name, batch_number):
             excel_client.merge_cells(
                 beg_col=COLUMNS["sku"].col,
                 beg_row=cur_row,
-                end_col=COLUMNS["boxes"].col - 1,
+                end_col=COLUMNS["in_box"].col - 1,
                 end_row=cur_row,
                 value=row["sku_name"],
             )
             excel_client.draw_cell(
-                col=COLUMNS["boxes"].col, row=cur_row, value=row["sku"].boxes
+                col=COLUMNS["in_box"].col, row=cur_row, value=row["sku"].in_box
             )
 
-            if row["sku"].group.name != "Качокавалло":
+            if row["sku"].in_box:
                 kg = round(row["kg"])
                 boxes_count = math.ceil(
-                    1000 * row["kg"] / row["sku"].boxes / row["sku"].weight_netto
+                    row["kg"] / row["sku"].in_box / row["sku"].weight_netto
                 )
             else:
-                kg = ""
+                kg = round(row["kg"])
                 boxes_count = ""
 
             excel_client.draw_cell(col=COLUMNS["kg"].col, row=cur_row, value=kg)
@@ -154,6 +154,7 @@ def draw_task_new(excel_client, df, date, cur_row, task_name, batch_number):
 
 def schedule_task_boilings(wb, df, date, batch_number):
     df_copy = df.copy()
+    df_copy["sku_name"] = df_copy["sku"].apply(lambda sku: sku.name)
     sheet_name = "Печать заданий"
     ricotta_task_name = "Задание на упаковку Рикоттного цеха"
 

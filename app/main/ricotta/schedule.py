@@ -5,6 +5,7 @@ from .. import main
 from app.schedule_maker import *
 import os
 from app.schedule_maker.departments.ricotta import *
+from app.utils.ricotta.schedule_tasks import schedule_task_boilings
 from app.utils.batches.batch import *
 import datetime
 
@@ -41,6 +42,11 @@ def ricotta_schedule():
         )
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"
         path_schedule = "{}/{}".format("app/data/schedule_plan", filename_schedule)
+
+        schedule_wb = schedule_task_boilings(
+            schedule_wb, boiling_plan_df, date, form.batch_number.data
+        )
+
         schedule_wb.save(path_schedule)
         return render_template("ricotta/schedule.html", form=form, filename=filename_schedule)
 
