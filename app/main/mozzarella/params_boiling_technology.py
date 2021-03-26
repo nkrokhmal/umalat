@@ -35,7 +35,7 @@ def edit_boiling_technology(boiling_technology_id):
         boiling_technology.extra_time = form.extra_time.data
 
         db.session.commit()
-        flash("Варка успешно изменена!")
+        flash("Параметры технологии варки успешно изменены", "success")
         return redirect(url_for(".get_boiling_technology"))
 
     if boiling_technology.boilings[0].line is not None:

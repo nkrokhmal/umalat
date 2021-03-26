@@ -54,6 +54,8 @@ def edit_form_factor(form_factor_id):
         )
         form_factor.default_cooling_technology.salting_time = form.salting_time.data
         db.session.commit()
+
+        flash("Параметры форм фактора успешно изменены", "success")
         return redirect(url_for(".get_form_factor"))
 
     form.name.data = form_factor.name

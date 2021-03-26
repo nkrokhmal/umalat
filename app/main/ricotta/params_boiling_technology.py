@@ -34,7 +34,7 @@ def ricotta_edit_boiling_technology(boiling_technology_id):
         boiling_technology.pumping_out_time = form.pumping_out_time.data
 
         db.session.commit()
-        flash("Варка успешно изменена!")
+        flash("Параметры технологии успешно изменены", "success")
         return redirect(url_for(".ricotta_get_boiling_technology"))
 
     form.name.data = boiling_technology.name

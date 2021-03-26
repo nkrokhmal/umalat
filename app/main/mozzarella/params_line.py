@@ -24,8 +24,9 @@ def edit_line(line_id):
         line.serving_time = form.serving_time.data
         line.chedderization_time = form.chedderization_time.data
         line.melting_speed = form.melting_speed.data
-
         db.session.commit()
+
+        flash("Параметры линии успешно изменены", "success")
         return redirect(url_for(".get_line"))
 
     form.name.data = line.name

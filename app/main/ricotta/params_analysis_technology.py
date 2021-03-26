@@ -31,8 +31,7 @@ def ricotta_edit_analysis_technology(analysis_technology_id):
         analysis_technology.pumping_time = form.pumping_time.data
 
         db.session.commit()
-        flash("Варка успешно изменена!")
-        print("Finished")
+        flash("Параметры анализа технологии успешно изменены", "success")
         return redirect(url_for(".ricotta_get_analysis_technology"))
 
     form.preparation_time.data = analysis_technology.preparation_time

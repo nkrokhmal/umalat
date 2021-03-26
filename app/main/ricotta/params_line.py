@@ -1,4 +1,4 @@
-from flask import url_for, render_template
+from flask import url_for, render_template, flash
 from werkzeug.utils import redirect
 from .. import main
 from ... import db
@@ -22,6 +22,7 @@ def ricotta_edit_line(line_id):
         line.name = form.name.data
         line.input_ton = form.input_ton.data
         db.session.commit()
+        flash("Параметры линии успешно изменены", "success")
         return redirect(url_for(".ricotta_get_line"))
 
     form.name.data = line.name

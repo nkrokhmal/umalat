@@ -1,4 +1,4 @@
-from flask import url_for, render_template
+from flask import url_for, render_template, flash
 from werkzeug.utils import redirect
 from .. import main
 from ... import db
@@ -28,6 +28,7 @@ def edit_washer(washer_id):
         washer.name = form.name.data
         washer.time = form.time.data
         db.session.commit()
+        flash("Параметры мойки успешно изменены", "success")
         return redirect(url_for(".get_washer"))
 
     form.name.data = washer.name

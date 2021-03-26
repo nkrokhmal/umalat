@@ -34,6 +34,7 @@ def ricotta_add_sku():
 
         db.session.add(sku)
         db.session.commit()
+        flash('SKU успешно добавлено', 'success')
         return redirect(url_for(".ricotta_get_sku", page=1))
     if name:
         form.name.data = name
@@ -75,7 +76,7 @@ def ricotta_edit_sku(sku_id):
 
         db.session.commit()
 
-        flash("SKU успешно изменено")
+        flash("SKU успешно изменено", "success")
         return redirect(url_for(".ricotta_get_sku", page=1))
 
     if len(sku.made_from_boilings) > 0:
@@ -103,6 +104,6 @@ def ricotta_delete_sku(sku_id):
     if sku:
         db.session.delete(sku)
         db.session.commit()
-        flash("SKU успешно удалено")
+        flash("SKU успешно удалено", "success")
     time.sleep(1.0)
     return redirect(url_for(".ricotta_get_sku", page=1))

@@ -72,13 +72,15 @@
                     {% endblock header %}
                     <div class="row">
                         <div class="container">
-                            {% for message in get_flashed_messages() %}
-                            <div class="alert alert-warning">
-                                <button type="button" class="close" data-dismiss="alert" style="position:absolute; top:0; right:0;">&times;</button>
-                                {{ message }}
-                            </div>
+                            {% for category, message in get_flashed_messages(with_categories=true) %}
+                                {% if category == "warning" %}
+                                    <div class="alert alert-warning">
+                                        <button type="button" class="close" data-dismiss="alert" style="position:absolute; top:0; right:0;">&times;</button>
+                                        {{ message }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                     </div>
                     {% block page_content %}
                     {% endblock page_content %}
@@ -88,6 +90,38 @@
     </div>
 
     {% include 'includes/scripts.html' %}
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+        {% if category == "success" %}
+            <script>
+                function show_notification(message){
+                    const notyf = new Notyf({
+                        position: {
+                           x: 'right',
+                           y: 'bottom',
+                        },
+                        types: [
+                            {
+                                type: 'info',
+                                background: '#00B74A',
+                                icon: {
+                                    className: 'fas fa-info-circle',
+                                    tagName: 'span',
+                                    color: '#fff'
+                                },
+                                dismissible: false
+                            }
+                        ]
+                    });
+                    notyf.open({
+                        type: 'info',
+                        message: message
+                    });
+                };
+                show_notification("{{message}}");
+            </script>
+        {% endif %}
+    {% endfor %}
+
     {% block javascripts %}
     {% endblock javascripts %}
 

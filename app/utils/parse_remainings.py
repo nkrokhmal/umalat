@@ -71,7 +71,7 @@ def get_skus(skus_req, skus, total_skus):
         else:
             sku_for_creation.append(sku_req["Name"])
     if sku_for_creation:
-        flash(convert_sku(sku_for_creation))
+        flash(convert_sku(sku_for_creation), "warning")
     return result
 
 
@@ -123,7 +123,7 @@ def convert_sku(sku):
         "В базе нет следующих SKU: <br> <br>"
         + " ".join(
             [
-                '<a href="/add_sku?name={0}">{1}</a> <br>'.format(quote(x), x)
+                '<p class="mb-0"><small>{1}</small> </p>'.format(quote(x), x)
                 for x in sku
             ]
         )
