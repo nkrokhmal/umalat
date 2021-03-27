@@ -35,6 +35,11 @@ class BoilingPlanForm(FlaskForm):
         label="Выберите файл",
         validators=validators,
     )
+    add_auto_boilings = BooleanField(
+        "Вставить дополнительные SKU",
+        validators=[Optional()],
+        default=False,
+    )
     date = DateTimeField(
         "Введите дату",
         format="%Y-%m-%d",

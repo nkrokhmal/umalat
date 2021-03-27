@@ -13,6 +13,8 @@ def ricotta_boiling_plan():
     form = BoilingPlanForm(request.form)
     if request.method == "POST" and "submit" in request.form:
         date = form.date.data
+        add_auto_boilings = form.add_auto_boilings.data
+
         skus = db.session.query(RicottaSKU).all()
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(RicottaBoiling).all()
@@ -59,7 +61,13 @@ def ricotta_boiling_plan():
         sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
         df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler)
-        df_plan = boiling_plan_create(df)
+
+        request_ton = 0
+        if add_auto_boilings:
+            request_ton = total_volume
+        print(request_ton)
+        df_plan = boiling_plan_create(df, request_ton)
+
         wb = draw_boiling_plan(df_plan, df_extra_packing, wb, total_volume)
         wb.save(filepath)
         os.remove(tmp_file_path)
