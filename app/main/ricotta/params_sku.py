@@ -34,7 +34,7 @@ def ricotta_add_sku():
 
         db.session.add(sku)
         db.session.commit()
-        flash('SKU успешно добавлено', 'success')
+        flash("SKU успешно добавлено", "success")
         return redirect(url_for(".ricotta_get_sku", page=1))
     if name:
         form.name.data = name

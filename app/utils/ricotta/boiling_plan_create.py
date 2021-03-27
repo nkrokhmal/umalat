@@ -38,13 +38,13 @@ def proceed_order(order, df, boilings_ricotta):
     df_filter = df[
         (df["is_cream"] == order.is_cream)
         & (
-                order.flavoring_agent is None
-                or df["flavoring_agent"] == order.flavoring_agent
+            order.flavoring_agent is None
+            or df["flavoring_agent"] == order.flavoring_agent
         )
-        ]
+    ]
     if not df_filter.empty:
         df_filter["output"] = (
-                df_filter["number_of_tanks"] * df_filter["output_per_tank"]
+            df_filter["number_of_tanks"] * df_filter["output_per_tank"]
         )
         df_filter["output"] = df_filter["output"].apply(lambda x: int(x))
         df_filter_groups = [group for _, group in df_filter.groupby("output")]
@@ -70,7 +70,13 @@ def handle_ricotta(df, request_ton=0):
     for order in orders:
         boilings_ricotta = proceed_order(order, df, boilings_ricotta)
     boilings_ricotta.finish()
-    sum_ton = pd.DataFrame(boilings_ricotta.boilings).groupby('id').first()['number_of_tanks'].sum() * input_ton
+    sum_ton = (
+        pd.DataFrame(boilings_ricotta.boilings)
+        .groupby("id")
+        .first()["number_of_tanks"]
+        .sum()
+        * input_ton
+    )
     if request_ton > sum_ton:
         additional_boilings = (request_ton - sum_ton) / 3 / input_ton
         if additional_boilings > 0:
@@ -78,24 +84,32 @@ def handle_ricotta(df, request_ton=0):
             for order in orders:
                 boilings_ricotta = proceed_order(order, df, boilings_ricotta)
                 if order == orders[1]:
-                    additional_df = pd.DataFrame.from_dict(get_popular_sku(additional_boilings))
-                    boilings_ricotta = proceed_order(order, additional_df, boilings_ricotta)
+                    additional_df = pd.DataFrame.from_dict(
+                        get_popular_sku(additional_boilings)
+                    )
+                    boilings_ricotta = proceed_order(
+                        order, additional_df, boilings_ricotta
+                    )
     boilings_ricotta.finish()
     return pd.DataFrame(boilings_ricotta.boilings), boilings_ricotta.boiling_number
 
 
 def get_popular_sku(count):
-    sku = db.session.query(RicottaSKU).filter(RicottaSKU.name == 'Рикотта "Pretto", 45%, 0,2 кг, пл/с').first()
+    sku = (
+        db.session.query(RicottaSKU)
+        .filter(RicottaSKU.name == 'Рикотта "Pretto", 45%, 0,2 кг, пл/с')
+        .first()
+    )
     return {
-        'sku': [sku],
-        'plan': [sku.output_per_tank * 3 * count],
-        'boiling_id': [sku.made_from_boilings[0].id],
-        'sku_id': [sku.id],
-        'percent': [sku.made_from_boilings[0].percent],
-        'flavoring_agent': [sku.made_from_boilings[0].flavoring_agent],
-        'number_of_tanks': [sku.made_from_boilings[0].number_of_tanks],
-        'short_display_name': [sku.made_from_boilings[0].short_display_name],
-        'group': [sku.group.name],
-        'is_cream': [sku.made_from_boilings[0].is_cream],
-        'output_per_tank': [sku.output_per_tank],
+        "sku": [sku],
+        "plan": [sku.output_per_tank * 3 * count],
+        "boiling_id": [sku.made_from_boilings[0].id],
+        "sku_id": [sku.id],
+        "percent": [sku.made_from_boilings[0].percent],
+        "flavoring_agent": [sku.made_from_boilings[0].flavoring_agent],
+        "number_of_tanks": [sku.made_from_boilings[0].number_of_tanks],
+        "short_display_name": [sku.made_from_boilings[0].short_display_name],
+        "group": [sku.group.name],
+        "is_cream": [sku.made_from_boilings[0].is_cream],
+        "output_per_tank": [sku.output_per_tank],
     }

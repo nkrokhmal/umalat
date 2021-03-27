@@ -7,7 +7,9 @@ import os
 from app.schedule_maker.departments.mozarella.frontend import *
 from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boilings
 from app.utils.batches.batch import *
-from app.schedule_maker.departments.mozarella.boiling_plan import read_boiling_plan as mozzarella_read_boiling_plan
+from app.schedule_maker.departments.mozarella.boiling_plan import (
+    read_boiling_plan as mozzarella_read_boiling_plan,
+)
 import datetime
 
 

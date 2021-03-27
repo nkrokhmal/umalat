@@ -25,7 +25,7 @@ def add_sku():
         sku = fill_mozzarella_sku_from_form(sku, form)
         db.session.add(sku)
         db.session.commit()
-        flash('SKU успешно добавлено', 'success')
+        flash("SKU успешно добавлено", "success")
         return redirect(url_for(".get_sku", page=1))
     if name:
         form.name.data = name
@@ -68,7 +68,7 @@ def edit_sku(sku_id):
 
         db.session.commit()
 
-        flash('SKU успешно изменено', 'success')
+        flash("SKU успешно изменено", "success")
         return redirect(url_for(".get_sku", page=1))
 
     if len(sku.made_from_boilings) > 0:

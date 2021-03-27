@@ -48,15 +48,17 @@ def ricotta_schedule():
         )
 
         schedule_wb.save(path_schedule)
-        return render_template("ricotta/schedule.html", form=form, filename=filename_schedule)
+        return render_template(
+            "ricotta/schedule.html", form=form, filename=filename_schedule
+        )
 
     form.date.data = datetime.datetime.today() + datetime.timedelta(days=1)
     form.batch_number.data = (
-            BatchNumber.last_batch_number(
-                datetime.datetime.today() + datetime.timedelta(days=1),
-                "Рикоттный цех",
-            )
-            + 1
+        BatchNumber.last_batch_number(
+            datetime.datetime.today() + datetime.timedelta(days=1),
+            "Рикоттный цех",
+        )
+        + 1
     )
 
     return render_template("ricotta/schedule.html", form=form, filename=None)

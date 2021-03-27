@@ -244,7 +244,11 @@ class BatchNumber(db.Model):
 
     @staticmethod
     def last_batch_number(date, department_name):
-        department = db.session.query(Department).filter(Department.name == department_name).first()
+        department = (
+            db.session.query(Department)
+            .filter(Department.name == department_name)
+            .first()
+        )
         last_batch = (
             db.session.query(BatchNumber)
             .filter(BatchNumber.department_id == department.id)

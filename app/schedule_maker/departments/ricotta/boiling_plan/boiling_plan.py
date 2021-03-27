@@ -24,34 +24,31 @@ def read_boiling_plan(wb_obj):
         values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
     df = pd.DataFrame(values, columns=header)
-    df = df[
-        [
-            "Номер варки",
-            "SKU",
-            "КГ",
-        ]
-    ]
-    df.columns = [
-        "boiling_id",
-        "sku",
-        "kg",
-    ]
+    df = df[["Номер варки", "SKU", "КГ", "Выход с варки, кг"]]
+    df.columns = ["boiling_id", "sku", "kg", "output"]
 
     # remove separators and empty lines
     df = df[df["sku"] != "-"]
     df = df[~df["kg"].isnull()]
 
     df["sku"] = df["sku"].apply(lambda sku: cast_model(RicottaSKU, sku))
-
     df["boiling"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0])
-    print(df["boiling_id"])
     df["boiling_id"] = df["boiling_id"].astype(int)
-    # for idx, grp in df.groupby("boiling_id"):
-        # assert (
-        #     len(grp["boiling"].unique()) == 1
-        # ), "В одной группе варок должен быть только один тип варки."
 
-    # todo: make properly
+    for idx, grp in df.groupby("boiling_id"):
+        assert (
+            len(grp["boiling"].unique()) == 1
+        ), "В одной варке должен быть только один тип варки"
+
+        assert (
+            len(grp["output"].unique()) == 1
+        ), "В одной варке должны совпадать выходы с варки"
+
+        assert (
+            grp["kg"].sum() == grp.iloc[0]["output"]
+        ), "В одной из варок выставлено неверное число килограм"
+
+    # # todo: make properly
     # # validate kilograms
     # for idx, grp in df.groupby("boiling_id"):
     #     boiling = grp.iloc[0]["boiling"]
