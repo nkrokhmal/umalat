@@ -39,7 +39,8 @@ def ricotta_boiling_plan():
             boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(
                 lambda x: int(x)
             )
-            total_volume = int(boiling_plan_df["configuration"].sum() * 0.81)
+            total_volume = int(boiling_plan_df.groupby("group_id").first()["configuration"].sum() * 0.81)
+            print(total_volume)
 
         skus_req, remainings_df = parse_file_path(tmp_file_path)
         skus_req = get_skus(skus_req, skus, total_skus)
