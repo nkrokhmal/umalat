@@ -22,7 +22,7 @@ COLUMNS = {
 }
 
 ROWS = {
-    "total_volume": 4,
+    "total_volume": 2,
 }
 
 
@@ -90,7 +90,7 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
         ]
         values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
 
-    cur_row = 2
+    cur_row = 3
     output = 0
     for v in values:
         value = v.values()

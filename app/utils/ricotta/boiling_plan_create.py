@@ -1,4 +1,6 @@
 import pandas as pd
+from app import db
+from app.models import *
 from app.utils.features.merge_boiling_utils import Boilings
 from collections import namedtuple
 
@@ -32,8 +34,9 @@ def boiling_plan_create(df):
     return result
 
 
-def handle_ricotta(df):
+def handle_ricotta(df, request_ton=0):
     boilings_ricotta = Boilings()
+    # input_ton = db.session.query(RicottaLine).first().input_ton
     Order = namedtuple("Collection", "is_cream, flavoring_agent")
     orders = [
         Order(True, None),
@@ -62,4 +65,5 @@ def handle_ricotta(df):
                     df_filter_group.to_dict("records"), max_weight=max_weight
                 )
     boilings_ricotta.finish()
+    # sum_ton = pd.DataFrame(boilings_ricotta.boilings).groupby('id').first()['number_of_tanks'].sum() * input_ton
     return pd.DataFrame(boilings_ricotta.boilings), boilings_ricotta.boiling_number
