@@ -132,13 +132,12 @@ def make_analysis_line(schedule):
 def calc_skus_label(skus):
     values = []
     for sku in skus:
-        values.append([sku.brand_name, str(sku.weight_netto)])
+        values.append([str(sku.weight_netto), sku.brand_name])
 
     tree = df_to_ordered_tree(pd.DataFrame(values))
-
-    return "/".join(
+    return ", ".join(
         [
-            group_label + " " + "/".join(form_factor_labels)
+            "/".join(form_factor_labels) + " " + group_label
             for group_label, form_factor_labels in tree
         ]
     )
