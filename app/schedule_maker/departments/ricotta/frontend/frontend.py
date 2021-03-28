@@ -75,17 +75,57 @@ def make_boiling_lines(schedule):
 
 
 def make_analysis_line(schedule):
-    maker, make = init_block_maker("analysis", size=(0, 1), is_parent_node=True)
+    maker, make = init_block_maker("analysis", size=(0, 2), axis=1, is_parent_node=True)
+
+    validator = ClassValidator(window=1)
+
+    def validate(b1, b2):
+        for c1 in b1.children:
+            for c2 in b2.children:
+                validate_disjoint_by_axis(c1, c2)
+
+    validator.add("analysis_group", "analysis_group", validate)
+
+    n_lines = 2
+
+    lines = []
+    for i in range(n_lines):
+        lines.append(
+            make(f"analysis_line_{i}", size=(0, 1), is_parent_node=False).block
+        )
+
+    # todo: hardcode
+    for line in lines:
+        push(line, maker.create_block("stub", size=(0, 1)), push_func=add_push)
 
     for boiling_group in listify(schedule["boiling_group"]):
-        with make("analysis_group", push_func=add_push):
-            for block in boiling_group["analysis_group"].children:
-                make(
-                    block.props["cls"],
-                    size=(block.size[0], 1),
-                    x=(block.x[0], 0),
-                    push_func=add_push,
-                )
+        analysis_group = maker.create_block("analysis_group")
+        for block in boiling_group["analysis_group"].children:
+            _block = maker.create_block(
+                block.props["cls"],
+                size=(block.size[0], 1),
+                x=(block.x[0], 0),
+            )
+            push(analysis_group, _block, push_func=add_push)
+
+        # todo: refactor
+        for i, line in enumerate(lines):
+            res = push(
+                line,
+                analysis_group,
+                push_func=lambda parent, block: simple_push(
+                    parent, block, validator=validator
+                ),
+            )
+            if not isinstance(res, dict):
+                # success
+                break
+            else:
+                if i == len(lines) - 1:
+                    # last one
+                    raise Exception(
+                        "Не получилось прорисовать баки Ришад-Ричи на двух линиях."
+                    )
     return maker.root
 
 
