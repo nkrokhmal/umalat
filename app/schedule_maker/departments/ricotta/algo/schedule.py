@@ -33,9 +33,12 @@ def validate(b1, b2):
     sku2 = b2.props["skus"][0]
 
     # todo: del
-    if sku1.weight_netto and sku2.weight_netto:
-        if sku1.weight_netto > sku2.weight_netto:
-            assert b1["packing"].y[0] + 1 <= b2["packing"].x[0]
+    if (
+        sku1.weight_netto
+        and sku2.weight_netto
+        and sku1.weight_netto > sku2.weight_netto
+    ):
+        assert b1["packing"].y[0] + 1 <= b2["packing"].x[0]
 
 
 validator.add("boiling_group", "boiling_group", validate)
