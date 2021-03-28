@@ -41,6 +41,10 @@ class RicottaBoiling(Boiling):
     )
 
     @property
+    def with_flavor(self):
+        return self.flavoring_agent != ""
+
+    @property
     def short_display_name(self):
         if self.flavoring_agent:
             return self.flavoring_agent
@@ -49,7 +53,7 @@ class RicottaBoiling(Boiling):
 
     @property
     def is_cream(self):
-        if self.percent == 30 and self.flavoring_agent == "":
+        if self.percent == 30 and not self.with_flavor:
             return True
         else:
             return False

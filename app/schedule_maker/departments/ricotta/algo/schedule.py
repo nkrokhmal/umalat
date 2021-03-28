@@ -90,7 +90,11 @@ def make_schedule(boiling_plan_df):
     for bg_prev, bg in iter_pairs(boiling_groups, method="any_prefix"):
         boiling_model = bg.props["boiling_model"]
 
-        line_nums_props = [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
+        line_nums_props = (
+            [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
+            if not boiling_model.with_flavor
+            else [[0, 1, 2]]
+        )
         idx = 0
         if bg_prev:
             idx = bg_prev.props["line_nums"][-1]  # ended with number

@@ -1,9 +1,11 @@
 from utils_ak.interactive_imports import *
 from app.schedule_maker.models import *
-from app.enum import LineName
+from app.schedule_maker.departments.ricotta.boiling_plan.saturate import (
+    saturate_boiling_plan,
+)
 
 
-def read_boiling_plan(wb_obj):
+def read_boiling_plan(wb_obj, saturate=True):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -57,4 +59,6 @@ def read_boiling_plan(wb_obj):
             else:
                 # all fine
                 pass
+    if saturate:
+        df = saturate_boiling_plan(df)
     return df
