@@ -50,7 +50,7 @@ def validate(b1, b2):
             ]
             validate_disjoint_by_axis(boiling, bath_cleaning)
 
-            assert boiling.y[0] + 1 <= bath_cleaning.x[0]
+            assert boiling.y[0] + 4 <= bath_cleaning.x[0]
 
 
 validator.add("boiling_group", "bath_cleanings", validate)
