@@ -156,6 +156,7 @@ def make_packing_line(schedule):
             x=(boiling_group["packing"].x[0], 0),
             push_func=add_push,
             boiling_id=boiling_group.props["boiling_id"],
+            font_size=9,
         )
 
         make(
@@ -164,6 +165,7 @@ def make_packing_line(schedule):
             x=(boiling_group["packing"].x[0] + 2, 0),
             push_func=add_push,
             brand_label=brand_label,
+            font_size=9,
         )
 
     return maker.root
