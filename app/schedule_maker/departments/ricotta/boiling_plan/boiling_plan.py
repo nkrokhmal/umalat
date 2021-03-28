@@ -44,29 +44,17 @@ def read_boiling_plan(wb_obj):
             len(grp["output"].unique()) == 1
         ), "В одной варке должны совпадать выходы с варки"
 
-        assert (
-            grp["kg"].sum() == grp.iloc[0]["output"]
-        ), "В одной из варок выставлено неверное число килограм"
-
-    # # todo: make properly
-    # # validate kilograms
-    # for idx, grp in df.groupby("boiling_id"):
-    #     boiling = grp.iloc[0]["boiling"]
-    #     if (
-    #         abs(grp["kg"].sum() - boiling.output)
-    #         / grp.iloc[0]["total_volume"]
-    #         > 0.05
-    #     ):
-    #         raise AssertionError(
-    #             "Одна из групп варок имеет неверное количество килограмм."
-    #         )
-    #     else:
-    #         if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
-    #             # todo: warning message
-    #             df.loc[grp.index, "kg"] *= (
-    #                 grp.iloc[0]["total_volume"] / grp["kg"].sum()
-    #             )  # scale to total_volume
-    #         else:
-    #             # all fine
-    #             pass
+        # fix number of kilograms
+        if abs(grp["kg"].sum() - grp.iloc[0]["output"]) / grp.iloc[0]["output"] > 0.05:
+            raise AssertionError(
+                "Одна из групп варок имеет неверное количество килограмм."
+            )
+        else:
+            if abs(grp["kg"].sum() - grp.iloc[0]["output"]) > 1e-5:
+                df.loc[grp.index, "kg"] *= (
+                    grp.iloc[0]["output"] / grp["kg"].sum()
+                )  # scale to total_volume
+            else:
+                # all fine
+                pass
     return df

@@ -154,7 +154,6 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
 
     # validate kilograms
     for idx, grp in df.groupby("group_id"):
-        # todo: make common parameter
         if (
             abs(grp["kg"].sum() - grp.iloc[0]["total_volume"])
             / grp.iloc[0]["total_volume"]
@@ -166,7 +165,6 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
         else:
             if normalization:
                 if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
-                    # todo: warning message
                     df.loc[grp.index, "kg"] *= (
                         grp.iloc[0]["total_volume"] / grp["kg"].sum()
                     )  # scale to total_volume
