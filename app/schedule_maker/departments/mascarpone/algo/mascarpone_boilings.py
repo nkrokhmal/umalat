@@ -40,7 +40,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
                 for i, row in boiling_group_df.iterrows()
             ]
         )
-        packing_time = int(custom_round(packing_time, 5, "ceil"))
+        packing_time = int(custom_round(packing_time, 5, "ceil", pre_round_precision=1))
 
         make(
             "packing",

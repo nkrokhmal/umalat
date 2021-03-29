@@ -35,7 +35,16 @@ def boiling_plan_create(df, request_ton=0):
         lambda sku: sku.made_from_boilings[0].to_str()
     )
     result = result[
-        ["id", "number_of_tanks", "group", "output", "name", "boiling_type", "kg", "boiling_count"]
+        [
+            "id",
+            "number_of_tanks",
+            "group",
+            "output",
+            "name",
+            "boiling_type",
+            "kg",
+            "boiling_count",
+        ]
     ]
     return result
 
@@ -94,7 +103,7 @@ def handle_ricotta(df, request_ton=0):
                 if order == orders[1]:
                     boiling_count_dict = {
                         "0.5": int(additional_boilings / 2),
-                        "0.2": additional_boilings - int(additional_boilings / 2)
+                        "0.2": additional_boilings - int(additional_boilings / 2),
                     }
                     for key in boiling_count_dict.keys():
                         additional_df_05 = pd.DataFrame.from_dict(
@@ -111,11 +120,7 @@ def handle_ricotta(df, request_ton=0):
 
 
 def get_popular_sku(name):
-    sku = (
-        db.session.query(RicottaSKU)
-        .filter(RicottaSKU.name == name)
-        .first()
-    )
+    sku = db.session.query(RicottaSKU).filter(RicottaSKU.name == name).first()
     return {
         "sku": [sku],
         "plan": [sku.output_per_tank * 3],

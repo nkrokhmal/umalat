@@ -38,4 +38,4 @@ if __name__ == "__main__":
         DebugConfig.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx")
     )
     test_make_frontend(boiling_plan_df)
-    test_drawing(boiling_plan_df)
+    # test_drawing(boiling_plan_df)

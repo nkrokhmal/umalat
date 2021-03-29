@@ -49,11 +49,7 @@ class Boilings:
         if new:
             self.add_remainings()
         for sku in skus:
-            self.add(
-                sku,
-                max_weight=max_weight,
-                boilings_count=boilings_count
-            )
+            self.add(sku, max_weight=max_weight, boilings_count=boilings_count)
 
 
 class MergedBoilings:
