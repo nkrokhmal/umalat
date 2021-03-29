@@ -33,9 +33,12 @@ def validate(b1, b2):
     sku2 = b2.props["skus"][0]
 
     # todo: del
-    if sku1.weight_netto and sku2.weight_netto:
-        if sku1.weight_netto > sku2.weight_netto:
-            assert b1["packing"].y[0] + 1 <= b2["packing"].x[0]
+    if (
+        sku1.weight_netto
+        and sku2.weight_netto
+        and sku1.weight_netto > sku2.weight_netto
+    ):
+        assert b1["packing"].y[0] + 1 <= b2["packing"].x[0]
 
 
 validator.add("boiling_group", "boiling_group", validate)
@@ -50,7 +53,7 @@ def validate(b1, b2):
             ]
             validate_disjoint_by_axis(boiling, bath_cleaning)
 
-            assert boiling.y[0] + 1 <= bath_cleaning.x[0]
+            assert boiling.y[0] + 4 <= bath_cleaning.x[0]
 
 
 validator.add("boiling_group", "bath_cleanings", validate)
@@ -90,7 +93,11 @@ def make_schedule(boiling_plan_df):
     for bg_prev, bg in iter_pairs(boiling_groups, method="any_prefix"):
         boiling_model = bg.props["boiling_model"]
 
-        line_nums_props = [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
+        line_nums_props = (
+            [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
+            if not boiling_model.with_flavor
+            else [[0, 1, 2]]
+        )
         idx = 0
         if bg_prev:
             idx = bg_prev.props["line_nums"][-1]  # ended with number

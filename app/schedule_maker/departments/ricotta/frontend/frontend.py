@@ -75,30 +75,69 @@ def make_boiling_lines(schedule):
 
 
 def make_analysis_line(schedule):
-    maker, make = init_block_maker("analysis", size=(0, 1), is_parent_node=True)
+    maker, make = init_block_maker("analysis", size=(0, 2), axis=1, is_parent_node=True)
+
+    validator = ClassValidator(window=1)
+
+    def validate(b1, b2):
+        for c1 in b1.children:
+            for c2 in b2.children:
+                validate_disjoint_by_axis(c1, c2)
+
+    validator.add("analysis_group", "analysis_group", validate)
+
+    n_lines = 2
+
+    lines = []
+    for i in range(n_lines):
+        lines.append(
+            make(f"analysis_line_{i}", size=(0, 1), is_parent_node=False).block
+        )
+
+    # todo: hardcode
+    for line in lines:
+        push(line, maker.create_block("stub", size=(0, 1)), push_func=add_push)
 
     for boiling_group in listify(schedule["boiling_group"]):
-        with make("analysis_group", push_func=add_push):
-            for block in boiling_group["analysis_group"].children:
-                make(
-                    block.props["cls"],
-                    size=(block.size[0], 1),
-                    x=(block.x[0], 0),
-                    push_func=add_push,
-                )
+        analysis_group = maker.create_block("analysis_group")
+        for block in boiling_group["analysis_group"].children:
+            _block = maker.create_block(
+                block.props["cls"],
+                size=(block.size[0], 1),
+                x=(block.x[0], 0),
+            )
+            push(analysis_group, _block, push_func=add_push)
+
+        # todo: refactor
+        for i, line in enumerate(lines):
+            res = push(
+                line,
+                analysis_group,
+                push_func=lambda parent, block: simple_push(
+                    parent, block, validator=validator
+                ),
+            )
+            if not isinstance(res, dict):
+                # success
+                break
+            else:
+                if i == len(lines) - 1:
+                    # last one
+                    raise Exception(
+                        "Не получилось прорисовать баки Ришад-Ричи на двух линиях."
+                    )
     return maker.root
 
 
 def calc_skus_label(skus):
     values = []
     for sku in skus:
-        values.append([sku.brand_name, str(sku.weight_netto)])
+        values.append([str(sku.weight_netto), sku.brand_name])
 
     tree = df_to_ordered_tree(pd.DataFrame(values))
-
-    return "/".join(
+    return ", ".join(
         [
-            group_label + " " + "/".join(form_factor_labels)
+            "/".join(form_factor_labels) + " " + group_label
             for group_label, form_factor_labels in tree
         ]
     )
@@ -116,6 +155,7 @@ def make_packing_line(schedule):
             x=(boiling_group["packing"].x[0], 0),
             push_func=add_push,
             boiling_id=boiling_group.props["boiling_id"],
+            font_size=9,
         )
 
         make(
@@ -124,6 +164,7 @@ def make_packing_line(schedule):
             x=(boiling_group["packing"].x[0] + 2, 0),
             push_func=add_push,
             brand_label=brand_label,
+            font_size=9,
         )
 
     return maker.root
