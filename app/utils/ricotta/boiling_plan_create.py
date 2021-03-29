@@ -5,6 +5,12 @@ from app.utils.features.merge_boiling_utils import Boilings
 from collections import namedtuple
 
 
+POPULAR_NAMES = {
+    "0.2": 'Рикотта "Pretto", 45%, 0,2 кг, пл/с',
+    "0.5": 'Рикотта "Pretto", 45%, 0,5 кг, пл/с',
+}
+
+
 def boiling_plan_create(df, request_ton=0):
     df["plan"] = df["plan"].apply(lambda x: round(x))
     df["percent"] = df["sku"].apply(lambda x: x.made_from_boilings[0].percent)
@@ -22,6 +28,7 @@ def boiling_plan_create(df, request_ton=0):
     df["output_per_tank"] = df["sku"].apply(lambda x: x.output_per_tank)
 
     result, boiling_number = handle_ricotta(df, request_ton=request_ton)
+    print(result)
     result["kg"] = result["plan"]
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result["output"] = result["output_per_tank"] * result["number_of_tanks"]
@@ -29,12 +36,12 @@ def boiling_plan_create(df, request_ton=0):
         lambda sku: sku.made_from_boilings[0].to_str()
     )
     result = result[
-        ["id", "number_of_tanks", "group", "output", "name", "boiling_type", "kg"]
+        ["id", "number_of_tanks", "group", "output", "name", "boiling_type", "kg", "boiling_count"]
     ]
     return result
 
 
-def proceed_order(order, df, boilings_ricotta):
+def proceed_order(order, df, boilings_ricotta, boilings_count=1):
     df_filter = df[
         (df["is_cream"] == order.is_cream)
         & (
@@ -51,7 +58,9 @@ def proceed_order(order, df, boilings_ricotta):
         for df_filter_group in df_filter_groups:
             max_weight = df_filter_group["output"].iloc[0]
             boilings_ricotta.add_group(
-                df_filter_group.to_dict("records"), max_weight=max_weight
+                df_filter_group.to_dict("records"),
+                max_weight=max_weight,
+                boilings_count=boilings_count,
             )
     return boilings_ricotta
 
@@ -84,25 +93,33 @@ def handle_ricotta(df, request_ton=0):
             for order in orders:
                 boilings_ricotta = proceed_order(order, df, boilings_ricotta)
                 if order == orders[1]:
-                    additional_df = pd.DataFrame.from_dict(
-                        get_popular_sku(additional_boilings)
-                    )
-                    boilings_ricotta = proceed_order(
-                        order, additional_df, boilings_ricotta
-                    )
+                    boiling_count_dict = {
+                        "0.5": int(additional_boilings / 2),
+                        "0.2": additional_boilings - int(additional_boilings / 2)
+                    }
+                    for key in boiling_count_dict.keys():
+                        additional_df_05 = pd.DataFrame.from_dict(
+                            get_popular_sku(POPULAR_NAMES[key])
+                        )
+                        boilings_ricotta = proceed_order(
+                            order,
+                            additional_df_05,
+                            boilings_ricotta,
+                            boiling_count_dict[key],
+                        )
     boilings_ricotta.finish()
     return pd.DataFrame(boilings_ricotta.boilings), boilings_ricotta.boiling_number
 
 
-def get_popular_sku(count):
+def get_popular_sku(name):
     sku = (
         db.session.query(RicottaSKU)
-        .filter(RicottaSKU.name == 'Рикотта "Pretto", 45%, 0,2 кг, пл/с')
+        .filter(RicottaSKU.name == name)
         .first()
     )
     return {
         "sku": [sku],
-        "plan": [sku.output_per_tank * 3 * count],
+        "plan": [sku.output_per_tank * 3],
         "boiling_id": [sku.made_from_boilings[0].id],
         "sku_id": [sku.id],
         "percent": [sku.made_from_boilings[0].percent],

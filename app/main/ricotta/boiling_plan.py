@@ -20,7 +20,6 @@ def ricotta_boiling_plan():
         skus = db.session.query(RicottaSKU).all()
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(RicottaBoiling).all()
-        ricotta_line = db.session.query(RicottaLine).first()
         total_volume = 0
 
         file = request.files["input_file"]
@@ -36,6 +35,7 @@ def ricotta_boiling_plan():
             ),
             data_only=True,
         )
+        request_ton = 0
         if ("Вода" in wb.sheetnames) and ("Соль" in wb.sheetnames):
             boiling_plan_df = mozzarella_read_boiling_plan(wb)
             boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(
@@ -45,7 +45,8 @@ def ricotta_boiling_plan():
                 boiling_plan_df.groupby("group_id").first()["configuration"].sum()
                 * 0.81
             )
-            print(total_volume)
+            if add_auto_boilings:
+                request_ton = total_volume
 
         skus_req, remainings_df = parse_file_path(tmp_file_path)
         skus_req = get_skus(skus_req, skus, total_skus)
@@ -68,10 +69,6 @@ def ricotta_boiling_plan():
         ws = wb_data_only[sheet_name]
         df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler)
 
-        request_ton = 0
-        if add_auto_boilings:
-            request_ton = total_volume
-        print(request_ton)
         df_plan = boiling_plan_create(df, request_ton)
 
         wb = draw_boiling_plan(df_plan, df_extra_packing, wb, total_volume)

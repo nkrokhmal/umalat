@@ -14,7 +14,7 @@ class Boilings:
             return sum([x["plan"] for x in self.cur_boiling])
         return 0
 
-    def add(self, sku, max_weight=None):
+    def add(self, sku, max_weight=None, boilings_count=1):
         while sku["plan"] > 0:
             remainings = (
                 self.max_weight - self.cur_sum()
@@ -24,6 +24,7 @@ class Boilings:
             boiling_weight = min(remainings, sku["plan"])
             new_boiling = deepcopy(sku)
             new_boiling["plan"] = boiling_weight
+            new_boiling["boiling_count"] = boilings_count
             new_boiling["id"] = self.boiling_number
             sku["plan"] -= boiling_weight
             self.cur_boiling.append(new_boiling)
@@ -44,11 +45,15 @@ class Boilings:
             self.boiling_number += 1
             self.cur_boiling = []
 
-    def add_group(self, skus, max_weight=None, new=True):
+    def add_group(self, skus, max_weight=None, boilings_count=1, new=True):
         if new:
             self.add_remainings()
         for sku in skus:
-            self.add(sku, max_weight)
+            self.add(
+                sku,
+                max_weight=max_weight,
+                boilings_count=boilings_count
+            )
 
 
 class MergedBoilings:

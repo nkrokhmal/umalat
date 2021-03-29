@@ -16,6 +16,7 @@ COLUMNS = {
     "kg": Cell(column_index_from_string("F"), "F"),
     "remainings": Cell(column_index_from_string("G"), "G"),
     "total_output": Cell(column_index_from_string("I"), "I"),
+    "boiling_count": Cell(column_index_from_string("Q"), "Q"),
     "delimiter": Cell(column_index_from_string("J"), "J"),
     "delimiter_int": Cell(column_index_from_string("M"), "M"),
     "total_volume": Cell(column_index_from_string("R"), "R"),
@@ -86,13 +87,17 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
             COLUMNS["number_of_tanks"],
             COLUMNS["name"],
             COLUMNS["total_output"],
+            COLUMNS["boiling_count"],
             COLUMNS["delimiter"],
         ]
         values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
 
     cur_row = 3
     output = 0
+    boiling_count = 1
     for v in values:
+        current_boiling_count = v[COLUMNS["boiling_count"]]
+        del v[COLUMNS["boiling_count"]]
         value = v.values()
         column = [x.col for x in v.keys()]
         formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
@@ -118,8 +123,16 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
                 value=output,
                 set_border=False,
             )
+            excel_client.draw_cell(
+                row=cur_row,
+                col=COLUMNS["boiling_count"].col,
+                value=boiling_count,
+                set_border=False,
+            )
         else:
             output = v[COLUMNS["output"]]
+            boiling_count = current_boiling_count
+
         cur_row += 1
 
     excel_client.font_size = 10
