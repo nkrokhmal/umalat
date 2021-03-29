@@ -69,7 +69,8 @@ def get_skus(skus_req, skus, total_skus):
             if sku:
                 result.append(namedtuple("Plan", "sku, plan")(sku, sku_req["Fact"]))
         else:
-            sku_for_creation.append(sku_req["Name"])
+            if sku_req["Name"] not in current_app.config["IGNORE_SKUS"]:
+                sku_for_creation.append(sku_req["Name"])
     if sku_for_creation:
         flash(convert_sku(sku_for_creation), "warning")
     return result

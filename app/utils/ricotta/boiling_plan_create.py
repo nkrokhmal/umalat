@@ -28,7 +28,6 @@ def boiling_plan_create(df, request_ton=0):
     df["output_per_tank"] = df["sku"].apply(lambda x: x.output_per_tank)
 
     result, boiling_number = handle_ricotta(df, request_ton=request_ton)
-    print(result)
     result["kg"] = result["plan"]
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result["output"] = result["output_per_tank"] * result["number_of_tanks"]
