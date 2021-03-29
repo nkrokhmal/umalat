@@ -74,9 +74,9 @@ def make_boiling_group(boiling_group_df):
     push(maker.root, boiling_sequence)
     analysis_start = listify(boiling_sequence["boiling"])[-1]["abandon"].x[0]
     with make("analysis_group", x=(analysis_start, 0), push_func=add_push):
-        analysis = cast_model(
-            RicottaAnalysisTechnology, 1
-        )  # todo: take from boiling_model
+        analysis = delistify(
+            boiling_model.analysis
+        )  # todo: can bge a list for some reason
         if boiling_model.flavoring_agent:
             make("analysis", size=(analysis.analysis_time // 5, 0))
             make("preparation", size=(analysis.preparation_time // 5, 0))

@@ -25,7 +25,6 @@ def validate(b1, b2):
 
         validate_disjoint_by_axis(boiling1, boiling2)
 
-    validate_disjoint_by_axis(b1["analysis_group"], b2["analysis_group"])
     validate_disjoint_by_axis(b1["packing"], b2["packing"])
 
     # five minute pause between bigger to smaller packing size
