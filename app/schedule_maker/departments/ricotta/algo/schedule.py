@@ -82,8 +82,10 @@ def _equal_prefixes(lst1, lst2):
     return lst1[:min_len] == lst2[:min_len]
 
 
-def make_schedule(boiling_plan_df):
+def make_schedule(boiling_plan_df, start_boiling_id=0):
     maker, make = init_block_maker("schedule")
+    boiling_plan_df = boiling_plan_df.copy()
+    boiling_plan_df["boiling_id"] += start_boiling_id - 1
 
     boiling_groups = []
     for boiling_id, grp in boiling_plan_df.groupby("boiling_id"):
