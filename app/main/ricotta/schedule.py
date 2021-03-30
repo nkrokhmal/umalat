@@ -35,7 +35,7 @@ def ricotta_schedule():
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
         )
-        schedule = make_schedule(boiling_plan_df)
+        schedule = make_schedule(boiling_plan_df, form.batch_number.data)
         frontend = make_frontend(schedule, date=date, start_time=beg_time)
         schedule_wb = draw_excel_frontend(
             frontend, RICOTTA_STYLE, open_file=False, fn=None
