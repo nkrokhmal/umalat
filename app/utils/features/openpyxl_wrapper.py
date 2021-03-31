@@ -19,6 +19,10 @@ class ExcelBlock:
                     "solid", fgColor=self.colour
                 )
 
+    def color_cell(self, row, col, color=None):
+        color = color if color else self.colour
+        self.sheet.cell(row, col).fill = PatternFill("solid", fgColor=color)
+
     def default_font(self, row, col, set_font):
         if set_font:
             self.sheet.cell(row, col).font = Font(size=self.font_size)

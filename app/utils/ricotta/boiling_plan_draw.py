@@ -19,7 +19,7 @@ COLUMNS = {
     "boiling_count": Cell(column_index_from_string("Q"), "Q"),
     "delimiter": Cell(column_index_from_string("J"), "J"),
     "delimiter_int": Cell(column_index_from_string("M"), "M"),
-    "total_volume": Cell(column_index_from_string("R"), "R"),
+    "total_volume": Cell(column_index_from_string("S"), "S"),
 }
 
 ROWS = {
@@ -43,13 +43,18 @@ def draw_skus(wb, data_sku):
     grouped_skus = data_sku
     grouped_skus.sort(key=lambda x: x.name, reverse=False)
     excel_client = ExcelBlock(wb["SKU"])
-    excel_client.draw_row(1, ["-", "-"], set_border=False)
+    excel_client.draw_row(1, ["-", "-", "-", "-"], set_border=False)
     cur_i = 2
 
     for group_sku in grouped_skus:
         excel_client.draw_row(
             cur_i,
-            [group_sku.name, group_sku.made_from_boilings[0].to_str()],
+            [
+                group_sku.name,
+                group_sku.made_from_boilings[0].to_str(),
+                int(group_sku.output_per_tank * group_sku.made_from_boilings[0].number_of_tanks),
+                group_sku.made_from_boilings[0].number_of_tanks,
+            ],
             set_border=False,
         )
         cur_i += 1
@@ -82,22 +87,26 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
             c = [COLUMNS[column] for column in columns]
             values.append(dict(zip(c, v)))
         empty_columns = [
-            COLUMNS["boiling_type"],
+            COLUMNS["name"],
             COLUMNS["output"],
             COLUMNS["number_of_tanks"],
-            COLUMNS["name"],
-            COLUMNS["total_output"],
             COLUMNS["boiling_count"],
             COLUMNS["delimiter"],
         ]
         values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
 
     cur_row = 3
-    output = 0
     boiling_count = 1
+    number_of_tanks = 0
+
     for v in values:
         current_boiling_count = v[COLUMNS["boiling_count"]]
+        current_number_of_tanks = v[COLUMNS["number_of_tanks"]]
+
         del v[COLUMNS["boiling_count"]]
+        del v[COLUMNS["output"]]
+        del v[COLUMNS["number_of_tanks"]]
+
         value = v.values()
         column = [x.col for x in v.keys()]
         formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
@@ -119,18 +128,16 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
         if v[COLUMNS["name"]] == "-":
             excel_client.draw_cell(
                 row=cur_row,
-                col=COLUMNS["total_output"].col,
-                value=output,
-                set_border=False,
-            )
-            excel_client.draw_cell(
-                row=cur_row,
                 col=COLUMNS["boiling_count"].col,
-                value=boiling_count,
+                value=int(boiling_count * number_of_tanks),
                 set_border=False,
             )
         else:
-            output = v[COLUMNS["output"]]
+            excel_client.color_cell(col=COLUMNS["boiling_type"].col, row=cur_row)
+            excel_client.color_cell(col=COLUMNS["output"].col, row=cur_row)
+            excel_client.color_cell(col=COLUMNS["number_of_tanks"].col, row=cur_row)
+
+            number_of_tanks = current_number_of_tanks
             boiling_count = current_boiling_count
 
         cur_row += 1
