@@ -19,7 +19,7 @@ COLUMNS = {
     "boiling_count": Cell(column_index_from_string("Q"), "Q"),
     "delimiter": Cell(column_index_from_string("J"), "J"),
     "delimiter_int": Cell(column_index_from_string("M"), "M"),
-    "total_volume": Cell(column_index_from_string("S"), "S"),
+    "total_volume": Cell(column_index_from_string("T"), "T"),
 }
 
 ROWS = {

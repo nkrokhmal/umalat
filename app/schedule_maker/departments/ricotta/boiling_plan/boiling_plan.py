@@ -16,10 +16,12 @@ TANKS_COLUMN = column_index_from_string("D")
 OUTPUT_COLUMN = column_index_from_string("C")
 NAME_COLUMN = column_index_from_string("E")
 TANKS_TOTAL_COLUMN = column_index_from_string("Q")
+FIRST_TANK_COLUMN = column_index_from_string("S")
 
 
 class BoilingParser:
-    def __init__(self, boilings, number_of_tanks, kg_per_tank, number_of_tanks_in_boiling, number_of_boiling=1):
+    def __init__(self, boilings, number_of_tanks, kg_per_tank, number_of_tanks_in_boiling, number_of_boiling=1,
+                 first_tank_number=""):
         self.boilings = boilings
         self.boilings_copy = boilings
         self.number_of_tanks = number_of_tanks
@@ -27,6 +29,7 @@ class BoilingParser:
         self.number_of_tanks_in_boiling = number_of_tanks_in_boiling
         self.index = 0
         self.number_of_boiling = number_of_boiling
+        self.first_tank_number = first_tank_number
 
     def add_tank(self):
         add_boiling = []
@@ -55,6 +58,7 @@ class BoilingParser:
     def parse(self):
         result = []
         current_number_of_tanks = 0
+        is_first = True
         while current_number_of_tanks < self.number_of_tanks:
             tanks = min(self.number_of_tanks_in_boiling, self.number_of_tanks - current_number_of_tanks)
             boiling_result = []
@@ -62,15 +66,21 @@ class BoilingParser:
                 boiling_result += self.add_tank()
             if boiling_result:
                 boiling_result = pd.DataFrame(boiling_result)
+                groupby_columns = list(range(KG_COLUMN))
+                groupby_columns.append(FIRST_TANK_COLUMN - 1)
+                boiling_result[FIRST_TANK_COLUMN - 1] = self.first_tank_number if is_first else ""
+
                 boiling_result = pd.DataFrame(boiling_result)\
-                    .groupby(list(range(KG_COLUMN)))\
+                    .groupby(groupby_columns)\
                     .agg({KG_COLUMN: 'sum'})\
                     .reset_index()
                 boiling_result[INDEX_COLUMN - 1] = self.number_of_boiling
                 boiling_result[TANKS_COLUMN - 1] = tanks
+
                 result += boiling_result.values.tolist()
                 self.number_of_boiling += 1
                 current_number_of_tanks += tanks
+                is_first = False
             else:
                 raise AssertionError("В одной из варок неправильно указано число кг, не хватает на указанное число варок")
         return result
@@ -88,8 +98,7 @@ def read_boiling_plan(wb_obj, saturate=True):
     values = []
 
     # collect header
-    header = [ws.cell(1, i).value for i in range(1, 100) if ws.cell(1, i).value]
-
+    length = 20
     current_boiling = []
     boiling_index_number = 1
 
@@ -98,27 +107,30 @@ def read_boiling_plan(wb_obj, saturate=True):
             continue
         if ws.cell(i, NAME_COLUMN).value == "-":
             if isinstance(ws.cell(i, TANKS_TOTAL_COLUMN).value, int):
+                first_tank_number = ws.cell(i, FIRST_TANK_COLUMN).value or ""
                 parser = BoilingParser(boilings=current_boiling,
                                        number_of_tanks=ws.cell(i, TANKS_TOTAL_COLUMN).value,
                                        number_of_tanks_in_boiling=number_of_tanks_in_boiling,
                                        kg_per_tank=kg_per_tank,
-                                       number_of_boiling=boiling_index_number)
+                                       number_of_boiling=boiling_index_number,
+                                       first_tank_number=first_tank_number)
                 values += parser.parse()
                 boiling_index_number = parser.number_of_boiling
                 current_boiling = []
         else:
             current_boiling.append(
-                [ws.cell(i, j).value for j in range(1, len(header) + 1)]
+                [ws.cell(i, j).value for j in range(1, length)]
             )
             number_of_tanks_in_boiling = ws.cell(i, TANKS_COLUMN).value
             kg_per_tank = float(ws.cell(i, OUTPUT_COLUMN).value / number_of_tanks_in_boiling)
 
-    df = pd.DataFrame(values, columns=["boiling_id", "boiling_type", "output", "tanks", "sku", "kg"])
-
+    df = pd.DataFrame(values, columns=["boiling_id", "boiling_type", "output", "tanks", "sku", "first_tank", "kg"])
     df["sku"] = df["sku"].apply(lambda sku: cast_model(RicottaSKU, sku))
     df["boiling"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0])
     df["full_tank_number"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0].number_of_tanks)
     df["boiling_id"] = df["boiling_id"].astype(int)
+    df["kg"] = df["kg"].apply(lambda x: int(x))
+    print(df)
 
     for idx, grp in df.groupby("boiling_id"):
         assert (
@@ -131,8 +143,6 @@ def read_boiling_plan(wb_obj, saturate=True):
 
         # fix number of kilograms
         if abs(grp["kg"].sum() - grp.iloc[0]["output"] * grp.iloc[0]["tanks"] / grp.iloc[0]["full_tank_number"]) / grp.iloc[0]["output"] > 0.05:
-            print(grp["kg"].sum())
-            print(grp.iloc[0]["output"] * grp.iloc[0]["tanks"] / grp.iloc[0]["full_tank_number"])
             raise AssertionError(
                 "Одна из групп варок имеет неверное количество килограмм."
             )
