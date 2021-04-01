@@ -93,23 +93,34 @@ def make_schedule(boiling_plan_df, start_boiling_id=0):
 
     for bg_prev, bg in iter_pairs(boiling_groups, method="any_prefix"):
         boiling_model = bg.props["boiling_model"]
+        n_tanks = bg.props["n_tanks"]
 
+        # todo: take from arguments instead
         line_nums_props = (
             [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
             if not boiling_model.with_flavor
             else [[0, 1, 2]]
         )
-        idx = 0
-        if bg_prev:
-            idx = bg_prev.props["line_nums"][-1]  # ended with number
-            idx = (idx + 1) % len(line_nums_props)  # next line_nums in circle
-        bg.props.update(line_nums=line_nums_props[idx][: boiling_model.number_of_tanks])
+        idx = -n_tanks % 3
+        iter_line_nums_props = recycle_list(line_nums_props, idx)
+
+        # todo: deprecated, del
+        # if not bg_prev:
+        #     idx = (-n_tanks) % 3  # try to start so we end at the beginning
+        #     iter_line_nums_props = recycle_list(line_nums_props, idx)
+        # else:
+        #     idx = bg_prev.props["line_nums"][-1]  # ended with number
+        #     idx = (idx + 1) % 3  # next line_nums in circle
+        # bg.props.update(line_nums=line_nums_props[idx][:n_tanks])
 
         push(
             maker.root,
             bg,
             push_func=AxisPusher(start_from="last_beg"),
             validator=validator,
+            iter_props=[
+                {"line_nums": line_nums[:n_tanks]} for line_nums in iter_line_nums_props
+            ],
         )
 
     # add bat cleanings

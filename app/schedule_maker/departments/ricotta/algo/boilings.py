@@ -44,10 +44,9 @@ def make_boiling_sequence(boiling_group_df):
     maker, make = init_block_maker("boiling_sequence")
 
     boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
+    n_tanks = boiling_group_df.iloc[0]["tanks"]
 
-    boilings = [
-        make_boiling(boiling_model) for _ in range(boiling_model.number_of_tanks)
-    ]
+    boilings = [make_boiling(boiling_model) for _ in range(n_tanks)]
 
     for b_prev, b in SimpleIterator(boilings).iter_sequences(2, method="any"):
         if not b:
@@ -63,11 +62,15 @@ def make_boiling_sequence(boiling_group_df):
 
 def make_boiling_group(boiling_group_df):
     boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
+    n_tanks = boiling_group_df.iloc[0]["tanks"]
+    group_tanks = boiling_group_df.iloc[0]["group_tanks"]
     maker, make = init_block_maker(
         "boiling_group",
         skus=boiling_group_df["sku"].tolist(),
         boiling_id=boiling_group_df.iloc[0]["boiling_id"],
         boiling_model=boiling_model,
+        n_tanks=n_tanks,
+        group_tanks=group_tanks,
     )
 
     boiling_sequence = make_boiling_sequence(boiling_group_df)

@@ -7,11 +7,11 @@ from config import DebugConfig
 
 
 def test_read_boiling_plan():
-    print(
-        read_boiling_plan(
-            DebugConfig.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx")
-        )
+    df = read_boiling_plan(
+        DebugConfig.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx")
     )
+    print(df[["boiling_id", "sku_name", "kg", "tanks"]].head())
+    print(df.iloc[0])
 
 
 if __name__ == "__main__":
