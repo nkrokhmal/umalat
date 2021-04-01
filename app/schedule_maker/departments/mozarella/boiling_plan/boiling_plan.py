@@ -4,7 +4,7 @@ from app.enum import LineName
 from .saturate import saturate_boiling_plan
 
 
-def read_boiling_plan(wb_obj, saturate=True, normalization=True):
+def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -153,24 +153,25 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
         ), "В одной группе варок должен быть только один тип варки."
 
     # validate kilograms
-    for idx, grp in df.groupby("group_id"):
-        if (
-            abs(grp["kg"].sum() - grp.iloc[0]["total_volume"])
-            / grp.iloc[0]["total_volume"]
-            > 0.05
-        ):
-            raise AssertionError(
-                "Одна из групп варок имеет неверное количество килограмм."
-            )
-        else:
-            if normalization:
-                if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
-                    df.loc[grp.index, "kg"] *= (
-                        grp.iloc[0]["total_volume"] / grp["kg"].sum()
-                    )  # scale to total_volume
-                else:
-                    # all fine
-                    pass
+    if validate:
+        for idx, grp in df.groupby("group_id"):
+            if (
+                abs(grp["kg"].sum() - grp.iloc[0]["total_volume"])
+                / grp.iloc[0]["total_volume"]
+                > 0.05
+            ):
+                raise AssertionError(
+                    "Одна из групп варок имеет неверное количество килограмм."
+                )
+            else:
+                if normalization:
+                    if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
+                        df.loc[grp.index, "kg"] *= (
+                            grp.iloc[0]["total_volume"] / grp["kg"].sum()
+                        )  # scale to total_volume
+                    else:
+                        # all fine
+                        pass
 
     df = df[
         [

@@ -37,7 +37,7 @@ def ricotta_boiling_plan():
         )
         request_ton = 0
         if ("Вода" in wb.sheetnames) and ("Соль" in wb.sheetnames):
-            boiling_plan_df = mozzarella_read_boiling_plan(wb)
+            boiling_plan_df = mozzarella_read_boiling_plan(wb, validate=False)
             boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(
                 lambda x: int(x)
             )
