@@ -19,7 +19,7 @@ COLUMNS = {
     "boiling_count": Cell(column_index_from_string("Q"), "Q"),
     "delimiter": Cell(column_index_from_string("J"), "J"),
     "delimiter_int": Cell(column_index_from_string("M"), "M"),
-    "total_volume": Cell(column_index_from_string("S"), "S"),
+    "total_volume": Cell(column_index_from_string("T"), "T"),
 }
 
 ROWS = {
@@ -52,7 +52,10 @@ def draw_skus(wb, data_sku):
             [
                 group_sku.name,
                 group_sku.made_from_boilings[0].to_str(),
-                int(group_sku.output_per_tank * group_sku.made_from_boilings[0].number_of_tanks),
+                int(
+                    group_sku.output_per_tank
+                    * group_sku.made_from_boilings[0].number_of_tanks
+                ),
                 group_sku.made_from_boilings[0].number_of_tanks,
             ],
             set_border=False,
