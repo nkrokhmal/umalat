@@ -168,7 +168,6 @@ def read_boiling_plan(wb_obj, saturate=True):
     )
     df["boiling_id"] = df["boiling_id"].astype(int)
     df["kg"] = df["kg"].apply(lambda x: int(x))
-    print(df)
 
     for idx, grp in df.groupby("boiling_id"):
         assert (
