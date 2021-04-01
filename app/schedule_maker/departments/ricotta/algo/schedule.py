@@ -92,15 +92,18 @@ def make_schedule(boiling_plan_df, start_boiling_id=0):
         boiling_groups.append(make_boiling_group(grp))
 
     for bg_prev, bg in iter_pairs(boiling_groups, method="any_prefix"):
-        boiling_model = bg.props["boiling_model"]
         n_tanks = bg.props["n_tanks"]
+        first_tank = bg.props["first_tank"]
 
         # todo: take from arguments instead
-        line_nums_props = (
-            [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
-            if not boiling_model.with_flavor
-            else [[0, 1, 2]]
-        )
+        if not first_tank:
+            line_nums_props = [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
+        else:
+            line_nums_props = [[0, 1, 2], [1, 2, 0], [2, 0, 1]][
+                int(first_tank) - 1 : int(first_tank)
+            ]
+
+        print(first_tank)
         idx = -n_tanks % 3
         iter_line_nums_props = recycle_list(line_nums_props, idx)
 

@@ -64,6 +64,7 @@ def make_boiling_group(boiling_group_df):
     boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
     n_tanks = boiling_group_df.iloc[0]["tanks"]
     group_tanks = boiling_group_df.iloc[0]["group_tanks"]
+    first_tank = boiling_group_df.iloc[0]["first_tank"]
     maker, make = init_block_maker(
         "boiling_group",
         skus=boiling_group_df["sku"].tolist(),
@@ -71,6 +72,7 @@ def make_boiling_group(boiling_group_df):
         boiling_model=boiling_model,
         n_tanks=n_tanks,
         group_tanks=group_tanks,
+        first_tank=first_tank,
     )
 
     boiling_sequence = make_boiling_sequence(boiling_group_df)
