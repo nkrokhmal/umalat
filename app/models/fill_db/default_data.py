@@ -81,7 +81,7 @@ def generate_mozzarella_lines():
     ricotta_department = Department.query.filter_by(name="Рикоттный цех").first()
     ricotta_line = RicottaLine(
         name="Рикотта",
-        input_ton=1890,
+        input_ton=1850,
     )
     ricotta_line.department_id = ricotta_department.id
     db.session.add(ricotta_line)

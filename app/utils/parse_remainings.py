@@ -104,6 +104,8 @@ def cast_volume(obj):
         return obj.line.output_ton
     elif isinstance(obj, RicottaSKU):
         return obj.made_from_boilings[0].number_of_tanks * obj.output_per_tank
+    elif isinstance(obj, MascarponeSKU):
+        return db.session.query(MascarponeFermentator).first().output_ton
     else:
         raise Exception("Unknown sku type")
 

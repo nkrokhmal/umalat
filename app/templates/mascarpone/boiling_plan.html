@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} План по варкам {% endblock %}
+
+{% block header%}
+<div class="row", style="padding:20px">
+    <div class="header-img">
+        <img src= "{{ url_for('static', filename='boiling_plan.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+    </div>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="row">
+    <div class="container">
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning">
+            <button type="button" class="close" data-dismiss="alert" style="position:absolute; top:0; right:0;">&times;</button>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="card card-body bg-white border-light shadow-sm mb-4">
+        <h2 class="h5 mb-4">Загрузите файл остатков</h2>
+        <div class="row">
+            <form method="post" action="/mascarpone_boiling_plan" enctype="multipart/form-data" class="mt-4">
+                {{ form.hidden_tag() }}
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Выберите файл остатков</label>
+                        {{form.input_file(place_holder='InputFile', class='form-control')}}
+                    </div>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите дату</label>
+                        {{form.date(place_holder='Date', class='form-control')}}
+                    </div>
+                </div>
+                <button type="submit" name="submit" class="btn btn-block btn-primary">Отправить</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if filename %}
+    <script>
+        function download(url, filename) {
+        fetch(url).then(function(t) {
+            return t.blob().then((b)=>{
+                var a = document.createElement("a");
+                a.href = URL.createObjectURL(b);
+                a.setAttribute("download", filename);
+                a.click();
+            }
+            );
+        });
+        }
+        var url = "download_boiling_plan/" + "{{filename}}";
+        download(url,"{{filename}}");
+    </script>
+{% endif %}
+{% endblock %}

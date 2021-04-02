@@ -64,6 +64,11 @@ class SKU(db.Model):
             "Сулугуни": "#F1DADA",
             "Рикотта": "#A3D5D2",
             "Терка": "#FFEBE0",
+            "Маскарпоне": "#E5B7B6",
+            "Кремчиз": "#DAE5F1",
+            "Творожный": "#CBC0D9",
+            "Робиола": "E5DFEC",
+            "Сливки": "#F1DADA",
         }
         if "Терка" not in self.form_factor.name:
             return COLOURS[self.group.name]

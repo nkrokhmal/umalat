@@ -1,8 +1,8 @@
 from flask import render_template, request
 from .forms import BoilingPlanForm
 
-# from app.utils.mascarpone.boiling_plan_create import boiling_plan_create
-# from app.utils.ricotta.boiling_plan_draw import draw_boiling_plan
+from app.utils.mascarpone.boiling_plan_create import mascarpone_boiling_plan_create
+from app.utils.mascarpone.boiling_plan_draw import draw_boiling_plan
 from ...utils.sku_plan import *
 from ...utils.parse_remainings import *
 from .. import main
@@ -16,8 +16,6 @@ def mascarpone_boiling_plan():
         skus = db.session.query(MascarponeSKU).all()
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(MascarponeBoiling).all()
-        mascarpone_line = db.session.query(MascarponeLine).first()
-        total_volume = 0
 
         file = request.files["input_file"]
         tmp_file_path = os.path.join(
@@ -26,24 +24,6 @@ def mascarpone_boiling_plan():
 
         if file:
             file.save(tmp_file_path)
-        wb = openpyxl.load_workbook(
-            filename=os.path.join(
-                current_app.config["UPLOAD_TMP_FOLDER"], file.filename
-            ),
-            data_only=True,
-        )
-        if ("Вода" in wb.sheetnames) and ("Соль" in wb.sheetnames):
-            boiling_plan_df = mozzarella_read_boiling_plan(wb)
-            boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(
-                lambda x: int(x)
-            )
-            total_volume = (
-                boiling_plan_df["configuration"].sum()
-                / 8000
-                * 3
-                * ricotta_line.input_ton
-            )
-
         skus_req, remainings_df = parse_file_path(tmp_file_path)
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
@@ -63,9 +43,10 @@ def mascarpone_boiling_plan():
         )
         sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
-        df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler)
-        df_plan = boiling_plan_create(df)
-        wb = draw_boiling_plan(df_plan, df_extra_packing, wb, total_volume)
+        df, _ = parse_sheet(ws, sheet_name, excel_compiler)
+        df_plan = mascarpone_boiling_plan_create(df)
+        print(df_plan)
+        wb = draw_boiling_plan(df_plan, wb)
         wb.save(filepath)
         os.remove(tmp_file_path)
         return render_template(

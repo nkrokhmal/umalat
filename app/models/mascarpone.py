@@ -37,6 +37,11 @@ class MascarponeBoiling(Boiling):
     percent = db.Column(db.Integer)
     weight = db.Column(db.Integer)
 
+    def to_str(self):
+        values = [self.percent, self.flavoring_agent]
+        values = [str(v) for v in values if v]
+        return ", ".join(values)
+
 
 class MascarponeBoilingTechnology(BoilingTechnology):
     __tablename__ = "mascarpone_boiling_technologies"
