@@ -37,21 +37,19 @@ def add_fields(result, type):
 def mascarpone_boiling_plan_create(df):
     df["plan"] = df["plan"].apply(lambda x: round(x))
     df["percent"] = df["sku"].apply(lambda x: x.made_from_boilings[0].percent)
+    df["weight"] = df["sku"].apply(lambda x: round(x.weight_netto))
     df["flavoring_agent"] = df["sku"].apply(
         lambda x: x.made_from_boilings[0].flavoring_agent if isinstance(x, MascarponeSKU) else ""
     )
     df["group"] = df["sku"].apply(lambda x: x.group.name)
 
     mascarpone_result = handle_mascarpone(df)
-    print(mascarpone_result)
     mascarpone_result = add_fields(mascarpone_result, "mascarpone")
 
     cream_cheese_result = handle_cream_cheese(df)
-    print(cream_cheese_result)
     cream_cheese_result = add_fields(cream_cheese_result, "cream_cheese")
 
     cream_result = handle_cream(df)
-    print(cream_result)
     cream_result = add_fields(cream_result, "cream")
 
     return mascarpone_result, cream_cheese_result, cream_result
@@ -69,8 +67,13 @@ def mascarpone_proceed_order(order, df, boilings, output_tons):
         df_filter_groups = [group for _, group in df_filter.groupby("percent")]
 
         for df_filter_group in df_filter_groups:
+            df_group_dict = df_filter_group.sort_values(
+                by="weight",
+                ascending=True,
+            ).to_dict("records")
+
             boilings.add_group(
-                df_filter_group.to_dict("records"),
+                df_group_dict,
             )
     return boilings
 
@@ -84,9 +87,13 @@ def cream_cheese_proceed_order(order, df, boilings):
         boilings.init_iterator(output_ton)
         df_filter_groups = [group for _, group in df_filter.groupby("percent")]
         for df_filter_group in df_filter_groups:
+            df_group_dict = df_filter_group.sort_values(
+                by="weight",
+                ascending=True,
+            ).to_dict("records")
+
             boilings.add_group(
-                df_filter_group.to_dict("records"),
-                max_weight=output_ton,
+                df_group_dict
             )
     return boilings
 

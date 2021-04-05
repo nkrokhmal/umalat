@@ -46,6 +46,7 @@ def boiling_plan_create(df, request_ton=0):
             "boiling_count",
         ]
     ]
+    print(result)
     return result
 
 
@@ -64,10 +65,9 @@ def proceed_order(order, df, boilings_ricotta, boilings_count=1):
         df_filter["output"] = df_filter["output"].apply(lambda x: int(x))
         df_filter_groups = [group for _, group in df_filter.groupby("output")]
         for df_filter_group in df_filter_groups:
-            max_weight = df_filter_group["output"].iloc[0]
+            boilings_ricotta.init_iterator(df_filter_group["output"].iloc[0])
             boilings_ricotta.add_group(
                 df_filter_group.to_dict("records"),
-                max_weight=max_weight,
                 boilings_count=boilings_count,
             )
     return boilings_ricotta
