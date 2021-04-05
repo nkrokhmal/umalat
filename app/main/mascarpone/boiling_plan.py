@@ -13,9 +13,10 @@ def mascarpone_boiling_plan():
     form = BoilingPlanForm(request.form)
     if request.method == "POST" and "submit" in request.form:
         date = form.date.data
-        skus = db.session.query(MascarponeSKU).all()
+
+        skus = db.session.query(MascarponeSKU).all() + db.session.query(CreamCheeseSKU).all()
         total_skus = db.session.query(SKU).all()
-        boilings = db.session.query(MascarponeBoiling).all()
+        boilings = db.session.query(MascarponeBoiling).all() + db.session.query(CreamCheeseBoiling).all()
 
         file = request.files["input_file"]
         tmp_file_path = os.path.join(
@@ -39,14 +40,13 @@ def mascarpone_boiling_plan():
         excel_compiler, wb, wb_data_only, filename, filepath = move_file(
             sku_plan_client.filepath,
             sku_plan_client.filename,
-            "рикотта",
+            "маскарпоне",
         )
         sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
         df, _ = parse_sheet(ws, sheet_name, excel_compiler)
-        df_plan = mascarpone_boiling_plan_create(df)
-        print(df_plan)
-        wb = draw_boiling_plan(df_plan, wb)
+        mascarpone_df, cream_cheese_df, cream_df = mascarpone_boiling_plan_create(df)
+        wb = draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb)
         wb.save(filepath)
         os.remove(tmp_file_path)
         return render_template(

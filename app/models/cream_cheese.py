@@ -29,6 +29,12 @@ class CreamCheeseBoiling(Boiling):
 
     id = db.Column(db.Integer, db.ForeignKey("boilings.id"), primary_key=True)
     percent = db.Column(db.Integer)
+    output_ton = db.Column(db.Integer)
+
+    def to_str(self):
+        values = [self.percent]
+        values = [str(v) for v in values if v]
+        return ", ".join(values)
 
 
 class CreamCheeseBoilingTechnology(BoilingTechnology):
@@ -55,5 +61,4 @@ class CreamCheeseFermentator(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    output_ton = db.Column(db.Integer)
     line_id = db.Column(db.Integer, db.ForeignKey("mascarpone_lines.id"), nullable=True)
