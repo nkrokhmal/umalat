@@ -3,35 +3,51 @@ import numpy as np
 
 
 class Boilings:
-    def __init__(self, max_weight=1000, min_weight=1000, boiling_number=0):
+    def __init__(self, max_iter_weight=None, max_weight=1000, min_weight=1000, boiling_number=0):
         self.max_weight = max_weight
         self.min_weight = min_weight
         self.boiling_number = boiling_number
         self.boilings = []
         self.cur_boiling = []
 
+        self.is_next = True
+        self.iterator = self.create_iterator(max_iter_weight)
+        self.cur_weight = None
+
+    def create_iterator(self, max_iter_weight):
+        circular_list = CircularList()
+        if isinstance(max_iter_weight, int) or isinstance(max_iter_weight, np.int64) or isinstance(max_iter_weight, float):
+            circular_list.add(int(max_iter_weight))
+        elif isinstance(max_iter_weight, list):
+            circular_list.create(max_iter_weight)
+        return iter(circular_list)
+
+    def init_iterator(self, max_iter_weight):
+        self.iterator = self.create_iterator(max_iter_weight)
+        self.is_next = True
+        self.cur_weight = None
+
     def cur_sum(self):
         if self.cur_boiling:
             return sum([x["plan"] for x in self.cur_boiling])
         return 0
 
-    def add(self, sku, max_weight_iterator=None, boilings_count=1):
-        is_next = True
+    def add(self, sku, boilings_count=1):
         while sku["plan"] > 0:
-            if is_next:
-                max_weight = next(max_weight_iterator)
-                is_next = False
+            if self.is_next:
+                self.cur_weight = next(self.iterator)
+                self.is_next = False
             remainings = (
                 self.max_weight - self.cur_sum()
-                if not max_weight
-                else max_weight - self.cur_sum()
+                if not self.cur_weight
+                else self.cur_weight - self.cur_sum()
             )
             boiling_weight = min(remainings, sku["plan"])
 
             new_boiling = deepcopy(sku)
             new_boiling["plan"] = boiling_weight
             new_boiling["boiling_count"] = boilings_count
-            new_boiling["max_boiling_weight"] = max_weight
+            new_boiling["max_boiling_weight"] = self.cur_weight
             new_boiling["id"] = self.boiling_number
 
             sku["plan"] -= boiling_weight
@@ -42,32 +58,27 @@ class Boilings:
                 self.boilings += self.cur_boiling
                 self.boiling_number += 1
                 self.cur_boiling = []
-                is_next = True
+                self.is_next = True
 
     def finish(self):
         if self.cur_boiling:
             self.boilings += self.cur_boiling
             self.boiling_number += 1
             self.cur_boiling = []
+            self.is_next = True
 
     def add_remainings(self):
         if self.cur_boiling:
             self.boilings += self.cur_boiling
             self.boiling_number += 1
             self.cur_boiling = []
+            self.is_next = True
 
     def add_group(self, skus, max_weight=None, boilings_count=1, new=True):
         if new:
             self.add_remainings()
         for sku in skus:
-            max_weight_list = CircularList()
-            if isinstance(max_weight, int) or isinstance(max_weight, np.int64) or isinstance(max_weight, float):
-                max_weight_list.add(int(max_weight))
-            elif isinstance(max_weight, list):
-                max_weight_list.create(max_weight)
-
-            max_weight_iterator = iter(max_weight_list)
-            self.add(sku, max_weight_iterator=max_weight_iterator, boilings_count=boilings_count)
+            self.add(sku, boilings_count=boilings_count)
 
 
 class Node:

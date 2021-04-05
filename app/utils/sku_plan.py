@@ -85,13 +85,13 @@ class SkuPlanClient:
                     )
                 beg_block_row = cur_row
                 for block_sku in block_skus:
-                    formula_plan = "=IFERROR(INDEX('{0}'!$A$5:$DK$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0)), 0)".format(
+                    formula_plan = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
                         current_app.config["SHEET_NAMES"]["remainings"],
                         excel_client.sheet.cell(
                             cur_row, CELLS["SKU"].column
                         ).coordinate,
                     )
-                    formula_remains = "=IFERROR(INDEX('{0}'!$A$5:$DK$265,MATCH($O$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$DK$5,0)), 0)".format(
+                    formula_remains = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($O$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
                         current_app.config["SHEET_NAMES"]["remainings"],
                         excel_client.sheet.cell(
                             cur_row, CELLS["SKU"].column

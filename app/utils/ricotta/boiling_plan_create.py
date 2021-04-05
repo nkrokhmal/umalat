@@ -81,6 +81,7 @@ def handle_ricotta(df, request_ton=0):
         Order(True, None),
         Order(False, ""),
         Order(False, "Ваниль"),
+        Order(False, "Мед"),
         Order(False, "Шоколад"),
         Order(False, "Шоколад-орех"),
     ]
