@@ -15,15 +15,12 @@ from flask_wtf import FlaskForm
 
 from ...models import (
     Packer,
-    RicottaBoiling,
-    RicottaLine,
-    PackType,
-    FormFactor,
-    RicottaSKU,
-    RicottaBoilingTechnology,
+    MascarponeBoiling,
+    MascarponeSKU,
+    CreamCheeseSKU,
+    CreamCheeseBoiling,
     Group,
     BatchNumber,
-    RicottaFormFactor,
 )
 from ... import db
 import datetime
@@ -41,3 +38,73 @@ class BoilingPlanForm(FlaskForm):
         default=datetime.datetime.today() + datetime.timedelta(days=1),
         validators=[Required()],
     )
+
+
+class SKUCreamCheeseForm(FlaskForm):
+    name = StringField("Введите имя SKU", validators=[Required()])
+    brand_name = StringField("Введите имя бренда", validators=[Optional()])
+    weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
+    packing_speed = IntegerField("Введите скорость фасовки", validators=[Optional()])
+    shelf_life = IntegerField("Введите время хранения, д", validators=[Optional()])
+    in_box = IntegerField(
+        "Введите количество упаковок в коробке, шт", validators=[Optional()]
+    )
+
+    boiling = SelectField("Выберите тип варки", coerce=int, default=-1)
+    group = SelectField("Выберите название форм фактора", coerce=int, default=-1)
+
+    submit = SubmitField(label="Сохранить")
+
+    def __init__(self, *args, **kwargs):
+        super(SKUCreamCheeseForm, self).__init__(*args, **kwargs)
+
+        self.boilings = db.session.query(CreamCheeseBoiling).all()
+        self.boiling.choices = list(enumerate(set([x.to_str() for x in self.boilings])))
+        self.boiling.choices.append((-1, ""))
+
+        self.groups = db.session.query(Group).all()
+        self.group.choices = list(enumerate(set([x.name for x in self.groups])))
+        self.group.choices.append((-1, ""))
+
+    @staticmethod
+    def validate_sku(self, name):
+        sku = (
+            db.session.query(CreamCheeseSKU).filter_by(CreamCheeseSKU.name == name.data).first()
+        )
+        if sku is not None:
+            raise ValidationError("SKU с таким именем уже существует")
+
+
+class SKUMascarponeForm(FlaskForm):
+    name = StringField("Введите имя SKU", validators=[Required()])
+    brand_name = StringField("Введите имя бренда", validators=[Optional()])
+    weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
+    packing_speed = IntegerField("Введите скорость фасовки", validators=[Optional()])
+    shelf_life = IntegerField("Введите время хранения, д", validators=[Optional()])
+    in_box = IntegerField(
+        "Введите количество упаковок в коробке, шт", validators=[Optional()]
+    )
+
+    boiling = SelectField("Выберите тип варки", coerce=int, default=-1)
+    group = SelectField("Выберите название форм фактора", coerce=int, default=-1)
+
+    submit = SubmitField(label="Сохранить")
+
+    def __init__(self, *args, **kwargs):
+        super(SKUMascarponeForm, self).__init__(*args, **kwargs)
+
+        self.boilings = db.session.query(MascarponeBoiling).all()
+        self.boiling.choices = list(enumerate(set([x.to_str() for x in self.boilings])))
+        self.boiling.choices.append((-1, ""))
+
+        self.groups = db.session.query(Group).all()
+        self.group.choices = list(enumerate(set([x.name for x in self.groups])))
+        self.group.choices.append((-1, ""))
+
+    @staticmethod
+    def validate_sku(self, name):
+        sku = (
+            db.session.query(MascarponeSKU).filter_by(MascarponeSKU.name == name.data).first()
+        )
+        if sku is not None:
+            raise ValidationError("SKU с таким именем уже существует")

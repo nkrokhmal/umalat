@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}SKU - Список SKU{% endblock %}
+{% block page_content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" xmlns="http://www.w3.org/1999/html"></script>
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Список всех SKU</h1>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+    <a href="{{ url_for('main.mascarpone_add_sku_mascarpone') }}" class="btn btn-primary btn-sm mr-2 dropdown-toggle">
+        <span class="fas fa-plus mr-2"></span>
+        Добавить новое SKU
+    </a>
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Название SKU</th>
+                        <th class="border-0">Тип варки</th>
+                        <th class="border-0">Группа</th>
+                        <th class="border-0">Скорость фасовки</th>
+                        <th class="border-0">Линия</th>
+                        <th class="border-0">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sku in pagination.items %}
+                        <tr>
+                            <td class="border-0">{{loop.index + (page - 1) * per_page}}</td>
+                            <td class="border-0"><a class="small">{{sku.name}}</a></td>
+                            <td class="border-0"><a class="small">{{sku.made_from_boilings[0].to_str()}}</a></td>
+                            <td class="border-0"><a class="small">{{sku.group.name}}</a></td>
+                            <td class="border-0"><a class="small">{{sku.packing_speed}}</a></td>
+                            <td class="border-0"><a class="small">{{sku.line.name}}</a></td>
+                            <td class="border-0">
+                                <a href="{{ url_for('main.mascarpone_edit_sku_mascarpone', sku_id = sku.id)}}" class="edit-sku">
+                                    <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>
+                                </a>
+                                <a href="#delete_sku" class="delete-current-sku" data-id={{sku.id}} data-toggle="modal">
+                                    <i class="material-icons" data-toggle="tooltip" style="color:red" title="Удалить"> <span class="fas fa-trash"> </i>
+                                </a>
+                                <div id="delete_sku" class="modal fade" >
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form>
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">Delete SKU</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete sku?</p>
+                                                    <p class="text-warning"><small>This action cannot be undone.</small></p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                                                    <input type="submit" class="btn btn-danger btn-ok" value= Удалить>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="card-footer px-3 border-0 d-flex align-items-center justify-content-between">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination mb-0">
+                        {% if pagination.has_prev %}
+                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.mascarpone_get_sku_mascarpone', page=pagination.prev_num) }}">Предыдущие</a></li>
+                        {% else %}
+                          <li class="page-item"><a class="page-link btn disabled" href="#">Предыдущие</a></li>
+                        {% endif %}
+                        {% if pagination.has_next %}
+                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.mascarpone_get_sku_mascarpone', page=pagination.next_num) }}">Следующие</a></li>
+                        {% else %}
+                          <li class="page-item"><a class="page-link btn disabled" href="#">Следующие</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    $(function () {
+        $(".delete-current-sku").click(function () {
+            var id = $(this).data('id');
+            $(".btn.btn-danger.btn-ok").click(function(){
+                $.ajax(
+                {
+                    url: '/mascarpone/delete_sku_mascarpone/' + id,
+                    type: 'DELETE',
+                    success: function(res)
+                    {
+                        console.log(res);
+                    },
+                    error: function(error) {
+                          console.log(error);
+                    }
+                });
+            });
+        })
+    });
+</script>
+{% endblock javascripts %}
