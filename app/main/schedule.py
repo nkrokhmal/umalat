@@ -77,6 +77,7 @@ def schedule():
     if request.method == "POST" and form.validate_on_submit():
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
+        is_merged_boiling = form.is_merged_boiling.data
 
         file = request.files["input_file"]
         file_path = os.path.join(current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
@@ -88,9 +89,19 @@ def schedule():
             ),
             data_only=True,
         )
+        if is_merged_boiling:
+            if 'План варок' not in wb.sheetnames:
+                raise Exception('Листа "План варок" не существует. Проверьте документ или уберите флажок с  '
+                                '"Построить расписание по объединенному плану варок" на странице расписания!')
+            else:
+                boiling_plan_df = read_merged_boiling_plan(wb)
+                boiling_plan_tasks_df = read_merged_boiling_plan(wb, normalization=False)
+        else:
+            boiling_plan_df = read_boiling_plan(wb)
+            boiling_plan_tasks_df = read_boiling_plan(wb, normalization=False)
 
-        boiling_plan_df = read_boiling_plan(wb)
-        boiling_plan_tasks_df = read_boiling_plan(wb, normalization=False)
+        print(boiling_plan_df.columns)
+
         add_batch(
             date,
             form.batch_number.data,

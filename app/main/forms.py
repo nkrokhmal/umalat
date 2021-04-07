@@ -73,6 +73,11 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default=datetime.time(8, 0),
     )
+    is_merged_boiling = BooleanField(
+        "Построить расписание по объединенному плану варок",
+        validators=[Optional()],
+        default=False,
+    )
     add_full_boiling = BooleanField(
         "Вставить полную мойку внутри дня по правилу 12 часов",
         validators=[Optional()],
