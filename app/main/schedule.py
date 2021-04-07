@@ -30,6 +30,47 @@ def add_batch(date, beg_number, end_number):
     db.session.commit()
 
 
+def prepare_schedule_json(schedule_json):
+    schedule_df = pd.concat(
+        [
+            x['props']['boiling_group_df'] for x in schedule_json['children'][0]['children'] if x['cls'] == 'boiling'
+        ]
+    )
+
+    schedule_df['id'] = schedule_df['group_id']
+    schedule_df['name'] = schedule_df['sku_name']
+    schedule_df['packer'] = schedule_df['sku'].apply(lambda sku: sku.packers_str)
+    schedule_df["boiling_form_factor"] = schedule_df["sku"].apply(
+        lambda sku: get_boiling_form_factor(sku)
+    )
+    schedule_df['form_factor'] = schedule_df['sku'].apply(lambda x: x.form_factor.name)
+    schedule_df['group'] = schedule_df["sku"].apply(lambda x: x.group.name)
+    schedule_df['boiling_configuration'] = schedule_df["boiling_volumes"].apply(lambda x: x[0])
+    schedule_df['boiling_type'] = schedule_df["boiling"].apply(lambda x: x.boiling_type)
+    schedule_df['boiling_volume'] = np.where(schedule_df["boiling_type"] == "salt", 850, 1000)
+    schedule_df['boiling_name'] = schedule_df["boiling"].apply(lambda b: b.to_str())
+    schedule_df['boiling_id'] = schedule_df["boiling"].apply(lambda b: b.id)
+    schedule_df['team_number'] = schedule_df['packing_team_id']
+
+    schedule_df = schedule_df[
+        [
+            "id",
+            "boiling_id",
+            "boiling_name",
+            "boiling_volume",
+            "group",
+            "form_factor",
+            "boiling_form_factor",
+            "packer",
+            "name",
+            "kg",
+            "team_number",
+            "boiling_configuration",
+        ]
+    ]
+    return schedule_df
+
+
 @main.route("/schedule", methods=["GET", "POST"])
 def schedule():
     form = ScheduleForm()
@@ -101,47 +142,8 @@ def schedule():
                 },
             ]
         )
-        schedule_df = pd.concat(
-            [
-                x['props']['boiling_group_df'] for x in schedule_json['children'][0]['children'] if x['cls'] == 'boiling'
-            ]
-        )
 
-        print(schedule_df)
-
-        schedule_df['id'] = schedule_df['group_id']
-        schedule_df['name'] = schedule_df['sku_name']
-        schedule_df['packer'] = schedule_df['sku'].apply(lambda sku: sku.packers_str)
-        schedule_df["boiling_form_factor"] = schedule_df["sku"].apply(
-            lambda sku: get_boiling_form_factor(sku)
-        )
-        schedule_df['form_factor'] = schedule_df['sku'].apply(lambda x: x.form_factor.name)
-        schedule_df['group'] = schedule_df["sku"].apply(lambda x: x.group.name)
-        schedule_df['boiling_configuration'] = schedule_df["boiling_volumes"].apply(lambda x: x[0])
-        schedule_df['boiling_type'] = schedule_df["boiling"].apply(lambda x: x.boiling_type)
-        schedule_df['boiling_volume'] = np.where(schedule_df["boiling_type"] == "salt", 850, 1000)
-        schedule_df['boiling_name'] = schedule_df["boiling"].apply(lambda b: b.to_str())
-        schedule_df['boiling_id'] = schedule_df["boiling"].apply(lambda b: b.id)
-        schedule_df['team_number'] = schedule_df['packing_team_id']
-
-        schedule_df = schedule_df[
-            [
-                "id",
-                "boiling_id",
-                "boiling_name",
-                "boiling_volume",
-                "group",
-                "form_factor",
-                "boiling_form_factor",
-                "packer",
-                "name",
-                "kg",
-                "team_number",
-                "boiling_configuration",
-            ]
-        ]
-        print()
-        print(schedule_df)
+        schedule_df = prepare_schedule_json(schedule_json)
 
         # todo: uncomment
         # schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
