@@ -89,6 +89,9 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
             elif np.isnan(value):
                 return None
             elif isinstance(value, str):
+                assert (
+                    "," not in value
+                ), "Группы варок не поддерживаются в моцаррельном цеху."
                 return value
             else:
                 raise AssertionError("Unknown format")
