@@ -10,6 +10,8 @@ from utils_ak.interactive_imports import *
 from app.schedule_maker import *
 
 from app.schedule_maker.frontend import *
+from ..utils.boiling_plan_create import get_boiling_form_factor
+from ..utils.boiling_plan_draw import draw_boiling_plan_merged
 from ..utils.schedule_task import schedule_task, schedule_task_boilings
 
 
@@ -88,8 +90,64 @@ def schedule():
         except Exception as e:
             return internal_error(e)
             # raise Exception('Ошибка при построении расписания.')
+        schedule_json = schedule.to_dict(
+            props=[
+                {"key": "x", "value": lambda b: list(b.props["x"])},
+                {"key": "size", "value": lambda b: list(b.props["size"])},
+                {"key": "cleaning_type", "cls": "cleaning"},
+                {
+                    "key": "boiling_group_df",
+                    "cls": "boiling",
+                },
+            ]
+        )
+        schedule_df = pd.concat(
+            [
+                x['props']['boiling_group_df'] for x in schedule_json['children'][0]['children'] if x['cls'] == 'boiling'
+            ]
+        )
 
-        schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
+        print(schedule_df)
+
+        schedule_df['id'] = schedule_df['group_id']
+        schedule_df['name'] = schedule_df['sku_name']
+        schedule_df['packer'] = schedule_df['sku'].apply(lambda sku: sku.packers_str)
+        schedule_df["boiling_form_factor"] = schedule_df["sku"].apply(
+            lambda sku: get_boiling_form_factor(sku)
+        )
+        schedule_df['form_factor'] = schedule_df['sku'].apply(lambda x: x.form_factor.name)
+        schedule_df['group'] = schedule_df["sku"].apply(lambda x: x.group.name)
+        schedule_df['boiling_configuration'] = schedule_df["boiling_volumes"].apply(lambda x: x[0])
+        schedule_df['boiling_type'] = schedule_df["boiling"].apply(lambda x: x.boiling_type)
+        schedule_df['boiling_volume'] = np.where(schedule_df["boiling_type"] == "salt", 850, 1000)
+        schedule_df['boiling_name'] = schedule_df["boiling"].apply(lambda b: b.to_str())
+        schedule_df['boiling_id'] = schedule_df["boiling"].apply(lambda b: b.id)
+        schedule_df['team_number'] = schedule_df['packing_team_id']
+
+        schedule_df = schedule_df[
+            [
+                "id",
+                "boiling_id",
+                "boiling_name",
+                "boiling_volume",
+                "group",
+                "form_factor",
+                "boiling_form_factor",
+                "packer",
+                "name",
+                "kg",
+                "team_number",
+                "boiling_configuration",
+            ]
+        ]
+        print()
+        print(schedule_df)
+
+        # todo: uncomment
+        # schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
+
+        schedule_wb = openpyxl.load_workbook(filename=current_app.config["TEMPLATE_SCHEDULE_PLAN"])
+        schedule_wb = draw_boiling_plan_merged(schedule_df, schedule_wb)
 
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание")
 
