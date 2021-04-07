@@ -51,3 +51,4 @@ stackprinter
 mongoengine
 ujson
 better_exceptions
+icecream
