@@ -20,7 +20,7 @@ from ...models import (
     CreamCheeseSKU,
     CreamCheeseBoiling,
     Group,
-    BatchNumber,
+    MascarponeFermentator,
 )
 from ... import db
 import datetime
@@ -108,3 +108,21 @@ class SKUMascarponeForm(FlaskForm):
         )
         if sku is not None:
             raise ValidationError("SKU с таким именем уже существует")
+
+
+class MascarponeBoilingTechnologyForm(FlaskForm):
+    name = StringField("Название варки", validators=[Optional()])
+    pouring_time = IntegerField("Введите время налива", validators=[Optional()])
+    heating_time = IntegerField("Введите время нагрева", validators=[Optional()])
+    adding_lactic_acid_time = IntegerField(
+        "Введите время добавления лактозы", validators=[Optional()]
+    )
+    separation_time = IntegerField("Введите время сепарации", validators=[Optional()])
+    fermentator_name = SelectField("Выберите ферментатор", coerce=int, default=-1)
+    submit = SubmitField(label="Сохранить")
+
+    def __init__(self, *args, **kwargs):
+        super(MascarponeBoilingTechnologyForm, self).__init__(*args, **kwargs)
+
+        self.fermentators = db.session.query(MascarponeFermentator).all()
+        self.fermentator_name.choices = list(enumerate(set([x.to_str() for x in self.fermentators])))

@@ -77,3 +77,7 @@ class MascarponeFermentator(db.Model):
         "MascarponeBoilingTechnology",
         backref=backref("fermentator", uselist=False, lazy="subquery"),
     )
+
+    def to_str(self):
+        return f"{self.name}, {self.output_ton}"
+
