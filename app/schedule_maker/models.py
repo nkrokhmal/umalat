@@ -57,7 +57,18 @@ def query_exactly_one(cls, key, value):
 
 
 def cast_model(cls, obj, int_attribute="id", str_attribute="name"):
-    if isinstance(obj, cls):
+    if isinstance(cls, list):
+        results = []
+        for _cls in cls:
+            try:
+                results.append(cast_model(_cls, obj, int_attribute, str_attribute))
+            except:
+                pass
+        print(cls, obj)
+        assert len(results) == 1
+        return results[0]
+
+    elif isinstance(obj, cls):
         return obj
     elif is_int_like(obj):
         return query_exactly_one(cls, int_attribute, int(float(obj)))
