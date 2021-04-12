@@ -146,6 +146,8 @@ def update_boiling_plan(dfs, normalization, saturate):
             len(grp["boiling"].unique()) == 1
         ), "В одной группе варок должен быть только один тип варки."
 
+    df["original_kg"] = df["kg"]
+
     # validate kilograms
     for idx, grp in df.groupby("group_id"):
         # todo: make common parameter
@@ -173,6 +175,7 @@ def update_boiling_plan(dfs, normalization, saturate):
             "group_id",
             "sku",
             "kg",
+            "original_kg",
             "packing_team_id",
             "boiling",
             "bff",
