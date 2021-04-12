@@ -221,11 +221,8 @@ def read_merged_boiling_plan(wb_obj, saturate=True, normalization=True):
     dfs = []
 
     for i, ws_name in enumerate(["План варок"]):
-        line = cast_line(LineName.WATER)
-        default_boiling_volume = line.output_ton
-
         df = read_sheet(wb, ws_name,
-                        default_boiling_volume=default_boiling_volume,
+                        default_boiling_volume=None,
                         sheet_number=i)
 
         dfs.append(df)
