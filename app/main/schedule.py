@@ -33,24 +33,30 @@ def add_batch(date, beg_number, end_number):
 def prepare_schedule_json(schedule_json):
     schedule_df = pd.concat(
         [
-            x['props']['boiling_group_df'] for x in schedule_json['children'][0]['children'] if x['cls'] == 'boiling'
+            x["props"]["boiling_group_df"]
+            for x in schedule_json["children"][0]["children"]
+            if x["cls"] == "boiling"
         ]
     )
 
-    schedule_df['id'] = schedule_df['group_id']
-    schedule_df['name'] = schedule_df['sku_name']
-    schedule_df['packer'] = schedule_df['sku'].apply(lambda sku: sku.packers_str)
+    schedule_df["id"] = schedule_df["group_id"]
+    schedule_df["name"] = schedule_df["sku_name"]
+    schedule_df["packer"] = schedule_df["sku"].apply(lambda sku: sku.packers_str)
     schedule_df["boiling_form_factor"] = schedule_df["sku"].apply(
         lambda sku: get_boiling_form_factor(sku)
     )
-    schedule_df['form_factor'] = schedule_df['sku'].apply(lambda x: x.form_factor.name)
-    schedule_df['group'] = schedule_df["sku"].apply(lambda x: x.group.name)
-    schedule_df['boiling_configuration'] = schedule_df["boiling_volumes"].apply(lambda x: x[0])
-    schedule_df['boiling_type'] = schedule_df["boiling"].apply(lambda x: x.boiling_type)
-    schedule_df['boiling_volume'] = np.where(schedule_df["boiling_type"] == "salt", 850, 1000)
-    schedule_df['boiling_name'] = schedule_df["boiling"].apply(lambda b: b.to_str())
-    schedule_df['boiling_id'] = schedule_df["boiling"].apply(lambda b: b.id)
-    schedule_df['team_number'] = schedule_df['packing_team_id']
+    schedule_df["form_factor"] = schedule_df["sku"].apply(lambda x: x.form_factor.name)
+    schedule_df["group"] = schedule_df["sku"].apply(lambda x: x.group.name)
+    schedule_df["boiling_configuration"] = schedule_df["boiling_volumes"].apply(
+        lambda x: x[0]
+    )
+    schedule_df["boiling_type"] = schedule_df["boiling"].apply(lambda x: x.boiling_type)
+    schedule_df["boiling_volume"] = np.where(
+        schedule_df["boiling_type"] == "salt", 850, 1000
+    )
+    schedule_df["boiling_name"] = schedule_df["boiling"].apply(lambda b: b.to_str())
+    schedule_df["boiling_id"] = schedule_df["boiling"].apply(lambda b: b.id)
+    schedule_df["team_number"] = schedule_df["packing_team_id"]
 
     schedule_df = schedule_df[
         [
@@ -77,7 +83,6 @@ def schedule():
     if request.method == "POST" and form.validate_on_submit():
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
-        is_merged_boiling = form.is_merged_boiling.data
 
         file = request.files["input_file"]
         file_path = os.path.join(current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
@@ -89,16 +94,8 @@ def schedule():
             ),
             data_only=True,
         )
-        if is_merged_boiling:
-            if 'План варок' not in wb.sheetnames:
-                raise Exception('Листа "План варок" не существует. Проверьте документ или уберите флажок с  '
-                                '"Построить расписание по объединенному плану варок" на странице расписания!')
-            else:
-                boiling_plan_df = read_merged_boiling_plan(wb)
-                boiling_plan_tasks_df = read_merged_boiling_plan(wb, normalization=False)
-        else:
-            boiling_plan_df = read_boiling_plan(wb)
-            boiling_plan_tasks_df = read_boiling_plan(wb, normalization=False)
+        boiling_plan_df = read_boiling_plan(wb)
+        boiling_plan_tasks_df = read_boiling_plan(wb, normalization=False)
 
         print(boiling_plan_df.columns)
 
@@ -159,7 +156,9 @@ def schedule():
         # todo: uncomment
         # schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
 
-        schedule_wb = openpyxl.load_workbook(filename=current_app.config["TEMPLATE_SCHEDULE_PLAN"])
+        schedule_wb = openpyxl.load_workbook(
+            filename=current_app.config["TEMPLATE_SCHEDULE_PLAN"]
+        )
         schedule_wb = draw_boiling_plan_merged(schedule_df, schedule_wb)
 
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание")

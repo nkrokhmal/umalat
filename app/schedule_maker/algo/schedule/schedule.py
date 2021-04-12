@@ -36,6 +36,8 @@ def validate(b1, b2):
         b2["pouring"]["first"]["pumping_out"],
     )
 
+    assert b1.x[0] < b2.x[0]
+
     wl1 = (
         LineName.WATER
         if b1["pouring"].props["pouring_line"] in ["0", "1"]
@@ -253,14 +255,20 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                 f"Неверно указано время первой подачи на линии {line_name}"
             )
 
-    # generate boilings
-    lines_df["boilings_left"] = [[], []]
-    for line_name in [LineName.WATER, LineName.SALT]:
-        lines_df.at[line_name, "boilings_left"] = [
-            boiling
-            for boiling in boilings
-            if boiling.props["boiling_model"].line.name == line_name
+    # make sheets df
+    values = [
+        [
+            boiling,
+            boiling.props["boiling_model"].line.name,
+            boiling.props["boiling_group_df"].iloc[0]["sheet"],
         ]
+        for boiling in boilings
+    ]
+    left_df = (
+        pd.DataFrame(values, columns=["boiling", "line_name", "sheet"])
+        .reset_index()
+        .sort_values(by=["sheet", "index"])
+    )
 
     lines_df["latest_boiling"] = None
 
@@ -271,21 +279,20 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         )
 
     assert (
-        lines_df["boilings_left"].apply(lambda lst: len(lst)).sum() >= 1
+        len(left_df) > 0
     ), "На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания."
 
     last_multihead_water_boiling = iter_get(
         [
-            boiling
-            for boiling in lines_df.at[LineName.WATER, "boilings_left"]
-            if boiling_has_multihead_packing(boiling)
+            row["boiling"]
+            for i, row in left_df.iterrows()
+            if boiling_has_multihead_packing(row["boiling"])
         ],
         -1,
     )
 
-    @clockify()
-    def add_one_block_from_line(line_name):
-        boiling = lines_df.at[line_name, "boilings_left"].pop(0)
+    def add_one_block_from_line(boiling):
+        line_name = boiling.props["boiling_model"].line.name
         if not lines_df.at[line_name, "latest_boiling"]:
             if lines_df.at[line_name, "start_time"]:
                 start_from = (
@@ -412,13 +419,12 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         return boiling
 
     while True:
-        are_boilings_left = lines_df["boilings_left"].apply(lambda lst: len(lst) > 0)
-        if are_boilings_left.sum() == 0:
+        if len(left_df) == 0:
             # finished
             break
-        elif are_boilings_left.sum() == 1:
-            line_name = are_boilings_left[are_boilings_left].index[0]
 
+        if (left_df["line_name"] == LineName.SALT).all():
+            # only salt left
             # start working on 3 line for salt
             # lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3, 1]]
             lines_df.at[LineName.SALT, "iter_props"] = [
@@ -426,23 +432,33 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                 for v1, v2 in itertools.product([2, 3, 1], [0, 1])
             ]
 
-        elif are_boilings_left.sum() == 2:
+        # get next boiling_rows for
+        next_rows = [grp.iloc[0] for sheet, grp in left_df.groupby("sheet")]
+
+        lines_left = len(set([row["line_name"] for row in next_rows]))
+        if lines_left == 1:
+            # one line of sheet left
+            next_row = iter_get(next_rows)
+        elif lines_left == 2:
             df = lines_df[~lines_df["latest_boiling"].isnull()]
             if len(df) == 0:
-                line_name = LineName.WATER
+                # begin with salt
+                line_name = LineName.SALT
             else:
                 line_name = (
                     max(df["latest_boiling"], key=lambda b: b.x[0])
                     .props["boiling_model"]
                     .line.name
                 )
-
-            # reverse
-            line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                # reverse
+                line_name = (
+                    LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                )
+            next_row = left_df[left_df["line_name"] == line_name].iloc[0]
         else:
             raise Exception("Should not happen")
-
-        add_one_block_from_line(line_name)
+        left_df = left_df[left_df["index"] != next_row["index"]]
+        add_one_block_from_line(next_row["boiling"])
 
     # push extra packings
     extra_packings_validator = ClassValidator(window=10)

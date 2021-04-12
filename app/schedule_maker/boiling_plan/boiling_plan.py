@@ -76,7 +76,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
             return None
         elif isinstance(value, str):
             assert (
-                    "," not in value
+                "," not in value
             ), "Группы варок не поддерживаются в моцаррельном цеху."
             return value
         else:
@@ -97,7 +97,9 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     df["sku_obj"] = df["sku_obj"].apply(lambda x: x.line.name)
 
     # add line name to boiling_params
-    df["boiling_params"] = df.apply(lambda row: row["sku_obj"] + "," + row["boiling_params"], axis=1)
+    df["boiling_params"] = df.apply(
+        lambda row: row["sku_obj"] + "," + row["boiling_params"], axis=1
+    )
     df["sheet"] = sheet_number
     return df
 
@@ -176,7 +178,7 @@ def update_boiling_plan(dfs, normalization, saturate):
             "bff",
             "configuration",
             "cleaning",
-            "sheet"
+            "sheet",
         ]
     ]
 
@@ -196,37 +198,26 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
 
     dfs = []
 
-    for i, ws_name in enumerate(["Вода", "Соль"]):
-        line = (
-            cast_line(LineName.WATER) if ws_name == "Вода" else cast_line(LineName.SALT)
+    sheet_names = ["Вода", "Соль", "План варок"]
+    sheet_names = [
+        sheet_name for sheet_name in sheet_names if sheet_name in wb.sheetnames
+    ]
+
+    for i, ws_name in enumerate(sheet_names):
+        if ws_name in ["Вода", "Соль"]:
+            line = (
+                cast_line(LineName.WATER)
+                if ws_name == "Вода"
+                else cast_line(LineName.SALT)
+            )
+            default_boiling_volume = line.output_ton
+        else:
+            default_boiling_volume = None
+
+        df = read_sheet(
+            wb, ws_name, default_boiling_volume=default_boiling_volume, sheet_number=i
         )
-        default_boiling_volume = line.output_ton
-
-        df = read_sheet(wb, ws_name,
-                        default_boiling_volume=default_boiling_volume,
-                        sheet_number=i)
         dfs.append(df)
 
     df = update_boiling_plan(dfs, normalization, saturate)
     return df
-
-
-def read_merged_boiling_plan(wb_obj, saturate=True, normalization=True):
-    """
-    :param wb_obj: str or openpyxl.Workbook
-    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
-    """
-    wb = cast_workbook(wb_obj)
-
-    dfs = []
-
-    for i, ws_name in enumerate(["План варок"]):
-        df = read_sheet(wb, ws_name,
-                        default_boiling_volume=None,
-                        sheet_number=i)
-
-        dfs.append(df)
-
-    df = update_boiling_plan(dfs, normalization, saturate)
-    return df
-
