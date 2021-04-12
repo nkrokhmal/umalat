@@ -36,7 +36,8 @@ def validate(b1, b2):
         b2["pouring"]["first"]["pumping_out"],
     )
 
-    assert b1.x[0] < b2.x[0]
+    if b1.props["sheet"] == b2.props["sheet"]:
+        assert b1.x[0] < b2.x[0]
 
     wl1 = (
         LineName.WATER
@@ -260,7 +261,7 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         [
             boiling,
             boiling.props["boiling_model"].line.name,
-            boiling.props["boiling_group_df"].iloc[0]["sheet"],
+            boiling.props["sheet"],
         ]
         for boiling in boilings
     ]

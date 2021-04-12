@@ -23,7 +23,7 @@ def make_boilings(boiling_plan_df, first_group_id=None):
             boilings = make_boilings_parallel_dynamic(grp)
 
         for boiling in boilings:
-            boiling.props.update(boiling_group_df=grp)
+            boiling.props.update(boiling_group_df=grp, sheet=grp.iloc[0]["sheet"])
         res += boilings
 
     return res

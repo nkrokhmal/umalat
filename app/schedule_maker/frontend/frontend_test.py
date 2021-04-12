@@ -12,10 +12,11 @@ from app.interactive_imports import *
 def test():
     makedirs("schedules/")
     # fn = os.path.join(basedir, "app/data/inputs/2021-02-08 План по варкам.xlsx")
+    # fn = os.path.join(basedir, "app/data/inputs/2021-02-17 План по варкам.xlsx")
+    fn = os.path.join(basedir, "app/data/inputs/2021-04-13 План по варкам.xlsx")
     fn = os.path.join(basedir, "app/data/inputs/2021-04-13 Расписание.xlsx")
-    # fn = os.path.join(basedir, "app/data/inputs/2021-04-13 План по варкам.xlsx")
     boiling_plan_df = read_boiling_plan(fn)
-    start_times = {LineName.WATER: "08:00", LineName.SALT: "07:00"}
+    start_times = {LineName.WATER: "02:00", LineName.SALT: "10:00"}
     boilings = make_boilings(boiling_plan_df)
     schedule = make_schedule(boilings, start_times=start_times)
 
