@@ -122,11 +122,14 @@ class BoilingPlanToSchedule:
             b1, b2 = boiling_group_dfs[i * 2], boiling_group_dfs[i * 2 + 1]
             boiling_groups.append(make_mascarpone_boiling_group(b1, b2))
 
-        all_line_nums = [[0, 1], [2, 3]]
+        all_line_nums = [[1, 2], [3, 4]]
 
         boiling_volumes = [800, 600]
         for i, bg in enumerate(boiling_groups):
-            line_nums = all_line_nums[i % 2]
+            line_nums = [
+                int(bg.props["boiling_group_df1"].iloc[0]["sourdough"]),
+                int(bg.props["boiling_group_df2"].iloc[0]["sourdough"]),
+            ]
             bg.props.update(line_nums=line_nums, boiling_volume=boiling_volumes[i % 2])
             push(
                 self.maker.root,

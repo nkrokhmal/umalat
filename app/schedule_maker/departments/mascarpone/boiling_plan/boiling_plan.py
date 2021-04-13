@@ -77,7 +77,6 @@ def read_boiling_plan(wb_obj, as_boilings=True):
         proportion = proportion / np.sum(proportion)
         sourdoughs = sourdough_range.split("-")
         sourdoughs = [str(int(float(sourdough))) for sourdough in sourdoughs]
-
         total_boiling_volume = grp.iloc[0]["output"]
 
         assert (

@@ -50,7 +50,7 @@ def make_mascarpone_lines(schedule):
             frontend_boiling = make_frontend_mascarpone_boiling(
                 boiling["boiling_process"]
             )
-            push(boiling_lines[line_nums[i]], frontend_boiling, push_func=add_push)
+            push(boiling_lines[line_nums[i] - 1], frontend_boiling, push_func=add_push)
 
     return maker.root
 
