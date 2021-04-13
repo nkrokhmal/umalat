@@ -3,8 +3,10 @@ from app.schedule_maker.models import *
 from app.enum import LineName
 from .saturate import saturate_boiling_plan
 
+# todo: normalization
 
-def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
+
+def read_boiling_plan(wb_obj, as_boilings=True):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -33,17 +35,21 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
         df = df[
             [
                 "Номер группы варок",
+                "Выход с одной варки, кг",
+                "Заквасочники",
                 "SKU",
                 "КГ",
             ]
         ]
         df.columns = [
-            "group_id",
+            "batch_id",
+            "output",
+            "sourdough",
             "sku",
             "kg",
         ]
-        max_id = df["group_id"].max()
-        df["group_id"] += cur_id
+        max_id = df["batch_id"].max()
+        df["batch_id"] += cur_id
         cur_id += max_id
         dfs.append(df)
 
@@ -53,6 +59,32 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
         lambda sku: cast_model([MascarponeSKU, CreamCheeseSKU], sku)
     )
 
-    if saturate:
-        df = saturate_boiling_plan(df)
+    if not as_boilings:
+        return df
+
+    # convert to boilings
+    values = []
+    for boiling_id, grp in df.groupby("batch_id"):
+        sourdough = grp.iloc[0]["sourdough"]
+        if sourdough == "1-2":
+            proportion = [800, 600]
+        elif "-" in sourdough:
+            proportion = [1, 1]
+        else:
+            proportion = [1]
+        proportion = np.array(proportion)
+        proportion = proportion / np.sum(proportion)
+
+        total_boiling_volume = grp.iloc[0]["output"]
+        boiling_volumes = list(proportion * total_boiling_volume)
+
+        for i, boiling_volume in enumerate(boiling_volumes):
+            left = boiling_volume
+            for j, row in grp.iterrows():
+                while left > 1e-5:
+                    pass
+
+
+        values += grp.tolist()
+
     return df

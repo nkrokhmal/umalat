@@ -64,7 +64,6 @@ def cast_model(cls, obj, int_attribute="id", str_attribute="name"):
                 results.append(cast_model(_cls, obj, int_attribute, str_attribute))
             except:
                 pass
-        print(cls, obj)
         assert len(results) == 1
         return results[0]
 
