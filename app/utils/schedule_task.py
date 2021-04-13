@@ -122,10 +122,10 @@ def draw_task_original(excel_client, df, date, cur_row, line_name, task_name):
             col=COLUMNS["boxes"].col, row=cur_row, value=grp.iloc[0]["sku"].boxes
         )
         if grp.iloc[0]["sku"].group.name != "Качокавалло":
-            kg = round(grp["kg"].sum())
+            kg = round(grp["original_kg"].sum())
             boxes_count = math.ceil(
                 1000
-                * grp["kg"].sum()
+                * grp["original_kg"].sum()
                 / grp.iloc[0]["sku"].boxes
                 / grp.iloc[0]["sku"].weight_netto
             )
@@ -170,9 +170,9 @@ def draw_task_new(excel_client, df, date, cur_row, line_name, task_name, batch_n
             )
 
             if row["sku"].group.name != "Качокавалло":
-                kg = round(row["kg"])
+                kg = round(row["original_kg"])
                 boxes_count = math.ceil(
-                    1000 * row["kg"] / row["sku"].boxes / row["sku"].weight_netto
+                    1000 * row["original_kg"] / row["sku"].boxes / row["sku"].weight_netto
                 )
             else:
                 kg = ""
