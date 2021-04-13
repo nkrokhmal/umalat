@@ -4,6 +4,7 @@ from app.enum import LineName
 from .saturate import saturate_boiling_plan
 
 # todo: normalization
+# todo: rounding
 
 
 def read_boiling_plan(wb_obj, as_boilings=True):
@@ -65,7 +66,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
     # convert to boilings
     values = []
     for boiling_id, grp in df.groupby("batch_id"):
-        sourdough = grp.iloc[0]["sourdough"]
+        sourdough = str(grp.iloc[0]["sourdough"])
         if sourdough == "1-2":
             proportion = [800, 600]
         elif "-" in sourdough:
@@ -76,15 +77,20 @@ def read_boiling_plan(wb_obj, as_boilings=True):
         proportion = proportion / np.sum(proportion)
 
         total_boiling_volume = grp.iloc[0]["output"]
+
+        assert (
+            abs(total_boiling_volume - grp["kg"].sum()) < 1e-5
+        ), "Указано неверное число килограмм в варке"
+
         boiling_volumes = list(proportion * total_boiling_volume)
 
-        for i, boiling_volume in enumerate(boiling_volumes):
-            left = boiling_volume
-            for j, row in grp.iterrows():
-                while left > 1e-5:
-                    pass
+        new_grp = split_into_sum_groups(
+            grp, boiling_volumes, column="kg", group_column="boiling_id"
+        )
+        if values:
+            new_grp["boiling_id"] += values[-1]["boiling_id"] + 1
+        values += new_grp.to_dict(orient="records")
 
-
-        values += grp.tolist()
+    df = pd.DataFrame(values)
 
     return df
