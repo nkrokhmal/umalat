@@ -51,9 +51,21 @@ def make_mascorpone_boiling(boiling_group_df, **props):
     return maker.root
 
 
-def make_mascarpone_boiling_group(boiling_group_df1, boiling_group_df2):
-    # todo: check that only one boiling_model
-    boiling_model = boiling_group_df1.iloc[0]["sku"].made_from_boilings[0]
+def make_mascarpone_boiling_group(boiling_group_dfs):
+    assert len(boiling_group_dfs) in [
+        1,
+        2,
+    ], "Only one or two mascarpone boilings can be put into the group"
+    boiling_models = list(
+        set(
+            [
+                boiling_group_df.iloc[0]["boiling"]
+                for boiling_group_df in boiling_group_dfs
+            ]
+        )
+    )
+    assert len(boiling_models) == 1
+    boiling_model = boiling_models[0]
 
     validator = ClassValidator(window=3)
 
@@ -73,27 +85,36 @@ def make_mascarpone_boiling_group(boiling_group_df1, boiling_group_df2):
     validator.add("boiling", "boiling", validate)
 
     maker, make = init_block_maker(
-        "mascarpone_boiling_group", boiling_model=boiling_model, boiling_group_df1=boiling_group_df1, boiling_group_df2=boiling_group_df2
+        "mascarpone_boiling_group",
+        boiling_model=boiling_model,
+        boiling_group_dfs=boiling_group_dfs,
     )
 
-    b1 = make_mascorpone_boiling(boiling_group_df1, n=0)
-    b2 = make_mascorpone_boiling(boiling_group_df2, n=1)
-    for b in [b1, b2]:
+    mascarpone_boilings = [
+        make_mascorpone_boiling(boiling_group_df, n=i)
+        for i, boiling_group_df in enumerate(boiling_group_dfs)
+    ]
+
+    for mascarpone_boiling in mascarpone_boilings:
         push(
             maker.root,
-            b,
+            mascarpone_boiling,
             push_func=AxisPusher(start_from="last_beg"),
             validator=validator,
         )
-    # fix waiting time
-    waiting_size = (
-        b2["boiling_process"]["pouring"].x[0] - b1["boiling_process"]["pouring"].y[0]
-    )
 
-    for b in [b2["boiling_process"]]:
-        b.props.update(x=(b.props["x_rel"][0] - waiting_size, 0))
-    for key in ["adding_lactic_acid", "separation"]:
-        b = b2["boiling_process"][key]
-        b.props.update(x=(b.props["x_rel"][0] + waiting_size, 0))
-    b2["boiling_process"]["waiting"].props.update(size=(waiting_size, 0))
+    # fix waiting time
+    if len(boiling_group_dfs) == 2:
+        b1, b2 = mascarpone_boilings
+        waiting_size = (
+            b2["boiling_process"]["pouring"].x[0]
+            - b1["boiling_process"]["pouring"].y[0]
+        )
+
+        for b in [b2["boiling_process"]]:
+            b.props.update(x=(b.props["x_rel"][0] - waiting_size, 0))
+        for key in ["adding_lactic_acid", "separation"]:
+            b = b2["boiling_process"][key]
+            b.props.update(x=(b.props["x_rel"][0] + waiting_size, 0))
+        b2["boiling_process"]["waiting"].props.update(size=(waiting_size, 0))
     return maker.root

@@ -7,7 +7,7 @@ from .saturate import saturate_boiling_plan
 # todo: rounding
 
 
-def read_boiling_plan(wb_obj, as_boilings=True):
+def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -98,4 +98,6 @@ def read_boiling_plan(wb_obj, as_boilings=True):
 
     df = pd.DataFrame(values)
 
+    if saturate:
+        df = saturate_boiling_plan(df)
     return df
