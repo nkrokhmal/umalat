@@ -26,6 +26,9 @@ ROWS = {
     "total_volume": 2,
 }
 
+SKU_SHEET_NAME = "SKU Маскарпоне"
+PLAN_SHEET_NAME = "План варок"
+
 
 def draw_skus(wb, data_sku, sheet_name, cur_i=None):
     grouped_skus = data_sku
@@ -141,8 +144,8 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
     cream_skus = db.session.query(MascarponeSKU).join(Group).filter(Group.name == "Сливки").all()
 
     cur_i = None
-    cur_i = draw_skus(wb, mascarpone_skus, "SKU Маскарпоне", cur_i)
-    cur_i = draw_skus(wb, cream_cheese_skus, "SKU Маскарпоне", cur_i)
+    cur_i = draw_skus(wb, mascarpone_skus, SKU_SHEET_NAME, cur_i)
+    cur_i = draw_skus(wb, cream_cheese_skus, SKU_SHEET_NAME, cur_i)
     _ = draw_skus(wb, cream_skus, "SKU Маскарпоне", cur_i)
 
     draw_fermentators(wb)
@@ -151,9 +154,9 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
 
     cur_row = None
     for item in [
-        SkuGroup(mascarpone_df, "Маскарпоне", mascarpone_skus, None),
-        SkuGroup(cream_cheese_df, "Маскарпоне", cream_cheese_skus, "cream_cheese"),
-        SkuGroup(cream_df, "Маскарпоне", cream_skus, None)
+        SkuGroup(mascarpone_df, PLAN_SHEET_NAME, mascarpone_skus, None),
+        SkuGroup(cream_cheese_df, PLAN_SHEET_NAME, cream_cheese_skus, "cream_cheese"),
+        SkuGroup(cream_df, PLAN_SHEET_NAME, cream_skus, None)
     ]:
 
         wb, cur_row = draw_boiling_sheet(
