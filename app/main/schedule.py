@@ -57,6 +57,7 @@ def prepare_schedule_json(schedule_json):
     schedule_df["boiling_name"] = schedule_df["boiling"].apply(lambda b: b.to_str())
     schedule_df["boiling_id"] = schedule_df["boiling"].apply(lambda b: b.id)
     schedule_df["team_number"] = schedule_df["packing_team_id"]
+    schedule_df["kg"] = schedule_df["original_kg"]
 
     schedule_df = schedule_df[
         [
