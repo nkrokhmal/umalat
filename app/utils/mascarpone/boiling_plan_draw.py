@@ -27,12 +27,13 @@ ROWS = {
 }
 
 
-def draw_skus(wb, data_sku, sheet_name):
+def draw_skus(wb, data_sku, sheet_name, cur_i=None):
     grouped_skus = data_sku
     grouped_skus.sort(key=lambda x: x.name, reverse=False)
     excel_client = ExcelBlock(wb[sheet_name])
     excel_client.draw_row(1, ["-", "-",], set_border=False)
-    cur_i = 2
+    if not cur_i:
+        cur_i = 2
 
     for group_sku in grouped_skus:
         excel_client.draw_row(
@@ -45,14 +46,15 @@ def draw_skus(wb, data_sku, sheet_name):
         )
         cur_i += 1
 
+    return cur_i
+
 
 def draw_fermentators(wb):
     sheet_name = 'Заквасочники'
     excel_client = ExcelBlock(wb[sheet_name])
     cur_i = 2
     for fermentators in [
-        ["1-2", "5", "1-2"],
-        ["3-4", "6", "3-4"],
+        ["1-2"], ["3-4"], ["1"], ["2"], ["3"], ["4"], ["5"], ["6"],
     ]:
         excel_client.draw_row(
             cur_i,
@@ -70,7 +72,7 @@ def get_colour_by_name(sku_name, skus):
         return current_app.config["COLOURS"]["Default"]
 
 
-def draw_boiling_sheet(wb, df, skus, sheet_name, type=None):
+def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None):
     excel_client = ExcelBlock(wb[sheet_name])
 
     if type:
@@ -96,7 +98,8 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None):
         ]
         values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
 
-    cur_row = 3
+    if not cur_row:
+        cur_row = 3
 
     for v in values:
         value = v.values()
@@ -129,7 +132,7 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None):
             else:
                 fermentator_number = next(fermentator_iterator)
         cur_row += 1
-    return wb
+    return wb, cur_row
 
 
 def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
@@ -137,23 +140,30 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
     cream_cheese_skus = db.session.query(CreamCheeseSKU).all()
     cream_skus = db.session.query(MascarponeSKU).join(Group).filter(Group.name == "Сливки").all()
 
-    print(cream_skus)
-
-    draw_skus(wb, mascarpone_skus, "SKU Маскарпоне")
-    draw_skus(wb, cream_cheese_skus, "SKU Крем чиз")
-    draw_skus(wb, cream_skus, "SKU Сливки")
+    cur_i = None
+    cur_i = draw_skus(wb, mascarpone_skus, "SKU Маскарпоне", cur_i)
+    cur_i = draw_skus(wb, cream_cheese_skus, "SKU Маскарпоне", cur_i)
+    _ = draw_skus(wb, cream_skus, "SKU Маскарпоне", cur_i)
 
     draw_fermentators(wb)
 
     SkuGroup = namedtuple("SkuGroup", "df, sheet_name, skus, type")
 
+    cur_row = None
     for item in [
         SkuGroup(mascarpone_df, "Маскарпоне", mascarpone_skus, None),
-        SkuGroup(cream_cheese_df, "Крем чиз", cream_cheese_skus, "cream_cheese"),
-        SkuGroup(cream_df, "Сливки", cream_skus, None)
+        SkuGroup(cream_cheese_df, "Маскарпоне", cream_cheese_skus, "cream_cheese"),
+        SkuGroup(cream_df, "Маскарпоне", cream_skus, None)
     ]:
 
-        wb = draw_boiling_sheet(wb=wb, df=item.df, sheet_name=item.sheet_name, skus=item.skus, type=item.type)
+        wb, cur_row = draw_boiling_sheet(
+            wb=wb,
+            df=item.df,
+            sheet_name=item.sheet_name,
+            skus=item.skus,
+            type=item.type,
+            cur_row=cur_row
+        )
 
     for sheet in wb.sheetnames:
         wb[sheet].views.sheetView[0].tabSelected = False
