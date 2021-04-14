@@ -97,8 +97,6 @@ def schedule():
         boiling_plan_df = read_boiling_plan(wb)
         boiling_plan_tasks_df = read_boiling_plan(wb, normalization=False)
 
-        print(boiling_plan_df.columns)
-
         add_batch(
             date,
             form.batch_number.data,

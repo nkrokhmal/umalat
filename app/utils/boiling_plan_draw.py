@@ -19,6 +19,7 @@ COLUMNS = {
     "packer": Cell(column_index_from_string("G"), "G"),
     "name": Cell(column_index_from_string("H"), "H"),
     "kg": Cell(column_index_from_string("I"), "I"),
+    # "orig_kg": Cell(column_index_from_string("I"), "I"),
     "remainings": Cell(column_index_from_string("J"), "J"),
     "team_number": Cell(column_index_from_string("K"), "K"),
     "washing": Cell(column_index_from_string("L"), "L"),
@@ -56,7 +57,7 @@ def draw_form_factors(wb, form_factors):
         cur_i += 1
 
 
-def draw_skus(wb, type_sku, data_sku):
+def draw_skus_sheet(wb, type_sku, data_sku):
     grouped_skus = data_sku[type_sku]
     grouped_skus.sort(key=lambda x: x.name, reverse=False)
     excel_client = ExcelBlock(wb["{} SKU".format(type_sku)])
@@ -106,7 +107,7 @@ def draw_boiling_plan(df, df_extra, wb):
     draw_extra_packing(wb=wb, df=df_extra, skus=skus)
     draw_form_factors(wb=wb, form_factors=form_factors)
     for sheet_name in ["Соль", "Вода"]:
-        draw_skus(wb, sheet_name, data_sku)
+        draw_skus_sheet(wb, sheet_name, data_sku)
 
         values = []
         excel_client = ExcelBlock(wb[sheet_name])
@@ -195,6 +196,7 @@ def draw_boiling_plan(df, df_extra, wb):
 
 
 def draw_boiling_plan_merged(df, wb):
+
     skus = db.session.query(SKU).all()
     sheet_name = 'План варок'
 
@@ -207,7 +209,6 @@ def draw_boiling_plan_merged(df, wb):
     for id, grp in df.groupby("id", sort=False):
         for i, row in grp.iterrows():
             columns = [x for x in row.index if x in COLUMNS.keys()]
-            print(columns)
             v = [row[column] for column in columns]
             c = [COLUMNS[column] for column in columns]
             values.append(dict(zip(c, v)))
