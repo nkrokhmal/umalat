@@ -8,4 +8,5 @@ from app.schedule_maker import *
 
 from config import basedir
 
+from .models import *
 set_global_db()
