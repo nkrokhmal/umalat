@@ -1,5 +1,5 @@
 STYLE = {
-    "boiling_num": {"text": "{boiling_id}"},
+    "boiling_num": {"text": "{batch_id}"},
     "boiling_name": {
         "text": lambda b: """производство маскарпоне на линии/варка ({boiling_volume} литров)"""
         if b.props["n"] == 0

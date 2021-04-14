@@ -116,7 +116,6 @@ class BoilingPlanToSchedule:
             grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
         ]
         if not is_cream:
-
             assert len(boiling_group_dfs) % 2 == 0
 
             boiling_groups = []
@@ -174,8 +173,7 @@ class BoilingPlanToSchedule:
         ]
         cream_cheese_blocks = [
             make_cream_cheese_boiling(
-                grp,
-                sourdough_num=i % 3 + 4,
+                grp, sourdough_num=i % 3 + 4, boiling_plan_df=boiling_plan_df
             )
             for i, grp in enumerate(boiling_group_dfs)
         ]

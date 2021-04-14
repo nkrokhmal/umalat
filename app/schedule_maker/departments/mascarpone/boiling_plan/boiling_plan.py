@@ -56,6 +56,7 @@ def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
 
     df = pd.concat(dfs).reset_index(drop=True)
     df = df[df["sku"] != "-"]
+    df["batch_id"] = df["batch_id"].astype(int)
     df["sku"] = df["sku"].apply(
         lambda sku: cast_model([MascarponeSKU, CreamCheeseSKU], sku)
     )
