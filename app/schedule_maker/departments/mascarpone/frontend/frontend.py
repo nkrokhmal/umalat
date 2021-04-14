@@ -14,6 +14,7 @@ def make_frontend_mascarpone_boiling(boiling_process):
         size=(0, 2),
         batch_id=boiling_process.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
     )
+    is_cream = boiling_process.props["boiling_group_dfs"][0].iloc[0]["is_cream"]
 
     with make():
         make("boiling_num", size=(3, 1))
@@ -33,11 +34,15 @@ def make_frontend_mascarpone_boiling(boiling_process):
             "adding_lactic_acid",
             size=(boiling_process["adding_lactic_acid"].size[0], 1),
         )
-        make("pumping_off", size=(boiling_process["pumping_off"].size[0], 1))
+        make(
+            "pumping_off",
+            is_cream=is_cream,
+            size=(boiling_process["pumping_off"].size[0], 1),
+        )
     return maker.root
 
 
-def make_mascarpone_lines(schedule):
+def make_mascarpone_lines(schedule, with_cream_cheese=False):
     maker, make = init_block_maker("mascarpone_lines", axis=1)
 
     boiling_lines = []
@@ -55,6 +60,24 @@ def make_mascarpone_lines(schedule):
                 boiling["boiling_process"]
             )
             push(boiling_lines[line_nums[i] - 1], frontend_boiling, push_func=add_push)
+
+    if with_cream_cheese:
+        cycle = itertools.cycle(boiling_lines)
+        for i, ccb in enumerate(list(schedule.iter(cls="cream_cheese_boiling"))):
+            block = make_frontend_cream_cheese_boiling(ccb)
+
+            for i in range(4):
+                boiling_line = next(cycle)
+                try:
+                    push(boiling_line, block, push_func=simple_push)
+                except:
+                    if i == 3:
+                        raise Exception("Failed to push cream cheese")
+                    else:
+                        # go for next try
+                        continue
+
+                break
 
     return maker.root
 
@@ -100,7 +123,13 @@ def make_packing_line(schedule):
                 push_func=add_push,
             )
             make("N", size=(p["N"].size[0], 1), x=(p["N"].x[0], 0), push_func=add_push)
-            make("P", size=(p["P"].size[0], 1), x=(p["P"].x[0], 0), push_func=add_push)
+            make(
+                "P",
+                size=(p["P"].size[0], 1),
+                x=(p["P"].x[0], 0),
+                is_cream=is_cream,
+                push_func=add_push,
+            )
 
     return maker.root
 
@@ -126,7 +155,11 @@ def make_frontend_cream_cheese_boiling(boiling):
         make("P", size=(bp["P"].size[0], 1))
 
     with make():
-        make("cream_cheese_boiling_label1", size=(bp["cooling"].size[0], 1))
+        make(
+            "cream_cheese_boiling_label1",
+            size=(bp["cooling"].size[0], 1),
+            sourdough=boiling.props["boiling_plan_df"].iloc[0]["sourdough"],
+        )
         make("cream_cheese_boiling_label2", size=(bp["separation"][0].size[0], 1))
         make("stub", size=(2, 1))
         make("P", size=(pp["P"].size[0], 1))
@@ -183,11 +216,11 @@ def make_frontend(schedule, date=None, start_time="07:00"):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
     make(make_header(date=date, start_time=start_time))
-    make(make_mascarpone_lines(schedule))
+    make(make_mascarpone_lines(schedule, with_cream_cheese=True))
     make(make_packing_line(schedule))
     make("stub", size=(0, 1))
-    make(make_cream_cheese_lines(schedule))
-    make("stub", size=(0, 1))
+    # make(make_cream_cheese_lines(schedule))
+    # make("stub", size=(0, 1))
     make(make_cleanings_line(schedule))
     #
     # from app.schedule_maker.models import cast_model, CreamCheeseSKU
