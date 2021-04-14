@@ -3,7 +3,7 @@ from utils_ak.openpyxl import *
 from app.schedule_maker.time import *
 
 
-def draw_schedule(schedule, style, fn=None):
+def draw_schedule(schedule, style, fn=None, wb=None):
     # update styles
     for b in schedule.iter():
         block_style = style.get(b.props["cls"])
@@ -16,7 +16,11 @@ def draw_schedule(schedule, style, fn=None):
 
     schedule.props.update(index_width=4)
 
-    wb = init_workbook(["Расписание"])
+    if not wb:
+        wb = init_workbook(["Расписание"])
+
+    if "Расписание" not in wb.sheetnames:
+        wb.create_sheet("Расписание")
 
     for ws in wb.worksheets:
         ws.sheet_view.zoomScale = 55

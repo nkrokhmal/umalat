@@ -745,8 +745,8 @@ def make_frontend(schedule, coolings_mode="first"):
     return maker.root
 
 
-def draw_excel_frontend(frontend, open_file=False, fn="schedule.xlsx"):
-    wb = draw_schedule(frontend, STYLE)
+def draw_excel_frontend(frontend, open_file=False, fn="schedule.xlsx", wb=None):
+    wb = draw_schedule(frontend, STYLE, wb=wb)
 
     if fn:
         sf = SplitFile(fn)

@@ -152,13 +152,14 @@ def schedule():
 
         schedule_df = prepare_schedule_json(schedule_json)
 
-        # todo: uncomment
-        # schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
-
         schedule_wb = openpyxl.load_workbook(
             filename=current_app.config["TEMPLATE_SCHEDULE_PLAN"]
         )
         schedule_wb = draw_boiling_plan_merged(schedule_df, schedule_wb)
+
+        schedule_wb = draw_excel_frontend(
+            frontend, open_file=False, fn=None, wb=schedule_wb
+        )
 
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание")
 
