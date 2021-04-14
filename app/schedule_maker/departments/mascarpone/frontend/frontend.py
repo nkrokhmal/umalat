@@ -29,7 +29,7 @@ def make_frontend_mascarpone_boiling(boiling_process):
             "adding_lactic_acid",
             size=(boiling_process["adding_lactic_acid"].size[0], 1),
         )
-        make("separation", size=(boiling_process["separation"].size[0], 1))
+        make("pumping_off", size=(boiling_process["pumping_off"].size[0], 1))
     return maker.root
 
 
@@ -77,16 +77,16 @@ def make_packing_line(schedule):
     maker, make = init_block_maker("packing_line", axis=1)
 
     for mbg in listify(schedule["mascarpone_boiling_group"]):
-        p1, p2 = [b["packing_process"] for b in mbg["boiling"]]
-        batch_id = int(p1.props["boiling_id"]) // 2
+        packing_processes = [b["packing_process"] for b in listify(mbg["boiling"])]
+        batch_id = int(packing_processes[0].props["boiling_id"]) // 2
         make(
             "packing_num",
             size=(2, 1),
-            x=(p1["N"].x[0] + 1, 1),
+            x=(packing_processes[0]["P"].x[0] - 1, 1),
             batch_id=batch_id,
             push_func=add_push,
         )
-        for p in [p1, p2]:
+        for p in packing_processes:
             make(
                 "packing",
                 size=(p["packing"].size[0], 1),
@@ -132,7 +132,7 @@ def make_frontend_cream_cheese_boiling(boiling):
 def make_cleanings_line(schedule):
     maker, make = init_block_maker("cleaning_line")
 
-    for cleaning in listify(schedule["cleaning"]):
+    for cleaning in schedule.iter(cls="cleaning"):
         make(
             cleaning.children[0].props["cls"],
             size=(cleaning.size[0], 2),

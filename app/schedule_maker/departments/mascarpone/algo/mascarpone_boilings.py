@@ -7,9 +7,7 @@ from app.schedule_maker.models import *
 
 def make_mascorpone_boiling(boiling_group_df, **props):
     sku = boiling_group_df.iloc[0]["sku"]
-    # todo: make properly
-    is_cream = "сливки" in sku.name.lower()
-
+    is_cream = boiling_group_df.iloc[0]["is_cream"]
     boiling_model = sku.made_from_boilings[0]
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
 
@@ -37,7 +35,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         make("heating", size=(bt.heating_time // 5, 0))
         make("waiting", size=[0, 0])
         make("adding_lactic_acid", size=(bt.adding_lactic_acid_time // 5, 0))
-        make("pumping_out", size=(bt.pumping_out // 5, 0))
+        make("pumping_off", size=(bt.pumping_out // 5, 0))
     with make("packing_process", x=(maker.root["boiling_process"].x[0], 0)):
         if is_cream:
             make("N", size=(0, 0))
@@ -90,7 +88,7 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
         )
         # just in case, not needed in reality
         validate_disjoint_by_axis(
-            b1["boiling_process"]["pumping_out"], b2["boiling_process"]["pumping_out"]
+            b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
         )
         assert (
             b2["boiling_process"]["pouring"].x[0]
@@ -128,7 +126,7 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
 
         for b in [b2["boiling_process"]]:
             b.props.update(x=(b.props["x_rel"][0] - waiting_size, 0))
-        for key in ["adding_lactic_acid", "pumping_out"]:
+        for key in ["adding_lactic_acid", "pumping_off"]:
             b = b2["boiling_process"][key]
             b.props.update(x=(b.props["x_rel"][0] + waiting_size, 0))
         b2["boiling_process"]["waiting"].props.update(size=(waiting_size, 0))
