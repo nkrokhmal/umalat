@@ -17,7 +17,8 @@ def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
     dfs = []
 
     cur_id = 0
-    for ws_name in ["Маскарпоне", "Крем чиз", "Сливки", "План варок"]:
+    # todo: make properly
+    for ws_name in ["план варок", "Маскарпоне"]:
         if ws_name not in wb.sheetnames:
             continue
         ws = wb[ws_name]
