@@ -216,12 +216,20 @@ def make_frontend(schedule, date=None, start_time="07:00"):
     maker, make = init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
     make(make_header(date=date, start_time=start_time))
-    make(make_mascarpone_lines(schedule, with_cream_cheese=True))
-    make(make_packing_line(schedule))
-    make("stub", size=(0, 1))
-    # make(make_cream_cheese_lines(schedule))
-    # make("stub", size=(0, 1))
-    make(make_cleanings_line(schedule))
+
+    with make(x=(6, 2), push_func=add_push, axis=1):
+        make(make_mascarpone_lines(schedule, with_cream_cheese=True))
+        make(make_packing_line(schedule))
+        make("stub", size=(0, 1))
+        # make(make_cream_cheese_lines(schedule))
+        # make("stub", size=(0, 1))
+        make(make_cleanings_line(schedule))
+        make(
+            "mascarpone_department_preparation",
+            size=(6, 11),
+            x=(-6, 0),
+            push_func=add_push,
+        )
     #
     # from app.schedule_maker.models import cast_model, CreamCheeseSKU
     # from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import (

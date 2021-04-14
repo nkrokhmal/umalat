@@ -52,4 +52,8 @@ STYLE = {
     },
     "cleaning_heat_exchanger": {"color": "yellow", "text": "Мойка теплообменника"},
     "stub": {"visible": False},
+    "mascarpone_department_preparation": {
+        "color": "white",
+        "text": "подготовка цеха к работе, проверка оборудования",
+    },
 }
