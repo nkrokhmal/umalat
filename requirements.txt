@@ -52,3 +52,4 @@ mongoengine
 ujson
 better_exceptions
 icecream
+kafka-python
