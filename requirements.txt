@@ -52,3 +52,5 @@ mongoengine
 flask_paginate
 ujson
 better_exceptions
+icecream
+kafka
