@@ -4,6 +4,7 @@ from .forms import ScheduleForm
 from .. import main
 import os
 from app.schedule_maker.departments.mascarpone import *
+from app.schedule_maker.departments.mascarpone.frontend.style import STYLE
 
 # from app.utils.mascarpone.schedule_tasks import schedule_task_boilings
 from app.utils.batches.batch import *
@@ -37,9 +38,7 @@ def mascarpone_schedule():
         )
         schedule = make_schedule(boiling_plan_df, form.batch_number.data)
         frontend = make_frontend(schedule, date=date, start_time=beg_time)
-        schedule_wb = draw_excel_frontend(
-            frontend, RICOTTA_STYLE, open_file=False, fn=None
-        )
+        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.xlsx"
         path_schedule = "{}/{}".format("app/data/schedule_plan", filename_schedule)
 
