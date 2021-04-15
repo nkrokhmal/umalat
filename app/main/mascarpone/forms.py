@@ -126,3 +126,17 @@ class MascarponeBoilingTechnologyForm(FlaskForm):
 
         self.fermentators = db.session.query(MascarponeFermentator).all()
         self.fermentator_name.choices = list(enumerate(set([x.to_str() for x in self.fermentators])))
+
+
+class ScheduleForm(FlaskForm):
+    validators = [FileRequired(message="Отсутствует файл!")]
+    input_file = FileField("", validators=validators)
+    batch_number = IntegerField(
+        "Введите номер первой партии в текущем дне", validators=[Optional()]
+    )
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    beg_time = TimeField(
+        'Начало первой подачи"',
+        validators=[Optional()],
+        default=datetime.time(7, 0),
+    )
