@@ -22,15 +22,16 @@ def draw_schedule(schedule, style, fn=None, wb=None):
     if "Расписание" not in wb.sheetnames:
         wb.create_sheet("Расписание")
 
-    for ws in wb.worksheets:
-        ws.sheet_view.zoomScale = 55
+    schedule_sheet = wb.worksheets[wb.sheetnames.index("Расписание")]
+
+    schedule_sheet.sheet_view.zoomScale = 55
 
     for i in range(4):
-        wb.worksheets[0].column_dimensions[get_column_letter(i + 1)].width = 21
+        schedule_sheet.column_dimensions[get_column_letter(i + 1)].width = 21
     for i in range(4, 288 * 2):
-        wb.worksheets[0].column_dimensions[get_column_letter(i + 1)].width = 2.4
+        schedule_sheet.column_dimensions[get_column_letter(i + 1)].width = 2.4
     for i in range(1, 220):
-        wb.worksheets[0].row_dimensions[i].height = 25
+        schedule_sheet.row_dimensions[i].height = 25
 
     for b in schedule.iter():
         if b.is_leaf() and b.props.get("visible", True):
