@@ -48,7 +48,8 @@ def draw_schedule(schedule, style, fn=None):
         if b.is_leaf() and b.props.get("visible", True):
             text = b.props.get("text", "")
             color = cast_color(b.props.get("color", "white"))
-
+            if b.size[0] == 0 or b.size[1] == 0:
+                continue
             try:
                 text = text.format(**b.props.all())
                 text = text.replace("<", "{")

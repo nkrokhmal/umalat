@@ -7,7 +7,7 @@ from .saturate import saturate_boiling_plan
 # todo: rounding
 
 
-def read_boiling_plan(wb_obj, as_boilings=True):
+def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -17,7 +17,8 @@ def read_boiling_plan(wb_obj, as_boilings=True):
     dfs = []
 
     cur_id = 0
-    for ws_name in ["Маскарпоне", "Крем чиз", "Сливки", "План варок"]:
+
+    for ws_name in ["План варок"]:
         if ws_name not in wb.sheetnames:
             continue
         ws = wb[ws_name]
@@ -45,7 +46,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
         df.columns = [
             "batch_id",
             "output",
-            "sourdough",
+            "sourdough_range",
             "sku",
             "kg",
         ]
@@ -56,6 +57,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
 
     df = pd.concat(dfs).reset_index(drop=True)
     df = df[df["sku"] != "-"]
+    df["batch_id"] = df["batch_id"].astype(int)
     df["sku"] = df["sku"].apply(
         lambda sku: cast_model([MascarponeSKU, CreamCheeseSKU], sku)
     )
@@ -66,16 +68,17 @@ def read_boiling_plan(wb_obj, as_boilings=True):
     # convert to boilings
     values = []
     for boiling_id, grp in df.groupby("batch_id"):
-        sourdough = str(grp.iloc[0]["sourdough"])
-        if sourdough == "1-2":
+        sourdough_range = str(grp.iloc[0]["sourdough_range"])
+        if sourdough_range == "1-2":
             proportion = [800, 600]
-        elif "-" in sourdough:
+        elif "-" in sourdough_range:
             proportion = [1, 1]
         else:
             proportion = [1]
         proportion = np.array(proportion)
         proportion = proportion / np.sum(proportion)
-
+        sourdoughs = sourdough_range.split("-")
+        sourdoughs = [str(int(float(sourdough))) for sourdough in sourdoughs]
         total_boiling_volume = grp.iloc[0]["output"]
 
         assert (
@@ -87,10 +90,16 @@ def read_boiling_plan(wb_obj, as_boilings=True):
         new_grp = split_into_sum_groups(
             grp, boiling_volumes, column="kg", group_column="boiling_id"
         )
+
+        for i, (boiling_id, sub_grp) in enumerate(new_grp.groupby("boiling_id")):
+            new_grp.loc[sub_grp.index, "sourdough"] = sourdoughs[i]
+
         if values:
             new_grp["boiling_id"] += values[-1]["boiling_id"] + 1
         values += new_grp.to_dict(orient="records")
 
     df = pd.DataFrame(values)
 
+    if saturate:
+        df = saturate_boiling_plan(df)
     return df

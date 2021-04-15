@@ -4,14 +4,18 @@ os.environ["environment"] = "interactive"
 
 from app.schedule_maker.departments.mascarpone.algo.schedule import *
 from app.schedule_maker.departments.mascarpone.boiling_plan import *
+from config import DebugConfig
 
 
 def test():
     from utils_ak.loguru import configure_loguru_stdout
 
     configure_loguru_stdout("INFO")
-    boiling_plan_df = generate_random_boiling_plan()
-    print(boiling_plan_df)
+    boiling_plan_df = read_boiling_plan(
+        DebugConfig.abs_path(
+            "app/data/inputs/mascarpone/2021.04.06 План по варкам.xlsx"
+        )
+    )
     print(make_schedule(boiling_plan_df))
 
 

@@ -31,7 +31,6 @@ def make_cream_cheese_boiling(boiling_group_df, **props):
         push_func=add_push,
     ):
         make("P", size=(bt.p_time // 5, 0))
-
         packing_time = sum(
             [
                 row["kg"] / row["sku"].packing_speed * 60
@@ -39,7 +38,6 @@ def make_cream_cheese_boiling(boiling_group_df, **props):
             ]
         )
         packing_time = int(custom_round(packing_time, 5, "ceil", pre_round_precision=1))
-
         make(
             "packing",
             size=(packing_time // 5, 0),
