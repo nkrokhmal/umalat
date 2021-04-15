@@ -30,7 +30,7 @@ def test_drawing():
             "app/data/inputs/mascarpone/2021-04-15 План по варкам маскарпоне.xlsx"
         )
     )
-    schedule = make_schedule(boiling_plan_df)
+    schedule = make_schedule(boiling_plan_df, start_batch_id=12)
     frontend = make_frontend(schedule)
     draw_excel_frontend(frontend, MASCARPONE_STYLE, open_file=True)
 

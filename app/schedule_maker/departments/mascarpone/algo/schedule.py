@@ -215,7 +215,8 @@ class BoilingPlanToSchedule:
                 validator=validator,
             )
 
-    def __call__(self, boiling_plan_df):
+    def __call__(self, boiling_plan_df, start_batch_id=0):
+        boiling_plan_df["batch_id"] += start_batch_id - 1
         columns = boiling_plan_df.columns
         boiling_plan_df["sku_cls_name"] = boiling_plan_df["sku"].apply(
             lambda sku: str(sku.__class__)
@@ -237,5 +238,5 @@ class BoilingPlanToSchedule:
         return self.maker.root
 
 
-def make_schedule(boiling_plan_df):
-    return BoilingPlanToSchedule()(boiling_plan_df)
+def make_schedule(boiling_plan_df, start_batch_id=0):
+    return BoilingPlanToSchedule()(boiling_plan_df, start_batch_id)
