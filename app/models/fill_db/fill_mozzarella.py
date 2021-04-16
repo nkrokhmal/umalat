@@ -113,7 +113,7 @@ def fill_boilings():
             line_id = [x for x in lines if x.name == LineName.SALT][0].id
         else:
             line_id = [x for x in lines if x.name == LineName.WATER][0].id
-        bts = [
+        bts_name = [
             x
             for x in bts
             if (x.pouring_time == b["Время налива"])
@@ -135,7 +135,7 @@ def fill_boilings():
             percent=b["Процент"],
             is_lactose=b["Наличие лактозы"],
             ferment=b["Тип закваски"],
-            boiling_technologies=bts,
+            boiling_technologies=bts_name,
             line_id=line_id,
         )
         db.session.add(boiling)

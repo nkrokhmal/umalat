@@ -102,11 +102,11 @@ def fill_boilings():
         b_data[column_name] = b_data[column_name].apply(lambda x: json.loads(x))
     b_data = b_data.to_dict("records")
     for b in b_data:
-        bts = []
+        bts_name = []
         for i in range(2):
             line_name = LineName.MASCARPONE
             line_id = [x for x in lines if x.name == LineName.MASCARPONE][0].id
-            bts += [
+            bts_name += [
                 x
                 for x in bts if
                 (
@@ -122,7 +122,7 @@ def fill_boilings():
         boiling = MascarponeBoiling(
             percent=b["Процент"],
             flavoring_agent=b["Вкусовая добавка"],
-            boiling_technologies=bts,
+            boiling_technologies=bts_name,
             line_id=line_id,
         )
         db.session.add(boiling)

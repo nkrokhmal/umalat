@@ -81,7 +81,7 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None):
 
     if not df.empty:
         excel_client = ExcelBlock(wb[sheet_name])
-    
+
         if type:
             fermentator_circular = CircularList()
             fermentator_circular.create([5, 6])
