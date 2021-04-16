@@ -16,7 +16,7 @@ def make_cream_cheese_boiling(boiling_group_df, **props):
         **props
     )
 
-    bt = boiling_model.boiling_technology
+    bt = delistify(boiling_model.boiling_technologies, single=True)
 
     with make("boiling_process"):
         make("cooling", size=(bt.cooling_time // 5, 0))

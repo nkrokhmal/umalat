@@ -12,19 +12,8 @@ def make_mascorpone_boiling(boiling_group_df, **props):
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
 
     boiling_models = sku.made_from_boilings
+    boiling_model = delistify(boiling_models[0], single=True)
 
-    print(len(boiling_models))
-
-    boiling_models = [
-        boiling_model
-        for boiling_model in boiling_models
-        if boiling_model.boiling_technology.fermentator
-        == cast_model(MascarponeFermentator, sourdough)
-    ]
-    assert (
-        len(boiling_models) == 1
-    ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_models)}"
-    boiling_model = boiling_models[0]
     maker, make = init_block_maker(
         "boiling",
         boiling_model=boiling_model,
@@ -33,7 +22,17 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         **props,
     )
 
-    bt = boiling_model.boiling_technology
+    boiling_technologies = [
+        boiling_technology
+        for boiling_technology in boiling_model.boiling_technologies
+        if cast_model(MascarponeSourdough, sourdough) in boiling_technology.sourdoughs
+    ]
+
+    assert (
+        len(boiling_technologies) == 1
+    ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"
+
+    bt = delistify(boiling_technologies)
 
     # todo: hardcode
     bt = dotdict(

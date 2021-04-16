@@ -9,8 +9,7 @@ def make_boiling(boiling_model):
     maker, make = init_block_maker(
         "boiling", boiling_model=boiling_model
     )  # copy boiling_model for working tests
-
-    bt = boiling_model.boiling_technology
+    bt = delistify(boiling_model.boiling_technologies, single=True)
     make("heating", size=(bt.heating_time // 5, 0))
     make("delay", size=(bt.delay_time // 5, 0))
     make("protein_harvest", size=(bt.protein_harvest_time // 5, 0))
