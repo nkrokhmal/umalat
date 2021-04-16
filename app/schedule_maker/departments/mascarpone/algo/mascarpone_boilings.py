@@ -8,16 +8,31 @@ from app.schedule_maker.models import *
 def make_mascorpone_boiling(boiling_group_df, **props):
     sku = boiling_group_df.iloc[0]["sku"]
     is_cream = boiling_group_df.iloc[0]["is_cream"]
-    boiling_model = sku.made_from_boilings[0]
+    sourdough = int(boiling_group_df.iloc[0]["sourdough"])
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
 
+    boiling_models = sku.made_from_boilings
+
+    print(len(boiling_models))
+
+    boiling_models = [
+        boiling_model
+        for boiling_model in boiling_models
+        if boiling_model.boiling_technology.fermentator
+        == cast_model(MascarponeFermentator, sourdough)
+    ]
+    assert (
+        len(boiling_models) == 1
+    ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_models)}"
+    boiling_model = boiling_models[0]
     maker, make = init_block_maker(
         "boiling",
         boiling_model=boiling_model,
         boiling_id=boiling_id,
         is_cream=is_cream,
-        **props
+        **props,
     )
+
     bt = boiling_model.boiling_technology
 
     # todo: hardcode

@@ -29,7 +29,7 @@ def test_drawing(boiling_plan_df):
     configure_loguru_stdout("INFO")
     schedule = make_schedule(boiling_plan_df)
     frontend = make_frontend(schedule)
-    draw_excel_frontend(frontend, RICOTTA_STYLE, open_file=True)
+    draw_excel_frontend(frontend, STYLE, open_file=True)
 
 
 if __name__ == "__main__":

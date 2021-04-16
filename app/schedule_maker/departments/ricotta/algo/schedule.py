@@ -103,7 +103,6 @@ def make_schedule(boiling_plan_df, start_boiling_id=0):
                 int(first_tank) - 1 : int(first_tank)
             ]
 
-        print(first_tank)
         idx = -n_tanks % 3
         iter_line_nums_props = recycle_list(line_nums_props, idx)
 
