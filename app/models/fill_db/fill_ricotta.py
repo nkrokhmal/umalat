@@ -77,7 +77,7 @@ def fill_boilings():
     for b in b_data:
         line_name = LineName.RICOTTA
         line_id = [x for x in lines if x.name == LineName.RICOTTA][0].id
-        bts = [
+        bts_name = [
             x
             for x in bts
             if (x.heating_time == b["Нагрев"])
@@ -94,11 +94,12 @@ def fill_boilings():
                 )
             )
         ]
+        print(bts_name)
         boiling = RicottaBoiling(
             percent=b["Процент"],
             flavoring_agent=b["Вкусовая добавка"],
             number_of_tanks=b["Количество баков"],
-            boiling_technologies=bts,
+            boiling_technologies=bts_name,
             line_id=line_id,
         )
         technology = RicottaAnalysisTechnology(
