@@ -63,7 +63,7 @@ def fill_boilings():
     for b in b_data:
         line_name = LineName.MASCARPONE
         line_id = [x for x in lines if x.name == line_name][0].id
-        bt_id = [
+        bts = [
             x
             for x in bts
             if (x.cooling_time == b["Охлаждение"])
@@ -76,9 +76,9 @@ def fill_boilings():
                     line=line_name, percent=b["Процент"]
                 )
             )
-        ][0].id
+        ]
         boiling = CreamCheeseBoiling(
-            percent=b["Процент"], output_ton=b["Выход"], boiling_technology_id=bt_id, line_id=line_id
+            percent=b["Процент"], output_ton=b["Выход"], boiling_technologies=bts, line_id=line_id
         )
         db.session.add(boiling)
         db.session.commit()

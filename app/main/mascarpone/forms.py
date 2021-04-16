@@ -20,7 +20,7 @@ from ...models import (
     CreamCheeseSKU,
     CreamCheeseBoiling,
     Group,
-    MascarponeFermentator,
+    MascarponeSourdough,
 )
 from ... import db
 import datetime
@@ -124,7 +124,7 @@ class MascarponeBoilingTechnologyForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(MascarponeBoilingTechnologyForm, self).__init__(*args, **kwargs)
 
-        self.fermentators = db.session.query(MascarponeFermentator).all()
+        self.fermentators = db.session.query(MascarponeSourdough).all()
         self.fermentator_name.choices = list(enumerate(set([x.to_str() for x in self.fermentators])))
 
 
