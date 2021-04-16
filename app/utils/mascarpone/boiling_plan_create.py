@@ -6,30 +6,31 @@ from collections import namedtuple
 
 
 def add_fields(result, type):
-    result["kg"] = result["plan"]
-    result["name"] = result["sku"].apply(lambda sku: sku.name)
-    result["boiling_type"] = result["sku"].apply(
-        lambda sku: sku.made_from_boilings[0].to_str()
-    )
-    result["output"] = result["max_boiling_weight"]
+    if not result.empty:
+        result["kg"] = result["plan"]
+        result["name"] = result["sku"].apply(lambda sku: sku.name)
+        result["boiling_type"] = result["sku"].apply(
+            lambda sku: sku.made_from_boilings[0].to_str()
+        )
+        result["output"] = result["max_boiling_weight"]
 
-    max_output = int(result["output"].max())
-    if type in ["cream", "mascarpone"]:
-        result["fermentators"] = result["output"].apply(lambda x: "1-2" if x == max_output else "3-4")
-    else:
-        result["fermentators"] = "5-6"
+        max_output = int(result["output"].max())
+        if type in ["cream", "mascarpone"]:
+            result["fermentators"] = result["output"].apply(lambda x: "1-2" if x == max_output else "3-4")
+        else:
+            result["fermentators"] = "5-6"
 
-    result = result[
-        [
-            "id",
-            "group",
-            "output",
-            "name",
-            "boiling_type",
-            "fermentators",
-            "kg",
+        result = result[
+            [
+                "id",
+                "group",
+                "output",
+                "name",
+                "boiling_type",
+                "fermentators",
+                "kg",
+            ]
         ]
-    ]
 
     return result
 
@@ -99,7 +100,7 @@ def cream_cheese_proceed_order(order, df, boilings):
 
 
 def handle_mascarpone(df):
-    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeFermentator).all()])), reverse=True)
+    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeSourdough).all()])), reverse=True)
     output_tons = [x + min(output_tons) for x in output_tons]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
@@ -115,7 +116,7 @@ def handle_mascarpone(df):
 
 
 def handle_cream(df):
-    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeFermentator).all()])), reverse=True)
+    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeSourdough).all()])), reverse=True)
     output_tons = [x + min(output_tons) for x in output_tons]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 

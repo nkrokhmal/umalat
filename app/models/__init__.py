@@ -177,8 +177,8 @@ class Boiling(db.Model):
     __tablename__ = "boilings"
     id = db.Column(db.Integer, primary_key=True)
     line_id = db.Column(db.Integer, db.ForeignKey("lines.id"), nullable=True)
-    boiling_technology_id = db.Column(
-        db.Integer, db.ForeignKey("boiling_technologies.id"), nullable=True
+    boiling_technologies = db.relationship(
+        "BoilingTechnology", backref=backref("boiling", uselist=False)
     )
 
     skus = db.relationship("SKU", secondary=sku_boiling, backref="made_from_boilings")
@@ -192,8 +192,8 @@ class BoilingTechnology(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
 
-    boilings = db.relationship(
-        "Boiling", backref=backref("boiling_technology", uselist=False)
+    boiling_id = db.Column(
+        db.Integer, db.ForeignKey("boilings.id"), nullable=True
     )
 
     type = db.Column(db.String)

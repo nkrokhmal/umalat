@@ -21,8 +21,17 @@ def fill_fermentators():
     line_name = LineName.MASCARPONE
     lines = db.session.query(MascarponeLine).all()
     mascarpone_line = [x for x in lines if x.name == line_name][0]
-    for output_ton, name in [[255, "Big"], [225, "Small"]]:
-        fermentator = MascarponeFermentator(
+    for i, (output_ton, name) in enumerate([
+        [255, "Big"],
+        [225, "Small"],
+        [225, "Small"],
+        [225, "Small"],
+        [225, "Small"],
+        [225, "Small"],
+        [225, "Small"],
+    ]):
+        fermentator = MascarponeSourdough(
+            number=i+1,
             name=name,
             output_ton=output_ton,
         )
@@ -45,7 +54,14 @@ def fill_boiling_technologies():
     bt_data = df[boiling_technologies_columns]
 
     bt_data = bt_data.drop_duplicates().fillna("")
-    fermentators = db.session.query(MascarponeFermentator).all()
+    fermentators = db.session.query(MascarponeSourdough).all()
+    big_fermentators = [x for x in fermentators if x.name == "Big"]
+    small_fermentators = [x for x in fermentators if x.name == "Small"]
+    fermentators_dict = {
+        0: big_fermentators,
+        1: small_fermentators,
+    }
+
     for column_name in ["Прием", "Нагрев", "Молочная кислота", "Сепарирование", "Вес"]:
         bt_data[column_name] = bt_data[column_name].apply(lambda x: json.loads(x))
     bt_data = bt_data.to_dict("records")
@@ -63,8 +79,9 @@ def fill_boiling_technologies():
                 heating_time=bt["Нагрев"][i],
                 adding_lactic_acid_time=bt["Молочная кислота"][i],
                 separation_time=bt["Сепарирование"][i],
+                weight=bt["Вес"][i],
             )
-            technology.fermentator = fermentators[i]
+            technology.sourdoughs = fermentators_dict[i]
             db.session.add(technology)
     db.session.commit()
 
@@ -77,29 +94,22 @@ def fill_boilings():
         "Вкусовая добавка",
         "Процент",
         "Линия",
-        "Прием",
-        "Нагрев",
-        "Молочная кислота",
-        "Сепарирование",
         "Вес",
     ]
     b_data = df[columns]
     b_data = b_data.drop_duplicates().fillna("")
-    for column_name in ["Прием", "Нагрев", "Молочная кислота", "Сепарирование", "Вес"]:
+    for column_name in ["Вес"]:
         b_data[column_name] = b_data[column_name].apply(lambda x: json.loads(x))
     b_data = b_data.to_dict("records")
     for b in b_data:
+        bts = []
         for i in range(2):
             line_name = LineName.MASCARPONE
             line_id = [x for x in lines if x.name == LineName.MASCARPONE][0].id
-            bt_id = [
+            bts += [
                 x
-                for x in bts
-                if (x.pouring_time == b["Прием"][i])
-                & (x.heating_time == b["Нагрев"][i])
-                & (x.adding_lactic_acid_time == b["Молочная кислота"][i])
-                & (x.separation_time == b["Сепарирование"][i])
-                & (
+                for x in bts if
+                (
                     x.name
                     == MascarponeBoilingTechnology.create_name(
                         line=line_name,
@@ -108,15 +118,14 @@ def fill_boilings():
                         flavoring_agent=b["Вкусовая добавка"],
                     )
                 )
-            ][0].id
-            boiling = MascarponeBoiling(
-                percent=b["Процент"],
-                flavoring_agent=b["Вкусовая добавка"],
-                weight=b["Вес"][i],
-                boiling_technology_id=bt_id,
-                line_id=line_id,
-            )
-            db.session.add(boiling)
+            ]
+        boiling = MascarponeBoiling(
+            percent=b["Процент"],
+            flavoring_agent=b["Вкусовая добавка"],
+            boiling_technologies=bts,
+            line_id=line_id,
+        )
+        db.session.add(boiling)
     db.session.commit()
 
 
@@ -141,7 +150,7 @@ def fill_sku():
     boilings = db.session.query(MascarponeBoiling).all()
     form_factors = db.session.query(MascarponeFormFactor).all()
     groups = db.session.query(Group).all()
-    fermentators = db.session.query(MascarponeFermentator).all()
+    fermentators = db.session.query(MascarponeSourdough).all()
     fermentator_small = [x for x in fermentators if x.name == "Small"][0]
 
     columns = [
