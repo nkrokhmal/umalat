@@ -26,7 +26,7 @@ STYLE = {
     "salting": {"color": "#92D050", "text": "посолка/нормализация"},  # green
     "cream_cheese_boiling_label1": {
         "color": "white",
-        "text": lambda b: "Кремчиз/1000л/бак {}".format(b.props["sourdough"]),
+        "text": lambda b: "Кремчиз/1000л/бак {}".format(b.props["sourdough_nums"]),
     },
     "cream_cheese_boiling_label2": {
         "color": "white",

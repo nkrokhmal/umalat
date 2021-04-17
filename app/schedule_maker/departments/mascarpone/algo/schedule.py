@@ -95,7 +95,7 @@ validator.add("cleaning", "cream_cheese_boiling", validate)
 def validate(b1, b2):
     if b2.props["entity"] == "separator" or (
         (b2.children[0].props["cls"] == "cleaning_sourdough_mascarpone_cream_cheese")
-        and (b1.props["sourdough_num"] in b2.props["sourdough_nums"])
+        and (b1.props["sourdough_nums"] in b2.props["sourdough_nums"])
     ):
         assert listify(b1["boiling_process"]["separation"])[-1].y[0] + 1 <= b2.x[0]
 
@@ -193,9 +193,12 @@ class BoilingPlanToSchedule:
         boiling_group_dfs = [
             grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
         ]
+
         cream_cheese_blocks = [
             make_cream_cheese_boiling(
-                grp, sourdough_num=i % 3 + 4, boiling_plan_df=boiling_plan_df
+                grp,
+                sourdough_nums=grp.iloc[0]["sourdoughs"],
+                boiling_plan_df=boiling_plan_df,
             )
             for i, grp in enumerate(boiling_group_dfs)
         ]
@@ -209,6 +212,7 @@ class BoilingPlanToSchedule:
             )
 
         # cleanings
+
         if len(cream_cheese_blocks) == 1:
             groups = [[5]]
         elif len(cream_cheese_blocks) == 2:
