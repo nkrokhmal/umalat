@@ -84,21 +84,17 @@ def mascarpone_proceed_order(order, df, boilings, output_tons):
 
 def cream_cheese_proceed_order(order, df, boilings):
     df_filter = df[
-        (df["group"] == order.group)
-    ]
+        (df["group"].isin(order.groups))
+    ].sort_values(by=["group", "percent"])
     if not df_filter.empty:
         output_ton = df_filter["sku"].apply(lambda x: x.made_from_boilings[0].output_ton).iloc[0]
         boilings.init_iterator(output_ton)
-        df_filter_groups = [group for _, group in df_filter.groupby("percent")]
-        for df_filter_group in df_filter_groups:
-            df_group_dict = df_filter_group.sort_values(
-                by="weight",
-                ascending=True,
-            ).to_dict("records")
 
-            boilings.add_group(
-                df_group_dict
-            )
+        df_group_dict = df_filter.to_dict("records")
+
+        boilings.add_group(
+            df_group_dict
+        )
     return boilings
 
 
@@ -135,11 +131,10 @@ def handle_cream(df):
 
 def handle_cream_cheese(df):
     boilings_cream_cheese = Boilings()
-    Order = namedtuple("Collection", "group")
+    Order = namedtuple("Collection", "groups")
     orders = [
-        Order("Кремчиз"),
-        Order("Творожный"),
-        Order("Робиола"),
+        Order(["Кремчиз"]),
+        Order(["Робиола", "Творожный"]),
     ]
     for order in orders:
         boilings_cream_cheese = cream_cheese_proceed_order(order, df, boilings_cream_cheese)

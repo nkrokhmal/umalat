@@ -84,8 +84,8 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None, normal
         excel_client = ExcelBlock(wb[sheet_name])
 
         if type:
-            fermentator_circular = CircularList()
-            fermentator_circular.create([5, 6])
+            fermentator_circular = CircularList(1)
+            fermentator_circular.create([5, 6, 7])
             fermentator_iterator = iter(fermentator_circular)
             fermentator_number = next(fermentator_iterator)
         values = []
