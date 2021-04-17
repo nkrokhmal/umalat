@@ -95,7 +95,7 @@ validator.add("cleaning", "cream_cheese_boiling", validate)
 def validate(b1, b2):
     if b2.props["entity"] == "separator" or (
         (b2.children[0].props["cls"] == "cleaning_sourdough_mascarpone_cream_cheese")
-        and (b1.props["sourdoughs"] in b2.props["sourdoughs"])
+        and len(set(b1.props["sourdoughs"]) & set(b2.props["sourdoughs"])) > 0
     ):
         assert listify(b1["boiling_process"]["separation"])[-1].y[0] + 1 <= b2.x[0]
 
