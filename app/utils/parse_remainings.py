@@ -105,7 +105,7 @@ def cast_volume(obj):
     elif isinstance(obj, RicottaSKU):
         return obj.made_from_boilings[0].number_of_tanks * obj.output_per_tank
     elif isinstance(obj, MascarponeSKU):
-        return db.session.query(MascarponeSourdough).first().output_ton
+        return obj.made_from_boilings[0].boiling_technologies[0].output_ton
     elif isinstance(obj, CreamCheeseSKU):
         return obj.made_from_boilings[0].output_ton
     else:

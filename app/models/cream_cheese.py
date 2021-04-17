@@ -50,10 +50,10 @@ class CreamCheeseBoilingTechnology(BoilingTechnology):
     p_time = db.Column(db.Integer)
 
     @staticmethod
-    def create_name(line, percent):
+    def create_name(form_factor, line, percent):
         boiling_name = [percent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, {}".format(line, boiling_name)
+        return "Линия {}, Форм фактор {}, {}".format(line, form_factor, boiling_name)
 
 
 class CreamCheeseFermentator(db.Model):

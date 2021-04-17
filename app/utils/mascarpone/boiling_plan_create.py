@@ -15,10 +15,13 @@ def add_fields(result, type):
         result["output"] = result["max_boiling_weight"]
 
         max_output = int(result["output"].max())
-        if type in ["cream", "mascarpone"]:
+        if type == "mascarpone":
             result["fermentators"] = result["output"].apply(lambda x: "1-2" if x == max_output else "3-4")
         else:
-            result["fermentators"] = "5-6"
+            result["fermentators"] = ""
+
+        result["coeff"] = result["sku"].apply(lambda sku: sku.made_from_boilings[0].output_coeff)
+        result["kg"] = result["kg"] / result["coeff"]
 
         result = result[
             [
@@ -81,26 +84,22 @@ def mascarpone_proceed_order(order, df, boilings, output_tons):
 
 def cream_cheese_proceed_order(order, df, boilings):
     df_filter = df[
-        (df["group"] == order.group)
-    ]
+        (df["group"].isin(order.groups))
+    ].sort_values(by=["group", "percent"])
     if not df_filter.empty:
         output_ton = df_filter["sku"].apply(lambda x: x.made_from_boilings[0].output_ton).iloc[0]
         boilings.init_iterator(output_ton)
-        df_filter_groups = [group for _, group in df_filter.groupby("percent")]
-        for df_filter_group in df_filter_groups:
-            df_group_dict = df_filter_group.sort_values(
-                by="weight",
-                ascending=True,
-            ).to_dict("records")
 
-            boilings.add_group(
-                df_group_dict
-            )
+        df_group_dict = df_filter.to_dict("records")
+
+        boilings.add_group(
+            df_group_dict
+        )
     return boilings
 
 
 def handle_mascarpone(df):
-    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeSourdough).all()])), reverse=True)
+    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeBoilingTechnology).all()])), reverse=True)
     output_tons = [x + min(output_tons) for x in output_tons]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
@@ -116,7 +115,7 @@ def handle_mascarpone(df):
 
 
 def handle_cream(df):
-    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeSourdough).all()])), reverse=True)
+    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeBoilingTechnology).all()])), reverse=True)
     output_tons = [x + min(output_tons) for x in output_tons]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
@@ -132,11 +131,10 @@ def handle_cream(df):
 
 def handle_cream_cheese(df):
     boilings_cream_cheese = Boilings()
-    Order = namedtuple("Collection", "group")
+    Order = namedtuple("Collection", "groups")
     orders = [
-        Order("Кремчиз"),
-        Order("Творожный"),
-        Order("Робиола"),
+        Order(["Кремчиз"]),
+        Order(["Робиола", "Творожный"]),
     ]
     for order in orders:
         boilings_cream_cheese = cream_cheese_proceed_order(order, df, boilings_cream_cheese)

@@ -88,11 +88,13 @@ class Node:
 
 
 class CircularList:
-    def __init__(self):
+    def __init__(self, max_counter=-1):
         self.root = Node(None, None)
         self.root.next = self.root
         self.length = 0
         self.cur = self.root
+        self.counter = -1
+        self.max_counter = max_counter
 
     def add(self, data):
         if self.length == 0:
@@ -115,8 +117,12 @@ class CircularList:
         if self.length == 0:
             return None
         elif self.next_node == self.root:
-            self.next_node = self.next_node.next
-            return self.root.data
+            self.counter += 1
+            if (self.max_counter > 0) and (self.max_counter <= self.counter):
+                return ""
+            else:
+                self.next_node = self.next_node.next
+                return self.root.data
         elif self.next_node:
             self.current_node = self.next_node
             self.next_node = self.next_node.next

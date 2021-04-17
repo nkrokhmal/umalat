@@ -176,6 +176,7 @@ sku_boiling = db.Table(
 class Boiling(db.Model):
     __tablename__ = "boilings"
     id = db.Column(db.Integer, primary_key=True)
+    output_coeff = db.Column(db.Float, default=1)
     line_id = db.Column(db.Integer, db.ForeignKey("lines.id"), nullable=True)
     boiling_technologies = db.relationship(
         "BoilingTechnology", backref=backref("boiling")
