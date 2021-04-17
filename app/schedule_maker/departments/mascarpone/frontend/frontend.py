@@ -158,7 +158,7 @@ def make_frontend_cream_cheese_boiling(boiling):
         make(
             "cream_cheese_boiling_label1",
             size=(bp["cooling"].size[0], 1),
-            sourdough=boiling.props["boiling_plan_df"].iloc[0]["sourdough"],
+            sourdoughs=boiling.props["boiling_plan_df"].iloc[0]["sourdoughs"],
         )
         make("cream_cheese_boiling_label2", size=(bp["separation"][0].size[0], 1))
         make("stub", size=(2, 1))
@@ -177,7 +177,7 @@ def make_cleanings_line(schedule):
             size=(cleaning.size[0], 2),
             x=cleaning.x,
             push_func=add_push,
-            sourdough_nums=cleaning.props.get("sourdough_nums"),
+            sourdoughs=cleaning.props.get("sourdoughs"),
         )
     return maker.root
 

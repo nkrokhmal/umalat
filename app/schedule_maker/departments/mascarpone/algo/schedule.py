@@ -39,7 +39,7 @@ validator.add("mascarpone_boiling_group", "cream_cheese_boiling", validate)
 def validate(b1, b2):
     if (
         b2.children[0].props["cls"] != "cleaning_sourdough_mascarpone"
-        or b1.props["line_nums"] == b2.props["sourdough_nums"]
+        or b1.props["line_nums"] == b2.props["sourdoughs"]
     ):
         for b in listify(b1["boiling"]):
             validate_disjoint_by_axis(b["boiling_process"], b2)
@@ -95,7 +95,7 @@ validator.add("cleaning", "cream_cheese_boiling", validate)
 def validate(b1, b2):
     if b2.props["entity"] == "separator" or (
         (b2.children[0].props["cls"] == "cleaning_sourdough_mascarpone_cream_cheese")
-        and (b1.props["sourdough_nums"] in b2.props["sourdough_nums"])
+        and (b1.props["sourdoughs"] in b2.props["sourdoughs"])
     ):
         assert listify(b1["boiling_process"]["separation"])[-1].y[0] + 1 <= b2.x[0]
 
@@ -160,7 +160,7 @@ class BoilingPlanToSchedule:
 
             block = make_cleaning(
                 "sourdough_mascarpone",
-                sourdough_nums=first_last_group.props["line_nums"],
+                sourdoughs=first_last_group.props["line_nums"],
             )
             push(
                 self.maker.root,
@@ -181,7 +181,7 @@ class BoilingPlanToSchedule:
                     )
 
             for line_nums in left_cleaning_lines:
-                block = make_cleaning("sourdough_mascarpone", sourdough_nums=line_nums)
+                block = make_cleaning("sourdough_mascarpone", sourdoughs=line_nums)
                 push(
                     self.maker.root,
                     block,
@@ -193,11 +193,13 @@ class BoilingPlanToSchedule:
         boiling_group_dfs = [
             grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
         ]
+        for grp in boiling_group_dfs:
+            print(grp.iloc[0]["sourdoughs"])
 
         cream_cheese_blocks = [
             make_cream_cheese_boiling(
                 grp,
-                sourdough_nums=grp.iloc[0]["sourdoughs"],
+                sourdoughs=grp.iloc[0]["sourdoughs"],
                 boiling_plan_df=boiling_plan_df,
             )
             for i, grp in enumerate(boiling_group_dfs)
@@ -222,9 +224,7 @@ class BoilingPlanToSchedule:
             groups = [[5, 6], [7]]
 
         for group in groups:
-            block = make_cleaning(
-                "sourdough_mascarpone_cream_cheese", sourdough_nums=group
-            )
+            block = make_cleaning("sourdough_mascarpone_cream_cheese", sourdoughs=group)
             push(
                 self.maker.root,
                 block,
@@ -244,9 +244,6 @@ class BoilingPlanToSchedule:
     def __call__(self, boiling_plan_df, start_batch_id=0):
         boiling_plan_df["batch_id"] += start_batch_id - 1
         columns = boiling_plan_df.columns
-        boiling_plan_df["sku_cls_name"] = boiling_plan_df["sku"].apply(
-            lambda sku: str(sku.__class__)
-        )
         boiling_plan_df["tag"] = (
             boiling_plan_df["sku_cls_name"]
             + "-"
@@ -256,10 +253,10 @@ class BoilingPlanToSchedule:
         df = boiling_plan_df[["tag"] + list(columns)]
         ordered_groups = df_to_ordered_tree(df, recursive=False)
         for i, (group_cls_name, grp) in enumerate(ordered_groups):
-            if "Mascarpone" in group_cls_name:
+            if grp.iloc[0]["type"] == "mascarpone":
                 is_last = i == len(ordered_groups) - 1
                 self._make_mascarpone(grp, is_last=is_last)
-            elif "CreamCheese" in group_cls_name:
+            elif grp.iloc[0]["type"] == "cream_cheese":
                 self._make_cream_cheese(grp)
         return self.maker.root
 

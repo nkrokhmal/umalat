@@ -8,7 +8,10 @@ from app.schedule_maker.models import *
 def make_mascorpone_boiling(boiling_group_df, **props):
     sku = boiling_group_df.iloc[0]["sku"]
     is_cream = boiling_group_df.iloc[0]["is_cream"]
-    sourdough = int(boiling_group_df.iloc[0]["sourdough"])
+    if is_cream:
+        sourdough = None
+    else:
+        sourdough = int(boiling_group_df.iloc[0]["sourdough"])
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
 
     boiling_models = sku.made_from_boilings
@@ -22,12 +25,16 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         **props,
     )
 
-    boiling_technologies = [
-        boiling_technology
-        for boiling_technology in boiling_model.boiling_technologies
-        if cast_model(MascarponeSourdough, sourdough) in boiling_technology.sourdoughs
-    ]
-
+    if not is_cream:
+        boiling_technologies = [
+            boiling_technology
+            for boiling_technology in boiling_model.boiling_technologies
+            if cast_model(MascarponeSourdough, sourdough)
+            in boiling_technology.sourdoughs
+        ]
+    else:
+        # todo: make properly
+        boiling_technologies = boiling_model.boiling_technologies[:1]
     assert (
         len(boiling_technologies) == 1
     ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"

@@ -26,7 +26,9 @@ STYLE = {
     "salting": {"color": "#92D050", "text": "посолка/нормализация"},  # green
     "cream_cheese_boiling_label1": {
         "color": "white",
-        "text": lambda b: "Кремчиз/1000л/бак {}".format(b.props["sourdough_nums"]),
+        "text": lambda b: "Кремчиз/1000л/бак {}".format(
+            ",".join(b.props["sourdoughs"])
+        ),
     },
     "cream_cheese_boiling_label2": {
         "color": "white",
@@ -37,13 +39,13 @@ STYLE = {
     "cleaning_sourdough_mascarpone": {
         "color": "yellow",
         "text": lambda b: "Мойка заквасочников {}".format(
-            ", ".join([f"№{sn}" for sn in b.props["sourdough_nums"]])
+            ", ".join([f"№{sn}" for sn in b.props["sourdoughs"]])
         ),
     },
     "cleaning_sourdough_mascarpone_cream_cheese": {
         "color": "yellow",
         "text": lambda b: "Мойка заквасочников {}".format(
-            ", ".join([f"№{sn}" for sn in b.props["sourdough_nums"]])
+            ", ".join([f"№{sn}" for sn in b.props["sourdoughs"]])
         ),
     },
     "cleaning_homogenizer": {
