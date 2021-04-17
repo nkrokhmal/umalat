@@ -19,6 +19,7 @@ def fill_db():
 def fill_boiling_technologies():
     df = read_params()
     boiling_technologies_columns = [
+        "Название форм фактора",
         "Охлаждение",
         "Сепарирование",
         "Посолка",
@@ -32,7 +33,7 @@ def fill_boiling_technologies():
         line_name = LineName.MASCARPONE
         technology = CreamCheeseBoilingTechnology(
             name=CreamCheeseBoilingTechnology.create_name(
-                line=line_name, percent=bt["Процент"]
+                line=line_name, percent=bt["Процент"], form_factor=bt["Название форм фактора"]
             ),
             cooling_time=bt["Охлаждение"],
             separation_time=bt["Сепарирование"],
@@ -49,6 +50,7 @@ def fill_boilings():
     lines = db.session.query(Line).all()
     bts = db.session.query(CreamCheeseBoilingTechnology).all()
     columns = [
+        "Название форм фактора",
         "Процент",
         "Линия",
         "Охлаждение",
@@ -74,7 +76,7 @@ def fill_boilings():
             & (
                 x.name
                 == CreamCheeseBoilingTechnology.create_name(
-                    line=line_name, percent=b["Процент"]
+                    line=line_name, percent=b["Процент"], form_factor=b["Название форм фактора"]
                 )
             )
         ]
@@ -122,6 +124,7 @@ def fill_sku():
         "Линия",
         "Вес форм фактора",
         "Название форм фактора",
+        "Коэффициент",
     ]
 
     sku_data = df[columns]
@@ -143,7 +146,7 @@ def fill_sku():
         add_sku.made_from_boilings = [
             x
             for x in boilings
-            if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id)
+            if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id) & (x.output_coeff == sku["Коэффициент"])
         ]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]

@@ -154,7 +154,6 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
     draw_fermentators(wb)
 
     SkuGroup = namedtuple("SkuGroup", "df, sheet_name, skus, type")
-
     cur_row = None
     for item in [
         SkuGroup(mascarpone_df, PLAN_SHEET_NAME, mascarpone_skus, None),
