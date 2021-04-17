@@ -37,13 +37,13 @@ STYLE = {
     "cleaning_sourdough_mascarpone": {
         "color": "yellow",
         "text": lambda b: "Мойка заквасочников {}".format(
-            ", ".join([f"№{sn + 1}" for sn in b.props["sourdough_nums"]])
+            ", ".join([f"№{sn}" for sn in b.props["sourdough_nums"]])
         ),
     },
     "cleaning_sourdough_mascarpone_cream_cheese": {
         "color": "yellow",
         "text": lambda b: "Мойка заквасочников {}".format(
-            ", ".join([f"№{sn + 1}" for sn in b.props["sourdough_nums"]])
+            ", ".join([f"№{sn}" for sn in b.props["sourdough_nums"]])
         ),
     },
     "cleaning_homogenizer": {

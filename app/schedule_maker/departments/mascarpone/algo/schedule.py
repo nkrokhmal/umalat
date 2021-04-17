@@ -85,11 +85,8 @@ validator.add("cleaning", "mascarpone_boiling_group", validate)
 
 
 def validate(b1, b2):
-    if b1.props["entity"] == "separator":
-        assert b1.y[0] + 1 <= listify(b2["boiling_process"]["separation"])[0].x[0]
-
     if b1.props["entity"] == "homogenizer":
-        assert b1.y[0] + 1 <= listify(b2["boiling_process"]["salting"])[0].x[0]
+        assert b1.y[0] + 1 <= listify(b2["boiling_process"]["separation"])[0].x[0]
 
 
 validator.add("cleaning", "cream_cheese_boiling", validate)
@@ -133,11 +130,13 @@ class BoilingPlanToSchedule:
 
         boiling_volumes = [800, 600]
         for i, bg in enumerate(boiling_groups):
-
-            line_nums = [
-                int(boiling_group_df.iloc[0]["sourdough"])
-                for boiling_group_df in bg.props["boiling_group_dfs"]
-            ]
+            if is_cream:
+                line_nums = [i % 4 + 1]
+            else:
+                line_nums = [
+                    int(boiling_group_df.iloc[0]["sourdough"])
+                    for boiling_group_df in bg.props["boiling_group_dfs"]
+                ]
             bg.props.update(line_nums=line_nums, boiling_volume=boiling_volumes[i % 2])
             push(
                 self.maker.root,
@@ -146,8 +145,31 @@ class BoilingPlanToSchedule:
                 validator=validator,
             )
 
+        left_cleaning_lines = list(all_line_nums)
         if not is_cream:
-            # cleanings
+            # clean first sourdoughs asap
+            last_groups = []
+            for line_nums in all_line_nums:
+                cur_groups = [
+                    bg for bg in boiling_groups if bg.props["line_nums"] == line_nums
+                ]
+                if len(cur_groups) == 0:
+                    continue
+                last_groups.append(cur_groups[-1])
+            first_last_group = min(last_groups, key=lambda bg: bg.x[0])
+
+            block = make_cleaning(
+                "sourdough_mascarpone",
+                sourdough_nums=first_last_group.props["line_nums"],
+            )
+            push(
+                self.maker.root,
+                block,
+                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                validator=validator,
+            )
+            left_cleaning_lines.remove(first_last_group.props["line_nums"])
+
             if len(boiling_group_dfs) > 6 or is_last:
                 for entity in ["separator", "homogenizer"]:
                     block = make_cleaning(entity)
@@ -158,7 +180,7 @@ class BoilingPlanToSchedule:
                         validator=validator,
                     )
 
-            for line_nums in all_line_nums:
+            for line_nums in left_cleaning_lines:
                 block = make_cleaning("sourdough_mascarpone", sourdough_nums=line_nums)
                 push(
                     self.maker.root,
@@ -188,12 +210,12 @@ class BoilingPlanToSchedule:
 
         # cleanings
         if len(cream_cheese_blocks) == 1:
-            groups = [[4]]
+            groups = [[5]]
         elif len(cream_cheese_blocks) == 2:
-            groups = [[4, 5]]
+            groups = [[5, 6]]
         else:
             # >= 3
-            groups = [[4, 5], [6]]
+            groups = [[5, 6], [7]]
 
         for group in groups:
             block = make_cleaning(
