@@ -110,5 +110,4 @@ def read_boiling_plan(wb_obj, as_boilings=True):
         values += new_grp.to_dict(orient="records")
 
     df = pd.DataFrame(values)
-
     return df

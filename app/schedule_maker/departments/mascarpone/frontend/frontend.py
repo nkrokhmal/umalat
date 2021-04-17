@@ -158,7 +158,7 @@ def make_frontend_cream_cheese_boiling(boiling):
         make(
             "cream_cheese_boiling_label1",
             size=(bp["cooling"].size[0], 1),
-            sourdoughs=boiling.props["boiling_plan_df"].iloc[0]["sourdoughs"],
+            sourdoughs=boiling.props["sourdoughs"],
         )
         make("cream_cheese_boiling_label2", size=(bp["separation"][0].size[0], 1))
         make("stub", size=(2, 1))

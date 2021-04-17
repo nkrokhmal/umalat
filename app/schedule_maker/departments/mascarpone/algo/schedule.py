@@ -193,8 +193,6 @@ class BoilingPlanToSchedule:
         boiling_group_dfs = [
             grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
         ]
-        for grp in boiling_group_dfs:
-            print(grp.iloc[0]["sourdoughs"])
 
         cream_cheese_blocks = [
             make_cream_cheese_boiling(
@@ -214,16 +212,13 @@ class BoilingPlanToSchedule:
             )
 
         # cleanings
+        sourdoughs = boiling_plan_df[boiling_plan_df["type"] == "cream_cheese"][
+            "sourdoughs"
+        ].tolist()
+        sourdoughs = remove_duplicates(sourdoughs, key=lambda lst: str(lst))
+        sourdoughs = sum(sourdoughs, [])
 
-        if len(cream_cheese_blocks) == 1:
-            groups = [[5]]
-        elif len(cream_cheese_blocks) == 2:
-            groups = [[5, 6]]
-        else:
-            # >= 3
-            groups = [[5, 6], [7]]
-
-        for group in groups:
+        for group in crop_to_chunks(sourdoughs, 2):
             block = make_cleaning("sourdough_mascarpone_cream_cheese", sourdoughs=group)
             push(
                 self.maker.root,
