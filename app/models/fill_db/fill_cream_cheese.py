@@ -55,6 +55,7 @@ def fill_boilings():
         "Сепарирование",
         "Посолка",
         "П",
+        "Коэффициент",
         "Выход",
     ]
     b_data = df[columns]
@@ -78,7 +79,11 @@ def fill_boilings():
             )
         ]
         boiling = CreamCheeseBoiling(
-            percent=b["Процент"], output_ton=b["Выход"], boiling_technologies=bts_name, line_id=line_id
+            percent=b["Процент"],
+            output_ton=b["Выход"],
+            output_coeff=b["Коэффициент"],
+            boiling_technologies=bts_name,
+            line_id=line_id
         )
         db.session.add(boiling)
         db.session.commit()

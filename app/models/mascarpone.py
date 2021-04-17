@@ -53,6 +53,7 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     pouring_time = db.Column(db.Integer)
     heating_time = db.Column(db.Integer)
     adding_lactic_acid_time = db.Column(db.Integer)
+    output_ton = db.Column(db.Integer)
     separation_time = db.Column(db.Integer)
     line_id = db.Column(db.Integer, db.ForeignKey("mascarpone_lines.id"), nullable=True)
 
@@ -76,7 +77,6 @@ class MascarponeSourdough(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.Integer)
     name = db.Column(db.String)
-    output_ton = db.Column(db.Integer)
     line_id = db.Column(db.Integer, db.ForeignKey("mascarpone_lines.id"), nullable=True)
     boiling_technologies = db.relationship(
         "MascarponeBoilingTechnology", secondary=boiling_technology_sourdough, backref=backref("sourdoughs", lazy="subquery")

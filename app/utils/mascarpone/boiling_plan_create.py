@@ -20,6 +20,9 @@ def add_fields(result, type):
         else:
             result["fermentators"] = "5-6"
 
+        result["coeff"] = result["sku"].apply(lambda sku: sku.made_from_boilings[0].output_coeff)
+        result["kg"] = result["kg"] / result["coeff"]
+
         result = result[
             [
                 "id",
@@ -100,7 +103,7 @@ def cream_cheese_proceed_order(order, df, boilings):
 
 
 def handle_mascarpone(df):
-    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeSourdough).all()])), reverse=True)
+    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeBoilingTechnology).all()])), reverse=True)
     output_tons = [x + min(output_tons) for x in output_tons]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
@@ -116,7 +119,7 @@ def handle_mascarpone(df):
 
 
 def handle_cream(df):
-    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeSourdough).all()])), reverse=True)
+    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeBoilingTechnology).all()])), reverse=True)
     output_tons = [x + min(output_tons) for x in output_tons]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 

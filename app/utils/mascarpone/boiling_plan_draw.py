@@ -14,12 +14,12 @@ COLUMNS = {
     "output": Cell(column_index_from_string("C"), "C"),
     "fermentators": Cell(column_index_from_string("D"), "D"),
     "name": Cell(column_index_from_string("E"), "E"),
-    "kg": Cell(column_index_from_string("F"), "F"),
-    "remainings": Cell(column_index_from_string("G"), "G"),
-    "total_output": Cell(column_index_from_string("I"), "I"),
-    "boiling_count": Cell(column_index_from_string("Q"), "Q"),
-    "delimiter": Cell(column_index_from_string("J"), "J"),
-    "delimiter_int": Cell(column_index_from_string("M"), "M"),
+    "kg_output": Cell(column_index_from_string("F"), "F"),
+    "kg": Cell(column_index_from_string("G"), "G"),
+    "remainings": Cell(column_index_from_string("H"), "H"),
+    "total_output": Cell(column_index_from_string("J"), "J"),
+    "delimiter": Cell(column_index_from_string("K"), "K"),
+    "delimiter_int": Cell(column_index_from_string("N"), "N"),
 }
 
 ROWS = {
@@ -34,7 +34,7 @@ def draw_skus(wb, data_sku, sheet_name, cur_i=None):
     grouped_skus = data_sku
     grouped_skus.sort(key=lambda x: x.name, reverse=False)
     excel_client = ExcelBlock(wb[sheet_name])
-    excel_client.draw_row(1, ["-", "-",], set_border=False)
+    excel_client.draw_row(1, ["-", "-", "-"], set_border=False)
     if not cur_i:
         cur_i = 2
 
@@ -44,6 +44,7 @@ def draw_skus(wb, data_sku, sheet_name, cur_i=None):
             [
                 group_sku.name,
                 group_sku.made_from_boilings[0].to_str(),
+                group_sku.made_from_boilings[0].output_coeff,
             ],
             set_border=False,
         )
@@ -75,7 +76,7 @@ def get_colour_by_name(sku_name, skus):
         return current_app.config["COLOURS"]["Default"]
 
 
-def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None):
+def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None, normalize=True):
     if not cur_row:
         cur_row = 3
 
@@ -105,8 +106,6 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None):
             ]
             values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
 
-
-
         for v in values:
             value = v.values()
             column = [x.col for x in v.keys()]
@@ -126,6 +125,7 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None):
                 set_border=False,
             )
             excel_client.draw_row(row=cur_row, values=value, cols=column, set_border=False)
+            excel_client.color_cell(row=cur_row, col=COLUMNS["kg_output"].col)
 
             if type:
                 if v[COLUMNS["name"]] != "-":

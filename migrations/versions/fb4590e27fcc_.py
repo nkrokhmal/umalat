@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d3b4d1722884
+Revision ID: fb4590e27fcc
 Revises: 
-Create Date: 2021-04-17 10:33:27.638005
+Create Date: 2021-04-17 14:37:23.036153
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd3b4d1722884'
+revision = 'fb4590e27fcc'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -73,6 +73,7 @@ def upgrade():
     )
     op.create_table('boilings',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('output_coeff', sa.Float(), nullable=True),
     sa.Column('line_id', sa.Integer(), nullable=True),
     sa.Column('type', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
@@ -174,7 +175,6 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('number', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(), nullable=True),
-    sa.Column('output_ton', sa.Integer(), nullable=True),
     sa.Column('line_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['line_id'], ['mascarpone_lines.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -247,6 +247,7 @@ def upgrade():
     sa.Column('pouring_time', sa.Integer(), nullable=True),
     sa.Column('heating_time', sa.Integer(), nullable=True),
     sa.Column('adding_lactic_acid_time', sa.Integer(), nullable=True),
+    sa.Column('output_ton', sa.Integer(), nullable=True),
     sa.Column('separation_time', sa.Integer(), nullable=True),
     sa.Column('line_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),

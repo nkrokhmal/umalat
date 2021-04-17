@@ -21,19 +21,12 @@ def fill_fermentators():
     line_name = LineName.MASCARPONE
     lines = db.session.query(MascarponeLine).all()
     mascarpone_line = [x for x in lines if x.name == line_name][0]
-    for i, (output_ton, name) in enumerate([
-        [255, "Big"],
-        [225, "Small"],
-        [225, "Small"],
-        [225, "Small"],
-        [225, "Small"],
-        [225, "Small"],
-        [225, "Small"],
+    for i, name in enumerate([
+        "Big", "Small", "Small", "Small", "Small", "Small", "Small",
     ]):
         fermentator = MascarponeSourdough(
             number=i+1,
             name=name,
-            output_ton=output_ton,
         )
         fermentator.line = mascarpone_line
         db.session.add(fermentator)
@@ -43,6 +36,7 @@ def fill_fermentators():
 def fill_boiling_technologies():
     df = read_params()
     boiling_technologies_columns = [
+        "Название форм фактора",
         "Прием",
         "Нагрев",
         "Молочная кислота",
@@ -50,9 +44,9 @@ def fill_boiling_technologies():
         "Процент",
         "Вкусовая добавка",
         "Вес",
+        "Выход",
     ]
     bt_data = df[boiling_technologies_columns]
-
     bt_data = bt_data.drop_duplicates().fillna("")
     fermentators = db.session.query(MascarponeSourdough).all()
     big_fermentators = [x for x in fermentators if x.name == "Big"]
@@ -62,7 +56,7 @@ def fill_boiling_technologies():
         1: small_fermentators,
     }
 
-    for column_name in ["Прием", "Нагрев", "Молочная кислота", "Сепарирование", "Вес"]:
+    for column_name in ["Прием", "Нагрев", "Молочная кислота", "Сепарирование", "Вес", "Выход"]:
         bt_data[column_name] = bt_data[column_name].apply(lambda x: json.loads(x))
     bt_data = bt_data.to_dict("records")
     for bt in bt_data:
@@ -80,8 +74,10 @@ def fill_boiling_technologies():
                 adding_lactic_acid_time=bt["Молочная кислота"][i],
                 separation_time=bt["Сепарирование"][i],
                 weight=bt["Вес"][i],
+                output_ton=bt["Выход"][i],
             )
-            technology.sourdoughs = fermentators_dict[i]
+            if "Сливки" not in bt["Название форм фактора"]:
+                technology.sourdoughs = fermentators_dict[i]
             db.session.add(technology)
     db.session.commit()
 
@@ -164,10 +160,13 @@ def fill_sku():
         "Скорость упаковки",
         "Линия",
         "Название форм фактора",
+        "Выход",
     ]
 
     sku_data = df[columns]
     sku_data = sku_data.drop_duplicates().fillna("")
+    for column_name in ["Выход"]:
+        sku_data[column_name] = sku_data[column_name].apply(lambda x: json.loads(x))
     sku_data = sku_data.to_dict("records")
     for sku in sku_data:
         add_sku = MascarponeSKU(
@@ -175,7 +174,7 @@ def fill_sku():
             brand_name=sku["Имя бренда"],
             weight_netto=sku["Вес нетто"],
             shelf_life=sku["Срок хранения"],
-            packing_speed=60 / sku["Скорость упаковки"] * fermentator_small.output_ton,
+            packing_speed=60 / sku["Скорость упаковки"] * sku["Выход"][0],
             in_box=sku["Коробки"],
         )
 

@@ -94,7 +94,6 @@ def fill_boilings():
                 )
             )
         ]
-        print(bts_name)
         boiling = RicottaBoiling(
             percent=b["Процент"],
             flavoring_agent=b["Вкусовая добавка"],
