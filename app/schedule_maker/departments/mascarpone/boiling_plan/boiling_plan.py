@@ -40,7 +40,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
                 "Выход с одной варки, кг",
                 "Заквасочники",
                 "SKU",
-                "КГ",
+                "КГ Использовано",
             ]
         ]
         df.columns = [
@@ -86,6 +86,9 @@ def read_boiling_plan(wb_obj, as_boilings=True):
         sourdoughs = []
         for s in sourdough_range.split("-"):
             if s == "None":
+                assert (
+                    grp.iloc[0]["type"] == "mascarpone" and grp.iloc[0]["is_cream"]
+                ), "Для одной из варок не указаны заквасочники."
                 sourdoughs.append("")
             else:
                 sourdoughs.append(str(int(float(s))))

@@ -10,7 +10,7 @@ def test_read_boiling_plan():
     print(
         read_boiling_plan(
             DebugConfig.abs_path(
-                "app/data/inputs/mascarpone/2021-04-15 План по варкам маскарпоне.xlsx"
+                "app/data/inputs/mascarpone/2021_04_18_План_по_варкам_маскарпоне_12.xlsx"
             )
         ).iloc[0]
     )
