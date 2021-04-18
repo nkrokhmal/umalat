@@ -146,6 +146,8 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
     cream_cheese_skus = db.session.query(CreamCheeseSKU).all()
     cream_skus = db.session.query(MascarponeSKU).join(Group).filter(Group.name == "Сливки").all()
 
+    print(cream_skus)
+
     cur_i = None
     cur_i = draw_skus(wb, mascarpone_skus, SKU_SHEET_NAME, cur_i)
     cur_i = draw_skus(wb, cream_cheese_skus, SKU_SHEET_NAME, cur_i)
