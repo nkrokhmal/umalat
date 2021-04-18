@@ -7,7 +7,7 @@ from .saturate import saturate_boiling_plan
 # todo: rounding
 
 
-def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
+def read_boiling_plan(wb_obj, as_boilings=True):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -40,7 +40,7 @@ def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
                 "Выход с одной варки, кг",
                 "Заквасочники",
                 "SKU",
-                "КГ",
+                "КГ Использовано",
             ]
         ]
         df.columns = [
@@ -62,6 +62,8 @@ def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
         lambda sku: cast_model([MascarponeSKU, CreamCheeseSKU], sku)
     )
 
+    df = saturate_boiling_plan(df)
+
     if not as_boilings:
         return df
 
@@ -69,16 +71,28 @@ def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
     values = []
     for boiling_id, grp in df.groupby("batch_id"):
         sourdough_range = str(grp.iloc[0]["sourdough_range"])
-        if sourdough_range == "1-2":
-            proportion = [800, 600]
-        elif "-" in sourdough_range:
-            proportion = [1, 1]
+
+        if grp.iloc[0]["type"] == "mascarpone" and not grp.iloc[0]["is_cream"]:
+            if sourdough_range == "1-2":
+                proportion = [800, 600]
+            else:
+                proportion = [1] * len(grp.iloc[0]["sourdoughs"])
         else:
             proportion = [1]
+
         proportion = np.array(proportion)
         proportion = proportion / np.sum(proportion)
-        sourdoughs = sourdough_range.split("-")
-        sourdoughs = [str(int(float(sourdough))) for sourdough in sourdoughs]
+
+        sourdoughs = []
+        for s in sourdough_range.split("-"):
+            if s == "None":
+                assert (
+                    grp.iloc[0]["type"] == "mascarpone" and grp.iloc[0]["is_cream"]
+                ), "Для одной из варок не указаны заквасочники."
+                sourdoughs.append("")
+            else:
+                sourdoughs.append(str(int(float(s))))
+
         total_boiling_volume = grp.iloc[0]["output"]
 
         assert (
@@ -99,7 +113,4 @@ def read_boiling_plan(wb_obj, saturate=True, as_boilings=True):
         values += new_grp.to_dict(orient="records")
 
     df = pd.DataFrame(values)
-
-    if saturate:
-        df = saturate_boiling_plan(df)
     return df

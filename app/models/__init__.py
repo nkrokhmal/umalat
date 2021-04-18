@@ -179,7 +179,7 @@ class Boiling(db.Model):
     output_coeff = db.Column(db.Float, default=1)
     line_id = db.Column(db.Integer, db.ForeignKey("lines.id"), nullable=True)
     boiling_technologies = db.relationship(
-        "BoilingTechnology", backref=backref("boiling", uselist=False)
+        "BoilingTechnology", backref=backref("boiling")
     )
 
     skus = db.relationship("SKU", secondary=sku_boiling, backref="made_from_boilings")
@@ -193,9 +193,7 @@ class BoilingTechnology(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
 
-    boiling_id = db.Column(
-        db.Integer, db.ForeignKey("boilings.id"), nullable=True
-    )
+    boiling_id = db.Column(db.Integer, db.ForeignKey("boilings.id"), nullable=True)
 
     type = db.Column(db.String)
     __mapper_args__ = {
