@@ -56,6 +56,8 @@ def mascarpone_boiling_plan_create(df):
     cream_result = handle_cream(df)
     cream_result = add_fields(cream_result, "cream")
 
+    print(cream_result)
+
     return mascarpone_result, cream_cheese_result, cream_result
 
 
@@ -115,8 +117,7 @@ def handle_mascarpone(df):
 
 
 def handle_cream(df):
-    output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeBoilingTechnology).all()])), reverse=True)
-    output_tons = [x + min(output_tons) for x in output_tons]
+    output_tons = [500]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
     Order = namedtuple("Collection", "flavoring_agent, group")
