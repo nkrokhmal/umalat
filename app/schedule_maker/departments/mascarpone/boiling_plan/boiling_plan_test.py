@@ -9,9 +9,7 @@ from config import DebugConfig
 def test_read_boiling_plan():
     print(
         read_boiling_plan(
-            DebugConfig.abs_path(
-                "app/data/inputs/mascarpone/2021_04_18_План_по_варкам_маскарпоне_12.xlsx"
-            )
+            DebugConfig.abs_path("app/data/inputs/mascarpone/2021_04_18_крем_чиза.xlsx")
         ).iloc[0]
     )
 

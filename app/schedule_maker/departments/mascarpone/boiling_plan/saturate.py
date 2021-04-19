@@ -7,6 +7,9 @@ def saturate_boiling_plan(boiling_plan_df):
 
     df["sourdough_range"] = df["sourdough_range"].astype(str)
     df["sourdoughs"] = df["sourdough_range"].apply(lambda s: s.split("-"))
+    df["sourdoughs"] = df["sourdoughs"].apply(
+        lambda lst: [str(int(float(s))) for s in lst]
+    )
 
     df["sku_cls_name"] = df["sku"].apply(lambda sku: str(sku.__class__))
 

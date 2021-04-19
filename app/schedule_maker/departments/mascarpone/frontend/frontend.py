@@ -43,6 +43,7 @@ def make_frontend_mascarpone_boiling(boiling_process):
 
 
 def make_mascarpone_lines(schedule, with_cream_cheese=False):
+
     maker, make = init_block_maker("mascarpone_lines", axis=1)
 
     boiling_lines = []
@@ -52,7 +53,7 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
         )
         make("stub", size=(0, 1))
 
-    for mbg in listify(schedule["mascarpone_boiling_group"]):
+    for mbg in schedule.iter(cls="mascarpone_boiling_group"):
         line_nums = mbg.props["line_nums"]
 
         for i, boiling in enumerate(listify(mbg["boiling"])):
@@ -102,6 +103,9 @@ def make_cream_cheese_lines(schedule, boiling_lines=None):
 
 def make_packing_line(schedule):
     maker, make = init_block_maker("packing_line", axis=1)
+
+    if "mascarpone_boiling_group" not in [c.props["cls"] for c in schedule.children]:
+        return
 
     for mbg in listify(schedule["mascarpone_boiling_group"]):
         packing_processes = [b["packing_process"] for b in listify(mbg["boiling"])]
