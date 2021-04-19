@@ -147,14 +147,13 @@ def make_packing_line(schedule):
         packing_processes = [b["packing_process"] for b in listify(mbg["boiling"])]
         is_cream = mbg.props["boiling_group_dfs"][0].iloc[0]["is_cream"]
 
-        if not is_cream:
-            make(
-                "packing_num",
-                size=(2, 1),
-                x=(packing_processes[0]["P"].x[0] - 1, 1),
-                batch_id=mbg.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
-                push_func=add_push,
-            )
+        make(
+            "packing_num",
+            size=(2, 1),
+            x=(packing_processes[0]["P"].x[0] - 1, 1),
+            batch_id=mbg.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
+            push_func=add_push,
+        )
         for p in packing_processes:
             make(
                 "packing",
