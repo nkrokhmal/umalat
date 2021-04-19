@@ -146,8 +146,6 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
     cream_cheese_skus = db.session.query(CreamCheeseSKU).all()
     cream_skus = db.session.query(MascarponeSKU).join(Group).filter(Group.name == "Сливки").all()
 
-    print(cream_skus)
-
     cur_i = None
     cur_i = draw_skus(wb, mascarpone_skus, SKU_SHEET_NAME, cur_i)
     cur_i = draw_skus(wb, cream_cheese_skus, SKU_SHEET_NAME, cur_i)
@@ -158,9 +156,9 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
     SkuGroup = namedtuple("SkuGroup", "df, sheet_name, skus, type")
     cur_row = None
     for item in [
+        SkuGroup(cream_df, PLAN_SHEET_NAME, cream_skus, None),
         SkuGroup(mascarpone_df, PLAN_SHEET_NAME, mascarpone_skus, None),
         SkuGroup(cream_cheese_df, PLAN_SHEET_NAME, cream_cheese_skus, "cream_cheese"),
-        SkuGroup(cream_df, PLAN_SHEET_NAME, cream_skus, None)
     ]:
 
         wb, cur_row = draw_boiling_sheet(
