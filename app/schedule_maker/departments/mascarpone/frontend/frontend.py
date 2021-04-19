@@ -74,7 +74,7 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
     ):
         for i, boiling in enumerate(listify(mbg["boiling"])):
             block = make_frontend_mascarpone_boiling(boiling["boiling_process"])
-            for i in range(4):
+            for i in range(len(boiling_lines)):
                 boiling_line = next(cycle)
                 try:
                     res = push(
@@ -85,12 +85,24 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
                     )
                     assert isinstance(res, Block)
                 except:
-                    if i == 3:
-                        raise Exception("Failed to push cream")
-                    else:
-                        # go for next try
-                        continue
+                    if i == len(boiling_lines) - 1:
+                        # create new line
+                        boiling_lines.append(
+                            make(
+                                f"boiling_line_{i}", size=(0, 2), is_parent_node=True
+                            ).block
+                        )
+                        make("stub", size=(0, 1))
+                        push(
+                            boiling_lines[-1],
+                            block,
+                            push_func=simple_push,
+                            validator=disjoint_validator,
+                        )
+                        cycle = itertools.cycle(boiling_lines)
 
+                    else:
+                        continue
                 break
 
     if with_cream_cheese:
@@ -98,18 +110,35 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
         for i, ccb in enumerate(list(schedule.iter(cls="cream_cheese_boiling"))):
             block = make_frontend_cream_cheese_boiling(ccb)
 
-            for i in range(4):
+            for i in range(len(boiling_lines)):
                 boiling_line = next(cycle)
                 try:
-                    push(
+                    res = push(
                         boiling_line,
                         block,
                         push_func=simple_push,
                         validator=disjoint_validator,
                     )
+
+                    assert isinstance(res, Block)
                 except:
-                    if i == 3:
-                        raise Exception("Failed to push cream cheese")
+                    print("Failed to push", i)
+                    if i == len(boiling_lines) - 1:
+                        # create new line
+                        print("Creating new line")
+                        boiling_lines.append(
+                            make(
+                                f"boiling_line_{i}", size=(0, 2), is_parent_node=True
+                            ).block
+                        )
+                        make("stub", size=(0, 1))
+                        push(
+                            boiling_lines[-1],
+                            block,
+                            push_func=simple_push,
+                            validator=disjoint_validator,
+                        )
+                        cycle = itertools.cycle(boiling_lines)
                     else:
                         # go for next try
                         continue
