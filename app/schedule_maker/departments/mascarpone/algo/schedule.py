@@ -20,6 +20,9 @@ def validate(b1, b2):
     validate_disjoint_by_axis(
         b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
     )
+    validate_disjoint_by_axis(
+        b1["boiling_process"]["pouring"], b2["boiling_process"]["pouring"]
+    )
 
 
 validator.add("mascarpone_boiling_group", "mascarpone_boiling_group", validate)

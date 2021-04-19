@@ -53,7 +53,11 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
         )
         make("stub", size=(0, 1))
 
-    for mbg in schedule.iter(cls="mascarpone_boiling_group"):
+    # non-cream
+    for mbg in schedule.iter(
+        cls="mascarpone_boiling_group",
+        boiling_group_dfs=lambda dfs: not dfs[0].iloc[0]["is_cream"],
+    ):
         line_nums = mbg.props["line_nums"]
 
         for i, boiling in enumerate(listify(mbg["boiling"])):
@@ -61,6 +65,33 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
                 boiling["boiling_process"]
             )
             push(boiling_lines[line_nums[i] - 1], frontend_boiling, push_func=add_push)
+
+    # cream
+    cycle = itertools.cycle(boiling_lines)
+    for mbg in schedule.iter(
+        cls="mascarpone_boiling_group",
+        boiling_group_dfs=lambda dfs: dfs[0].iloc[0]["is_cream"],
+    ):
+        for i, boiling in enumerate(listify(mbg["boiling"])):
+            block = make_frontend_mascarpone_boiling(boiling["boiling_process"])
+            for i in range(4):
+                boiling_line = next(cycle)
+                try:
+                    res = push(
+                        boiling_line,
+                        block,
+                        push_func=simple_push,
+                        validator=disjoint_validator,
+                    )
+                    assert isinstance(res, Block)
+                except:
+                    if i == 3:
+                        raise Exception("Failed to push cream")
+                    else:
+                        # go for next try
+                        continue
+
+                break
 
     if with_cream_cheese:
         cycle = itertools.cycle(boiling_lines)
@@ -70,7 +101,12 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
             for i in range(4):
                 boiling_line = next(cycle)
                 try:
-                    push(boiling_line, block, push_func=simple_push)
+                    push(
+                        boiling_line,
+                        block,
+                        push_func=simple_push,
+                        validator=disjoint_validator,
+                    )
                 except:
                     if i == 3:
                         raise Exception("Failed to push cream cheese")
