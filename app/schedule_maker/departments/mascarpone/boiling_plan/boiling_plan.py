@@ -86,7 +86,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
 
         sourdoughs = []
         for s in sourdough_range.split("-"):
-            if s == "None" or np.isnan(s):
+            if s == "None" or is_none(s):
                 assert (
                     grp.iloc[0]["type"] == "mascarpone" and grp.iloc[0]["is_cream"]
                 ), "Для одной из варок не указаны заквасочники."
