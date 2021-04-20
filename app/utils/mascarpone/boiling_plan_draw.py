@@ -58,7 +58,7 @@ def draw_fermentators(wb):
     excel_client = ExcelBlock(wb[sheet_name])
     cur_i = 2
     for fermentators in [
-        ["1-2"], ["3-4"], ["1"], ["2"], ["3"], ["4"], ["5"], ["6"],
+        ["1-2"], ["3-4"], ["1"], ["2"], ["3"], ["4"], ["5"], ["6"], ["7"],
     ]:
         excel_client.draw_row(
             cur_i,
