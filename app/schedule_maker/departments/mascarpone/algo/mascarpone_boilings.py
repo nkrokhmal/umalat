@@ -15,7 +15,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
 
     boiling_models = sku.made_from_boilings
-    boiling_model = delistify(boiling_models[0], single=True)
+    boiling_model = delistify(boiling_models, single=True)
 
     maker, make = init_block_maker(
         "boiling",
@@ -40,7 +40,6 @@ def make_mascorpone_boiling(boiling_group_df, **props):
     assert (
         len(boiling_technologies) == 1
     ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"
-
     bt = delistify(boiling_technologies)
 
     with make("boiling_process"):
