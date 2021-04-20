@@ -8,6 +8,7 @@ from app.schedule_maker.algo.packing import *
 from app.enum import LineName
 
 from app.schedule_maker.algo.schedule.awaiting_pusher import AwaitingPusher
+from datetime import datetime
 
 # todo: optimize
 # class_validator = ClassValidator(window=10, window_by_classes={'boiling': {'boiling': 4, 'cleaning': 1, 'packing_configuration': 2},
