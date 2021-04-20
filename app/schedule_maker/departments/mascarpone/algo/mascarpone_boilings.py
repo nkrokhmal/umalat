@@ -33,30 +33,22 @@ def make_mascorpone_boiling(boiling_group_df, **props):
             in boiling_technology.sourdoughs
         ]
     else:
-        # todo: make properly
         boiling_technologies = boiling_model.boiling_technologies[:1]
+        # boiling_technologies = [
+        #     delistify(boiling_model.boiling_technologies, single=True)
+        # ]
     assert (
         len(boiling_technologies) == 1
     ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"
 
     bt = delistify(boiling_technologies)
 
-    # todo: hardcode
-    bt = dotdict(
-        {
-            "pouring_time": bt.pouring_time,
-            "heating_time": bt.heating_time,
-            "adding_lactic_acid_time": bt.adding_lactic_acid_time,
-            "pumping_off": bt.separation_time,
-        }
-    )
-
     with make("boiling_process"):
         make("pouring", size=(bt.pouring_time // 5, 0))
         make("heating", size=(bt.heating_time // 5, 0))
         make("waiting", size=[0, 0])
         make("adding_lactic_acid", size=(bt.adding_lactic_acid_time // 5, 0))
-        make("pumping_off", size=(bt.pumping_off // 5, 0))
+        make("pumping_off", size=(bt.pumping_off_time // 5, 0))
 
     packing_process_start = (
         maker.root["boiling_process"].y[0]
@@ -68,6 +60,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
             make("N", size=(0, 0))
         else:
             make("N", size=(2, 0))
+        make("ingredient", size=(bt.ingredient_time // 5, 0))
         make("P", size=(2, 0))
 
         packing_start = (

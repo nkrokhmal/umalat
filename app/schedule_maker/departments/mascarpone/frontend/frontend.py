@@ -192,6 +192,11 @@ def make_packing_line(schedule):
             )
             make("N", size=(p["N"].size[0], 1), x=(p["N"].x[0], 0), push_func=add_push)
             make(
+                "ingredient",
+                size=(p["ingredient"].size[0], 1),
+                x=(p["ingredient"].x[0], 0),
+            )
+            make(
                 "P",
                 size=(p["P"].size[0], 1),
                 x=(p["P"].x[0], 0),
