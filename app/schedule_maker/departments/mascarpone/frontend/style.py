@@ -9,6 +9,7 @@ STYLE = {
     "heating": {"color": "red", "text": "нагрев"},
     "waiting": {"color": "white", "text": "ожидание"},
     "adding_lactic_acid": {"color": "yellow", "text": "4"},
+    "ingredient": {"color": "#C0504D", "text": "внесение ингредиентов"},  # brown
     "pumping_off": {
         "color": "#00B0F0",
         "text": lambda b: "перекачивание в 2 бак"

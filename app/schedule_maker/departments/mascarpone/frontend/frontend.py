@@ -122,10 +122,9 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
 
                     assert isinstance(res, Block)
                 except:
-                    print("Failed to push", i)
                     if i == len(boiling_lines) - 1:
                         # create new line
-                        print("Creating new line")
+                        # print("Creating new line")
                         boiling_lines.append(
                             make(
                                 f"boiling_line_{i}", size=(0, 2), is_parent_node=True
@@ -191,6 +190,12 @@ def make_packing_line(schedule):
                 push_func=add_push,
             )
             make("N", size=(p["N"].size[0], 1), x=(p["N"].x[0], 0), push_func=add_push)
+            make(
+                "ingredient",
+                size=(p["ingredient"].size[0], 1),
+                x=(p["ingredient"].x[0], 0),
+                push_func=add_push,
+            )
             make(
                 "P",
                 size=(p["P"].size[0], 1),
