@@ -178,7 +178,7 @@ def fill_sku():
             brand_name=sku["Имя бренда"],
             weight_netto=sku["Вес нетто"],
             shelf_life=sku["Срок хранения"],
-            packing_speed=60 / sku["Скорость упаковки"] * sku["Выход"][0],
+            packing_speed=sku["Скорость упаковки"],
             in_box=sku["Коробки"],
         )
 
