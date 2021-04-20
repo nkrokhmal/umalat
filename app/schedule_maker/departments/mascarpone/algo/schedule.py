@@ -30,6 +30,7 @@ def validate(b1, b2):
 
     assert b1["packing_process"]["P"].x[0] <= b2["boiling_process"]["pumping_off"].x[0]
 
+
 validator.add("mascarpone_boiling_group", "mascarpone_boiling_group", validate)
 
 

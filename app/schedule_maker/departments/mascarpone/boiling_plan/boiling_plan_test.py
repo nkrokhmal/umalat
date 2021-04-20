@@ -9,8 +9,10 @@ from config import DebugConfig
 def test_read_boiling_plan():
     print(
         read_boiling_plan(
-            DebugConfig.abs_path("app/data/inputs/mascarpone/2021_04_18_крем_чиза.xlsx")
-        ).iloc[0]
+            DebugConfig.abs_path(
+                "app/data/inputs/mascarpone/2021_04_21_План_по_варкам_маскарпоне_14.xlsx"
+            )
+        )[["batch_id", "boiling_id", "sku", "kg"]]
     )
 
 
