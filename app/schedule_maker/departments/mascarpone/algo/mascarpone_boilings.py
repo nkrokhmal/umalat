@@ -25,22 +25,25 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         **props,
     )
 
-    if not is_cream:
-        boiling_technologies = [
-            boiling_technology
-            for boiling_technology in boiling_model.boiling_technologies
-            if cast_model(MascarponeSourdough, sourdough)
-            in boiling_technology.sourdoughs
-        ]
-    else:
-        boiling_technologies = boiling_model.boiling_technologies[:1]
-        # boiling_technologies = [
-        #     delistify(boiling_model.boiling_technologies, single=True)
-        # ]
-    assert (
-        len(boiling_technologies) == 1
-    ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"
-    bt = delistify(boiling_technologies)
+    def get_boiling_technology_from_boiling_model(boiling_model):
+        if not is_cream:
+            boiling_technologies = [
+                boiling_technology
+                for boiling_technology in boiling_model.boiling_technologies
+                if cast_model(MascarponeSourdough, sourdough)
+                in boiling_technology.sourdoughs
+            ]
+        else:
+            boiling_technologies = boiling_model.boiling_technologies[:1]
+            # boiling_technologies = [
+            #     delistify(boiling_model.boiling_technologies, single=True)
+            # ]
+        assert (
+            len(boiling_technologies) == 1
+        ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"
+        return delistify(boiling_technologies, single=True)
+
+    bt = get_boiling_technology_from_boiling_model(boiling_model)
 
     with make("boiling_process"):
         make("pouring", size=(bt.pouring_time // 5, 0))
