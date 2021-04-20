@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 from app import db
 from app.models import *
@@ -22,6 +24,7 @@ def add_fields(result, type):
 
         result["coeff"] = result["sku"].apply(lambda sku: sku.made_from_boilings[0].output_coeff)
         result["kg"] = result["kg"] / result["coeff"]
+        result["kg"] = result["kg"].apply(lambda x: math.ceil(x))
 
         result = result[
             [
