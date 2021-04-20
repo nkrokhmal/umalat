@@ -18,8 +18,8 @@ def validate(b1, b2):
         validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"])
 
     assert (
-        b1["packing_process"]["packing"].y[0] + 2
-        <= b2["packing_process"]["packing"].x[0]
+        b1["packing_process"]["packing_group"].y[0] + 2
+        <= b2["packing_process"]["packing_group"].x[0]
     )
     validate_disjoint_by_axis(
         b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
