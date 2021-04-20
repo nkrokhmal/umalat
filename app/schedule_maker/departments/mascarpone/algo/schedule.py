@@ -13,6 +13,10 @@ def validate(b1, b2):
     b1 = listify(b1["boiling"])[-1]
     b2 = listify(b2["boiling"])[0]
 
+    if sum([b1.props.get("is_cream", False), b2.props.get("is_cream", False)]) == 1:
+        # one is cream and one is not
+        validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"])
+
     assert (
         b1["packing_process"]["packing"].y[0] + 2
         <= b2["packing_process"]["packing"].x[0]
@@ -24,6 +28,7 @@ def validate(b1, b2):
         b1["boiling_process"]["pouring"], b2["boiling_process"]["pouring"]
     )
 
+    assert b1["packing_process"]["P"].x[0] <= b2["boiling_process"]["pumping_off"].x[0]
 
 validator.add("mascarpone_boiling_group", "mascarpone_boiling_group", validate)
 
