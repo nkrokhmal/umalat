@@ -25,22 +25,25 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         **props,
     )
 
-    if not is_cream:
-        boiling_technologies = [
-            boiling_technology
-            for boiling_technology in boiling_model.boiling_technologies
-            if cast_model(MascarponeSourdough, sourdough)
-            in boiling_technology.sourdoughs
-        ]
-    else:
-        boiling_technologies = boiling_model.boiling_technologies[:1]
-        # boiling_technologies = [
-        #     delistify(boiling_model.boiling_technologies, single=True)
-        # ]
-    assert (
-        len(boiling_technologies) == 1
-    ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"
-    bt = delistify(boiling_technologies)
+    def get_boiling_technology_from_boiling_model(boiling_model):
+        if not is_cream:
+            boiling_technologies = [
+                boiling_technology
+                for boiling_technology in boiling_model.boiling_technologies
+                if cast_model(MascarponeSourdough, sourdough)
+                in boiling_technology.sourdoughs
+            ]
+        else:
+            boiling_technologies = boiling_model.boiling_technologies[:1]
+            # boiling_technologies = [
+            #     delistify(boiling_model.boiling_technologies, single=True)
+            # ]
+        assert (
+            len(boiling_technologies) == 1
+        ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"
+        return delistify(boiling_technologies, single=True)
+
+    bt = get_boiling_technology_from_boiling_model(boiling_model)
 
     with make("boiling_process"):
         make("pouring", size=(bt.pouring_time // 5, 0))
@@ -62,24 +65,26 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         make("ingredient", size=(bt.ingredient_time // 5, 0))
         make("P", size=(2, 0))
 
-        packing_start = (
-            maker.root["packing_process"]["P"].props.relative_props["x"][0] + 1
-        )
-
-        packing_time = sum(
-            [
-                row["kg"] / row["sku"].packing_speed * 60
-                for i, row in boiling_group_df.iterrows()
-            ]
-        )
-        packing_time = int(custom_round(packing_time, 5, "ceil", pre_round_precision=1))
-
-        make(
-            "packing",
-            x=(packing_start, 0),
-            size=(packing_time // 5, 0),
+        with make(
+            "packing_group",
+            x=(maker.root["packing_process"]["P"].props.relative_props["x"][0] + 1, 0),
             push_func=add_push,
-        )
+        ):
+            packing_time = sum(
+                [
+                    row["kg"] / row["sku"].packing_speed * 60
+                    for i, row in boiling_group_df.iterrows()
+                ]
+            )
+            packing_time = int(
+                custom_round(packing_time, 5, "ceil", pre_round_precision=1)
+            )
+
+            make(
+                "packing",
+                size=(packing_time // 5, 0),
+                push_func=add_push,
+            )
     return maker.root
 
 
@@ -103,7 +108,8 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
 
     def validate(b1, b2):
         validate_disjoint_by_axis(
-            b1["packing_process"]["packing"], b2["packing_process"]["packing"]
+            b1["packing_process"]["packing_group"],
+            b2["packing_process"]["packing_group"],
         )
         # just in case, not needed in reality
         validate_disjoint_by_axis(

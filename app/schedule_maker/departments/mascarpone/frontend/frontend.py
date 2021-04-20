@@ -183,26 +183,20 @@ def make_packing_line(schedule):
             push_func=add_push,
         )
         for p in packing_processes:
-            make(
-                "packing",
-                size=(p["packing"].size[0], 1),
-                x=(p["packing"].x[0], 1),
-                push_func=add_push,
-            )
-            make("N", size=(p["N"].size[0], 1), x=(p["N"].x[0], 0), push_func=add_push)
-            make(
-                "ingredient",
-                size=(p["ingredient"].size[0], 1),
-                x=(p["ingredient"].x[0], 0),
-                push_func=add_push,
-            )
-            make(
-                "P",
-                size=(p["P"].size[0], 1),
-                x=(p["P"].x[0], 0),
-                is_cream=is_cream,
-                push_func=add_push,
-            )
+            for block in p.iter(cls=lambda cls: cls in ["N", "ingredient", "P"]):
+                make(
+                    block.props["cls"],
+                    size=(block.size[0], 1),
+                    x=(block.x[0], 0),
+                    push_func=add_push,
+                )
+            for block in p.iter(cls="packing"):
+                make(
+                    "packing",
+                    size=(block.size[0], 1),
+                    x=(block.x[0], 1),
+                    push_func=add_push,
+                )
 
     return maker.root
 
