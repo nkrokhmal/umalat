@@ -56,8 +56,6 @@ def mascarpone_boiling_plan_create(df):
     cream_result = handle_cream(df)
     cream_result = add_fields(cream_result, "cream")
 
-    print(cream_result)
-
     return mascarpone_result, cream_cheese_result, cream_result
 
 
@@ -88,21 +86,24 @@ def cream_cheese_proceed_order(order, df, boilings):
     df_filter = df[
         (df["group"].isin(order.groups))
     ].sort_values(by=["group", "percent"])
+
     if not df_filter.empty:
         output_ton = df_filter["sku"].apply(lambda x: x.made_from_boilings[0].output_ton).iloc[0]
         boilings.init_iterator(output_ton)
 
-        df_group_dict = df_filter.to_dict("records")
+        df_filter_groups = [group for _, group in df_filter.groupby("boiling_id")]
+        for df_filter_group in df_filter_groups:
+            df_group_dict = df_filter_group.to_dict("records")
 
-        boilings.add_group(
-            df_group_dict
-        )
+            boilings.add_group(
+                df_group_dict
+            )
     return boilings
 
 
 def handle_mascarpone(df):
     output_tons = sorted(list(set([x.output_ton for x in db.session.query(MascarponeBoilingTechnology).all()])), reverse=True)
-    output_tons = [x + min(output_tons) for x in output_tons]
+    output_tons = [max(output_tons) + min(output_tons), 2 * min(output_tons)]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
     Order = namedtuple("Collection", "flavoring_agent, group")
@@ -117,7 +118,7 @@ def handle_mascarpone(df):
 
 
 def handle_cream(df):
-    output_tons = [500]
+    output_tons = [250]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
     Order = namedtuple("Collection", "flavoring_agent, group")

@@ -25,6 +25,7 @@ def fill_boiling_technologies():
         "Посолка",
         "П",
         "Процент",
+        "Вес нетто",
     ]
     bt_data = df[boiling_technologies_columns]
     bt_data = bt_data.drop_duplicates()
@@ -33,7 +34,9 @@ def fill_boiling_technologies():
         line_name = LineName.MASCARPONE
         technology = CreamCheeseBoilingTechnology(
             name=CreamCheeseBoilingTechnology.create_name(
-                line=line_name, percent=bt["Процент"], form_factor=bt["Название форм фактора"]
+                line=line_name, percent=bt["Процент"],
+                weight=bt["Вес нетто"],
+                form_factor=bt["Название форм фактора"]
             ),
             cooling_time=bt["Охлаждение"],
             separation_time=bt["Сепарирование"],
@@ -59,6 +62,7 @@ def fill_boilings():
         "П",
         "Коэффициент",
         "Выход",
+        "Вес нетто",
     ]
     b_data = df[columns]
     b_data = b_data.drop_duplicates()
@@ -76,7 +80,9 @@ def fill_boilings():
             & (
                 x.name
                 == CreamCheeseBoilingTechnology.create_name(
-                    line=line_name, percent=b["Процент"], form_factor=b["Название форм фактора"]
+                    line=line_name, percent=b["Процент"],
+                    form_factor=b["Название форм фактора"],
+                    weight=b["Вес нетто"],
                 )
             )
         ]
@@ -85,7 +91,8 @@ def fill_boilings():
             output_ton=b["Выход"],
             output_coeff=b["Коэффициент"],
             boiling_technologies=bts_name,
-            line_id=line_id
+            line_id=line_id,
+            weight_netto=b["Вес нетто"],
         )
         db.session.add(boiling)
         db.session.commit()
@@ -146,7 +153,8 @@ def fill_sku():
         add_sku.made_from_boilings = [
             x
             for x in boilings
-            if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id) & (x.output_coeff == sku["Коэффициент"])
+            if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id) & (x.output_coeff == sku["Коэффициент"]) &
+               (x.weight_netto == sku["Вес нетто"])
         ]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]

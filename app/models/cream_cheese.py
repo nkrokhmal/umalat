@@ -28,6 +28,7 @@ class CreamCheeseBoiling(Boiling):
     __mapper_args__ = {"polymorphic_identity": "cream_cheese_boiling"}
 
     id = db.Column(db.Integer, db.ForeignKey("boilings.id"), primary_key=True)
+    weight_netto = db.Column(db.Float)
     percent = db.Column(db.Integer)
     output_ton = db.Column(db.Integer)
 
@@ -50,10 +51,10 @@ class CreamCheeseBoilingTechnology(BoilingTechnology):
     p_time = db.Column(db.Integer)
 
     @staticmethod
-    def create_name(form_factor, line, percent):
+    def create_name(form_factor, line, percent, weight):
         boiling_name = [percent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, Форм фактор {}, {}".format(line, form_factor, boiling_name)
+        return "Линия {}, Форм фактор {}, Вес {}, {}".format(line, form_factor, weight, boiling_name)
 
 
 class CreamCheeseFermentator(db.Model):

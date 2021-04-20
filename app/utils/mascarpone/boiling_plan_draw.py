@@ -107,7 +107,10 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None, normal
             values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
 
         for v in values:
+            if v[COLUMNS["name"]] != "-":
+                del v[COLUMNS["boiling_type"]]
             value = v.values()
+
             column = [x.col for x in v.keys()]
             formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
                 cur_row,
@@ -125,6 +128,7 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None, normal
                 set_border=False,
             )
             excel_client.draw_row(row=cur_row, values=value, cols=column, set_border=False)
+            excel_client.color_cell(row=cur_row, col=COLUMNS["boiling_type"].col)
             excel_client.color_cell(row=cur_row, col=COLUMNS["kg_output"].col)
 
             if type:

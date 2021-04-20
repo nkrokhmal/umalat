@@ -91,6 +91,7 @@ def fill_boilings():
         "Процент",
         "Линия",
         "Вес",
+        "Коэффициент",
     ]
     b_data = df[columns]
     b_data = b_data.drop_duplicates().fillna("")
@@ -119,6 +120,7 @@ def fill_boilings():
             percent=b["Процент"],
             flavoring_agent=b["Вкусовая добавка"],
             boiling_technologies=bts_name,
+            output_coeff=b["Коэффициент"],
             line_id=line_id,
         )
         db.session.add(boiling)

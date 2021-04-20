@@ -63,7 +63,9 @@ def proceed_order(order, df, boilings_ricotta, boilings_count=1):
             df_filter["number_of_tanks"] * df_filter["output_per_tank"]
         )
         df_filter["output"] = df_filter["output"].apply(lambda x: int(x))
-        df_filter_groups = [group for _, group in df_filter.groupby("output")]
+
+        # df_filter_groups = [group for _, group in df_filter.groupby("output")]
+        df_filter_groups = [group for _, group in df_filter.groupby(["boiling_id", "output"])]
         for df_filter_group in df_filter_groups:
             boilings_ricotta.init_iterator(df_filter_group["output"].iloc[0])
             boilings_ricotta.add_group(
