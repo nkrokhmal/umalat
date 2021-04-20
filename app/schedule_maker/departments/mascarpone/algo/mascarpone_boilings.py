@@ -47,7 +47,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
             "pouring_time": bt.pouring_time,
             "heating_time": bt.heating_time,
             "adding_lactic_acid_time": bt.adding_lactic_acid_time,
-            "pumping_out": bt.separation_time,
+            "pumping_off": bt.separation_time,
         }
     )
 
@@ -56,8 +56,14 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         make("heating", size=(bt.heating_time // 5, 0))
         make("waiting", size=[0, 0])
         make("adding_lactic_acid", size=(bt.adding_lactic_acid_time // 5, 0))
-        make("pumping_off", size=(bt.pumping_out // 5, 0))
-    with make("packing_process", x=(maker.root["boiling_process"].x[0], 0)):
+        make("pumping_off", size=(bt.pumping_off // 5, 0))
+
+    packing_process_start = (
+        maker.root["boiling_process"].y[0]
+        if not is_cream
+        else maker.root["boiling_process"]["pumping_off"].x[0] + 3
+    )
+    with make("packing_process", x=(packing_process_start, 0), push_func=add_push):
         if is_cream:
             make("N", size=(0, 0))
         else:
@@ -116,6 +122,11 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
             >= b1["boiling_process"]["pouring"].y[0]
         )
 
+        # make separation not before pumping_out
+        assert (
+            b1["packing_process"]["P"].x[0] <= b2["boiling_process"]["pumping_off"].x[0]
+        )
+
     validator.add("boiling", "boiling", validate)
 
     maker, make = init_block_maker(
@@ -137,8 +148,8 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
             validator=validator,
         )
 
-    # fix waiting time
     if len(boiling_group_dfs) == 2:
+        # fix waiting time
         b1, b2 = mascarpone_boilings
         waiting_size = (
             b2["boiling_process"]["pouring"].x[0]
@@ -151,4 +162,5 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
             b = b2["boiling_process"][key]
             b.props.update(x=(b.props["x_rel"][0] + waiting_size, 0))
         b2["boiling_process"]["waiting"].props.update(size=(waiting_size, 0))
+
     return maker.root

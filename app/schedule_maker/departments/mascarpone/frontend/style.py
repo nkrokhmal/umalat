@@ -27,7 +27,7 @@ STYLE = {
     "cream_cheese_boiling_label1": {
         "color": "white",
         "text": lambda b: "Кремчиз/1000л/бак {}".format(
-            ",".join(b.props["sourdoughs"])
+            ",".join([str(x) for x in b.props["sourdoughs"]])
         ),
     },
     "cream_cheese_boiling_label2": {

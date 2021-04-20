@@ -43,6 +43,7 @@ def make_frontend_mascarpone_boiling(boiling_process):
 
 
 def make_mascarpone_lines(schedule, with_cream_cheese=False):
+
     maker, make = init_block_maker("mascarpone_lines", axis=1)
 
     boiling_lines = []
@@ -52,7 +53,11 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
         )
         make("stub", size=(0, 1))
 
-    for mbg in listify(schedule["mascarpone_boiling_group"]):
+    # non-cream
+    for mbg in schedule.iter(
+        cls="mascarpone_boiling_group",
+        boiling_group_dfs=lambda dfs: not dfs[0].iloc[0]["is_cream"],
+    ):
         line_nums = mbg.props["line_nums"]
 
         for i, boiling in enumerate(listify(mbg["boiling"])):
@@ -61,18 +66,79 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
             )
             push(boiling_lines[line_nums[i] - 1], frontend_boiling, push_func=add_push)
 
+    # cream
+    cycle = itertools.cycle(boiling_lines)
+    for mbg in schedule.iter(
+        cls="mascarpone_boiling_group",
+        boiling_group_dfs=lambda dfs: dfs[0].iloc[0]["is_cream"],
+    ):
+        for i, boiling in enumerate(listify(mbg["boiling"])):
+            block = make_frontend_mascarpone_boiling(boiling["boiling_process"])
+            for i in range(len(boiling_lines)):
+                boiling_line = next(cycle)
+                try:
+                    res = push(
+                        boiling_line,
+                        block,
+                        push_func=simple_push,
+                        validator=disjoint_validator,
+                    )
+                    assert isinstance(res, Block)
+                except:
+                    if i == len(boiling_lines) - 1:
+                        # create new line
+                        boiling_lines.append(
+                            make(
+                                f"boiling_line_{i}", size=(0, 2), is_parent_node=True
+                            ).block
+                        )
+                        make("stub", size=(0, 1))
+                        push(
+                            boiling_lines[-1],
+                            block,
+                            push_func=simple_push,
+                            validator=disjoint_validator,
+                        )
+                        cycle = itertools.cycle(boiling_lines)
+
+                    else:
+                        continue
+                break
+
     if with_cream_cheese:
         cycle = itertools.cycle(boiling_lines)
         for i, ccb in enumerate(list(schedule.iter(cls="cream_cheese_boiling"))):
             block = make_frontend_cream_cheese_boiling(ccb)
 
-            for i in range(4):
+            for i in range(len(boiling_lines)):
                 boiling_line = next(cycle)
                 try:
-                    push(boiling_line, block, push_func=simple_push)
+                    res = push(
+                        boiling_line,
+                        block,
+                        push_func=simple_push,
+                        validator=disjoint_validator,
+                    )
+
+                    assert isinstance(res, Block)
                 except:
-                    if i == 3:
-                        raise Exception("Failed to push cream cheese")
+                    print("Failed to push", i)
+                    if i == len(boiling_lines) - 1:
+                        # create new line
+                        print("Creating new line")
+                        boiling_lines.append(
+                            make(
+                                f"boiling_line_{i}", size=(0, 2), is_parent_node=True
+                            ).block
+                        )
+                        make("stub", size=(0, 1))
+                        push(
+                            boiling_lines[-1],
+                            block,
+                            push_func=simple_push,
+                            validator=disjoint_validator,
+                        )
+                        cycle = itertools.cycle(boiling_lines)
                     else:
                         # go for next try
                         continue
@@ -103,18 +169,20 @@ def make_cream_cheese_lines(schedule, boiling_lines=None):
 def make_packing_line(schedule):
     maker, make = init_block_maker("packing_line", axis=1)
 
+    if "mascarpone_boiling_group" not in [c.props["cls"] for c in schedule.children]:
+        return
+
     for mbg in listify(schedule["mascarpone_boiling_group"]):
         packing_processes = [b["packing_process"] for b in listify(mbg["boiling"])]
         is_cream = mbg.props["boiling_group_dfs"][0].iloc[0]["is_cream"]
 
-        if not is_cream:
-            make(
-                "packing_num",
-                size=(2, 1),
-                x=(packing_processes[0]["P"].x[0] - 1, 1),
-                batch_id=mbg.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
-                push_func=add_push,
-            )
+        make(
+            "packing_num",
+            size=(2, 1),
+            x=(packing_processes[0]["P"].x[0] - 1, 1),
+            batch_id=mbg.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
+            push_func=add_push,
+        )
         for p in packing_processes:
             make(
                 "packing",
