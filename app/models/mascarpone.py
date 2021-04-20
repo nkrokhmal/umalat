@@ -54,7 +54,8 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     heating_time = db.Column(db.Integer)
     adding_lactic_acid_time = db.Column(db.Integer)
     output_ton = db.Column(db.Integer)
-    separation_time = db.Column(db.Integer)
+    pumping_off_time = db.Column(db.Integer)
+    ingredient_time = db.Column(db.Integer)
     line_id = db.Column(db.Integer, db.ForeignKey("mascarpone_lines.id"), nullable=True)
 
     @staticmethod

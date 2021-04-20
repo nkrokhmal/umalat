@@ -41,6 +41,7 @@ def fill_boiling_technologies():
         "Нагрев",
         "Молочная кислота",
         "Сепарирование",
+        "Внесение ингредиентов",
         "Процент",
         "Вкусовая добавка",
         "Вес",
@@ -72,7 +73,8 @@ def fill_boiling_technologies():
                 pouring_time=bt["Прием"][i],
                 heating_time=bt["Нагрев"][i],
                 adding_lactic_acid_time=bt["Молочная кислота"][i],
-                separation_time=bt["Сепарирование"][i],
+                pumping_off_time=bt["Сепарирование"][i],
+                ingredient_time=bt["Внесение ингредиентов"],
                 weight=bt["Вес"][i],
                 output_ton=bt["Выход"][i],
             )
