@@ -61,7 +61,8 @@ def fill_boiling_technologies():
         bt_data[column_name] = bt_data[column_name].apply(lambda x: json.loads(x))
     bt_data = bt_data.to_dict("records")
     for bt in bt_data:
-        for i in range(2):
+        n = 1 if bt["Название форм фактора"] == "Сливки" else 2
+        for i in range(n):
             line_name = LineName.MASCARPONE
             technology = MascarponeBoilingTechnology(
                 name=MascarponeBoilingTechnology.create_name(

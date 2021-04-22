@@ -20,7 +20,7 @@ def add_fields(result, type):
         if type == "mascarpone":
             result["fermentators"] = result["output"].apply(lambda x: "1-2" if x == max_output else "3-4")
         else:
-            result["fermentators"] = ""
+            result["fermentators"] = "-"
 
         result["coeff"] = result["sku"].apply(lambda sku: sku.made_from_boilings[0].output_coeff)
         result["kg"] = result["kg"] / result["coeff"]

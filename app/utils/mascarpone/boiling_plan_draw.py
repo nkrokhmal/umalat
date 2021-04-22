@@ -30,6 +30,52 @@ SKU_SHEET_NAME = "SKU Маскарпоне"
 PLAN_SHEET_NAME = "План варок"
 
 
+def draw_skus_fermentator(wb):
+    sheet_name = 'SKU заквасочник'
+    excel_client = ExcelBlock(wb[sheet_name])
+
+    cur_i = 1
+    fermentators = ["", "1-2", "3-4", "1", "2", "3", "4", "5", "6", "7", "-",]
+
+    excel_client.draw_row(
+        cur_i,
+        fermentators,
+        set_border=False,
+    )
+    cur_i += 1
+
+    excel_client.draw_row(
+        cur_i,
+        ["-"],
+        set_border=False,
+    )
+    cur_i += 1
+
+    skus_mascarpone = db.session.query(MascarponeSKU).all()
+    for sku in skus_mascarpone:
+        if sku.group.name == 'Маскарпоне':
+            sku_fermentator = [sku.name, 480, 450, 255] + [225] * 3 + [""] * 4
+        else:
+            sku_fermentator = [sku.name] + [""] * 9 + [250]
+
+        excel_client.draw_row(
+            cur_i,
+            sku_fermentator,
+            set_border=False,
+        )
+        cur_i += 1
+
+    skus_cream_cheese = db.session.query(CreamCheeseSKU).all()
+    for sku in skus_cream_cheese:
+        sku_fermentator = [sku.name] + [""] * 2 + [450] * 8
+        excel_client.draw_row(
+            cur_i,
+            sku_fermentator,
+            set_border=False,
+        )
+        cur_i += 1
+
+
 def draw_skus(wb, data_sku, sheet_name, cur_i=None):
     grouped_skus = data_sku
     grouped_skus.sort(key=lambda x: x.name, reverse=False)
@@ -109,6 +155,7 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None, normal
         for v in values:
             if v[COLUMNS["name"]] != "-":
                 del v[COLUMNS["boiling_type"]]
+                del v[COLUMNS["output"]]
             value = v.values()
 
             column = [x.col for x in v.keys()]
@@ -128,7 +175,9 @@ def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None, normal
                 set_border=False,
             )
             excel_client.draw_row(row=cur_row, values=value, cols=column, set_border=False)
+
             excel_client.color_cell(row=cur_row, col=COLUMNS["boiling_type"].col)
+            excel_client.color_cell(row=cur_row, col=COLUMNS["output"].col)
             excel_client.color_cell(row=cur_row, col=COLUMNS["kg_output"].col)
 
             if type:
@@ -154,6 +203,7 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
     cur_i = draw_skus(wb, mascarpone_skus, SKU_SHEET_NAME, cur_i)
     cur_i = draw_skus(wb, cream_cheese_skus, SKU_SHEET_NAME, cur_i)
     _ = draw_skus(wb, cream_skus, "SKU Маскарпоне", cur_i)
+    draw_skus_fermentator(wb)
 
     draw_fermentators(wb)
 
