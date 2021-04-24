@@ -35,13 +35,6 @@ def draw_skus_fermentator(wb):
     excel_client = ExcelBlock(wb[sheet_name])
 
     cur_i = 1
-    fermentators = ["", "1-2", "3-4", "1", "2", "3", "4", "5", "6", "7", "-",]
-
-    excel_client.draw_row(
-        cur_i,
-        fermentators,
-        set_border=False,
-    )
     cur_i += 1
 
     excel_client.draw_row(
