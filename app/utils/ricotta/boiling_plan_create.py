@@ -3,6 +3,7 @@ from app import db
 from app.models import *
 from app.utils.features.merge_boiling_utils import Boilings
 from collections import namedtuple
+import math
 
 
 POPULAR_NAMES = {
@@ -37,6 +38,7 @@ def boiling_plan_create(df, request_ton=0):
     result = result[
         [
             "id",
+            "sku",
             "number_of_tanks",
             "group",
             "output",
@@ -46,8 +48,25 @@ def boiling_plan_create(df, request_ton=0):
             "boiling_count",
         ]
     ]
-    print(result)
+    result = group_result(result)
     return result
+
+
+def group_result(df):
+    agg = {
+        'id': 'first',
+        'sku': 'first',
+        'number_of_tanks': 'sum',
+        'group': 'first',
+        'output': 'first',
+        'boiling_type': 'first',
+        'kg': 'sum',
+        'boiling_count': 'sum',
+    }
+    df['number_of_tanks'] = df['boiling_count'].apply(lambda x: math.floor(x)) * \
+                            df['sku'].apply(lambda x: x.made_from_boilings[0].number_of_tanks)
+
+    return df.groupby('name', as_index=False).agg(agg)
 
 
 def proceed_order(order, df, boilings_ricotta, boilings_count=1):
@@ -65,7 +84,7 @@ def proceed_order(order, df, boilings_ricotta, boilings_count=1):
         df_filter["output"] = df_filter["output"].apply(lambda x: int(x))
 
         # df_filter_groups = [group for _, group in df_filter.groupby("output")]
-        df_filter_groups = [group for _, group in df_filter.groupby(["boiling_id", "output"])]
+        df_filter_groups = [group for _, group in df_filter.groupby(["sku_id"])]
         for df_filter_group in df_filter_groups:
             boilings_ricotta.init_iterator(df_filter_group["output"].iloc[0])
             boilings_ricotta.add_group(
