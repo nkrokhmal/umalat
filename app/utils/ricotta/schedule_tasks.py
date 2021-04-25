@@ -98,6 +98,45 @@ def draw_header(excel_client, date, cur_row, task_name, is_boiling=None):
     return cur_row, excel_client
 
 
+def draw_task_original(excel_client, df, date, cur_row, task_name):
+    df_filter = df
+    index = 1
+
+    cur_row, excel_client = draw_header(excel_client, date, cur_row, task_name)
+
+    for sku_name, grp in df_filter.groupby("sku_name"):
+        excel_client.raw_dimension(cur_row, DIMENSIONS["body"])
+        excel_client.font_size = FONTS["body"]
+        excel_client.colour = COLOR[1:]
+
+        excel_client.draw_cell(col=COLUMNS["index"].col, row=cur_row, value=index)
+        excel_client.colour = None
+        excel_client.merge_cells(
+            beg_col=COLUMNS["sku"].col,
+            beg_row=cur_row,
+            end_col=COLUMNS["in_box"].col - 1,
+            end_row=cur_row,
+            value=sku_name,
+        )
+        excel_client.draw_cell(
+            col=COLUMNS["in_box"].col, row=cur_row, value=grp.iloc[0]["sku"].in_box
+        )
+        kg = round(grp["kg"].sum())
+        boxes_count = math.ceil(
+            grp["kg"].sum()
+            / grp.iloc[0]["sku"].in_box
+            / grp.iloc[0]["sku"].weight_netto
+        )
+        excel_client.draw_cell(col=COLUMNS["kg"].col, row=cur_row, value=kg)
+        excel_client.draw_cell(
+            col=COLUMNS["boxes_count"].col, row=cur_row, value=boxes_count
+        )
+        excel_client.draw_cell(col=COLUMNS["priority"].col, row=cur_row, value="")
+        cur_row += 1
+        index += 1
+    return cur_row
+
+
 def draw_task_new(excel_client, df, date, cur_row, task_name, batch_number):
     cur_row, excel_client = draw_header(excel_client, date, cur_row, task_name, "варки")
     for boiling_group_id, grp in df.groupby("boiling_id"):
@@ -164,13 +203,12 @@ def schedule_task_boilings(wb, df, date, batch_number):
     wb.create_sheet(sheet_name)
     excel_client = ExcelBlock(wb[sheet_name], font_size=9)
 
-    cur_row = draw_task_new(
+    cur_row = draw_task_original(
         excel_client,
         df_copy,
         date,
         cur_row,
         ricotta_task_name,
-        batch_number,
     )
     cur_row += space_row
     return wb
