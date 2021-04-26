@@ -62,29 +62,31 @@ def make_mascorpone_boiling(boiling_group_df, **props):
             make("N", size=(0, 0))
         else:
             make("N", size=(2, 0))
-        make("ingredient", size=(bt.ingredient_time // 5, 0))
-        make("P", size=(2, 0))
+        with make("packing_group"):
+            for ind, grp in df_to_ordered_tree(
+                boiling_group_df, column="boiling_key", recursive=False
+            ):
+                bt = get_boiling_technology_from_boiling_model(grp.iloc[0]["boiling"])
 
-        with make(
-            "packing_group",
-            x=(maker.root["packing_process"]["P"].props.relative_props["x"][0] + 1, 0),
-            push_func=add_push,
-        ):
-            packing_time = sum(
-                [
-                    row["kg"] / row["sku"].packing_speed * 60
-                    for i, row in boiling_group_df.iterrows()
-                ]
-            )
-            packing_time = int(
-                custom_round(packing_time, 5, "ceil", pre_round_precision=1)
-            )
+                make("ingredient", size=(bt.ingredient_time // 5, 0))
+                p = make("P", size=(2, 0)).block
+                packing_time = sum(
+                    [
+                        row["kg"] / row["sku"].packing_speed * 60
+                        for i, row in grp.iterrows()
+                    ]
+                )
+                packing_time = int(custom_round(packing_time, 5, "ceil"))
 
-            make(
-                "packing",
-                size=(packing_time // 5, 0),
-                push_func=add_push,
-            )
+                make(
+                    "packing",
+                    x=(
+                        p.props.relative_props["x"][0] + 1,
+                        0,
+                    ),
+                    size=(packing_time // 5, 0),
+                    push_func=add_push,
+                )
     return maker.root
 
 
@@ -112,7 +114,8 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
 
         # make separation not before pumping_out
         assert (
-            b1["packing_process"]["P"].x[0] <= b2["boiling_process"]["pumping_off"].x[0]
+            listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
+            <= b2["boiling_process"]["pumping_off"].x[0]
         )
 
     validator.add("boiling", "boiling", validate)
