@@ -106,6 +106,8 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
         current_boiling_count = v[COLUMNS["boiling_count"]]
         current_number_of_tanks = v[COLUMNS["number_of_tanks"]]
 
+        print(current_boiling_count, current_number_of_tanks)
+
         del v[COLUMNS["boiling_count"]]
         del v[COLUMNS["output"]]
         del v[COLUMNS["number_of_tanks"]]
@@ -132,7 +134,7 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
             excel_client.draw_cell(
                 row=cur_row,
                 col=COLUMNS["boiling_count"].col,
-                value=int(boiling_count * number_of_tanks),
+                value=int(number_of_tanks),
                 set_border=False,
             )
         else:
