@@ -93,16 +93,6 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
         1,
         2,
     ], "Only one or two mascarpone boilings can be put into the group"
-    boiling_models = list(
-        set(
-            [
-                boiling_group_df.iloc[0]["boiling"]
-                for boiling_group_df in boiling_group_dfs
-            ]
-        )
-    )
-    assert len(boiling_models) == 1
-    boiling_model = boiling_models[0]
 
     validator = ClassValidator(window=3)
 
@@ -129,7 +119,6 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
 
     maker, make = init_block_maker(
         "mascarpone_boiling_group",
-        boiling_model=boiling_model,
         boiling_group_dfs=boiling_group_dfs,
     )
 

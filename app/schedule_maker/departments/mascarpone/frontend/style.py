@@ -1,10 +1,15 @@
+def _get_boiling_name(b):
+    if b.props["is_cream"]:
+        return "производство сливок"
+    elif b.props["n"] == 0:
+        return "производство маскарпоне на линии/варка ({boiling_volume} литров)"
+    else:
+        return "производство маскарпоне на линии/produz. Mascarpone"
+
+
 STYLE = {
     "boiling_num": {"text": "{batch_id}"},
-    "boiling_name": {
-        "text": lambda b: """производство маскарпоне на линии/варка ({boiling_volume} литров)"""
-        if b.props["n"] == 0
-        else """производство маскарпоне на линии/produz. Mascarpone"""
-    },
+    "boiling_name": {"text": _get_boiling_name},
     "pouring": {"color": "#B8CCE4", "text": "3"},  # blue
     "heating": {"color": "red", "text": "нагрев"},
     "waiting": {"color": "white", "text": "ожидание"},

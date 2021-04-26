@@ -7,14 +7,16 @@ from datetime import datetime
 
 
 def make_frontend_mascarpone_boiling(boiling_process):
+    is_cream = boiling_process.props["boiling_group_dfs"][0].iloc[0]["is_cream"]
+
     maker, make = init_block_maker(
         "boiling",
         axis=1,
         x=(boiling_process.x[0], 0),
         size=(0, 2),
         batch_id=boiling_process.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
+        is_cream=is_cream,
     )
-    is_cream = boiling_process.props["boiling_group_dfs"][0].iloc[0]["is_cream"]
 
     with make():
         make("boiling_num", size=(3, 1))
@@ -36,7 +38,6 @@ def make_frontend_mascarpone_boiling(boiling_process):
         )
         make(
             "pumping_off",
-            is_cream=is_cream,
             size=(boiling_process["pumping_off"].size[0], 1),
         )
     return maker.root
