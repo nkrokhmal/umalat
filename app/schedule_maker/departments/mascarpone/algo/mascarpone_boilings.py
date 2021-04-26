@@ -62,14 +62,23 @@ def make_mascorpone_boiling(boiling_group_df, **props):
             make("N", size=(0, 0))
         else:
             make("N", size=(2, 0))
+
+        start_from = 0
+
         with make("packing_group"):
             for ind, grp in df_to_ordered_tree(
                 boiling_group_df, column="boiling_key", recursive=False
             ):
                 bt = get_boiling_technology_from_boiling_model(grp.iloc[0]["boiling"])
 
-                make("ingredient", size=(bt.ingredient_time // 5, 0))
+                make(
+                    "ingredient",
+                    size=(bt.ingredient_time // 5, 0),
+                    x=(start_from, 0),
+                    push_func=add_push,
+                )
                 p = make("P", size=(2, 0)).block
+
                 packing_time = sum(
                     [
                         row["kg"] / row["sku"].packing_speed * 60
@@ -87,6 +96,8 @@ def make_mascorpone_boiling(boiling_group_df, **props):
                     size=(packing_time // 5, 0),
                     push_func=add_push,
                 )
+
+                start_from = p.props.relative_props["x"][0] + 2
     return maker.root
 
 
