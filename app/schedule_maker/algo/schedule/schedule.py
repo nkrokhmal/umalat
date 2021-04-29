@@ -284,14 +284,17 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         len(left_df) > 0
     ), "На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания."
 
-    last_multihead_water_boiling = iter_get(
-        [
-            row["boiling"]
-            for i, row in left_df.iterrows()
-            if boiling_has_multihead_packing(row["boiling"])
-        ],
-        -1,
-    )
+    multihead_water_boilings = [
+        row["boiling"]
+        for i, row in left_df.iterrows()
+        if boiling_has_multihead_packing(row["boiling"])
+        and row["boiling"].props["boiling_model"].line.name == LineName.WATER
+    ]
+
+    if multihead_water_boilings:
+        last_multihead_water_boiling = multihead_water_boilings[-1]
+    else:
+        last_multihead_water_boiling = None
 
     def add_one_block_from_line(boiling):
         line_name = boiling.props["boiling_model"].line.name
