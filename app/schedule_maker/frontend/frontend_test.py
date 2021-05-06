@@ -14,14 +14,11 @@ def test():
     # fn = os.path.join(basedir, "app/data/inputs/2021-02-08 План по варкам.xlsx")
     # fn = os.path.join(basedir, "app/data/inputs/2021-02-17 План по варкам.xlsx")
     fn = os.path.join(basedir, "app/data/inputs/2021-04-13 План по варкам.xlsx")
-    fn = os.path.join(
-        basedir, "app/data/inputs/mozarella/2021-04-30 Расписание (3).xlsx"
-    )
+    fn = os.path.join(basedir, "app/data/inputs/2021-05-07 План по варкам.xlsx")
     boiling_plan_df = read_boiling_plan(fn)
     start_times = {LineName.WATER: "02:00", LineName.SALT: "10:00"}
     boilings = make_boilings(boiling_plan_df)
     schedule = make_schedule(boilings, start_times=start_times)
-
     try:
         frontend = make_frontend(schedule)
     except Exception as e:

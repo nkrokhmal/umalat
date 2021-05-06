@@ -199,10 +199,8 @@ def make_mpp(boiling_df, left_boiling_volume):
                             maker.create_block(
                                 "process",
                                 size=[packing_size, 0],
-                                x=list(block.props["x_rel"]),
                                 sku=row["sku"],
                             ),
-                            push_func=add_push,
                         )
 
     bff = boiling_df.iloc[0]["bff"]
