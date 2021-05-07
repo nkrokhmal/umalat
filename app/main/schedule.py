@@ -30,7 +30,11 @@ def add_batch(date, beg_number, end_number):
     db.session.commit()
 
 
-def prepare_schedule_json(schedule_json):
+def prepare_schedule_json(schedule_json, cleanings):
+    for x in schedule_json["children"][0]["children"]:
+        if x["cls"] == "boiling":
+            x["props"]["boiling_group_df"]["time"] = x["props"]["x"][0]
+
     schedule_df = pd.concat(
         [
             x["props"]["boiling_group_df"]
@@ -38,6 +42,12 @@ def prepare_schedule_json(schedule_json):
             if x["cls"] == "boiling"
         ]
     )
+    schedule_df["cleaning"] = np.nan
+    for cleaning in cleanings:
+        for i in range(schedule_df.shape[0] - 1):
+            if (schedule_df.iloc[i]["time"] < cleaning["props"]["x"][0]) and \
+               (schedule_df.iloc[i + 1]["time"] >= cleaning["props"]["x"][0]):
+                schedule_df.loc[i, "cleaning"] = "Длинная мойка" if cleaning["props"]["cleaning_type"] == "full" else "Короткая мойка"
 
     schedule_df["id"] = schedule_df["group_id"]
     schedule_df["name"] = schedule_df["sku_name"]
@@ -73,6 +83,8 @@ def prepare_schedule_json(schedule_json):
             "kg",
             "team_number",
             "boiling_configuration",
+            "time",
+            "cleaning",
         ]
     ]
     return schedule_df
@@ -150,7 +162,13 @@ def schedule():
             ]
         )
 
-        schedule_df = prepare_schedule_json(schedule_json)
+        cleanings = ([
+            x
+            for x in schedule_json["children"][0]["children"]
+            if x["cls"] == "cleaning"
+        ])
+
+        schedule_df = prepare_schedule_json(schedule_json, cleanings)
 
         schedule_wb = openpyxl.load_workbook(
             filename=current_app.config["TEMPLATE_SCHEDULE_PLAN"]
