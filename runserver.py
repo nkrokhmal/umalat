@@ -21,4 +21,5 @@ for name, obj in inspect.getmembers(umalat_models):
         admin.add_view(ModelView(obj, db.session))
 
 if __name__ == "__main__":
+    print("Starting umalat server")
     app.run(port=5000, threaded=True, host="0.0.0.0", debug=False)

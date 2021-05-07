@@ -22,7 +22,7 @@ COLUMNS = {
     # "orig_kg": Cell(column_index_from_string("I"), "I"),
     "remainings": Cell(column_index_from_string("J"), "J"),
     "team_number": Cell(column_index_from_string("K"), "K"),
-    "washing": Cell(column_index_from_string("L"), "L"),
+    "cleaning": Cell(column_index_from_string("L"), "L"),
     "boiling_configuration": Cell(column_index_from_string("M"), "M"),
     "total_boiling_volume": Cell(column_index_from_string("N"), "N"),
     "delimiter": Cell(column_index_from_string("O"), "O"),
@@ -252,7 +252,6 @@ def draw_boiling_plan_merged(df, wb):
         excel_client.draw_row(
             row=cur_row, values=value, cols=column, set_border=False
         )
-
         if v[COLUMNS["name"]] == "-":
             excel_client.draw_cell(
                 row=cur_row,
