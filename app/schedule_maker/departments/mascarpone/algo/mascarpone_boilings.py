@@ -1,8 +1,6 @@
-from utils_ak.block_tree import *
-from utils_ak.iteration import *
-from utils_ak.builtin import *
+from app.imports.runtime import *
 
-from app.schedule_maker.models import *
+from app.models import *
 
 
 def make_mascorpone_boiling(boiling_group_df, **props):
@@ -15,9 +13,9 @@ def make_mascorpone_boiling(boiling_group_df, **props):
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
 
     boiling_models = sku.made_from_boilings
-    boiling_model = delistify(boiling_models, single=True)
+    boiling_model = utils.delistify(boiling_models, single=True)
 
-    maker, make = init_block_maker(
+    maker, make = utils.init_block_maker(
         "boiling",
         boiling_model=boiling_model,
         boiling_id=boiling_id,
@@ -41,7 +39,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         assert (
             len(boiling_technologies) == 1
         ), f"Число варок для sku с данным заквасочником неверное: {len(boiling_technologies)}"
-        return delistify(boiling_technologies, single=True)
+        return utils.delistify(boiling_technologies, single=True)
 
     bt = get_boiling_technology_from_boiling_model(boiling_model)
 
@@ -66,7 +64,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         start_from = 0
 
         with make("packing_group"):
-            for ind, grp in df_to_ordered_tree(
+            for ind, grp in utils.df_to_ordered_tree(
                 boiling_group_df, column="boiling_key", recursive=False
             ):
                 bt = get_boiling_technology_from_boiling_model(grp.iloc[0]["boiling"])
@@ -75,7 +73,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
                     "ingredient",
                     size=(bt.ingredient_time // 5, 0),
                     x=(start_from, 0),
-                    push_func=add_push,
+                    push_func=utils.add_push,
                 )
                 p = make("P", size=(2, 0)).block
 
@@ -85,7 +83,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
                         for i, row in grp.iterrows()
                     ]
                 )
-                packing_time = int(custom_round(packing_time, 5, "ceil"))
+                packing_time = int(utils.custom_round(packing_time, 5, "ceil"))
 
                 make(
                     "packing",
@@ -94,7 +92,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
                         0,
                     ),
                     size=(packing_time // 5, 0),
-                    push_func=add_push,
+                    push_func=utils.add_push,
                 )
 
                 start_from = p.props.relative_props["x"][0] + 2
@@ -107,15 +105,15 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
         2,
     ], "Only one or two mascarpone boilings can be put into the group"
 
-    validator = ClassValidator(window=3)
+    validator = utils.ClassValidator(window=3)
 
     def validate(b1, b2):
-        validate_disjoint_by_axis(
+        utils.validate_disjoint_by_axis(
             b1["packing_process"]["packing_group"],
             b2["packing_process"]["packing_group"],
         )
         # just in case, not needed in reality
-        validate_disjoint_by_axis(
+        utils.validate_disjoint_by_axis(
             b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
         )
         assert (
@@ -125,13 +123,13 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
 
         # make separation not before pumping_out
         assert (
-            listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
+            utils.listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
             <= b2["boiling_process"]["pumping_off"].x[0]
         )
 
     validator.add("boiling", "boiling", validate)
 
-    maker, make = init_block_maker(
+    maker, make = utils.init_block_maker(
         "mascarpone_boiling_group",
         boiling_group_dfs=boiling_group_dfs,
     )
@@ -142,10 +140,10 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
     ]
 
     for mascarpone_boiling in mascarpone_boilings:
-        push(
+        utils.push(
             maker.root,
             mascarpone_boiling,
-            push_func=AxisPusher(start_from="last_beg"),
+            push_func=utils.AxisPusher(start_from="last_beg"),
             validator=validator,
         )
 

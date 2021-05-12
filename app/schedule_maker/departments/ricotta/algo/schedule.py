@@ -1,8 +1,8 @@
-from utils_ak.block_tree import *
+from app.imports.runtime import *
 
 from app.schedule_maker.departments.ricotta.algo.boilings import *
 from app.schedule_maker.departments.ricotta.algo.cleanings import *
-from app.schedule_maker.models import *
+from app.models import *
 
 validator = ClassValidator(window=3)
 
@@ -16,10 +16,10 @@ def validate(b1, b2):
             # skip if no common line number is used
             continue
 
-        boiling1 = listify(b1["boiling_sequence"]["boiling"])[
+        boiling1 = utils.listify(b1["boiling_sequence"]["boiling"])[
             b1.props["line_nums"].index(line_num)
         ]
-        boiling2 = listify(b2["boiling_sequence"]["boiling"])[
+        boiling2 = utils.listify(b2["boiling_sequence"]["boiling"])[
             b2.props["line_nums"].index(line_num)
         ]
 
@@ -45,9 +45,9 @@ validator.add("boiling_group", "boiling_group", validate)
 
 def validate(b1, b2):
     for line_num in range(3):
-        bath_cleaning = listify(b2["bath_cleaning"])[line_num]
+        bath_cleaning = utils.listify(b2["bath_cleaning"])[line_num]
         if line_num in b1.props["line_nums"]:
-            boiling = listify(b1["boiling_sequence"].children)[
+            boiling = utils.listify(b1["boiling_sequence"].children)[
                 b1.props["line_nums"].index(line_num)
             ]
             validate_disjoint_by_axis(boiling, bath_cleaning)
@@ -104,7 +104,7 @@ def make_schedule(boiling_plan_df, start_boiling_id=0):
             ]
 
         idx = -n_tanks % 3
-        iter_line_nums_props = recycle_list(line_nums_props, idx)
+        iter_line_nums_props = utils.recycle_list(line_nums_props, idx)
 
         # todo: deprecated, del
         # if not bg_prev:

@@ -1,5 +1,6 @@
-from utils_ak.interactive_imports import *
-from app.schedule_maker.models import *
+from app.imports.runtime import *
+
+from app.models import *
 from app.schedule_maker.departments.mozarella.algo.packing import *
 from app.schedule_maker.departments.mozarella.algo.cooling import *
 from app.schedule_maker.departments.mozarella.algo.boiling import make_boiling
@@ -20,7 +21,7 @@ def make_melting_and_packing_basic(boiling_plan):
     boiling_plan["group_key"] = boiling_plan["bff"].astype(str) + boiling_plan[
         "ct"
     ].astype(str)
-    mark_consecutive_groups(boiling_plan, "group_key", "melting_group")
+    utils.mark_consecutive_groups(boiling_plan, "group_key", "melting_group")
 
     maker, make = init_block_maker("melting_and_packing")
 
@@ -71,9 +72,9 @@ def make_melting_and_packing_basic(boiling_plan):
     with make(
         "packing",
         x=(
-            listify(maker.root["melting"]["coolings"]["cooling_process"])[0]["start"].y[
-                0
-            ],
+            utils.listify(maker.root["melting"]["coolings"]["cooling_process"])[0][
+                "start"
+            ].y[0],
             0,
         ),
         packing_team_id=1,
@@ -103,6 +104,7 @@ def make_melting_and_packing_basic(boiling_plan):
     return maker.root
 
 
-def make_boiling_basic(boiling_model, boiling_id, grp):
-    melting_and_packing = make_melting_and_packing_basic(grp)
-    return make_boiling(boiling_model, boiling_id, melting_and_packing)
+# deprecated
+# def make_boiling_basic(boiling_model, boiling_id, grp):
+#     melting_and_packing = make_melting_and_packing_basic(grp)
+#     return make_boiling(boiling_model, boiling_id, melting_and_packing)

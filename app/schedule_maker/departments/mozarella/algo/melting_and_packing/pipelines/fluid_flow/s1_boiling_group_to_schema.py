@@ -1,4 +1,6 @@
-from app.schedule_maker.models import *
+from app.imports.runtime import *
+
+from app.models import *
 from app.schedule_maker.calculation import *
 from app.enum import LineName
 
@@ -7,7 +9,7 @@ class BoilingGroupToSchema:
     def _calc_boilings_meltings(self, boiling_group_df):
         df = boiling_group_df.copy()
         df = df.reset_index()
-        mark_consecutive_groups(df, "bff", "bff_group")
+        utils.mark_consecutive_groups(df, "bff", "bff_group")
 
         bff_kgs = df.groupby("bff_group").agg(
             {"kg": "sum", "bff": "first", "index": "first"}
@@ -16,7 +18,7 @@ class BoilingGroupToSchema:
             drop=True
         )  # keep initial order
 
-        iterator = SimpleIterator(
+        iterator = utils.SimpleIterator(
             [[row["bff"], row["kg"]] for bff_id, row in bff_kgs.iterrows()]
         )
 
@@ -53,7 +55,7 @@ class BoilingGroupToSchema:
         df = df.reset_index()
 
         df["key"] = df["packing_team_id"].astype(str) + df["sku_id"].astype(str)
-        mark_consecutive_groups(df, "key", "group")
+        utils.mark_consecutive_groups(df, "key", "group")
 
         sku_kgs = df.groupby("group").agg(
             {

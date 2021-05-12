@@ -67,7 +67,7 @@ def schedule():
                 for k, v in cleanings.items()
                 if v
             }
-            schedule = make_schedule(
+            schedule = make_schedule_from_boilings(
                 boilings, cleanings=cleanings, start_times=start_times, date=date
             )
 

@@ -1,5 +1,5 @@
-import random
-from app.schedule_maker.models import *
+from app.imports.runtime import *
+from app.models import *
 
 
 def _generate_random_boiling_group(sku_model, boiling_model, n=3):
@@ -15,7 +15,7 @@ def _generate_random_boiling_group(sku_model, boiling_model, n=3):
                 [sku for sku in skus if boiling_model in sku.made_from_boilings]
             )
             kg = sku.packing_speed * np.random.uniform(0.6, 0.8) / 2
-            kg = custom_round(kg, 10, "ceil")
+            kg = utils.custom_round(kg, 10, "ceil")
             values.append([i * 2 + j, sku, kg])
 
     return pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])

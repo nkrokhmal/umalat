@@ -1,5 +1,5 @@
 from utils_ak.interactive_imports import *
-from app.schedule_maker.models import *
+from app.models import *
 
 from app.schedule_maker.departments.mozarella.algo import make_boiling
 from app.schedule_maker.departments.mozarella.algo.packing import *

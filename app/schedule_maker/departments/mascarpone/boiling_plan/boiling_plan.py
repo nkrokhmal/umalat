@@ -1,6 +1,8 @@
-from utils_ak.interactive_imports import *
-from app.schedule_maker.models import *
+from app.imports.runtime import *
+
+from app.models import *
 from app.enum import LineName
+
 from .saturate import saturate_boiling_plan
 
 # todo: normalization
@@ -12,7 +14,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    wb = cast_workbook(wb_obj)
+    wb = utils.cast_workbook(wb_obj)
 
     dfs = []
 
@@ -87,7 +89,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
         sourdoughs = []
 
         for s in sourdough_range.split("-"):
-            if s == "None" or is_none(s) or not is_int_like(s):
+            if s == "None" or utils.is_none(s) or not utils.is_int_like(s):
                 assert (
                     grp.iloc[0]["type"] == "mascarpone" and grp.iloc[0]["is_cream"]
                 ), "Для одной из варок не указаны заквасочники."
@@ -103,7 +105,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
 
         boiling_volumes = list(proportion * total_boiling_volume)
 
-        new_grp = split_into_sum_groups(
+        new_grp = utils.split_into_sum_groups(
             grp, boiling_volumes, column="kg", group_column="boiling_id"
         )
 
@@ -126,7 +128,7 @@ def fix_batch_id(boiling_plan_df):
     )
 
     df = boiling_plan_df[["tag"] + list(columns)]
-    ordered_groups = df_to_ordered_tree(df, recursive=False)
+    ordered_groups = utils.df_to_ordered_tree(df, recursive=False)
 
     all_sourdoughs = [["1", "2"], ["3", "4"]]
     last_pair = None
@@ -138,7 +140,7 @@ def fix_batch_id(boiling_plan_df):
 
             assert len(boiling_group_dfs) % 2 == 0
 
-            for boiling_group_df1, boiling_group_df2 in crop_to_chunks(
+            for boiling_group_df1, boiling_group_df2 in utils.crop_to_chunks(
                 boiling_group_dfs, 2
             ):
                 sourdough1, sourdough2 = [

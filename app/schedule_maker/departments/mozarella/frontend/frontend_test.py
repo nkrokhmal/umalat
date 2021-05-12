@@ -2,27 +2,22 @@ import os
 
 os.environ["environment"] = "interactive"
 
-import warnings
+from app.imports.runtime import *
 
 warnings.filterwarnings("ignore")
 
-from config import basedir
 from app.schedule_maker.departments.mozarella import *
+from app.schedule_maker.frontend import draw_excel_frontend
 
 
 def test():
     makedirs("schedules/")
-    # fn = os.path.join(basedir, "app/data/inputs/2021-02-08 План по варкам.xlsx")
-    # fn = os.path.join(basedir, "app/data/inputs/2021-02-17 План по варкам.xlsx")
-    # fn = os.path.join(basedir, "app/data/inputs/2021-04-13 План по варкам.xlsx")
-    fn = os.path.join(basedir, "app/data/inputs/2021-05-07 План по варкам.xlsx")
-    boiling_plan_df = read_boiling_plan(fn)
+    fn = DebugConfig.abs_path("app/data/inputs/2021-05-07 План по варкам.xlsx")
     start_times = {LineName.WATER: "02:00", LineName.SALT: "06:00"}
-    boilings = make_boilings(boiling_plan_df, first_group_id=74)
-    schedule = make_schedule(boilings, start_times=start_times)
-    # schedule = make_schedule_with_boiling_inside_a_day(
-    #     boiling_plan_df, start_times=start_times, first_group_id=74
-    # )
+
+    schedule = make_schedule(
+        fn, optimize=False, start_times=start_times, first_group_id=1
+    )
 
     try:
         frontend = make_frontend(schedule)

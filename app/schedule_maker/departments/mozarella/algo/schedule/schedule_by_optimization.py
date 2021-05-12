@@ -12,7 +12,7 @@ def make_schedule_with_boiling_inside_a_day(
 
     # make first boiling - no cleaning boilings
     boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
-    schedule = make_schedule(boilings, start_times=start_times)
+    schedule = make_schedule_from_boilings(boilings, start_times=start_times)
     res[None] = calc_schedule_stats(schedule)
 
     start_from = None
@@ -53,7 +53,7 @@ def make_schedule_with_boiling_inside_a_day(
                     ),
                 )
             )
-            schedule = make_schedule(
+            schedule = make_schedule_from_boilings(
                 boilings,
                 cleanings={boilings[i].props["boiling_id"]: "full"},
                 start_times=start_times,
@@ -90,6 +90,6 @@ def make_schedule_with_boiling_inside_a_day(
     cleanings = (
         {} if not cleaning_boiling else {cleaning_boiling.props["boiling_id"]: "full"}
     )
-    return make_schedule(
+    return make_schedule_from_boilings(
         boilings, cleanings=cleanings, start_times=start_times, date=date
     )

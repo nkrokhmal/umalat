@@ -1,5 +1,6 @@
-from utils_ak.interactive_imports import *
-from app.schedule_maker.models import *
+from app.imports.runtime import *
+
+from app.models import *
 from app.enum import LineName
 from .saturate import saturate_boiling_plan
 
@@ -68,7 +69,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
 
     # fill configuration
     def format_configuration(value):
-        if is_int_like(value):
+        if utils.is_int_like(value):
             return str(int(value))
         elif value is None:
             return None
@@ -132,7 +133,7 @@ def update_boiling_plan(dfs, normalization, saturate):
         if grp["_bff"].isnull().all():
             # take from bff input if not specified
             # todo: hardcode, make properly
-            df.loc[grp.index, "_bff"] = cast_form_factor(8)  # 460
+            df.loc[grp.index, "_bff"] = utils.cast_form_factor(8)  # 460
         else:
             filled_grp = grp.copy()
             filled_grp = filled_grp.fillna(method="ffill")
@@ -197,7 +198,7 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    wb = cast_workbook(wb_obj)
+    wb = utils.cast_workbook(wb_obj)
 
     dfs = []
 

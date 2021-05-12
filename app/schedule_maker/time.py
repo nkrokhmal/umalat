@@ -1,11 +1,10 @@
-import datetime
-import re
+from app.imports.runtime import *
 
 
 def cast_t(obj):
     if isinstance(obj, int):
         return obj
-    elif isinstance(obj, datetime.time):
+    elif isinstance(obj, time):
         return cast_t(cast_time(obj))
     elif isinstance(obj, str):
         # 3:12:00
@@ -31,7 +30,7 @@ def cast_time(obj):
         else:
             assert re.search(r"(\d+):(\d\d):(\d\d)", obj)
             return obj
-    elif isinstance(obj, datetime.time):
+    elif isinstance(obj, time):
         return cast_time("0:" + str(obj.hour).zfill(2) + ":" + str(obj.minute).zfill(2))
     elif isinstance(obj, int):
         days = obj // 288

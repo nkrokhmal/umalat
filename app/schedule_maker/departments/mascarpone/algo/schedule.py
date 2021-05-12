@@ -1,25 +1,25 @@
-from utils_ak.block_tree import *
+from app.imports.runtime import *
 
-from app.schedule_maker.models import *
+from app.models import *
 
 from app.schedule_maker.departments.mascarpone.algo.mascarpone_boilings import *
 from app.schedule_maker.departments.mascarpone.algo.cream_cheese_boilings import *
 from app.schedule_maker.departments.mascarpone.algo.cleanings import *
 
-validator = ClassValidator(window=20)
+validator = utils.ClassValidator(window=20)
 
 
 def validate(b1, b2):
-    b1 = listify(b1["boiling"])[-1]
-    b2 = listify(b2["boiling"])[0]
+    b1 = utils.listify(b1["boiling"])[-1]
+    b2 = utils.listify(b2["boiling"])[0]
 
     if sum([b1.props.get("is_cream", False), b2.props.get("is_cream", False)]) == 1:
         # one is cream and one is not
         validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"])
 
     assert (
-        listify(b1["packing_process"]["packing_group"]["packing"])[-1].y[0] + 2
-        <= listify(b2["packing_process"]["packing_group"]["packing"])[0].x[0]
+        utils.listify(b1["packing_process"]["packing_group"]["packing"])[-1].y[0] + 2
+        <= utils.listify(b2["packing_process"]["packing_group"]["packing"])[0].x[0]
     )
     validate_disjoint_by_axis(
         b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
@@ -29,7 +29,7 @@ def validate(b1, b2):
     )
 
     assert (
-        listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
+        utils.listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
         <= b2["boiling_process"]["pumping_off"].x[0]
     )
 
@@ -38,10 +38,10 @@ validator.add("mascarpone_boiling_group", "mascarpone_boiling_group", validate)
 
 
 def validate(b1, b2):
-    b = listify(b1["boiling"])[-1]
+    b = utils.listify(b1["boiling"])[-1]
     assert (
         b["packing_process"].y[0] - 1
-        <= listify(b2["boiling_process"]["separation"])[0].x[0]
+        <= utils.listify(b2["boiling_process"]["separation"])[0].x[0]
     )
 
 
@@ -53,7 +53,7 @@ def validate(b1, b2):
         b2.children[0].props["cls"] != "cleaning_sourdough_mascarpone"
         or b1.props["line_nums"] == b2.props["sourdoughs"]
     ):
-        for b in listify(b1["boiling"]):
+        for b in utils.listify(b1["boiling"]):
             validate_disjoint_by_axis(b["boiling_process"], b2)
             assert b["boiling_process"].y[0] + 1 <= b2.x[0]
 
@@ -62,7 +62,7 @@ validator.add("mascarpone_boiling_group", "cleaning", validate)
 
 
 def validate(b1, b2):
-    assert listify(b1["boiling_process"]["salting"][-1].y[0]) <= listify(
+    assert utils.listify(b1["boiling_process"]["salting"][-1].y[0]) <= utils.listify(
         b2["boiling_process"]["separation"][0].y[0]
     )
 
@@ -88,7 +88,7 @@ validator.add("cleaning", "cleaning", validate)
 
 
 def validate(b1, b2):
-    b = listify(b2["boiling"])[0]
+    b = utils.listify(b2["boiling"])[0]
     if b1.props["entity"] == "homogenizer":
         assert b1.y[0] + 1 <= b["packing_process"]["N"].x[0]
 
@@ -98,7 +98,7 @@ validator.add("cleaning", "mascarpone_boiling_group", validate)
 
 def validate(b1, b2):
     if b1.props["entity"] == "homogenizer":
-        assert b1.y[0] + 1 <= listify(b2["boiling_process"]["separation"])[0].x[0]
+        assert b1.y[0] + 1 <= utils.listify(b2["boiling_process"]["separation"])[0].x[0]
 
 
 validator.add("cleaning", "cream_cheese_boiling", validate)
@@ -109,7 +109,9 @@ def validate(b1, b2):
         (b2.children[0].props["cls"] == "cleaning_sourdough_mascarpone_cream_cheese")
         and len(set(b1.props["sourdoughs"]) & set(b2.props["sourdoughs"])) > 0
     ):
-        assert listify(b1["boiling_process"]["separation"])[-1].y[0] + 1 <= b2.x[0]
+        assert (
+            utils.listify(b1["boiling_process"]["separation"])[-1].y[0] + 1 <= b2.x[0]
+        )
 
 
 validator.add("cream_cheese_boiling", "cleaning", validate)
@@ -227,10 +229,10 @@ class BoilingPlanToSchedule:
         sourdoughs = boiling_plan_df[boiling_plan_df["type"] == "cream_cheese"][
             "sourdoughs"
         ].tolist()
-        sourdoughs = remove_duplicates(sourdoughs, key=lambda lst: str(lst))
+        sourdoughs = utils.remove_duplicates(sourdoughs, key=lambda lst: str(lst))
         sourdoughs = sum(sourdoughs, [])
 
-        for group in crop_to_chunks(sourdoughs, 2):
+        for group in utils.crop_to_chunks(sourdoughs, 2):
             block = make_cleaning("sourdough_mascarpone_cream_cheese", sourdoughs=group)
             push(
                 self.maker.root,
@@ -258,7 +260,7 @@ class BoilingPlanToSchedule:
         )
 
         df = boiling_plan_df[["tag"] + list(columns)]
-        ordered_groups = df_to_ordered_tree(df, recursive=False)
+        ordered_groups = utils.df_to_ordered_tree(df, recursive=False)
         for i, (group_cls_name, grp) in enumerate(ordered_groups):
             if grp.iloc[0]["type"] == "mascarpone":
                 is_last = i == len(ordered_groups) - 1

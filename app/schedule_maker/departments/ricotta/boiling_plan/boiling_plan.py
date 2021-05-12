@@ -1,12 +1,11 @@
-import math
+from app.imports.runtime import *
 
-from utils_ak.interactive_imports import *
-from app.schedule_maker.models import *
+from app.models import *
 from app.schedule_maker.departments.ricotta.boiling_plan.saturate import (
     saturate_boiling_plan,
 )
+
 from openpyxl.utils.cell import column_index_from_string
-from copy import copy, deepcopy
 
 
 INDEX_COLUMN = column_index_from_string("A")
@@ -114,7 +113,7 @@ def read_boiling_plan(wb_obj, saturate=True):
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    wb = cast_workbook(wb_obj)
+    wb = utils.cast_workbook(wb_obj)
 
     ws_name = "План варок"
     ws = wb[ws_name]

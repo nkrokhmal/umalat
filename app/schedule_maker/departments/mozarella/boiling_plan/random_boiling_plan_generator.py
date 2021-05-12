@@ -1,5 +1,5 @@
 from utils_ak.interactive_imports import *
-from app.schedule_maker.models import *
+from app.models import *
 from app.enum import LineName
 
 
@@ -14,7 +14,7 @@ class RandomBoilingPlanGenerator:
 
         values = []
 
-        default_boiling_volume = cast_line(line_name).output_ton
+        default_boiling_volume = cast_model(Line, line_name).output_ton
 
         left = default_boiling_volume
 
