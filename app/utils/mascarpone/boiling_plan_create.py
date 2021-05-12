@@ -1,9 +1,6 @@
-import math
-import pandas as pd
-from collections import namedtuple
+from app.imports.runtime import *
 
 from app.models import *
-from app.globals import db
 from app.utils.features.merge_boiling_utils import Boilings
 
 
@@ -125,7 +122,7 @@ def handle_mascarpone(df):
     output_tons = [max(output_tons) + min(output_tons), 2 * min(output_tons)]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
-    Order = namedtuple("Collection", "flavoring_agent, group")
+    Order = collections.namedtuple("Collection", "flavoring_agent, group")
     orders = [
         Order("", "Маскарпоне"),
         Order("Шоколад", "Маскарпоне"),
@@ -142,7 +139,7 @@ def handle_cream(df):
     output_tons = [250]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
-    Order = namedtuple("Collection", "flavoring_agent, group")
+    Order = collections.namedtuple("Collection", "flavoring_agent, group")
     orders = [
         Order("", "Сливки"),
     ]
@@ -156,7 +153,7 @@ def handle_cream(df):
 
 def handle_cream_cheese(df):
     boilings_cream_cheese = Boilings()
-    Order = namedtuple("Collection", "groups")
+    Order = collections.namedtuple("Collection", "groups")
     orders = [
         Order(["Кремчиз"]),
         Order(["Робиола", "Творожный"]),

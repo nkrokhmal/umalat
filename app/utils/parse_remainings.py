@@ -1,15 +1,9 @@
-import pandas as pd
-import os
-import openpyxl
+from app.imports.runtime import *
 
-from io import BytesIO
-from flask import flash, Markup
-from pycel import ExcelCompiler
-from app.utils.features.db_utils import *
-from shutil import copyfile
-from flask import current_app
-from collections import namedtuple
 from urllib.parse import quote
+
+from app.models import *
+from app.utils.features.db_utils import *
 
 
 REMAININGS_COLUMN = 4
@@ -27,7 +21,7 @@ def parse_file(file_bytes):
     :return: преобразованный словарь с ключами Name, Total, Fact, Normative и изначальный
     файл остатков в виде Pandas DataFrame
     """
-    df = pd.read_excel(BytesIO(file_bytes), index_col=0)
+    df = pd.read_excel(io.BytesIO(file_bytes), index_col=0)
     df_original = df.copy()
     df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
     df = (
@@ -70,7 +64,9 @@ def get_skus(skus_req, skus, total_skus):
         if sku:
             sku = get_sku_by_name(skus, sku_req["Name"])
             if sku:
-                result.append(namedtuple("Plan", "sku, plan")(sku, sku_req["Fact"]))
+                result.append(
+                    collections.namedtuple("Plan", "sku, plan")(sku, sku_req["Fact"])
+                )
         else:
             if sku_req["Name"] not in current_app.config["IGNORE_SKUS"]:
                 sku_for_creation.append(sku_req["Name"])
@@ -91,7 +87,7 @@ def group_skus(skus_req, boilings):
             x for x in skus_req if x.sku.made_from_boilings[0].id == boiling.id
         ]
         if any(sku_grouped):
-            Request = namedtuple("Request", "skus, boiling, volume")
+            Request = collections.namedtuple("Request", "skus, boiling, volume")
             result.append(
                 Request(
                     sku_grouped,
@@ -176,8 +172,8 @@ def move_file(old_filepath, old_filename, department=""):
         old_filename.split(" ")[0], department
     )
     filepath = os.path.join(current_app.config["BOILING_PLAN_FOLDER"], new_filename)
-    copyfile(old_filepath, filepath)
-    excel_compiler = ExcelCompiler(filepath)
+    shutil.copyfile(old_filepath, filepath)
+    excel_compiler = pycel.ExcelCompiler(filepath)
     wb_data_only = openpyxl.load_workbook(filename=filepath, data_only=True)
     wb = openpyxl.load_workbook(filename=filepath)
     return excel_compiler, wb, wb_data_only, new_filename, filepath

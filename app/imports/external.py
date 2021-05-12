@@ -6,18 +6,21 @@ import warnings
 import random
 import math
 import traceback
-
+import collections
+import openpyxl
+import pycel
+import shutil
+import io
+import copy
 
 import pandas as pd
 import numpy as np
 import ujson as json
 
-from copy import copy, deepcopy
-from collections import namedtuple
 from loguru import logger
 from datetime import datetime, time, timedelta
-from urllib.parse import quote
-from pycel import ExcelCompiler
+
+# from pycel import ExcelCompiler
 
 from flask import Flask
 from flask import render_template, request
@@ -25,6 +28,7 @@ from flask import url_for, render_template, flash
 from flask import current_app, session
 from flask import send_from_directory
 from flask import jsonify
+from flask import Markup
 
 from flask_pagedown import PageDown
 from flask_sqlalchemy import SQLAlchemy

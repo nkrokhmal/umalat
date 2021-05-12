@@ -1,11 +1,9 @@
-import openpyxl
+from app.imports.runtime import *
+
 from openpyxl.styles import Alignment
+
 from app.models import MozzarellaSKU
 from app.utils.features.openpyxl_wrapper import ExcelBlock
-import pandas as pd
-from flask import current_app
-import os
-from shutil import copyfile
 
 
 class Cell:
@@ -48,7 +46,7 @@ class SkuPlanClient:
         self.wb = self.create_file()
 
     def create_file(self):
-        copyfile(self.template_path, self.filepath)
+        shutil.copyfile(self.template_path, self.filepath)
         return openpyxl.load_workbook(self.filepath)
 
     def fill_remainigs_list(self):

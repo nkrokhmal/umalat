@@ -1,5 +1,4 @@
 from app.models import *
-from collections import namedtuple
 
 
 def generate_departments():
@@ -95,7 +94,7 @@ def generate_mozzarella_lines():
 
 
 def generate_washer():
-    WasherData = namedtuple("WasherData", "name, time")
+    WasherData = collections.namedtuple("WasherData", "name, time")
     mozzarella_department = Department.query.filter_by(name="Моцарельный цех").first()
     for data in [
         WasherData("Короткая мойка термизатора", 40),

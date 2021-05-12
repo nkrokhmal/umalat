@@ -1,14 +1,12 @@
-import os
-from flask import current_app
+from app.imports.runtime import *
+
 from openpyxl.styles import Alignment
-from collections import namedtuple
-import math
-from app.enum import LineName
-from app.utils.features.openpyxl_wrapper import ExcelBlock
 from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
 
+from app.utils.features.openpyxl_wrapper import ExcelBlock
 
-Cell = namedtuple("Cell", "col, col_name")
+
+Cell = collections.namedtuple("Cell", "col, col_name")
 COLOR = "#dce6f2"
 COLUMNS = {
     "index": Cell(column_index_from_string("B"), "B"),

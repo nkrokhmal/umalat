@@ -1,12 +1,12 @@
 from app.imports.runtime import *
 
-from flask import current_app
-from app.utils.features.merge_boiling_utils import CircularList
-from app.utils.features.openpyxl_wrapper import ExcelBlock
 from openpyxl.utils.cell import column_index_from_string
 
+from app.utils.features.merge_boiling_utils import CircularList
+from app.utils.features.openpyxl_wrapper import ExcelBlock
+from app.models import *
 
-Cell = namedtuple("Cell", "col, col_name")
+Cell = collections.namedtuple("Cell", "col, col_name")
 
 COLUMNS = {
     "boiling_number": Cell(column_index_from_string("A"), "A"),
@@ -219,7 +219,7 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
 
     draw_fermentators(wb)
 
-    SkuGroup = namedtuple("SkuGroup", "df, sheet_name, skus, type")
+    SkuGroup = collections.namedtuple("SkuGroup", "df, sheet_name, skus, type")
     cur_row = None
     for item in [
         SkuGroup(cream_df, PLAN_SHEET_NAME, cream_skus, None),

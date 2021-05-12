@@ -1,12 +1,12 @@
 from app.imports.runtime import *
-from flask import current_app
+
+from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
 
 from app.utils.features.db_utils import sku_is_rubber
 from app.utils.features.openpyxl_wrapper import ExcelBlock
-from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
 
 
-Cell = namedtuple("Cell", "col, col_name")
+Cell = collections.namedtuple("Cell", "col, col_name")
 
 COLUMNS = {
     "boiling_number": Cell(column_index_from_string("A"), "A"),

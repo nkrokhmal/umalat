@@ -1,9 +1,7 @@
-import pandas as pd
+from app.imports.runtime import *
+
 from app.models import *
-from app.globals import db
 from app.utils.features.merge_boiling_utils import Boilings
-from collections import namedtuple
-import math
 
 
 POPULAR_NAMES = {
@@ -98,7 +96,7 @@ def proceed_order(order, df, boilings_ricotta, boilings_count=1):
 def handle_ricotta(df, request_ton=0):
     boilings_ricotta = Boilings()
     input_ton = db.session.query(RicottaLine).first().input_ton
-    Order = namedtuple("Collection", "is_cream, flavoring_agent")
+    Order = collections.namedtuple("Collection", "is_cream, flavoring_agent")
     orders = [
         Order(True, None),
         Order(False, ""),

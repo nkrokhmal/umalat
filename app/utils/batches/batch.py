@@ -1,5 +1,5 @@
+from app.imports.runtime import *
 from app.models import BatchNumber, Department
-from app.globals import db
 
 
 def add_batch(date, department_name, beg_number, end_number):

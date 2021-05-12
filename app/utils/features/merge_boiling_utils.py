@@ -1,9 +1,10 @@
-from copy import deepcopy
-import numpy as np
+from app.imports.runtime import *
 
 
 class Boilings:
-    def __init__(self, max_iter_weight=None, max_weight=1000, min_weight=1000, boiling_number=0):
+    def __init__(
+        self, max_iter_weight=None, max_weight=1000, min_weight=1000, boiling_number=0
+    ):
         self.max_weight = max_weight
         self.min_weight = min_weight
         self.boiling_number = boiling_number
@@ -16,7 +17,11 @@ class Boilings:
 
     def create_iterator(self, max_iter_weight):
         circular_list = CircularList()
-        if isinstance(max_iter_weight, int) or isinstance(max_iter_weight, np.int64) or isinstance(max_iter_weight, float):
+        if (
+            isinstance(max_iter_weight, int)
+            or isinstance(max_iter_weight, np.int64)
+            or isinstance(max_iter_weight, float)
+        ):
             circular_list.add(int(max_iter_weight))
         elif isinstance(max_iter_weight, list):
             circular_list.create(max_iter_weight)
@@ -44,7 +49,7 @@ class Boilings:
             )
             boiling_weight = min(remainings, sku["plan"])
 
-            new_boiling = deepcopy(sku)
+            new_boiling = copy.deepcopy(sku)
             new_boiling["plan"] = boiling_weight
             new_boiling["boiling_count"] = boilings_count
             new_boiling["max_boiling_weight"] = self.cur_weight

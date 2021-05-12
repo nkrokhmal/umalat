@@ -49,7 +49,7 @@ class BoilingParser:
             if cur_boiling[KG_COLUMN] >= self.kg_per_tank - sum(
                 [x[KG_COLUMN] for x in add_boiling]
             ):
-                boiling = deepcopy(cur_boiling)
+                boiling = copy.deepcopy(cur_boiling)
                 boiling[KG_COLUMN] = self.kg_per_tank - sum(
                     [x[KG_COLUMN] for x in add_boiling]
                 )
@@ -59,7 +59,7 @@ class BoilingParser:
                 add_boiling.append(boiling)
                 break
             else:
-                add_boiling.append(deepcopy(cur_boiling))
+                add_boiling.append(copy.deepcopy(cur_boiling))
                 self.boilings[self.index][KG_COLUMN] = 0
                 self.index += 1
                 if self.index > len(self.boilings) - 1:

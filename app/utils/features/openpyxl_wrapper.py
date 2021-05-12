@@ -1,6 +1,6 @@
+from app.imports.runtime import *
+
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
-import openpyxl
-from copy import copy
 
 
 class ExcelBlock:
@@ -137,16 +137,16 @@ def merge_workbooks(wb1, wb2):
             for j in range(1, max_col + 1):
                 ws2.cell(row=i, column=j).value = ws1.cell(row=i, column=j).value
                 if ws1.cell(row=i, column=j).has_style:
-                    ws2.cell(row=i, column=j).fill = copy(
+                    ws2.cell(row=i, column=j).fill = copy.copy(
                         ws1.cell(row=i, column=j).fill
                     )
-                    ws2.cell(row=i, column=j).font = copy(
+                    ws2.cell(row=i, column=j).font = copy.copy(
                         ws1.cell(row=i, column=j).font
                     )
-                    ws2.cell(row=i, column=j).border = copy(
+                    ws2.cell(row=i, column=j).border = copy.copy(
                         ws1.cell(row=i, column=j).border
                     )
-                    ws2.cell(row=i, column=j).alignment = copy(
+                    ws2.cell(row=i, column=j).alignment = copy.copy(
                         ws1.cell(row=i, column=j).alignment
                     )
     return ws2
