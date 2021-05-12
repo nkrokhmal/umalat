@@ -1,7 +1,3 @@
-from app.imports.external import *
-
-os.environ["environment"] = "runtime"
-
 from app.app import *
 
 app = create_app()

@@ -76,10 +76,10 @@ def schedule():
             "mozzarella/schedule.html", form=form, filename=filename_schedule
         )
 
-    form.date.data = datetime.datetime.today() + datetime.timedelta(days=1)
+    form.date.data = datetime.today() + timedelta(days=1)
     form.batch_number.data = (
         BatchNumber.last_batch_number(
-            datetime.datetime.today() + datetime.timedelta(days=1),
+            datetime.today() + timedelta(days=1),
             "Моцарельный цех",
         )
         + 1

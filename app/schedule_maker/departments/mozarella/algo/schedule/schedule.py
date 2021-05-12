@@ -1,7 +1,7 @@
 from app.enum import LineName
 from app.schedule_maker.departments.mozarella import *
 from app.schedule_maker.departments.mozarella.boiling_plan.boiling_plan import (
-    read_boiling_plan,
+    cast_boiling_plan,
 )
 
 from .schedule_from_boilings import *
@@ -9,7 +9,7 @@ from .schedule_by_optimization import *
 
 
 def make_schedule(boiling_plan_obj, optimize=False, start_times=None, first_group_id=1):
-    boiling_plan_df = read_boiling_plan(boiling_plan_obj)
+    boiling_plan_df = cast_boiling_plan(boiling_plan_obj)
 
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
 

@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 
 from app.utils.features.merge_boiling_utils import Boilings
-from app.schedule_maker.models import cast_mozarella_boiling
+from app.models import cast_mozarella_boiling
 
 
 def boiling_plan_create(df):

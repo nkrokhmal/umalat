@@ -10,6 +10,7 @@ from app.schedule_maker import draw_excel_frontend
 
 from .forms import ScheduleForm
 
+
 @main.route("/mascarpone_schedule", methods=["GET", "POST"])
 def mascarpone_schedule():
 
@@ -19,14 +20,12 @@ def mascarpone_schedule():
         beg_time = form.beg_time.data
         file = request.files["input_file"]
 
-        file_path = os.path.join(
-            current_app.configs["UPLOAD_TMP_FOLDER"], file.filename
-        )
+        file_path = os.path.join(current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                current_app.configs["UPLOAD_TMP_FOLDER"], file.filename
+                current_app.config["UPLOAD_TMP_FOLDER"], file.filename
             ),
             data_only=True,
         )
@@ -53,10 +52,10 @@ def mascarpone_schedule():
             "mascarpone/schedule.html", form=form, filename=filename_schedule
         )
 
-    form.date.data = datetime.datetime.today() + datetime.timedelta(days=1)
+    form.date.data = datetime.today() + timedelta(days=1)
     form.batch_number.data = (
         BatchNumber.last_batch_number(
-            datetime.datetime.today() + datetime.timedelta(days=1),
+            datetime.today() + timedelta(days=1),
             "Маскарпоновый цех",
         )
         + 1
