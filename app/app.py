@@ -35,7 +35,6 @@ def create_app(config_name="default"):
     page_down.init_app(app)
 
     app.register_blueprint(main_bp)
-
     return app
 
 
@@ -46,6 +45,6 @@ def create_manager(app):
 
     admin = Admin(app, name="Umalat admin", template_mode="bootstrap3")
     for name, obj in inspect.getmembers(umalat_models):
-        if inspect.isclass(obj):
+        if inspect.isclass(obj) and isinstance(obj, mdb.Model):
             admin.add_view(ModelView(obj, db.session))
     return manager

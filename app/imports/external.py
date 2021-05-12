@@ -34,13 +34,14 @@ from flask_pagedown import PageDown
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate, MigrateCommand
-from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
 from flask_script import Manager
 
 from flask_restplus import ValidationError
 from flask_wtf.file import FileRequired, FileField
 from flask_wtf import FlaskForm
+
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 from wtforms import *
 from wtforms.validators import Required, Optional
