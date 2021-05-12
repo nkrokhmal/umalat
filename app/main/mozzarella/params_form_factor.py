@@ -31,7 +31,7 @@ def get_form_factor():
         ],
         key=lambda ff: ff.name,
     )
-    return render_template(
+    return flask.render_template(
         "mozzarella/get_form_factor.html",
         water_form_factors=water_form_factors,
         salt_form_factors=salt_form_factors,
@@ -55,8 +55,8 @@ def edit_form_factor(form_factor_id):
         form_factor.default_cooling_technology.salting_time = form.salting_time.data
         db.session.commit()
 
-        flash("Параметры форм фактора успешно изменены", "success")
-        return redirect(url_for(".get_form_factor"))
+        flask.flash("Параметры форм фактора успешно изменены", "success")
+        return redirect(flask.url_for(".get_form_factor"))
 
     form.name.data = form_factor.name
     form.first_cooling_time.data = (
@@ -68,6 +68,6 @@ def edit_form_factor(form_factor_id):
     form.salting_time.data = form_factor.default_cooling_technology.salting_time
     form.line.data = form_factor.line.name
 
-    return render_template(
+    return flask.render_template(
         "mozzarella/edit_form_factor.html", form=form, form_factor_id=form_factor.id
     )

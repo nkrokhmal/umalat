@@ -10,7 +10,7 @@ from .forms import BoilingTechnologyForm
 @main.route("/mozzarella/get_boiling_technology", methods=["GET", "POST"])
 def get_boiling_technology():
     boiling_technologies = db.session.query(MozzarellaBoilingTechnology).all()
-    return render_template(
+    return flask.render_template(
         "mozzarella/get_boiling_technology.html",
         boiling_technologies=boiling_technologies,
         endpoints=".get_boiling",
@@ -35,8 +35,8 @@ def edit_boiling_technology(boiling_technology_id):
         boiling_technology.extra_time = form.extra_time.data
 
         db.session.commit()
-        flash("Параметры технологии варки успешно изменены", "success")
-        return redirect(url_for(".get_boiling_technology"))
+        flask.flash("Параметры технологии варки успешно изменены", "success")
+        return redirect(flask.url_for(".get_boiling_technology"))
 
     if boiling_technology.boilings[0].line is not None:
         form.line.default = default_form_value(
@@ -52,7 +52,7 @@ def edit_boiling_technology(boiling_technology_id):
     form.pouring_off_time.data = boiling_technology.pouring_off_time
     form.extra_time.data = boiling_technology.extra_time
 
-    return render_template(
+    return flask.render_template(
         "mozzarella/edit_boiling_technology.html",
         form=form,
         boiling_technology_id=boiling_technology.id,

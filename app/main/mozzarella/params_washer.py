@@ -15,7 +15,7 @@ def get_washer():
         .filter(Department.name == DepartmentName.MOZZ)
         .all()
     )
-    return render_template(
+    return flask.render_template(
         "mozzarella/get_washer.html", washers=washers, endpoints=".get_washer"
     )
 
@@ -28,12 +28,12 @@ def edit_washer(washer_id):
         washer.name = form.name.data
         washer.time = form.time.data
         db.session.commit()
-        flash("Параметры мойки успешно изменены", "success")
-        return redirect(url_for(".get_washer"))
+        flask.flash("Параметры мойки успешно изменены", "success")
+        return redirect(flask.url_for(".get_washer"))
 
     form.name.data = washer.name
     form.time.data = washer.time
 
-    return render_template(
+    return flask.render_template(
         "mozzarella/edit_washer.html", form=form, washer_id=washer.id
     )

@@ -15,8 +15,8 @@ from app.models import *
 
 @main.route("/ricotta_boiling_plan", methods=["POST", "GET"])
 def ricotta_boiling_plan():
-    form = BoilingPlanForm(request.form)
-    if request.method == "POST" and "submit" in request.form:
+    form = BoilingPlanForm(flask.request.form)
+    if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_auto_boilings = form.add_auto_boilings.data
 
@@ -25,16 +25,16 @@ def ricotta_boiling_plan():
         boilings = db.session.query(RicottaBoiling).all()
         total_volume = 0
 
-        file = request.files["input_file"]
+        file = flask.request.files["input_file"]
         tmp_file_path = os.path.join(
-            current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+            flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
         )
 
         if file:
             file.save(tmp_file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
             ),
             data_only=True,
         )
@@ -58,7 +58,7 @@ def ricotta_boiling_plan():
             date=date,
             remainings=remainings_df,
             skus_grouped=skus_grouped,
-            template_path=current_app.config["TEMPLATE_RICOTTA_BOILING_PLAN"],
+            template_path=flask.current_app.config["TEMPLATE_RICOTTA_BOILING_PLAN"],
         )
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_ricotta_sku_plan()
@@ -68,7 +68,7 @@ def ricotta_boiling_plan():
             sku_plan_client.filename,
             "рикотта",
         )
-        sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
+        sheet_name = flask.current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
         df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler)
 
@@ -77,7 +77,7 @@ def ricotta_boiling_plan():
         wb = draw_boiling_plan(df_plan, df_extra_packing, wb, total_volume)
         wb.save(filepath)
         os.remove(tmp_file_path)
-        return render_template(
+        return flask.render_template(
             "ricotta/boiling_plan.html", form=form, filename=filename
         )
-    return render_template("ricotta/boiling_plan.html", form=form, filename=None)
+    return flask.render_template("ricotta/boiling_plan.html", form=form, filename=None)

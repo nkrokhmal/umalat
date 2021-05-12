@@ -14,18 +14,18 @@ from .forms import ScheduleForm
 @main.route("/schedule", methods=["GET", "POST"])
 def schedule():
 
-    form = ScheduleForm(request.form)
-    if request.method == "POST" and "submit" in request.form:
+    form = ScheduleForm(flask.request.form)
+    if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
 
-        file = request.files["input_file"]
-        file_path = os.path.join(current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
+        file = flask.request.files["input_file"]
+        file_path = os.path.join(flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
             ),
             data_only=True,
         )
@@ -72,7 +72,7 @@ def schedule():
 
         os.remove(file_path)
 
-        return render_template(
+        return flask.render_template(
             "mozzarella/schedule.html", form=form, filename=filename_schedule
         )
 
@@ -86,6 +86,6 @@ def schedule():
     )
     filename_schedule = None
 
-    return render_template(
+    return flask.render_template(
         "mozzarella/schedule.html", form=form, filename=filename_schedule
     )

@@ -9,7 +9,7 @@ from .forms import AnalysisForm
 @main.route("/ricotta/get_analysis_technology", methods=["GET", "POST"])
 def ricotta_get_analysis_technology():
     analysis_technologies = db.session.query(RicottaAnalysisTechnology).all()
-    return render_template(
+    return flask.render_template(
         "ricotta/get_analysis_technology.html",
         boiling_technologies=analysis_technologies,
         endpoints=".ricotta_get_analysis_technology",
@@ -31,15 +31,15 @@ def ricotta_edit_analysis_technology(analysis_technology_id):
         analysis_technology.pumping_time = form.pumping_time.data
 
         db.session.commit()
-        flash("Параметры анализа технологии успешно изменены", "success")
-        return redirect(url_for(".ricotta_get_analysis_technology"))
+        flask.flash("Параметры анализа технологии успешно изменены", "success")
+        return redirect(flask.url_for(".ricotta_get_analysis_technology"))
 
     form.preparation_time.data = analysis_technology.preparation_time
     form.analysis_time.data = analysis_technology.analysis_time
     form.pumping_time.data = analysis_technology.pumping_time
     form.boiling_name.data = analysis_technology.boiling.to_str()
 
-    return render_template(
+    return flask.render_template(
         "ricotta/edit_analysis_technology.html",
         form=form,
         analysis_technology_id=analysis_technology.id,

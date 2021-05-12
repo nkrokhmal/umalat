@@ -13,7 +13,7 @@ from .forms import SKUForm
 @main.route("/ricotta/add_sku", methods=["POST", "GET"])
 def ricotta_add_sku():
     form = SKUForm()
-    name = request.args.get("name")
+    name = flask.request.args.get("name")
     if form.validate_on_submit():
         sku = RicottaSKU(
             name=form.name.data,
@@ -35,16 +35,16 @@ def ricotta_add_sku():
 
         db.session.add(sku)
         db.session.commit()
-        flash("SKU успешно добавлено", "success")
-        return redirect(url_for(".ricotta_get_sku", page=1))
+        flask.flash("SKU успешно добавлено", "success")
+        return redirect(flask.url_for(".ricotta_get_sku", page=1))
     if name:
         form.name.data = name
-    return render_template("ricotta/add_sku.html", form=form)
+    return flask.render_template("ricotta/add_sku.html", form=form)
 
 
 @main.route("/ricotta/get_sku/<int:page>", methods=["GET"])
 def ricotta_get_sku(page):
-    session.clear()
+    flask.session.clear()
 
     form = SKUForm()
     skus_count = db.session.query(RicottaSKU).count()
@@ -52,15 +52,15 @@ def ricotta_get_sku(page):
     pagination = (
         db.session.query(RicottaSKU)
         .order_by(RicottaSKU.name)
-        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
-    return render_template(
+    return flask.render_template(
         "ricotta/get_sku.html",
         form=form,
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.config["SKU_PER_PAGE"],
+        per_page=flask.current_app.config["SKU_PER_PAGE"],
         endopoints=".ricotta_get_sku",
     )
 
@@ -99,7 +99,7 @@ def ricotta_edit_sku(sku_id):
     form.in_box.data = sku.in_box
     form.output_per_tank.data = sku.output_per_tank
 
-    return render_template("ricotta/edit_sku.html", form=form, sku_id=sku_id)
+    return flask.render_template("ricotta/edit_sku.html", form=form, sku_id=sku_id)
 
 
 @main.route("/ricotta/delete_sku/<int:sku_id>", methods=["DELETE"])
@@ -108,6 +108,6 @@ def ricotta_delete_sku(sku_id):
     if sku:
         db.session.delete(sku)
         db.session.commit()
-        flash("SKU успешно удалено", "success")
+        flask.flash("SKU успешно удалено", "success")
     time.sleep(1.0)
-    return redirect(url_for(".ricotta_get_sku", page=1))
+    return redirect(flask.url_for(".ricotta_get_sku", page=1))

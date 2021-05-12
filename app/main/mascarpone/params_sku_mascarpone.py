@@ -11,7 +11,7 @@ from .forms import SKUMascarponeForm
 @main.route("/mascarpone/add_sku_mascarpone", methods=["POST", "GET"])
 def mascarpone_add_sku_mascarpone():
     form = SKUMascarponeForm()
-    name = request.args.get("name")
+    name = flask.request.args.get("name")
     if form.validate_on_submit():
         sku = MascarponeSKU(
             name=form.name.data,
@@ -32,16 +32,16 @@ def mascarpone_add_sku_mascarpone():
 
         db.session.add(sku)
         db.session.commit()
-        flash("SKU успешно добавлено", "success")
-        return redirect(url_for(".mascarpone_get_sku_mascarpone", page=1))
+        flask.flash("SKU успешно добавлено", "success")
+        return redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
     if name:
         form.name.data = name
-    return render_template("mascarpone/add_sku_mascarpone.html", form=form)
+    return flask.render_template("mascarpone/add_sku_mascarpone.html", form=form)
 
 
 @main.route("/mascarpone/get_sku_mascarpone/<int:page>", methods=["GET"])
 def mascarpone_get_sku_mascarpone(page):
-    session.clear()
+    flask.session.clear()
     form = SKUMascarponeForm()
     skus_count = db.session.query(MascarponeSKU).count()
 
@@ -50,15 +50,15 @@ def mascarpone_get_sku_mascarpone(page):
         .join(Group)
         .filter(Group.name == "Маскарпоне")
         .order_by(MascarponeSKU.name)
-        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
-    return render_template(
+    return flask.render_template(
         "mascarpone/get_sku_mascarpone.html",
         form=form,
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.config["SKU_PER_PAGE"],
+        per_page=flask.current_app.config["SKU_PER_PAGE"],
         endopoints=".mascarpone_get_sku_mascarpone",
     )
 
@@ -78,8 +78,8 @@ def mascarpone_edit_sku_mascarpone(sku_id):
 
         db.session.commit()
 
-        flash("SKU успешно изменено", "success")
-        return redirect(url_for(".mascarpone_get_sku_mascarpone", page=1))
+        flask.flash("SKU успешно изменено", "success")
+        return redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
 
     if len(sku.made_from_boilings) > 0:
         print(sku.made_from_boilings[0].to_str())
@@ -97,7 +97,7 @@ def mascarpone_edit_sku_mascarpone(sku_id):
     form.packing_speed.data = sku.packing_speed
     form.in_box.data = sku.in_box
 
-    return render_template(
+    return flask.render_template(
         "mascarpone/edit_sku_mascarpone.html", form=form, sku_id=sku_id
     )
 
@@ -108,6 +108,6 @@ def mascarpone_delete_sku_mascarpone(sku_id):
     if sku:
         db.session.delete(sku)
         db.session.commit()
-        flash("SKU успешно удалено", "success")
+        flask.flash("SKU успешно удалено", "success")
     time.sleep(1.0)
-    return redirect(url_for(".mascarpone_get_sku_mascarpone", page=1))
+    return redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))

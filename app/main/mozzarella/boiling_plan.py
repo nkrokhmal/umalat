@@ -12,20 +12,20 @@ from .forms import BoilingPlanFastForm
 
 @main.route("/boiling_plan", methods=["POST", "GET"])
 def boiling_plan():
-    form = BoilingPlanFastForm(request.form)
-    if request.method == "POST" and "submit" in request.form:
+    form = BoilingPlanFastForm(flask.request.form)
+    if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         skus = db.session.query(MozzarellaSKU).all()
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(MozzarellaBoiling).all()
-        skus_req, remainings_df = parse_file(request.files["input_file"].read())
+        skus_req, remainings_df = parse_file(flask.request.files["input_file"].read())
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
         sku_plan_client = SkuPlanClient(
             date=date,
             remainings=remainings_df,
             skus_grouped=skus_grouped,
-            template_path=current_app.config["TEMPLATE_BOILING_PLAN"],
+            template_path=flask.current_app.config["TEMPLATE_BOILING_PLAN"],
         )
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_mozzarella_sku_plan()
@@ -35,13 +35,13 @@ def boiling_plan():
             sku_plan_client.filename,
             "моцарелла",
         )
-        sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
+        sheet_name = flask.current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
         df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler)
         df_plan = boiling_plan_create(df)
         wb = draw_boiling_plan(df_plan, df_extra_packing, wb)
         wb.save(filepath)
-        return render_template(
+        return flask.render_template(
             "mozzarella/boiling_plan.html", form=form, filename=filename
         )
-    return render_template("mozzarella/boiling_plan.html", form=form, filename=None)
+    return flask.render_template("mozzarella/boiling_plan.html", form=form, filename=None)

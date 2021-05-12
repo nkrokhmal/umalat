@@ -10,7 +10,7 @@ from .forms import LineForm
 @main.route("/ricotta/get_line", methods=["GET", "POST"])
 def ricotta_get_line():
     lines = db.session.query(RicottaLine).all()
-    return render_template(
+    return flask.render_template(
         "ricotta/get_line.html", lines=lines, endpoints=".ricotta_get_line"
     )
 
@@ -23,10 +23,10 @@ def ricotta_edit_line(line_id):
         line.name = form.name.data
         line.input_ton = form.input_ton.data
         db.session.commit()
-        flash("Параметры линии успешно изменены", "success")
-        return redirect(url_for(".ricotta_get_line"))
+        flask.flash("Параметры линии успешно изменены", "success")
+        return redirect(flask.url_for(".ricotta_get_line"))
 
     form.name.data = line.name
     form.input_ton.data = line.input_ton
 
-    return render_template("ricotta/edit_line.html", form=form, line_id=line.id)
+    return flask.render_template("ricotta/edit_line.html", form=form, line_id=line.id)

@@ -14,18 +14,18 @@ from .forms import ScheduleForm
 @main.route("/mascarpone_schedule", methods=["GET", "POST"])
 def mascarpone_schedule():
 
-    form = ScheduleForm(request.form)
-    if request.method == "POST" and "submit" in request.form:
+    form = ScheduleForm(flask.request.form)
+    if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         beg_time = form.beg_time.data
-        file = request.files["input_file"]
+        file = flask.request.files["input_file"]
 
-        file_path = os.path.join(current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
+        file_path = os.path.join(flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
             ),
             data_only=True,
         )
@@ -48,7 +48,7 @@ def mascarpone_schedule():
         path_schedule = "{}/{}".format("app/data/schedule_plan", filename_schedule)
 
         schedule_wb.save(path_schedule)
-        return render_template(
+        return flask.render_template(
             "mascarpone/schedule.html", form=form, filename=filename_schedule
         )
 
@@ -61,4 +61,4 @@ def mascarpone_schedule():
         + 1
     )
 
-    return render_template("mascarpone/schedule.html", form=form, filename=None)
+    return flask.render_template("mascarpone/schedule.html", form=form, filename=None)

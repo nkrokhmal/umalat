@@ -29,7 +29,7 @@ def mascarpone_boiling_plan():
 
         file = request.files["input_file"]
         tmp_file_path = os.path.join(
-            current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+            flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
         )
 
         if file:
@@ -41,7 +41,7 @@ def mascarpone_boiling_plan():
             date=date,
             remainings=remainings_df,
             skus_grouped=skus_grouped,
-            template_path=current_app.config["TEMPLATE_MASCARPONE_BOILING_PLAN"],
+            template_path=flask.current_app.config["TEMPLATE_MASCARPONE_BOILING_PLAN"],
         )
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_ricotta_sku_plan()
@@ -51,7 +51,7 @@ def mascarpone_boiling_plan():
             sku_plan_client.filename,
             "маскарпоне",
         )
-        sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
+        sheet_name = flask.current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
         df, _ = parse_sheet(ws, sheet_name, excel_compiler)
         mascarpone_df, cream_cheese_df, cream_df = mascarpone_boiling_plan_create(df)

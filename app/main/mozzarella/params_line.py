@@ -8,7 +8,7 @@ from .forms import LineForm
 @main.route("/mozzarella/get_line", methods=["GET", "POST"])
 def get_line():
     lines = db.session.query(MozzarellaLine).all()
-    return render_template(
+    return flask.render_template(
         "mozzarella/get_line.html", lines=lines, endpoints=".get_line"
     )
 
@@ -25,8 +25,8 @@ def edit_line(line_id):
         line.melting_speed = form.melting_speed.data
         db.session.commit()
 
-        flash("Параметры линии успешно изменены", "success")
-        return redirect(url_for(".get_line"))
+        flask.flash("Параметры линии успешно изменены", "success")
+        return redirect(flask.url_for(".get_line"))
 
     form.name.data = line.name
     form.pouring_time.data = line.pouring_time
@@ -34,4 +34,4 @@ def edit_line(line_id):
     form.chedderization_time.data = line.chedderization_time
     form.melting_speed.data = line.melting_speed
 
-    return render_template("mozzarella/edit_line.html", form=form, line_id=line.id)
+    return flask.render_template("mozzarella/edit_line.html", form=form, line_id=line.id)

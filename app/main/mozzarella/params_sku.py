@@ -10,7 +10,7 @@ from .forms import SKUForm
 @main.route("/mozzarella/add_sku", methods=["POST", "GET"])
 def add_sku():
     form = SKUForm()
-    name = request.args.get("name")
+    name = flask.request.args.get("name")
     if form.validate_on_submit():
         sku = MozzarellaSKU(
             name=form.name.data,
@@ -24,31 +24,31 @@ def add_sku():
         sku = fill_mozzarella_sku_from_form(sku, form)
         db.session.add(sku)
         db.session.commit()
-        flash("SKU успешно добавлено", "success")
-        return redirect(url_for(".get_sku", page=1))
+        flask.flash("SKU успешно добавлено", "success")
+        return redirect(flask.url_for(".get_sku", page=1))
     if name:
         form.name.data = name
-    return render_template("mozzarella/add_sku.html", form=form)
+    return flask.render_template("mozzarella/add_sku.html", form=form)
 
 
 @main.route("/mozzarella/get_sku/<int:page>", methods=["GET"])
 def get_sku(page):
-    session.clear()
+    flask.session.clear()
     form = SKUForm()
     skus_count = db.session.query(MozzarellaSKU).count()
 
     pagination = (
         db.session.query(MozzarellaSKU)
         .order_by(MozzarellaSKU.name)
-        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
-    return render_template(
+    return flask.render_template(
         "mozzarella/get_sku.html",
         form=form,
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.config["SKU_PER_PAGE"],
+        per_page=flask.current_app.config["SKU_PER_PAGE"],
         endopoints=".get_sku",
     )
 
@@ -68,8 +68,8 @@ def edit_sku(sku_id):
 
         db.session.commit()
 
-        flash("SKU успешно изменено", "success")
-        return redirect(url_for(".get_sku", page=1))
+        flask.flash("SKU успешно изменено", "success")
+        return redirect(flask.url_for(".get_sku", page=1))
 
     if len(sku.made_from_boilings) > 0:
         default_form_value(form.boiling, sku.made_from_boilings[0].to_str())
@@ -98,7 +98,7 @@ def edit_sku(sku_id):
     form.packing_speed.data = sku.packing_speed
     form.in_box.data = sku.in_box
 
-    return render_template("mozzarella/edit_sku.html", form=form, sku_id=sku_id)
+    return flask.render_template("mozzarella/edit_sku.html", form=form, sku_id=sku_id)
 
 
 @main.route("/mozzarella/delete_sku/<int:sku_id>", methods=["DELETE"])
@@ -107,6 +107,6 @@ def delete_sku(sku_id):
     if sku:
         db.session.delete(sku)
         db.session.commit()
-        flash("SKU успешно удалено", "success")
+        flask.flash("SKU успешно удалено", "success")
     time.sleep(1.0)
-    return redirect(url_for(".get_sku", page=1))
+    return redirect(flask.url_for(".get_sku", page=1))
