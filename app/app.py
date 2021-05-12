@@ -1,5 +1,8 @@
 from app.imports.runtime import *
 
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+
 import app.models as umalat_models
 
 from .main import main as main_bp

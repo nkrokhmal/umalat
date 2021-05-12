@@ -1,9 +1,10 @@
 from app.imports.runtime import *
+from flask_wtf.file import FileRequired, FileField
 
 from app.models import *
 
 
-class BoilingPlanForm(FlaskForm):
+class BoilingPlanForm(flask_wtf.FlaskFormFlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
     input_file = FileField(
         label="Выберите файл",
@@ -17,7 +18,7 @@ class BoilingPlanForm(FlaskForm):
     )
 
 
-class SKUCreamCheeseForm(FlaskForm):
+class SKUCreamCheeseForm(flask_wtf.FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
@@ -54,7 +55,7 @@ class SKUCreamCheeseForm(FlaskForm):
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
-class SKUMascarponeForm(FlaskForm):
+class SKUMascarponeForm(flask_wtf.FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
@@ -91,7 +92,7 @@ class SKUMascarponeForm(FlaskForm):
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
-class MascarponeBoilingTechnologyForm(FlaskForm):
+class MascarponeBoilingTechnologyForm(flask_wtf.FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
     pouring_time = IntegerField("Введите время налива", validators=[Optional()])
     heating_time = IntegerField("Введите время нагрева", validators=[Optional()])
@@ -111,7 +112,7 @@ class MascarponeBoilingTechnologyForm(FlaskForm):
         )
 
 
-class ScheduleForm(FlaskForm):
+class ScheduleForm(flask_wtf.FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
     input_file = FileField("", validators=validators)
     batch_number = IntegerField(

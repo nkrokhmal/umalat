@@ -1,9 +1,10 @@
 from app.imports.runtime import *
+from flask_wtf.file import FileRequired, FileField
 
 from app.models import *
 
 
-class BoilingPlanForm(FlaskForm):
+class BoilingPlanForm(flask_wtf.FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
     input_file = FileField(
         label="Выберите файл",
@@ -22,7 +23,7 @@ class BoilingPlanForm(FlaskForm):
     )
 
 
-class SKUForm(FlaskForm):
+class SKUForm(flask_wtf.FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
@@ -60,14 +61,14 @@ class SKUForm(FlaskForm):
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
-class LineForm(FlaskForm):
+class LineForm(flask_wtf.FlaskForm):
     name = StringField("Введите название линии", validators=[Required()])
     input_ton = IntegerField(
         "Введите количество литров в одном танке", validators=[Required()]
     )
 
 
-class BoilingTechnologyForm(FlaskForm):
+class BoilingTechnologyForm(flask_wtf.FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
     heating_time = IntegerField("Введите время нагрева", validators=[Optional()])
     delay_time = IntegerField("Введите время выдержки", validators=[Optional()])
@@ -81,7 +82,7 @@ class BoilingTechnologyForm(FlaskForm):
     submit = SubmitField(label="Сохранить")
 
 
-class AnalysisForm(FlaskForm):
+class AnalysisForm(flask_wtf.FlaskForm):
     preparation_time = IntegerField("Введите время нагрева", validators=[Optional()])
     analysis_time = IntegerField("Введите время выдержки", validators=[Optional()])
     pumping_time = IntegerField("Введите время сбора белка", validators=[Optional()])
@@ -89,7 +90,7 @@ class AnalysisForm(FlaskForm):
     submit = SubmitField(label="Сохранить")
 
 
-class ScheduleForm(FlaskForm):
+class ScheduleForm(flask_wtf.FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
     input_file = FileField("", validators=validators)
     batch_number = IntegerField(

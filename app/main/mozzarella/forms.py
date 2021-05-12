@@ -1,9 +1,10 @@
 from app.imports.runtime import *
+from flask_wtf.file import FileRequired, FileField
 
 from app.models import *
 
 
-class BoilingPlanFastForm(FlaskForm):
+class BoilingPlanFastForm(flask_wtf.FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
     input_file = FileField(
         label="Выберите файл",
@@ -17,7 +18,7 @@ class BoilingPlanFastForm(FlaskForm):
     )
 
 
-class ScheduleForm(FlaskForm):
+class ScheduleForm(flask_wtf.FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
     input_file = FileField("", validators=validators)
     batch_number = IntegerField(
@@ -41,7 +42,7 @@ class ScheduleForm(FlaskForm):
     )
 
 
-class SKUForm(FlaskForm):
+class SKUForm(flask_wtf.FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
@@ -101,7 +102,7 @@ class SKUForm(FlaskForm):
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
-class LineForm(FlaskForm):
+class LineForm(flask_wtf.FlaskForm):
     name = StringField("Введите название линии", validators=[Required()])
     pouring_time = IntegerField("Введите время налива", validators=[Required()])
     serving_time = IntegerField(
@@ -113,7 +114,7 @@ class LineForm(FlaskForm):
     melting_speed = IntegerField("Введите скорость плавления", validators=[Required()])
 
 
-class BoilingTechnologyForm(FlaskForm):
+class BoilingTechnologyForm(flask_wtf.FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
     pouring_time = IntegerField("Введите время налива", validators=[Optional()])
     soldification_time = IntegerField("Введите время схватки", validators=[Optional()])
@@ -135,7 +136,7 @@ class BoilingTechnologyForm(FlaskForm):
         self.line.choices.append((-1, ""))
 
 
-class FormFactorForm(FlaskForm):
+class FormFactorForm(flask_wtf.FlaskForm):
     name = StringField("Название форм фактора", validators=[Optional()])
     line = StringField("Название линии", validators=[Optional()])
     first_cooling_time = IntegerField(
@@ -147,7 +148,7 @@ class FormFactorForm(FlaskForm):
     salting_time = IntegerField("Введите время посолки", validators=[Optional()])
 
 
-class WasherForm(FlaskForm):
+class WasherForm(flask_wtf.FlaskForm):
     name = StringField("Название", validators=[Optional()])
     time = IntegerField("Введите время мойки", validators=[Optional()])
 

@@ -24,15 +24,10 @@ import flask_bootstrap
 import flask_migrate
 import flask_script
 import flask_restplus
+import flask_wtf
 
 from loguru import logger
 from datetime import datetime, time, timedelta
-
-from flask_wtf.file import FileRequired, FileField
-from flask_wtf import FlaskForm
-
-from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
 
 from wtforms import *
 from wtforms.validators import Required, Optional
