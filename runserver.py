@@ -1,6 +1,6 @@
 from app.imports.external import *
 
-os.environ["environment"] = "flask_app"
+os.environ["environment"] = "runtime"
 
 from app.app import *
 

@@ -1,28 +1,29 @@
-import numpy as np
-from ..enum import LineName
-from . import db, SKU, Line, FormFactor, Boiling, BoilingTechnology, backref
+from app.imports.runtime import *
+
+from app.enum import LineName
+from .basic import SKU, Line, FormFactor, Boiling, BoilingTechnology, backref
 
 
 class MozzarellaSKU(SKU):
     __tablename__ = "mozzarella_skus"
     __mapper_args__ = {"polymorphic_identity": "mozzarella_skus"}
 
-    id = db.Column(db.Integer, db.ForeignKey("skus.id"), primary_key=True)
-    production_by_request = db.Column(db.Boolean)
-    packing_by_request = db.Column(db.Boolean)
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("skus.id"), primary_key=True)
+    production_by_request = mdb.Column(mdb.Boolean)
+    packing_by_request = mdb.Column(mdb.Boolean)
 
 
 class MozzarellaLine(Line):
     __tablename__ = "mozzarella_lines"
     __mapper_args__ = {"polymorphic_identity": "mozzarella_lines"}
 
-    id = db.Column(db.Integer, db.ForeignKey("lines.id"), primary_key=True)
-    input_ton = db.Column(db.Integer)
-    output_ton = db.Column(db.Integer)
-    pouring_time = db.Column(db.Integer)
-    serving_time = db.Column(db.Integer)
-    melting_speed = db.Column(db.Integer)
-    chedderization_time = db.Column(db.Integer)
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
+    input_ton = mdb.Column(mdb.Integer)
+    output_ton = mdb.Column(mdb.Integer)
+    pouring_time = mdb.Column(mdb.Integer)
+    serving_time = mdb.Column(mdb.Integer)
+    melting_speed = mdb.Column(mdb.Integer)
+    chedderization_time = mdb.Column(mdb.Integer)
 
     @property
     def name_short(self):
@@ -38,9 +39,9 @@ class MozzarellaFormFactor(FormFactor):
     __tablename__ = "mozzarella_form_factors"
     __mapper_args__ = {"polymorphic_identity": "mozzarella_form_factor"}
 
-    id = db.Column(db.Integer, db.ForeignKey("form_factors.id"), primary_key=True)
-    default_cooling_technology_id = db.Column(
-        db.Integer, db.ForeignKey("mozzarella_cooling_technologies.id"), nullable=True
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("form_factors.id"), primary_key=True)
+    default_cooling_technology_id = mdb.Column(
+        mdb.Integer, mdb.ForeignKey("mozzarella_cooling_technologies.id"), nullable=True
     )
 
 
@@ -48,10 +49,10 @@ class MozzarellaBoiling(Boiling):
     __tablename__ = "mozzarella_boilings"
     __mapper_args__ = {"polymorphic_identity": "mozzarella_boiling"}
 
-    id = db.Column(db.Integer, db.ForeignKey("boilings.id"), primary_key=True)
-    percent = db.Column(db.Float)
-    is_lactose = db.Column(db.Boolean)
-    ferment = db.Column(db.String)
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True)
+    percent = mdb.Column(mdb.Float)
+    is_lactose = mdb.Column(mdb.Boolean)
+    ferment = mdb.Column(mdb.String)
 
     @property
     def boiling_type(self):
@@ -67,15 +68,15 @@ class MozzarellaBoilingTechnology(BoilingTechnology):
     __tablename__ = "mozzarella_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "mozzarella_boiling_technology"}
 
-    id = db.Column(
-        db.Integer, db.ForeignKey("boiling_technologies.id"), primary_key=True
+    id = mdb.Column(
+        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
     )
-    pouring_time = db.Column(db.Integer)
-    soldification_time = db.Column(db.Integer)
-    cutting_time = db.Column(db.Integer)
-    pouring_off_time = db.Column(db.Integer)
-    pumping_out_time = db.Column(db.Integer)
-    extra_time = db.Column(db.Integer)
+    pouring_time = mdb.Column(mdb.Integer)
+    soldification_time = mdb.Column(mdb.Integer)
+    cutting_time = mdb.Column(mdb.Integer)
+    pouring_off_time = mdb.Column(mdb.Integer)
+    pumping_out_time = mdb.Column(mdb.Integer)
+    extra_time = mdb.Column(mdb.Integer)
 
     @staticmethod
     def create_name(line, percent, ferment, is_lactose):
@@ -84,14 +85,14 @@ class MozzarellaBoilingTechnology(BoilingTechnology):
         return "Линия {}, {}".format(line, boiling_name)
 
 
-class MozzarellaCoolingTechnology(db.Model):
+class MozzarellaCoolingTechnology(mdb.Model):
     __tablename__ = "mozzarella_cooling_technologies"
-    id = db.Column(db.Integer, primary_key=True)
-    first_cooling_time = db.Column(db.Integer)
-    second_cooling_time = db.Column(db.Integer)
-    salting_time = db.Column(db.Integer)
+    id = mdb.Column(mdb.Integer, primary_key=True)
+    first_cooling_time = mdb.Column(mdb.Integer)
+    second_cooling_time = mdb.Column(mdb.Integer)
+    salting_time = mdb.Column(mdb.Integer)
 
-    form_factors = db.relationship(
+    form_factors = mdb.relationship(
         "MozzarellaFormFactor",
         backref=backref("default_cooling_technology", uselist=False),
     )

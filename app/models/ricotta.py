@@ -1,41 +1,42 @@
-from app.globals import db
-from sqlalchemy.orm import relationship, backref
-from . import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from app.imports.runtime import *
+
+
+from .basic import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
 
 
 class RicottaSKU(SKU):
     __tablename__ = "ricotta_skus"
     __mapper_args__ = {"polymorphic_identity": "ricotta_skus"}
 
-    id = db.Column(db.Integer, db.ForeignKey("skus.id"), primary_key=True)
-    output_per_tank = db.Column(db.Float)
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("skus.id"), primary_key=True)
+    output_per_tank = mdb.Column(mdb.Float)
 
 
 class RicottaLine(Line):
     __tablename__ = "ricotta_lines"
     __mapper_args__ = {"polymorphic_identity": "ricotta_lines"}
 
-    id = db.Column(db.Integer, db.ForeignKey("lines.id"), primary_key=True)
-    input_ton = db.Column(db.Integer)
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
+    input_ton = mdb.Column(mdb.Integer)
 
 
 class RicottaFormFactor(FormFactor):
     __tablename__ = "ricotta_form_factors"
     __mapper_args__ = {"polymorphic_identity": "ricotta_form_factor"}
 
-    id = db.Column(db.Integer, db.ForeignKey("form_factors.id"), primary_key=True)
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("form_factors.id"), primary_key=True)
 
 
 class RicottaBoiling(Boiling):
     __tablename__ = "ricotta_boilings"
     __mapper_args__ = {"polymorphic_identity": "ricotta_boiling"}
 
-    id = db.Column(db.Integer, db.ForeignKey("boilings.id"), primary_key=True)
-    flavoring_agent = db.Column(db.String)
-    percent = db.Column(db.Integer)
-    number_of_tanks = db.Column(db.Integer)
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True)
+    flavoring_agent = mdb.Column(mdb.String)
+    percent = mdb.Column(mdb.Integer)
+    number_of_tanks = mdb.Column(mdb.Integer)
 
-    analysis = db.relationship(
+    analysis = mdb.relationship(
         "RicottaAnalysisTechnology",
         backref=backref("boiling", uselist=False, lazy="subquery"),
     )
@@ -68,14 +69,14 @@ class RicottaBoilingTechnology(BoilingTechnology):
     __tablename__ = "ricotta_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "ricotta_boiling_technology"}
 
-    id = db.Column(
-        db.Integer, db.ForeignKey("boiling_technologies.id"), primary_key=True
+    id = mdb.Column(
+        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
     )
-    heating_time = db.Column(db.Integer)
-    delay_time = db.Column(db.Integer)
-    protein_harvest_time = db.Column(db.Integer)
-    abandon_time = db.Column(db.Integer)
-    pumping_out_time = db.Column(db.Integer)
+    heating_time = mdb.Column(mdb.Integer)
+    delay_time = mdb.Column(mdb.Integer)
+    protein_harvest_time = mdb.Column(mdb.Integer)
+    abandon_time = mdb.Column(mdb.Integer)
+    pumping_out_time = mdb.Column(mdb.Integer)
 
     @staticmethod
     def create_name(line, percent, flavoring_agent):
@@ -84,13 +85,13 @@ class RicottaBoilingTechnology(BoilingTechnology):
         return "Линия {}, {}".format(line, boiling_name)
 
 
-class RicottaAnalysisTechnology(db.Model):
+class RicottaAnalysisTechnology(mdb.Model):
     __tablename__ = "ricotta_analyses_technology"
-    id = db.Column(db.Integer, primary_key=True)
-    preparation_time = db.Column(db.Integer)
-    analysis_time = db.Column(db.Integer)
-    pumping_time = db.Column(db.Integer)
+    id = mdb.Column(mdb.Integer, primary_key=True)
+    preparation_time = mdb.Column(mdb.Integer)
+    analysis_time = mdb.Column(mdb.Integer)
+    pumping_time = mdb.Column(mdb.Integer)
 
-    boiling_id = db.Column(
-        db.Integer, db.ForeignKey("ricotta_boilings.id"), nullable=True
+    boiling_id = mdb.Column(
+        mdb.Integer, mdb.ForeignKey("ricotta_boilings.id"), nullable=True
     )

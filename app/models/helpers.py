@@ -1,40 +1,7 @@
 from app.imports.runtime import *
-from app.models import *
 from app.enum import LineName
 
-from config import SQLITE_PATH
-
-
-def get_db(environment=None):
-    environment = environment or os.getenv("environment")
-
-    if environment == "flask_app":
-        from app.globals import db
-    elif environment == "interactive":
-        print("WORKING IN INTERACTIVE MODE")
-        from sqlalchemy import create_engine
-        from sqlalchemy.orm import sessionmaker
-
-        engine = create_engine(f"sqlite:///{SQLITE_PATH}?check_same_thread=False")
-        Session = sessionmaker()
-        Session.configure(bind=engine)
-        session = Session()
-        db = utils.dotdict()
-        db["session"] = session
-    else:
-        raise Exception(f"Enviroment {environment} not supported")
-    return db
-
-
-db = None
-
-
-def set_global_db(environment=None):
-    global db
-    db = get_db(environment)
-
-
-set_global_db()
+from .mozzarella import *
 
 
 def fetch_all(cls):
