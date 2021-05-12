@@ -40,7 +40,7 @@ def get_sku(page):
     pagination = (
         db.session.query(MozzarellaSKU)
         .order_by(MozzarellaSKU.name)
-        .paginate(page, per_page=current_app.configs["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return render_template(
         "mozzarella/get_sku.html",
@@ -48,7 +48,7 @@ def get_sku(page):
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.configs["SKU_PER_PAGE"],
+        per_page=current_app.config["SKU_PER_PAGE"],
         endopoints=".get_sku",
     )
 

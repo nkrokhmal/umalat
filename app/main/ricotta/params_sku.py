@@ -52,7 +52,7 @@ def ricotta_get_sku(page):
     pagination = (
         db.session.query(RicottaSKU)
         .order_by(RicottaSKU.name)
-        .paginate(page, per_page=current_app.configs["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return render_template(
         "ricotta/get_sku.html",
@@ -60,7 +60,7 @@ def ricotta_get_sku(page):
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.configs["SKU_PER_PAGE"],
+        per_page=current_app.config["SKU_PER_PAGE"],
         endopoints=".ricotta_get_sku",
     )
 

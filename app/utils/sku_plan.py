@@ -39,7 +39,7 @@ class SkuPlanClient:
     def __init__(self, date, remainings, skus_grouped, template_path):
         self.filename = "{} План по SKU.xlsx".format(date.strftime("%Y-%m-%d"))
         self.filepath = os.path.join(
-            current_app.configs["SKU_PLAN_FOLDER"], self.filename
+            current_app.config["SKU_PLAN_FOLDER"], self.filename
         )
         self.skus_grouped = skus_grouped
         self.remainings = remainings
@@ -56,7 +56,7 @@ class SkuPlanClient:
             writer.book = self.wb
             writer.sheets = dict((ws.title, ws) for ws in self.wb.worksheets)
             self.remainings.to_excel(
-                writer, sheet_name=current_app.configs["SHEET_NAMES"]["remainings"]
+                writer, sheet_name=current_app.config["SHEET_NAMES"]["remainings"]
             )
             writer.save()
         self.wb = openpyxl.load_workbook(self.filepath)
@@ -76,7 +76,7 @@ class SkuPlanClient:
     ):
         beg_row = cur_row
         formula_group = []
-        for group_name in current_app.configs["ORDER"]:
+        for group_name in current_app.config["ORDER"]:
             block_skus = [x for x in sku_grouped.skus if x.sku.group.name == group_name]
             if block_skus:
                 if sorted_by_weight:
@@ -86,13 +86,13 @@ class SkuPlanClient:
                 beg_block_row = cur_row
                 for block_sku in block_skus:
                     formula_plan = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
-                        current_app.configs["SHEET_NAMES"]["remainings"],
+                        current_app.config["SHEET_NAMES"]["remainings"],
                         excel_client.sheet.cell(
                             cur_row, CELLS["SKU"].column
                         ).coordinate,
                     )
                     formula_remains = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($O$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
-                        current_app.configs["SHEET_NAMES"]["remainings"],
+                        current_app.config["SHEET_NAMES"]["remainings"],
                         excel_client.sheet.cell(
                             cur_row, CELLS["SKU"].column
                         ).coordinate,
@@ -159,7 +159,7 @@ class SkuPlanClient:
                         ),
                     )
         end_row = cur_row - 1
-        excel_client.colour = current_app.configs["COLOURS"]["DefaultGray"][1:]
+        excel_client.colour = current_app.config["COLOURS"]["DefaultGray"][1:]
         excel_client.merge_cells(
             beg_row=beg_row,
             end_row=end_row,
@@ -212,7 +212,7 @@ class SkuPlanClient:
         self.skus_grouped = sorted(
             self.skus_grouped, key=lambda x: (x.boiling.is_lactose, x.boiling.percent)
         )
-        sheet = self.wb[current_app.configs["SHEET_NAMES"]["schedule_plan"]]
+        sheet = self.wb[current_app.config["SHEET_NAMES"]["schedule_plan"]]
         cur_row = 2
         is_lactose = False
         for sku_grouped in self.skus_grouped:
@@ -231,7 +231,7 @@ class SkuPlanClient:
         self.wb.save(self.filepath)
 
     def fill_ricotta_sku_plan(self):
-        sheet = self.wb[current_app.configs["SHEET_NAMES"]["schedule_plan"]]
+        sheet = self.wb[current_app.config["SHEET_NAMES"]["schedule_plan"]]
         cur_row = 2
         for sku_grouped in self.skus_grouped:
             excel_client = ExcelBlock(sheet=sheet)

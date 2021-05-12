@@ -54,7 +54,7 @@ def mascarpone_get_sku_cream_cheese(page):
         .join(Group)
         .filter(Group.name == "Кремчиз")
         .order_by(CreamCheeseSKU.name)
-        .paginate(page, per_page=current_app.configs["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return render_template(
         "mascarpone/get_sku_cream_cheese.html",
@@ -62,7 +62,7 @@ def mascarpone_get_sku_cream_cheese(page):
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.configs["SKU_PER_PAGE"],
+        per_page=current_app.config["SKU_PER_PAGE"],
         endopoints=".mascarpone_get_sku_cream_cheese",
     )
 
