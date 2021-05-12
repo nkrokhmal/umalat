@@ -5,6 +5,7 @@ from .. import main
 from app.schedule_maker import *
 import os
 from app.schedule_maker.departments.mozarella.frontend import *
+from app.schedule_maker.departments.mozarella.algo import *
 from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boilings
 from app.utils.batches.batch import *
 from app.schedule_maker.departments.mozarella.boiling_plan import (
@@ -75,7 +76,9 @@ def schedule():
             return internal_error(e)
             # raise Exception('Ошибка при построении расписания.')
 
-        schedule_wb = draw_excel_frontend(frontend, open_file=False, fn=None)
+        schedule_wb = draw_excel_frontend(
+            frontend, open_file=False, fn=None, style=STYLE
+        )
 
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание")
 
