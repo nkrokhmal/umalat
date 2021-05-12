@@ -126,7 +126,7 @@ def draw_task_original(excel_client, df, date, cur_row, line_name, task_name):
             boxes_count = math.ceil(
                 1000
                 * grp["kg"].sum()
-                / grp.iloc[0]["sku"].boxes
+                / grp.iloc[0]["sku"].in_box
                 / grp.iloc[0]["sku"].weight_netto
             )
         else:
