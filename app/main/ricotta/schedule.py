@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from app.main.errors import internal_error
 from app.main import main
 from app.schedule_maker import *
-from app.schedule_maker.departments.ricotta import *
+from app.schedule_maker.ricotta import *
 from app.utils.ricotta.schedule_tasks import schedule_task_boilings
 from app.utils.batches.batch import *
 
