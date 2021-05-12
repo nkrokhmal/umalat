@@ -93,7 +93,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     # remove separators and empty lines
     df = df[df["sku"] != "-"]
     df = df[~df["kg"].isnull()]
-    df["sku_obj"] = df["sku"].apply(cast_sku)
+    df["sku_obj"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
     df["sku_obj"] = df["sku_obj"].apply(lambda x: x.line.name)
 
     # add line name to boiling_params
@@ -110,9 +110,9 @@ def update_boiling_plan(dfs, normalization, saturate):
             dfs[1]["group_id"] += dfs[0].iloc[-1]["group_id"]
 
     df = pd.concat(dfs).reset_index(drop=True)
-    df["sku"] = df["sku"].apply(cast_sku)
+    df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
 
-    df["boiling"] = df["boiling_params"].apply(cast_boiling)
+    df["boiling"] = df["boiling_params"].apply(cast_mozarella_boiling)
 
     # set boiling form factors
     df["ff"] = df["sku"].apply(lambda sku: sku.form_factor)
@@ -209,9 +209,9 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
     for i, ws_name in enumerate(sheet_names):
         if ws_name in ["Вода", "Соль"]:
             line = (
-                cast_line(LineName.WATER)
+                cast_model(Line, LineName.WATER)
                 if ws_name == "Вода"
-                else cast_line(LineName.SALT)
+                else cast_model(Line, LineName.SALT)
             )
             default_boiling_volume = line.output_ton
         else:

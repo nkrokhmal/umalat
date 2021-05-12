@@ -4,6 +4,7 @@ from app.schedule_maker.departments.mozarella.boiling_plan import *
 def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing):
     maker, make = init_block_maker("root")
 
+    bt = boiling_model.boiling_technologies[0]
     with make(
         "boiling",
         boiling_id=boiling_id,
@@ -13,34 +14,33 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
         with make("pouring"):
             with make("first"):
                 make("termizator", size=(boiling_model.line.pouring_time // 5, 0))
+                # todo: use boiling technology from outside???
+
                 make(
                     "fermenting",
                     size=(
-                        boiling_model.boiling_technology.pouring_time // 5
-                        - boiling_model.line.pouring_time // 5,
+                        bt.pouring_time // 5 - boiling_model.line.pouring_time // 5,
                         0,
                     ),
                 )
                 make(
                     "soldification",
-                    size=(boiling_model.boiling_technology.soldification_time // 5, 0),
+                    size=(bt.soldification_time // 5, 0),
                 )
                 make(
                     "cutting",
-                    size=(boiling_model.boiling_technology.cutting_time // 5, 0),
+                    size=(bt.cutting_time // 5, 0),
                 )
                 make(
                     "pumping_out",
-                    size=(boiling_model.boiling_technology.pumping_out_time // 5, 0),
+                    size=(bt.pumping_out_time // 5, 0),
                 )
             with make("second"):
                 make(
                     "pouring_off",
-                    size=(boiling_model.boiling_technology.pouring_off_time // 5, 0),
+                    size=(bt.pouring_off_time // 5, 0),
                 )
-                make(
-                    "extra", size=(boiling_model.boiling_technology.extra_time // 5, 0)
-                )
+                make("extra", size=(bt.extra_time // 5, 0))
         make(
             "drenator",
             x=(maker.root["boiling"]["pouring"]["first"].y[0], 0),
