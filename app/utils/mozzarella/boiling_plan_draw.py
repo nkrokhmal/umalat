@@ -1,6 +1,5 @@
-from app.interactive_imports import *
+from app.imports.runtime import *
 from flask import current_app
-from collections import namedtuple
 
 from app.utils.features.db_utils import sku_is_rubber
 from app.utils.features.openpyxl_wrapper import ExcelBlock
