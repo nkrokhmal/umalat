@@ -1,7 +1,5 @@
-from flask import jsonify, render_template
-from flask_restplus import ValidationError
-import traceback
-from . import main
+from app.imports.interactive import *
+from app.main import main
 
 
 @main.errorhandler(400)

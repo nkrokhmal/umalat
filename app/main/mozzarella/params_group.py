@@ -1,6 +1,6 @@
-from flask import render_template
+from app.imports.runtime import *
+
 from app.main import main
-from app.globals import db
 from app.models import Group
 
 

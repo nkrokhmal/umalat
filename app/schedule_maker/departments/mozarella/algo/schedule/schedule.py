@@ -8,8 +8,8 @@ from .schedule_from_boilings import *
 from .schedule_by_optimization import *
 
 
-def make_schedule(fn, optimize=False, start_times=None, first_group_id=1):
-    boiling_plan_df = read_boiling_plan(fn)
+def make_schedule(boiling_plan_obj, optimize=False, start_times=None, first_group_id=1):
+    boiling_plan_df = read_boiling_plan(boiling_plan_obj)
 
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
 
@@ -23,7 +23,7 @@ def make_schedule(fn, optimize=False, start_times=None, first_group_id=1):
             .agg({"cleaning": "first"})
             .to_dict()["cleaning"]
         )
-        cleanings = {k: v for k, v in cleanings.items() if v}
+        cleanings = {k + first_group_id - 1: v for k, v in cleanings.items() if v}
         boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
         schedule = make_schedule_from_boilings(
             boilings, cleanings=cleanings, start_times=start_times

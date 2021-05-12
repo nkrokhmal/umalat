@@ -9,3 +9,5 @@ from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.pandas import *
 from utils_ak.iteration import *
 from utils_ak.builtin import *
+from utils_ak.fluid_flow import *
+from utils_ak.numeric import *

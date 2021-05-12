@@ -1,9 +1,8 @@
-from flask import url_for, render_template, flash
-from werkzeug.utils import redirect
-from .. import main
-from ... import db
+from app.imports.runtime import *
+
+from app.main import main
 from .forms import MascarponeBoilingTechnologyForm
-from ...models import MascarponeBoilingTechnology
+from app.models import MascarponeBoilingTechnology
 
 
 @main.route("/mascarpone/get_boiling_technology_mascarpone", methods=["GET", "POST"])

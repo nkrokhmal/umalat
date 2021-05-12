@@ -12,7 +12,9 @@ from app.schedule_maker.frontend import draw_excel_frontend
 
 def test():
     makedirs("schedules/")
-    fn = DebugConfig.abs_path("app/data/inputs/2021-05-07 План по варкам.xlsx")
+    fn = DebugConfig.abs_path(
+        "app/data/inputs/samples/mozzarella/2021-05-07 План по варкам.xlsx"
+    )
     start_times = {LineName.WATER: "02:00", LineName.SALT: "06:00"}
 
     schedule = make_schedule(

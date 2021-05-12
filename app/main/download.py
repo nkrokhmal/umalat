@@ -1,7 +1,5 @@
-from flask import send_from_directory
-import os
-from flask import current_app
-from . import main
+from app.imports.interactive import *
+from app.main import main
 
 
 @main.route("/download_boiling_plan/<file_name>", methods=["POST", "GET"])

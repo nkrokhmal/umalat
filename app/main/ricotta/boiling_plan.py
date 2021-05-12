@@ -1,13 +1,16 @@
-from flask import render_template, request
+from app.imports.runtime import *
+
 from .forms import BoilingPlanForm
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create
 from app.utils.ricotta.boiling_plan_draw import draw_boiling_plan
 from app.schedule_maker.departments.mozarella.boiling_plan import (
     read_boiling_plan as mozzarella_read_boiling_plan,
 )
-from ...utils.sku_plan import *
-from ...utils.parse_remainings import *
-from .. import main
+from app.utils.sku_plan import *
+from app.utils.parse_remainings import *
+from app.main import main
+
+from app.models import *
 
 
 @main.route("/ricotta_boiling_plan", methods=["POST", "GET"])

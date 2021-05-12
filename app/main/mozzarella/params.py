@@ -1,5 +1,5 @@
-from flask import render_template
-from .. import main
+from app.imports.runtime import *
+from app.main import main
 
 
 @main.route("/mozzarella_params", methods=["GET"])

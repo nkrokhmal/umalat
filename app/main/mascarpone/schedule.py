@@ -1,15 +1,14 @@
-from flask import render_template, request, current_app
-from ..errors import internal_error
-from .forms import ScheduleForm
-from .. import main
-import os
+from app.imports.runtime import *
+
+from app.main import main
+from app.main.errors import internal_error
 from app.schedule_maker.departments.mascarpone import *
 from app.schedule_maker.departments.mascarpone.frontend.style import STYLE
-
 from app.utils.mascarpone.schedule_task import schedule_task_boilings
 from app.utils.batches.batch import *
-import datetime
+from app.schedule_maker import draw_excel_frontend
 
+from .forms import ScheduleForm
 
 @main.route("/mascarpone_schedule", methods=["GET", "POST"])
 def mascarpone_schedule():
@@ -20,7 +19,9 @@ def mascarpone_schedule():
         beg_time = form.beg_time.data
         file = request.files["input_file"]
 
-        file_path = os.path.join(current_app.configs["UPLOAD_TMP_FOLDER"], file.filename)
+        file_path = os.path.join(
+            current_app.configs["UPLOAD_TMP_FOLDER"], file.filename
+        )
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(

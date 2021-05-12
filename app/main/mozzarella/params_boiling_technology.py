@@ -1,9 +1,9 @@
-from flask import url_for, render_template, flash
-from werkzeug.utils import redirect
+from app.imports.runtime import *
+
 from app.main import main
-from app.globals import db
 from app.models import MozzarellaBoilingTechnology
 from app.utils.features.form_utils import *
+
 from .forms import BoilingTechnologyForm
 
 

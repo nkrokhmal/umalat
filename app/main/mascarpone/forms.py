@@ -1,12 +1,6 @@
-from flask_restplus import ValidationError
-from flask_wtf.file import FileRequired, FileField
-from flask_wtf import FlaskForm
-from wtforms import *
-from wtforms.validators import Required, Optional
+from app.imports.runtime import *
 
 from app.models import *
-from app.globals import db
-import datetime
 
 
 class BoilingPlanForm(FlaskForm):
@@ -18,7 +12,7 @@ class BoilingPlanForm(FlaskForm):
     date = DateTimeField(
         "Введите дату",
         format="%Y-%m-%d",
-        default=datetime.datetime.today() + datetime.timedelta(days=1),
+        default=datetime.today() + timedelta(days=1),
         validators=[Required()],
     )
 
@@ -127,5 +121,5 @@ class ScheduleForm(FlaskForm):
     beg_time = TimeField(
         'Начало первой подачи"',
         validators=[Optional()],
-        default=datetime.time(7, 0),
+        default=time(7, 0),
     )

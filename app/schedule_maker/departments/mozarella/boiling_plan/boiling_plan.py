@@ -3,6 +3,7 @@ from app.imports.runtime import *
 from app.models import *
 from app.enum import LineName
 from .saturate import saturate_boiling_plan
+import openpyxl as opx
 
 
 def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
@@ -225,3 +226,12 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
 
     df = update_boiling_plan(dfs, normalization, saturate)
     return df
+
+
+def cast_boiling_plan(boiling_plan_obj):
+    if isinstance(boiling_plan_obj, (str, opx.Workbook)):
+        return read_boiling_plan(boiling_plan_obj)
+    elif isinstance(boiling_plan_obj, pd.DataFrame):
+        return boiling_plan_obj
+    else:
+        raise Exception("Unknown boiling plan type")

@@ -1,17 +1,13 @@
-import os
-import datetime
+from app.imports.runtime import *
 
-from flask import render_template, request, current_app
 from app.main import main
 from app.main.errors import internal_error
 from app.schedule_maker import *
-from app.schedule_maker.departments.mozarella.frontend import *
-from app.schedule_maker.departments.mozarella.algo import *
+from app.schedule_maker.departments.mozarella import *
 from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boilings
 from app.utils.batches.batch import *
-from app.schedule_maker.departments.mozarella.boiling_plan import (
-    read_boiling_plan as mozzarella_read_boiling_plan,
-)
+
+
 from .forms import ScheduleForm
 
 
@@ -34,42 +30,25 @@ def schedule():
             data_only=True,
         )
 
-        boiling_plan_df = mozzarella_read_boiling_plan(wb)
+        boiling_plan_df = cast_boiling_plan(wb)
         add_batch(
             date,
             "Моцарельный цех",
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["group_id"].max()) - 1,
         )
+
         start_times = {
             LineName.WATER: form.water_beg_time.data,
             LineName.SALT: form.salt_beg_time.data,
         }
 
-        if add_full_boiling:
-            schedule = make_schedule_with_boiling_inside_a_day(
-                boiling_plan_df,
-                start_times=start_times,
-                first_group_id=form.batch_number.data,
-                date=date,
-            )
-        else:
-            boilings = make_boilings(
-                boiling_plan_df, first_group_id=form.batch_number.data
-            )
-            cleanings = (
-                boiling_plan_df.groupby("group_id")
-                .agg({"cleaning": "first"})
-                .to_dict()["cleaning"]
-            )
-            cleanings = {
-                k + int(form.batch_number.data) - 1: v
-                for k, v in cleanings.items()
-                if v
-            }
-            schedule = make_schedule_from_boilings(
-                boilings, cleanings=cleanings, start_times=start_times, date=date
-            )
+        schedule = make_schedule(
+            boiling_plan_df,
+            start_times=start_times,
+            optimize=add_full_boiling,
+            first_group_id=int(form.batch_number.data),
+        )
 
         try:
             frontend = make_frontend(schedule)

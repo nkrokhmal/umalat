@@ -1,9 +1,8 @@
 import os
-import time
-
 os.environ["environment"] = "interactive"
 
-from config import basedir
+from app.imports.runtime import *
+
 from app.schedule_maker.departments.mozarella.boiling_plan import read_boiling_plan
 from app.schedule_maker.departments.mozarella.algo import *
 

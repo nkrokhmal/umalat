@@ -1,5 +1,5 @@
-from utils_ak.fluid_flow import *
-from utils_ak.numeric import *
+from app.imports.runtime import *
+
 from app.enum import LineName
 
 
@@ -10,14 +10,14 @@ class SchemaToBoilingsDataframes:
         for boiling_meltings in boilings_meltings:
             boiling_volume = sum(kg for bff, kg in boiling_meltings)
 
-            drenator = Container(
+            drenator = utils.Container(
                 "Drenator", value=boiling_volume, max_pressures=[None, None]
             )
 
             melting_processors = []
             cooling_processors = []
             for i, (bff, kg) in enumerate(boiling_meltings):
-                melting_processor = Processor(
+                melting_processor = utils.Processor(
                     f"Melting{i}",
                     items=["cheese_mass", bff],
                     max_pressures=[melting_speed, melting_speed],
@@ -26,7 +26,7 @@ class SchemaToBoilingsDataframes:
                 )
                 melting_processors.append(melting_processor)
 
-                cooling_processor = Processor(
+                cooling_processor = utils.Processor(
                     f"Cooling{i}",
                     items=[bff, bff],
                     max_pressures=[None, None],
@@ -34,12 +34,12 @@ class SchemaToBoilingsDataframes:
                     limits=[kg, kg],
                 )
                 cooling_processors.append(cooling_processor)
-            melting_queue = Queue(
+            melting_queue = utils.Queue(
                 "MeltingQueue",
                 melting_processors,
                 break_funcs={"in": lambda old, new: 1 / 12},
             )
-            cooling_queue = Queue("CoolingQueue", cooling_processors)
+            cooling_queue = utils.Queue("CoolingQueue", cooling_processors)
 
             res.append([drenator, melting_queue, cooling_queue])
         return res
@@ -55,21 +55,21 @@ class SchemaToBoilingsDataframes:
                     sku.packing_speed == sku.collecting_speed
                 ), f"SKU {sku.name} имеет разные скорости сборки и фасовки. На линии воды позволяются только одинаковые скорости сборки и фасовки."
 
-                container = Container(
+                container = utils.Container(
                     f"Container{packing_team_id}-{j}",
                     item=bff,
                     limits=[kg, None],
                     max_pressures=[sku.collecting_speed, None],
                 )
-                processor = Processor(
+                processor = utils.Processor(
                     f"Processor{packing_team_id}-{j}",
                     items=[bff, sku],
                     max_pressures=[sku.packing_speed, None],
                     processing_time=0,
                 )
-                seq = Sequence(f"Sequence{packing_team_id}-{j}", [container, processor])
+                seq = utils.Sequence(f"Sequence{packing_team_id}-{j}", [container, processor])
                 sequences.append(seq)
-            packing_queue = Queue(
+            packing_queue = utils.Queue(
                 f"PackingQueue{packing_team_id}",
                 sequences,
                 break_funcs={"in": lambda old, new: 1 / 12},
@@ -85,19 +85,19 @@ class SchemaToBoilingsDataframes:
         for drenator, melting_queue, cooling_queue in melting_actors_by_boiling:
             boiling_dataframes = {}
 
-            packing_hub = Hub("hub")
+            packing_hub = utils.Hub("hub")
 
-            pipe_connect(drenator, melting_queue, "drenator-melting")
-            pipe_connect(melting_queue, cooling_queue, "melting-cooling")
-            pipe_connect(cooling_queue, packing_hub, "cooling-hub")
+            utils.pipe_connect(drenator, melting_queue, "drenator-melting")
+            utils.pipe_connect(melting_queue, cooling_queue, "melting-cooling")
+            utils.pipe_connect(cooling_queue, packing_hub, "cooling-hub")
 
             for packing_team_id, packing_queue in packing_queues.items():
-                pipe_connect(
+                utils.pipe_connect(
                     packing_hub, packing_queue, f"hub-packing_queue{packing_team_id}"
                 )
 
-            flow = FluidFlow(drenator, verbose=False)
-            run_flow(flow)
+            flow = utils.FluidFlow(drenator, verbose=False)
+            utils.run_flow(flow)
 
             df = pd.DataFrame(
                 melting_queue.active_periods("out"), columns=["item", "beg", "end"]
@@ -106,10 +106,10 @@ class SchemaToBoilingsDataframes:
             boiling_dataframes["meltings"] = df
 
             assert (
-                abs(drenator.value) < ERROR
+                abs(drenator.value) < utils.ERROR
             ), f"Дренатор не был опустошен полностью во время плавления на линии {LineName.WATER} из-за невалидного плана варок. Поправьте план варок и повторите попытку. "
             assert all(
-                abs(container.io_containers["out"].value) < ERROR
+                abs(container.io_containers["out"].value) < utils.ERROR
                 for container in cooling_queue.lines
             ), f"Некоторые SKU не были собраны полностью во время паковки на линии {LineName.WATER} из-за невалидного плана варок. Поправьте план варок и повторите попытку. "
 
@@ -163,7 +163,7 @@ class SchemaToBoilingsDataframes:
 
             # remove packers from current boiling
             for packing_queue in packing_queues.values():
-                pipe_disconnect(packing_hub, packing_queue)
+                utils.pipe_disconnect(packing_hub, packing_queue)
         return res
 
     def _post_process_dataframe(self, df, fix_small_intervals=True, round=True):
@@ -176,12 +176,12 @@ class SchemaToBoilingsDataframes:
             df["beg"] = df["beg"].apply(
                 lambda ts: None
                 if ts is None
-                else custom_round(ts, 5, "nearest_half_down")
+                else utils.custom_round(ts, 5, "nearest_half_down")
             )
             df["end"] = df["end"].apply(
                 lambda ts: None
                 if ts is None
-                else custom_round(ts, 5, "nearest_half_down")
+                else utils.custom_round(ts, 5, "nearest_half_down")
             )
 
             # fix small intervals (like beg and end: 5, 5 -> 5, 10)
