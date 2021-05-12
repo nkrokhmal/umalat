@@ -1,5 +1,8 @@
 from app.imports.runtime import *
 
+from sqlalchemy import func, extract
+from sqlalchemy.orm import backref
+
 
 class Department(mdb.Model):
     __tablename__ = "departments"
@@ -139,7 +142,7 @@ class FormFactor(mdb.Model):
     )
     line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), nullable=True)
 
-    made_from = relationship(
+    made_from = mdb.relationship(
         "FormFactor",
         secondary=parent_child,
         primaryjoin=id == parent_child.c.ChildId,

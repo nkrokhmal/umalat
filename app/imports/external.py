@@ -28,7 +28,4 @@ import flask_restplus
 from loguru import logger
 from datetime import datetime, time, timedelta
 
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy import func, extract
-
 from app.imports import utils
