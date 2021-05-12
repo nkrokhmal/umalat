@@ -2,44 +2,59 @@ import openpyxl
 import pandas as pd
 from app.enum import LineName
 
-from app.schedule_maker.time import *
-from app.schedule_maker.calculation import *
-from app.schedule_maker.frontend import *
-
+from app.schedule_maker.departments.mozarella.frontend.drawing import *
+from app.schedule_maker.departments.mozarella.frontend.style import *
 from utils_ak.interactive_imports import *
 
 
 def calc_form_factor_label(form_factors):
-    values = [ff.name for ff in form_factors]
-    values = remove_neighbor_duplicates(values)
+    form_factors = remove_neighbor_duplicates(form_factors)
+    cur_label = None
+    values = []
+    for ff in form_factors:
+        label = ""
+
+        s = ""
+        if label != cur_label:
+            s += label + " "
+            cur_label = label
+
+        s += ff.name
+
+        values.append(s)
     return "/".join(values)
 
 
 def calc_group_form_factor_label(skus):
     skus = remove_neighbor_duplicates(skus)
-
+    cur_label = None
+    cur_form_factor = None
     values = []
     for sku in skus:
+
         if len(skus) == 1:
-            group_label = sku.group.name
+            label = sku.group.name
         else:
-            group_label = sku.group.short_name
+            label = sku.group.short_name
+
+        s = ""
+        if label != cur_label:
+            s += label + " "
+            cur_label = label
+            # reset form factor also
+            cur_form_factor = None
 
         if "Терка" in sku.form_factor.name:
-            form_factor_label = "Терка"
+            form_factor = "Терка"
         else:
-            form_factor_label = sku.form_factor.name
+            form_factor = sku.form_factor.name
 
-        values.append([group_label, form_factor_label])
-
-    tree = df_to_ordered_tree(pd.DataFrame(values))
-
-    return "/".join(
-        [
-            group_label + " " + "/".join(form_factor_labels)
-            for group_label, form_factor_labels in tree
-        ]
-    )
+        if cur_form_factor != form_factor:
+            s += form_factor
+            cur_form_factor = form_factor
+        if s:
+            values.append(s)
+    return "/".join(values)
 
 
 def make_header(date, start_time="01:00"):
@@ -70,103 +85,6 @@ def make_header(date, start_time="01:00"):
     return maker.root["header"]
 
 
-def _make_frontend_boiling(boiling):
-    maker, make = init_block_maker("boiling", axis=1)
-
-    boiling_model = boiling.props["boiling_model"]
-
-    standard_boiling_volume = (
-        1000 if boiling_model.line.name == LineName.WATER else 850
-    )  # todo: make properly
-    boiling_size = int(
-        round(
-            8000
-            * boiling.props.relative_props.get(
-                "boiling_volume", standard_boiling_volume
-            )
-            / standard_boiling_volume
-        )
-    )  # todo: make properly
-
-    # [cheesemakers.boiling_params]
-    boiling_label = "{} {} {} {}кг".format(
-        boiling_model.percent,
-        boiling_model.ferment,
-        "" if boiling_model.is_lactose else "безлактозная",
-        boiling_size,
-    )
-
-    with make(
-        "pouring_block",
-        boiling_label=boiling_label,
-        boiling_id=boiling.props["boiling_id"],
-        x=(boiling["pouring"].x[0], 0),
-        push_func=add_push,
-        axis=1,
-    ):
-        with make():
-            make(
-                "termizator",
-                size=(boiling["pouring"]["first"]["termizator"].size[0], 1),
-            )
-            make(
-                "pouring_name",
-                size=(
-                    boiling["pouring"].size[0]
-                    - boiling["pouring"]["first"]["termizator"].size[0],
-                    1,
-                ),
-                boiling_label=boiling_label,
-            )
-        with make(font_size=8):
-            make(
-                "pouring_and_fermenting",
-                size=(
-                    boiling["pouring"]["first"]["termizator"].size[0]
-                    + boiling["pouring"]["first"]["fermenting"].size[0],
-                    1,
-                ),
-                push_func=add_push,
-            )
-            make(
-                "soldification",
-                size=(
-                    boiling["pouring"]["first"]["soldification"].size[0],
-                    1,
-                ),
-            )
-            make(
-                "cutting",
-                size=(boiling["pouring"]["first"]["cutting"].size[0], 1),
-            )
-            make(
-                "pumping_out",
-                size=(
-                    boiling["pouring"]["first"]["pumping_out"].size[0],
-                    1,
-                ),
-            )
-            make(
-                "pouring_off",
-                size=(
-                    boiling["pouring"]["second"]["pouring_off"].size[0],
-                    1,
-                ),
-            )
-            make(
-                "extra",
-                size=(boiling["pouring"]["second"]["extra"].size[0], 1),
-            )
-        with make():
-            for b in listify(boiling["steams"]["steam_consumption"]):
-                make(
-                    make_steam_blocks(b, x=b.props.relative_props["x"]),
-                    push_func=add_push,
-                )
-
-    return maker.root
-
-
 def make_cheese_makers(master, rng):
     maker, make = init_block_maker("cheese_makers", axis=1)
 
@@ -183,8 +101,92 @@ def make_cheese_makers(master, rng):
                 )
 
             for boiling in master.iter(cls="boiling", pouring_line=str(i)):
-                make(_make_frontend_boiling(boiling), push_func=add_push)
-        make("stub", size=(0, 1))
+                boiling_model = boiling.props["boiling_model"]
+
+                standard_boiling_volume = (
+                    1000 if boiling_model.line.name == LineName.WATER else 850
+                )  # todo: make properly
+                boiling_size = int(
+                    round(
+                        8000
+                        * boiling.props.relative_props.get(
+                            "boiling_volume", standard_boiling_volume
+                        )
+                        / standard_boiling_volume
+                    )
+                )  # todo: make properly
+
+                # [cheesemakers.boiling_params]
+                boiling_label = "{} {} {} {}кг".format(
+                    boiling_model.percent,
+                    boiling_model.ferment,
+                    "" if boiling_model.is_lactose else "безлактозная",
+                    boiling_size,
+                )
+
+                with make(
+                    "pouring_block",
+                    boiling_label=boiling_label,
+                    boiling_id=boiling.props["boiling_id"],
+                    x=(boiling["pouring"].x[0], 0),
+                    push_func=add_push,
+                    axis=1,
+                ):
+                    with make():
+                        make(
+                            "termizator",
+                            size=(boiling["pouring"]["first"]["termizator"].size[0], 1),
+                        )
+                        make(
+                            "pouring_name",
+                            size=(
+                                boiling["pouring"].size[0]
+                                - boiling["pouring"]["first"]["termizator"].size[0],
+                                1,
+                            ),
+                            boiling_label=boiling_label,
+                        )
+                    with make(font_size=8):
+                        make(
+                            "pouring_and_fermenting",
+                            size=(
+                                boiling["pouring"]["first"]["termizator"].size[0]
+                                + boiling["pouring"]["first"]["fermenting"].size[0],
+                                1,
+                            ),
+                            push_func=add_push,
+                        )
+                        make(
+                            "soldification",
+                            size=(
+                                boiling["pouring"]["first"]["soldification"].size[0],
+                                1,
+                            ),
+                        )
+                        make(
+                            "cutting",
+                            size=(boiling["pouring"]["first"]["cutting"].size[0], 1),
+                        )
+                        make(
+                            "pumping_out",
+                            size=(
+                                boiling["pouring"]["first"]["pumping_out"].size[0],
+                                1,
+                            ),
+                        )
+                        make(
+                            "pouring_off",
+                            size=(
+                                boiling["pouring"]["second"]["pouring_off"].size[0],
+                                1,
+                            ),
+                        )
+                        make(
+                            "extra",
+                            size=(boiling["pouring"]["second"]["extra"].size[0], 1),
+                        )
+        # add two lines for "Расход пара"
+        make("stub", size=(0, 2))
 
     return maker.root
 
@@ -371,7 +373,6 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
             j = 0
             while True:
                 if j == n_cooling_lines:
-                    # add new cooling line
                     n_cooling_lines += 1
                     new_cooling_line = maker.create_block(
                         "cooling_line", is_parent_node=True, size=(0, 1)
@@ -390,16 +391,8 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                 if n_cooling_lines == 100:
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
-    # add one line for "Расход пара"
-    with make(font_size=8):
-        for b in master.iter(
-            cls="steam_consumption",
-            boiling_model=lambda bm: bm.line.name == line_name,
-            type="melting",
-        ):
-            make(make_steam_blocks(b), push_func=add_push)
-
-    make("stub", size=(0, 1))
+    # add two lines for "Расход пара"
+    make("stub", size=(0, 2))
     return maker.root
 
 
@@ -496,24 +489,6 @@ def make_melting(boiling, line_name):
                 ),
                 push_func=add_push,
             )
-        with make("steams", font_size=8):
-            for b in boiling.iter(
-                cls="steam_consumption",
-                boiling_model=lambda bm: bm.line.name == line_name,
-                type="melting",
-            ):
-                for j in range(
-                    int(b.x[0]), int(b.y[0])
-                ):  # todo: small hardcode (should be int already)
-                    make(
-                        x=(j, 0),
-                        size=(1, 1),
-                        text=str(b.props["value"]),
-                        text_rotation=90,
-                        push_func=add_push,
-                        # border=None,
-                    )
-
     return maker.root
 
 
@@ -768,3 +743,17 @@ def make_frontend(schedule, coolings_mode="first"):
         make(make_extra_packings(extra_packings))
 
     return maker.root
+
+
+def draw_excel_frontend(frontend, open_file=False, fn="schedule.xlsx", wb=None):
+    wb = draw_schedule(frontend, STYLE, wb=wb)
+
+    if fn:
+        sf = SplitFile(fn)
+        fn = sf.get_new()
+        wb.save(fn)
+
+        if open_file:
+            open_file_in_os(fn)
+
+    return wb

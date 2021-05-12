@@ -1,6 +1,8 @@
-from app.schedule_maker.departments.mozarella.algo import *
+from utils_ak.interactive_imports import *
+from app.schedule_maker.models import *
+from app.schedule_maker.departments.mozarella.algo.packing import *
 from app.schedule_maker.departments.mozarella.algo.cooling import *
-from app.schedule_maker.departments.mozarella.algo import make_boiling
+from app.schedule_maker.departments.mozarella.algo.boiling import make_boiling
 
 
 def make_melting_and_packing_basic(boiling_plan):

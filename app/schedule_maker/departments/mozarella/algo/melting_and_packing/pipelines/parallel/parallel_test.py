@@ -2,9 +2,10 @@ import os
 
 os.environ["environment"] = "interactive"
 
-from config import DebugConfig
-from app.schedule_maker.departments.mozarella.algo import *
-from app.schedule_maker.departments.mozarella.boiling_plan import read_boiling_plan
+from config import basedir
+from app.schedule_maker.models import *
+from app.schedule_maker.algo import *
+from app.schedule_maker.boiling_plan import read_boiling_plan
 
 from utils_ak.interactive_imports import *
 import warnings
@@ -17,7 +18,7 @@ def test1():
     configure_loguru_stdout("DEBUG")
 
     boiling_plan_df = read_boiling_plan(
-        DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
+        r"C:\Users\Mi\Desktop\master\code\git\2020.10-umalat\umalat\app\data\inputs\2021-02-19 План по варкам.xlsx"
     )
     boiling_plan_df = boiling_plan_df[
         boiling_plan_df["boiling"].apply(lambda b: b.line.name == LineName.SALT)
@@ -35,7 +36,7 @@ def test1():
 
 def test2():
     boiling_plan_df = read_boiling_plan(
-        DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
+        os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
     )
 
     mark_consecutive_groups(boiling_plan_df, "boiling", "boiling_group")
@@ -54,12 +55,10 @@ def test2():
 
 def test3():
     boiling_plan_df = read_boiling_plan(
-        DebugConfig.abs_path("app/data/inputs/sample_boiling_plan.xlsx")
+        os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
     )
 
-    boiling_df = boiling_plan_df[
-        boiling_plan_df["bff"] == cast_mozarella_form_factor(14)
-    ]
+    boiling_df = boiling_plan_df[boiling_plan_df["bff"] == cast_form_factor(14)]
     boiling_df["sku_name"] = boiling_df["sku"].apply(lambda sku: sku.name)
 
     values = []

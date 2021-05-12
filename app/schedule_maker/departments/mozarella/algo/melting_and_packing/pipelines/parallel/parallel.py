@@ -1,12 +1,11 @@
-import pandas as pd
+from utils_ak.interactive_imports import *
+from app.schedule_maker.models import *
 
-pd.set_option("mode.chained_assignment", None)
-
-from app.schedule_maker.departments.mozarella.algo import make_boiling
-from app.schedule_maker.departments.mozarella.algo import *
-from app.schedule_maker.departments.mozarella.algo.cooling import *
+from app.schedule_maker.algo import make_boiling
+from app.schedule_maker.algo.packing import *
+from app.schedule_maker.algo.cooling import *
 from app.schedule_maker.calculation import *
-from app.schedule_maker.departments.mozarella.algo.melting_and_packing.melting_process import (
+from app.schedule_maker.algo.melting_and_packing.melting_process import (
     make_melting_and_packing_from_mpps,
 )
 
@@ -200,10 +199,8 @@ def make_mpp(boiling_df, left_boiling_volume):
                             maker.create_block(
                                 "process",
                                 size=[packing_size, 0],
-                                x=list(block.props["x_rel"]),
                                 sku=row["sku"],
                             ),
-                            push_func=add_push,
                         )
 
     bff = boiling_df.iloc[0]["bff"]

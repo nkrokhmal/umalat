@@ -1,15 +1,19 @@
+import itertools
+
+
+from utils_ak.interactive_imports import *
+
 from app.schedule_maker.time import *
-from app.schedule_maker.departments.mozarella.algo import *
+from app.schedule_maker.departments.mozarella.algo.packing import *
 from app.enum import LineName
 
-from app.schedule_maker.departments.mozarella.algo.schedule.awaiting_pusher import (
-    AwaitingPusher,
-)
+from app.schedule_maker.departments.mozarella.algo.schedule.awaiting_pusher import AwaitingPusher
+from datetime import datetime
 
 # todo: optimize
 # class_validator = ClassValidator(window=10, window_by_classes={'boiling': {'boiling': 4, 'cleaning': 1, 'packing_configuration': 2},
 #                                                                'cleaning': {'boiling': 1, 'cleaning': 1},
-#                                              §                  'packing_configuration': {'boiling': 4}})
+#                                                                'packing_configuration': {'boiling': 4}})
 
 
 master_validator = ClassValidator(window=20)
@@ -17,17 +21,24 @@ master_validator = ClassValidator(window=20)
 
 def validate(b1, b2):
     validate_disjoint_by_axis(
-        b1["pouring"]["first"]["termizator"], b2["pouring"]["first"]["termizator"]
+        b1["pouring"]["first"]["termizator"],
+        b2["pouring"]["first"]["termizator"],
     )
     validate_disjoint_by_axis(
-        b1["pouring"]["second"]["pouring_off"], b2["pouring"]["second"]["pouring_off"]
+        b1["pouring"]["second"]["pouring_off"],
+        b2["pouring"]["second"]["pouring_off"],
     )
     validate_disjoint_by_axis(
-        b1["pouring"]["first"]["pumping_out"], b2["pouring"]["second"]["pouring_off"]
+        b1["pouring"]["first"]["pumping_out"],
+        b2["pouring"]["second"]["pouring_off"],
     )
     validate_disjoint_by_axis(
-        b1["pouring"]["second"]["pouring_off"], b2["pouring"]["first"]["pumping_out"]
+        b1["pouring"]["second"]["pouring_off"],
+        b2["pouring"]["first"]["pumping_out"],
     )
+
+    if b1.props["sheet"] == b2.props["sheet"]:
+        assert b1.x[0] < b2.x[0]
 
     wl1 = (
         LineName.WATER
@@ -50,7 +61,8 @@ def validate(b1, b2):
         # check drenator
         if b1.props["drenator_num"] == b2.props["drenator_num"]:
             validate_disjoint_by_axis(
-                b1["melting_and_packing"]["melting"]["meltings"], b2["drenator"]
+                b1["melting_and_packing"]["melting"]["meltings"],
+                b2["drenator"],
             )
 
     if b1.props["boiling_model"].line.name == b2.props["boiling_model"].line.name:
@@ -70,6 +82,26 @@ def validate(b1, b2):
                 b2["melting_and_packing"]["melting"]["serving"],
             )
 
+        # there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors
+        mp1 = listify(
+            b1["melting_and_packing"]["melting"]["meltings"]["melting_process"]
+        )[-1]
+
+        mp2 = listify(
+            b2["melting_and_packing"]["melting"]["meltings"]["melting_process"]
+        )[0]
+
+        bff1_name = mp1.props["bff"].name
+        bff2_name = mp2.props["bff"].name
+
+        sticks = ["Палочки 15.0г", "Палочки 7.5г"]
+        if bff1_name not in sticks and bff2_name in sticks:
+            assert (
+                b1["melting_and_packing"]["melting"]["meltings"].y[0] + 12
+                <= b2["melting_and_packing"]["melting"]["meltings"].x[0]
+            )
+
+        # collectings
         for p1, p2 in itertools.product(
             listify(b1["melting_and_packing"]["collecting"]),
             listify(b2["melting_and_packing"]["collecting"]),
@@ -188,7 +220,6 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
     return maker.root
 
 
-@clockify()
 def make_schedule(boilings, date=None, cleanings=None, start_times=None):
     date = date or datetime.now()
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
@@ -200,7 +231,6 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
     make("master", push_func=add_push)
     make("extra", push_func=add_push)
     make("extra_packings", push_func=add_push)
-    make("steam_consumptions", push_func=add_push)
 
     schedule = maker.root
 
@@ -223,19 +253,24 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         try:
             lines_df.at[line_name, "start_time"] = cast_time(start_times[line_name])
         except:
-            raise
             raise AssertionError(
                 f"Неверно указано время первой подачи на линии {line_name}"
             )
 
-    # generate boilings
-    lines_df["boilings_left"] = [[], []]
-    for line_name in [LineName.WATER, LineName.SALT]:
-        lines_df.at[line_name, "boilings_left"] = [
-            boiling
-            for boiling in boilings
-            if boiling.props["boiling_model"].line.name == line_name
+    # make sheets df
+    values = [
+        [
+            boiling,
+            boiling.props["boiling_model"].line.name,
+            boiling.props["sheet"],
         ]
+        for boiling in boilings
+    ]
+    left_df = (
+        pd.DataFrame(values, columns=["boiling", "line_name", "sheet"])
+        .reset_index()
+        .sort_values(by=["sheet", "index"])
+    )
 
     lines_df["latest_boiling"] = None
 
@@ -246,21 +281,23 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         )
 
     assert (
-        lines_df["boilings_left"].apply(lambda lst: len(lst)).sum() >= 1
+        len(left_df) > 0
     ), "На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания."
 
-    last_multihead_water_boiling = iter_get(
-        [
-            boiling
-            for boiling in lines_df.at[LineName.WATER, "boilings_left"]
-            if boiling_has_multihead_packing(boiling)
-        ],
-        -1,
-    )
+    multihead_water_boilings = [
+        row["boiling"]
+        for i, row in left_df.iterrows()
+        if boiling_has_multihead_packing(row["boiling"])
+        and row["boiling"].props["boiling_model"].line.name == LineName.WATER
+    ]
 
-    @clockify()
-    def add_one_block_from_line(line_name):
-        boiling = lines_df.at[line_name, "boilings_left"].pop(0)
+    if multihead_water_boilings:
+        last_multihead_water_boiling = multihead_water_boilings[-1]
+    else:
+        last_multihead_water_boiling = None
+
+    def add_one_block_from_line(boiling):
+        line_name = boiling.props["boiling_model"].line.name
         if not lines_df.at[line_name, "latest_boiling"]:
             if lines_df.at[line_name, "start_time"]:
                 start_from = (
@@ -333,7 +370,8 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         for packing in boiling.iter(cls="packing"):
             if not list(
                 packing.iter(
-                    cls="process", sku=lambda sku: "Терка" in sku.form_factor.name
+                    cls="process",
+                    sku=lambda sku: "Терка" in sku.form_factor.name,
                 )
             ):
                 continue
@@ -348,14 +386,18 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
             push(
                 schedule["master"],
                 maker.create_block(
-                    "multihead_cleaning", x=(boiling.y[0], 0), size=(cast_t("03:00"), 0)
+                    "multihead_cleaning",
+                    x=(boiling.y[0], 0),
+                    size=(cast_t("03:00"), 0),
                 ),
                 push_func=add_push,
             )
             push(
                 schedule["extra"],
                 maker.create_block(
-                    "multihead_cleaning", x=(boiling.y[0], 0), size=(cast_t("03:00"), 0)
+                    "multihead_cleaning",
+                    x=(boiling.y[0], 0),
+                    size=(cast_t("03:00"), 0),
                 ),
                 push_func=add_push,
             )
@@ -382,13 +424,12 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         return boiling
 
     while True:
-        are_boilings_left = lines_df["boilings_left"].apply(lambda lst: len(lst) > 0)
-        if are_boilings_left.sum() == 0:
+        if len(left_df) == 0:
             # finished
             break
-        elif are_boilings_left.sum() == 1:
-            line_name = are_boilings_left[are_boilings_left].index[0]
 
+        if (left_df["line_name"] == LineName.SALT).all():
+            # only salt left
             # start working on 3 line for salt
             # lines_df.at[LineName.SALT, 'iter_props'] = [{'pouring_line': str(v)} for v in [2, 3, 1]]
             lines_df.at[LineName.SALT, "iter_props"] = [
@@ -396,23 +437,33 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
                 for v1, v2 in itertools.product([2, 3, 1], [0, 1])
             ]
 
-        elif are_boilings_left.sum() == 2:
+        # get next boiling_rows for
+        next_rows = [grp.iloc[0] for sheet, grp in left_df.groupby("sheet")]
+
+        lines_left = len(set([row["line_name"] for row in next_rows]))
+        if lines_left == 1:
+            # one line of sheet left
+            next_row = iter_get(next_rows)
+        elif lines_left == 2:
             df = lines_df[~lines_df["latest_boiling"].isnull()]
             if len(df) == 0:
-                line_name = LineName.WATER
+                # begin with salt
+                line_name = LineName.SALT
             else:
                 line_name = (
                     max(df["latest_boiling"], key=lambda b: b.x[0])
                     .props["boiling_model"]
                     .line.name
                 )
-
-            # reverse
-            line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                # reverse
+                line_name = (
+                    LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                )
+            next_row = left_df[left_df["line_name"] == line_name].iloc[0]
         else:
             raise Exception("Should not happen")
-
-        add_one_block_from_line(line_name)
+        left_df = left_df[left_df["index"] != next_row["index"]]
+        add_one_block_from_line(next_row["boiling"])
 
     # push extra packings
     extra_packings_validator = ClassValidator(window=10)
@@ -504,47 +555,5 @@ def make_schedule(boilings, date=None, cleanings=None, start_times=None):
         push_func=AxisPusher(start_from=start_from),
         validator=master_validator,
     )
-
-    for line_name in [LineName.WATER, LineName.SALT]:
-        for b1, b2 in SimpleIterator(
-            list(
-                schedule["master"].iter(
-                    cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
-                )
-            )
-        ).iter_sequences(2, method="any_prefix"):
-            # first element
-            if not b1:
-                first_value = 300 if line_name == LineName.WATER else 2000
-                push(
-                    b2,
-                    maker.create_block(
-                        "steam_consumption",
-                        x=(b2["melting_and_packing"].x[0] - b2.x[0] - 5, 0),
-                        size=(5, 0),
-                        value=first_value,
-                        type="melting",
-                        line_name=line_name,
-                    ),
-                    push_func=add_push,
-                )
-
-            if (
-                b1
-                and b2
-                and b1["melting_and_packing"]["melting"]["meltings"].y[0]
-                > b2["melting_and_packing"]["melting"].x[0]
-                and line_name == LineName.SALT
-            ):
-                sc = b2["melting_and_packing"]["steam_consumption"]
-                # start twenty minutes before melting
-                assert (
-                    b2["melting_and_packing"]["melting"]["serving"].size[0] > 4
-                ), "Время подачи и вымешивания не должно быть меньше 20 минут."
-                shift = b2["melting_and_packing"]["melting"]["serving"].size[0] - 4
-                sc.props.update(
-                    x=(sc.props.relative_props["x"][0] + shift, 0),
-                    size=(sc.size[0] - shift, 0),
-                )
 
     return schedule

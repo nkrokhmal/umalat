@@ -1,7 +1,8 @@
 from itertools import product
 from utils_ak.interactive_imports import *
 
-from app.schedule_maker.departments.mozarella.algo import (
+from app.schedule_maker.departments.mozarella.algo.packing import (
+    get_configuration_time,
     make_configuration_blocks,
 )
 

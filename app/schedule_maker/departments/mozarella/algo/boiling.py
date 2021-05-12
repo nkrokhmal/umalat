@@ -47,45 +47,8 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
             size=(boiling_model.line.chedderization_time // 5, 0),
             push_func=add_push,
         )
-        with make("steams"):
-            make(
-                "steam_consumption",
-                x=(0, 0),
-                size=(6, 0),
-                value=1100,
-                push_func=add_push,
-            )
-
-            if boiling_model.line.name == LineName.SALT:
-                make(
-                    "steam_consumption",
-                    x=(
-                        maker.root["boiling"]["pouring"]["first"]["pumping_out"].x[0]
-                        - 3,
-                        0,
-                    ),
-                    size=(3, 0),
-                    value=700,
-                    push_func=add_push,
-                )
-
-    # add steams to melting_and_packing
-    value = 250 if boiling_model.line.name == LineName.WATER else 1200
-    push(
-        melting_and_packing,
-        maker.create_block(
-            "steam_consumption",
-            size=(
-                melting_and_packing["melting"]["serving"].size[0]
-                + melting_and_packing["melting"]["meltings"].size[0],
-                0,
-            ),
-            value=value,
-            type="melting",
-        ),
-        push_func=add_push,
-    )
-
     push(maker.root["boiling"], melting_and_packing)
 
+    # todo: make proper drenator
+    # push(maker.root['boiling'], maker.create_block('full_drenator', x=[maker.root['boiling']['pouring']['second']['pouring_off'].x[0], 0], size=[maker.root['drenator'].size[0] + melting_and_packing['melting']['serving'].size[0] + melting_and_packing['melting']['meltings'].size[0], 0]), push_func=add_push)
     return maker.root["boiling"]
