@@ -1,16 +1,11 @@
-from utils_ak.block_tree import *
-from utils_ak.split_file import *
-from utils_ak.os import *
-from utils_ak.openpyxl import *
+from app.imports.runtime import *
 
 from app.schedule_maker.time import *
-
-from loguru import logger
 
 
 def make_steam_blocks(block, x=None):
     x = x or block.x
-    maker, make = init_block_maker("steam_consumption_blocks", font_size=8, x=x)
+    maker, make = utils.init_block_maker("steam_consumption_blocks", font_size=8, x=x)
 
     for j in range(block.size[0]):
         make(
@@ -18,7 +13,7 @@ def make_steam_blocks(block, x=None):
             size=(1, 1),
             text=str(block.props["value"]),
             text_rotation=90,
-            push_func=add_push,
+            push_func=utils.add_push,
         )
     return maker.root
 
@@ -36,22 +31,22 @@ def draw_schedule(schedule, style, fn=None):
 
     schedule.props.update(index_width=4)
 
-    wb = init_workbook(["Расписание"])
+    wb = utils.init_workbook(["Расписание"])
 
     for ws in wb.worksheets:
         ws.sheet_view.zoomScale = 55
 
     for i in range(4):
-        wb.worksheets[0].column_dimensions[get_column_letter(i + 1)].width = 21
+        wb.worksheets[0].column_dimensions[utils.get_column_letter(i + 1)].width = 21
     for i in range(4, 288 * 2):
-        wb.worksheets[0].column_dimensions[get_column_letter(i + 1)].width = 2.4
+        wb.worksheets[0].column_dimensions[utils.get_column_letter(i + 1)].width = 2.4
     for i in range(1, 220):
         wb.worksheets[0].row_dimensions[i].height = 25
 
     for b in schedule.iter():
         if b.is_leaf() and b.props.get("visible", True):
             text = b.props.get("text", "")
-            color = cast_color(b.props.get("color", "white"))
+            color = utils.cast_color(b.props.get("color", "white"))
             if b.size[0] == 0 or b.size[1] == 0:
                 continue
             try:
@@ -72,7 +67,7 @@ def draw_schedule(schedule, style, fn=None):
                 font_size = b.props.get("font_size", 12)
                 # print(b.props['cls'], x1, b.x[1], b.size[0], b.size[1])
 
-                draw_block(
+                utils.draw_block(
                     wb.worksheets[0],
                     x1,
                     b.x[1],
@@ -102,13 +97,13 @@ def draw_excel_frontend(frontend, style, open_file=False, fn="schedules/schedule
     wb = draw_schedule(frontend, style)
 
     if fn:
-        sf = SplitFile(fn)
+        sf = utils.SplitFile(fn)
         fn = sf.get_new()
 
-        makedirs(fn)
+        utils.makedirs(fn)
         wb.save(fn)
 
         if open_file:
-            open_file_in_os(fn)
+            utils.open_file_in_os(fn)
 
     return wb

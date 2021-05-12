@@ -1,5 +1,4 @@
-import os
-import json
+from app.imports.external import *
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 

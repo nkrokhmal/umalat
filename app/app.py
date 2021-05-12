@@ -1,19 +1,8 @@
-import os
-import inspect
+from app.imports.runtime import *
 
-from flask import Flask
-from flask_migrate import Migrate, MigrateCommand
-from flask_admin import Admin
-from flask_script import Manager
-from flask_admin.contrib.sqla import ModelView
-
-from utils_ak.os import makedirs
-
-from config import configs
 import app.models as umalat_models
 
 from .main import main as main_bp
-from .globals import db, bootstrap, page_down
 
 
 def create_app(config_name="default"):
@@ -27,7 +16,7 @@ def create_app(config_name="default"):
         config.SKU_PLAN_FOLDER,
         config.SCHEDULE_PLAN_FOLDER,
     ]:
-        makedirs(config.abs_path(local_path) + "/")
+        utils.makedirs(config.abs_path(local_path) + "/")
 
     # init directories for files
     for local_path in [
@@ -36,7 +25,7 @@ def create_app(config_name="default"):
         config.TEMPLATE_MASCARPONE_BOILING_PLAN,
         config.IGNORE_SKU_FILE,
     ]:
-        makedirs(config.abs_path(local_path))
+        utils.makedirs(config.abs_path(local_path))
 
     app = Flask(__name__)
     app.config.from_object(config)

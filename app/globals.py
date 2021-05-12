@@ -1,6 +1,4 @@
-from flask_pagedown import PageDown
-from flask_sqlalchemy import SQLAlchemy
-from flask_bootstrap import Bootstrap
+from app.imports.external import *
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()

@@ -1,4 +1,4 @@
-import os
+from app.imports.external import *
 
 os.environ["environment"] = "flask_app"
 

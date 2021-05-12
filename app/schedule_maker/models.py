@@ -1,8 +1,7 @@
+from app.imports.runtime import *
 from app.models import *
-
 from app.enum import LineName
 
-from utils_ak.interactive_imports import *
 from config import SQLITE_PATH
 
 
@@ -20,7 +19,7 @@ def get_db(environment=None):
         Session = sessionmaker()
         Session.configure(bind=engine)
         session = Session()
-        db = dotdict()
+        db = utils.dotdict()
         db["session"] = session
     else:
         raise Exception(f"Enviroment {environment} not supported")
@@ -69,16 +68,12 @@ def cast_model(cls, obj, int_attribute="id", str_attribute="name"):
 
     elif isinstance(obj, cls):
         return obj
-    elif is_int_like(obj):
+    elif utils.is_int_like(obj):
         return query_exactly_one(cls, int_attribute, int(float(obj)))
     elif isinstance(obj, str):
         return query_exactly_one(cls, str_attribute, obj)
     else:
         raise Exception(f"Unknown {cls} type")
-
-
-def get_termizator():
-    return db.session.query(Termizator).first()
 
 
 def cast_mozarella_form_factor(obj):
@@ -113,8 +108,8 @@ def cast_mozarella_boiling(obj):
             values = obj.split(",")
             line_name, percent, ferment = values[:3]
             percent = percent.replace(" ", "")
-            ferment = re.sub(spaces_on_edge("beg"), "", ferment)
-            ferment = re.sub(spaces_on_edge("end"), "", ferment)
+            ferment = re.sub(utils.spaces_on_edge("beg"), "", ferment)
+            ferment = re.sub(utils.spaces_on_edge("end"), "", ferment)
             is_lactose = len(values) < 4
             query = db.session.query(MozzarellaBoiling).filter(
                 (MozzarellaBoiling.percent == percent)
