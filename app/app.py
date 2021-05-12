@@ -27,7 +27,7 @@ def create_app(config_name="default"):
     ]:
         utils.makedirs(config.abs_path(local_path))
 
-    app = Flask(__name__)
+    app = flask.Flask(__name__)
     app.config.from_object(config)
 
     db.init_app(app)
@@ -39,9 +39,9 @@ def create_app(config_name="default"):
 
 
 def create_manager(app):
-    manager = Manager(app)
-    Migrate(app, db, render_as_batch=True)
-    manager.add_command("db", MigrateCommand)
+    manager = flask_script.Manager(app)
+    flask_migrate.Migrate(app, db, render_as_batch=True)
+    manager.add_command("db", flask_migrate.MigrateCommand)
 
     admin = Admin(app, name="Umalat admin", template_mode="bootstrap3")
     for name, obj in inspect.getmembers(umalat_models):

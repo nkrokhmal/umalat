@@ -51,7 +51,7 @@ class SKUCreamCheeseForm(FlaskForm):
             .first()
         )
         if sku is not None:
-            raise ValidationError("SKU с таким именем уже существует")
+            raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
 class SKUMascarponeForm(FlaskForm):
@@ -88,7 +88,7 @@ class SKUMascarponeForm(FlaskForm):
             .first()
         )
         if sku is not None:
-            raise ValidationError("SKU с таким именем уже существует")
+            raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
 class MascarponeBoilingTechnologyForm(FlaskForm):

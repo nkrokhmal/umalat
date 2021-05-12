@@ -57,7 +57,7 @@ class SKUForm(FlaskForm):
             db.session.query(RicottaSKU).filter_by(RicottaSKU.name == name.data).first()
         )
         if sku is not None:
-            raise ValidationError("SKU с таким именем уже существует")
+            raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
 class LineForm(FlaskForm):

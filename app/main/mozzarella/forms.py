@@ -98,7 +98,7 @@ class SKUForm(FlaskForm):
             .first()
         )
         if sku is not None:
-            raise ValidationError("SKU с таким именем уже существует")
+            raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
 class LineForm(FlaskForm):
@@ -166,4 +166,4 @@ class WasherForm(FlaskForm):
 #             .filter_by(Boiling.line.name == line.data) \
 #             .first()
 #         if boiling is not None:
-#             raise ValidationError('Варка с такими параметрами уже существует!')
+#             raise flask_restplus.ValidationError('Варка с такими параметрами уже существует!')
