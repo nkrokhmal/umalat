@@ -1,4 +1,4 @@
-from .. import db
+from app.globals import db
 from sqlalchemy.orm import relationship, backref
 from . import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
 

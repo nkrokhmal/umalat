@@ -1,28 +1,11 @@
 from flask_restplus import ValidationError
 from flask_wtf.file import FileRequired, FileField
-from wtforms import (
-    StringField,
-    SubmitField,
-    BooleanField,
-    SelectField,
-    IntegerField,
-    FloatField,
-    DateTimeField,
-    TimeField,
-)
-from wtforms.validators import Required, Optional
 from flask_wtf import FlaskForm
+from wtforms import *
+from wtforms.validators import Required, Optional
 
-from ...models import (
-    Packer,
-    MascarponeBoiling,
-    MascarponeSKU,
-    CreamCheeseSKU,
-    CreamCheeseBoiling,
-    Group,
-    MascarponeSourdough,
-)
-from ... import db
+from app.models import *
+from app.globals import db
 import datetime
 
 
@@ -69,7 +52,9 @@ class SKUCreamCheeseForm(FlaskForm):
     @staticmethod
     def validate_sku(self, name):
         sku = (
-            db.session.query(CreamCheeseSKU).filter_by(CreamCheeseSKU.name == name.data).first()
+            db.session.query(CreamCheeseSKU)
+            .filter_by(CreamCheeseSKU.name == name.data)
+            .first()
         )
         if sku is not None:
             raise ValidationError("SKU с таким именем уже существует")
@@ -104,7 +89,9 @@ class SKUMascarponeForm(FlaskForm):
     @staticmethod
     def validate_sku(self, name):
         sku = (
-            db.session.query(MascarponeSKU).filter_by(MascarponeSKU.name == name.data).first()
+            db.session.query(MascarponeSKU)
+            .filter_by(MascarponeSKU.name == name.data)
+            .first()
         )
         if sku is not None:
             raise ValidationError("SKU с таким именем уже существует")
@@ -125,7 +112,9 @@ class MascarponeBoilingTechnologyForm(FlaskForm):
         super(MascarponeBoilingTechnologyForm, self).__init__(*args, **kwargs)
 
         self.fermentators = db.session.query(MascarponeSourdough).all()
-        self.fermentator_name.choices = list(enumerate(set([x.to_str() for x in self.fermentators])))
+        self.fermentator_name.choices = list(
+            enumerate(set([x.to_str() for x in self.fermentators]))
+        )
 
 
 class ScheduleForm(FlaskForm):

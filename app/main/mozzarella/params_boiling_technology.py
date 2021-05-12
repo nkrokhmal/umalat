@@ -1,10 +1,10 @@
 from flask import url_for, render_template, flash
 from werkzeug.utils import redirect
-from .. import main
-from ... import db
-from .forms import BoilingTechnologyForm
-from ...models import MozzarellaBoilingTechnology
+from app.main import main
+from app.globals import db
+from app.models import MozzarellaBoilingTechnology
 from app.utils.features.form_utils import *
+from .forms import BoilingTechnologyForm
 
 
 @main.route("/mozzarella/get_boiling_technology", methods=["GET", "POST"])

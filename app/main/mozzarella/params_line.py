@@ -1,9 +1,9 @@
 from flask import url_for, render_template
 from werkzeug.utils import redirect
-from .. import main
-from ... import db
+from app.main import main
+from app.globals import db
+from app.models import MozzarellaLine
 from .forms import LineForm
-from ...models import MozzarellaLine
 
 
 @main.route("/mozzarella/get_line", methods=["GET", "POST"])

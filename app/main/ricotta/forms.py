@@ -1,32 +1,12 @@
+import datetime
 from flask_restplus import ValidationError
 from flask_wtf.file import FileRequired, FileField
-from wtforms import (
-    StringField,
-    SubmitField,
-    BooleanField,
-    SelectField,
-    IntegerField,
-    FloatField,
-    DateTimeField,
-    TimeField,
-)
-from wtforms.validators import Required, Optional
 from flask_wtf import FlaskForm
+from wtforms import *
+from wtforms.validators import Required, Optional
 
-from ...models import (
-    Packer,
-    RicottaBoiling,
-    RicottaLine,
-    PackType,
-    FormFactor,
-    RicottaSKU,
-    RicottaBoilingTechnology,
-    Group,
-    BatchNumber,
-    RicottaFormFactor,
-)
-from ... import db
-import datetime
+from app.models import *
+from app.globals import db
 
 
 class BoilingPlanForm(FlaskForm):

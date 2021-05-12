@@ -1,7 +1,7 @@
 from flask import render_template
-from .. import main
-from ... import db
-from ...models import Group
+from app.main import main
+from app.globals import db
+from app.models import Group
 
 
 @main.route("/mozzarella/get_group", methods=["GET", "POST"])

@@ -1,11 +1,14 @@
+import time
+
 from flask import url_for, render_template, flash, current_app, request, session
 from werkzeug.utils import redirect
-from .. import main
-from ... import db
-from .forms import SKUForm
-from ...models import MozzarellaSKU, SKU
+
+from app.main import main
+from app.globals import db
 from app.utils.features.form_utils import *
-import time
+from app.models import MozzarellaSKU, SKU
+
+from .forms import SKUForm
 
 
 @main.route("/mozzarella/add_sku", methods=["POST", "GET"])
@@ -41,7 +44,7 @@ def get_sku(page):
     pagination = (
         db.session.query(MozzarellaSKU)
         .order_by(MozzarellaSKU.name)
-        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=current_app.configs["SKU_PER_PAGE"], error_out=False)
     )
     return render_template(
         "mozzarella/get_sku.html",
@@ -49,7 +52,7 @@ def get_sku(page):
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.config["SKU_PER_PAGE"],
+        per_page=current_app.configs["SKU_PER_PAGE"],
         endopoints=".get_sku",
     )
 

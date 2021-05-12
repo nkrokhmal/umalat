@@ -1,12 +1,14 @@
+import time
 from flask import url_for, render_template, flash, current_app, request, session
 from werkzeug.utils import redirect
-from .. import main
-from ... import db
-from .forms import SKUCreamCheeseForm
-from ...models import CreamCheeseSKU, CreamCheeseLine, Group
-from ...enum import LineName
+
+from app.main import main
+from app.globals import db
+from app.models import CreamCheeseSKU, CreamCheeseLine, Group
+from app.enum import LineName
 from app.utils.features.form_utils import *
-import time
+
+from .forms import SKUCreamCheeseForm
 
 
 @main.route("/mascarpone/add_sku_cream_cheese", methods=["POST", "GET"])
@@ -51,7 +53,7 @@ def mascarpone_get_sku_cream_cheese(page):
         .join(Group)
         .filter(Group.name == "Кремчиз")
         .order_by(CreamCheeseSKU.name)
-        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=current_app.configs["SKU_PER_PAGE"], error_out=False)
     )
     return render_template(
         "mascarpone/get_sku_cream_cheese.html",
@@ -59,7 +61,7 @@ def mascarpone_get_sku_cream_cheese(page):
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.config["SKU_PER_PAGE"],
+        per_page=current_app.configs["SKU_PER_PAGE"],
         endopoints=".mascarpone_get_sku_cream_cheese",
     )
 
@@ -97,7 +99,9 @@ def mascarpone_edit_sku_cream_cheese(sku_id):
     form.packing_speed.data = sku.packing_speed
     form.in_box.data = sku.in_box
 
-    return render_template("mascarpone/edit_sku_cream_cheese.html", form=form, sku_id=sku_id)
+    return render_template(
+        "mascarpone/edit_sku_cream_cheese.html", form=form, sku_id=sku_id
+    )
 
 
 @main.route("/mascarpone/delete_sku_cream_cheese/<int:sku_id>", methods=["DELETE"])

@@ -7,10 +7,10 @@ from flask_admin.contrib.sqla import ModelView
 
 os.environ["environment"] = "flask_app"
 
-from app import create_app
+from app import create_app, db
 import app.models as umalat_models
 
-app, db = create_app()
+app = create_app()
 manager = Manager(app)
 migrate = Migrate(app, db, render_as_batch=True)
 manager.add_command("db", MigrateCommand)

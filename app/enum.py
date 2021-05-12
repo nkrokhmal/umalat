@@ -10,12 +10,12 @@ LineName = dotdict(
 )
 DepartmentName = dotdict(
     {
-        "MOZZ": "Моцарельный цех",
-        "RIC": "Рикоттный цех",
-        "MASC": "Маскарпоновый цех",
+        "MOZZARELLA": "Моцарельный цех",
+        "RICOTTA": "Рикоттный цех",
+        "MASCARPONE": "Маскарпоновый цех",
     }
 )
 
 if __name__ == "__main__":
-    print(DepartmentName.MOZZ)
+    print(DepartmentName.MOZZARELLA)
     print(LineName.WATER)

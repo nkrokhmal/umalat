@@ -1,5 +1,6 @@
 import os
 import inspect
+
 from flask_migrate import Migrate, MigrateCommand
 from flask_admin import Admin
 from flask_script import Manager

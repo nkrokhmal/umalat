@@ -20,12 +20,12 @@ def mascarpone_schedule():
         beg_time = form.beg_time.data
         file = request.files["input_file"]
 
-        file_path = os.path.join(current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
+        file_path = os.path.join(current_app.configs["UPLOAD_TMP_FOLDER"], file.filename)
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                current_app.configs["UPLOAD_TMP_FOLDER"], file.filename
             ),
             data_only=True,
         )

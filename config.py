@@ -3,7 +3,7 @@ import json
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLITE_PATH = os.path.join(basedir, "data.sqlite")
+SQLITE_PATH = os.path.join(basedir, "db/data.sqlite")
 
 
 class BaseClass:
@@ -19,7 +19,7 @@ class BaseClass:
     SKU_PLAN_FOLDER = "app/data/sku_plan"
     SCHEDULE_PLAN_FOLDER = "app/data/schedule_plan"
 
-    TEMPLATE_BOILING_PLAN = "app/data/templates/constructor_mozzarella.xlsx"
+    TEMPLATE_MOZZARELLA_BOILING_PLAN = "app/data/templates/constructor_mozzarella.xlsx"
     TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/templates/constructor_ricotta.xlsx"
     TEMPLATE_MASCARPONE_BOILING_PLAN = "app/data/templates/constructor_mascarpone.xlsx"
 
@@ -33,7 +33,7 @@ class BaseClass:
         "water": "Вода",
         "salt": "Соль",
     }
-    COLOURS = {
+    COLORS = {
         "Для пиццы": "#E5B7B6",
         "Моцарелла": "#DAE5F1",
         "Фиор Ди Латте": "#CBC0D9",
@@ -94,4 +94,4 @@ class ProductionConfig(BaseClass):
     ) + "?check_same_thread=False"
 
 
-config = {"default": DebugConfig, "production": ProductionConfig, "debug": DebugConfig}
+configs = {"default": DebugConfig, "production": ProductionConfig, "debug": DebugConfig}

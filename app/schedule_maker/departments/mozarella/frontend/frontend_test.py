@@ -30,7 +30,7 @@ def test():
         raise Exception("Ошибка при построении расписания")
 
     draw_excel_frontend(
-        frontend, open_file=True, fn="schedules/schedule.xlsx", style=STYLE
+        frontend, open_file=False, fn="schedules/schedule.xlsx", style=STYLE
     )
 
 

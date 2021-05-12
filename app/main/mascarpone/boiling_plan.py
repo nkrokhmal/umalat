@@ -1,11 +1,14 @@
 from flask import render_template, request
-from .forms import BoilingPlanForm
 
 from app.utils.mascarpone.boiling_plan_create import mascarpone_boiling_plan_create
 from app.utils.mascarpone.boiling_plan_draw import draw_boiling_plan
-from ...utils.sku_plan import *
-from ...utils.parse_remainings import *
-from .. import main
+from app.utils.sku_plan import *
+from app.utils.parse_remainings import *
+from app.main import main
+from app.models import *
+from app.globals import db
+
+from .forms import BoilingPlanForm
 
 
 @main.route("/mascarpone_boiling_plan", methods=["POST", "GET"])
@@ -14,13 +17,19 @@ def mascarpone_boiling_plan():
     if request.method == "POST" and "submit" in request.form:
         date = form.date.data
 
-        skus = db.session.query(MascarponeSKU).all() + db.session.query(CreamCheeseSKU).all()
+        skus = (
+            db.session.query(MascarponeSKU).all()
+            + db.session.query(CreamCheeseSKU).all()
+        )
         total_skus = db.session.query(SKU).all()
-        boilings = db.session.query(MascarponeBoiling).all() + db.session.query(CreamCheeseBoiling).all()
+        boilings = (
+            db.session.query(MascarponeBoiling).all()
+            + db.session.query(CreamCheeseBoiling).all()
+        )
 
         file = request.files["input_file"]
         tmp_file_path = os.path.join(
-            current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+            current_app.configs["UPLOAD_TMP_FOLDER"], file.filename
         )
 
         if file:
@@ -32,7 +41,7 @@ def mascarpone_boiling_plan():
             date=date,
             remainings=remainings_df,
             skus_grouped=skus_grouped,
-            template_path=current_app.config["TEMPLATE_MASCARPONE_BOILING_PLAN"],
+            template_path=current_app.configs["TEMPLATE_MASCARPONE_BOILING_PLAN"],
         )
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_ricotta_sku_plan()
@@ -42,7 +51,7 @@ def mascarpone_boiling_plan():
             sku_plan_client.filename,
             "маскарпоне",
         )
-        sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
+        sheet_name = current_app.configs["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
         df, _ = parse_sheet(ws, sheet_name, excel_compiler)
         mascarpone_df, cream_cheese_df, cream_df = mascarpone_boiling_plan_create(df)

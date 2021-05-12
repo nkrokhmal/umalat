@@ -10,7 +10,7 @@ def get_db(environment=None):
     environment = environment or os.getenv("environment")
 
     if environment == "flask_app":
-        from app import db
+        from app.globals import db
     elif environment == "interactive":
         print("WORKING IN INTERACTIVE MODE")
         from sqlalchemy import create_engine

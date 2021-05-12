@@ -1,6 +1,6 @@
 import pandas as pd
-from app import db
 from app.models import *
+from app.globals import db
 from app.utils.features.merge_boiling_utils import Boilings
 from collections import namedtuple
 import math
@@ -54,19 +54,20 @@ def boiling_plan_create(df, request_ton=0):
 
 def group_result(df):
     agg = {
-        'id': 'first',
-        'sku': 'first',
-        'number_of_tanks': 'sum',
-        'group': 'first',
-        'output': 'first',
-        'boiling_type': 'first',
-        'kg': 'sum',
-        'boiling_count': 'sum',
+        "id": "first",
+        "sku": "first",
+        "number_of_tanks": "sum",
+        "group": "first",
+        "output": "first",
+        "boiling_type": "first",
+        "kg": "sum",
+        "boiling_count": "sum",
     }
-    df['number_of_tanks'] = df['boiling_count'].apply(lambda x: math.floor(x)) * \
-                            df['sku'].apply(lambda x: x.made_from_boilings[0].number_of_tanks)
+    df["number_of_tanks"] = df["boiling_count"].apply(lambda x: math.floor(x)) * df[
+        "sku"
+    ].apply(lambda x: x.made_from_boilings[0].number_of_tanks)
 
-    return df.groupby('name', as_index=False).agg(agg)
+    return df.groupby("name", as_index=False).agg(agg)
 
 
 def proceed_order(order, df, boilings_ricotta, boilings_count=1):

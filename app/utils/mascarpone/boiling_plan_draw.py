@@ -112,7 +112,7 @@ def get_colour_by_name(sku_name, skus):
     if len(sku) > 0:
         return sku[0].colour
     else:
-        return current_app.config["COLOURS"]["Default"]
+        return current_app.configs["COLOURS"]["Default"]
 
 
 def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None, normalize=True):

@@ -24,14 +24,14 @@ def ricotta_boiling_plan():
 
         file = request.files["input_file"]
         tmp_file_path = os.path.join(
-            current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+            current_app.configs["UPLOAD_TMP_FOLDER"], file.filename
         )
 
         if file:
             file.save(tmp_file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                current_app.configs["UPLOAD_TMP_FOLDER"], file.filename
             ),
             data_only=True,
         )
@@ -55,7 +55,7 @@ def ricotta_boiling_plan():
             date=date,
             remainings=remainings_df,
             skus_grouped=skus_grouped,
-            template_path=current_app.config["TEMPLATE_RICOTTA_BOILING_PLAN"],
+            template_path=current_app.configs["TEMPLATE_RICOTTA_BOILING_PLAN"],
         )
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_ricotta_sku_plan()
@@ -65,7 +65,7 @@ def ricotta_boiling_plan():
             sku_plan_client.filename,
             "рикотта",
         )
-        sheet_name = current_app.config["SHEET_NAMES"]["schedule_plan"]
+        sheet_name = current_app.configs["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
         df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler)
 

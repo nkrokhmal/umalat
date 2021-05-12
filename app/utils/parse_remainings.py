@@ -69,7 +69,7 @@ def get_skus(skus_req, skus, total_skus):
             if sku:
                 result.append(namedtuple("Plan", "sku, plan")(sku, sku_req["Fact"]))
         else:
-            if sku_req["Name"] not in current_app.config["IGNORE_SKUS"]:
+            if sku_req["Name"] not in current_app.configs["IGNORE_SKUS"]:
                 sku_for_creation.append(sku_req["Name"])
     if sku_for_creation:
         flash(convert_sku(sku_for_creation), "warning")
@@ -172,7 +172,7 @@ def move_file(old_filepath, old_filename, department=""):
     new_filename = "{} План по варкам {}.xlsx".format(
         old_filename.split(" ")[0], department
     )
-    filepath = os.path.join(current_app.config["BOILING_PLAN_FOLDER"], new_filename)
+    filepath = os.path.join(current_app.configs["BOILING_PLAN_FOLDER"], new_filename)
     copyfile(old_filepath, filepath)
     excel_compiler = ExcelCompiler(filepath)
     wb_data_only = openpyxl.load_workbook(filename=filepath, data_only=True)

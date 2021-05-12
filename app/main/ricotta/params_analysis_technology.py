@@ -1,9 +1,9 @@
 from flask import url_for, render_template, flash
 from werkzeug.utils import redirect
-from .. import main
-from ... import db
+from app.main import main
+from app.globals import db
+from app.models import RicottaAnalysisTechnology
 from .forms import AnalysisForm
-from ...models import RicottaAnalysisTechnology
 
 
 @main.route("/ricotta/get_analysis_technology", methods=["GET", "POST"])

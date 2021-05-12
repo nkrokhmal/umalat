@@ -1,12 +1,13 @@
+import time
 from flask import url_for, render_template, flash, current_app, request, session
 from werkzeug.utils import redirect
-from .. import main
-from ... import db
-from .forms import SKUForm
-from ...models import RicottaSKU, RicottaLine
-from ...enum import LineName
+
+from app.main import main
+from app.globals import db
+from app.models import RicottaSKU, RicottaLine
+from app.enum import LineName
 from app.utils.features.form_utils import *
-import time
+from .forms import SKUForm
 
 
 @main.route("/ricotta/add_sku", methods=["POST", "GET"])
@@ -51,7 +52,7 @@ def ricotta_get_sku(page):
     pagination = (
         db.session.query(RicottaSKU)
         .order_by(RicottaSKU.name)
-        .paginate(page, per_page=current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page, per_page=current_app.configs["SKU_PER_PAGE"], error_out=False)
     )
     return render_template(
         "ricotta/get_sku.html",
@@ -59,7 +60,7 @@ def ricotta_get_sku(page):
         pagination=pagination,
         page=page,
         skus_count=skus_count,
-        per_page=current_app.config["SKU_PER_PAGE"],
+        per_page=current_app.configs["SKU_PER_PAGE"],
         endopoints=".ricotta_get_sku",
     )
 

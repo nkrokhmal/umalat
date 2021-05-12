@@ -1,9 +1,10 @@
-from flask import render_template, request, current_app
-from ..errors import internal_error
-from .forms import ScheduleForm
-from .. import main
-from app.schedule_maker import *
 import os
+import datetime
+
+from flask import render_template, request, current_app
+from app.main import main
+from app.main.errors import internal_error
+from app.schedule_maker import *
 from app.schedule_maker.departments.mozarella.frontend import *
 from app.schedule_maker.departments.mozarella.algo import *
 from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boilings
@@ -11,7 +12,7 @@ from app.utils.batches.batch import *
 from app.schedule_maker.departments.mozarella.boiling_plan import (
     read_boiling_plan as mozzarella_read_boiling_plan,
 )
-import datetime
+from .forms import ScheduleForm
 
 
 @main.route("/schedule", methods=["GET", "POST"])

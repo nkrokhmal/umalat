@@ -1,9 +1,9 @@
 from flask import url_for, render_template, flash
 from werkzeug.utils import redirect
-from .. import main
-from ... import db
+from app.main import main
+from app.globals import db
+from app.models import RicottaBoilingTechnology
 from .forms import BoilingTechnologyForm
-from ...models import RicottaBoilingTechnology
 
 
 @main.route("/ricotta/get_boiling_technology", methods=["GET", "POST"])
