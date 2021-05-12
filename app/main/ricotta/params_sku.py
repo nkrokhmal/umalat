@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 
+from werkzeug.utils import redirect
 
 from app.main import main
 from app.globals import db
@@ -52,7 +53,9 @@ def ricotta_get_sku(page):
     pagination = (
         db.session.query(RicottaSKU)
         .order_by(RicottaSKU.name)
-        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(
+            page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False
+        )
     )
     return flask.render_template(
         "ricotta/get_sku.html",
@@ -80,8 +83,8 @@ def ricotta_edit_sku(sku_id):
 
         db.session.commit()
 
-        flash("SKU успешно изменено", "success")
-        return redirect(url_for(".ricotta_get_sku", page=1))
+        flask.flash("SKU успешно изменено", "success")
+        return redirect(flask.url_for(".ricotta_get_sku", page=1))
 
     if len(sku.made_from_boilings) > 0:
         default_form_value(form.boiling, sku.made_from_boilings[0].to_str())

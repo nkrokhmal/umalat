@@ -1,3 +1,5 @@
+from werkzeug.utils import redirect
+
 from app.imports.runtime import *
 from app.main import main
 from app.models import RicottaBoilingTechnology

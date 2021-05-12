@@ -1,10 +1,14 @@
 from app.imports.runtime import *
+
 from flask_wtf.file import FileRequired, FileField
+from flask_wtf import FlaskForm
+from wtforms import *
+from wtforms.validators import Required, Optional
 
 from app.models import *
 
 
-class BoilingPlanForm(flask_wtf.FlaskFormFlaskForm):
+class BoilingPlanForm(FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
     input_file = FileField(
         label="Выберите файл",
@@ -18,7 +22,7 @@ class BoilingPlanForm(flask_wtf.FlaskFormFlaskForm):
     )
 
 
-class SKUCreamCheeseForm(flask_wtf.FlaskForm):
+class SKUCreamCheeseForm(FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
@@ -55,7 +59,7 @@ class SKUCreamCheeseForm(flask_wtf.FlaskForm):
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
-class SKUMascarponeForm(flask_wtf.FlaskForm):
+class SKUMascarponeForm(FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
@@ -92,7 +96,7 @@ class SKUMascarponeForm(flask_wtf.FlaskForm):
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
-class MascarponeBoilingTechnologyForm(flask_wtf.FlaskForm):
+class MascarponeBoilingTechnologyForm(FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
     pouring_time = IntegerField("Введите время налива", validators=[Optional()])
     heating_time = IntegerField("Введите время нагрева", validators=[Optional()])
@@ -112,7 +116,7 @@ class MascarponeBoilingTechnologyForm(flask_wtf.FlaskForm):
         )
 
 
-class ScheduleForm(flask_wtf.FlaskForm):
+class ScheduleForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
     input_file = FileField("", validators=validators)
     batch_number = IntegerField(

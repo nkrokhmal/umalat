@@ -1,6 +1,6 @@
 from app.imports.runtime import *
 
-from flask import session
+from werkzeug.utils import redirect
 
 from app.main import main
 from app.globals import db
@@ -45,7 +45,7 @@ def mascarpone_add_sku_cream_cheese():
 
 @main.route("/mascarpone/get_sku_cream_cheese/<int:page>", methods=["GET"])
 def mascarpone_get_sku_cream_cheese(page):
-    session.clear()
+    flask.session.clear()
     form = SKUCreamCheeseForm()
     skus_count = db.session.query(CreamCheeseSKU).count()
 
@@ -54,7 +54,9 @@ def mascarpone_get_sku_cream_cheese(page):
         .join(Group)
         .filter(Group.name == "Кремчиз")
         .order_by(CreamCheeseSKU.name)
-        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(
+            page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False
+        )
     )
     return flask.render_template(
         "mascarpone/get_sku_cream_cheese.html",

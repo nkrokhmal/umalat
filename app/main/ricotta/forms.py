@@ -1,10 +1,13 @@
 from app.imports.runtime import *
 from flask_wtf.file import FileRequired, FileField
+from flask_wtf import FlaskForm
+from wtforms import *
+from wtforms.validators import Required, Optional
 
 from app.models import *
 
 
-class BoilingPlanForm(flask_wtf.FlaskForm):
+class BoilingPlanForm(FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
     input_file = FileField(
         label="Выберите файл",
@@ -23,7 +26,7 @@ class BoilingPlanForm(flask_wtf.FlaskForm):
     )
 
 
-class SKUForm(flask_wtf.FlaskForm):
+class SKUForm(FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
@@ -61,14 +64,14 @@ class SKUForm(flask_wtf.FlaskForm):
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
-class LineForm(flask_wtf.FlaskForm):
+class LineForm(FlaskForm):
     name = StringField("Введите название линии", validators=[Required()])
     input_ton = IntegerField(
         "Введите количество литров в одном танке", validators=[Required()]
     )
 
 
-class BoilingTechnologyForm(flask_wtf.FlaskForm):
+class BoilingTechnologyForm(FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
     heating_time = IntegerField("Введите время нагрева", validators=[Optional()])
     delay_time = IntegerField("Введите время выдержки", validators=[Optional()])
@@ -82,7 +85,7 @@ class BoilingTechnologyForm(flask_wtf.FlaskForm):
     submit = SubmitField(label="Сохранить")
 
 
-class AnalysisForm(flask_wtf.FlaskForm):
+class AnalysisForm(FlaskForm):
     preparation_time = IntegerField("Введите время нагрева", validators=[Optional()])
     analysis_time = IntegerField("Введите время выдержки", validators=[Optional()])
     pumping_time = IntegerField("Введите время сбора белка", validators=[Optional()])
@@ -90,7 +93,7 @@ class AnalysisForm(flask_wtf.FlaskForm):
     submit = SubmitField(label="Сохранить")
 
 
-class ScheduleForm(flask_wtf.FlaskForm):
+class ScheduleForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
     input_file = FileField("", validators=validators)
     batch_number = IntegerField(

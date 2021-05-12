@@ -24,14 +24,9 @@ import flask_bootstrap
 import flask_migrate
 import flask_script
 import flask_restplus
-import flask_wtf
 
 from loguru import logger
 from datetime import datetime, time, timedelta
-
-from wtforms import *
-from wtforms.validators import Required, Optional
-from werkzeug.utils import redirect
 
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import func, extract
