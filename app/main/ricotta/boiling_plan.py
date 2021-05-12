@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from .forms import BoilingPlanForm
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create
 from app.utils.ricotta.boiling_plan_draw import draw_boiling_plan
-from app.schedule_maker.mozarella.boiling_plan import (
+from app.scheduler.mozarella.boiling_plan import (
     read_boiling_plan as mozzarella_read_boiling_plan,
 )
 from app.utils.sku_plan import *

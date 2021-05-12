@@ -2,8 +2,8 @@ from app.imports.runtime import *
 
 from app.main import main
 from app.main.errors import internal_error
-from app.schedule_maker import *
-from app.schedule_maker.mozarella import *
+from app.scheduler import *
+from app.scheduler.mozarella import *
 from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boilings
 from app.utils.batches.batch import *
 

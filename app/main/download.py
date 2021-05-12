@@ -1,4 +1,4 @@
-from app.imports.interactive import *
+from app.imports.runtime import *
 from app.main import main
 
 
@@ -18,7 +18,8 @@ def download_boiling_plan(file_name):
 @main.route("/download_sku_plan/<file_name>", methods=["POST", "GET"])
 def download_sku_plan(file_name):
     uploads = os.path.join(
-        os.path.dirname(flask.current_app.root_path), flask.current_app.config["SKU_PLAN_FOLDER"]
+        os.path.dirname(flask.current_app.root_path),
+        flask.current_app.config["SKU_PLAN_FOLDER"],
     )
     response = flask.send_from_directory(
         directory=uploads, filename=file_name, as_attachment=True
@@ -30,7 +31,8 @@ def download_sku_plan(file_name):
 @main.route("/download_stats/<file_name>", methods=["POST", "GET"])
 def download_stats(file_name):
     uploads = os.path.join(
-        os.path.dirname(flask.current_app.root_path), flask.current_app.config["STATS_FOLDER"]
+        os.path.dirname(flask.current_app.root_path),
+        flask.current_app.config["STATS_FOLDER"],
     )
     response = flask.send_from_directory(
         directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True

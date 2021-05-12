@@ -2,11 +2,11 @@ from app.imports.runtime import *
 
 from app.main import main
 from app.main.errors import internal_error
-from app.schedule_maker.mascarpone import *
-from app.schedule_maker.mascarpone.frontend.style import STYLE
+from app.scheduler.mascarpone import *
+from app.scheduler.mascarpone.frontend.style import STYLE
 from app.utils.mascarpone.schedule_task import schedule_task_boilings
 from app.utils.batches.batch import *
-from app.schedule_maker import draw_excel_frontend
+from app.scheduler import draw_excel_frontend
 
 from .forms import ScheduleForm
 
