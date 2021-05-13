@@ -48,6 +48,6 @@ def create_manager(app):
 
     admin = Admin(app, name="Umalat admin", template_mode="bootstrap3")
     for name, obj in inspect.getmembers(umalat_models):
-        if inspect.isclass(obj) and isinstance(obj, mdb.Model):
+        if inspect.isclass(obj) and issubclass(obj, mdb.Model):
             admin.add_view(ModelView(obj, db.session))
     return manager
