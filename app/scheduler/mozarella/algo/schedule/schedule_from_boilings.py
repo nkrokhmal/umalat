@@ -377,7 +377,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 continue
             packing_copy = maker.copy(packing, with_props=True)
             packing_copy.props.update(extra_props={"start_from": packing.x[0]})
-            packing.disconnect()
+            packing.parent.remove_child(packing)
             push(schedule["extra"], packing_copy, push_func=add_push)
 
         # todo: put to the place of last multihead usage!

@@ -11,6 +11,7 @@ from app.scheduler.frontend import draw_excel_frontend
 
 
 def test():
+    utils.clock.enable()
     makedirs("schedules/")
     fn = DebugConfig.abs_path(
         "app/data/samples/inputs/mozzarella/2021-05-07 План по варкам.xlsx"
@@ -27,8 +28,9 @@ def test():
         raise Exception("Ошибка при построении расписания")
 
     draw_excel_frontend(
-        frontend, open_file=False, fn="schedules/schedule.xlsx", style=STYLE
+        frontend, open_file=True, fn="schedules/schedule.xlsx", style=STYLE
     )
+    print(utils.clock.stats())
 
 
 if __name__ == "__main__":
