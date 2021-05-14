@@ -3,7 +3,7 @@ from app.db import create_external_db
 
 model_db = mdb = flask_sqlalchemy.SQLAlchemy()
 
-if os.environ.get("environment") == "interactive":
+if os.environ.get("ENVIRONMENT") == "interactive":
     db = create_external_db()
 else:
     db = mdb

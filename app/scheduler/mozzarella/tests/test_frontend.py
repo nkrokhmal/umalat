@@ -9,6 +9,7 @@ from app.scheduler.frontend import draw_excel_frontend
 
 
 def test():
+    logger.info(os.environ["ENVIRONMENT"])
     warnings.filterwarnings("ignore")
 
     fn = DebugConfig.abs_path(
