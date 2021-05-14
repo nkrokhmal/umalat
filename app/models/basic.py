@@ -1,3 +1,5 @@
+import flask
+
 from app.imports.runtime import *
 
 from sqlalchemy import func, extract
@@ -252,6 +254,15 @@ class BatchNumber(mdb.Model):
     department_id = mdb.Column(
         mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True
     )
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "datetime": self.datetime.strftime(flask.current_app.config["DATE_FORMAT"]),
+            "beg_number": self.beg_number,
+            "end_number": self.end_number,
+            "department_id": self.department_id,
+        }
 
     @staticmethod
     def last_batch_number(date, department_name):

@@ -13,6 +13,7 @@ def create_app(config_name="default"):
 
     # init directories
     for local_path in [
+        config.BATCH_NUMBERS_DIR,
         config.UPLOAD_TMP_FOLDER,
         config.STATS_FOLDER,
         config.BOILING_PLAN_FOLDER,
@@ -53,3 +54,4 @@ def create_manager(app):
         if inspect.isclass(obj) and issubclass(obj, mdb.Model):
             admin.add_view(ModelView(obj, db.session))
     return manager
+

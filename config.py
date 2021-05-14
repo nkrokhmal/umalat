@@ -12,6 +12,10 @@ class BaseClass:
     CHEESE_MAKER_PER_PAGE = 10
     SKU_PER_PAGE = 10
 
+    DATE_FORMAT = "%Y-%m-%d"
+
+    BATCH_NUMBERS_DIR = "db/batch_numbers"
+
     UPLOAD_TMP_FOLDER = "app/data/dynamic/tmp"
     STATS_FOLDER = "app/data/dynamic/stats"
     BOILING_PLAN_FOLDER = "app/data/dynamic/boiling_plan"

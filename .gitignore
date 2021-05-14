@@ -60,6 +60,9 @@ app/data/dynamic/stats/*.xlsx
 app/data/dynamic/tmp/*.csv
 app/data/dynamic/tmp/*.xlsx
 
+# Dynamic data
+db/batch_numbers/data.json
+
 # Pyc files
 app/**/*.pyc
 
