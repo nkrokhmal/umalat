@@ -55,7 +55,9 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         if not is_cream
         else maker.root["boiling_process"]["pumping_off"].x[0] + 2
     )
-    with make("packing_process", x=(packing_process_start, 0), push_func=add_push):
+    with make(
+        "packing_process", x=(packing_process_start, 0), push_func=utils.add_push
+    ):
         if is_cream:
             make("N", size=(0, 0))
         else:

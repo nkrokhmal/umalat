@@ -357,7 +357,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
             line_name == LineName.WATER
             and lines_df.at[LineName.WATER, "latest_boiling"]
         ):
-            boiling.disconnect()
+            boiling.parent.remove_child(boiling)
             push(
                 schedule["master"],
                 boiling,

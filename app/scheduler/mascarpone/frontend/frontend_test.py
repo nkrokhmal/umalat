@@ -27,7 +27,7 @@ def test_drawing():
     configure_loguru_stdout("INFO")
     boiling_plan_df = read_boiling_plan(
         DebugConfig.abs_path(
-            "app/data/inputs/mascarpone/2021-04-20 План по варкам маскарпоне (1).xlsx"
+            "app/data/samples/inputs/mascarpone/2021-04-20 План по варкам маскарпоне (1).xlsx"
         )
     )
     schedule = make_schedule(boiling_plan_df, start_batch_id=1)
