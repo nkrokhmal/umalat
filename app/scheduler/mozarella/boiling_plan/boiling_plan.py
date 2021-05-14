@@ -134,7 +134,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
         if grp["_bff"].isnull().all():
             # take from bff input if not specified
             # todo: hardcode, make properly
-            df.loc[grp.index, "_bff"] = utils.cast_form_factor(8)  # 460
+            df.loc[grp.index, "_bff"] = cast_mozarella_form_factor(8)  # 460
         else:
             filled_grp = grp.copy()
             filled_grp = filled_grp.fillna(method="ffill")
