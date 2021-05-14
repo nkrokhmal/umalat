@@ -42,8 +42,10 @@ def create_app(config_name="default"):
 
 
 def create_manager(app):
+    MIGRATION_DIR = os.path.join('db', 'migrations')
+
     manager = flask_script.Manager(app)
-    flask_migrate.Migrate(app, db, render_as_batch=True)
+    flask_migrate.Migrate(app, db, render_as_batch=True, directory=MIGRATION_DIR)
     manager.add_command("db", flask_migrate.MigrateCommand)
 
     admin = Admin(app, name="Umalat admin", template_mode="bootstrap3")

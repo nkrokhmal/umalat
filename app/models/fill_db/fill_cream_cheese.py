@@ -4,7 +4,7 @@ import json
 from app.models import *
 
 
-def read_params(fn="app/data/params/creamcheese.xlsx"):
+def read_params(fn="app/data/static/params/creamcheese.xlsx"):
     df = pd.read_excel(fn, index_col=0)
     return df
 
