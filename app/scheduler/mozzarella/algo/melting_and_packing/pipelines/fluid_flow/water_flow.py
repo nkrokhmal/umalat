@@ -1,10 +1,10 @@
-from app.scheduler.mozarella.algo.melting_and_packing.pipelines.fluid_flow.s1_boiling_group_to_schema import (
+from app.scheduler.mozzarella.algo.melting_and_packing.pipelines.fluid_flow.s1_boiling_group_to_schema import (
     BoilingGroupToSchema,
 )
-from app.scheduler.mozarella.algo.melting_and_packing.pipelines.fluid_flow.s2_water_schema_to_boilings_dataframes import (
+from app.scheduler.mozzarella.algo.melting_and_packing.pipelines.fluid_flow.s2_water_schema_to_boilings_dataframes import (
     SchemaToBoilingsDataframes,
 )
-from app.scheduler.mozarella.algo.melting_and_packing.pipelines.fluid_flow.s3_water_boilings_dataframes_to_boiling import (
+from app.scheduler.mozzarella.algo.melting_and_packing.pipelines.fluid_flow.s3_water_boilings_dataframes_to_boiling import (
     BoilingsDataframesToBoilings,
 )
 

@@ -1,7 +1,7 @@
 from utils_ak.interactive_imports import *
 
-from app.scheduler.mozarella.algo.boiling import make_boiling
-from app.scheduler.mozarella.algo.melting_and_packing import *
+from app.scheduler.mozzarella.algo.boiling import make_boiling
+from app.scheduler.mozzarella.algo.melting_and_packing import *
 from app.enum import LineName
 
 

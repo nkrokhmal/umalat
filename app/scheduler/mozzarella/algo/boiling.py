@@ -1,4 +1,4 @@
-from app.scheduler.mozarella.boiling_plan import *
+from app.scheduler.mozzarella.boiling_plan import *
 
 
 def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing):

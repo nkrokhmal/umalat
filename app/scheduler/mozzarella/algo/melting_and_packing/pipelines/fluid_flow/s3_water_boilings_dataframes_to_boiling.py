@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 
-from app.scheduler.mozarella.algo.cooling import make_cooling_process
-from app.scheduler.mozarella.algo.boiling import make_boiling
+from app.scheduler.mozzarella.algo.cooling import make_cooling_process
+from app.scheduler.mozzarella.algo.boiling import make_boiling
 from app.scheduler.calculation import *
 
 

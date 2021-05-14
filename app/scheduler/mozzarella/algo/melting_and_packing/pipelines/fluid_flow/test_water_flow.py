@@ -3,7 +3,7 @@ import os
 os.environ["environment"] = "interactive"
 
 
-from app.scheduler.mozarella import *
+from app.scheduler.mozzarella import *
 
 warnings.filterwarnings("ignore")
 

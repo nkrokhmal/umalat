@@ -1,6 +1,6 @@
 from app.enum import LineName
-from app.scheduler.mozarella import *
-from app.scheduler.mozarella.boiling_plan.boiling_plan import (
+from app.scheduler.mozzarella import *
+from app.scheduler.mozzarella.boiling_plan.boiling_plan import (
     cast_boiling_plan,
 )
 

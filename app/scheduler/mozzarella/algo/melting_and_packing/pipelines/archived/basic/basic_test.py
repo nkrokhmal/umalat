@@ -3,8 +3,8 @@ os.environ["environment"] = "interactive"
 
 from app.imports.runtime import *
 
-from app.scheduler.mozarella.boiling_plan import read_boiling_plan
-from app.scheduler.mozarella.algo import *
+from app.scheduler.mozzarella.boiling_plan import read_boiling_plan
+from app.scheduler.mozzarella.algo import *
 
 
 def test_melting_and_packing_basic_single():

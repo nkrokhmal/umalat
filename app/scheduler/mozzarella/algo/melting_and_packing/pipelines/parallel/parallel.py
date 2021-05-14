@@ -1,11 +1,11 @@
 from utils_ak.interactive_imports import *
 from app.models import *
 
-from app.scheduler.mozarella.algo import make_boiling
-from app.scheduler.mozarella.algo.packing import *
-from app.scheduler.mozarella.algo.cooling import *
+from app.scheduler.mozzarella.algo import make_boiling
+from app.scheduler.mozzarella.algo.packing import *
+from app.scheduler.mozzarella.algo.cooling import *
 from app.scheduler.calculation import *
-from app.scheduler.mozarella.algo.melting_and_packing.melting_process import (
+from app.scheduler.mozzarella.algo.melting_and_packing.melting_process import (
     make_melting_and_packing_from_mpps,
 )
 

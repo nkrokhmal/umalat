@@ -2,8 +2,8 @@ import openpyxl
 import pandas as pd
 from app.enum import LineName
 
-from app.scheduler.mozarella.frontend.drawing import *
-from app.scheduler.mozarella.frontend.style import *
+from app.scheduler.mozzarella.frontend.drawing import *
+from app.scheduler.mozzarella.frontend.style import *
 from utils_ak.interactive_imports import *
 
 

@@ -6,7 +6,7 @@ from app.imports.runtime import *
 
 warnings.filterwarnings("ignore")
 
-from app.scheduler.mozarella import *
+from app.scheduler.mozzarella import *
 from app.scheduler.frontend import draw_excel_frontend
 
 

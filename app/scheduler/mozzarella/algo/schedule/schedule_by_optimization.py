@@ -1,7 +1,7 @@
 from utils_ak.interactive_imports import *
-from app.scheduler.mozarella.algo.schedule.schedule import *
-from app.scheduler.mozarella.algo.schedule.boilings import *
-from app.scheduler.mozarella.algo.stats import *
+from app.scheduler.mozzarella.algo.schedule.schedule import *
+from app.scheduler.mozzarella.algo.schedule.boilings import *
+from app.scheduler.mozzarella.algo.stats import *
 
 # todo: refactor
 def make_schedule_with_boiling_inside_a_day(

@@ -4,10 +4,10 @@ import itertools
 from utils_ak.interactive_imports import *
 
 from app.scheduler.time import *
-from app.scheduler.mozarella.algo.packing import *
+from app.scheduler.mozzarella.algo.packing import *
 from app.enum import LineName
 
-from app.scheduler.mozarella.algo.schedule.awaiting_pusher import AwaitingPusher
+from app.scheduler.mozzarella.algo.schedule.awaiting_pusher import AwaitingPusher
 from datetime import datetime
 
 # todo: optimize
