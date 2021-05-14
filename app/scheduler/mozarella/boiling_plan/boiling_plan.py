@@ -106,7 +106,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     return df
 
 
-def update_boiling_plan(dfs, normalization, saturate):
+def update_boiling_plan(dfs, normalization, saturate, validate=True):
     if len(dfs) > 1:
         if len(dfs[0]) >= 1:
             dfs[1]["group_id"] += dfs[0].iloc[-1]["group_id"]
@@ -151,26 +151,27 @@ def update_boiling_plan(dfs, normalization, saturate):
     df["original_kg"] = df["kg"]
 
     # validate kilograms
-    for idx, grp in df.groupby("group_id"):
-        # todo: make common parameter
-        if (
-            abs(grp["kg"].sum() - grp.iloc[0]["total_volume"])
-            / grp.iloc[0]["total_volume"]
-            > 0.05
-        ):
-            raise AssertionError(
-                "Одна из групп варок имеет неверное количество килограмм."
-            )
-        else:
-            if normalization:
-                if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
-                    # todo: warning message
-                    df.loc[grp.index, "kg"] *= (
-                        grp.iloc[0]["total_volume"] / grp["kg"].sum()
-                    )  # scale to total_volume
-                else:
-                    # all fine
-                    pass
+    if validate:
+        for idx, grp in df.groupby("group_id"):
+            # todo: make common parameter
+            if (
+                abs(grp["kg"].sum() - grp.iloc[0]["total_volume"])
+                / grp.iloc[0]["total_volume"]
+                > 0.05
+            ):
+                raise AssertionError(
+                    "Одна из групп варок имеет неверное количество килограмм."
+                )
+            else:
+                if normalization:
+                    if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
+                        # todo: warning message
+                        df.loc[grp.index, "kg"] *= (
+                            grp.iloc[0]["total_volume"] / grp["kg"].sum()
+                        )  # scale to total_volume
+                    else:
+                        # all fine
+                        pass
 
     df = df[
         [
@@ -194,7 +195,7 @@ def update_boiling_plan(dfs, normalization, saturate):
     return df
 
 
-def read_boiling_plan(wb_obj, saturate=True, normalization=True):
+def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -224,7 +225,7 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True):
         )
         dfs.append(df)
 
-    df = update_boiling_plan(dfs, normalization, saturate)
+    df = update_boiling_plan(dfs, normalization, saturate, validate)
     return df
 
 
