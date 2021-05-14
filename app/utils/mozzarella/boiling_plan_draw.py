@@ -197,7 +197,7 @@ def draw_boiling_plan(df, df_extra, wb):
 
 def draw_boiling_plan_merged(df, wb):
 
-    skus = db.session.query(SKU).all()
+    skus = db.session.query(MozzarellaSKU).all()
     sheet_name = 'План варок'
 
     values = []

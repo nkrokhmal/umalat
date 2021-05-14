@@ -21,6 +21,7 @@ class BaseClass:
     TEMPLATE_MOZZARELLA_BOILING_PLAN = "app/data/static/templates/constructor_mozzarella.xlsx"
     TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/static/templates/constructor_ricotta.xlsx"
     TEMPLATE_MASCARPONE_BOILING_PLAN = "app/data/static/templates/constructor_mascarpone.xlsx"
+    TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
 
     IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:

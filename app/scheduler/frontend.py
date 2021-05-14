@@ -18,7 +18,7 @@ def make_steam_blocks(block, x=None):
     return maker.root
 
 
-def draw_schedule(schedule, style, fn=None):
+def draw_schedule(schedule, style, fn=None, wb=None):
     # update styles
     for b in schedule.iter():
         block_style = style.get(b.props["cls"])
@@ -31,7 +31,11 @@ def draw_schedule(schedule, style, fn=None):
 
     schedule.props.update(index_width=4)
 
-    wb = utils.init_workbook(["Расписание"])
+    if not wb:
+        wb = utils.init_workbook(["Расписание"])
+
+    if "Расписание" not in wb.sheetnames:
+        wb.create_sheet("Расписание")
 
     for ws in wb.worksheets:
         ws.sheet_view.zoomScale = 55
@@ -93,8 +97,8 @@ def draw_schedule(schedule, style, fn=None):
     return wb
 
 
-def draw_excel_frontend(frontend, style, open_file=False, fn="schedules/schedule.xlsx"):
-    wb = draw_schedule(frontend, style)
+def draw_excel_frontend(frontend, style, open_file=False, fn="schedules/schedule.xlsx", wb=None):
+    wb = draw_schedule(frontend, style, wb=wb)
 
     if fn:
         sf = utils.SplitFile(fn)

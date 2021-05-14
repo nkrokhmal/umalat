@@ -6,6 +6,8 @@ from app.scheduler import *
 from app.scheduler.mozarella import *
 from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boilings
 from app.utils.batches.batch import *
+from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
+from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 
 
 from .forms import ScheduleForm
@@ -31,6 +33,8 @@ def schedule():
         )
 
         boiling_plan_df = cast_boiling_plan(wb)
+        # todo: check boiling_plan_task
+
         add_batch(
             date,
             "Моцарельный цех",
@@ -56,8 +60,30 @@ def schedule():
             return internal_error(e)
             # raise Exception('Ошибка при построении расписания.')
 
+        schedule_json = schedule.to_dict(
+            props=[
+                {"key": "x", "value": lambda b: list(b.props["x"])},
+                {"key": "size", "value": lambda b: list(b.props["size"])},
+                {"key": "cleaning_type", "cls": "cleaning"},
+                {
+                    "key": "boiling_group_df",
+                    "cls": "boiling",
+                },
+            ]
+        )
+        cleanings = ([
+            x
+            for x in schedule_json["children"][0]["children"]
+            if x["cls"] == "cleaning"
+        ])
+        schedule_df = prepare_schedule_json(schedule_json, cleanings)
+
+        schedule_wb = openpyxl.load_workbook(
+            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN"]
+        )
+        schedule_wb = draw_boiling_plan_merged(schedule_df, schedule_wb)
         schedule_wb = draw_excel_frontend(
-            frontend, open_file=False, fn=None, style=STYLE
+            frontend, open_file=False, fn=None, style=STYLE, wb=schedule_wb,
         )
 
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание")
@@ -67,7 +93,7 @@ def schedule():
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )
 
-        path_schedule = "{}/{}".format("app/data/schedule_plan", filename_schedule)
+        path_schedule = "{}/{}".format("app/data/dynamic/schedule_plan", filename_schedule)
         schedule_wb.save(path_schedule)
 
         os.remove(file_path)
