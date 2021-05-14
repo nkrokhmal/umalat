@@ -1,3 +1,4 @@
+
 from app.app import *
 
 app = create_app()
