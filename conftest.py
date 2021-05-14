@@ -1,7 +1,5 @@
 import pytest
 import os
 
+os.environ["environment"] = "interactive"
 
-@pytest.fixture()
-def use_interactive_environment():
-    os.environ["environment"] = "interactive"
