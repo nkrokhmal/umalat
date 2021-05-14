@@ -1,7 +1,3 @@
-import os
-
-os.environ["environment"] = "interactive"
-from app.scheduler.models import cast_model
 from app.models import *
 
 from app.scheduler.mascarpone.algo.cream_cheese_boilings import *

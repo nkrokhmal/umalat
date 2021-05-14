@@ -1,7 +1,3 @@
-import os
-
-os.environ["environment"] = "interactive"
-
 from app.scheduler.mascarpone.algo.schedule import *
 from app.scheduler.mascarpone.boiling_plan import *
 from config import DebugConfig

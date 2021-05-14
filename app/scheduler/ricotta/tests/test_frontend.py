@@ -1,7 +1,3 @@
-import os
-
-os.environ["environment"] = "interactive"
-
 from app.scheduler.ricotta import *
 from app.scheduler import draw_excel_frontend
 from app.scheduler.ricotta.algo.schedule import *

@@ -1,7 +1,3 @@
-import os
-
-os.environ["ENVIRONMENT"] = "interactive"
-
 from app.imports.runtime import *
 from app.enum import LineName
 from app.scheduler.mozzarella import make_schedule, make_frontend, STYLE

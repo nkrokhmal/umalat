@@ -1,3 +1,7 @@
+import os
+
+os.environ["ENVIRONMENT"] = "runtime"
+
 from app.app import *
 
 app = create_app()

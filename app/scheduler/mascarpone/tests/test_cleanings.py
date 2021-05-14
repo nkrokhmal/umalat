@@ -1,7 +1,3 @@
-import os
-
-os.environ["environment"] = "interactive"
-
 from app.scheduler.mascarpone.algo.cleanings import *
 
 

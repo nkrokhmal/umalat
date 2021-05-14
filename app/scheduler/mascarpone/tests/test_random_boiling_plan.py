@@ -1,7 +1,3 @@
-import os
-
-os.environ["environment"] = "interactive"
-
 from app.scheduler import *
 from app.scheduler.mascarpone.boiling_plan.random import *
 from app.scheduler.mascarpone.boiling_plan.random import (

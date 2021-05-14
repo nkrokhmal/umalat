@@ -1,7 +1,3 @@
-import os
-
-os.environ["environment"] = "interactive"
-
 from app.scheduler.mascarpone import *
 from app.scheduler import draw_excel_frontend
 from config import DebugConfig
