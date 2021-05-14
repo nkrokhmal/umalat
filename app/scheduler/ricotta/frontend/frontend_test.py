@@ -35,7 +35,9 @@ def test_drawing(boiling_plan_df):
 if __name__ == "__main__":
     test_make_frontend_boiling()
     boiling_plan_df = read_boiling_plan(
-        DebugConfig.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx")
+        DebugConfig.abs_path(
+            "app/data/samples/inputs/ricotta/2021-05-15 План по варкам рикотта.xlsx"
+        )
     )
     test_make_frontend(boiling_plan_df)
     test_drawing(boiling_plan_df)
