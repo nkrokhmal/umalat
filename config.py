@@ -12,17 +12,17 @@ class BaseClass:
     CHEESE_MAKER_PER_PAGE = 10
     SKU_PER_PAGE = 10
 
-    UPLOAD_TMP_FOLDER = "app/data/tmp"
-    STATS_FOLDER = "app/data/stats"
-    BOILING_PLAN_FOLDER = "app/data/boiling_plan"
-    SKU_PLAN_FOLDER = "app/data/sku_plan"
-    SCHEDULE_PLAN_FOLDER = "app/data/schedule_plan"
+    UPLOAD_TMP_FOLDER = "app/data/dynamic/tmp"
+    STATS_FOLDER = "app/data/dynamic/stats"
+    BOILING_PLAN_FOLDER = "app/data/dynamic/boiling_plan"
+    SKU_PLAN_FOLDER = "app/data/dynamic/sku_plan"
+    SCHEDULE_PLAN_FOLDER = "app/data/dynamic/schedule_plan"
 
-    TEMPLATE_MOZZARELLA_BOILING_PLAN = "app/data/templates/constructor_mozzarella.xlsx"
-    TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/templates/constructor_ricotta.xlsx"
-    TEMPLATE_MASCARPONE_BOILING_PLAN = "app/data/templates/constructor_mascarpone.xlsx"
+    TEMPLATE_MOZZARELLA_BOILING_PLAN = "app/data/static/templates/constructor_mozzarella.xlsx"
+    TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/static/templates/constructor_ricotta.xlsx"
+    TEMPLATE_MASCARPONE_BOILING_PLAN = "app/datastatic//templates/constructor_mascarpone.xlsx"
 
-    IGNORE_SKU_FILE = "app/data/ignore/ignore_sku.json"
+    IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:
         IGNORE_SKUS = json.load(json_file)
 
