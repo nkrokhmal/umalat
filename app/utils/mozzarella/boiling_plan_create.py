@@ -160,15 +160,15 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
                         if x["sku"].form_factor.name == "Терка Моцарелла"
                     ]
 
-                    boilings.add_group(df_grouped_sul, new=True)
-                    boilings.add_group(df_grouped_moz, new=True)
+                    boilings.add_group(df_grouped_sul, True)
+                    boilings.add_group(df_grouped_moz, True)
                     new = True
                 else:
                     df_grouped_dict = df_grouped.sort_values(
                         by=["weight", "pack_weight", "plan"],
                         ascending=[True, False, True],
                     ).to_dict("records")
-                    boilings.add_group(df_grouped_dict, new=new)
+                    boilings.add_group(df_grouped_dict, new)
                     new = False
 
     boilings.finish()
@@ -182,3 +182,4 @@ def get_boiling_form_factor(sku):
         return "{}: {}".format(sku.line.name_short, 370)
     else:
         return "{}: {}".format(sku.line.name_short, 460)
+

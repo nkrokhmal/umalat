@@ -51,14 +51,14 @@ coverage.xml
 *.pot
 
 # Xlsx files
-app/data/boiling_plan/*.xlsx
-app/data/schedule_plan/*.xlsx
-app/data/schedule/*.xlsx
-app/data/sku_plan/*.xlsx
-app/data/stats/*.csv
-app/data/stats/*.xlsx
-app/data/tmp/*.csv
-app/data/tmp/*.xlsx
+app/data/dynamic/boiling_plan/*.xlsx
+app/data/dynamic/schedule_plan/*.xlsx
+app/data/dynamic/schedule/*.xlsx
+app/data/dynamic/sku_plan/*.xlsx
+app/data/dynamic/stats/*.csv
+app/data/dynamic/stats/*.xlsx
+app/data/dynamic/tmp/*.csv
+app/data/dynamic/tmp/*.xlsx
 
 # Pyc files
 app/**/*.pyc

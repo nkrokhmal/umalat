@@ -3,6 +3,7 @@ from app.imports.runtime import *
 from openpyxl.utils.cell import column_index_from_string
 
 from app.utils.features.openpyxl_wrapper import ExcelBlock
+from app.models import RicottaBoiling, RicottaSKU
 
 
 Cell = collections.namedtuple("Cell", "col, col_name")
@@ -68,7 +69,7 @@ def get_colour_by_name(sku_name, skus):
     if len(sku) > 0:
         return sku[0].colour
     else:
-        return current_app.config["COLOURS"]["Default"]
+        return flask.current_app.config["COLORS"]["Default"]
 
 
 def draw_boiling_plan(df, df_extra, wb, total_volume=0):

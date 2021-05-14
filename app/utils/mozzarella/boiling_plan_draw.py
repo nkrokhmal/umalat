@@ -4,9 +4,10 @@ from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
 
 from app.utils.features.db_utils import sku_is_rubber
 from app.utils.features.openpyxl_wrapper import ExcelBlock
+from collections import namedtuple
+from app.models import MozzarellaSKU, MozzarellaBoiling, FormFactor
 
-
-Cell = collections.namedtuple("Cell", "col, col_name")
+Cell = namedtuple("Cell", "col, col_name")
 
 COLUMNS = {
     "boiling_number": Cell(column_index_from_string("A"), "A"),
@@ -18,9 +19,10 @@ COLUMNS = {
     "packer": Cell(column_index_from_string("G"), "G"),
     "name": Cell(column_index_from_string("H"), "H"),
     "kg": Cell(column_index_from_string("I"), "I"),
+    # "orig_kg": Cell(column_index_from_string("I"), "I"),
     "remainings": Cell(column_index_from_string("J"), "J"),
     "team_number": Cell(column_index_from_string("K"), "K"),
-    "washing": Cell(column_index_from_string("L"), "L"),
+    "cleaning": Cell(column_index_from_string("L"), "L"),
     "boiling_configuration": Cell(column_index_from_string("M"), "M"),
     "total_boiling_volume": Cell(column_index_from_string("N"), "N"),
     "delimiter": Cell(column_index_from_string("O"), "O"),
@@ -30,9 +32,7 @@ COLUMNS = {
 
 def draw_boiling_names(wb):
     excel_client = ExcelBlock(wb["Типы варок"])
-    boiling_names = list(
-        set([x.to_str() for x in db.session.query(MozzarellaBoiling).all()])
-    )
+    boiling_names = list(set([x.to_str() for x in db.session.query(MozzarellaBoiling).all()]))
     excel_client.draw_row(1, ["-"])
     cur_i = 2
     for boiling_name in boiling_names:
@@ -57,7 +57,7 @@ def draw_form_factors(wb, form_factors):
         cur_i += 1
 
 
-def draw_skus(wb, type_sku, data_sku):
+def draw_skus_sheet(wb, type_sku, data_sku):
     grouped_skus = data_sku[type_sku]
     grouped_skus.sort(key=lambda x: x.name, reverse=False)
     excel_client = ExcelBlock(wb["{} SKU".format(type_sku)])
@@ -73,35 +73,47 @@ def draw_skus(wb, type_sku, data_sku):
         cur_i += 1
 
 
+def draw_skus(wb, skus):
+    skus.sort(key=lambda x: x.name, reverse=False)
+    excel_client = ExcelBlock(wb["Вода SKU"])
+    excel_client.draw_row(1, ["-", "-"], set_border=False)
+    cur_i = 2
+
+    for group_sku in skus:
+        excel_client.draw_row(
+            cur_i,
+            [group_sku.name, group_sku.made_from_boilings[0].to_str()],
+            set_border=False,
+        )
+        cur_i += 1
+
+
 def get_colour_by_name(sku_name, skus):
     sku = [x for x in skus if x.name == sku_name]
     if len(sku) > 0:
         return sku[0].colour
     else:
-        return current_app.config["COLOURS"]["Default"]
+        return flask.current_app.config["COLORS"]["Default"]
 
 
 def draw_boiling_plan(df, df_extra, wb):
     skus = db.session.query(MozzarellaSKU).all()
-    form_factors = db.session.query(MozzarellaFormFactor).all()
+    form_factors = db.session.query(FormFactor).all()
     data_sku = {
         "Вода": [x for x in skus if x.made_from_boilings[0].boiling_type == "water"],
         "Соль": [x for x in skus if x.made_from_boilings[0].boiling_type == "salt"],
     }
-
     draw_boiling_names(wb=wb)
     draw_extra_packing(wb=wb, df=df_extra, skus=skus)
     draw_form_factors(wb=wb, form_factors=form_factors)
-
     for sheet_name in ["Соль", "Вода"]:
-        draw_skus(wb, sheet_name, data_sku)
+        draw_skus_sheet(wb, sheet_name, data_sku)
 
         values = []
         excel_client = ExcelBlock(wb[sheet_name])
 
         sku_names = [x.name for x in data_sku[sheet_name]]
         df_filter = df[df["name"].isin(sku_names)].copy()
-
         for id, grp in df_filter.groupby("id", sort=False):
             for i, row in grp.iterrows():
                 columns = [x for x in row.index if x in COLUMNS.keys()]
@@ -119,7 +131,6 @@ def draw_boiling_plan(df, df_extra, wb):
                 COLUMNS["delimiter"],
             ]
             values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
-
         cur_row = 2
         for v in values:
             value = v.values()
@@ -136,7 +147,6 @@ def draw_boiling_plan(df, df_extra, wb):
                     COLUMNS["delimiter"].col_name,
                     COLUMNS["delimiter_int"].col_name,
                 )
-
             colour = get_colour_by_name(v[COLUMNS["name"]], skus)
             excel_client.colour = colour[1:]
 
@@ -179,8 +189,78 @@ def draw_boiling_plan(df, df_extra, wb):
                     set_colour=False,
                 )
             cur_row += 1
-
     for sheet in wb.sheetnames:
         wb[sheet].views.sheetView[0].tabSelected = False
     wb.active = 2
+    return wb
+
+
+def draw_boiling_plan_merged(df, wb):
+
+    skus = db.session.query(SKU).all()
+    sheet_name = 'План варок'
+
+    values = []
+    excel_client = ExcelBlock(wb[sheet_name])
+
+    draw_boiling_names(wb=wb)
+    draw_skus(wb, skus)
+
+    for id, grp in df.groupby("id", sort=False):
+        for i, row in grp.iterrows():
+            columns = [x for x in row.index if x in COLUMNS.keys()]
+            v = [row[column] for column in columns]
+            c = [COLUMNS[column] for column in columns]
+            values.append(dict(zip(c, v)))
+        empty_columns = [
+            COLUMNS["boiling_name"],
+            COLUMNS["boiling_volume"],
+            COLUMNS["group"],
+            COLUMNS["form_factor"],
+            COLUMNS["boiling_form_factor"],
+            COLUMNS["packer"],
+            COLUMNS["name"],
+            COLUMNS["delimiter"],
+            COLUMNS["boiling_configuration"]
+        ]
+        values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
+
+    cur_row = 2
+
+    configuration = 0
+    for v in values:
+        cur_configuration = v[COLUMNS["boiling_configuration"]]
+        del v[COLUMNS["boiling_configuration"]]
+
+        value = v.values()
+        column = [x.col for x in v.keys()]
+        formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
+            cur_row,
+            COLUMNS["delimiter"].col_name,
+            COLUMNS["delimiter_int"].col_name,
+        )
+
+        colour = get_colour_by_name(v[COLUMNS["name"]], skus)
+        excel_client.colour = colour[1:]
+
+        excel_client.draw_cell(
+            row=cur_row,
+            col=COLUMNS["boiling_number"].col,
+            value=formula,
+            set_border=False,
+        )
+        excel_client.draw_row(
+            row=cur_row, values=value, cols=column, set_border=False
+        )
+        if v[COLUMNS["name"]] == "-":
+            excel_client.draw_cell(
+                row=cur_row,
+                col=COLUMNS["boiling_configuration"].col,
+                value=configuration,
+                set_border=False,
+            )
+        else:
+            configuration = int(8000 * cur_configuration / v[COLUMNS["boiling_volume"]])
+        cur_row += 1
+
     return wb

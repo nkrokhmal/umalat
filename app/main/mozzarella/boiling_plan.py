@@ -25,7 +25,7 @@ def boiling_plan():
             date=date,
             remainings=remainings_df,
             skus_grouped=skus_grouped,
-            template_path=flask.current_app.config["TEMPLATE_BOILING_PLAN"],
+            template_path=flask.current_app.config["TEMPLATE_MOZZARELLA_BOILING_PLAN"],
         )
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_mozzarella_sku_plan()

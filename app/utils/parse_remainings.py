@@ -68,10 +68,10 @@ def get_skus(skus_req, skus, total_skus):
                     collections.namedtuple("Plan", "sku, plan")(sku, sku_req["Fact"])
                 )
         else:
-            if sku_req["Name"] not in current_app.config["IGNORE_SKUS"]:
+            if sku_req["Name"] not in flask.current_app.config["IGNORE_SKUS"]:
                 sku_for_creation.append(sku_req["Name"])
     if sku_for_creation:
-        flash(convert_sku(sku_for_creation), "warning")
+        flask.flash(convert_sku(sku_for_creation), "warning")
     return result
 
 
@@ -171,7 +171,7 @@ def move_file(old_filepath, old_filename, department=""):
     new_filename = "{} План по варкам {}.xlsx".format(
         old_filename.split(" ")[0], department
     )
-    filepath = os.path.join(current_app.config["BOILING_PLAN_FOLDER"], new_filename)
+    filepath = os.path.join(flask.current_app.config["BOILING_PLAN_FOLDER"], new_filename)
     shutil.copyfile(old_filepath, filepath)
     excel_compiler = pycel.ExcelCompiler(filepath)
     wb_data_only = openpyxl.load_workbook(filename=filepath, data_only=True)
