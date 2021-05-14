@@ -54,4 +54,3 @@ def create_manager(app):
         if inspect.isclass(obj) and issubclass(obj, mdb.Model):
             admin.add_view(ModelView(obj, db.session))
     return manager
-
