@@ -1,6 +1,6 @@
 import os
 
-os.environ["environment"] = "interactive"
+os.environ["ENVIRONMENT"] = "interactive"
 
 from app.imports.runtime import *
 from app.enum import LineName
@@ -9,7 +9,6 @@ from app.scheduler.frontend import draw_excel_frontend
 
 
 def test():
-    logger.info(os.environ["ENVIRONMENT"])
     warnings.filterwarnings("ignore")
 
     fn = DebugConfig.abs_path(
