@@ -3,18 +3,16 @@ import os
 os.environ["environment"] = "interactive"
 
 from app.imports.runtime import *
-
-warnings.filterwarnings("ignore")
-
-from app.scheduler.mozzarella import *
+from app.enum import LineName
+from app.scheduler.mozzarella import make_schedule, make_frontend, STYLE
 from app.scheduler.frontend import draw_excel_frontend
 
 
 def test():
-    utils.clock.enable()
-    makedirs("schedules/")
+    warnings.filterwarnings("ignore")
+
     fn = DebugConfig.abs_path(
-        "app/data/samples/inputs/mozzarella/2021-05-07 План по варкам.xlsx"
+        "app/data/static/samples/inputs/mozzarella/2021-02-28 План по варкам.xlsx"
     )
     start_times = {LineName.WATER: "02:00", LineName.SALT: "06:00"}
 
@@ -28,9 +26,8 @@ def test():
         raise Exception("Ошибка при построении расписания")
 
     draw_excel_frontend(
-        frontend, open_file=True, fn="schedules/schedule.xlsx", style=STYLE
+        frontend, open_file=False, fn="schedules/schedule.xlsx", style=STYLE
     )
-    print(utils.clock.stats())
 
 
 if __name__ == "__main__":
