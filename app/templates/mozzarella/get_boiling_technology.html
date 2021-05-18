@@ -38,7 +38,7 @@
                             <td class="border-0"><a class="small">{{bt.cutting_time}}</a></td>
                             <td class="border-0"><a class="small">{{bt.pouring_off_time}}</a></td>
                             <td class="border-0"><a class="small">{{bt.extra_time}}</a></td>
-                            <td class="border-0"><a class="small">{{bt.boilings[0].line.name}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.boiling.line.name}}</a></td>
                             <td class="border-0">
                                 <a href="{{ url_for('main.edit_boiling_technology', boiling_technology_id = bt.id)}}" class="edit-bt">
                                     <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>

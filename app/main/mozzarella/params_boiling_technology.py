@@ -40,9 +40,9 @@ def edit_boiling_technology(boiling_technology_id):
         flask.flash("Параметры технологии варки успешно изменены", "success")
         return redirect(flask.url_for(".get_boiling_technology"))
 
-    if boiling_technology.boilings[0].line is not None:
+    if boiling_technology.boiling.line is not None:
         form.line.default = default_form_value(
-            form.line, boiling_technology.boilings[0].line.name
+            form.line, boiling_technology.boiling.line.name
         )
 
     form.process()

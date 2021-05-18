@@ -14,7 +14,7 @@ def get_washer():
     washers = (
         db.session.query(Washer)
         .join(Department)
-        .filter(Department.name == DepartmentName.MOZZ)
+        .filter(Department.name == DepartmentName.MOZZARELLA)
         .all()
     )
     return flask.render_template(

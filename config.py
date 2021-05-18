@@ -2,7 +2,8 @@ from app.imports.external import *
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLITE_PATH = os.path.join(basedir, "db/data.sqlite")
+SQLITE_PATH = os.path.join(basedir, "db/prod/data.sqlite")
+TEST_SQLITE_PATH = os.path.join(basedir, "db/test/data.sqlite")
 
 
 class BaseClass:
@@ -87,15 +88,24 @@ class BaseClass:
 
 
 class DebugConfig(BaseClass):
+    TESTING = False
     SQLALCHEMY_DATABASE_URI = (
         os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + SQLITE_PATH
     ) + "?check_same_thread=False"
 
 
 class ProductionConfig(BaseClass):
+    TESTING = False
     SQLALCHEMY_DATABASE_URI = (
         os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + SQLITE_PATH
     ) + "?check_same_thread=False"
 
 
-configs = {"default": DebugConfig, "production": ProductionConfig, "debug": DebugConfig}
+class TestConfig(BaseClass):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = (
+          os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + TEST_SQLITE_PATH
+    ) + "?check_same_thread=False"
+
+
+configs = {"default": DebugConfig, "production": ProductionConfig, "debug": DebugConfig, "test": TestConfig,}
