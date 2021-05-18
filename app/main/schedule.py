@@ -109,6 +109,7 @@ def schedule():
         )
         boiling_plan_df = read_boiling_plan(wb)
         boiling_plan_tasks_df = read_boiling_plan(wb, normalization=False)
+        additional_packing_df = read_additional_packing(wb)
 
         add_batch(
             date,
@@ -181,9 +182,9 @@ def schedule():
 
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание")
 
-        schedule_wb = schedule_task(schedule_wb, boiling_plan_tasks_df, date)
+        schedule_wb = schedule_task(schedule_wb, boiling_plan_tasks_df, additional_packing_df, date)
         schedule_wb = schedule_task_boilings(
-            schedule_wb, boiling_plan_tasks_df, date, form.batch_number.data
+            schedule_wb, boiling_plan_tasks_df, additional_packing_df, date, form.batch_number.data
         )
 
         path_schedule = "{}/{}".format("app/data/schedule_plan", filename_schedule)
