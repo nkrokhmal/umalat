@@ -1,4 +1,9 @@
-from app.scheduler.mascarpone import *
+from app.scheduler.mascarpone import (
+    read_boiling_plan,
+    make_schedule,
+    make_frontend,
+    MASCARPONE_STYLE,
+)
 from app.scheduler import draw_excel_frontend
 from config import DebugConfig
 
@@ -17,7 +22,7 @@ def test_make_frontend():
     print(frontend)
 
 
-def test_drawing():
+def test_drawing(open_file=False):
     from utils_ak.loguru import configure_loguru_stdout
 
     configure_loguru_stdout("INFO")
@@ -28,9 +33,9 @@ def test_drawing():
     )
     schedule = make_schedule(boiling_plan_df, start_batch_id=1)
     frontend = make_frontend(schedule)
-    draw_excel_frontend(frontend, MASCARPONE_STYLE, open_file=True)
+    draw_excel_frontend(frontend, MASCARPONE_STYLE, open_file=open_file)
 
 
 if __name__ == "__main__":
     # test_make_frontend()
-    test_drawing()
+    test_drawing(open_file=True)

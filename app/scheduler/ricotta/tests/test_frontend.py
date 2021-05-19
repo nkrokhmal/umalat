@@ -19,13 +19,13 @@ def test_make_frontend(boiling_plan_df):
     print(frontend)
 
 
-def test_drawing(boiling_plan_df):
+def test_drawing(boiling_plan_df, open_file=False):
     from utils_ak.loguru import configure_loguru_stdout
 
     configure_loguru_stdout("INFO")
     schedule = make_schedule(boiling_plan_df)
     frontend = make_frontend(schedule)
-    draw_excel_frontend(frontend, STYLE, open_file=True)
+    draw_excel_frontend(frontend, STYLE, open_file=open_file)
 
 
 if __name__ == "__main__":
@@ -36,4 +36,4 @@ if __name__ == "__main__":
         )
     )
     test_make_frontend(boiling_plan_df)
-    test_drawing(boiling_plan_df)
+    test_drawing(boiling_plan_df, open_file=True)

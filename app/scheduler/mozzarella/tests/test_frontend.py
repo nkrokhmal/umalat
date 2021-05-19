@@ -4,7 +4,7 @@ from app.scheduler.mozzarella import make_schedule, make_frontend, STYLE
 from app.scheduler.frontend import draw_excel_frontend
 
 
-def test():
+def test(open_file=False):
     warnings.filterwarnings("ignore")
 
     fn = DebugConfig.abs_path(
@@ -22,9 +22,9 @@ def test():
         raise Exception("Ошибка при построении расписания")
 
     draw_excel_frontend(
-        frontend, open_file=False, fn="schedules/schedule.xlsx", style=STYLE
+        frontend, open_file=open_file, fn="schedules/schedule.xlsx", style=STYLE
     )
 
 
 if __name__ == "__main__":
-    test()
+    test(open_file=True)
