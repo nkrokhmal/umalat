@@ -6,7 +6,7 @@
 
 # C extensions
 *.so
-app/**/*schedule*.xlsx
+# app/**/*schedule*.xlsx
 research/akadaner/*xlsx
 
 # Distribution / packaging
