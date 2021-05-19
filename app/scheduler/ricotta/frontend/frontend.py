@@ -107,7 +107,6 @@ def make_analysis_line(schedule):
                 x=(block.x[0], 0),
             )
             push(analysis_group, _block, push_func=add_push)
-
         # todo: refactor
         for i, line in enumerate(lines):
             res = push(

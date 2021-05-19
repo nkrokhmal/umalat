@@ -18,7 +18,7 @@ def make_steam_blocks(block, x=None):
     return maker.root
 
 
-def draw_schedule(schedule, style, fn=None, wb=None):
+def draw_schedule(schedule, style, fn=None, wb=None, debug=False):
     # update styles
     for b in schedule.iter():
         block_style = style.get(b.props["cls"])
@@ -71,22 +71,28 @@ def draw_schedule(schedule, style, fn=None, wb=None):
                 font_size = b.props.get("font_size", 12)
                 # print(b.props['cls'], x1, b.x[1], b.size[0], b.size[1])
 
-                utils.draw_block(
-                    wb.worksheets[0],
-                    x1,
-                    b.x[1],
-                    b.size[0],
-                    b.size[1],
-                    text,
-                    color,
-                    bold=bold,
-                    border=b.props.relative_props.get(
-                        "border", {"border_style": "thin", "color": "000000"}
-                    ),
-                    text_rotation=b.props.get("text_rotation"),
-                    font_size=font_size,
-                    alignment="center",
-                )
+                try:
+                    utils.draw_block(
+                        wb.worksheets[0],
+                        x1,
+                        b.x[1],
+                        b.size[0],
+                        b.size[1],
+                        text,
+                        color,
+                        bold=bold,
+                        border=b.props.relative_props.get(
+                            "border", {"border_style": "thin", "color": "000000"}
+                        ),
+                        text_rotation=b.props.get("text_rotation"),
+                        font_size=font_size,
+                        alignment="center",
+                    )
+                except AttributeError as e:
+                    if "'MergedCell' object attribute 'value' is read-only" in str(e):
+                        logger.exception("Block conflict during drawing")
+                    if not debug:
+                        raise
             except:
                 logger.error("Failed to draw block", b=b, x=(x1, b.x[1]), size=b.size)
                 logger.error("Relative props", props=b.props.relative_props)
@@ -97,7 +103,9 @@ def draw_schedule(schedule, style, fn=None, wb=None):
     return wb
 
 
-def draw_excel_frontend(frontend, style, open_file=False, fn="schedules/schedule.xlsx", wb=None):
+def draw_excel_frontend(
+    frontend, style, open_file=False, fn="schedules/schedule.xlsx", wb=None
+):
     wb = draw_schedule(frontend, style, wb=wb)
 
     if fn:
