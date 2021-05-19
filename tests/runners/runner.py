@@ -8,4 +8,4 @@ def run_test(local_path):
     code = py.test.cmdline.main([os.path.join(basedir, local_path)])
 
     if code == ExitCode.TESTS_FAILED:
-        raise Exception("Failed to run some tests")
+        raise Exception(f"Failed to run tests under: {local_path}")
