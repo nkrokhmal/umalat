@@ -1,5 +1,7 @@
+import os
+os.environ["ENVIRONMENT"] = "runtime"
+
 import pytest
-from flask import template_rendered
 from app.app import create_app
 
 
