@@ -1,3 +1,5 @@
+import flask
+
 from app.imports.runtime import *
 
 from app.main import main
@@ -45,7 +47,7 @@ def mascarpone_schedule():
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )
 
-        path_schedule = "{}/{}".format("app/data/schedule_plan", filename_schedule)
+        path_schedule = "{}/{}".format(flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule)
 
         schedule_wb.save(path_schedule)
         return flask.render_template(
