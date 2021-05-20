@@ -8,6 +8,7 @@ from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boil
 from app.utils.batches.batch import *
 from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
+from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
 
 
 from .forms import ScheduleForm
@@ -33,6 +34,7 @@ def schedule():
         )
 
         boiling_plan_df = cast_boiling_plan(wb)
+        additional_packing_df = read_additional_packing(wb)
         # todo: check boiling_plan_task
 
         add_batch(
@@ -88,10 +90,11 @@ def schedule():
 
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание")
 
-        schedule_wb = schedule_task(schedule_wb, boiling_plan_df, date)
+        schedule_wb = schedule_task(schedule_wb, boiling_plan_df, additional_packing_df, date)
         schedule_wb = schedule_task_boilings(
-            schedule_wb, boiling_plan_df, date, form.batch_number.data
+            schedule_wb, boiling_plan_df, additional_packing_df, date, form.batch_number.data
         )
+        schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
 
         path_schedule = "{}/{}".format("app/data/dynamic/schedule_plan", filename_schedule)
         schedule_wb.save(path_schedule)

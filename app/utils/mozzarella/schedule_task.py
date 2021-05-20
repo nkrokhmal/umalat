@@ -5,14 +5,16 @@ from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
 
 from app.enum import LineName
 from app.utils.features.openpyxl_wrapper import ExcelBlock
+from collections import namedtuple
 
 
-Cell = collections.namedtuple("Cell", "col, col_name")
+Cell = namedtuple("Cell", "col, col_name")
 COLOR = "#dce6f2"
+COLOR_PACKING = "#E0E0E0"
 COLUMNS = {
     "index": Cell(column_index_from_string("B"), "B"),
     "sku": Cell(column_index_from_string("C"), "C"),
-    "in_box": Cell(column_index_from_string("I"), "I"),
+    "boxes": Cell(column_index_from_string("I"), "I"),
     "kg": Cell(column_index_from_string("J"), "J"),
     "boxes_count": Cell(column_index_from_string("K"), "K"),
     "priority": Cell(column_index_from_string("L"), "L"),
@@ -66,14 +68,14 @@ def draw_header(excel_client, date, cur_row, task_name, is_boiling=None):
     excel_client.merge_cells(
         beg_col=COLUMNS["sku"].col,
         beg_row=cur_row,
-        end_col=COLUMNS["in_box"].col - 1,
+        end_col=COLUMNS["boxes"].col - 1,
         end_row=cur_row,
         value="Номенклатура",
         alignment=alignment,
         font_size=FONTS["header"],
     )
     excel_client.draw_cell(
-        col=COLUMNS["in_box"].col,
+        col=COLUMNS["boxes"].col,
         row=cur_row,
         value="Вложение коробок",
         alignment=alignment,
@@ -97,111 +99,123 @@ def draw_header(excel_client, date, cur_row, task_name, is_boiling=None):
     return cur_row, excel_client
 
 
-def draw_task_original(excel_client, df, date, cur_row, line_name, task_name):
+def draw_schedule_raw(excel_client, cur_row, values, color=None):
+    excel_client.raw_dimension(cur_row, DIMENSIONS["body"])
+    excel_client.font_size = FONTS["body"]
+    excel_client.colour = COLOR[1:]
+
+    excel_client.draw_cell(
+        col=COLUMNS["index"].col,
+        row=cur_row,
+        value=values[0],
+    )
+    excel_client.colour = color[1:] if color else None
+    excel_client.merge_cells(
+        beg_col=COLUMNS["sku"].col,
+        beg_row=cur_row,
+        end_col=COLUMNS["boxes"].col - 1,
+        end_row=cur_row,
+        value=values[1],
+    )
+    excel_client.draw_cell(
+        col=COLUMNS["boxes"].col, row=cur_row, value=values[2]
+    )
+    excel_client.draw_cell(col=COLUMNS["kg"].col, row=cur_row, value=values[3])
+    excel_client.draw_cell(
+        col=COLUMNS["boxes_count"].col, row=cur_row, value=values[4])
+    excel_client.draw_cell(col=COLUMNS["priority"].col, row=cur_row, value="")
+    excel_client.colour = None
+    cur_row += 1
+    return excel_client, cur_row
+
+
+def draw_blue_line(excel_client, cur_row):
+    excel_client.colour = COLOR[1:]
+    excel_client.draw_cell(col=COLUMNS["index"].col, row=cur_row, value="")
+    excel_client.merge_cells(
+        beg_col=COLUMNS["sku"].col,
+        beg_row=cur_row,
+        end_col=COLUMNS["priority"].col,
+        end_row=cur_row,
+        value="",
+    )
+    return excel_client
+
+
+def draw_task_original(excel_client, df, date, cur_row, line_name, task_name, df_packing=None):
     df_filter = df[df["line"] == line_name]
     index = 1
 
     cur_row, excel_client = draw_header(excel_client, date, cur_row, task_name)
 
     for sku_name, grp in df_filter.groupby("sku_name"):
-        excel_client.raw_dimension(cur_row, DIMENSIONS["body"])
-        excel_client.font_size = FONTS["body"]
-        excel_client.colour = COLOR[1:]
-
-        excel_client.draw_cell(col=COLUMNS["index"].col, row=cur_row, value=index)
-        excel_client.colour = None
-        excel_client.merge_cells(
-            beg_col=COLUMNS["sku"].col,
-            beg_row=cur_row,
-            end_col=COLUMNS["in_box"].col - 1,
-            end_row=cur_row,
-            value=sku_name,
-        )
-        excel_client.draw_cell(
-            col=COLUMNS["in_box"].col, row=cur_row, value=grp.iloc[0]["sku"].in_box
-        )
         if grp.iloc[0]["sku"].group.name != "Качокавалло":
-            kg = round(grp["kg"].sum())
+            kg = round(grp["original_kg"].sum())
             boxes_count = math.ceil(
                 1000
-                * grp["kg"].sum()
+                * grp["original_kg"].sum()
                 / grp.iloc[0]["sku"].in_box
                 / grp.iloc[0]["sku"].weight_netto
             )
         else:
             kg = ""
             boxes_count = ""
-        excel_client.draw_cell(col=COLUMNS["kg"].col, row=cur_row, value=kg)
-        excel_client.draw_cell(
-            col=COLUMNS["boxes_count"].col, row=cur_row, value=boxes_count
-        )
-        excel_client.draw_cell(col=COLUMNS["priority"].col, row=cur_row, value="")
-        cur_row += 1
+        values = [index, sku_name, grp.iloc[0]["sku"].in_box, kg, boxes_count]
+        excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values)
         index += 1
+
+    if df_packing is not None:
+        for i, row in df_packing.iterrows():
+            boxes_count = math.ceil(
+                1000
+                * row["kg"]
+                / row["sku_obj"].in_box
+                / row["sku_obj"].weight_netto
+            )
+            values = [index, row["sku"], row["sku_obj"].in_box, row["kg"], boxes_count]
+            excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values, COLOR_PACKING)
+            index += 1
+            index += 1
+
     return cur_row
 
 
-def draw_task_new(excel_client, df, date, cur_row, line_name, task_name, batch_number):
+def draw_task_new(excel_client, df, date, cur_row, line_name, task_name, batch_number, df_packing=None):
     df_filter = df[df["line"] == line_name]
 
     cur_row, excel_client = draw_header(excel_client, date, cur_row, task_name, "варки")
     for boiling_group_id, grp in df_filter.groupby("group_id"):
         for i, row in grp.iterrows():
-            excel_client.raw_dimension(cur_row, DIMENSIONS["body"])
-            excel_client.font_size = FONTS["body"]
-            excel_client.colour = COLOR[1:]
-
-            excel_client.draw_cell(
-                col=COLUMNS["index"].col,
-                row=cur_row,
-                value=boiling_group_id + batch_number - 1,
-            )
-            excel_client.colour = None
-            excel_client.merge_cells(
-                beg_col=COLUMNS["sku"].col,
-                beg_row=cur_row,
-                end_col=COLUMNS["in_box"].col - 1,
-                end_row=cur_row,
-                value=row["sku_name"],
-            )
-            excel_client.draw_cell(
-                col=COLUMNS["in_box"].col, row=cur_row, value=row["sku"].in_box
-            )
-
             if row["sku"].group.name != "Качокавалло":
-                kg = round(row["kg"])
+                kg = round(row["original_kg"])
                 boxes_count = math.ceil(
-                    1000 * row["kg"] / row["sku"].in_box / row["sku"].weight_netto
+                    1000 * row["original_kg"] / row["sku"].in_box / row["sku"].weight_netto
                 )
             else:
                 kg = ""
                 boxes_count = ""
 
-            excel_client.draw_cell(col=COLUMNS["kg"].col, row=cur_row, value=kg)
-            excel_client.draw_cell(
-                col=COLUMNS["boxes_count"].col, row=cur_row, value=boxes_count
-            )
-            excel_client.draw_cell(col=COLUMNS["priority"].col, row=cur_row, value="")
-            cur_row += 1
-
-        excel_client.colour = COLOR[1:]
-        excel_client.draw_cell(col=COLUMNS["index"].col, row=cur_row, value="")
-        excel_client.merge_cells(
-            beg_col=COLUMNS["sku"].col,
-            beg_row=cur_row,
-            end_col=COLUMNS["priority"].col,
-            end_row=cur_row,
-            value="",
-        )
-        # excel_client.draw_cell(col=COLUMNS['boxes'].col, row=cur_row, value='')
-        # excel_client.draw_cell(col=COLUMNS['kg'].col, row=cur_row, value='')
-        # excel_client.draw_cell(col=COLUMNS['boxes_count'].col, row=cur_row, value='')
-        # excel_client.draw_cell(col=COLUMNS['priority'].col, row=cur_row, value='')
+            values = [boiling_group_id + batch_number - 1, row["sku_name"], row["sku"].in_box, kg, boxes_count]
+            excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values)
+        excel_client = draw_blue_line(excel_client, cur_row)
         cur_row += 1
+
+    if df_packing is not None:
+        for i, row in df_packing.iterrows():
+            kg = round(row["kg"])
+            boxes_count = math.ceil(
+                1000 * row["kg"] / row["sku_obj"].in_box / row["sku_obj"].weight_netto
+            )
+            values = ["", row["sku"], row["sku_obj"].in_box, kg, boxes_count]
+            excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values, COLOR_PACKING)
+
+        excel_client = draw_blue_line(excel_client, cur_row)
+        cur_row += 1
+
     return cur_row
 
 
-def schedule_task(wb, df, date):
+def schedule_task(wb, df, df_packing, date):
     df_copy = df.copy()
     sheet_name = "Печать заданий"
     water_task_name = "Задание на упаковку линии воды Моцарельного цеха"
@@ -220,12 +234,12 @@ def schedule_task(wb, df, date):
     cur_row += space_row
 
     draw_task_original(
-        excel_client, df_copy, date, cur_row, LineName.SALT, salt_task_name
+        excel_client, df_copy, date, cur_row, LineName.SALT, salt_task_name, df_packing,
     )
     return wb
 
 
-def schedule_task_boilings(wb, df, date, batch_number):
+def schedule_task_boilings(wb, df, df_packing, date, batch_number):
     df_copy = df.copy()
     sheet_name = "Печать заданий 2"
     water_task_name = "Задание на упаковку линии воды Моцарельного цеха"
@@ -257,5 +271,6 @@ def schedule_task_boilings(wb, df, date, batch_number):
         LineName.SALT,
         salt_task_name,
         batch_number,
+        df_packing,
     )
     return wb

@@ -229,6 +229,23 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
     return df
 
 
+def read_additional_packing(wb_obj):
+    wb = utils.cast_workbook(wb_obj)
+    ws = wb["Дополнительная фасовка"]
+
+    values = []
+    for i in range(2, 10):
+        if not ws.cell(i, 2).value:
+            continue
+
+        values.append([ws.cell(i, j).value for j in range(1, 3)])
+
+    df = pd.DataFrame(values, columns=["sku", "kg"])
+    df["sku_obj"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
+    df = df[df["kg"] > 0]
+    return df
+
+
 def cast_boiling_plan(boiling_plan_obj):
     if isinstance(boiling_plan_obj, (str, opx.Workbook)):
         return read_boiling_plan(boiling_plan_obj)
