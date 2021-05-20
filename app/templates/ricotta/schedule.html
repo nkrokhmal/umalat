@@ -3,13 +3,15 @@
 
 {% block title %} План по варкам {% endblock %}
 
-{% block header %}
+{% block header%}
 <div class="row", style="padding:20px">
+    <h1 class="h4 mb-4">Расписание рикотты</h1>
     <div class="header-img">
-        <img src= "{{ url_for('static', filename='schedule.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; opacity: 1; object-position: center 60%;">
+        <img src= "{{ url_for('static', filename='imgs/ricotta_schedule.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 40vh; opacity: 1; object-position: center 60%;">
     </div>
 </div>
 {% endblock %}
+
 
 
 {% block page_content %}
