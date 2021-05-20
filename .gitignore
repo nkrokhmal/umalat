@@ -8,6 +8,7 @@
 *.so
 # app/**/*schedule*.xlsx
 research/akadaner/*xlsx
+schedules/*.xlsx
 
 # Distribution / packaging
 bin/
