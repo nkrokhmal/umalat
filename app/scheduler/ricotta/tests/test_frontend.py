@@ -10,30 +10,20 @@ def test_make_frontend_boiling():
     print(make_frontend_boiling(make_boiling(boiling_model)))
 
 
-def test_make_frontend(boiling_plan_df):
+def test_drawing_ricotta(open_file=False):
     from utils_ak.loguru import configure_loguru_stdout
 
     configure_loguru_stdout("INFO")
+    boiling_plan_fn = DebugConfig.abs_path(
+        "app/data/static/samples/inputs/ricotta/2021-05-15 План по варкам рикотта.xlsx"
+    )
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn)
     schedule = make_schedule(boiling_plan_df)
     frontend = make_frontend(schedule)
-    print(frontend)
-
-
-def test_drawing(boiling_plan_df):
-    from utils_ak.loguru import configure_loguru_stdout
-
-    configure_loguru_stdout("INFO")
-    schedule = make_schedule(boiling_plan_df)
-    frontend = make_frontend(schedule)
-    draw_excel_frontend(frontend, STYLE, open_file=True)
+    draw_excel_frontend(frontend, STYLE, open_file=open_file)
 
 
 if __name__ == "__main__":
-    test_make_frontend_boiling()
-    boiling_plan_df = read_boiling_plan(
-        DebugConfig.abs_path(
-            "app/data/samples/inputs/ricotta/2021-05-15 План по варкам рикотта.xlsx"
-        )
-    )
-    test_make_frontend(boiling_plan_df)
-    test_drawing(boiling_plan_df)
+    # test_make_frontend_boiling()
+    # test_make_frontend()
+    test_drawing_ricotta(open_file=True)

@@ -106,15 +106,6 @@ def make_schedule(boiling_plan_df, start_boiling_id=0):
         idx = -n_tanks % 3
         iter_line_nums_props = utils.recycle_list(line_nums_props, idx)
 
-        # todo: deprecated, del
-        # if not bg_prev:
-        #     idx = (-n_tanks) % 3  # try to start so we end at the beginning
-        #     iter_line_nums_props = recycle_list(line_nums_props, idx)
-        # else:
-        #     idx = bg_prev.props["line_nums"][-1]  # ended with number
-        #     idx = (idx + 1) % 3  # next line_nums in circle
-        # bg.props.update(line_nums=line_nums_props[idx][:n_tanks])
-
         push(
             maker.root,
             bg,
