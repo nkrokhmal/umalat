@@ -242,6 +242,7 @@ def read_additional_packing(wb_obj):
 
     df = pd.DataFrame(values, columns=["sku", "kg"])
     df["sku_obj"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
+    df["kg"] = -df["kg"]
     df = df[df["kg"] > 0]
     return df
 

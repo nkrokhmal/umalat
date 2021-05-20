@@ -10,8 +10,9 @@ def draw_additional_packing(wb, packing_df):
 
     excel_client = ExcelBlock(wb[sheet_name])
     cur_row = 1
+    packing_df["kg_min"] = - packing_df["kg"]
 
-    for _, row in packing_df[['sku', 'kg']].iterrows():
+    for _, row in packing_df[['sku', 'kg_min']].iterrows():
         excel_client.draw_row(cur_row, row.values)
         cur_row += 1
 
