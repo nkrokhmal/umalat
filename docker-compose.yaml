@@ -6,7 +6,7 @@ services:
     command: python /app/runserver.py runserver
     volumes:
       - .:/app
-      - /root/home/data/umalat/schedule:/app/app/data/schedule_plan
-      - /root/home/data/umalat/boiling_plan_schedule:/app/app/data/boiling_plan
+      - /root/home/data/umalat/schedule:/app/app/data/dynamic/schedule_plan
+      - /root/home/data/umalat/boiling_plan_schedule:/app/app/data/dynamic/boiling_plan
     ports:
       - 5000:5000
