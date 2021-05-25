@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Список расписаний{% endblock %}
+{% block page_content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Файлы расписания</h1>
+        </div>
+    </div>
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Дата</th>
+                        <th class="border-0">Моцарелла</th>
+                        <th class="border-0">Рикотта</th>
+                        <th class="border-0">Маскарпоне</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key in data.keys() %}
+                        <tr>
+                            <td class="border-0">{{loop.index + (pagination.page - 1) * pagination.per_page}}</td>
+                            <td class="border-0"><a class="small">{{key}}</a></td>
+                            <td class="border-0">
+                                {% if data[key].get("моцарелла", "") != "" %}
+                                    <a class="small" href="{{ url_for('main.download_schedule_plan', file_name=data[key].get('моцарелла', ''))}}">
+                                        {{data[key].get("моцарелла", "")}}
+                                    </a>
+                                {% else %}
+                                    <td class="border-0"><a class="small"></a></td>
+                                {% endif %}
+                            </td>
+                            <td class="border-0">
+                                {% if data[key].get("рикотта", "") != "" %}
+                                    <a class="small" href="{{ url_for('main.download_schedule_plan', file_name=data[key].get('рикотта', ''))}}">
+                                        {{data[key].get("рикотта", "")}}
+                                    </a>
+                                {% else %}
+                                    <td class="border-0"><a class="small"></a></td>
+                                {% endif %}
+                            </td>
+                            <td class="border-0">
+                                {% if data[key].get("маскарпоне", "") != "" %}
+                                    <a class="small" href="{{ url_for('main.download_schedule_plan', file_name=data[key].get('маскарпоне', ''))}}">
+                                        {{data[key].get("маскарпоне", "")}}
+                                    </a>
+                                {% else %}
+                                    <td class="border-0"><a class="small"></a></td>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="card-footer px-3 border-0 d-flex align-items-center justify-content-between">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination mb-0">
+                        {% if pagination.has_prev %}
+                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.download_schedules', page=pagination.page - 1) }}">Предыдущие</a></li>
+                        {% else %}
+                          <li class="page-item"><a class="page-link btn disabled" href="#">Предыдущие</a></li>
+                        {% endif %}
+                        {% if pagination.has_next %}
+                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.download_schedules', page=pagination.page + 1) }}">Следующие</a></li>
+                        {% else %}
+                          <li class="page-item"><a class="page-link btn disabled" href="#">Следующие</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
