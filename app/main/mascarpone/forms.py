@@ -103,17 +103,20 @@ class MascarponeBoilingTechnologyForm(FlaskForm):
     adding_lactic_acid_time = IntegerField(
         "Введите время добавления лактозы", validators=[Optional()]
     )
-    separation_time = IntegerField("Введите время сепарации", validators=[Optional()])
-    fermentator_name = SelectField("Выберите ферментатор", coerce=int, default=-1)
+    pumping_off_time = IntegerField("Введите время слива", validators=[Optional()])
+    ingredient_time = IntegerField("Введите время внесения ингредиентов", validators=[Optional()])
     submit = SubmitField(label="Сохранить")
 
-    def __init__(self, *args, **kwargs):
-        super(MascarponeBoilingTechnologyForm, self).__init__(*args, **kwargs)
 
-        self.fermentators = db.session.query(MascarponeSourdough).all()
-        self.fermentator_name.choices = list(
-            enumerate(set([x.to_str() for x in self.fermentators]))
-        )
+class CreamCheeseBoilingTechnologyForm(FlaskForm):
+    name = StringField("Название варки", validators=[Optional()])
+    cooling_time = IntegerField("Введите время охлаждения", validators=[Optional()])
+    separation_time = IntegerField("Введите время сепарирования", validators=[Optional()])
+    salting_time = IntegerField(
+        "Введите время посолки", validators=[Optional()]
+    )
+    p_time = IntegerField("Введите время П", validators=[Optional()])
+    submit = SubmitField(label="Сохранить")
 
 
 class ScheduleForm(FlaskForm):
