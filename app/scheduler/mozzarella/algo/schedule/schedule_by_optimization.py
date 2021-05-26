@@ -3,6 +3,9 @@ from app.scheduler.mozzarella.algo.schedule.schedule import *
 from app.scheduler.mozzarella.algo.schedule.boilings import *
 from app.scheduler.mozzarella.algo.stats import *
 
+# todo: put into parameters
+FULL_CLEANING_LENGTH = 16  # 80 minutes
+
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):
     boilings = schedule["master"]["boiling"]
@@ -19,7 +22,11 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     df = pd.DataFrame(values, columns=["x", "y", "group_id", "line_name"])
 
     df["time_till_next_boiling"] = (df["x"].shift(-1) - df["y"]).fillna(0).astype(int)
-
+    df["conflict_time"] = np.where(
+        df["time_till_next_boiling"] < FULL_CLEANING_LENGTH,
+        FULL_CLEANING_LENGTH - df["time_till_next_boiling"],
+        0,
+    )
     df["is_water_done"] = df["line_name"]
     df["is_water_done"] = np.where(
         df["is_water_done"] == "Моцарелла в воде", True, np.nan
@@ -28,6 +35,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     df["is_water_done"] = df["is_water_done"].shift(-1).fillna(0)
     df["is_water_done"] = df["is_water_done"].astype(bool)
     df["is_water_done"] = ~df["is_water_done"]
+    print(df)
 
     def _is_cleaning_combination_fit(cleaning_combination):
         separators = [-1] + list(cleaning_combination) + [df.index[-1]]
@@ -56,21 +64,22 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
         values1 = [
             [
                 combo,
-                sum(df.loc[s]["time_till_next_boiling"] for s in combo),
+                sum(df.loc[s]["conflict_time"] for s in combo),
                 df.loc[combo[0]]["is_water_done"],
             ]
             for combo in available_combinations
         ]
 
         df1 = pd.DataFrame(
-            values1, columns=["combo", "total_time_till_next_boilings", "is_water_done"]
+            values1, columns=["combo", "total_conflict_time", "is_water_done"]
         )
         # set priorities
-        df1 = df1.sort_values(by=["total_time_till_next_boilings"], ascending=False)
+        df1 = df1.sort_values(by=["total_conflict_time"], ascending=True)
         df1 = df1.sort_values(by=["is_water_done"], ascending=False)
 
         # take first one
         combo = df1.iloc[0]["combo"]
+        print(df1.head())
         return {df.loc[s]["group_id"]: "full" for s in combo}
 
     raise Exception("Failed to fill cleanings")
