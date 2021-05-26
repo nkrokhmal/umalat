@@ -34,8 +34,7 @@ def create_app(config_name="default"):
     app = flask.Flask(__name__)
     app.config.from_object(config)
 
-    if config_name != "test":
-        db.init_app(app)
+    db.init_app(app)
     bootstrap.init_app(app)
     page_down.init_app(app)
 
@@ -44,7 +43,7 @@ def create_app(config_name="default"):
 
 
 def create_manager(app):
-    DB_FOLDER = 'prod' if app.config["TESTING"] else 'test'
+    DB_FOLDER = 'test' if app.config["TESTING"] else 'prod'
     MIGRATION_DIR = os.path.join('db', DB_FOLDER, 'migrations')
 
     manager = flask_script.Manager(app)

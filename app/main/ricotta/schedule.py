@@ -1,3 +1,5 @@
+import flask
+
 from app.imports.runtime import *
 
 from app.main.errors import internal_error
@@ -39,7 +41,7 @@ def ricotta_schedule():
         frontend = make_frontend(schedule, date=date, start_time=beg_time)
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"
-        path_schedule = "{}/{}".format("app/data/schedule_plan", filename_schedule)
+        path_schedule = "{}/{}".format(flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule)
 
         schedule_wb = schedule_task_boilings(
             schedule_wb, boiling_plan_df, date, form.batch_number.data

@@ -52,3 +52,5 @@ def download_schedule_plan(file_name):
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
+
+
