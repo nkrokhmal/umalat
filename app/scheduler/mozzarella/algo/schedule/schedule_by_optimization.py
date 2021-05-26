@@ -65,9 +65,11 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
         df1 = pd.DataFrame(
             values1, columns=["combo", "total_time_till_next_boilings", "is_water_done"]
         )
+        # set priorities
         df1 = df1.sort_values(by=["total_time_till_next_boilings"], ascending=False)
         df1 = df1.sort_values(by=["is_water_done"], ascending=False)
 
+        # take first one
         combo = df1.iloc[0]["combo"]
         return {df.loc[s]["group_id"]: "full" for s in combo}
 

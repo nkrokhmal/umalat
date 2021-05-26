@@ -8,7 +8,7 @@ def test(open_file=False):
     warnings.filterwarnings("ignore")
 
     fn = DebugConfig.abs_path(
-        "app/data/static/samples/inputs/mozzarella/2021-02-28 План по варкам.xlsx"
+        "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам.xlsx"
     )
     start_times = {LineName.WATER: "02:00", LineName.SALT: "06:00"}
 
