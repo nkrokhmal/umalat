@@ -13,7 +13,7 @@ def test(open_file=False):
     start_times = {LineName.WATER: "02:00", LineName.SALT: "06:00"}
 
     schedule = make_schedule(
-        fn, optimize=False, start_times=start_times, first_group_id=1
+        fn, optimize=True, start_times=start_times, first_boiling_id=12
     )
 
     try:

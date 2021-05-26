@@ -96,7 +96,10 @@ def draw_schedule(schedule, style, fn=None, wb=None, debug=False):
             except:
                 logger.error("Failed to draw block", b=b, x=(x1, b.x[1]), size=b.size)
                 logger.error("Relative props", props=b.props.relative_props)
-                raise
+                if os.environ.get("ENVIRONMENT") == "runtime":
+                    raise
+                else:
+                    break
     if fn:
         wb.save(fn)
 

@@ -77,13 +77,13 @@ class BoilingsDataframesToBoilings:
         return maker.root
 
     def __call__(
-        self, boiling_volumes, boilings_dataframes, boiling_model, start_from_id
+        self, boiling_volumes, boilings_dataframes, boiling_model, first_boiling_id
     ):
         res = []
         for i in range(len(boiling_volumes)):
             mp = self._make_melting_and_packing(boilings_dataframes[i], boiling_model)
             boiling = make_boiling(
-                boiling_model, start_from_id + i, boiling_volumes[i], mp
+                boiling_model, first_boiling_id + i, boiling_volumes[i], mp
             )
             res.append(boiling)
         return res
