@@ -30,7 +30,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     df["is_water_done"] = ~df["is_water_done"]
 
     def _is_cleaning_combination_fit(cleaning_combination):
-        separators = [-1] + list(cleaning_combination) + [20]
+        separators = [-1] + list(cleaning_combination) + [df.index[-1]]
         for s1, s2 in iter_pairs(separators):
             group = df.loc[s1 + 1 : s2]
 
@@ -39,7 +39,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
                 return False
         return True
 
-    for n_cleanings in range(1, 5):
+    for n_cleanings in range(5):
         available_combinations = [
             combo
             for combo in itertools.combinations(range(len(df) - 1), n_cleanings)
@@ -48,6 +48,10 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
 
         if not available_combinations:
             continue
+
+        if n_cleanings == 0:
+            # no cleanings needed, all is good
+            return {}
 
         values1 = [
             [
