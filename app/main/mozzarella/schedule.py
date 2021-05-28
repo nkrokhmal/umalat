@@ -53,7 +53,7 @@ def schedule():
             boiling_plan_df,
             start_times=start_times,
             optimize=add_full_boiling,
-            first_group_id=int(form.batch_number.data),
+            first_boiling_id=int(form.batch_number.data),
         )
 
         try:

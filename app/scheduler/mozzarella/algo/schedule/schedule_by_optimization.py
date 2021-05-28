@@ -3,93 +3,90 @@ from app.scheduler.mozzarella.algo.schedule.schedule import *
 from app.scheduler.mozzarella.algo.schedule.boilings import *
 from app.scheduler.mozzarella.algo.stats import *
 
-# todo: refactor
-def make_schedule_with_boiling_inside_a_day(
-    boiling_plan_df, start_times=None, first_group_id=None, date=None
-):
-    start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
-    res = {}
+# todo: put into parameters
+FULL_CLEANING_LENGTH = 16  # 80 minutes
 
-    # make first boiling - no cleaning boilings
-    boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
-    schedule = make_schedule_from_boilings(boilings, start_times=start_times)
-    res[None] = calc_schedule_stats(schedule)
 
-    start_from = None
-    if cast_t(res[None]["max_non_full_cleaning_time"]) >= cast_t("12:00"):
-        boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
-        water_boilings = [
-            boiling
-            for boiling in boilings
-            if boiling.props["boiling_model"].line.name == LineName.WATER
+def _find_optimal_cleanings_combination_by_schedule(schedule):
+    boilings = schedule["master"]["boiling"]
+    boilings = list(sorted(boilings, key=lambda b: b.x[0]))
+    values = [
+        [
+            b1["pouring"]["first"]["termizator"].x[0],
+            b1["pouring"]["first"]["termizator"].y[0],
+            b1.props["boiling_group_df"].iloc[0]["group_id"],
+            b1.props["boiling_group_df"].iloc[0]["line"].name,
         ]
-        boilings = list(
-            sorted(
-                boilings,
-                key=lambda boiling: listify(schedule["master"]["boiling"]).index(
-                    [
-                        b
-                        for b in listify(schedule["master"]["boiling"])
-                        if b.props["boiling_id"] == boiling.props["boiling_id"]
-                    ][0]
-                ),
-            )
-        )
+        for b1, b2 in iter_pairs(boilings, method="any_suffix")
+    ]
+    df = pd.DataFrame(values, columns=["x", "y", "group_id", "line_name"])
 
-        if water_boilings:
-            start_from = boilings.index(water_boilings[-1])
-
-        for i in tqdm(range(len(boilings) - 1)):
-            boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
-            boilings = list(
-                sorted(
-                    boilings,
-                    key=lambda boiling: listify(schedule["master"]["boiling"]).index(
-                        [
-                            b
-                            for b in listify(schedule["master"]["boiling"])
-                            if b.props["boiling_id"] == boiling.props["boiling_id"]
-                        ][0]
-                    ),
-                )
-            )
-            schedule = make_schedule_from_boilings(
-                boilings,
-                cleanings={boilings[i].props["boiling_id"]: "full"},
-                start_times=start_times,
-            )
-            res[i] = calc_schedule_stats(schedule)
-
-    suitable = {
-        k: v
-        for k, v in res.items()
-        if cast_t(v["max_non_full_cleaning_time"]) < cast_t("12:00")
-    }
-
-    if suitable:
-        if start_from:
-            res = {k: v for k, v in suitable.items() if k is None or k >= start_from}
-            if not res:
-                res = suitable
-        else:
-            res = suitable
-
-        best = min(res.items(), key=lambda v: v[1]["total_time"])
-    else:
-        # todo: make properly
-        raise AssertionError(
-            "Для правила 12 часов необходимо вставить две полные варки внутридня. Укажите эти полные варки в ручном режиме в плане варок и не используйте автоматическое вставление полной варки по правилу 12 часов."
-        )
-        # res.pop(None)
-        # best = min(res.items(), key=lambda v: v[1]['max_non_full_cleaning_time'])
-
-    logger.info(f"Best cleaning_boiling: {best}")
-
-    boilings = make_boilings(boiling_plan_df, first_group_id=first_group_id)
-    cleaning_boiling = None if best[0] is None else boilings[best[0]]
-    cleanings = (
-        {} if not cleaning_boiling else {cleaning_boiling.props["boiling_id"]: "full"}
+    df["time_till_next_boiling"] = (df["x"].shift(-1) - df["y"]).fillna(0).astype(int)
+    df["conflict_time"] = np.where(
+        df["time_till_next_boiling"] < FULL_CLEANING_LENGTH,
+        FULL_CLEANING_LENGTH - df["time_till_next_boiling"],
+        0,
     )
-    return make_schedule_from_boilings(
-        boilings, cleanings=cleanings, start_times=start_times, date=date
+    df["is_water_done"] = df["line_name"]
+    df["is_water_done"] = np.where(
+        df["is_water_done"] == "Моцарелла в воде", True, np.nan
     )
+    df["is_water_done"] = df["is_water_done"].fillna(method="bfill")
+    df["is_water_done"] = df["is_water_done"].shift(-1).fillna(0)
+    df["is_water_done"] = df["is_water_done"].astype(bool)
+    df["is_water_done"] = ~df["is_water_done"]
+    print(df)
+
+    def _is_cleaning_combination_fit(cleaning_combination):
+        separators = [-1] + list(cleaning_combination) + [df.index[-1]]
+        for s1, s2 in iter_pairs(separators):
+            group = df.loc[s1 + 1 : s2]
+
+            group_length = group.iloc[-1]["y"] - group.iloc[0]["x"]
+            if group_length > cast_t("12:00"):
+                return False
+        return True
+
+    for n_cleanings in range(5):
+        available_combinations = [
+            combo
+            for combo in itertools.combinations(range(len(df) - 1), n_cleanings)
+            if _is_cleaning_combination_fit(combo)
+        ]
+
+        if not available_combinations:
+            continue
+
+        if n_cleanings == 0:
+            # no cleanings needed, all is good
+            return {}
+
+        values1 = [
+            [
+                combo,
+                sum(df.loc[s]["conflict_time"] for s in combo),
+                df.loc[combo[0]]["is_water_done"],
+            ]
+            for combo in available_combinations
+        ]
+
+        df1 = pd.DataFrame(
+            values1, columns=["combo", "total_conflict_time", "is_water_done"]
+        )
+        # set priorities
+        df1 = df1.sort_values(by=["total_conflict_time"], ascending=True)
+        df1 = df1.sort_values(by=["is_water_done"], ascending=False)
+
+        # take first one
+        combo = df1.iloc[0]["combo"]
+        print(df1.head())
+        return {df.loc[s]["group_id"]: "full" for s in combo}
+
+    raise Exception("Failed to fill cleanings")
+
+
+def find_optimal_cleanings(boiling_plan_df, start_times=None):
+    start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
+    boilings = make_boilings(boiling_plan_df)
+    schedule = make_schedule_from_boilings(boilings, start_times=start_times)
+    return _find_optimal_cleanings_combination_by_schedule(schedule)

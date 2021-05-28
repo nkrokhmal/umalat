@@ -1,7 +1,6 @@
 import os
 
 os.environ["environment"] = "interactive"
-from app.scheduler.models import cast_model
 from app.models import *
 
 from app.scheduler.ricotta.algo.boilings import *
@@ -27,5 +26,5 @@ def test_make_boiling_group():
 
 if __name__ == "__main__":
     test_make_boiling()
-    test_make_boiling_sequence()
-    test_make_boiling_group()
+    # test_make_boiling_sequence()
+    # test_make_boiling_group()

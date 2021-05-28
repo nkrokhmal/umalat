@@ -8,12 +8,18 @@ def test(open_file=False):
     warnings.filterwarnings("ignore")
 
     fn = DebugConfig.abs_path(
-        "app/data/static/samples/inputs/mozzarella/2021-02-28 План по варкам.xlsx"
+        # "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам Убольшенный.xlsx"
+        # "app/data/static/samples/inputs/mozzarella/2021-02-28 План по варкам.xlsx"
+        # "app/data/static/samples/inputs/mozzarella/2021-02-26 План по варкам.xlsx"
+        # "app/data/static/samples/inputs/mozzarella/2021-02-19 План по варкам.xlsx"
+        # "app/data/static/samples/inputs/mozzarella/2021-02-17 План по варкам.xlsx"
+        # "app/data/static/samples/inputs/mozzarella/2021-02-16 План по варкам.xlsx"
+        "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"
     )
     start_times = {LineName.WATER: "02:00", LineName.SALT: "06:00"}
 
     schedule = make_schedule(
-        fn, optimize=False, start_times=start_times, first_group_id=1
+        fn, optimize=True, start_times=start_times, first_boiling_id=1
     )
 
     try:

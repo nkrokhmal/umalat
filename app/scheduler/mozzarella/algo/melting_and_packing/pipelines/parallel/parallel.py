@@ -233,7 +233,7 @@ def make_mpp(boiling_df, left_boiling_volume):
     return maker.root
 
 
-def make_boilings_parallel_dynamic(boiling_group_df):
+def make_boilings_parallel_dynamic(boiling_group_df, first_boiling_id=1):
     boilings = []
 
     boiling_group_df = boiling_group_df.copy()
@@ -262,7 +262,6 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
     grouped_df["left"] = grouped_df["kg"]
 
-    group_id = grouped_df.iloc[0]["group_id"]
     form_factors = remove_duplicates(grouped_df["bff"])
 
     cur_form_factor = form_factors[0]
@@ -286,7 +285,7 @@ def make_boilings_parallel_dynamic(boiling_group_df):
 
         melting_and_packing = make_melting_and_packing_from_mpps(boiling_model, mpps)
         boiling = make_boiling(
-            boiling_model, group_id + i, boiling_volume, melting_and_packing
+            boiling_model, first_boiling_id + i, boiling_volume, melting_and_packing
         )
         boilings.append(boiling)
 
