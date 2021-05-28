@@ -132,6 +132,7 @@ def fill_sku():
         "Вес форм фактора",
         "Название форм фактора",
         "Коэффициент",
+        "Kод",
     ]
 
     sku_data = df[columns]
@@ -144,6 +145,7 @@ def fill_sku():
             weight_netto=sku["Вес нетто"],
             shelf_life=sku["Срок хранения"],
             packing_speed=sku["Скорость упаковки"],
+            code=sku["Kод"],
             in_box=sku["Коробки"],
         )
 

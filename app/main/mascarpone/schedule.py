@@ -32,9 +32,10 @@ def mascarpone_schedule():
             data_only=True,
         )
         boiling_plan_df = read_boiling_plan(wb)
+        print(int(boiling_plan_df["boiling_id"].max()) - 1)
         add_batch(
             date,
-            "Рикоттный цех",
+            "Маскарпоновый цех",
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
         )

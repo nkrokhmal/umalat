@@ -218,6 +218,7 @@ def fill_sku():
     form_factors = db.session.query(MozzarellaFormFactor).all()
     groups = db.session.query(Group).all()
 
+    print(df.columns)
     columns = [
         "Название SKU",
         "Процент",
@@ -237,6 +238,7 @@ def fill_sku():
         "Охлаждение 1(для воды)",
         "Охлаждение 2(для воды)",
         "Время посолки",
+        "Kод",
     ]
 
     sku_data = df[columns]
@@ -254,6 +256,7 @@ def fill_sku():
             or _cast_non_nan(sku["Скорость упаковки"]),
             packing_speed=sku["Скорость упаковки"],
             in_box=sku["Коробки"],
+            code=sku["Kод"],
         )
 
         sku_packers = [x for x in packer if x.name in sku["Упаковщик"].split("/")]

@@ -38,6 +38,7 @@ class SKU(mdb.Model):
     brand_name = mdb.Column(mdb.String)
     weight_netto = mdb.Column(mdb.Float)
     shelf_life = mdb.Column(mdb.Integer)
+    code = mdb.Column(mdb.String)
     collecting_speed = mdb.Column(mdb.Integer, nullable=True)
     packing_speed = mdb.Column(mdb.Integer, nullable=True)
     in_box = mdb.Column(mdb.Integer)
