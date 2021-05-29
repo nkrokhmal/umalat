@@ -2,7 +2,7 @@ from app.scheduler.mascarpone import (
     read_boiling_plan,
     make_schedule,
     make_frontend,
-    MASCARPONE_STYLE,
+    STYLE,
 )
 from app.scheduler import draw_excel_frontend
 from config import DebugConfig
@@ -19,7 +19,7 @@ def test_drawing_mascarpone(open_file=False):
     )
     schedule = make_schedule(boiling_plan_df, start_batch_id=1)
     frontend = make_frontend(schedule)
-    draw_excel_frontend(frontend, MASCARPONE_STYLE, open_file=open_file)
+    draw_excel_frontend(frontend, STYLE, open_file=open_file)
 
 
 if __name__ == "__main__":

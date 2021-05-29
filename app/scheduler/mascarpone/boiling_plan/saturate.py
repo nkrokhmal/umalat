@@ -1,12 +1,10 @@
-from utils_ak.pandas import *
-
-from utils_ak.numeric import *
+from app.imports.runtime import *
 
 
 def saturate_boiling_plan(boiling_plan_df):
     df = boiling_plan_df
     df["boiling"] = df["sku"].apply(
-        lambda sku: delistify(sku.made_from_boilings, single=True)
+        lambda sku: utils.delistify(sku.made_from_boilings, single=True)
     )
     df["boiling_key"] = df["boiling"].apply(lambda boiling: boiling.id)
     df["sourdough_range"] = df["sourdough_range"].astype(str)
@@ -14,7 +12,7 @@ def saturate_boiling_plan(boiling_plan_df):
 
     def format_sourdoughs(lst):
         try:
-            return [cast_int(s) for s in lst]
+            return [utils.cast_int(s) for s in lst]
         except:
             return lst
 

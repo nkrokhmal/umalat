@@ -1,4 +1,3 @@
-from utils_ak.interactive_imports import *
 from app.scheduler.mozzarella.algo.schedule.schedule import *
 from app.scheduler.mozzarella.algo.schedule.boilings import *
 from app.scheduler.mozzarella.algo.stats import *
@@ -35,7 +34,6 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     df["is_water_done"] = df["is_water_done"].shift(-1).fillna(0)
     df["is_water_done"] = df["is_water_done"].astype(bool)
     df["is_water_done"] = ~df["is_water_done"]
-    print(df)
 
     def _is_cleaning_combination_fit(cleaning_combination):
         separators = [-1] + list(cleaning_combination) + [df.index[-1]]
@@ -79,7 +77,6 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
 
         # take first one
         combo = df1.iloc[0]["combo"]
-        print(df1.head())
         return {df.loc[s]["group_id"]: "full" for s in combo}
 
     raise Exception("Failed to fill cleanings")

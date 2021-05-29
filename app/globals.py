@@ -10,3 +10,5 @@ else:
 
 bootstrap = flask_bootstrap.Bootstrap()
 page_down = flask_pagedown.PageDown()
+
+ERROR = 1e-5

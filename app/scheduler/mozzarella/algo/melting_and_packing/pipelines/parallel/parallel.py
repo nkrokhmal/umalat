@@ -1,4 +1,4 @@
-from utils_ak.interactive_imports import *
+from app.imports.runtime import *
 from app.models import *
 
 from app.scheduler.mozzarella.algo import make_boiling
@@ -22,7 +22,7 @@ def make_mpp(boiling_df, left_boiling_volume):
 
     boiling_model = boiling_df.iloc[0]["boiling"]
     boiling_volume = min(boiling_df["left"].sum(), left_boiling_volume)
-    packing_team_ids = remove_duplicates(boiling_df["packing_team_id"])
+    packing_team_ids = utils.remove_duplicates(boiling_df["packing_team_id"])
 
     old_ts = 0
     cur_ts = 0
@@ -216,11 +216,11 @@ def make_mpp(boiling_df, left_boiling_volume):
     )
 
     # shift packing and collecting for cooling
-    for packing in listify(maker.root["packing"]):
+    for packing in utils.listify(maker.root["packing"]):
         packing.props.update(
             x=[packing.props["x"][0] + maker.root["cooling_process"]["start"].y[0], 0]
         )
-    for collecting in listify(maker.root["collecting"]):
+    for collecting in utils.listify(maker.root["collecting"]):
         collecting.props.update(
             x=[
                 collecting.props["x"][0] + maker.root["cooling_process"]["start"].y[0],
@@ -262,7 +262,7 @@ def make_boilings_parallel_dynamic(boiling_group_df, first_boiling_id=1):
 
     grouped_df["left"] = grouped_df["kg"]
 
-    form_factors = remove_duplicates(grouped_df["bff"])
+    form_factors = utils.remove_duplicates(grouped_df["bff"])
 
     cur_form_factor = form_factors[0]
     cur_boiling_df = grouped_df[grouped_df["bff"] == cur_form_factor]

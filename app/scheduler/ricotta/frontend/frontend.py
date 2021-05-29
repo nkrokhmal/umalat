@@ -1,13 +1,11 @@
-from utils_ak.interactive_imports import *
 from app.scheduler.time import *
 from app.scheduler.frontend import *
-from datetime import datetime
 
 
 def make_frontend_boiling(boiling):
     boiling_label = boiling.props["boiling_model"].short_display_name
 
-    maker, make = init_block_maker(
+    maker, make = utils.init_block_maker(
         "boiling",
         axis=1,
         x=(boiling.x[0], 0),
@@ -46,7 +44,7 @@ def make_frontend_boiling(boiling):
 
 
 def make_boiling_lines(schedule):
-    maker, make = init_block_maker("boiling_lines", axis=1)
+    maker, make = utils.init_block_maker("boiling_lines", axis=1)
 
     boiling_lines = []
     for i in range(3):
@@ -56,33 +54,37 @@ def make_boiling_lines(schedule):
         if i <= 1:
             make("stub", size=(0, 1))
 
-    for boiling_group in listify(schedule["boiling_group"]):
+    for boiling_group in utils.listify(schedule["boiling_group"]):
         for i, line_num in enumerate(boiling_group.props["line_nums"]):
-            boiling = listify(boiling_group["boiling_sequence"]["boiling"])[i]
-            push(
+            boiling = utils.listify(boiling_group["boiling_sequence"]["boiling"])[i]
+            utils.push(
                 boiling_lines[line_num],
                 make_frontend_boiling(boiling),
-                push_func=add_push,
+                push_func=utils.add_push,
             )
 
-    for i, cleaning in enumerate(listify(schedule["bath_cleanings"]["bath_cleaning"])):
+    for i, cleaning in enumerate(
+        utils.listify(schedule["bath_cleanings"]["bath_cleaning"])
+    ):
         cleaning_block = maker.copy(cleaning, with_props=True)
         for block in cleaning_block.children:
             block.props.update(size=(block.size[0], 2))
-        push(boiling_lines[i], cleaning_block, push_func=add_push)
+        utils.push(boiling_lines[i], cleaning_block, push_func=utils.add_push)
 
     return maker.root
 
 
 def make_analysis_line(schedule):
-    maker, make = init_block_maker("analysis", size=(0, 2), axis=1, is_parent_node=True)
+    maker, make = utils.init_block_maker(
+        "analysis", size=(0, 2), axis=1, is_parent_node=True
+    )
 
-    validator = ClassValidator(window=1)
+    validator = utils.ClassValidator(window=1)
 
     def validate(b1, b2):
         for c1 in b1.children:
             for c2 in b2.children:
-                validate_disjoint_by_axis(c1, c2)
+                utils.validate_disjoint_by_axis(c1, c2)
 
     validator.add("analysis_group", "analysis_group", validate)
 
@@ -96,9 +98,11 @@ def make_analysis_line(schedule):
 
     # todo: hardcode
     for line in lines:
-        push(line, maker.create_block("stub", size=(0, 1)), push_func=add_push)
+        utils.push(
+            line, maker.create_block("stub", size=(0, 1)), push_func=utils.add_push
+        )
 
-    for boiling_group in listify(schedule["boiling_group"]):
+    for boiling_group in utils.listify(schedule["boiling_group"]):
         analysis_group = maker.create_block("analysis_group")
         for block in boiling_group["analysis_group"].children:
             _block = maker.create_block(
@@ -106,13 +110,13 @@ def make_analysis_line(schedule):
                 size=(block.size[0], 1),
                 x=(block.x[0], 0),
             )
-            push(analysis_group, _block, push_func=add_push)
+            utils.push(analysis_group, _block, push_func=utils.add_push)
         # todo: refactor
         for i, line in enumerate(lines):
-            res = push(
+            res = utils.push(
                 line,
                 analysis_group,
-                push_func=lambda parent, block: simple_push(
+                push_func=lambda parent, block: utils.simple_push(
                     parent, block, validator=validator
                 ),
             )
@@ -133,7 +137,7 @@ def calc_skus_label(skus):
     for sku in skus:
         values.append([str(sku.weight_netto), sku.brand_name])
 
-    tree = df_to_ordered_tree(pd.DataFrame(values))
+    tree = utils.df_to_ordered_tree(pd.DataFrame(values))
     return ", ".join(
         [
             "/".join(form_factor_labels) + " " + group_label
@@ -143,16 +147,16 @@ def calc_skus_label(skus):
 
 
 def make_packing_line(schedule):
-    maker, make = init_block_maker("packing", size=(0, 1), is_parent_node=True)
+    maker, make = utils.init_block_maker("packing", size=(0, 1), is_parent_node=True)
 
-    for boiling_group in listify(schedule["boiling_group"]):
+    for boiling_group in utils.listify(schedule["boiling_group"]):
         brand_label = calc_skus_label(boiling_group.props["skus"])
 
         make(
             "packing_num",
             size=(2, 1),
             x=(boiling_group["packing"].x[0], 0),
-            push_func=add_push,
+            push_func=utils.add_push,
             boiling_id=boiling_group.props["boiling_id"],
             font_size=9,
         )
@@ -161,7 +165,7 @@ def make_packing_line(schedule):
             "packing",
             size=(boiling_group["packing"].size[0] - 2, 1),
             x=(boiling_group["packing"].x[0] + 2, 0),
-            push_func=add_push,
+            push_func=utils.add_push,
             brand_label=brand_label,
             font_size=9,
         )
@@ -170,7 +174,7 @@ def make_packing_line(schedule):
 
 
 def make_container_cleanings(schedule):
-    maker, make = init_block_maker(
+    maker, make = utils.init_block_maker(
         "container_cleanings", size=(0, 1), is_parent_node=True
     )
 
@@ -179,17 +183,17 @@ def make_container_cleanings(schedule):
             block.props["cls"],
             size=(block.size[0], 1),
             x=(block.x[0], 0),
-            push_func=add_push,
+            push_func=utils.add_push,
         )
     return maker.root
 
 
 def make_header(date, start_time="07:00"):
-    maker, make = init_block_maker("header", axis=1)
+    maker, make = utils.init_block_maker("header", axis=1)
 
     with make("header", size=(0, 1), index_width=2):
         make(size=(1, 1), text="График наливов сыворотки")
-        make(size=(1, 1), text=cast_str(date, "%d.%m.%Y"), bold=True)
+        make(size=(1, 1), text=utils.cast_str(date, "%d.%m.%Y"), bold=True)
         for i in range(566):
             cur_time = cast_time(i + cast_t(start_time))
             days, hours, minutes = cur_time.split(":")
@@ -215,7 +219,7 @@ def make_header(date, start_time="07:00"):
 def make_frontend(schedule, date=None, start_time="07:00"):
     date = date or datetime.now()
 
-    maker, make = init_block_maker("frontend", axis=1)
+    maker, make = utils.init_block_maker("frontend", axis=1)
     make("stub", size=(0, 1))  # start with 1
     make(make_header(date=date, start_time=start_time))
     make(make_boiling_lines(schedule))
