@@ -5,11 +5,23 @@ from app.scheduler.frontend import draw_excel_frontend
 
 
 def test_batch():
-    for fn in tqdm.tqdm(
-        glob.glob(
-            DebugConfig.abs_path("app/data/static/samples/inputs/mozzarella/*.xlsx")
-        )
-    ):
+    # fns = glob.glob(
+    #     DebugConfig.abs_path("app/data/static/samples/inputs/mozzarella/*.xlsx")
+    # )
+
+    fns = [
+        DebugConfig.abs_path(fn)
+        for fn in [
+            "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам Убольшенный.xlsx",
+            # "app/data/static/samples/inputs/mozzarella/2021-02-28 План по варкам.xlsx",
+            # "app/data/static/samples/inputs/mozzarella/2021-02-26 План по варкам.xlsx",
+            # "app/data/static/samples/inputs/mozzarella/2021-02-19 План по варкам.xlsx",
+            # "app/data/static/samples/inputs/mozzarella/2021-02-17 План по варкам.xlsx",
+            # "app/data/static/samples/inputs/mozzarella/2021-02-16 План по варкам.xlsx",
+            "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx",
+        ]
+    ]
+    for fn in tqdm.tqdm(fns):
         _test(fn, open_file=False)
 
 
