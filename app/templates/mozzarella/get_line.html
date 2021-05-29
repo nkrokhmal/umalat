@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Линии - Список линий{% endblock %}
+{% block page_content %}
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Параметры линий</h1>
+        </div>
+    </div>
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Название линии</th>
+                        <th class="border-0">Налив, мин</th>
+                        <th class="border-0">Подача и вымешивание, мин</th>
+                        <th class="border-0">Чеддеризация, мин</th>
+                        <th class="border-0">Скорость плавления, кг/ч</th>
+                        <th class="border-0">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for line in lines %}
+                        <tr>
+                            <td class="border-0">{{loop.index}}</td>
+                            <td class="border-0"><a class="small">{{line.name}}</a></td>
+                            <td class="border-0"><a class="small">{{line.pouring_time}}</a></td>
+                            <td class="border-0"><a class="small">{{line.serving_time}}</a></td>
+                            <td class="border-0"><a class="small">{{line.chedderization_time}}</a></td>
+                            <td class="border-0"><a class="small">{{line.melting_speed}}</a></td>
+                            <td class="border-0">
+                                <a href="{{ url_for('main.edit_line', line_id = line.id)}}" class="edit-bt">
+                                    <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

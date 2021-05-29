@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}SKU - Добавить SKU{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="py-4">
+        <div class="d-flex justify-content-between w-100 flex-wrap">
+            <div class="mb-3 mb-lg-0">
+                <h1 class="h4">Добавление нового sku в базу данных <br></h1>
+                <h7>Постарайтесь заполнить максимальное количество параметров, чтобы избежать ошибок при построении расписания</h7>
+            </div>
+        </div>
+    </div>
+    <form method="post" action="/ricotta/add_sku" class="mt-4">
+        {{ form.hidden_tag() }}
+        <div class="row mb-4">
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите название SKU</label>
+                        {{form.name(place_holder='Name', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите вес нетто</label>
+                        {{form.weight_netto(place_holder='WeightNetto', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите время хранения, д</label>
+                        {{form.shelf_life(place_holder='ShelfLife', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Выберите тип варки</label>
+                        {{form.boiling(place_holder='Boiling', class='form-select')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите имя бренда</label>
+                        {{form.brand_name(place_holder='Brand', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите скорость фасовки</label>
+                        {{form.packing_speed(place_holder='PackingSpeed', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите количество упаковок в коробке, шт</label>
+                        {{form.in_box(place_holder='InBox', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Выберите название форм фактора</label>
+                        {{form.group(place_holder='Group', class='form-select')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-3" style="margin-top:30px;">
+                <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,9 +1,9 @@
-import os
-import json
+from app.imports.external import *
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLITE_PATH = os.path.join(basedir, "data.sqlite")
+SQLITE_PATH = os.path.join(basedir, "db/prod/data.sqlite")
+TEST_SQLITE_PATH = os.path.join(basedir, "db/test/data.sqlite")
 
 
 class BaseClass:
@@ -11,16 +11,25 @@ class BaseClass:
     SECRET_KEY = "Umalat"
     CHEESE_PER_PAGE = 10
     CHEESE_MAKER_PER_PAGE = 10
-    SKU_PER_PAGE = 100
+    SKU_PER_PAGE = 10
 
-    UPLOAD_TMP_FOLDER = "app/data/tmp"
-    STATS_FOLDER = "app/data/stats"
-    BOILING_PLAN_FOLDER = "app/data/boiling_plan"
-    SKU_PLAN_FOLDER = "app/data/sku_plan"
-    SCHEDULE_PLAN_FOLDER = "app/data/schedule_plan"
-    TEMPLATE_BOILING_PLAN = "app/data/templates/constructor.xlsx"
-    TEMPLATE_SCHEDULE_PLAN = "app/data/templates/constructor_schedule.xlsx"
-    IGNORE_SKU_FILE = "app/data/ignore/ignore_sku.json"
+    DATE_FORMAT = "%Y-%m-%d"
+
+    BATCH_NUMBERS_DIR = "db/batch_numbers"
+
+    UPLOAD_TMP_FOLDER = "app/data/dynamic/tmp"
+    STATS_FOLDER = "app/data/dynamic/stats"
+    BOILING_PLAN_FOLDER = "app/data/dynamic/boiling_plan"
+    SKU_PLAN_FOLDER = "app/data/dynamic/sku_plan"
+    SCHEDULE_PLAN_FOLDER = "app/data/dynamic/schedule_plan"
+    TOTAL_SCHEDULE_TASK_FOLDER = "app/data/dynamic/schedule_task"
+
+    TEMPLATE_MOZZARELLA_BOILING_PLAN = "app/data/static/templates/constructor_mozzarella.xlsx"
+    TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/static/templates/constructor_ricotta.xlsx"
+    TEMPLATE_MASCARPONE_BOILING_PLAN = "app/data/static/templates/constructor_mascarpone.xlsx"
+    TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
+
+    IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:
         IGNORE_SKUS = json.load(json_file)
 
@@ -30,7 +39,7 @@ class BaseClass:
         "water": "Вода",
         "salt": "Соль",
     }
-    COLOURS = {
+    COLORS = {
         "Для пиццы": "#E5B7B6",
         "Моцарелла": "#DAE5F1",
         "Фиор Ди Латте": "#CBC0D9",
@@ -41,6 +50,12 @@ class BaseClass:
         "Default": "#FFFFFF",
         "DefaultGray": "#D9DDDC",
         "Remainings": "#F3F3C0",
+        "Рикотта": "#A3D5D2",
+        "Маскарпоне": "#E5B7B6",
+        "Кремчиз": "#DAE5F1",
+        "Творожный": "#CBC0D9",
+        "Робиола": "E5DFEC",
+        "Сливки": "#F1DADA",
     }
     ORDER = [
         "Фиор Ди Латте",
@@ -50,6 +65,12 @@ class BaseClass:
         "Для пиццы",
         "Качокавалло",
         "Терка",
+        "Рикотта",
+        "Маскарпоне",
+        "Кремчиз",
+        "Творожный",
+        "Робиола",
+        "Сливки",
     ]
     BOILING_VOLUME_LIMITS = {"MIN": 6000, "MAX": 8000}
     CONSTRUCTOR_CELLS = {
@@ -62,17 +83,33 @@ class BaseClass:
     # cache files for 30 seconds
     CACHE_FILE_MAX_AGE = 30
 
+    @staticmethod
+    def abs_path(local_path):
+        return os.path.join(basedir, local_path)
+
 
 class DebugConfig(BaseClass):
+    TESTING = False
     SQLALCHEMY_DATABASE_URI = (
         os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + SQLITE_PATH
     ) + "?check_same_thread=False"
 
 
 class ProductionConfig(BaseClass):
+    TESTING = False
     SQLALCHEMY_DATABASE_URI = (
         os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + SQLITE_PATH
     ) + "?check_same_thread=False"
 
 
-config = {"default": DebugConfig, "production": ProductionConfig, "debug": DebugConfig}
+class TestConfig(BaseClass):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = (
+          os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + TEST_SQLITE_PATH
+    ) + "?check_same_thread=False"
+    TEST_MOZZARELLA = "app/data/tests/mozzarella_plan.xlsx"
+    TEST_RICOTTA = "app/data/tests/ricotta_plan.xlsx"
+    TEST_MASCARPONE = "app/data/tests/mascarpone_plan.xlsx"
+
+
+configs = {"default": DebugConfig, "production": ProductionConfig, "debug": DebugConfig, "test": TestConfig,}

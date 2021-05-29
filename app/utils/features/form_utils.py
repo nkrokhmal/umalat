@@ -8,19 +8,43 @@ def get_choice_data(f):
     return dict(f.choices).get(f.data)
 
 
-def fill_sku_from_form(sku, form):
+def fill_ricotta_sku_from_form(sku, form):
+    if form.boiling.data != -1:
+        sku.made_from_boilings = [
+            x for x in form.boilings if x.to_str() == get_choice_data(form.boiling)
+        ]
+
+    if form.group.data != -1:
+        sku.group = [x for x in form.groups if x.name == get_choice_data(form.group)][0]
+
+    return sku
+
+
+def fill_mascarpone_sku_from_form(sku, form):
+    if form.boiling.data != -1:
+        sku.made_from_boilings = [
+            x for x in form.boilings if x.to_str() == get_choice_data(form.boiling)
+        ]
+
+    if form.group.data != -1:
+        sku.group = [x for x in form.groups if x.name == get_choice_data(form.group)][0]
+
+    return sku
+
+
+def fill_mozzarella_sku_from_form(sku, form):
     if form.boiling.data != -1:
         sku.made_from_boilings += [
             x for x in form.boilings if x.to_str() == get_choice_data(form.boiling)
         ]
 
     if form.group.data != -1:
-        sku.group = [x for x in form.groups if x.name == get_choice_data(form.group)]
+        sku.group = [x for x in form.groups if x.name == get_choice_data(form.group)][0]
 
     if form.packer.data != -1:
-        sku.packer = [
+        sku.packers = [
             x for x in form.packers if x.name == get_choice_data(form.packer)
-        ][0]
+        ]
 
     if form.pack_type.data != -1:
         sku.pack_type = [

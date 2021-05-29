@@ -49,6 +49,7 @@ sortedcollections
 loguru
 stackprinter
 mongoengine
+flask_paginate
 ujson
 better_exceptions
 icecream
