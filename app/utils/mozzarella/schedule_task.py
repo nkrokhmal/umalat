@@ -118,7 +118,7 @@ def draw_task_new(excel_client, df, date, cur_row, line_name, task_name, batch_n
             boxes_count = math.ceil(
                 1000 * row["kg"] / row["sku_obj"].in_box / row["sku_obj"].weight_netto
             )
-            values = ["", row["sku"], row["sku_obj"].in_box, kg, boxes_count, row["code"].in_box]
+            values = ["", row["sku"], row["sku_obj"].in_box, kg, boxes_count, row["sku_obj"].code]
             excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values, COLOR_PACKING)
 
         excel_client = draw_blue_line(excel_client, cur_row)
