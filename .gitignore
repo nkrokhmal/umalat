@@ -50,6 +50,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+!tests/lazy_tester_logs
 *.pot
 
 # Xlsx files

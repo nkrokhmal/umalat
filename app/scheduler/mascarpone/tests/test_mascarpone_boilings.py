@@ -1,3 +1,4 @@
+from app.imports.runtime import *
 from app.models import *
 
 from app.scheduler.mascarpone.algo.mascarpone_boilings import *
@@ -15,6 +16,8 @@ def test_make_mascarpone_boiling():
 
 
 def test_make_mascarpone_boiling_group():
+    utils.lazy_tester.set_function_logs_path()
+
     sku = cast_model(SKU, 92)
     print(sku.name)
     values = [[0, 0, sku.made_from_boilings[0], sku, 10, True]]
@@ -23,7 +26,13 @@ def test_make_mascarpone_boiling_group():
         columns=["boiling_key", "boiling_id", "boiling", "sku", "kg", "is_cream"],
     )
 
-    print(make_mascarpone_boiling_group([boiling_group_df, boiling_group_df]))
+    utils.lazy_tester.log(
+        "Boiling group",
+        boiling_group=make_mascarpone_boiling_group(
+            [boiling_group_df, boiling_group_df]
+        ),
+    )
+    utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
