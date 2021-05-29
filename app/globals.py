@@ -16,5 +16,6 @@ ERROR = 1e-5
 
 basedir = os.path.dirname(os.path.dirname(__file__))
 
-utils.lazy_tester.set_logs_path(os.path.join(basedir, "tests/lazy_tester_logs"))
-utils.lazy_tester.set_app_path(basedir)
+utils.lazy_tester.configure(
+    root=os.path.join(basedir, "tests/lazy_tester_logs"), app_path=basedir
+)
