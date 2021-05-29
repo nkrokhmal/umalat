@@ -22,6 +22,7 @@
                         <th class="border-0">Моцарелла</th>
                         <th class="border-0">Рикотта</th>
                         <th class="border-0">Маскарпоне</th>
+                        <th class="border-0">Задания</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,6 +52,15 @@
                                 {% if data[key].get("маскарпоне", "") != "" %}
                                     <a class="small" href="{{ url_for('main.download_schedule_plan', file_name=data[key].get('маскарпоне', ''))}}">
                                         {{data[key].get("маскарпоне", "")}}
+                                    </a>
+                                {% else %}
+                                    <td class="border-0"><a class="small"></a></td>
+                                {% endif %}
+                            </td>
+                            <td class="border-0">
+                                {% if data[key].get("маскарпоне", "") != "" %}
+                                    <a class="small" href="{{ url_for('main.download_schedule_task', file_name=data[key].get('task', ''))}}">
+                                        {{data[key].get("task", "")}}
                                     </a>
                                 {% else %}
                                     <td class="border-0"><a class="small"></a></td>

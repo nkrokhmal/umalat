@@ -1,3 +1,6 @@
+import flask
+import pandas as pd
+
 from app.imports.runtime import *
 
 from openpyxl.styles import Alignment
@@ -7,6 +10,48 @@ from app.enum import LineName
 from app.utils.features.openpyxl_wrapper import ExcelBlock
 from app.utils.features.draw_utils import *
 from collections import namedtuple
+
+
+def update_total_schedule_task(date, df, df_packing=None):
+    folder = flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"]
+    path = os.path.join(folder, f"{date.date()}.csv")
+    columns = ['sku', 'code', 'in_box', 'kg', 'boxes_count']
+    if not os.path.exists(path):
+        df_task = pd.DataFrame(columns=columns)
+        df_task.to_csv(path, index=False)
+
+    df_task = pd.read_csv(path)
+    skus = df_task.sku
+    for sku_name, grp in df.groupby("sku_name"):
+        if grp.iloc[0]["sku"].group.name != "Качокавалло":
+            kg = round(grp["original_kg"].sum())
+            boxes_count = math.ceil(
+                1000
+                * grp["original_kg"].sum()
+                / grp.iloc[0]["sku"].in_box
+                / grp.iloc[0]["sku"].weight_netto
+            )
+            values = [sku_name, grp.iloc[0]["sku"].code, grp.iloc[0]["sku"].in_box, kg, boxes_count]
+            if sku_name in skus:
+                df_task.loc[df_task.sku == values[0], columns] = values
+            else:
+                df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+
+    if df_packing is not None:
+        for i, row in df_packing.iterrows():
+            boxes_count = math.ceil(
+                1000
+                * row["kg"]
+                / row["sku_obj"].in_box
+                / row["sku_obj"].weight_netto
+            )
+            values = [row["sku"], row["sku_obj"].code, row["sku_obj"].in_box, row["kg"], boxes_count]
+            if sku_name in skus:
+                df_task.loc[df_task.sku == values[0], columns] = values
+            else:
+                df_task = df_task.append(dict(zip(columns, values)))
+
+    df_task.to_csv(path, index=False)
 
 
 def draw_task_original(excel_client, df, date, cur_row, line_name, task_name, df_packing=None):

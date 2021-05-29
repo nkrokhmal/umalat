@@ -24,7 +24,13 @@ def download_schedules(page):
         os.path.dirname(flask.current_app.root_path),
         flask.current_app.config["SCHEDULE_PLAN_FOLDER"],
     )
+    schedule_task_path = os.path.join(
+        os.path.dirname(flask.current_app.root_path),
+        flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"],
+    )
+
     schedules_filenames = os.listdir(schedules_path)
+    schedules_task_filenames = os.listdir(schedule_task_path)
     schedules_metadata = {}
 
     for filename in schedules_filenames:
@@ -37,6 +43,16 @@ def download_schedules(page):
             schedules_metadata[date] = {}
             schedules_metadata[date][get_department(filename)] = filename
 
+    for filename in schedules_task_filenames:
+        date = filename.split('.')[0]
+        if date in schedules_metadata.keys():
+            department = "task"
+            schedules_metadata[date][department] = filename
+
+        else:
+            schedules_metadata[date] = {}
+            schedules_metadata[date]["task"] = filename
+
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
 
     schedules_result = get_metadata(
@@ -44,6 +60,8 @@ def download_schedules(page):
         offset=(page - 1) * flask.current_app.config["SKU_PER_PAGE"],
         per_page=flask.current_app.config["SKU_PER_PAGE"]
     )
+
+    print(page)
     pagination = flask_paginate.Pagination(
         page=page,
         per_page=flask.current_app.config["SKU_PER_PAGE"],
@@ -51,6 +69,7 @@ def download_schedules(page):
         total=len(schedules_metadata.keys()),
         items=schedules_metadata.keys(),
     )
+    print(pagination)
     return flask.render_template(
         "download_schedules.html", pagination=pagination, data=schedules_result,
     )

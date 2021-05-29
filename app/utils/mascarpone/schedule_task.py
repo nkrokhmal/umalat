@@ -2,6 +2,32 @@ from app.utils.features.draw_utils import *
 from app.utils.features.openpyxl_wrapper import ExcelBlock
 
 
+def update_total_schedule_task(date, df):
+    folder = flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"]
+    path = os.path.join(folder, f"{date.date()}.csv")
+    columns = ['sku', 'code', 'in_box', 'kg', 'boxes_count']
+    if not os.path.exists(path):
+        df_task = pd.DataFrame(columns=columns)
+        df_task.to_csv(path, index=False)
+
+    df_task = pd.read_csv(path)
+    skus = df_task.sku
+    df["sku_name"] = df["sku"].apply(lambda x: x.name)
+    for sku_name, grp in df.groupby("sku_name"):
+        kg = round(grp["kg"].sum())
+        boxes_count = math.ceil(
+            grp["kg"].sum()
+            / grp.iloc[0]["sku"].in_box
+            / grp.iloc[0]["sku"].weight_netto
+        )
+        values = [sku_name, grp.iloc[0]["sku"].code, grp.iloc[0]["sku"].in_box, kg, boxes_count]
+        if sku_name in skus:
+            df_task.loc[df_task.sku == values[0], columns] = values
+        else:
+            df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+    df_task.to_csv(path, index=False)
+
+
 def draw_task_new(excel_client, df, date, cur_row, task_name, batch_number):
     cur_row, excel_client = draw_header(excel_client, date, cur_row, task_name, "варки")
     for boiling_group_id, grp in df.groupby("boiling_id"):
