@@ -163,6 +163,7 @@ def fill_sku():
         "Название форм фактора",
         "Количество баков",
         "Выход",
+        "Kод",
     ]
 
     sku_data = df[columns]
@@ -177,6 +178,7 @@ def fill_sku():
             packing_speed=60 / sku["Скорость упаковки"] * sku["Выход"],
             in_box=sku["Коробки"],
             output_per_tank=sku["Выход"] / sku["Количество баков"],
+            code=sku["Kод"],
         )
 
         line_name = LineName.RICOTTA

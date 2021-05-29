@@ -1,0 +1,1 @@
+cd .. && rm -f db/test/data.sqlite && rm -r -f db/test/migrations && python3 manage.py db init --directory db/test/migrations && python3 manage.py db migrate && python3 manage.py db upgrade && python3 db/fill_db.py

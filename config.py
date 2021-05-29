@@ -22,6 +22,7 @@ class BaseClass:
     BOILING_PLAN_FOLDER = "app/data/dynamic/boiling_plan"
     SKU_PLAN_FOLDER = "app/data/dynamic/sku_plan"
     SCHEDULE_PLAN_FOLDER = "app/data/dynamic/schedule_plan"
+    TOTAL_SCHEDULE_TASK_FOLDER = "app/data/dynamic/schedule_task"
 
     TEMPLATE_MOZZARELLA_BOILING_PLAN = "app/data/static/templates/constructor_mozzarella.xlsx"
     TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/static/templates/constructor_ricotta.xlsx"

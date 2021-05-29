@@ -166,6 +166,7 @@ def fill_sku():
         "Линия",
         "Название форм фактора",
         "Выход",
+        "Kод",
     ]
 
     sku_data = df[columns]
@@ -181,6 +182,7 @@ def fill_sku():
             shelf_life=sku["Срок хранения"],
             packing_speed=sku["Скорость упаковки"],
             in_box=sku["Коробки"],
+            code=sku["Kод"],
         )
 
         line_name = LineName.MASCARPONE

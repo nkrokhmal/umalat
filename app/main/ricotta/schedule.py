@@ -6,7 +6,7 @@ from app.main.errors import internal_error
 from app.main import main
 from app.scheduler import *
 from app.scheduler.ricotta import *
-from app.utils.ricotta.schedule_tasks import schedule_task_boilings
+from app.utils.ricotta.schedule_tasks import schedule_task_boilings, update_total_schedule_task
 from app.utils.batches.batch import *
 
 from .forms import ScheduleForm
@@ -39,10 +39,12 @@ def ricotta_schedule():
         )
         schedule = make_schedule(boiling_plan_df, form.batch_number.data)
         frontend = make_frontend(schedule, date=date, start_time=beg_time)
+
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"
         path_schedule = "{}/{}".format(flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule)
 
+        update_total_schedule_task(date, boiling_plan_df)
         schedule_wb = schedule_task_boilings(
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )

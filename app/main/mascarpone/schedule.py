@@ -6,7 +6,7 @@ from app.main import main
 from app.main.errors import internal_error
 from app.scheduler.mascarpone import *
 from app.scheduler.mascarpone.frontend.style import STYLE
-from app.utils.mascarpone.schedule_task import schedule_task_boilings
+from app.utils.mascarpone.schedule_task import schedule_task_boilings, update_total_schedule_task
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 
@@ -34,7 +34,7 @@ def mascarpone_schedule():
         boiling_plan_df = read_boiling_plan(wb)
         add_batch(
             date,
-            "Рикоттный цех",
+            "Маскарпоновый цех",
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
         )
@@ -43,6 +43,7 @@ def mascarpone_schedule():
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.xlsx"
 
+        update_total_schedule_task(date, boiling_plan_df)
         schedule_wb = schedule_task_boilings(
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )

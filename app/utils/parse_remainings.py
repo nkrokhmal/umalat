@@ -123,7 +123,7 @@ def cast_sku_name(obj):
 
 
 def convert_sku(sku):
-    return Markup(
+    return flask.Markup(
         "В базе нет следующих SKU: <br> <br>"
         + " ".join(
             ['<p class="mb-0"><small>{1}</small> </p>'.format(quote(x), x) for x in sku]
