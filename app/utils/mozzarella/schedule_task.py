@@ -49,7 +49,7 @@ def update_total_schedule_task(date, df, df_packing=None):
             if sku_name in skus:
                 df_task.loc[df_task.sku == values[0], columns] = values
             else:
-                df_task = df_task.append(dict(zip(columns, values)))
+                df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
 
     df_task.to_csv(path, index=False)
 
