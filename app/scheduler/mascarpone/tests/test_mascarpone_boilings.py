@@ -5,7 +5,7 @@ from app.scheduler.mascarpone.algo.mascarpone_boilings import *
 
 
 def test_make_mascarpone_boiling():
-    utils.lazy_tester.configure_function()
+    utils.lazy_tester.configure_function_path()
 
     sku = cast_model(SKU, 90)
     values = [[0, 0, sku.made_from_boilings[0], sku, 10, True]]
@@ -19,7 +19,7 @@ def test_make_mascarpone_boiling():
 
 
 def test_make_mascarpone_boiling_group():
-    utils.lazy_tester.configure_function()
+    utils.lazy_tester.configure_function_path()
 
     sku = cast_model(SKU, 92)
     values = [[0, 0, sku.made_from_boilings[0], sku, 10, True]]

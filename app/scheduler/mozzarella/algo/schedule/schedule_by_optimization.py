@@ -1,3 +1,4 @@
+from app.imports.runtime import *
 from app.scheduler.mozzarella.algo.schedule.schedule import *
 from app.scheduler.mozzarella.algo.schedule.boilings import *
 from app.scheduler.mozzarella.algo.stats import *
@@ -16,7 +17,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
             b1.props["boiling_group_df"].iloc[0]["group_id"],
             b1.props["boiling_group_df"].iloc[0]["line"].name,
         ]
-        for b1, b2 in iter_pairs(boilings, method="any_suffix")
+        for b1, b2 in utils.iter_pairs(boilings, method="any_suffix")
     ]
     df = pd.DataFrame(values, columns=["x", "y", "group_id", "line_name"])
 
@@ -37,7 +38,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
 
     def _is_cleaning_combination_fit(cleaning_combination):
         separators = [-1] + list(cleaning_combination) + [df.index[-1]]
-        for s1, s2 in iter_pairs(separators):
+        for s1, s2 in utils.iter_pairs(separators):
             group = df.loc[s1 + 1 : s2]
 
             group_length = group.iloc[-1]["y"] - group.iloc[0]["x"]
