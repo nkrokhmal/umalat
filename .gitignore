@@ -61,6 +61,7 @@ app/data/dynamic/stats/*.csv
 app/data/dynamic/stats/*.xlsx
 app/data/dynamic/tmp/*.csv
 app/data/dynamic/tmp/*.xlsx
+app/data/dynamic/schedule_task/*.csv
 
 # Dynamic data
 db/batch_numbers/data.json
