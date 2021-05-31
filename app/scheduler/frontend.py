@@ -18,7 +18,9 @@ def make_steam_blocks(block, x=None):
     return maker.root
 
 
-def draw_schedule(schedule, style, fn=None, wb=None, debug=False):
+def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
+    O = O or [0, 0]  # initial coordinates
+
     # update styles
     for b in schedule.iter():
         block_style = style.get(b.props["cls"])
@@ -74,8 +76,8 @@ def draw_schedule(schedule, style, fn=None, wb=None, debug=False):
                 try:
                     utils.draw_block(
                         wb.worksheets[0],
-                        x1,
-                        b.x[1],
+                        x1 + O[0],
+                        b.x[1] + O[1],
                         b.size[0],
                         b.size[1],
                         text,
@@ -107,9 +109,9 @@ def draw_schedule(schedule, style, fn=None, wb=None, debug=False):
 
 
 def draw_excel_frontend(
-    frontend, style, open_file=False, fn="schedules/schedule.xlsx", wb=None
+    frontend, style, O=None, open_file=False, fn="schedules/schedule.xlsx", wb=None
 ):
-    wb = draw_schedule(frontend, style, wb=wb)
+    wb = draw_schedule(frontend, style, O=O, wb=wb)
 
     if fn:
         sf = utils.SplitFile(fn)
