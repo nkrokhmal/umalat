@@ -54,14 +54,12 @@ def download_schedules(page):
             schedules_metadata[date]["task"] = filename
 
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
-    print(schedules_metadata)
 
     schedules_result = get_metadata(
         schedules_metadata,
         offset=(page - 1) * flask.current_app.config["SKU_PER_PAGE"],
         per_page=flask.current_app.config["SKU_PER_PAGE"]
     )
-    print(schedules_result['2021-05-30'])
 
     pagination = flask_paginate.Pagination(
         page=page,
