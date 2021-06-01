@@ -12,7 +12,7 @@ def test_batch():
     fns = [
         DebugConfig.abs_path(fn)
         for fn in [
-            "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам Убольшенный.xlsx",
+            "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам.xlsx",
             # "app/data/static/samples/inputs/mozzarella/2021-02-28 План по варкам.xlsx",
             # "app/data/static/samples/inputs/mozzarella/2021-02-26 План по варкам.xlsx",
             # "app/data/static/samples/inputs/mozzarella/2021-02-19 План по варкам.xlsx",
