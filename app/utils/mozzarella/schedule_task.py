@@ -51,7 +51,7 @@ def update_total_schedule_task(date, df, df_packing=None):
             else:
                 df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
 
-    df_task.to_csv(path, index=False)
+    df_task.to_csv(path, index=False, sep=';')
 
 
 def draw_task_original(excel_client, df, date, cur_row, line_name, task_name, df_packing=None):
