@@ -15,20 +15,22 @@ def make_boiling(boiling_model):
     m.row("protein_harvest", size=bt.protein_harvest_time // 5)
     m.row("abandon", size=bt.abandon_time // 5)
 
-    if not boiling_model.flavoring_agent:
-        m.row("pumping_out", size=bt.pumping_out_time // 5)
-    else:
-        # make pumping_out parallel with abandon
-        m.row("pumping_out", push_func=add_push,
-              size=bt.pumping_out_time // 5,
-              x=m.root["abandon"].y[0] - bt.pumping_out_time // 5)
+    with code('pumping_out'):
+        if not boiling_model.flavoring_agent:
+            m.row("pumping_out", size=bt.pumping_out_time // 5)
+        else:
+            # make pumping_out parallel with abandon
+            m.row("pumping_out", push_func=add_push,
+                  size=bt.pumping_out_time // 5,
+                  x=m.root["abandon"].y[0] - bt.pumping_out_time // 5)
 
-    steam_value = 900 if not boiling_model.flavoring_agent else 673 # todo: take from parameters
+    with code('steam_consumption'):
+        steam_value = 900 if not boiling_model.flavoring_agent else 673 # todo: take from parameters
 
-    m.row("steam_consumption", push_func=add_push,
-          size=m.root["heating"].size,
-          x=0,
-          value=steam_value)
+        m.row("steam_consumption", push_func=add_push,
+              size=m.root["heating"].size,
+              x=0,
+              value=steam_value)
     return m.root
 
 
@@ -65,41 +67,42 @@ def make_boiling_group(boiling_group_df):
 
     m.block(boiling_sequence)
 
-    # make analysis
-    _last_boiling = boiling_sequence["boiling", True][-1]
-    analysis_start = _last_boiling["abandon"].x[0]
-    with m.row("analysis_group", push_func=add_push,
-               x=analysis_start):
-        analysis = utils.delistify(boiling_model.analysis)  # todo: can be a list for some reason
+    with code('analysis'):
+        _last_boiling = boiling_sequence["boiling", True][-1]
+        analysis_start = _last_boiling["abandon"].x[0]
+        with m.row("analysis_group", push_func=add_push,
+                   x=analysis_start):
+            analysis = utils.delistify(boiling_model.analysis)  # todo: can be a list for some reason
 
-        if boiling_model.flavoring_agent:
-            m.row("analysis", size=analysis.analysis_time // 5)
-            m.row("preparation", size=analysis.preparation_time // 5)
-            m.row("pumping", size=analysis.pumping_time // 5)
+            if boiling_model.flavoring_agent:
+                m.row("analysis", size=analysis.analysis_time // 5)
+                m.row("preparation", size=analysis.preparation_time // 5)
+                m.row("pumping", size=analysis.pumping_time // 5)
+            else:
+                m.row("preparation", size=analysis.preparation_time // 5)
+                m.row("analysis", size=analysis.analysis_time // 5)
+                m.row("pumping", size=analysis.pumping_time // 5)
+
+    with code('packing'):
+        # make packing
+        if first_row['sku'].weight_netto != 0.5:
+            packing_start = m.root["analysis_group"]["pumping"].x[0] + 1
         else:
-            m.row("preparation", size=analysis.preparation_time // 5)
-            m.row("analysis", size=analysis.analysis_time // 5)
-            m.row("pumping", size=analysis.pumping_time // 5)
+            packing_start = m.root["analysis_group"]["pumping"].y[0] - 1
 
-    # make packing
-    if first_row['sku'].weight_netto != 0.5:
-        packing_start = m.root["analysis_group"]["pumping"].x[0] + 1
-    else:
-        packing_start = m.root["analysis_group"]["pumping"].y[0] - 1
+        # todo: pauses
+        packing_time = sum(
+            [
+                row["kg"] / row["sku"].packing_speed * 60
+                for i, row in boiling_group_df.iterrows()
+            ]
+        )
+        packing_time = int(
+            utils.custom_round(packing_time, 5, "ceil", pre_round_precision=1)
+        )
+        assert packing_time >= 15, "Время паковки должно превышать 15 минут"
 
-    # todo: pauses
-    packing_time = sum(
-        [
-            row["kg"] / row["sku"].packing_speed * 60
-            for i, row in boiling_group_df.iterrows()
-        ]
-    )
-    packing_time = int(
-        utils.custom_round(packing_time, 5, "ceil", pre_round_precision=1)
-    )
-    assert packing_time >= 15, "Время паковки должно превышать 15 минут"
-
-    m.row("packing", push_func=add_push,
-           x=packing_start,
-           size=packing_time // 5)
+        m.row("packing", push_func=add_push,
+               x=packing_start,
+               size=packing_time // 5)
     return m.root
