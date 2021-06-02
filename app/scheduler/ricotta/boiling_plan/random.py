@@ -29,4 +29,5 @@ def generate_random_boiling_plan(n=24, seed=12):
             values.append([i, sku, kg])
 
     df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
+    df["tanks"] = 3
     return df
