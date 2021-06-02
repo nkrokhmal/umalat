@@ -8,10 +8,10 @@ def update_total_schedule_task(date, df):
     columns = ["sku", "code", "in_box", "kg", "boxes_count"]
     if not os.path.exists(path):
         df_task = pd.DataFrame(columns=columns)
-        df_task.to_csv(path, index=False)
+        df_task.to_csv(path, index=False, sep=";")
 
     df_task = pd.read_csv(path, sep=";")
-    skus = df_task.sku
+    skus = df_task.sku.values
     for sku_name, grp in df.groupby("sku_name"):
         kg = round(grp["kg"].sum())
         boxes_count = math.ceil(
