@@ -84,7 +84,6 @@ def make_boiling_group(boiling_group_df):
                 m.row("pumping", size=analysis.pumping_time // 5)
 
     with code('packing'):
-        # make packing
         if first_row['sku'].weight_netto != 0.5:
             packing_start = m.root["analysis_group"]["pumping"].x[0] + 1
         else:
