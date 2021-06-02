@@ -49,39 +49,37 @@ def make_boiling_sequence(boiling_group_df):
 
 
 def make_boiling_group(boiling_group_df):
-    boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
-    n_tanks = boiling_group_df.iloc[0]["tanks"]
-    group_tanks = boiling_group_df.iloc[0]["group_tanks"]
-    first_tank = boiling_group_df.iloc[0]["first_tank"]
-    m = BlockMaker(
-        "boiling_group",
-        skus=boiling_group_df["sku"].tolist(),
-        boiling_id=boiling_group_df.iloc[0]["boiling_id"],
-        boiling_model=boiling_model,
-        n_tanks=n_tanks,
-        group_tanks=group_tanks,
-        first_tank=first_tank,
-    )
+    first_row = sample_row = boiling_group_df.iloc[0]
+
+    boiling_model = utils.delistify(sample_row["sku"].made_from_boilings, single=True)
+
+    m = BlockMaker("boiling_group",
+                   skus=boiling_group_df["sku"].tolist(),
+                   boiling_id=sample_row["boiling_id"],
+                   boiling_model=boiling_model,
+                   n_tanks=sample_row["tanks"],
+                   group_tanks=sample_row["group_tanks"],
+                   first_tank=sample_row["first_tank"])
 
     boiling_sequence = make_boiling_sequence(boiling_group_df)
-    utils.push(m.root, boiling_sequence)
-    analysis_start = utils.listify(boiling_sequence["boiling"])[-1]["abandon"].x[0]
-    with m.make("analysis_group", x=(analysis_start, 0), push_func=utils.add_push):
-        analysis = utils.delistify(
-            boiling_model.analysis
-        )  # todo: can bge a list for some reason
-        if boiling_model.flavoring_agent:
-            m.make("analysis", size=(analysis.analysis_time // 5, 0))
-            m.make("preparation", size=(analysis.preparation_time // 5, 0))
-            m.make("pumping", size=(analysis.pumping_time // 5, 0))
-        else:
-            m.make("preparation", size=(analysis.preparation_time // 5, 0))
-            m.make("analysis", size=(analysis.analysis_time // 5, 0))
-            m.make("pumping", size=(analysis.pumping_time // 5, 0))
 
-    # todo: add to rules
-    first_packing_sku = boiling_group_df["sku"].iloc[0]
-    if first_packing_sku.weight_netto != 0.5:
+    m.block(boiling_sequence)
+
+    analysis_start = utils.listify(boiling_sequence["boiling"])[-1]["abandon"].x[0]
+    with m.row("analysis_group", push_func=add_push,
+               x=analysis_start):
+        analysis = utils.delistify(boiling_model.analysis)  # todo: can bge a list for some reason
+
+        if boiling_model.flavoring_agent:
+            m.row("analysis", size=analysis.analysis_time // 5)
+            m.row("preparation", size=analysis.preparation_time // 5)
+            m.row("pumping", size=analysis.pumping_time // 5)
+        else:
+            m.row("preparation", size=analysis.preparation_time // 5)
+            m.row("analysis", size=analysis.analysis_time // 5)
+            m.row("pumping", size=analysis.pumping_time // 5)
+
+    if first_row['sku'].weight_netto != 0.5:
         packing_start = m.root["analysis_group"]["pumping"].x[0] + 1
     else:
         packing_start = m.root["analysis_group"]["pumping"].y[0] - 1
@@ -97,10 +95,8 @@ def make_boiling_group(boiling_group_df):
         utils.custom_round(packing_time, 5, "ceil", pre_round_precision=1)
     )
     assert packing_time >= 15, "Время паковки должно превышать 15 минут"
-    m.make(
-        "packing",
-        x=(packing_start, 0),
-        size=(packing_time // 5, 0),
-        push_func=utils.add_push,
-    )
+
+    m.row("packing", push_func=add_push,
+           x=packing_start,
+           size=packing_time // 5)
     return m.root
