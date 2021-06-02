@@ -65,10 +65,12 @@ def make_boiling_group(boiling_group_df):
 
     m.block(boiling_sequence)
 
-    analysis_start = utils.listify(boiling_sequence["boiling"])[-1]["abandon"].x[0]
+    # make analysis
+    _last_boiling = boiling_sequence["boiling", True][-1]
+    analysis_start = _last_boiling["abandon"].x[0]
     with m.row("analysis_group", push_func=add_push,
                x=analysis_start):
-        analysis = utils.delistify(boiling_model.analysis)  # todo: can bge a list for some reason
+        analysis = utils.delistify(boiling_model.analysis)  # todo: can be a list for some reason
 
         if boiling_model.flavoring_agent:
             m.row("analysis", size=analysis.analysis_time // 5)
@@ -79,6 +81,7 @@ def make_boiling_group(boiling_group_df):
             m.row("analysis", size=analysis.analysis_time // 5)
             m.row("pumping", size=analysis.pumping_time // 5)
 
+    # make packing
     if first_row['sku'].weight_netto != 0.5:
         packing_start = m.root["analysis_group"]["pumping"].x[0] + 1
     else:
