@@ -32,4 +32,4 @@ def test_drawing_ricotta(open_file=False):
 if __name__ == "__main__":
     # test_make_frontend_boiling()
     # test_make_frontend()
-    test_drawing_ricotta(open_file=True)
+    test_drawing_ricotta(open_file=False)

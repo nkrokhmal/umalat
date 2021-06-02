@@ -40,13 +40,10 @@ def make_boiling_sequence(boiling_group_df):
 
     boilings = [make_boiling(boiling_model) for _ in range(n_tanks)]
 
-    for b_prev, b in utils.iter_pairs(boilings, method='any'):
-        if not b:
-            continue
+    m.row(boilings[0], push_func=add_push)
 
-        if b_prev:
-            b.props.update(x=(b_prev["delay"].x[0], 0))
-        push(m.root, b, push_func=add_push)
+    for b_prev, b in utils.iter_pairs(boilings):
+        m.row(b, push_func=add_push, x=b_prev['delay'].x)
 
     return m.root
 
