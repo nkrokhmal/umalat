@@ -8,7 +8,7 @@ FULL_CLEANING_LENGTH = 16  # 80 minutes
 
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):
-    boilings = schedule["master"]["boiling"]
+    boilings = schedule["master"]["boiling", True]
     boilings = list(sorted(boilings, key=lambda b: b.x[0]))
     values = [
         [
