@@ -11,6 +11,7 @@ def make_frontend_boiling(boiling):
         "boiling",
         default_row_width=1,
         default_col_width=1,
+        # props
         axis=1,
         x=(boiling.x[0], 0),
         size=(0, 2),
@@ -48,7 +49,13 @@ def make_frontend_boiling(boiling):
 
 
 def make_boiling_lines(schedule):
-    m = BlockMaker("boiling_lines", default_row_width=1, default_col_width=1, axis=1)
+    m = BlockMaker(
+        "boiling_lines",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        axis=1,
+    )
 
     boiling_lines = []
     for i in range(3):
@@ -77,7 +84,15 @@ def make_boiling_lines(schedule):
 
 
 def make_analysis_line(schedule):
-    m = BlockMaker("analysis", size=(0, 2), axis=1, is_parent_node=True)
+    m = BlockMaker(
+        "analysis",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        size=(0, 2),
+        axis=1,
+        is_parent_node=True,
+    )
 
     class Validator(ClassValidator):
         def __init__(self):
@@ -93,9 +108,7 @@ def make_analysis_line(schedule):
 
     lines = []
     for i in range(n_lines):
-        lines.append(
-            m.block(f"analysis_line_{i}", size=(0, 1), is_parent_node=False).block
-        )
+        lines.append(m.row(f"analysis_line_{i}", size=0, is_parent_node=False).block)
 
     # todo: hardcode
     for line in lines:
@@ -146,23 +159,30 @@ def calc_skus_label(skus):
 
 
 def make_packing_line(schedule):
-    m = BlockMaker("packing", size=(0, 1), is_parent_node=True)
+    m = BlockMaker(
+        "packing",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        size=(0, 1),
+        is_parent_node=True,
+    )
 
     for boiling_group in schedule["boiling_group", True]:
         brand_label = calc_skus_label(boiling_group.props["skus"])
 
-        m.block(
+        m.row(
             "packing_num",
-            size=(2, 1),
+            size=2,
             x=(boiling_group["packing"].x[0], 0),
             push_func=add_push,
             boiling_id=boiling_group.props["boiling_id"],
             font_size=9,
         )
 
-        m.block(
+        m.row(
             "packing",
-            size=(boiling_group["packing"].size[0] - 2, 1),
+            size=boiling_group["packing"].size[0] - 2,
             x=(boiling_group["packing"].x[0] + 2, 0),
             push_func=add_push,
             brand_label=brand_label,
@@ -173,12 +193,19 @@ def make_packing_line(schedule):
 
 
 def make_container_cleanings(schedule):
-    m = BlockMaker("container_cleanings", size=(0, 1), is_parent_node=True)
+    m = BlockMaker(
+        "container_cleanings",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        size=(0, 1),
+        is_parent_node=True,
+    )
 
     for block in schedule["container_cleanings"].children:
-        m.block(
+        m.row(
             block.props["cls"],
-            size=(block.size[0], 1),
+            size=block.size[0],
             x=(block.x[0], 0),
             push_func=add_push,
         )
