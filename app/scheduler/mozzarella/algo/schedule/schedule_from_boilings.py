@@ -132,7 +132,7 @@ class Validator(ClassValidator):
                 b2["melting_and_packing"]["melting"]["meltings"].x[0]
                 - b1["melting_and_packing"]["melting"]["meltings"].y[0]
                 > 6
-            )  # todo: optimize - add straight to validate disjoint
+            )  # todo maybe: optimize - add straight to validate disjoint
 
 
     @staticmethod
@@ -186,7 +186,7 @@ class Validator(ClassValidator):
 def make_termizator_cleaning_block(cleaning_type, **kwargs):
     cleaning_duration = (
         40 if cleaning_type == "short" else 80
-    )  # todo: take from parameters
+    )  # todo soon: take from parameters
     m = BlockMaker(
         "cleaning",
         size=(cleaning_duration // 5, 0),
@@ -354,7 +354,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
             packing.parent.remove_child(packing)
             push(schedule["extra"], packing_copy, push_func=add_push)
 
-        # todo: put to the place of last multihead usage!
+        # todo soon: put to the place of last multihead usage!
         # add multihead boiling after all water boilings if multihead was present
         if boiling == last_multihead_water_boiling:
             push(
@@ -381,7 +381,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
             start_from = boiling["pouring"]["first"]["termizator"].y[0]
             text = (
                 "Полная мойка" if cleaning_type == "full" else "Короткая мойка"
-            )  # todo: refactor
+            )  # todo maybe: refactor
             cleaning = make_termizator_cleaning_block(
                 cleaning_type,
                 x=(boiling["pouring"]["first"]["termizator"].y[0], 0),
@@ -456,7 +456,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 sorted([b1, b2], key=lambda b: b.props["cls"])
             )  # boiling, cleaning
             for process in packing.iter(cls="process"):
-                # todo: switch
+                # todo soon: switch
                 # if process.props['sku'].packer.name == 'Мультиголова'
                 if (
                     process.props["sku"].name

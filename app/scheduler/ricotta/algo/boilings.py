@@ -89,7 +89,6 @@ def make_boiling_group(boiling_group_df):
         else:
             packing_start = m.root["analysis_group"]["pumping"].y[0] - 1
 
-        # todo: pauses
         packing_time = sum(
             [
                 row["kg"] / row["sku"].packing_speed * 60

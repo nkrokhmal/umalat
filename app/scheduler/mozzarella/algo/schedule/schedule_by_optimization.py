@@ -3,7 +3,7 @@ from app.scheduler.mozzarella.algo.schedule.schedule import *
 from app.scheduler.mozzarella.algo.schedule.boilings import *
 from app.scheduler.mozzarella.algo.stats import *
 
-# todo: put into parameters
+# todo soon: put into parameters
 FULL_CLEANING_LENGTH = 16  # 80 minutes
 
 

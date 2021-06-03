@@ -104,7 +104,7 @@ def wrap_cheese_makers(master, rng):
 
                 standard_boiling_volume = (
                     1000 if boiling_model.line.name == LineName.WATER else 850
-                )  # todo: make properly
+                )  # todo soon: make properly
                 boiling_size = int(
                     round(
                         8000
@@ -113,7 +113,7 @@ def wrap_cheese_makers(master, rng):
                         )
                         / standard_boiling_volume
                     )
-                )  # todo: make properly
+                )
 
                 # [cheesemakers.boiling_params]
                 boiling_label = "{} {} {} {}кг".format(
@@ -287,7 +287,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                     )
                     make("melting_label", size=(4, 1))
 
-                    # todo: make properly
+                    # todo soon: make properly
                     assert (
                         boiling["melting_and_packing"]["melting"]["meltings"].size[0]
                         >= 5
@@ -347,7 +347,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
             start_from = cooling_process["start"]["cooling", True][0].x[0]
             cooling_block = maker.create_block(
                 "cooling_block", x=(start_from, 0)
-            )  # todo: create dynamic x calculation when empty block
+            )  # todo soon: create dynamic x calculation when empty block
 
             for cooling in cooling_process["start"]["cooling", True]:
                 block = maker.create_block(
@@ -484,7 +484,6 @@ def make_melting(boiling, line_name):
 
 
 def make_meltings_2(master, line_name, title):
-    # todo: make dynamic lines
     maker, make = utils.init_block_maker("melting", axis=1)
 
     n_lines = 5
@@ -539,7 +538,6 @@ def make_packing_block(packing_block, boiling_id):
             make("packing_label", size=(3, 1))
             make("packing_name", size=(packing_block.size[0] - 3, 1))
         else:
-            # todo: make properly
             make("packing_name", size=(packing_block.size[0], 1))
 
     with make():

@@ -5,8 +5,6 @@ from app.enum import LineName
 
 from .saturate import saturate_boiling_plan
 
-# todo: normalization
-# todo: rounding
 
 
 def read_boiling_plan(wb_obj, as_boilings=True):
@@ -155,7 +153,7 @@ def fix_batch_id(boiling_plan_df):
                     cur_pair in all_sourdoughs
                 ), "Варки на маскарпоне должны идти парами по заквасочникам: 1->2, 3->4, 1->2, ..."
 
-                # todo: refactor
+                # todo maybe: refactor
                 if last_pair:
                     next_pair = [pair for pair in all_sourdoughs if pair != last_pair][
                         0

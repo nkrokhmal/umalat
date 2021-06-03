@@ -35,7 +35,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
                 in boiling_technology.sourdoughs
             ]
         else:
-            # todo: make properly
+            # todo soon: make properly
             boiling_technologies = boiling_model.boiling_technologies[:1]
             # boiling_technologies = [
             #     delistify(boiling_model.boiling_technologies, single=True)

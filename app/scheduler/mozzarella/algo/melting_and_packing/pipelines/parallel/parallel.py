@@ -122,7 +122,7 @@ def make_mpp(boiling_df, left_boiling_volume):
     m = BlockMaker("melting_and_packing_process", axis=1)
 
     # create packing blocks
-    last_collecting_process_y = 0  # todo: redundant?
+    last_collecting_process_y = 0  # todo maybe: redundant?
     for packing_team_id in packing_team_ids:
         df = boiling_df[boiling_df["packing_team_id"] == packing_team_id]
         df = df[~df["beg_ts"].isnull()]
