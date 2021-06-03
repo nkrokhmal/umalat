@@ -133,6 +133,6 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                            packing_team_id=packing_team_id):
                     for block in blocks:
                         # fix start with coolings
-                        block.props.update(x=(block.props["x_rel"][0] - shift, 0))
-                        m.block(block, push_func=add_push)
+                        m.row(block, push_func=add_push,
+                              x=block.props["x_rel"][0] - shift)
     return m.root
