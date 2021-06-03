@@ -8,7 +8,7 @@ from utils_ak.block_tree import *
 def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing):
     m = BlockMaker("root")
 
-    bt = boiling_model.boiling_technologies[0]
+    bt = utils.delistify(boiling_model.boiling_technologies, single=True)
     with m.block(
         "boiling",
         boiling_id=boiling_id,
