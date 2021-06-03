@@ -213,25 +213,31 @@ def make_container_cleanings(schedule):
 
 
 def make_header(date, start_time="07:00"):
-    m = BlockMaker("header", axis=1)
+    m = BlockMaker(
+        "header",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        axis=1,
+    )
 
     with m.block("header", size=(0, 1), index_width=2):
-        m.block(size=(1, 1), text="График наливов сыворотки")
-        m.block(size=(1, 1), text=utils.cast_str(date, "%d.%m.%Y"), bold=True)
+        m.row(size=1, text="График наливов сыворотки")
+        m.row(size=1, text=utils.cast_str(date, "%d.%m.%Y"), bold=True)
         for i in range(566):
             cur_time = cast_time(i + cast_t(start_time))
             days, hours, minutes = cur_time.split(":")
             if cur_time[-2:] == "00":
-                m.block(
-                    size=(1, 1),
+                m.row(
+                    size=1,
                     text=str(int(hours)),
                     color=(218, 150, 148),
                     text_rotation=90,
                     font_size=9,
                 )
             else:
-                m.block(
-                    size=(1, 1),
+                m.row(
+                    size=1,
                     text=minutes,
                     color=(204, 255, 255),
                     text_rotation=90,
@@ -243,8 +249,14 @@ def make_header(date, start_time="07:00"):
 def make_frontend(schedule, date=None, start_time="07:00"):
     date = date or datetime.now()
 
-    m = BlockMaker("frontend", axis=1)
-    m.block("stub", size=(0, 1))  # start with 1
+    m = BlockMaker(
+        "frontend",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        axis=1,
+    )
+    m.row("stub", size=0)  # start with 1
     m.block(make_header(date=date, start_time=start_time))
     m.block(make_boiling_lines(schedule))
     m.block(make_analysis_line(schedule))
