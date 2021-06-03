@@ -56,9 +56,9 @@ def make_boiling_lines(schedule):
         if i <= 1:
             m.block("stub", size=(0, 1))
 
-    for boiling_group in utils.listify(schedule["boiling_group"]):
+    for boiling_group in schedule["boiling_group", True]:
         for i, line_num in enumerate(boiling_group.props["line_nums"]):
-            boiling = utils.listify(boiling_group["boiling_sequence"]["boiling"])[i]
+            boiling = boiling_group["boiling_sequence"]["boiling", True][i]
             utils.push(
                 boiling_lines[line_num],
                 make_frontend_boiling(boiling),
@@ -98,7 +98,7 @@ def make_analysis_line(schedule):
     for line in lines:
         utils.push(line, m.create_block("stub", size=(0, 1)), push_func=utils.add_push)
 
-    for boiling_group in utils.listify(schedule["boiling_group"]):
+    for boiling_group in schedule["boiling_group", True]:
         analysis_group = m.create_block("analysis_group")
         for block in boiling_group["analysis_group"].children:
             _block = m.create_block(
@@ -145,7 +145,7 @@ def calc_skus_label(skus):
 def make_packing_line(schedule):
     m = BlockMaker("packing", size=(0, 1), is_parent_node=True)
 
-    for boiling_group in utils.listify(schedule["boiling_group"]):
+    for boiling_group in schedule["boiling_group", True]:
         brand_label = calc_skus_label(boiling_group.props["skus"])
 
         m.block(
