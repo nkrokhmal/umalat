@@ -39,7 +39,7 @@
                             <td class="border-0"><a class="small">{{sku.name}}</a></td>
                             <td class="border-0"><a class="small">{{sku.made_from_boilings[0].to_str()}}</a></td>
                             <td class="border-0"><a class="small">{{sku.group.name}}</a></td>
-                            <td class="border-0"><a class="small">{{sku.packing_speed}}</a></td>
+                            <td class="border-0"><a class="small">{{sku.packing_speed|int}}</a></td>
                             <td class="border-0"><a class="small">{{sku.line.name}}</a></td>
                             <td class="border-0">
                                 <a href="{{ url_for('main.ricotta_edit_sku', sku_id = sku.id)}}" class="edit-sku">
