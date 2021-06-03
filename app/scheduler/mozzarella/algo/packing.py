@@ -1,7 +1,9 @@
+# fmt: off
 from app.imports.runtime import *
-
 from app.models import *
 from app.enum import LineName
+
+from utils_ak.block_tree import *
 
 
 def get_configuration_time(line_name, sku1, sku2):
@@ -9,7 +11,7 @@ def get_configuration_time(line_name, sku1, sku2):
         [
             line_name == LineName.SALT,
             sku1.form_factor.relative_weight
-            != sku2.form_factor.relative_weight,  # todo: better to compare form factors? Делаю так, потому что у палочек бывают разные фф, хотя это одни и те же палочки
+            != sku2.form_factor.relative_weight,  # todo soon: better to compare form factors? Делаю так, потому что у палочек бывают разные фф, хотя это одни и те же палочки
             sku1.packers[0].name == sku2.packers[0].name == "Ульма",
         ]
     ):
@@ -19,9 +21,8 @@ def get_configuration_time(line_name, sku1, sku2):
     else:
         return 5
 
-
-# todo: refactor
-def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
+# todo soon: refactor
+def make_configuration_blocks(b1, b2, m, line_name, between_boilings=False):
     res = []
     for packing_team_id in range(1, 3):
         packings = list(b1.iter(cls="packing", packing_team_id=packing_team_id))
@@ -35,7 +36,7 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
             # todo: refactor
             if between_boilings:
                 # add one between boilings anyway
-                conf_block = maker.create_block(
+                conf_block = m.create_block(
                     "packing_configuration",
                     size=[1, 0],
                     packing_team_id=packing_team_id,
@@ -53,7 +54,7 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
             conf_time_size = max(5, conf_time_size)
 
         if conf_time_size:
-            conf_block = maker.create_block(
+            conf_block = m.create_block(
                 "packing_configuration",
                 size=[conf_time_size // 5, 0],
                 packing_team_id=packing_team_id,
