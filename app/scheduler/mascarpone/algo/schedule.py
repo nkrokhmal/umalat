@@ -60,7 +60,7 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__cream_cheese_boiling__cream_cheese_boiling(b1, b2):
-        # todo soon: make properly. Bug?
+        # todo next: make properly. Bug?
         assert utils.listify(b1["boiling_process"]["salting"][-1].y[0]) <= utils.listify(
             b2["boiling_process"]["separation"][0].y[0]
         )
@@ -127,7 +127,7 @@ class BoilingPlanToSchedule:
 
         all_line_nums = [[1, 2], [3, 4]]
 
-        # todo soon: why two only???
+        # todo next: why two only???
         boiling_volumes = [800, 600]
         for i, bg in enumerate(boiling_groups):
             if is_cream:

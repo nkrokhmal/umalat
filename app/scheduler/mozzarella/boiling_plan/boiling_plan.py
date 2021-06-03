@@ -158,10 +158,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
             else:
                 if normalization:
                     if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
-                        # todo soon: warning message
-                        df.loc[grp.index, "kg"] *= (
-                            grp.iloc[0]["total_volume"] / grp["kg"].sum()
-                        )  # scale to total_volume
+                        df.loc[grp.index, "kg"] *= (grp.iloc[0]["total_volume"] / grp["kg"].sum())  # scale to total_volume
                     else:
                         # all fine
                         pass
