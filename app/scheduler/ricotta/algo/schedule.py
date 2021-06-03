@@ -102,7 +102,6 @@ def make_schedule(boiling_plan_df, start_boiling_id=0):
                     push_kwargs={'validator': Validator(),
                                  'iter_props': [{"line_nums": line_nums[:n_tanks]} for line_nums in iter_line_nums_props]})
 
-
     with code('make_bath_cleanings'):
         bath_cleanings = make_bath_cleanings()
         m.block(bath_cleanings,
@@ -112,7 +111,6 @@ def make_schedule(boiling_plan_df, start_boiling_id=0):
     with code('make_container_cleanings'):
         # add container cleanings
         container_cleanings = make_container_cleanings()
-
         m.block(container_cleanings,
                 push_func=AxisPusher(start_from=boiling_groups[-1]["analysis_group"].x[0]),
                 push_kwargs={'validator': Validator()})
