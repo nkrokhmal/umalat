@@ -72,7 +72,7 @@ def make_melting_and_packing_basic(boiling_plan):
     with make(
         "packing",
         x=(
-            utils.listify(maker.root["melting"]["coolings"]["cooling_process"])[0][
+            maker.root["melting"]["coolings"]["cooling_process", True][0][
                 "start"
             ].y[0],
             0,

@@ -80,13 +80,9 @@ def validate(b1, b2):
             )
 
         # there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors
-        mp1 = utils.listify(
-            b1["melting_and_packing"]["melting"]["meltings"]["melting_process"]
-        )[-1]
+        mp1 = b1["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
 
-        mp2 = utils.listify(
-            b2["melting_and_packing"]["melting"]["meltings"]["melting_process"]
-        )[0]
+        mp2 = b2["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
 
         bff1_name = mp1.props["bff"].name
         bff2_name = mp2.props["bff"].name
@@ -100,9 +96,8 @@ def validate(b1, b2):
 
         # collectings
         for p1, p2 in itertools.product(
-            utils.listify(b1["melting_and_packing"]["collecting"]),
-            utils.listify(b2["melting_and_packing"]["collecting"]),
-        ):
+            b1["melting_and_packing"]["collecting", True],
+            b2["melting_and_packing"]["collecting", True]):
             # if p1.props['packing_team_id'] != p2.props['packing_team_id']:
             #     continue
             utils.validate_disjoint_by_axis(p1, p2)
@@ -499,7 +494,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
         )
 
     # add cleanings if necessary
-    boilings = utils.listify(schedule["master"]["boiling"])
+    boilings = schedule["master"]["boiling", True]
     boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
     for a, b in utils.SimpleIterator(boilings).iter_sequences(2):

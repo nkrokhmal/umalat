@@ -16,12 +16,12 @@ class AwaitingPusher(IterativePusher):
             x=[self.block.props["x_rel"][0] - period, self.block.x[1]]
         )
 
-        for collecting in listify(self.block["melting_and_packing"]["collecting"]):
+        for collecting in self.block["melting_and_packing"]["collecting", True]:
             collecting.props.update(
                 x=[collecting.props["x_rel"][0] + period, collecting.x[1]]
             )
 
-        for packing in listify(self.block["melting_and_packing"]["packing"]):
+        for packing in self.block["melting_and_packing"]["packing", True]:
             packing.props.update(x=[packing.props["x_rel"][0] + period, packing.x[1]])
         # logger.debug('After', x=self.block.x[0], packings=[packing.x[0] for packing in listify(self.block['melting_and_packing']['packing'])])
 

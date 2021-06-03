@@ -122,7 +122,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
         ).block
 
         with make("meltings", x=(serving.size[0], 0), push_func=utils.add_push):
-            for i, block in enumerate(utils.listify(mp["melting_and_packing_process"])):
+            for i, block in enumerate(mp["melting_and_packing_process", True]):
 
                 make(
                     maker.copy(block["melting_process"], with_props=True),
@@ -131,7 +131,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                 )
 
         with make("coolings", x=(serving.size[0], 0), push_func=utils.add_push):
-            for i, block in enumerate(utils.listify(mp["melting_and_packing_process"])):
+            for i, block in enumerate(mp["melting_and_packing_process", True]):
                 make(
                     maker.copy(block["cooling_process"], with_props=True),
                     push_func=utils.add_push,
@@ -141,8 +141,8 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
         for key in ["packing", "collecting"]:
             blocks = []
 
-            for mpp in utils.listify(mp["melting_and_packing_process"]):
-                for block in utils.listify(mpp[key]):
+            for mpp in mp["melting_and_packing_process", True]:
+                for block in mpp[key, True]:
                     for child_block in block.children:
                         if child_block.props["packing_team_id"] != packing_team_id:
                             continue
@@ -153,7 +153,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
             ]:  # todo: refactor
                 for block in [
                     b
-                    for b in utils.listify(mp["packing_configuration"])
+                    for b in mp["packing_configuration", True]
                     if b.props["packing_team_id"] == packing_team_id
                 ]:
                     blocks.append(maker.copy(block, with_props=True))

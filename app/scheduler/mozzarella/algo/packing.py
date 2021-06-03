@@ -45,8 +45,8 @@ def make_configuration_blocks(b1, b2, maker, line_name, between_boilings=False):
             continue
 
         packing2 = packings[0]
-        sku1 = utils.listify(packing1["process"])[-1].props["sku"]  # last sku
-        sku2 = utils.listify(packing2["process"])[0].props["sku"]  # first sku
+        sku1 = packing1["process", True][-1].props["sku"]  # last sku
+        sku2 = packing2["process", True][0].props["sku"]  # first sku
 
         conf_time_size = get_configuration_time(line_name, sku1, sku2)
         if between_boilings:

@@ -100,18 +100,18 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
         2,
     ], "Only one or two mascarpone boilings can be put into the group"
 
-    class Validator(utils.ClassValidator):
+    class Validator(ClassValidator):
         def __init__(self):
             super().__init__(window=3)
 
         @staticmethod
         def validate__boiling__boiling(b1, b2):
-            utils.validate_disjoint_by_axis(
+            validate_disjoint_by_axis(
                 b1["packing_process"]["packing_group"],
                 b2["packing_process"]["packing_group"],
             )
             # just in case, not needed in reality
-            utils.validate_disjoint_by_axis(
+            validate_disjoint_by_axis(
                 b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
             )
             assert (
@@ -121,7 +121,7 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
 
             # make separation not before pumping_out
             assert (
-                utils.listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
+                b1["packing_process"]["packing_group"]["P", True][-1].x[0]
                 <= b2["boiling_process"]["pumping_off"].x[0]
             )
 

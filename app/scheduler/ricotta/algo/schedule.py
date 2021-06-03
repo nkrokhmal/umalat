@@ -21,12 +21,8 @@ class Validator(ClassValidator):
                 # skip if no common line number is used
                 continue
 
-            boiling1 = utils.listify(b1["boiling_sequence"]["boiling"])[
-                b1.props["line_nums"].index(line_num)
-            ]
-            boiling2 = utils.listify(b2["boiling_sequence"]["boiling"])[
-                b2.props["line_nums"].index(line_num)
-            ]
+            boiling1 = b1["boiling_sequence"]["boiling", True][b1.props["line_nums"].index(line_num)]
+            boiling2 = b2["boiling_sequence"]["boiling", True][b2.props["line_nums"].index(line_num)]
 
             validate_disjoint_by_axis(boiling1, boiling2)
 
@@ -47,7 +43,7 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling_group__bath_cleanings(b1, b2):
         for line_num in range(3):
-            bath_cleaning = utils.listify(b2["bath_cleaning"])[line_num]
+            bath_cleaning = b2["bath_cleaning", True][line_num]
             if line_num in b1.props["line_nums"]:
                 boiling = utils.listify(b1["boiling_sequence"].children)[
                     b1.props["line_nums"].index(line_num)

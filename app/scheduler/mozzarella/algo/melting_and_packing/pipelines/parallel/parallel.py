@@ -216,11 +216,11 @@ def make_mpp(boiling_df, left_boiling_volume):
     )
 
     # shift packing and collecting for cooling
-    for packing in utils.listify(maker.root["packing"]):
+    for packing in maker.root["packing", True]:
         packing.props.update(
             x=[packing.props["x"][0] + maker.root["cooling_process"]["start"].y[0], 0]
         )
-    for collecting in utils.listify(maker.root["collecting"]):
+    for collecting in maker.root["collecting", True]:
         collecting.props.update(
             x=[
                 collecting.props["x"][0] + maker.root["cooling_process"]["start"].y[0],

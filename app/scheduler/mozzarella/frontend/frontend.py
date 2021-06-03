@@ -214,9 +214,7 @@ def make_cleanings(master):
 
 
 def make_multihead_cleanings(master):
-    maker, make = utils.init_block_maker(
-        "multihead_cleanings_row", axis=1
-    )
+    maker, make = utils.init_block_maker("multihead_cleanings_row", axis=1)
     for multihead_cleaning in master.iter(cls="multihead_cleaning"):
         b = maker.copy(multihead_cleaning, with_props=True)
         b.props.update(size=(b.props["size"][0], 1))
@@ -342,16 +340,16 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
 
         cur_cooling_size = None
         for i, cooling_process in enumerate(
-            utils.listify(
-                boiling["melting_and_packing"]["melting"]["coolings"]["cooling_process"]
-            )
+            boiling["melting_and_packing"]["melting"]["coolings"][
+                "cooling_process", True
+            ]
         ):
-            start_from = utils.listify(cooling_process["start"]["cooling"])[0].x[0]
+            start_from = cooling_process["start"]["cooling", True][0].x[0]
             cooling_block = maker.create_block(
                 "cooling_block", x=(start_from, 0)
             )  # todo: create dynamic x calculation when empty block
 
-            for cooling in utils.listify(cooling_process["start"]["cooling"]):
+            for cooling in cooling_process["start"]["cooling", True]:
                 block = maker.create_block(
                     cooling_label,
                     size=(cooling.size[0], 1),
@@ -373,9 +371,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
             while True:
                 if j == n_cooling_lines:
                     n_cooling_lines += 1
-                    new_cooling_line = maker.create_block(
-                        "cooling_line", size=(0, 1)
-                    )
+                    new_cooling_line = maker.create_block("cooling_line", size=(0, 1))
                     cooling_lines.append(new_cooling_line)
                     utils.push(maker.root["cooling_row"], new_cooling_line)
 
@@ -460,11 +456,9 @@ def make_melting(boiling, line_name):
             make(
                 cooling_label,
                 size=(
-                    utils.listify(
-                        boiling["melting_and_packing"]["melting"]["coolings"][
-                            "cooling_process"
-                        ]
-                    )[-1]["start"].size[0],
+                    boiling["melting_and_packing"]["melting"]["coolings"][
+                        "cooling_process", True
+                    ][-1]["start"].size[0],
                     1,
                 ),
             )
@@ -473,19 +467,15 @@ def make_melting(boiling, line_name):
             make(
                 cooling_label,
                 x=(
-                    utils.listify(
-                        boiling["melting_and_packing"]["melting"]["coolings"][
-                            "cooling_process"
-                        ]
-                    )[0]["start"].x[0],
+                    boiling["melting_and_packing"]["melting"]["coolings"][
+                        "cooling_process", True
+                    ][0]["start"].x[0],
                     0,
                 ),
                 size=(
-                    utils.listify(
-                        boiling["melting_and_packing"]["melting"]["coolings"][
-                            "cooling_process"
-                        ]
-                    )[0]["start"].size[0],
+                    boiling["melting_and_packing"]["melting"]["coolings"][
+                        "cooling_process", True
+                    ][0]["start"].size[0],
                     1,
                 ),
                 push_func=utils.add_push,
@@ -501,9 +491,7 @@ def make_meltings_2(master, line_name, title):
 
     melting_lines = []
     for i in range(n_lines):
-        melting_lines.append(
-            make(f"salt_melting_{i}", size=(0, 3)).block
-        )
+        melting_lines.append(make(f"salt_melting_{i}", size=(0, 3)).block)
         # add line for "Расход пара"
         make("stub", size=(0, 1))
 
@@ -591,7 +579,7 @@ def make_packings(master, line_name):
                         push_func=utils.add_push,
                     )
             try:
-                for conf in utils.listify(master["packing_configuration"]):
+                for conf in master["packing_configuration", True]:
                     # first level only
                     if (
                         conf.props["packing_team_id"] != packing_team_id
@@ -629,7 +617,7 @@ def make_frontend(schedule, coolings_mode="first"):
     make("stub", size=(0, 1))
 
     start_t = min(
-        [boiling.x[0] for boiling in utils.listify(master["boiling"])]
+        [boiling.x[0] for boiling in master["boiling", True]]
     )  # first pouring time
     start_t = int(utils.custom_round(start_t, 12, "floor"))  # round to last hour
     start_t -= 24
@@ -670,10 +658,7 @@ def make_frontend(schedule, coolings_mode="first"):
         )
 
     start_t = min(
-        [
-            boiling["melting_and_packing"].x[0]
-            for boiling in utils.listify(master["boiling"])
-        ]
+        [boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]]
     )  # first melting time
     start_t = int(utils.custom_round(start_t, 12, "floor"))  # round to last hour
     start_t -= 24

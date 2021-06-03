@@ -10,22 +10,22 @@ from app.scheduler.mascarpone.algo.cleanings import *
 from utils_ak.block_tree import *
 
 
-class Validator(utils.ClassValidator):
+class Validator(ClassValidator):
     def __init__(self):
         super().__init__(window=20)
 
     @staticmethod
     def validate__mascarpone_boiling_group__mascarpone_boiling_group(b1, b2):
-        b1 = utils.listify(b1["boiling"])[-1]
-        b2 = utils.listify(b2["boiling"])[0]
+        b1 = b1["boiling", True][-1]
+        b2 = b2["boiling", True][0]
 
         if sum([b1.props.get("is_cream", False), b2.props.get("is_cream", False)]) == 1:
             # one is cream and one is not
             validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"])
 
         assert (
-            utils.listify(b1["packing_process"]["packing_group"]["packing"])[-1].y[0] + 2
-            <= utils.listify(b2["packing_process"]["packing_group"]["packing"])[0].x[0]
+            b1["packing_process"]["packing_group"]["packing", True][-1].y[0] + 2
+            <= b2["packing_process"]["packing_group"]["packing", True][0].x[0]
         )
         validate_disjoint_by_axis(
             b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
@@ -35,16 +35,16 @@ class Validator(utils.ClassValidator):
         )
 
         assert (
-            utils.listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
+            b1["packing_process"]["packing_group"]["P", True][-1].x[0]
             <= b2["boiling_process"]["pumping_off"].x[0]
         )
 
     @staticmethod
     def validate__mascarpone_boiling_group__cream_cheese_boiling(b1, b2):
-        b = utils.listify(b1["boiling"])[-1]
+        b = b1["boiling", True][-1]
         assert (
             b["packing_process"].y[0] - 1
-            <= utils.listify(b2["boiling_process"]["separation"])[0].x[0]
+            <= b2["boiling_process"]["separation", True][0].x[0]
         )
 
 
@@ -54,12 +54,13 @@ class Validator(utils.ClassValidator):
             b2.children[0].props["cls"] != "cleaning_sourdough_mascarpone"
             or b1.props["line_nums"] == b2.props["sourdoughs"]
         ):
-            for b in utils.listify(b1["boiling"]):
+            for b in b1["boiling", True]:
                 validate_disjoint_by_axis(b["boiling_process"], b2)
                 assert b["boiling_process"].y[0] + 1 <= b2.x[0]
 
     @staticmethod
     def validate__cream_cheese_boiling__cream_cheese_boiling(b1, b2):
+        # todo: make properly. Bug?
         assert utils.listify(b1["boiling_process"]["salting"][-1].y[0]) <= utils.listify(
             b2["boiling_process"]["separation"][0].y[0]
         )
@@ -81,14 +82,14 @@ class Validator(utils.ClassValidator):
 
     @staticmethod
     def validate__cleaning__mascarpone_boiling_group(b1, b2):
-        b = utils.listify(b2["boiling"])[0]
+        b = b2["boiling", True][0]
         if b1.props["entity"] == "homogenizer":
             assert b1.y[0] + 1 <= b["packing_process"]["N"].x[0]
 
     @staticmethod
     def validate__cleaning__cream_cheese_boiling(b1, b2):
         if b1.props["entity"] == "homogenizer":
-            assert b1.y[0] + 1 <= utils.listify(b2["boiling_process"]["separation"])[0].x[0]
+            assert b1.y[0] + 1 <= b2["boiling_process"]["separation", True][0].x[0]
 
     @staticmethod
     def validate__cream_cheese_boiling__cleaning(b1, b2):
@@ -96,9 +97,8 @@ class Validator(utils.ClassValidator):
             (b2.children[0].props["cls"] == "cleaning_sourdough_mascarpone_cream_cheese")
             and len(set(b1.props["sourdoughs"]) & set(b2.props["sourdoughs"])) > 0
         ):
-            assert (
-                utils.listify(b1["boiling_process"]["separation"])[-1].y[0] + 1 <= b2.x[0]
-            )
+            assert b1["boiling_process"]["separation", True][-1].y[0] + 1 <= b2.x[0]
+
 
 
 class BoilingPlanToSchedule:

@@ -57,7 +57,7 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
     ):
         line_nums = mbg.props["line_nums"]
 
-        for i, boiling in enumerate(utils.listify(mbg["boiling"])):
+        for i, boiling in enumerate(mbg["boiling", True]):
             frontend_boiling = make_frontend_mascarpone_boiling(
                 boiling["boiling_process"]
             )
@@ -73,7 +73,7 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
         cls="mascarpone_boiling_group",
         boiling_group_dfs=lambda dfs: dfs[0].iloc[0]["is_cream"],
     ):
-        for i, boiling in enumerate(utils.listify(mbg["boiling"])):
+        for i, boiling in enumerate(mbg["boiling", True]):
             block = make_frontend_mascarpone_boiling(boiling["boiling_process"])
             for i in range(len(boiling_lines)):
                 boiling_line = next(cycle)
@@ -172,16 +172,16 @@ def make_packing_line(schedule):
     if "mascarpone_boiling_group" not in [c.props["cls"] for c in schedule.children]:
         return
 
-    for mbg in utils.listify(schedule["mascarpone_boiling_group"]):
+    for mbg in schedule["mascarpone_boiling_group", True]:
         packing_processes = [
-            b["packing_process"] for b in utils.listify(mbg["boiling"])
+            b["packing_process"] for b in mbg["boiling", True]
         ]
 
         make(
             "packing_num",
             size=(2, 1),
             x=(
-                utils.listify(packing_processes[0]["packing_group"]["P"])[0].x[0] - 1,
+                packing_processes[0]["packing_group"]["P", True][0].x[0] - 1,
                 1,
             ),
             batch_id=mbg.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
