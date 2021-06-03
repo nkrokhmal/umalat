@@ -9,6 +9,8 @@ def make_frontend_boiling(boiling):
 
     m = BlockMaker(
         "boiling",
+        default_row_width=1,
+        default_col_width=1,
         axis=1,
         x=(boiling.x[0], 0),
         size=(0, 2),
@@ -24,20 +26,20 @@ def make_frontend_boiling(boiling):
         if is_pumping_parallel:
             boiling_name_size -= boiling["pumping_out"].size[0]
 
-        m.block("boiling_num", size=(boiling["heating"].size[0], 1))
-        m.block("boiling_name", size=(boiling_name_size, 1))
+        m.row("boiling_num", size=boiling["heating"].size[0])
+        m.row("boiling_name", size=boiling_name_size)
 
         if is_pumping_parallel:
-            m.block("pumping_out", size=(boiling["pumping_out"].size[0], 1))
+            m.row("pumping_out", size=boiling["pumping_out"].size[0])
 
     with m.block():
-        m.block("heating", size=(boiling["heating"].size[0], 1), text="1900")
-        m.block("delay", size=(boiling["delay"].size[0], 1))
-        m.block("protein_harvest", size=(boiling["protein_harvest"].size[0], 1))
-        m.block("abandon", size=(boiling["abandon"].size[0], 1))
+        m.row("heating", size=boiling["heating"].size[0], text="1900")
+        m.row("delay", size=boiling["delay"].size[0])
+        m.row("protein_harvest", size=boiling["protein_harvest"].size[0])
+        m.row("abandon", size=boiling["abandon"].size[0])
 
         if not is_pumping_parallel:
-            m.block("pumping_out", size=(boiling["pumping_out"].size[0], 1))
+            m.row("pumping_out", size=boiling["pumping_out"].size[0])
 
     with m.block():
         m.block(make_steam_blocks(boiling["steam_consumption"], x=(0, 0)))
@@ -46,7 +48,7 @@ def make_frontend_boiling(boiling):
 
 
 def make_boiling_lines(schedule):
-    m = BlockMaker("boiling_lines", axis=1)
+    m = BlockMaker("boiling_lines", default_row_width=1, default_col_width=1, axis=1)
 
     boiling_lines = []
     for i in range(3):
@@ -54,22 +56,22 @@ def make_boiling_lines(schedule):
             m.block(f"boiling_line_{i}", size=(0, 3), is_parent_node=True).block
         )
         if i <= 1:
-            m.block("stub", size=(0, 1))
+            m.row("stub", size=0)
 
     for boiling_group in schedule["boiling_group", True]:
         for i, line_num in enumerate(boiling_group.props["line_nums"]):
             boiling = boiling_group["boiling_sequence"]["boiling", True][i]
-            utils.push(
+            push(
                 boiling_lines[line_num],
                 make_frontend_boiling(boiling),
-                push_func=utils.add_push,
+                push_func=add_push,
             )
 
     for i, cleaning in enumerate(schedule["bath_cleanings"]["bath_cleaning", True]):
         cleaning_block = m.copy(cleaning, with_props=True)
         for block in cleaning_block.children:
             block.props.update(size=(block.size[0], 2))
-        utils.push(boiling_lines[i], cleaning_block, push_func=utils.add_push)
+        push(boiling_lines[i], cleaning_block, push_func=add_push)
 
     return m.root
 
@@ -77,14 +79,15 @@ def make_boiling_lines(schedule):
 def make_analysis_line(schedule):
     m = BlockMaker("analysis", size=(0, 2), axis=1, is_parent_node=True)
 
-    validator = utils.ClassValidator(window=1)
+    class Validator(ClassValidator):
+        def __init__(self):
+            super().__init__(window=1)
 
-    def validate(b1, b2):
-        for c1 in b1.children:
-            for c2 in b2.children:
-                utils.validate_disjoint_by_axis(c1, c2)
-
-    validator.add("analysis_group", "analysis_group", validate)
+        @staticmethod
+        def validate__analysis_group__analysis_group(b1, b2):
+            for c1 in b1.children:
+                for c2 in b2.children:
+                    validate_disjoint_by_axis(c1, c2)
 
     n_lines = 2
 
@@ -96,7 +99,7 @@ def make_analysis_line(schedule):
 
     # todo: hardcode
     for line in lines:
-        utils.push(line, m.create_block("stub", size=(0, 1)), push_func=utils.add_push)
+        push(line, m.create_block("stub", size=(0, 1)), push_func=add_push)
 
     for boiling_group in schedule["boiling_group", True]:
         analysis_group = m.create_block("analysis_group")
@@ -106,14 +109,14 @@ def make_analysis_line(schedule):
                 size=(block.size[0], 1),
                 x=(block.x[0], 0),
             )
-            utils.push(analysis_group, _block, push_func=utils.add_push)
+            push(analysis_group, _block, push_func=add_push)
         # todo: refactor
         for i, line in enumerate(lines):
-            res = utils.push(
+            res = push(
                 line,
                 analysis_group,
-                push_func=lambda parent, block: utils.simple_push(
-                    parent, block, validator=validator
+                push_func=lambda parent, block: simple_push(
+                    parent, block, validator=Validator()
                 ),
             )
             if not isinstance(res, dict):
@@ -152,7 +155,7 @@ def make_packing_line(schedule):
             "packing_num",
             size=(2, 1),
             x=(boiling_group["packing"].x[0], 0),
-            push_func=utils.add_push,
+            push_func=add_push,
             boiling_id=boiling_group.props["boiling_id"],
             font_size=9,
         )
@@ -161,7 +164,7 @@ def make_packing_line(schedule):
             "packing",
             size=(boiling_group["packing"].size[0] - 2, 1),
             x=(boiling_group["packing"].x[0] + 2, 0),
-            push_func=utils.add_push,
+            push_func=add_push,
             brand_label=brand_label,
             font_size=9,
         )
@@ -177,7 +180,7 @@ def make_container_cleanings(schedule):
             block.props["cls"],
             size=(block.size[0], 1),
             x=(block.x[0], 0),
-            push_func=utils.add_push,
+            push_func=add_push,
         )
     return m.root
 
