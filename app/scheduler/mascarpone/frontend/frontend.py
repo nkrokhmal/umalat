@@ -46,7 +46,7 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
     boiling_lines = []
     for i in range(4):
         boiling_lines.append(
-            make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
+            make(f"boiling_line_{i}", size=(0, 2)).block
         )
         make("stub", size=(0, 1))
 
@@ -90,7 +90,7 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
                         # create new line
                         boiling_lines.append(
                             make(
-                                f"boiling_line_{i}", size=(0, 2), is_parent_node=True
+                                f"boiling_line_{i}", size=(0, 2)
                             ).block
                         )
                         make("stub", size=(0, 1))
@@ -128,7 +128,7 @@ def make_mascarpone_lines(schedule, with_cream_cheese=False):
                         # print("Creating new line")
                         boiling_lines.append(
                             make(
-                                f"boiling_line_{i}", size=(0, 2), is_parent_node=True
+                                f"boiling_line_{i}", size=(0, 2)
                             ).block
                         )
                         make("stub", size=(0, 1))
@@ -155,7 +155,7 @@ def make_cream_cheese_lines(schedule, boiling_lines=None):
         boiling_lines = []
         for i in range(3):
             boiling_lines.append(
-                make(f"boiling_line_{i}", size=(0, 2), is_parent_node=True).block
+                make(f"boiling_line_{i}", size=(0, 2)).block
             )
             make("stub", size=(0, 1))
 

@@ -61,7 +61,7 @@ def wrap_boiling_lines(schedule):
         boiling_lines = []
         for i in range(3):
             boiling_lines.append(
-                m.block(f"boiling_line_{i}", size=(0, 3), is_parent_node=True).block
+                m.block(f"boiling_line_{i}", size=(0, 3)).block
             )
             if i <= 1:
                 m.row("stub", size=0)
@@ -93,8 +93,7 @@ def wrap_analysis_line(schedule):
         default_col_width=1,
         # props
         size=(0, 2),
-        axis=1,
-        is_parent_node=True,
+        axis=1
     )
 
     class Validator(ClassValidator):
@@ -107,15 +106,14 @@ def wrap_analysis_line(schedule):
                 for c2 in b2.children:
                     validate_disjoint_by_axis(c1, c2)
 
-    n_lines = 2
+    with code("init analysis lines"):
+        n_lines = 2
+        lines = []
+        for i in range(n_lines):
+            lines.append(m.row(f"analysis_line_{i}", size=0).block)
 
-    lines = []
-    for i in range(n_lines):
-        lines.append(m.row(f"analysis_line_{i}", size=0, is_parent_node=False).block)
-
-    # todo: hardcode
-    for line in lines:
-        push(line, m.create_block("stub", size=(0, 1)), push_func=add_push)
+        # for line in lines:
+        #     push(line, m.create_block("stub", size=(0, 1)), push_func=add_push)
 
     for boiling_group in schedule["boiling_group", True]:
         analysis_group = m.create_block("analysis_group")
@@ -144,6 +142,8 @@ def wrap_analysis_line(schedule):
                     raise Exception(
                         "Не получилось прорисовать баки Ришад-Ричи на двух линиях."
                     )
+    print(lines[0])
+    print(lines[1])
     return m.root
 
 
@@ -167,8 +167,7 @@ def wrap_packing_line(schedule):
         default_row_width=1,
         default_col_width=1,
         # props
-        size=(0, 1),
-        is_parent_node=True,
+        size=(0, 1)
     )
 
     for boiling_group in schedule["boiling_group", True]:
@@ -201,8 +200,7 @@ def wrap_container_cleanings(schedule):
         default_row_width=1,
         default_col_width=1,
         # props
-        size=(0, 1),
-        is_parent_node=True,
+        size=(0, 1)
     )
 
     for block in schedule["container_cleanings"].children:

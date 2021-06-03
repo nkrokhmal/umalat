@@ -54,7 +54,7 @@ def calc_group_form_factor_label(skus):
     return "/".join(values)
 
 
-def make_header(date, start_time="01:00"):
+def wrap_header(date, start_time="01:00"):
     maker, make = utils.init_block_maker("header", axis=1)
 
     with make("header", size=(0, 1), index_width=2):
@@ -82,11 +82,11 @@ def make_header(date, start_time="01:00"):
     return maker.root["header"]
 
 
-def make_cheese_makers(master, rng):
+def wrap_cheese_makers(master, rng):
     maker, make = utils.init_block_maker("cheese_makers", axis=1)
 
     for i in rng:
-        with make(f"cheese_maker", is_parent_node=True):
+        with make(f"cheese_maker"):
             with make(
                 "header", index_width=0, start_time="00:00", push_func=utils.add_push
             ):
@@ -191,7 +191,7 @@ def make_cheese_makers(master, rng):
 
 
 def make_cleanings(master):
-    maker, make = utils.init_block_maker("cleanings_row", is_parent_node=True, axis=1)
+    maker, make = utils.init_block_maker("cleanings_row", axis=1)
 
     with make("header", index_width=0, start_time="00:00", push_func=utils.add_push):
         make(
@@ -215,7 +215,7 @@ def make_cleanings(master):
 
 def make_multihead_cleanings(master):
     maker, make = utils.init_block_maker(
-        "multihead_cleanings_row", is_parent_node=True, axis=1
+        "multihead_cleanings_row", axis=1
     )
     for multihead_cleaning in master.iter(cls="multihead_cleaning"):
         b = maker.copy(multihead_cleaning, with_props=True)
@@ -237,7 +237,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
             push_func=utils.add_push,
         )
 
-    with make("melting_row", push_func=utils.add_push, is_parent_node=True):
+    with make("melting_row", push_func=utils.add_push):
         for boiling in master.iter(
             cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
         ):
@@ -325,7 +325,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                     )
 
     n_cooling_lines = 0
-    make("cooling_row", axis=1, is_parent_node=True)
+    make("cooling_row", axis=1)
     cooling_lines = []
 
     for boiling in master.iter(
@@ -374,7 +374,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                 if j == n_cooling_lines:
                     n_cooling_lines += 1
                     new_cooling_line = maker.create_block(
-                        "cooling_line", is_parent_node=True, size=(0, 1)
+                        "cooling_line", size=(0, 1)
                     )
                     cooling_lines.append(new_cooling_line)
                     utils.push(maker.root["cooling_row"], new_cooling_line)
@@ -502,7 +502,7 @@ def make_meltings_2(master, line_name, title):
     melting_lines = []
     for i in range(n_lines):
         melting_lines.append(
-            make(f"salt_melting_{i}", size=(0, 3), is_parent_node=True).block
+            make(f"salt_melting_{i}", size=(0, 3)).block
         )
         # add line for "Расход пара"
         make("stub", size=(0, 1))
@@ -557,7 +557,7 @@ def make_packing_block(packing_block, boiling_id):
     with make():
         make("packing_brand", size=(packing_block.size[0], 1))
 
-    with make(is_parent_node=True):
+    with make():
         for packing_process in packing_block.iter(cls="process"):
             make(
                 "packing_process",
@@ -579,7 +579,7 @@ def make_packings(master, line_name):
     maker, make = utils.init_block_maker("packing", axis=1)
 
     for packing_team_id in range(1, 3):
-        with make("packing_team", size=(0, 3), axis=0, is_parent_node=True):
+        with make("packing_team", size=(0, 3), axis=0):
             for boiling in master.iter(
                 cls="boiling", boiling_model=lambda bm: bm.line.name == line_name
             ):
@@ -611,7 +611,7 @@ def make_packings(master, line_name):
 
 
 def make_extra_packings(extra_packings):
-    maker, make = utils.init_block_maker("packing", axis=1, is_parent_node=True)
+    maker, make = utils.init_block_maker("packing", axis=1)
     for packing_block in extra_packings.iter(cls="packing"):
         make(
             make_packing_block(packing_block, packing_block.props["boiling_id"]),
@@ -634,7 +634,7 @@ def make_frontend(schedule, coolings_mode="first"):
     start_t = int(utils.custom_round(start_t, 12, "floor"))  # round to last hour
     start_t -= 24
     start_time = cast_time(start_t)
-    make(make_header(schedule.props["date"], start_time=start_time))
+    make(wrap_header(schedule.props["date"], start_time=start_time))
 
     with make("pouring", start_time=start_time, axis=1):
         make(
@@ -652,11 +652,11 @@ def make_frontend(schedule, coolings_mode="first"):
                 ],
             )
         )
-        make(make_cheese_makers(master, range(2)))
+        make(wrap_cheese_makers(master, range(2)))
         # make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
         #                      {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         make(make_cleanings(master))
-        make(make_cheese_makers(master, range(2, 4)))
+        make(wrap_cheese_makers(master, range(2, 4)))
         make(
             make_shifts(
                 0,
@@ -678,7 +678,7 @@ def make_frontend(schedule, coolings_mode="first"):
     start_t = int(utils.custom_round(start_t, 12, "floor"))  # round to last hour
     start_t -= 24
     start_time = cast_time(start_t)
-    make(make_header(schedule.props["date"], start_time=start_time))
+    make(wrap_header(schedule.props["date"], start_time=start_time))
 
     with make("melting", start_time=start_time, axis=1):
         make(make_multihead_cleanings(master))
