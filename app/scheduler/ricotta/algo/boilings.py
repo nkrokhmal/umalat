@@ -67,7 +67,7 @@ def make_boiling_group(boiling_group_df):
 
     m.block(boiling_sequence)
 
-    with code('analysis'):
+    with code('make_analysis'):
         _last_boiling = boiling_sequence["boiling", True][-1]
         analysis_start = _last_boiling["abandon"].x[0]
         with m.row("analysis_group", push_func=add_push,
@@ -83,7 +83,7 @@ def make_boiling_group(boiling_group_df):
                 m.row("analysis", size=analysis.analysis_time // 5)
                 m.row("pumping", size=analysis.pumping_time // 5)
 
-    with code('packing'):
+    with code('make_packing'):
         if first_row['sku'].weight_netto != 0.5:
             packing_start = m.root["analysis_group"]["pumping"].x[0] + 1
         else:

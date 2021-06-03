@@ -20,13 +20,15 @@ def test_drawing_ricotta(open_file=False):
     utils.lazy_tester.configure(local_path=os.path.basename(boiling_plan_fn))
 
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
+
     schedule = make_schedule(boiling_plan_df)
     utils.lazy_tester.log(schedule)
     frontend = make_frontend(schedule)
     utils.lazy_tester.log(frontend)
 
-    draw_excel_frontend(frontend, STYLE, open_file=open_file)
     utils.lazy_tester.assert_logs()
+
+    draw_excel_frontend(frontend, STYLE, open_file=open_file)
 
 
 if __name__ == "__main__":
