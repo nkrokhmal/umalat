@@ -1,3 +1,4 @@
+# fmt: off
 from app.imports.runtime import *
 
 from app.models import *
@@ -6,120 +7,103 @@ from app.scheduler.mascarpone.algo.mascarpone_boilings import *
 from app.scheduler.mascarpone.algo.cream_cheese_boilings import *
 from app.scheduler.mascarpone.algo.cleanings import *
 
-validator = utils.ClassValidator(window=20)
+from utils_ak.block_tree import *
 
 
-def validate(b1, b2):
-    b1 = utils.listify(b1["boiling"])[-1]
-    b2 = utils.listify(b2["boiling"])[0]
+class Validator(utils.ClassValidator):
+    def __init__(self):
+        super().__init__(window=20)
 
-    if sum([b1.props.get("is_cream", False), b2.props.get("is_cream", False)]) == 1:
-        # one is cream and one is not
-        validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"])
+    @staticmethod
+    def validate__mascarpone_boiling_group__mascarpone_boiling_group(b1, b2):
+        b1 = utils.listify(b1["boiling"])[-1]
+        b2 = utils.listify(b2["boiling"])[0]
 
-    assert (
-        utils.listify(b1["packing_process"]["packing_group"]["packing"])[-1].y[0] + 2
-        <= utils.listify(b2["packing_process"]["packing_group"]["packing"])[0].x[0]
-    )
-    validate_disjoint_by_axis(
-        b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
-    )
-    validate_disjoint_by_axis(
-        b1["boiling_process"]["pouring"], b2["boiling_process"]["pouring"]
-    )
+        if sum([b1.props.get("is_cream", False), b2.props.get("is_cream", False)]) == 1:
+            # one is cream and one is not
+            validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"])
 
-    assert (
-        utils.listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
-        <= b2["boiling_process"]["pumping_off"].x[0]
-    )
-
-
-validator.add("mascarpone_boiling_group", "mascarpone_boiling_group", validate)
-
-
-def validate(b1, b2):
-    b = utils.listify(b1["boiling"])[-1]
-    assert (
-        b["packing_process"].y[0] - 1
-        <= utils.listify(b2["boiling_process"]["separation"])[0].x[0]
-    )
-
-
-validator.add("mascarpone_boiling_group", "cream_cheese_boiling", validate)
-
-
-def validate(b1, b2):
-    if (
-        b2.children[0].props["cls"] != "cleaning_sourdough_mascarpone"
-        or b1.props["line_nums"] == b2.props["sourdoughs"]
-    ):
-        for b in utils.listify(b1["boiling"]):
-            validate_disjoint_by_axis(b["boiling_process"], b2)
-            assert b["boiling_process"].y[0] + 1 <= b2.x[0]
-
-
-validator.add("mascarpone_boiling_group", "cleaning", validate)
-
-
-def validate(b1, b2):
-    assert utils.listify(b1["boiling_process"]["salting"][-1].y[0]) <= utils.listify(
-        b2["boiling_process"]["separation"][0].y[0]
-    )
-
-
-validator.add("cream_cheese_boiling", "cream_cheese_boiling", validate)
-
-
-def validate(b1, b2):
-    validate_disjoint_by_axis(b1, b2)
-    subclasses = [b.children[0].props["cls"] for b in [b1, b2]]
-
-    a = all("sourdough" not in sub_cls for sub_cls in subclasses)
-    b = all("sourdough" in sub_cls for sub_cls in subclasses)
-
-    if a or b:
-        assert b1.y[0] + 3 <= b2.x[0]
-    else:
-        # validate with neighborhood
-        validate_disjoint_by_intervals((b1.x[0] - 3, b1.y[0] + 3), (b2.x[0], b2.y[0]))
-
-
-validator.add("cleaning", "cleaning", validate)
-
-
-def validate(b1, b2):
-    b = utils.listify(b2["boiling"])[0]
-    if b1.props["entity"] == "homogenizer":
-        assert b1.y[0] + 1 <= b["packing_process"]["N"].x[0]
-
-
-validator.add("cleaning", "mascarpone_boiling_group", validate)
-
-
-def validate(b1, b2):
-    if b1.props["entity"] == "homogenizer":
-        assert b1.y[0] + 1 <= utils.listify(b2["boiling_process"]["separation"])[0].x[0]
-
-
-validator.add("cleaning", "cream_cheese_boiling", validate)
-
-
-def validate(b1, b2):
-    if b2.props["entity"] == "separator" or (
-        (b2.children[0].props["cls"] == "cleaning_sourdough_mascarpone_cream_cheese")
-        and len(set(b1.props["sourdoughs"]) & set(b2.props["sourdoughs"])) > 0
-    ):
         assert (
-            utils.listify(b1["boiling_process"]["separation"])[-1].y[0] + 1 <= b2.x[0]
+            utils.listify(b1["packing_process"]["packing_group"]["packing"])[-1].y[0] + 2
+            <= utils.listify(b2["packing_process"]["packing_group"]["packing"])[0].x[0]
+        )
+        validate_disjoint_by_axis(
+            b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
+        )
+        validate_disjoint_by_axis(
+            b1["boiling_process"]["pouring"], b2["boiling_process"]["pouring"]
+        )
+
+        assert (
+            utils.listify(b1["packing_process"]["packing_group"]["P"])[-1].x[0]
+            <= b2["boiling_process"]["pumping_off"].x[0]
+        )
+
+    @staticmethod
+    def validate__mascarpone_boiling_group__cream_cheese_boiling(b1, b2):
+        b = utils.listify(b1["boiling"])[-1]
+        assert (
+            b["packing_process"].y[0] - 1
+            <= utils.listify(b2["boiling_process"]["separation"])[0].x[0]
         )
 
 
-validator.add("cream_cheese_boiling", "cleaning", validate)
+    @staticmethod
+    def validate__mascarpone_boiling_group__cleaning(b1, b2):
+        if (
+            b2.children[0].props["cls"] != "cleaning_sourdough_mascarpone"
+            or b1.props["line_nums"] == b2.props["sourdoughs"]
+        ):
+            for b in utils.listify(b1["boiling"]):
+                validate_disjoint_by_axis(b["boiling_process"], b2)
+                assert b["boiling_process"].y[0] + 1 <= b2.x[0]
+
+    @staticmethod
+    def validate__cream_cheese_boiling__cream_cheese_boiling(b1, b2):
+        assert utils.listify(b1["boiling_process"]["salting"][-1].y[0]) <= utils.listify(
+            b2["boiling_process"]["separation"][0].y[0]
+        )
+
+    @staticmethod
+    def validate__cleaning__cleaning(b1, b2):
+        validate_disjoint_by_axis(b1, b2)
+        subclasses = [b.children[0].props["cls"] for b in [b1, b2]]
+
+        a = all("sourdough" not in sub_cls for sub_cls in subclasses)
+        b = all("sourdough" in sub_cls for sub_cls in subclasses)
+
+        if a or b:
+            assert b1.y[0] + 3 <= b2.x[0]
+        else:
+            # validate with neighborhood
+            validate_disjoint_by_intervals((b1.x[0] - 3, b1.y[0] + 3), (b2.x[0], b2.y[0]))
+
+
+    @staticmethod
+    def validate__cleaning__mascarpone_boiling_group(b1, b2):
+        b = utils.listify(b2["boiling"])[0]
+        if b1.props["entity"] == "homogenizer":
+            assert b1.y[0] + 1 <= b["packing_process"]["N"].x[0]
+
+    @staticmethod
+    def validate__cleaning__cream_cheese_boiling(b1, b2):
+        if b1.props["entity"] == "homogenizer":
+            assert b1.y[0] + 1 <= utils.listify(b2["boiling_process"]["separation"])[0].x[0]
+
+    @staticmethod
+    def validate__cream_cheese_boiling__cleaning(b1, b2):
+        if b2.props["entity"] == "separator" or (
+            (b2.children[0].props["cls"] == "cleaning_sourdough_mascarpone_cream_cheese")
+            and len(set(b1.props["sourdoughs"]) & set(b2.props["sourdoughs"])) > 0
+        ):
+            assert (
+                utils.listify(b1["boiling_process"]["separation"])[-1].y[0] + 1 <= b2.x[0]
+            )
 
 
 class BoilingPlanToSchedule:
     def __init__(self):
-        self.maker, self.make = init_block_maker("schedule")
+        self.m = BlockMaker("schedule")
 
     def _make_mascarpone(self, boiling_plan_df, is_last=False):
         is_cream = boiling_plan_df.iloc[0]["is_cream"]
@@ -127,6 +111,7 @@ class BoilingPlanToSchedule:
             grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
         ]
         if not is_cream:
+            # create by pairs
             assert len(boiling_group_dfs) % 2 == 0
 
             boiling_groups = []
@@ -142,6 +127,7 @@ class BoilingPlanToSchedule:
 
         all_line_nums = [[1, 2], [3, 4]]
 
+        # todo: why two only???
         boiling_volumes = [800, 600]
         for i, bg in enumerate(boiling_groups):
             if is_cream:
@@ -151,13 +137,12 @@ class BoilingPlanToSchedule:
                     int(boiling_group_df.iloc[0]["sourdough"])
                     for boiling_group_df in bg.props["boiling_group_dfs"]
                 ]
-            bg.props.update(line_nums=line_nums, boiling_volume=boiling_volumes[i % 2])
-            push(
-                self.maker.root,
-                bg,
-                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                validator=validator,
-            )
+
+            self.m.block(bg,
+                 push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                 push_kwargs={'validator': Validator()},
+                 # props
+                 line_nums=line_nums, boiling_volume=boiling_volumes[i % 2])
 
         left_cleaning_lines = list(all_line_nums)
         if not is_cream:
@@ -176,32 +161,25 @@ class BoilingPlanToSchedule:
                 "sourdough_mascarpone",
                 sourdoughs=first_last_group.props["line_nums"],
             )
-            push(
-                self.maker.root,
-                block,
-                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
-                validator=validator,
-            )
+
+            self.m.block(block,
+                    push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                    push_kwargs={'validator': Validator()})
             left_cleaning_lines.remove(first_last_group.props["line_nums"])
 
             if len(boiling_group_dfs) > 6 or is_last:
                 for entity in ["separator", "homogenizer"]:
-                    block = make_cleaning(entity)
-                    push(
-                        self.maker.root,
-                        block,
-                        push_func=AxisPusher(start_from="last_beg"),
-                        validator=validator,
-                    )
+                    cleaning = make_cleaning(entity)
+                    self.m.block(cleaning,
+                                 push_func=AxisPusher(start_from="last_beg"),
+                                 push_kwargs={'validator': Validator()})
 
             for line_nums in left_cleaning_lines:
-                block = make_cleaning("sourdough_mascarpone", sourdoughs=line_nums)
-                push(
-                    self.maker.root,
-                    block,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-30),
-                    validator=validator,
-                )
+                cleaning = make_cleaning("sourdough_mascarpone", sourdoughs=line_nums)
+                self.m.block(cleaning,
+                             push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                             push_kwargs={'validator': Validator()})
+
 
     def _make_cream_cheese(self, boiling_plan_df):
         boiling_group_dfs = [
@@ -218,12 +196,9 @@ class BoilingPlanToSchedule:
         ]
 
         for block in cream_cheese_blocks:
-            push(
-                self.maker.root,
-                block,
-                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                validator=validator,
-            )
+            self.m.block(block,
+                         push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                         push_kwargs={'validator': Validator()})
 
         # cleanings
         sourdoughs = boiling_plan_df[boiling_plan_df["type"] == "cream_cheese"][
@@ -234,21 +209,15 @@ class BoilingPlanToSchedule:
 
         for group in utils.crop_to_chunks(sourdoughs, 2):
             block = make_cleaning("sourdough_mascarpone_cream_cheese", sourdoughs=group)
-            push(
-                self.maker.root,
-                block,
-                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
-                validator=validator,
-            )
+            self.m.block(block,
+                         push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                         push_kwargs={'validator': Validator()})
 
         for entity in ["separator", "homogenizer", "heat_exchanger"]:
             block = make_cleaning(entity)
-            push(
-                self.maker.root,
-                block,
-                push_func=AxisPusher(start_from="last_beg"),
-                validator=validator,
-            )
+            self.m.block(block,
+                         push_func=AxisPusher(start_from="last_beg"),
+                         push_kwargs={'validator': Validator()})
 
     def __call__(self, boiling_plan_df, start_batch_id=0):
         boiling_plan_df["batch_id"] += start_batch_id - 1
@@ -267,7 +236,7 @@ class BoilingPlanToSchedule:
                 self._make_mascarpone(grp, is_last=is_last)
             elif grp.iloc[0]["type"] == "cream_cheese":
                 self._make_cream_cheese(grp)
-        return self.maker.root
+        return self.m.root
 
 
 def make_schedule(boiling_plan_df, start_batch_id=0):

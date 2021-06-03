@@ -1,4 +1,5 @@
-from utils_ak.iteration import *
+from app.imports.runtime import *
+
 from utils_ak.block_tree import *
 
 
@@ -11,19 +12,19 @@ def make_cleaning(entity, **kwargs):
         "heat_exchanger": 12,
         "homogenizer": 12,
     }
-    maker, make = init_block_maker("cleaning", entity=entity, **kwargs)
+    m = BlockMaker("cleaning", entity=entity, **kwargs)
 
-    make(f"cleaning_{entity}", size=(CLEANING_SIZES[entity], 0))
+    m.row(f"cleaning_{entity}", size=CLEANING_SIZES[entity])
 
     # todo: add steam consumption
-    return maker.root
+    return m.root
 
 
 def make_container_cleanings():
-    maker, make = init_block_maker("container_cleanings")
-    make("container_cleaning_1", size=(12, 0))
-    make("stub", size=(3, 0))
-    make("container_cleaning_2", size=(12, 0))
-    make("stub", size=(3, 0))
-    make("container_cleaning_3", size=(12, 0))
-    return maker.root
+    m = BlockMaker("container_cleanings")
+    m.row("container_cleaning_1", size=12)
+    m.row("stub", size=3)
+    m.row("container_cleaning_2", size=12)
+    m.row("stub", size=3)
+    m.row("container_cleaning_3", size=12)
+    return m.root
