@@ -1,6 +1,7 @@
+# fmt: off
 from app.scheduler.time import *
 from app.scheduler.frontend import *
-
+from app.scheduler.header import wrap_header
 from utils_ak.block_tree import *
 
 
@@ -59,11 +60,10 @@ def wrap_boiling_lines(schedule):
 
     with code("init boiling lines"):
         boiling_lines = []
-        for i in range(3):
-            boiling_lines.append(
-                m.block(f"boiling_line_{i}", size=(0, 3)).block
-            )
-            if i <= 1:
+        n_lines = 3
+        for i in range(n_lines):
+            boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 3)).block)
+            if i <= n_lines - 2:
                 m.row("stub", size=0)
 
     with code("add boiling groups"):
@@ -93,7 +93,7 @@ def wrap_analysis_line(schedule):
         default_col_width=1,
         # props
         size=(0, 2),
-        axis=1
+        axis=1,
     )
 
     class Validator(ClassValidator):
@@ -112,19 +112,14 @@ def wrap_analysis_line(schedule):
         for i in range(n_lines):
             lines.append(m.row(f"analysis_line_{i}", size=0).block)
 
-        # for line in lines:
-        #     push(line, m.create_block("stub", size=(0, 1)), push_func=add_push)
-
     for boiling_group in schedule["boiling_group", True]:
         analysis_group = m.create_block("analysis_group")
         for block in boiling_group["analysis_group"].children:
-            _block = m.create_block(
-                block.props["cls"],
-                size=(block.size[0], 1),
-                x=(block.x[0], 0),
-            )
+            _block = m.create_block(block.props["cls"],
+                                    size=(block.size[0], 1),
+                                    x=(block.x[0], 0))
             push(analysis_group, _block, push_func=add_push)
-        # todo: refactor
+
         for i, line in enumerate(lines):
             res = push(
                 line,
@@ -142,8 +137,6 @@ def wrap_analysis_line(schedule):
                     raise Exception(
                         "Не получилось прорисовать баки Ришад-Ричи на двух линиях."
                     )
-    print(lines[0])
-    print(lines[1])
     return m.root
 
 
@@ -167,29 +160,23 @@ def wrap_packing_line(schedule):
         default_row_width=1,
         default_col_width=1,
         # props
-        size=(0, 1)
+        size=(0, 1),
     )
 
     for boiling_group in schedule["boiling_group", True]:
         brand_label = calc_skus_label(boiling_group.props["skus"])
 
-        m.row(
-            "packing_num",
-            size=2,
-            x=(boiling_group["packing"].x[0], 0),
-            push_func=add_push,
-            boiling_id=boiling_group.props["boiling_id"],
-            font_size=9,
-        )
+        m.row("packing_num", push_func=add_push,
+              size=2,
+              x=(boiling_group["packing"].x[0], 0),
+              boiling_id=boiling_group.props["boiling_id"],
+              font_size=9)
 
-        m.row(
-            "packing",
-            size=boiling_group["packing"].size[0] - 2,
-            x=(boiling_group["packing"].x[0] + 2, 0),
-            push_func=add_push,
-            brand_label=brand_label,
-            font_size=9,
-        )
+        m.row("packing", push_func=add_push,
+              size=boiling_group["packing"].size[0] - 2,
+              x=(boiling_group["packing"].x[0] + 2, 0),
+              brand_label=brand_label,
+              font_size=9)
 
     return m.root
 
@@ -200,51 +187,14 @@ def wrap_container_cleanings(schedule):
         default_row_width=1,
         default_col_width=1,
         # props
-        size=(0, 1)
+        size=(0, 1),
     )
 
     for block in schedule["container_cleanings"].children:
-        m.row(
-            block.props["cls"],
-            size=block.size[0],
-            x=(block.x[0], 0),
-            push_func=add_push,
-        )
+        m.row(block.props["cls"], push_func=add_push,
+              size=block.size[0],
+              x=(block.x[0], 0))
     return m.root
-
-
-def wrap_header(date, start_time="07:00"):
-    m = BlockMaker(
-        "header",
-        default_row_width=1,
-        default_col_width=1,
-        # props
-        axis=1,
-    )
-
-    with m.block("header", size=(0, 1), index_width=2):
-        m.row(size=1, text="График наливов сыворотки")
-        m.row(size=1, text=utils.cast_str(date, "%d.%m.%Y"), bold=True)
-        for i in range(566):
-            cur_time = cast_time(i + cast_t(start_time))
-            days, hours, minutes = cur_time.split(":")
-            if cur_time[-2:] == "00":
-                m.row(
-                    size=1,
-                    text=str(int(hours)),
-                    color=(218, 150, 148),
-                    text_rotation=90,
-                    font_size=9,
-                )
-            else:
-                m.row(
-                    size=1,
-                    text=minutes,
-                    color=(204, 255, 255),
-                    text_rotation=90,
-                    font_size=9,
-                )
-    return m.root["header"]
 
 
 def wrap_frontend(schedule, date=None, start_time="07:00"):
@@ -258,7 +208,7 @@ def wrap_frontend(schedule, date=None, start_time="07:00"):
         axis=1,
     )
     m.row("stub", size=0)  # start with 1
-    m.block(wrap_header(date=date, start_time=start_time))
+    m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
     m.block(wrap_boiling_lines(schedule))
     m.block(wrap_analysis_line(schedule))
     m.block(wrap_packing_line(schedule))

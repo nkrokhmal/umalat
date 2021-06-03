@@ -24,11 +24,11 @@ def test_drawing_ricotta(open_file=False):
     schedule = make_schedule(boiling_plan_df)
     utils.lazy_tester.log(schedule)
     frontend = wrap_frontend(schedule)
-    print(frontend)
+
     utils.lazy_tester.log(frontend)
     draw_excel_frontend(frontend, STYLE, open_file=open_file)
 
-    # utils.lazy_tester.assert_logs()
+    utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
