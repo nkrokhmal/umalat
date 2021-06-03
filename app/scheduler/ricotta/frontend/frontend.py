@@ -4,7 +4,7 @@ from app.scheduler.frontend import *
 from utils_ak.block_tree import *
 
 
-def make_frontend_boiling(boiling):
+def wrap_boiling(boiling):
     boiling_label = boiling.props["boiling_model"].short_display_name
 
     m = BlockMaker(
@@ -21,7 +21,7 @@ def make_frontend_boiling(boiling):
 
     is_pumping_parallel = boiling["pumping_out"].x[0] < boiling["abandon"].y[0]
 
-    with m.block():
+    with m.block("Upper line"):
         boiling_name_size = boiling.size[0] - boiling["heating"].size[0]
 
         if is_pumping_parallel:
@@ -33,7 +33,7 @@ def make_frontend_boiling(boiling):
         if is_pumping_parallel:
             m.row("pumping_out", size=boiling["pumping_out"].size[0])
 
-    with m.block():
+    with m.block("Lower line"):
         m.row("heating", size=boiling["heating"].size[0], text="1900")
         m.row("delay", size=boiling["delay"].size[0])
         m.row("protein_harvest", size=boiling["protein_harvest"].size[0])
@@ -48,7 +48,7 @@ def make_frontend_boiling(boiling):
     return m.root
 
 
-def make_boiling_lines(schedule):
+def wrap_boiling_lines(schedule):
     m = BlockMaker(
         "boiling_lines",
         default_row_width=1,
@@ -57,33 +57,36 @@ def make_boiling_lines(schedule):
         axis=1,
     )
 
-    boiling_lines = []
-    for i in range(3):
-        boiling_lines.append(
-            m.block(f"boiling_line_{i}", size=(0, 3), is_parent_node=True).block
-        )
-        if i <= 1:
-            m.row("stub", size=0)
-
-    for boiling_group in schedule["boiling_group", True]:
-        for i, line_num in enumerate(boiling_group.props["line_nums"]):
-            boiling = boiling_group["boiling_sequence"]["boiling", True][i]
-            push(
-                boiling_lines[line_num],
-                make_frontend_boiling(boiling),
-                push_func=add_push,
+    with code("init boiling lines"):
+        boiling_lines = []
+        for i in range(3):
+            boiling_lines.append(
+                m.block(f"boiling_line_{i}", size=(0, 3), is_parent_node=True).block
             )
+            if i <= 1:
+                m.row("stub", size=0)
 
-    for i, cleaning in enumerate(schedule["bath_cleanings"]["bath_cleaning", True]):
-        cleaning_block = m.copy(cleaning, with_props=True)
-        for block in cleaning_block.children:
-            block.props.update(size=(block.size[0], 2))
-        push(boiling_lines[i], cleaning_block, push_func=add_push)
+    with code("add boiling groups"):
+        for boiling_group in schedule["boiling_group", True]:
+            for i, line_num in enumerate(boiling_group.props["line_nums"]):
+                boiling = boiling_group["boiling_sequence"]["boiling", True][i]
+                push(
+                    boiling_lines[line_num],
+                    wrap_boiling(boiling),
+                    push_func=add_push,
+                )
+
+    with code("add cleanings"):
+        for i, cleaning in enumerate(schedule["bath_cleanings"]["bath_cleaning", True]):
+            cleaning_block = m.copy(cleaning, with_props=True)
+            for block in cleaning_block.children:
+                block.update_size(size=(block.size[0], 2))
+            push(boiling_lines[i], cleaning_block, push_func=add_push)
 
     return m.root
 
 
-def make_analysis_line(schedule):
+def wrap_analysis_line(schedule):
     m = BlockMaker(
         "analysis",
         default_row_width=1,
@@ -158,7 +161,7 @@ def calc_skus_label(skus):
     )
 
 
-def make_packing_line(schedule):
+def wrap_packing_line(schedule):
     m = BlockMaker(
         "packing",
         default_row_width=1,
@@ -192,7 +195,7 @@ def make_packing_line(schedule):
     return m.root
 
 
-def make_container_cleanings(schedule):
+def wrap_container_cleanings(schedule):
     m = BlockMaker(
         "container_cleanings",
         default_row_width=1,
@@ -212,7 +215,7 @@ def make_container_cleanings(schedule):
     return m.root
 
 
-def make_header(date, start_time="07:00"):
+def wrap_header(date, start_time="07:00"):
     m = BlockMaker(
         "header",
         default_row_width=1,
@@ -246,7 +249,7 @@ def make_header(date, start_time="07:00"):
     return m.root["header"]
 
 
-def make_frontend(schedule, date=None, start_time="07:00"):
+def wrap_frontend(schedule, date=None, start_time="07:00"):
     date = date or datetime.now()
 
     m = BlockMaker(
@@ -257,9 +260,9 @@ def make_frontend(schedule, date=None, start_time="07:00"):
         axis=1,
     )
     m.row("stub", size=0)  # start with 1
-    m.block(make_header(date=date, start_time=start_time))
-    m.block(make_boiling_lines(schedule))
-    m.block(make_analysis_line(schedule))
-    m.block(make_packing_line(schedule))
-    m.block(make_container_cleanings(schedule))
+    m.block(wrap_header(date=date, start_time=start_time))
+    m.block(wrap_boiling_lines(schedule))
+    m.block(wrap_analysis_line(schedule))
+    m.block(wrap_packing_line(schedule))
+    m.block(wrap_container_cleanings(schedule))
     return m.root
