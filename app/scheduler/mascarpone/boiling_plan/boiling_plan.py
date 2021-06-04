@@ -5,9 +5,6 @@ from app.enum import LineName
 
 from .saturate import saturate_boiling_plan
 
-# todo: normalization
-# todo: rounding
-
 
 def read_boiling_plan(wb_obj, as_boilings=True):
     """
@@ -77,7 +74,10 @@ def read_boiling_plan(wb_obj, as_boilings=True):
 
         if grp.iloc[0]["type"] == "mascarpone" and not grp.iloc[0]["is_cream"]:
             if sourdough_range == "1-2":
-                proportion = [800, 600]
+                proportion = [
+                    500 + 300,
+                    300 + 300,
+                ]  # 500, 300, 300, 300 -> volumes of sourdougs
             else:
                 proportion = [1] * len(grp.iloc[0]["sourdoughs"])
         else:
@@ -155,7 +155,7 @@ def fix_batch_id(boiling_plan_df):
                     cur_pair in all_sourdoughs
                 ), "Варки на маскарпоне должны идти парами по заквасочникам: 1->2, 3->4, 1->2, ..."
 
-                # todo: refactor
+                # todo archived: refactor
                 if last_pair:
                     next_pair = [pair for pair in all_sourdoughs if pair != last_pair][
                         0

@@ -26,5 +26,5 @@ def test_make_boiling_group():
 
 if __name__ == "__main__":
     test_make_boiling()
-    # test_make_boiling_sequence()
+    test_make_boiling_sequence()
     # test_make_boiling_group()

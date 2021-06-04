@@ -57,7 +57,7 @@ def schedule():
         )
 
         try:
-            frontend = make_frontend(schedule)
+            frontend = wrap_frontend(schedule)
         except Exception as e:
             return internal_error(e)
             # raise Exception('Ошибка при построении расписания.')
