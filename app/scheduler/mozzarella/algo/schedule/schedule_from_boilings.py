@@ -406,11 +406,13 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                     validate_disjoint_by_axis(multihead_cleaning, process)
                     assert multihead_cleaning.y[0] + 1 <= process.x[0]
 
+    # add multihead to "extra_packings"
     for multihead_cleaning in schedule["extra"].iter(cls="multihead_cleaning"):
         push(
             schedule["extra_packings"], multihead_cleaning, push_func=add_push
         )
 
+    # add packings to "extra_packings"
     for packing in schedule["extra"].iter(cls="packing"):
         push(
             schedule["extra_packings"],
@@ -421,45 +423,43 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
             validator=ExtraValidator(),
         )
 
-    # add cleanings if necessary
-    boilings = schedule["master"]["boiling", True]
-    boilings = list(sorted(boilings, key=lambda b: b.x[0]))
+    with code('Add cleanings if necessary'):
+        # extract boilings
+        boilings = schedule["master"]["boiling", True]
+        boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
-    for a, b in utils.iter_pairs(boilings):
-        rest = (
-            b["pouring"]["first"]["termizator"].x[0]
-            - a["pouring"]["first"]["termizator"].y[0]
-        )
+        for a, b in utils.iter_pairs(boilings):
+            rest = b["pouring"]["first"]["termizator"].x[0] - a["pouring"]["first"]["termizator"].y[0]
 
-        cleanings = list(schedule["master"].iter(cls="cleaning"))
+            # extract current cleanings
+            cleanings = list(schedule["master"].iter(cls="cleaning"))
 
-        in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
-        previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
-        if previous_cleanings:
-            previous_cleaning = max(previous_cleanings, key=lambda c: c.x[0])
-        else:
-            previous_cleaning = None
+            # calc in_between and previous cleanings
+            in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
+            previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
+            if previous_cleanings:
+                previous_cleaning = max(previous_cleanings, key=lambda c: c.x[0])
+            else:
+                previous_cleaning = None
 
-        if not in_between_cleanings:
-            if 12 <= rest < 18:
-                cleaning = make_termizator_cleaning_block(
-                    "short", text="Короткая мойка"
-                )
-                cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
-                push(schedule["master"], cleaning, push_func=add_push)
+            if not in_between_cleanings:
+                # no current in between cleanings -> try to add if needed
+                if 12 <= rest < 18: # todo soon: take from parameters
+                    cleaning = make_termizator_cleaning_block("short", text="Короткая мойка")
+                    cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
+                    push(schedule["master"], cleaning, push_func=add_push)
 
-            if rest >= 18:
-                if previous_cleaning and (a.x[0] - previous_cleaning.x[0]) < cast_t(
-                    "04:00"
-                ):
-                    cleaning = make_termizator_cleaning_block("short", text="Короткая мойка")  # 4 часа
-                elif (a.x[0] - boilings[0].x[0]) < cast_t("04:00"):
-                    cleaning = make_termizator_cleaning_block("short", text="Короткая мойка")  # 4 часа
-                else:
-                    cleaning = make_termizator_cleaning_block("full", text="Полная мойка")
-                cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
-                push(schedule["master"], cleaning, push_func=add_push)
+                if rest >= 18: # todo soon: take from parameters
+                    if previous_cleaning and a.x[0] - previous_cleaning.x[0] < cast_t("04:00"):
+                        cleaning = make_termizator_cleaning_block("short", text="Короткая мойка")  # 4 часа
+                    elif a.x[0] - boilings[0].x[0] < cast_t("04:00"):
+                        cleaning = make_termizator_cleaning_block("short", text="Короткая мойка")  # 4 часа
+                    else:
+                        cleaning = make_termizator_cleaning_block("full", text="Полная мойка")
+                    cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
+                    push(schedule["master"], cleaning, push_func=add_push)
 
+    # add last full cleaning
     last_boiling = list(schedule["master"].iter(cls="boiling"))[-1]
     start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1
     cleaning = make_termizator_cleaning_block("full", text="Полная мойка")  # add five extra minutes
