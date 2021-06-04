@@ -114,7 +114,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     df = pd.concat(dfs).reset_index(drop=True)
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
 
-    df["boiling"] = df["boiling_params"].apply(cast_mozarella_boiling)
+    df["boiling"] = df["boiling_params"].apply(cast_mozzarella_boiling)
 
     # set boiling form factors
     df["ff"] = df["sku"].apply(lambda sku: sku.form_factor)
@@ -126,8 +126,8 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     for idx, grp in df.copy().groupby("group_id"):
         if grp["_bff"].isnull().all():
             # take from bff input if not specified
-            # todo soon: hardcode, make properly
-            df.loc[grp.index, "_bff"] = cast_mozarella_form_factor(8)  # 460
+            # todo later: take from parameters
+            df.loc[grp.index, "_bff"] = cast_mozzarella_form_factor(8)  # 460
         else:
             filled_grp = grp.copy()
             filled_grp = filled_grp.fillna(method="ffill")
@@ -146,7 +146,6 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     # validate kilograms
     if validate:
         for idx, grp in df.groupby("group_id"):
-            # todo soon: make common parameter
             if (
                 abs(grp["kg"].sum() - grp.iloc[0]["total_volume"])
                 / grp.iloc[0]["total_volume"]
@@ -158,7 +157,9 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
             else:
                 if normalization:
                     if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
-                        df.loc[grp.index, "kg"] *= (grp.iloc[0]["total_volume"] / grp["kg"].sum())  # scale to total_volume
+                        df.loc[grp.index, "kg"] *= (
+                            grp.iloc[0]["total_volume"] / grp["kg"].sum()
+                        )  # scale to total_volume
                     else:
                         # all fine
                         pass

@@ -10,8 +10,7 @@ def get_configuration_time(line_name, sku1, sku2):
     if all(
         [
             line_name == LineName.SALT,
-            sku1.form_factor.relative_weight
-            != sku2.form_factor.relative_weight,  # todo soon: better to compare form factors? Делаю так, потому что у палочек бывают разные фф, хотя это одни и те же палочки
+            sku1.form_factor.relative_weight != sku2.form_factor.relative_weight,
             sku1.packers[0].name == sku2.packers[0].name == "Ульма",
         ]
     ):
@@ -21,7 +20,6 @@ def get_configuration_time(line_name, sku1, sku2):
     else:
         return 5
 
-# todo soon: refactor
 def make_configuration_blocks(b1, b2, m, line_name, between_boilings=False):
     res = []
     for packing_team_id in range(1, 3):

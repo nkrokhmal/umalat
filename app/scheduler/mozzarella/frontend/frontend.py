@@ -1,3 +1,4 @@
+# fmt: off
 from app.imports.runtime import *
 from app.enum import LineName
 from app.scheduler.mozzarella.frontend.drawing import *
@@ -102,9 +103,7 @@ def wrap_cheese_makers(master, rng):
             for boiling in master.iter(cls="boiling", pouring_line=str(i)):
                 boiling_model = boiling.props["boiling_model"]
 
-                standard_boiling_volume = (
-                    1000 if boiling_model.line.name == LineName.WATER else 850
-                )  # todo soon: make properly
+                standard_boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo later: take from parameters
                 boiling_size = int(
                     round(
                         8000
@@ -287,11 +286,10 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                     )
                     make("melting_label", size=(4, 1))
 
-                    # todo soon: make properly
                     assert (
                         boiling["melting_and_packing"]["melting"]["meltings"].size[0]
                         >= 5
-                    ), "В расписании есть блок плавления меньше 5 блоков. Такой случай пока не обработан. "
+                    ), "В расписании есть блок плавления меньше 5 блоков. Такой случай не поддерживается. "
 
                     make(
                         "melting_name",
@@ -345,9 +343,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
             ]
         ):
             start_from = cooling_process["start"]["cooling", True][0].x[0]
-            cooling_block = maker.create_block(
-                "cooling_block", x=(start_from, 0)
-            )  # todo soon: create dynamic x calculation when empty block
+            cooling_block = maker.create_block("cooling_block", x=(start_from, 0))
 
             for cooling in cooling_process["start"]["cooling", True]:
                 block = maker.create_block(

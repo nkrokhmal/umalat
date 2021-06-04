@@ -43,7 +43,7 @@ def cast_model(cls, obj, int_attribute="id", str_attribute="name"):
         raise Exception(f"Unknown {cls} type")
 
 
-def cast_mozarella_form_factor(obj):
+def cast_mozzarella_form_factor(obj):
     if isinstance(obj, str):
         # 'Вода: 200'
         short_line_name, relative_weight = obj.split(":")
@@ -68,7 +68,7 @@ def cast_mozarella_form_factor(obj):
         return cast_model(MozzarellaFormFactor, obj)
 
 
-def cast_mozarella_boiling(obj):
+def cast_mozzarella_boiling(obj):
     if isinstance(obj, str):
         try:
             # water, 2.7, Альче
