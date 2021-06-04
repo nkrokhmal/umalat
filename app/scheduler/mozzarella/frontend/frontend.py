@@ -4,6 +4,7 @@ from app.enum import LineName
 from app.scheduler.mozzarella.frontend.drawing import *
 from app.scheduler.mozzarella.frontend.style import *
 from app.scheduler.header import wrap_header
+from app.models import *
 
 def calc_form_factor_label(form_factors):
     form_factors = utils.remove_neighbor_duplicates(form_factors)
@@ -74,18 +75,15 @@ def wrap_cheese_makers(master, rng):
 
             for boiling in master.iter(cls="boiling", pouring_line=str(i)):
                 boiling_model = boiling.props["boiling_model"]
-
-                standard_boiling_volume = 1000 if boiling_model.line.name == LineName.WATER else 850  # todo later: take from parameters
                 boiling_size = int(
                     round(
-                        8000
+                        boiling_model.line.input_ton
                         * boiling.props.relative_props.get(
-                            "boiling_volume", standard_boiling_volume
+                            "boiling_volume", boiling_model.line.output_ton
                         )
-                        / standard_boiling_volume
+                        / boiling_model.line.output_ton
                     )
                 )
-
                 boiling_label = "{} {} {} {}кг".format(
                     boiling_model.percent,
                     boiling_model.ferment,
