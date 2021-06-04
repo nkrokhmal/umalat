@@ -25,7 +25,7 @@ def make_boiling(boiling_model):
                   x=m.root["abandon"].y[0] - bt.pumping_out_time // 5)
 
     with code('steam_consumption'):
-        steam_value = 900 if not boiling_model.flavoring_agent else 673 # todo: take from parameters
+        steam_value = 900 if not boiling_model.flavoring_agent else 673 # todo next: take from parameters
 
         m.row("steam_consumption", push_func=add_push,
               size=m.root["heating"].size,
@@ -70,9 +70,8 @@ def make_boiling_group(boiling_group_df):
     with code('make_analysis'):
         _last_boiling = boiling_sequence["boiling", True][-1]
         analysis_start = _last_boiling["abandon"].x[0]
-        with m.row("analysis_group", push_func=add_push,
-                   x=analysis_start):
-            analysis = utils.delistify(boiling_model.analysis)  # todo: can be a list for some reason
+        with m.row("analysis_group", push_func=add_push, x=analysis_start):
+            analysis = utils.delistify(boiling_model.analysis, single=True)
 
             if boiling_model.flavoring_agent:
                 m.row("analysis", size=analysis.analysis_time // 5)
