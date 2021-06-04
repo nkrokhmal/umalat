@@ -5,6 +5,7 @@ from app.scheduler.mozzarella.frontend.drawing import *
 from app.scheduler.mozzarella.frontend.style import *
 from app.scheduler.header import wrap_header
 from app.models import *
+from app.scheduler.frontend import *
 
 from utils_ak.block_tree import *
 
@@ -117,7 +118,15 @@ def wrap_cheese_makers(master, rng):
                         m.row("pumping_out", size=boiling["pouring"]["first"]["pumping_out"].size[0])
                         m.row("pouring_off", size=boiling["pouring"]["second"]["pouring_off"].size[0])
                         m.row("extra", size=boiling["pouring"]["second"]["extra"].size[0])
-        # add two lines for "Расход пара"
+
+                    with code('Steam consumption'):
+                        pass
+
+                        # deprecated (2021.06.04). Steam consumption is now not needed
+                        # with m.block('steam consumption'):
+                        #     for b in boiling["steams"]["steam_consumption", True]:
+                        #         m.block(make_steam_blocks(b, x=b.x_rel), push_func=add_push)
+
         m.block("stub", size=(0, 2))
 
     return m.root
@@ -273,7 +282,17 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
                 if n_cooling_lines == 100:
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
-    # add two lines for "Расход пара"
+    with code('Steam consumption'):
+        pass
+
+        # deprecated (2021.06.04). Steam consumption is not needed anymore
+        # with m.block(font_size=8):
+        #     for b in master.iter(
+        #         cls="steam_consumption",
+        #         boiling_model=lambda bm: bm.line.name == line_name,
+        #         type="melting",
+        #     ):
+        #         m.block(make_steam_blocks(b), push_func=add_push)
     m.block("stub", size=(0, 2))
     return m.root
 
@@ -329,6 +348,28 @@ def make_melting(boiling, line_name):
             m.row(cooling_label, push_func=add_push,
                   x=boiling["melting_and_packing"]["melting"]["coolings"]["cooling_process", True][0]["start"].x[0],
                   size=boiling["melting_and_packing"]["melting"]["coolings"]["cooling_process", True][0]["start"].size[0])
+
+        with code('Steam consumption'):
+            pass
+
+            # deprecated (2021.06.04). Steam consumption is not needed anymore
+            # with m.block("steams", font_size=8):
+            #     for b in boiling.iter(
+            #         cls="steam_consumption",
+            #         boiling_model=lambda bm: bm.line.name == line_name,
+            #         type="melting",
+            #     ):
+            #         for j in range(
+            #             int(b.x[0]), int(b.y[0])
+            #         ):  # todo: small hardcode (should be int already)
+            #              m.block(push_func=add_push,
+            #                      x=(j, 0),
+            #                      size=(1, 1),
+            #                      text=str(b.props["value"]),
+            #                      text_rotation=90,
+            #                 # border=None,
+            #             )
+
     return m.root
 
 
