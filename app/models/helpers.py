@@ -50,7 +50,7 @@ def cast_mozzarella_form_factor(obj):
         relative_weight = relative_weight.strip()
         short_line_names_map = {"Вода": "Моцарелла в воде", "Соль": "Пицца чиз"}
 
-        form_factors = db.session.query(FormFactor).all()
+        form_factors = db.session.query(MozzarellaFormFactor).all()
         form_factors = [
             ff
             for ff in form_factors

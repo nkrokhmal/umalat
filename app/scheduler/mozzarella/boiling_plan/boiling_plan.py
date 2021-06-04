@@ -126,8 +126,9 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     for idx, grp in df.copy().groupby("group_id"):
         if grp["_bff"].isnull().all():
             # take from bff input if not specified
-            # todo later: take from parameters
-            df.loc[grp.index, "_bff"] = cast_mozzarella_form_factor(8)  # 460
+            df.loc[grp.index, "_bff"] = cast_mozzarella_form_factor(
+                DebugConfig.DEFAULT_RUBBER_FORM_FACTOR
+            )
         else:
             filled_grp = grp.copy()
             filled_grp = filled_grp.fillna(method="ffill")
