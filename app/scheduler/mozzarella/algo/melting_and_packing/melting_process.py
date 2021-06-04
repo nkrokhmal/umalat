@@ -9,6 +9,8 @@ from app.scheduler.mozzarella.algo.packing import (
 from utils_ak.block_tree import *
 
 
+N_PACKING_TEAMS = 2
+
 def fill_configurations(maker, mpps, boiling_model):
     res = [mpps[0]]
 
@@ -105,7 +107,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
             for i, block in enumerate(mp["melting_and_packing_process", True]):
                 m.block(m.copy(block["cooling_process"], with_props=True), push_func=add_push)
 
-    for packing_team_id in range(1, 3):  # todo maybe: specify number of teams somewhere
+    for packing_team_id in range(1, N_PACKING_TEAMS + 1):
         for key in ["packing", "collecting"]:
             blocks = []
 
@@ -118,7 +120,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
 
             if "packing_configuration" in [
                 block.props["cls"] for block in mp.children
-            ]:  # todo maybe: refactor
+            ]:  # todo archived: refactor
                 for block in [
                     b
                     for b in mp["packing_configuration", True]

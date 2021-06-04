@@ -155,7 +155,7 @@ def fix_batch_id(boiling_plan_df):
                     cur_pair in all_sourdoughs
                 ), "Варки на маскарпоне должны идти парами по заквасочникам: 1->2, 3->4, 1->2, ..."
 
-                # todo maybe: refactor
+                # todo archived: refactor
                 if last_pair:
                     next_pair = [pair for pair in all_sourdoughs if pair != last_pair][
                         0
