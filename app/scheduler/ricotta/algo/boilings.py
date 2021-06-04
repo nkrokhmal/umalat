@@ -24,13 +24,15 @@ def make_boiling(boiling_model):
                   size=bt.pumping_out_time // 5,
                   x=m.root["abandon"].y[0] - bt.pumping_out_time // 5)
 
-    with code('steam_consumption'):
-        steam_value = 900 if not boiling_model.flavoring_agent else 673 # todo next: take from parameters
-
-        m.row("steam_consumption", push_func=add_push,
-              size=m.root["heating"].size,
-              x=0,
-              value=steam_value)
+    with code('Steam_consumption'):
+        pass
+        # deprecated (2021.06.04). Steam consumption is not needed anymore
+        # steam_value = 900 if not boiling_model.flavoring_agent else 673 # todo next: take from parameters
+        #
+        # m.row("steam_consumption", push_func=add_push,
+        #       size=m.root["heating"].size,
+        #       x=0,
+        #       value=steam_value)
     return m.root
 
 

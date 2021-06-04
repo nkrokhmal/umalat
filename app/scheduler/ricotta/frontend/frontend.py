@@ -43,8 +43,12 @@ def wrap_boiling(boiling):
         if not is_pumping_parallel:
             m.row("pumping_out", size=boiling["pumping_out"].size[0])
 
-    with m.block():
-        m.block(make_steam_blocks(boiling["steam_consumption"], x=(0, 0)))
+    with code('Steam consumption'):
+        pass
+
+        # deprecated (2021.06.04). Steam consumption is not needed anymore
+        # with m.block():
+        #     m.block(make_steam_blocks(boiling["steam_consumption"], x=(0, 0)))
 
     return m.root
 
