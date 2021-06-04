@@ -210,19 +210,21 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
         last_multihead_water_boiling = None
 
     def add_one_block_from_line(boiling):
+        # extract line name
         line_name = boiling.props["boiling_model"].line.name
+
+        # find start_from
         if not lines_df.at[line_name, "latest_boiling"]:
+            # init
             if lines_df.at[line_name, "start_time"]:
-                start_from = (
-                    cast_t(lines_df.at[line_name, "start_time"])
-                    - boiling["melting_and_packing"].x[0]
-                )
+                # start time present
+                start_from = cast_t(lines_df.at[line_name, "start_time"]) - boiling["melting_and_packing"].x[0]
             else:
-                latest_boiling = lines_df[~lines_df["latest_boiling"].isnull()].iloc[0][
-                    "latest_boiling"
-                ]
+                # start time not present - start from overall latest boiling from both lines
+                latest_boiling = lines_df[~lines_df["latest_boiling"].isnull()].iloc[0]["latest_boiling"]
                 start_from = latest_boiling.x[0]
         else:
+            # start from latest boiling
             start_from = lines_df.at[line_name, "latest_boiling"].x[0]
 
         # add configuration if needed
@@ -243,7 +245,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                     validator=Validator(),
                 )
 
-        # no two boilings allowed sequentially on the same pouring line
+        # filter iter_props: no two boilings allowed sequentially on the same pouring line
         iter_props = lines_df.at[line_name, "iter_props"]
         if lines_df.at[line_name, "latest_boiling"]:
             current_pouring_line = lines_df.at[line_name, "latest_boiling"].props[
@@ -255,6 +257,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 if props["pouring_line"] != current_pouring_line
             ]
 
+        # push boiling
         push(
             schedule["master"],
             boiling,
@@ -264,12 +267,8 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
             max_tries=100,
         )
 
-        # try to push water before - allowing awaiting in line
-        # remove boiling from parent for now
-        if (
-            line_name == LineName.WATER
-            and lines_df.at[LineName.WATER, "latest_boiling"]
-        ):
+        # fix water a little bit: try to push water before - allowing awaiting in line
+        if line_name == LineName.WATER and lines_df.at[LineName.WATER, "latest_boiling"]:
             boiling.parent.remove_child(boiling)
             push(
                 schedule["master"],
@@ -279,7 +278,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 max_tries=9,
             )
 
-        # take rubber packing to extras
+        # move rubber packing to extras
         for packing in boiling.iter(cls="packing"):
             if not list(
                 packing.iter(
@@ -287,13 +286,14 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                     sku=lambda sku: "Терка" in sku.form_factor.name,
                 )
             ):
+                # rubber not present
                 continue
+
             packing_copy = m.copy(packing, with_props=True)
             packing_copy.props.update(extra_props={"start_from": packing.x[0]})
             packing.parent.remove_child(packing)
             push(schedule["extra"], packing_copy, push_func=add_push)
 
-        # todo soon: put to the place of last multihead usage!
         # add multihead boiling after all water boilings if multihead was present
         if boiling == last_multihead_water_boiling:
             push(
@@ -315,12 +315,11 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 push_func=add_push,
             )
 
+        # add cleaning after boiling if needed
         cleaning_type = cleanings.get(boiling.props["boiling_id"])
         if cleaning_type:
             start_from = boiling["pouring"]["first"]["termizator"].y[0]
-            text = (
-                "Полная мойка" if cleaning_type == "full" else "Короткая мойка"
-            )  # todo maybe: refactor
+            text = "Полная мойка" if cleaning_type == "full" else "Короткая мойка"  # todo maybe: refactor
             cleaning = make_termizator_cleaning_block(
                 cleaning_type,
                 x=(boiling["pouring"]["first"]["termizator"].y[0], 0),
@@ -333,6 +332,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 validator=Validator(),
             )
 
+        # set latest boiling
         lines_df.at[line_name, "latest_boiling"] = boiling
         return boiling
 
