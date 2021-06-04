@@ -3,11 +3,11 @@ from app.scheduler.mozzarella.algo.schedule.schedule import *
 from app.scheduler.mozzarella.algo.schedule.boilings import *
 from app.scheduler.mozzarella.algo.stats import *
 
-# extract full cleaning duration
-FULL_CLEANING_LENGTH = cast_model(Washer, "Длинная мойка термизатора").time
-
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):
+    # extract full cleaning duration
+    full_cleaning_length = cast_model(Washer, "Длинная мойка термизатора").time
+
     boilings = schedule["master"]["boiling", True]
     boilings = list(sorted(boilings, key=lambda b: b.x[0]))
     values = [
@@ -23,8 +23,8 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
 
     df["time_till_next_boiling"] = (df["x"].shift(-1) - df["y"]).fillna(0).astype(int)
     df["conflict_time"] = np.where(
-        df["time_till_next_boiling"] < FULL_CLEANING_LENGTH,
-        FULL_CLEANING_LENGTH - df["time_till_next_boiling"],
+        df["time_till_next_boiling"] < full_cleaning_length,
+        full_cleaning_length - df["time_till_next_boiling"],
         0,
     )
     df["is_water_done"] = df["line_name"]
