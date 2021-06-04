@@ -319,11 +319,10 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
         cleaning_type = cleanings.get(boiling.props["boiling_id"])
         if cleaning_type:
             start_from = boiling["pouring"]["first"]["termizator"].y[0]
-            text = "Полная мойка" if cleaning_type == "full" else "Короткая мойка"  # todo maybe: refactor
             cleaning = make_termizator_cleaning_block(
                 cleaning_type,
                 x=(boiling["pouring"]["first"]["termizator"].y[0], 0),
-                text=text,
+                rule='manual',
             )
             push(
                 schedule["master"],
@@ -444,25 +443,31 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
 
             if not in_between_cleanings:
                 # no current in between cleanings -> try to add if needed
-                if 12 <= rest < 18: # todo soon: take from parameters
-                    cleaning = make_termizator_cleaning_block("short", text="Короткая мойка")
+
+                # if rest is more than an hour and less than 80 minutes -> short cleaning
+                if 12 <= rest < 18:
+                    cleaning = make_termizator_cleaning_block("short", rule='rest_between_60_and_80')
                     cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
                     push(schedule["master"], cleaning, push_func=add_push)
 
-                if rest >= 18: # todo soon: take from parameters
+                # if rest is more than 80 minutes
+                if rest >= 18:
                     if previous_cleaning and a.x[0] - previous_cleaning.x[0] < cast_t("04:00"):
-                        cleaning = make_termizator_cleaning_block("short", text="Короткая мойка")  # 4 часа
+                        # if 4 hours ago or earlier was cleaning -> make short
+                        cleaning = make_termizator_cleaning_block("short", rule='rest_after_80_4_hours_cleaning')
                     elif a.x[0] - boilings[0].x[0] < cast_t("04:00"):
-                        cleaning = make_termizator_cleaning_block("short", text="Короткая мойка")  # 4 часа
+                        # if less than 4 hours since day start -> make short
+                        cleaning = make_termizator_cleaning_block("short", rule='rest_after_80_4_hours_init')
                     else:
-                        cleaning = make_termizator_cleaning_block("full", text="Полная мойка")
+                        # otherwise -> make full
+                        cleaning = make_termizator_cleaning_block("full", rule='rest_after_80')
                     cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
                     push(schedule["master"], cleaning, push_func=add_push)
 
     # add last full cleaning
     last_boiling = list(schedule["master"].iter(cls="boiling"))[-1]
     start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1
-    cleaning = make_termizator_cleaning_block("full", text="Полная мойка")  # add five extra minutes
+    cleaning = make_termizator_cleaning_block("full", rule='closing')  # add five extra minutes
     push(
         schedule["master"],
         cleaning,
