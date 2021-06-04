@@ -27,4 +27,4 @@ def test_drawing_mascarpone(open_file=False):
 
 
 if __name__ == "__main__":
-    test_drawing_mascarpone(open_file=True)
+    test_drawing_mascarpone(open_file=False)

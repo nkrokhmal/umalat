@@ -8,7 +8,7 @@ from utils_ak.block_tree import *
 def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing):
     m = BlockMaker("root")
 
-    bt = utils.delistify(boiling_model.boiling_technologies, single=True)
+    bt = utils.delistify(boiling_model.boiling_technologies, single=True) # there is only one boiling technology is for every boiling model in mozzarella department
     with m.block(
         "boiling",
         boiling_id=boiling_id,
@@ -18,8 +18,6 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
         with m.block("pouring"):
             with m.block("first"):
                 m.row("termizator", size=boiling_model.line.pouring_time // 5)
-                # todo soon: use boiling technology from outside???
-
                 m.row("fermenting", size=bt.pouring_time // 5 - boiling_model.line.pouring_time // 5)
                 m.row("soldification", size=bt.soldification_time // 5)
                 m.row("cutting", size=bt.cutting_time // 5)
