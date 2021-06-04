@@ -6,7 +6,6 @@ from app.enum import LineName
 from .saturate import saturate_boiling_plan
 
 
-
 def read_boiling_plan(wb_obj, as_boilings=True):
     """
     :param wb_obj: str or openpyxl.Workbook
@@ -75,7 +74,10 @@ def read_boiling_plan(wb_obj, as_boilings=True):
 
         if grp.iloc[0]["type"] == "mascarpone" and not grp.iloc[0]["is_cream"]:
             if sourdough_range == "1-2":
-                proportion = [800, 600]
+                proportion = [
+                    500 + 300,
+                    300 + 300,
+                ]  # 500, 300, 300, 300 -> volumes of sourdougs
             else:
                 proportion = [1] * len(grp.iloc[0]["sourdoughs"])
         else:

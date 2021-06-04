@@ -54,6 +54,6 @@ if __name__ == "__main__":
         DebugConfig.abs_path(
             "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"
         ),
-        open_file=True,
+        open_file=False,
     )
     # test_batch()

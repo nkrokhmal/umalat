@@ -121,10 +121,11 @@ class Validator(ClassValidator):
 
 
 def make_termizator_cleaning_block(cleaning_type, **kwargs):
-    cleaning_duration = (40 if cleaning_type == "short" else 80)  # todo soon: take from parameters
+    cleaning_name = 'Короткая мойка термизатора' if cleaning_type == 'short' else 'Длинная мойка термизатора'
+    washer = cast_model(Washer, cleaning_name)
     m = BlockMaker(
         "cleaning",
-        size=(cleaning_duration // 5, 0),
+        size=(washer.time // 5, 0),
         cleaning_type=cleaning_type,
         **kwargs,
     )

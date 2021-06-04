@@ -3,8 +3,8 @@ from app.scheduler.mozzarella.algo.schedule.schedule import *
 from app.scheduler.mozzarella.algo.schedule.boilings import *
 from app.scheduler.mozzarella.algo.stats import *
 
-# todo later: put into parameters
-FULL_CLEANING_LENGTH = 16  # 80 minutes
+# extract full cleaning duration
+FULL_CLEANING_LENGTH = cast_model(Washer, "Длинная мойка термизатора").time
 
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):
