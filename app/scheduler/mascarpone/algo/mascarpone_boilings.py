@@ -5,6 +5,8 @@ from app.models import *
 
 from utils_ak.block_tree import *
 
+# note: steam consumption was not implemented and became deprecated (2021.06.04)
+
 
 def make_mascorpone_boiling(boiling_group_df, **props):
     sku = boiling_group_df.iloc[0]["sku"]

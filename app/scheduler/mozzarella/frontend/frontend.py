@@ -122,7 +122,7 @@ def wrap_cheese_makers(master, rng):
                     with code('Steam consumption'):
                         pass
 
-                        # deprecated (2021.06.04). Steam consumption is now not needed
+                        # deprecated (2021.06.04). Steam consumption is not needed anymore
                         # with m.block('steam consumption'):
                         #     for b in boiling["steams"]["steam_consumption", True]:
                         #         m.block(make_steam_blocks(b, x=b.x_rel), push_func=add_push)

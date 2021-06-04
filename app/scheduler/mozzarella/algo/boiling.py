@@ -31,7 +31,7 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
 
         with code('Steam consumption'):
             pass
-            # deprecated (2021.06.04). Steam consumption is not neede anymore
+            # deprecated (2021.06.04). Steam consumption is not needed anymore
             # with m.block("steams"):
             #     m.row("steam_consumption", push_func=add_push,
             #           x=0,
@@ -46,7 +46,7 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
 
     with code('Steam consumption'):
         pass
-        # deprecated (2021.06.04). Steam consumption is not neede anymore
+        # deprecated (2021.06.04). Steam consumption is not needed anymore
         # add steams to melting_and_packing
         # value = 250 if boiling_model.line.name == LineName.WATER else 1200
         # push(
