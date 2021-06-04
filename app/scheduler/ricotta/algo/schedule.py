@@ -31,13 +31,7 @@ class Validator(ClassValidator):
         # five minute pause between bigger to smaller packing size
         sku1 = b1.props["skus"][-1]
         sku2 = b2.props["skus"][0]
-
-        # todo soon: del
-        if (
-            sku1.weight_netto
-            and sku2.weight_netto
-            and sku1.weight_netto > sku2.weight_netto
-        ):
+        if sku1.weight_netto and sku2.weight_netto and sku1.weight_netto > sku2.weight_netto:
             assert b1["packing"].y[0] + 1 <= b2["packing"].x[0]
 
     @staticmethod
@@ -72,7 +66,7 @@ class Validator(ClassValidator):
 def make_schedule(boiling_plan_df, start_boiling_id=0):
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
-    # todo soon: compare with mozzarella
+    # todo later: compare with mozzarella
     boiling_plan_df["boiling_id"] += start_boiling_id - 1
 
     boiling_groups = []
