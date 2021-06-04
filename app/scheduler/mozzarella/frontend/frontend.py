@@ -132,7 +132,7 @@ def wrap_cheese_makers(master, rng):
     return m.root
 
 
-def make_cleanings(master):
+def wrap_cleanings(master):
     m = BlockMaker("cleanings_row",
                    default_row_width=1,
                    default_col_width=1,
@@ -158,7 +158,7 @@ def make_cleanings(master):
     return m.root
 
 
-def make_multihead_cleanings(master):
+def wrap_multihead_cleanings(master):
     m = BlockMaker("multihead_cleanings_row", axis=1)
     for multihead_cleaning in master.iter(cls="multihead_cleaning"):
         b = m.copy(multihead_cleaning, with_props=True)
@@ -167,7 +167,7 @@ def make_multihead_cleanings(master):
     return m.root
 
 
-def make_meltings_1(master, line_name, title, coolings_mode="all"):
+def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
     m = BlockMaker("melting",
                    default_row_width=1,
                    default_col_width=1,
@@ -297,7 +297,7 @@ def make_meltings_1(master, line_name, title, coolings_mode="all"):
     return m.root
 
 
-def make_shifts(start_from, shifts):
+def wrap_shifts(start_from, shifts):
     m = BlockMaker("shifts", start_time="00:00", x=[start_from, 0])
 
     for shift in shifts:
@@ -306,7 +306,7 @@ def make_shifts(start_from, shifts):
     return m.root
 
 
-def make_melting(boiling, line_name):
+def wrap_melting(boiling, line_name):
     m = BlockMaker("meltings",
                    default_row_width=1,
                    default_col_width=1,
@@ -373,7 +373,7 @@ def make_melting(boiling, line_name):
     return m.root
 
 
-def make_meltings_2(master, line_name, title):
+def wrap_meltings_2(master, line_name, title):
     m = BlockMaker("melting", axis=1)
 
     n_lines = 5
@@ -394,11 +394,11 @@ def make_meltings_2(master, line_name, title):
     for i, boiling in enumerate(
         master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == line_name)
     ):
-        push(melting_lines[i % n_lines], make_melting(boiling, line_name), push_func=add_push)
+        push(melting_lines[i % n_lines], wrap_melting(boiling, line_name), push_func=add_push)
     return m.root
 
 
-def make_packing_block(packing_block, boiling_id):
+def wrap_packing_block(packing_block, boiling_id):
     skus = [
         packing_process.props["sku"]
         for packing_process in packing_block.iter(cls="process")
@@ -438,7 +438,7 @@ def make_packing_block(packing_block, boiling_id):
     return m.root
 
 
-def make_packings(master, line_name):
+def wrap_packings(master, line_name):
     m = BlockMaker("packing",
                    default_row_width=1,
                    default_col_width=1,
@@ -453,7 +453,7 @@ def make_packings(master, line_name):
                 for packing_block in boiling.iter(
                     cls="collecting", packing_team_id=packing_team_id
                 ):
-                    m.block(make_packing_block(packing_block, boiling.props["boiling_id"]), push_func=add_push)
+                    m.block(wrap_packing_block(packing_block, boiling.props["boiling_id"]), push_func=add_push)
             try:
                 for conf in master["packing_configuration", True]:
                     # first level only
@@ -471,17 +471,17 @@ def make_packings(master, line_name):
     return m.root
 
 
-def make_extra_packings(extra_packings):
+def wrap_extra_packings(extra_packings):
     m = BlockMaker("packing", axis=1)
     for packing_block in extra_packings.iter(cls="packing"):
         m.block(
-            make_packing_block(packing_block, packing_block.props["boiling_id"]),
+            wrap_packing_block(packing_block, packing_block.props["boiling_id"]),
             push_func=add_push,
         )
     return m.root
 
 
-def make_frontend(schedule, coolings_mode="first"):
+def wrap_frontend(schedule, coolings_mode="first"):
     master = schedule["master"]
     extra_packings = schedule["extra_packings"]
 
@@ -498,15 +498,15 @@ def make_frontend(schedule, coolings_mode="first"):
     m.block(wrap_header(schedule.props["date"], start_time=start_time, header='График наливов'))
 
     with m.block("pouring", start_time=start_time, axis=1):
-        m.block(make_shifts(0,
+        m.block(wrap_shifts(0,
                             [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена"},
                              {"size": (cast_t("01:03:00") - cast_t("19:00") + 1 + cast_t("05:30"), 1, ), "text": "2 смена"}]))
         m.block(wrap_cheese_makers(master, range(2)))
         # make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
         #                      {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
-        m.block(make_cleanings(master))
+        m.block(wrap_cleanings(master))
         m.block(wrap_cheese_makers(master, range(2, 4)))
-        m.block(make_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "Оператор + Помощник"}]))
+        m.block(wrap_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "Оператор + Помощник"}]))
 
     start_t = min(
         [boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]]
@@ -517,9 +517,9 @@ def make_frontend(schedule, coolings_mode="first"):
     m.block(wrap_header(schedule.props["date"], start_time=start_time, header='График наливов'))
 
     with m.block("melting", start_time=start_time, axis=1):
-        m.block(make_multihead_cleanings(master))
+        m.block(wrap_multihead_cleanings(master))
         m.block(
-            make_meltings_1(
+            wrap_meltings_1(
                 master,
                 LineName.WATER,
                 "Линия плавления моцареллы в воде №1",
@@ -527,14 +527,14 @@ def make_frontend(schedule, coolings_mode="first"):
             )
         )
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
-        m.block(make_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "бригадир упаковки + 5 рабочих"}]))
-        m.block(make_packings(master, LineName.WATER))
-        m.block(make_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена оператор + помощник"},
+        m.block(wrap_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "бригадир упаковки + 5 рабочих"}]))
+        m.block(wrap_packings(master, LineName.WATER))
+        m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена оператор + помощник"},
                                 {"size": (cast_t("23:55") - cast_t("19:00") + 1 + cast_t("05:30"), 1)}]))
-        m.block(make_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
-        m.block(make_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "Бригадир упаковки +5 рабочих упаковки + наладчик"},
+        m.block(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
+        m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "Бригадир упаковки +5 рабочих упаковки + наладчик"},
                                 {"size": (cast_t("01:03:00") - cast_t("19:00") + 1 + cast_t("05:30"), 1), "text": "бригадир + наладчик + 5 рабочих"}]))
-        m.block(make_packings(master, LineName.SALT))
-        m.block(make_extra_packings(extra_packings))
+        m.block(wrap_packings(master, LineName.SALT))
+        m.block(wrap_extra_packings(extra_packings))
 
     return m.root

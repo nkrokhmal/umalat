@@ -1,6 +1,6 @@
 from app.imports.runtime import *
 from app.enum import LineName
-from app.scheduler.mozzarella import make_schedule, make_frontend, STYLE
+from app.scheduler.mozzarella import make_schedule, wrap_frontend, STYLE
 from app.scheduler.frontend import draw_excel_frontend
 
 
@@ -38,7 +38,7 @@ def _test(fn, open_file=False):
     utils.lazy_tester.log(schedule)
 
     try:
-        frontend = make_frontend(schedule)
+        frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
     utils.lazy_tester.log(frontend)
