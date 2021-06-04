@@ -60,10 +60,8 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__cream_cheese_boiling__cream_cheese_boiling(b1, b2):
-        # todo next: make properly. Bug?
-        assert utils.listify(b1["boiling_process"]["salting"][-1].y[0]) <= utils.listify(
-            b2["boiling_process"]["separation"][0].y[0]
-        )
+        assert b1["boiling_process"]["salting", True][-1].y[0] <= b2["boiling_process"]["separation", True][0].y[0]
+
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
