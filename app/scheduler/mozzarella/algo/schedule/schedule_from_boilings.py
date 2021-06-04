@@ -389,7 +389,6 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
         add_one_block_from_line(next_row["boiling"])
 
     # push extra packings
-
     class ExtraValidator(ClassValidator):
         def __init__(self):
             super().__init__(window=10)
@@ -398,19 +397,12 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
         def validate__packing__packing(b1, b2):
             return validate_disjoint_by_axis(b1, b2)
 
-
         @staticmethod
         def validate__multihead_cleaning__packing(b1, b2):
-            multihead_cleaning, packing = list(
-                sorted([b1, b2], key=lambda b: b.props["cls"])
-            )  # boiling, cleaning
+            multihead_cleaning, packing = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
             for process in packing.iter(cls="process"):
-                # todo soon: switch
-                # if process.props['sku'].packer.name == 'Мультиголова'
-                if (
-                    process.props["sku"].name
-                    == 'Сулугуни "Умалат" (для хачапури), 45%, 0,12 кг, ф/п'
-                ):
+                packer = utils.delistify(process.props['sku'].packers, single=True)
+                if packer.name == 'Мультиголова':
                     validate_disjoint_by_axis(multihead_cleaning, process)
                     assert multihead_cleaning.y[0] + 1 <= process.x[0]
 
