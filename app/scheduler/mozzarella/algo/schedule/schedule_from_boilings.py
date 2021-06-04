@@ -32,7 +32,10 @@ class Validator(ClassValidator):
 
         with code('Process boilings on the same pouring line'):
             if b1["pouring"].props["pouring_line"] == b2["pouring"].props["pouring_line"]:
-                # five minutes between boilings
+                # pourings should not intersect
+                validate_disjoint_by_axis(b1["pouring"], b2['pouring'])
+
+                # more than that: five minutes should be between boilings
                 assert b1["pouring"].y[0] + 1 <= b2["pouring"].x[0]
 
                 # if boilings use same drenator - drenator should not intersect with meltings
