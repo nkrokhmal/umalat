@@ -50,10 +50,10 @@ def _test(fn, open_file=False):
 
 
 if __name__ == "__main__":
-    # _test(
-    #     DebugConfig.abs_path(
-    #         "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"
-    #     ),
-    #     open_file=False,
-    # )
+    _test(
+        DebugConfig.abs_path(
+            "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"
+        ),
+        open_file=True,
+    )
     test_batch()

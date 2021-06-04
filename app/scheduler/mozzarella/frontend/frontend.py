@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from app.enum import LineName
 from app.scheduler.mozzarella.frontend.drawing import *
 from app.scheduler.mozzarella.frontend.style import *
-
+from app.scheduler.header import wrap_header
 
 def calc_form_factor_label(form_factors):
     form_factors = utils.remove_neighbor_duplicates(form_factors)
@@ -55,34 +55,6 @@ def calc_group_form_factor_label(skus):
     return "/".join(values)
 
 
-def wrap_header(date, start_time="01:00"):
-    maker, make = utils.init_block_maker("header", axis=1)
-
-    with make("header", size=(0, 1), index_width=2):
-        make(size=(1, 1), text="График наливов")
-        make(size=(1, 1), text=utils.cast_str(date, "%d.%m.%Y"), bold=True)
-        for i in range(566):
-            cur_time = cast_time(i + cast_t(start_time))
-            days, hours, minutes = cur_time.split(":")
-            if cur_time[-2:] == "00":
-                make(
-                    size=(1, 1),
-                    text=str(int(hours)),
-                    color=(218, 150, 148),
-                    text_rotation=90,
-                    font_size=9,
-                )
-            else:
-                make(
-                    size=(1, 1),
-                    text=minutes,
-                    color=(204, 255, 255),
-                    text_rotation=90,
-                    font_size=9,
-                )
-    return maker.root["header"]
-
-
 def wrap_cheese_makers(master, rng):
     maker, make = utils.init_block_maker("cheese_makers", axis=1)
 
@@ -114,7 +86,6 @@ def wrap_cheese_makers(master, rng):
                     )
                 )
 
-                # [cheesemakers.boiling_params]
                 boiling_label = "{} {} {} {}кг".format(
                     boiling_model.percent,
                     boiling_model.ferment,
@@ -616,7 +587,7 @@ def make_frontend(schedule, coolings_mode="first"):
     start_t = int(utils.custom_round(start_t, 12, "floor"))  # round to last hour
     start_t -= 24
     start_time = cast_time(start_t)
-    make(wrap_header(schedule.props["date"], start_time=start_time))
+    make(wrap_header(schedule.props["date"], start_time=start_time, header='График наливов'))
 
     with make("pouring", start_time=start_time, axis=1):
         make(
@@ -657,7 +628,7 @@ def make_frontend(schedule, coolings_mode="first"):
     start_t = int(utils.custom_round(start_t, 12, "floor"))  # round to last hour
     start_t -= 24
     start_time = cast_time(start_t)
-    make(wrap_header(schedule.props["date"], start_time=start_time))
+    make(wrap_header(schedule.props["date"], start_time=start_time, header='График наливов'))
 
     with make("melting", start_time=start_time, axis=1):
         make(make_multihead_cleanings(master))

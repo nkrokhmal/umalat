@@ -16,7 +16,6 @@ def make_cleaning(entity, **kwargs):
 
     m.row(f"cleaning_{entity}", size=CLEANING_SIZES[entity])
 
-    # todo soon: add steam consumption
     return m.root
 
 
