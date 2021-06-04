@@ -2,7 +2,7 @@ from app.models import *
 
 
 def generate_departments():
-    for name in ["Моцарельный цех", "Рикоттный цех", "Маскарпоновый цех"]:
+    for name in ["Моцарельный цех", "Рикоттный цех", "Маскарпоновый цех", "Масло цех"]:
         department = Department(name=name)
         db.session.add(department)
     db.session.commit()
@@ -24,6 +24,7 @@ def generate_group():
             "Творожный": "ТВР",
             "Робиола": "РБЛ",
             "Сливки": "СЛВ",
+            "Масло": "МСЛ"
         }
         for name, short_name in groups.items():
             ff = Group(name=name, short_name=short_name)
@@ -89,6 +90,16 @@ def generate_mozzarella_lines():
     mascarpone_line = MascarponeLine(name="Маскарпоне")
     mascarpone_line.department_id = mascarpone_department.id
     db.session.add(mascarpone_line)
+
+    butter_department = Department.query.filter_by(name="Масло цех").first()
+    butter_line = ButterLine(
+        name="Масло",
+        output_ton=450,
+        preparing_time=70,
+        displacement_time=10,
+    )
+    butter_line.department_id = butter_department.id
+    db.session.add(butter_line)
 
     db.session.commit()
 
