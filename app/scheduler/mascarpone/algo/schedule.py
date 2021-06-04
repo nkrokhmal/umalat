@@ -125,8 +125,6 @@ class BoilingPlanToSchedule:
 
         all_line_nums = [[1, 2], [3, 4]]
 
-        # todo next: why two only???
-        boiling_volumes = [800, 600]
         for i, bg in enumerate(boiling_groups):
             if is_cream:
                 line_nums = [i % 4 + 1]
@@ -140,7 +138,7 @@ class BoilingPlanToSchedule:
                  push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                  push_kwargs={'validator': Validator()},
                  # props
-                 line_nums=line_nums, boiling_volume=boiling_volumes[i % 2])
+                 line_nums=line_nums)
 
         left_cleaning_lines = list(all_line_nums)
         if not is_cream:
