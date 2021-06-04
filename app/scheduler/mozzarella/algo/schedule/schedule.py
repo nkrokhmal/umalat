@@ -21,7 +21,6 @@ def make_schedule(
             .agg({"cleaning": "first"})
             .to_dict()["cleaning"]
         )
-        # todo maybe: assert that all groups are actually single boilings
 
     cleanings = {k + first_boiling_id - 1: v for k, v in cleanings.items() if v}
     boilings = make_boilings(boiling_plan_df, first_boiling_id=first_boiling_id)

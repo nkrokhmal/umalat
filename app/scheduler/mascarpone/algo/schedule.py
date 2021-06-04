@@ -215,8 +215,8 @@ class BoilingPlanToSchedule:
                          push_func=AxisPusher(start_from="last_beg"),
                          push_kwargs={'validator': Validator()})
 
-    def __call__(self, boiling_plan_df, start_batch_id=0):
-        boiling_plan_df["batch_id"] += start_batch_id - 1
+    def __call__(self, boiling_plan_df, first_batch_id=0):
+        boiling_plan_df["batch_id"] += first_batch_id - 1
         columns = boiling_plan_df.columns
         boiling_plan_df["tag"] = (
             boiling_plan_df["sku_cls_name"]
