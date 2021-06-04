@@ -67,7 +67,9 @@ class SchemaToBoilingsDataframes:
                     max_pressures=[sku.packing_speed, None],
                     processing_time=0,
                 )
-                seq = utils.Sequence(f"Sequence{packing_team_id}-{j}", [container, processor])
+                seq = utils.Sequence(
+                    f"Sequence{packing_team_id}-{j}", [container, processor]
+                )
                 sequences.append(seq)
             packing_queue = utils.Queue(
                 f"PackingQueue{packing_team_id}",
@@ -78,7 +80,7 @@ class SchemaToBoilingsDataframes:
         return packing_queues
 
     def _calc_boilings_dataframes(
-        self, melting_actors_by_boiling, packing_queues, round=True
+        self, melting_actors_by_boiling, packing_queues, rounding="nearest_half_down"
     ):
         res = []
 
@@ -140,18 +142,20 @@ class SchemaToBoilingsDataframes:
                 boiling_dataframes["collectings"][packing_team_id] = df.copy()
 
             boiling_dataframes["meltings"] = self._post_process_dataframe(
-                boiling_dataframes["meltings"], round=round
+                boiling_dataframes["meltings"], rounding=rounding
             )
             boiling_dataframes["coolings"] = self._post_process_dataframe(
-                boiling_dataframes["coolings"], fix_small_intervals=False, round=round
+                boiling_dataframes["coolings"],
+                fix_small_intervals=False,
+                rounding=rounding,
             )
 
             boiling_dataframes["collectings"] = {
-                packing_team_id: self._post_process_dataframe(df, round=round)
+                packing_team_id: self._post_process_dataframe(df, rounding=rounding)
                 for packing_team_id, df in boiling_dataframes["collectings"].items()
             }
             boiling_dataframes["packings"] = {
-                packing_team_id: self._post_process_dataframe(df, round=round)
+                packing_team_id: self._post_process_dataframe(df, rounding=rounding)
                 for packing_team_id, df in boiling_dataframes["packings"].items()
             }
 
@@ -166,22 +170,19 @@ class SchemaToBoilingsDataframes:
                 utils.pipe_disconnect(packing_hub, packing_queue)
         return res
 
-    def _post_process_dataframe(self, df, fix_small_intervals=True, round=True):
+    def _post_process_dataframe(
+        self, df, fix_small_intervals=True, rounding="nearest_half_down"
+    ):
         # move to minutes
         df["beg"] = df["beg"] * 60
         df["end"] = df["end"] * 60
-
-        if round:
+        if rounding:
             # round to five-minute intervals
             df["beg"] = df["beg"].apply(
-                lambda ts: None
-                if ts is None
-                else utils.custom_round(ts, 5, "nearest_half_down")
+                lambda ts: None if ts is None else utils.custom_round(ts, 5, rounding)
             )
             df["end"] = df["end"].apply(
-                lambda ts: None
-                if ts is None
-                else utils.custom_round(ts, 5, "nearest_half_down")
+                lambda ts: None if ts is None else utils.custom_round(ts, 5, rounding)
             )
 
             # fix small intervals (like beg and end: 5, 5 -> 5, 10)
@@ -197,12 +198,14 @@ class SchemaToBoilingsDataframes:
             df["end"] = df["end"].astype(int)
         return df
 
-    def __call__(self, boilings_meltings, packings, melting_speed, round=True):
+    def __call__(
+        self, boilings_meltings, packings, melting_speed, rounding="nearest_half_down"
+    ):
         melting_actors_by_boiling = self._calc_melting_actors_by_boiling(
             boilings_meltings, melting_speed
         )
         packing_queues = self._calc_packing_queues(packings)
         boilings_dataframes = self._calc_boilings_dataframes(
-            melting_actors_by_boiling, packing_queues, round=round
+            melting_actors_by_boiling, packing_queues, rounding=rounding
         )
         return boilings_dataframes

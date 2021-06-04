@@ -1,3 +1,4 @@
+# fmt: off
 from utils_ak.block_tree import *
 from app.enum import LineName
 
@@ -5,8 +6,8 @@ from app.enum import LineName
 def make_cooling_process(
     line_name, cooling_technology, melting_process_size=None, size=None, *args, **kwargs
 ):
-    maker, make = init_block_maker("cooling_process", *args, **kwargs)
-    with make("start"):
+    m = BlockMaker("cooling_process", *args, **kwargs)
+    with m.block("start"):
         cooling_times = (
             [
                 cooling_technology.first_cooling_time,
@@ -16,11 +17,11 @@ def make_cooling_process(
             else [cooling_technology.salting_time]
         )
         for cooling_time in cooling_times:
-            make("cooling", size=(cooling_time // 5, 0))
+            m.row("cooling", size=cooling_time // 5)
 
     if size:
-        melting_process_size = size - maker.root["start"].size[0]
+        melting_process_size = size - m.root["start"].size[0]
 
-    with make("finish"):
-        make("cooling", size=(melting_process_size, 0))
-    return maker.root
+    with m.block("finish"):
+        m.row("cooling", size=melting_process_size)
+    return m.root

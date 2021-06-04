@@ -167,6 +167,8 @@ def read_boiling_plan(wb_obj, saturate=True):
     )
     df["boiling_id"] = df["boiling_id"].astype(int)
     df["kg"] = df["kg"].apply(lambda x: int(x))
+    df["first_tank"] = np.where(df["first_tank"] == "", 0, df["first_tank"])
+    df["first_tank"] = df["first_tank"].astype(int)
 
     for idx, grp in df.groupby("boiling_id"):
         assert (
@@ -207,6 +209,7 @@ def read_boiling_plan(wb_obj, saturate=True):
             else:
                 # all fine
                 pass
+
     if saturate:
         df = saturate_boiling_plan(df)
     return df

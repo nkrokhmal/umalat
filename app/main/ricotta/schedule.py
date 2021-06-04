@@ -38,7 +38,7 @@ def ricotta_schedule():
             form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
         )
         schedule = make_schedule(boiling_plan_df, form.batch_number.data)
-        frontend = make_frontend(schedule, date=date, start_time=beg_time)
+        frontend = wrap_frontend(schedule, date=date, start_time=beg_time)
 
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"

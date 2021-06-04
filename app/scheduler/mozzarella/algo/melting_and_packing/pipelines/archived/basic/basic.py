@@ -10,10 +10,10 @@ def make_melting_and_packing_basic(boiling_plan):
     boiling_plan = boiling_plan.copy()
     boiling_model = boiling_plan.iloc[0]["boiling"]
 
-    # todo: test
+    # todo archived: test and refactor
     assert boiling_plan[
         "bff"
-    ].any(), "At least one sku should be non-Терка for now"  # todo: make properly
+    ].any(), "At least one sku should be non-Терка for now"
 
     boiling_plan["ct"] = boiling_plan["bff"].apply(
         lambda ff: ff.default_cooling_technology
@@ -35,12 +35,10 @@ def make_melting_and_packing_basic(boiling_plan):
         coolings = make("coolings", x=(serving.size[0], 0), push_func=add_push).block
 
         for i, (group, grp) in enumerate(boiling_plan.groupby("melting_group")):
-            # print(group)
-            # print(grp)
             if i >= 1 and boiling_model.line.name == LineName.WATER:
                 # non-first group - reconfigure time
                 push(meltings, maker.create_block("melting_configuration", size=(1, 0)))
-                # todo: remove reconfiguration when neighbour form_factors are the same
+                # todo archived: remove reconfiguration when neighbour form_factors are the same
 
             bff, ct = grp.iloc[0]["bff"], grp.iloc[0]["ct"]
 
@@ -72,7 +70,7 @@ def make_melting_and_packing_basic(boiling_plan):
     with make(
         "packing",
         x=(
-            utils.listify(maker.root["melting"]["coolings"]["cooling_process"])[0][
+            maker.root["melting"]["coolings"]["cooling_process", True][0][
                 "start"
             ].y[0],
             0,

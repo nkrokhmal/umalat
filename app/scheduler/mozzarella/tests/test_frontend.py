@@ -5,22 +5,20 @@ from app.scheduler.frontend import draw_excel_frontend
 
 
 def test_batch():
-    # fns = glob.glob(
-    #     DebugConfig.abs_path("app/data/static/samples/inputs/mozzarella/*.xlsx")
-    # )
-
-    fns = [
-        DebugConfig.abs_path(fn)
-        for fn in [
-            "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам.xlsx",
-            # "app/data/static/samples/inputs/mozzarella/2021-02-28 План по варкам.xlsx",
-            # "app/data/static/samples/inputs/mozzarella/2021-02-26 План по варкам.xlsx",
-            # "app/data/static/samples/inputs/mozzarella/2021-02-19 План по варкам.xlsx",
-            # "app/data/static/samples/inputs/mozzarella/2021-02-17 План по варкам.xlsx",
-            # "app/data/static/samples/inputs/mozzarella/2021-02-16 План по варкам.xlsx",
-            "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx",
-        ]
-    ]
+    fns = glob.glob(
+        DebugConfig.abs_path("app/data/static/samples/inputs/mozzarella/*.xlsx")
+    )
+    fns = [fn for fn in fns if "$" not in fn]
+    # fns = [
+    #     DebugConfig.abs_path(fn)
+    #     for fn in [
+    #         "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx",
+    #         "app/data/static/samples/inputs/mozzarella/2021-02-17 План по варкам.xlsx",
+    #         "app/data/static/samples/inputs/mozzarella/2021-02-19 План по варкам.xlsx",
+    #         "app/data/static/samples/inputs/mozzarella/2021-02-26 План по варкам.xlsx",
+    #         "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам.xlsx",
+    #     ]
+    # ]
     for fn in tqdm.tqdm(fns):
         _test(fn, open_file=False)
 
@@ -52,5 +50,10 @@ def _test(fn, open_file=False):
 
 
 if __name__ == "__main__":
-    # _test(open_file=False)
-    test_batch()
+    _test(
+        DebugConfig.abs_path(
+            "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"
+        ),
+        open_file=False,
+    )
+    # test_batch()
