@@ -142,7 +142,7 @@ class SchemaToBoilingsDataframes:
                 boiling_dataframes["collectings"][packing_team_id] = df.copy()
 
             boiling_dataframes["meltings"] = self._post_process_dataframe(
-                boiling_dataframes["meltings"], rounding='ceil'
+                boiling_dataframes["meltings"], rounding='nearest_half_down'
             )
             boiling_dataframes["coolings"] = self._post_process_dataframe(
                 boiling_dataframes["coolings"],
