@@ -46,6 +46,7 @@ def cast_model(cls, obj, int_attribute="id", str_attribute="name"):
 def cast_mozzarella_form_factor(obj):
     if isinstance(obj, str):
         # 'Вода: 200'
+        # todo maybe: make 'Вода: 200' a default name for form factor, not 0.2.
         short_line_name, relative_weight = obj.split(":")
         relative_weight = relative_weight.strip()
         short_line_names_map = {"Вода": "Моцарелла в воде", "Соль": "Пицца чиз"}
