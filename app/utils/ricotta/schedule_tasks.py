@@ -1,5 +1,6 @@
 from app.utils.features.draw_utils import *
 from app.utils.features.openpyxl_wrapper import ExcelBlock
+from app.models import RicottaSKU
 
 
 def update_total_schedule_task(date, df):
@@ -11,7 +12,11 @@ def update_total_schedule_task(date, df):
         df_task.to_csv(path, index=False, sep=";")
 
     df_task = pd.read_csv(path, sep=";")
-    skus = df_task.sku.values
+
+    sku_names = db.session.query(RicottaSKU).all()
+    sku_names = [x.name for x in sku_names]
+    df_task = df_task[~df_task['sku'].isin(sku_names)]
+
     for sku_name, grp in df.groupby("sku_name"):
         kg = round(grp["kg"].sum())
         boxes_count = math.ceil(
@@ -26,10 +31,7 @@ def update_total_schedule_task(date, df):
             kg,
             boxes_count,
         ]
-        if sku_name in skus:
-            df_task.loc[df_task.sku == values[0], columns] = values
-        else:
-            df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+        df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
     df_task.to_csv(path, index=False, sep=";")
 
 
