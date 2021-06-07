@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 from app.models import *
+from app.scheduler.butter.boiling_plan.saturate import saturate_boiling_plan
 
 
 def generate_random_boiling_plan(n=3, seed=12):
@@ -22,7 +23,6 @@ def generate_random_boiling_plan(n=3, seed=12):
                     [sku for sku in skus if boiling_model in sku.made_from_boilings]
                 )
             )
-
         boiling_skus = list(sorted(boiling_skus, key=lambda sku: sku.name))
         for sku in boiling_skus:
             kg = sku.packing_speed * np.random.uniform(0.6, 0.8) / 3
@@ -30,4 +30,5 @@ def generate_random_boiling_plan(n=3, seed=12):
             values.append([i, sku, kg])
 
     df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
+    df = saturate_boiling_plan(df)
     return df
