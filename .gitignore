@@ -63,6 +63,7 @@ app/data/dynamic/stats/*.xlsx
 app/data/dynamic/tmp/*.csv
 app/data/dynamic/tmp/*.xlsx
 app/data/dynamic/schedule_task/*.csv
+app/scheduler/butter/tests/schedules
 
 # Dynamic data
 db/batch_numbers/data.json
