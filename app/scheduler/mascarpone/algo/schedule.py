@@ -60,7 +60,7 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__cream_cheese_boiling__cream_cheese_boiling(b1, b2):
-        assert b1["boiling_process"]["salting", True][-1].y[0] <= b2["boiling_process"]["separation", True][0].y[0]
+        assert b1["boiling_process"]["salting", True][-1].y[0] <= b2["boiling_process"]["separation", True][0].x[0]
 
 
     @staticmethod
