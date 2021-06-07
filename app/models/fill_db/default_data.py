@@ -99,6 +99,7 @@ def generate_mozzarella_lines():
         output_ton=450,
         preparing_time=70,
         displacement_time=10,
+        cleaning_time=27*5,
     )
     butter_line.department_id = butter_department.id
     db.session.add(butter_line)
