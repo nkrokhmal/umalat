@@ -50,7 +50,7 @@ def test_make_mascarpone_boiling_group():
             [_create_boiling_group_df(1), _create_boiling_group_df(2)]
         )
     )
-    utils.lazy_tester.assert_logs(reset=True)
+    utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
