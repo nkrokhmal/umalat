@@ -13,8 +13,8 @@ def make_boiling(boiling_group_df):
     bt = utils.delistify(boiling_model.boiling_technologies, single=True) # there is only one boiling technology is for every boiling model in butter department
 
     m.row('separator_runaway', size=bt.separator_runaway_time // 5)
-    m.row('pasteurization_time', size=bt.pasteurization_time // 5)
-    m.row('increasing_temperature_time', size=bt.increasing_temperature_time // 5)
+    m.row('pasteurization', size=bt.pasteurization_time // 5)
+    m.row('increasing_temperature', size=bt.increasing_temperature_time // 5)
 
     packing_time = sum(
         [
