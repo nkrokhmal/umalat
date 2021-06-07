@@ -7,11 +7,19 @@ from app.scheduler.mascarpone.algo.mascarpone_boilings import *
 def test_make_mascarpone_boiling():
     utils.lazy_tester.configure_function_path()
 
-    sku = cast_model(SKU, 90)
-    values = [[0, 0, sku.made_from_boilings[0], sku, 10, True]]
+    sku = cast_model(MascarponeSKU, 'Маскарпоне "Pretto", 80%, 0,25 кг, пл/с')
+    values = [[0, 0, sku.made_from_boilings[0], sku, 10, False, 1]]
     boiling_group_df = pd.DataFrame(
         values,
-        columns=["boiling_key", "boiling_id", "boiling", "sku", "kg", "is_cream"],
+        columns=[
+            "boiling_key",
+            "boiling_id",
+            "boiling",
+            "sku",
+            "kg",
+            "is_cream",
+            "sourdough",
+        ],
     )
 
     utils.lazy_tester.log(make_mascorpone_boiling(boiling_group_df))
@@ -20,18 +28,29 @@ def test_make_mascarpone_boiling():
 
 def test_make_mascarpone_boiling_group():
     utils.lazy_tester.configure_function_path()
+    sku = cast_model(MascarponeSKU, 'Маскарпоне "Pretto", 80%, 0,25 кг, пл/с')
 
-    sku = cast_model(SKU, 92)
-    values = [[0, 0, sku.made_from_boilings[0], sku, 10, True]]
-    boiling_group_df = pd.DataFrame(
-        values,
-        columns=["boiling_key", "boiling_id", "boiling", "sku", "kg", "is_cream"],
-    )
+    def _create_boiling_group_df(sourdough):
+        values = [[0, 0, sku.made_from_boilings[0], sku, 10, False, sourdough]]
+        return pd.DataFrame(
+            values,
+            columns=[
+                "boiling_key",
+                "boiling_id",
+                "boiling",
+                "sku",
+                "kg",
+                "is_cream",
+                "sourdough",
+            ],
+        )
 
     utils.lazy_tester.log(
-        make_mascarpone_boiling_group([boiling_group_df, boiling_group_df])
+        make_mascarpone_boiling_group(
+            [_create_boiling_group_df(1), _create_boiling_group_df(2)]
+        )
     )
-    utils.lazy_tester.assert_logs()
+    utils.lazy_tester.assert_logs(reset=True)
 
 
 if __name__ == "__main__":
