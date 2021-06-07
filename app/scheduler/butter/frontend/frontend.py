@@ -15,10 +15,13 @@ def wrap_line(schedule):
     for child in schedule.iter():
         if not child.is_leaf():
             continue
+
         child.update_size(size=(child.size[0], 2))
 
         if child.props['cls'] == 'pasteurization':
-            with m.block('pasteurization', x=(child.x[0], 0), push_func=add_push):
+            with m.block('pasteurization', push_func=add_push,
+                         x=(child.x[0], 0),
+                         boiling_model=child.props['boiling_model']):
                 m.block('pasteurization_1', push_func=add_push,
                         size=(child.size[0], 1), x=(0, 0))
 
