@@ -116,6 +116,8 @@ def generate_mozzarella_lines():
 def generate_washer():
     WasherData = collections.namedtuple("WasherData", "name, time")
     mozzarella_department = Department.query.filter_by(name="Моцарельный цех").first()
+    mascarpone_department = Department.query.filter_by(name="Маскарпоновый цех").first()
+    ricotta_department = Department.query.filter_by(name="Рикоттный цех").first()
     for data in [
         WasherData("Короткая мойка термизатора", 40),
         WasherData("Длинная мойка термизатора", 80),
@@ -124,6 +126,37 @@ def generate_washer():
             name=data.name,
             time=data.time,
             department_id=mozzarella_department.id,
+        )
+        db.session.add(washer)
+
+    for data in [
+        WasherData("sourdough", 13),
+        WasherData("sourdough_cream_cheese", 12),
+        WasherData("separator", 15),
+        WasherData("heat_exchanger", 12),
+        WasherData("homogenizer", 12),
+    ]:
+        washer = Washer(
+            name=data.name,
+            time=data.time,
+            department_id=mascarpone_department.id,
+        )
+        db.session.add(washer)
+
+    for data in [
+        WasherData("bath_cleaning_1", 2),
+        WasherData("bath_cleaning_2", 4),
+        WasherData("bath_cleaning_3", 1),
+        WasherData("bath_cleaning_4", 2),
+        WasherData("bath_cleaning_5", 2),
+        WasherData("container_cleaning_1", 12),
+        WasherData("container_cleaning_2", 12),
+        WasherData("container_cleaning_3", 12),
+    ]:
+        washer = Washer(
+            name=data.name,
+            time=data.time,
+            department_id=ricotta_department.id,
         )
         db.session.add(washer)
     db.session.commit()
