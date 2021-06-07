@@ -7,7 +7,7 @@ from app.scheduler.ricotta.boiling_plan import *
 
 def test_make_frontend_boiling():
     boiling_model = cast_model(RicottaBoiling, 9)
-    print(make_frontend_boiling(make_boiling(boiling_model)))
+    print(wrap_boiling(make_boiling(boiling_model)))
 
 
 def test_drawing_ricotta(open_file=False):
@@ -20,12 +20,14 @@ def test_drawing_ricotta(open_file=False):
     utils.lazy_tester.configure(local_path=os.path.basename(boiling_plan_fn))
 
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
+
     schedule = make_schedule(boiling_plan_df)
     utils.lazy_tester.log(schedule)
-    frontend = make_frontend(schedule)
-    utils.lazy_tester.log(frontend)
+    frontend = wrap_frontend(schedule)
 
+    utils.lazy_tester.log(frontend)
     draw_excel_frontend(frontend, STYLE, open_file=open_file)
+
     utils.lazy_tester.assert_logs()
 
 

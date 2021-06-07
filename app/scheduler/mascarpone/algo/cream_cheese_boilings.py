@@ -1,12 +1,15 @@
-from app.imports.runtime import *
+# fmt: off
+# from app.imports.runtime import *
 from app.models import *
+
+from utils_ak.block_tree import *
 
 
 def make_cream_cheese_boiling(boiling_group_df, **props):
     boiling_model = boiling_group_df.iloc[0]["sku"].made_from_boilings[0]
 
     boiling_id = boiling_group_df.iloc[0]["boiling_id"]
-    maker, make = utils.init_block_maker(
+    m = BlockMaker(
         "cream_cheese_boiling",
         boiling_model=boiling_model,
         boiling_id=boiling_id,
@@ -15,19 +18,18 @@ def make_cream_cheese_boiling(boiling_group_df, **props):
 
     bt = utils.delistify(boiling_model.boiling_technologies, single=True)
 
-    with make("boiling_process"):
-        make("cooling", size=(bt.cooling_time // 5, 0))
-        make("separation", size=(bt.separation_time // 5, 0))
-        make("salting", size=(bt.salting_time // 5, 0))
-        make("separation", size=(bt.separation_time // 5, 0))
-        make("salting", size=(bt.salting_time // 5, 0))
-        make("P", size=(bt.p_time // 5, 0))
-    with make(
-        "packing_process",
-        x=(maker.root["boiling_process"]["separation"][-1].x[0] - bt.p_time // 5, 0),
-        push_func=utils.add_push,
+    with m.row("boiling_process"):
+        m.row("cooling", size=bt.cooling_time // 5)
+        m.row("separation", size=bt.separation_time // 5)
+        m.row("salting", size=bt.salting_time // 5)
+        m.row("separation", size=bt.separation_time // 5)
+        m.row("salting", size=bt.salting_time // 5)
+        m.row("P", size=bt.p_time // 5)
+    with m.row(
+        "packing_process", push_func=add_push,
+        x=m.root["boiling_process"]["separation"][-1].x[0] - bt.p_time // 5,
     ):
-        make("P", size=(bt.p_time // 5, 0))
+        m.row("P", size=bt.p_time // 5)
         packing_time = sum(
             [
                 row["kg"] / row["sku"].packing_speed * 60
@@ -37,8 +39,8 @@ def make_cream_cheese_boiling(boiling_group_df, **props):
         packing_time = int(
             utils.custom_round(packing_time, 5, "ceil", pre_round_precision=1)
         )
-        make(
+        m.row(
             "packing",
-            size=(packing_time // 5, 0),
+            size=packing_time // 5,
         )
-    return maker.root
+    return m.root
