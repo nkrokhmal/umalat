@@ -23,8 +23,8 @@ def test_drawing_mascarpone(open_file=False):
     utils.lazy_tester.log(frontend)
     draw_excel_frontend(frontend, STYLE, open_file=open_file)
 
-    utils.lazy_tester.assert_logs(reset=True)
+    utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
-    test_drawing_mascarpone(open_file=True)
+    test_drawing_mascarpone(open_file=False)

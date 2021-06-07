@@ -2,20 +2,21 @@ from app.imports.runtime import *
 from app.models import *
 
 
-def generate_random_boiling_plan(n=24, seed=12):
+def generate_random_boiling_plan(n=3, seed=12):
     random.seed(seed)
+    np.random.seed(seed)
 
-    skus = fetch_all(RicottaSKU)
+    skus = fetch_all(ButterSKU)
     skus = [sku for sku in skus if sku.weight_netto]
 
-    models = fetch_all(RicottaBoiling)
+    models = fetch_all(ButterBoiling)
 
     values = []
     for i in range(n):
         boiling_skus = []
         boiling_model = random.choice(models)
 
-        for _ in range(boiling_model.number_of_tanks):
+        for _ in range(4):
             boiling_skus.append(
                 random.choice(
                     [sku for sku in skus if boiling_model in sku.made_from_boilings]
@@ -29,5 +30,4 @@ def generate_random_boiling_plan(n=24, seed=12):
             values.append([i, sku, kg])
 
     df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
-    df["tanks"] = 3
     return df
