@@ -13,16 +13,7 @@ def test_mascarpone_batch():
         DebugConfig.abs_path("app/data/static/samples/inputs/mascarpone/*.xlsx")
     )
     fns = [fn for fn in fns if "$" not in fn]
-    # fns = [
-    #     DebugConfig.abs_path(fn)
-    #     for fn in [
-    #         "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx",
-    #         "app/data/static/samples/inputs/mozzarella/2021-02-17 План по варкам.xlsx",
-    #         "app/data/static/samples/inputs/mozzarella/2021-02-19 План по варкам.xlsx",
-    #         "app/data/static/samples/inputs/mozzarella/2021-02-26 План по варкам.xlsx",
-    #         "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам.xlsx",
-    #     ]
-    # ]
+
     for fn in tqdm.tqdm(fns):
         _test(fn, open_file=False)
 
@@ -38,7 +29,6 @@ def _test(fn, open_file=False):
     frontend = wrap_frontend(schedule)
     utils.lazy_tester.log(frontend)
     draw_excel_frontend(frontend, STYLE, open_file=open_file)
-
     utils.lazy_tester.assert_logs()
 
 
