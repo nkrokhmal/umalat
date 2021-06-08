@@ -38,9 +38,15 @@ def make_mascorpone_boiling(boiling_group_df, **props):
                 if cast_model(MascarponeSourdough, sourdough)
                 in boiling_technology.sourdoughs
             ]
+
+        assert (
+            len(boiling_technologies) != 0
+        ), f"Не найдено ни одной технологии варки на данном заквасочнике для данного типа варки."
+
         assert (
             len(boiling_technologies) == 1
         ), f"Найдено более одной технологии варки на данном заквасочнике для данного типа варки: {len(boiling_technologies)}"
+
         return utils.delistify(boiling_technologies, single=True)
 
     bt = get_boiling_technology_from_boiling_model(boiling_model)
@@ -142,11 +148,17 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
                 b2["boiling_process"]["pouring"].x[0]
                 - b1["boiling_process"]["pouring"].y[0]
             )
-            for b in [b2["boiling_process"]]:
-                b.props.update(x=(b.props["x_rel"][0] - waiting_size, 0))
 
+            # update boiling
+            b2.props.update(x=(b2.x_rel[0] - waiting_size, 0))
+            # update boiling children
             for key in ["adding_lactic_acid", "pumping_off"]:
-                b = b2["boiling_process"][key]
-                b.props.update(x=(b.props["x_rel"][0] + waiting_size, 0))
+                b2["boiling_process"][key].props.update(x=(b2["boiling_process"][key].x_rel[0] + waiting_size, 0))
+
+            b2["packing_process"].props.update(x=(b2["packing_process"].x_rel[0] + waiting_size, 0))
+
             b2["boiling_process"]["waiting"].update_size(size=(waiting_size, 0))
+            # reset cache since we monkey-patched things
+            b2.props.reset_cache(recursion='up')
+
     return m.root

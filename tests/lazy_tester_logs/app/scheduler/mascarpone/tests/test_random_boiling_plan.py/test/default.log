@@ -1,0 +1,25 @@
+   boiling_id                   sku     kg
+0           0   <MascarponeSKU 104>  110.0
+1           1   <MascarponeSKU 104>  120.0
+2           2   <MascarponeSKU 103>  160.0
+3           3    <MascarponeSKU 99>  170.0
+4           4   <MascarponeSKU 101>  190.0
+5           5    <MascarponeSKU 98>  190.0
+0           6  <CreamCheeseSKU 114>  120.0
+1           7  <CreamCheeseSKU 114>  130.0
+2           8  <CreamCheeseSKU 115>   80.0
+3           9  <CreamCheeseSKU 115>   90.0
+4          10  <CreamCheeseSKU 115>   80.0
+5          11  <CreamCheeseSKU 116>   90.0
+0          12   <MascarponeSKU 104>  110.0
+1          13   <MascarponeSKU 104>  100.0
+2          14   <MascarponeSKU 102>  180.0
+3          15   <MascarponeSKU 100>  180.0
+4          16    <MascarponeSKU 97>  150.0
+5          17   <MascarponeSKU 102>  180.0
+0          18  <CreamCheeseSKU 106>   90.0
+1          19  <CreamCheeseSKU 106>   90.0
+2          20  <CreamCheeseSKU 114>  130.0
+3          21  <CreamCheeseSKU 114>  140.0
+4          22  <CreamCheeseSKU 113>  130.0
+5          23  <CreamCheeseSKU 112>  120.0

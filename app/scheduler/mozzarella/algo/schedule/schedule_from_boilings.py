@@ -36,6 +36,8 @@ class Validator(ClassValidator):
                 _b1 = b1['pouring']
                 _b2 = b2['pouring']
                 validate_disjoint_by_intervals((_b1.x[0], _b1.y[0] + 1), (_b2.x[0], _b2.y[0]))
+                # todo soon: optimize
+                assert b1["pouring"].y[0] + 1 <= b2["pouring"].x[0]
 
                 # if boilings use same drenator - drenator should not intersect with meltings
                 if b1.props["drenator_num"] == b2.props["drenator_num"]:
@@ -70,6 +72,8 @@ class Validator(ClassValidator):
                     _b2 = b2["melting_and_packing"]["melting"]["meltings"]
                     # at least one hour should pass between meltings
                     validate_disjoint_by_intervals((_b1.x[0], _b1.y[0] + 12), (_b2.x[0], _b2.y[0]))
+                    # todo soon: optimize
+                    assert b1["melting_and_packing"]["melting"]["meltings"].y[0] + 12 <= b2["melting_and_packing"]["melting"]["meltings"].x[0]
 
             with code('Process lactose switch on salt line'):
                 if boiling_model1.line.name == LineName.SALT:
@@ -77,11 +81,15 @@ class Validator(ClassValidator):
                         _b1 = b1["melting_and_packing"]["melting"]["meltings"]
                         _b2 = b2["melting_and_packing"]["melting"]["serving"]
                         validate_disjoint_by_intervals((_b1.x[0], _b1.y[0] + 2), (_b2.x[0], _b2.y[0]))
+                        # todo soon: optimize
+                        assert b1["melting_and_packing"]["melting"]["meltings"].y[0] + 2 <= b2["melting_and_packing"]["melting"]["serving"].x[0]
 
                     if not boiling_model1.is_lactose and boiling_model2.is_lactose:
                         _b1 = b1["melting_and_packing"]["melting"]["meltings"]
                         _b2 = b2["melting_and_packing"]["melting"]["serving"]
                         validate_disjoint_by_intervals((_b1.x[0], _b1.y[0] - 2), (_b2.x[0], _b2.y[0]))
+                        # todo soon: optimize
+                        assert b1["melting_and_packing"]["melting"]["meltings"].y[0] - 2 <= b2["melting_and_packing"]["melting"]["serving"].x[0]
 
         else:
             # different lines
@@ -96,6 +104,8 @@ class Validator(ClassValidator):
                 _b1 = b1["melting_and_packing"]["melting"]["meltings"]
                 _b2 = b2["melting_and_packing"]["melting"]["meltings"]
                 validate_disjoint_by_intervals((_b1.x[0], _b1.y[0] + 7), (_b2.x[0], _b2.y[0]))
+                # todo soon: optimize
+                assert b2["melting_and_packing"]["melting"]["meltings"].x[0] - b1["melting_and_packing"]["melting"]["meltings"].y[0] > 6
 
 
     @staticmethod
@@ -417,6 +427,8 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 if packer.name == 'Мультиголова':
                     validate_disjoint_by_axis(multihead_cleaning, process)
                     validate_disjoint_by_intervals((multihead_cleaning.x[0], multihead_cleaning.y[0] + 1), (process.x[0], process.y[0]))
+                    # todo soon: optimize
+                    assert multihead_cleaning.y[0] + 1 <= process.x[0]
 
     # add multihead to "extra_packings"
     for multihead_cleaning in schedule["extra"].iter(cls="multihead_cleaning"):

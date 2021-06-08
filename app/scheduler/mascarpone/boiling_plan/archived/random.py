@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 from app.models import *
+from app.scheduler.mascarpone.boiling_plan.saturate import saturate_boiling_plan
 
 
 def _generate_random_boiling_group(sku_model, boiling_model, n=3):
@@ -18,11 +19,13 @@ def _generate_random_boiling_group(sku_model, boiling_model, n=3):
             kg = utils.custom_round(kg, 10, "ceil")
             values.append([i * 2 + j, sku, kg])
 
-    return pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
+    return pd.DataFrame(values, columns=["batch_id", "sku", "kg"])
 
 
 def generate_random_boiling_plan(n_groups=4, seed=3):
     random.seed(seed)
+    np.random.seed(seed)
+
     dfs = []
     for group_type in random.choices(["Mascarpone", "CreamCheese"], k=n_groups):
         sku_model = globals()[group_type + "SKU"]
@@ -31,6 +34,5 @@ def generate_random_boiling_plan(n_groups=4, seed=3):
         dfs.append(df)
 
     res = pd.concat(dfs, axis=0)
-
-    res["boiling_id"] = range(len(res))
+    res = saturate_boiling_plan(res)
     return res

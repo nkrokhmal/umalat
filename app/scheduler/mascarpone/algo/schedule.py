@@ -60,8 +60,7 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__cream_cheese_boiling__cream_cheese_boiling(b1, b2):
-        assert b1["boiling_process"]["salting", True][-1].y[0] <= b2["boiling_process"]["separation", True][0].x[0]
-
+        assert b1["boiling_process"]["salting", True][-1].y[0] + 1 <= b2["boiling_process"]["separation", True][0].x[0]
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -96,7 +95,6 @@ class Validator(ClassValidator):
             and len(set(b1.props["sourdoughs"]) & set(b2.props["sourdoughs"])) > 0
         ):
             assert b1["boiling_process"]["separation", True][-1].y[0] + 1 <= b2.x[0]
-
 
 
 class BoilingPlanToSchedule:

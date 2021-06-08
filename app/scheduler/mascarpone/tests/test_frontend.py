@@ -8,13 +8,29 @@ from app.scheduler.mascarpone import (
 from app.scheduler import draw_excel_frontend
 
 
-def test_drawing_mascarpone(open_file=False):
+def test_mascarpone_batch():
+    fns = glob.glob(
+        DebugConfig.abs_path("app/data/static/samples/inputs/mascarpone/*.xlsx")
+    )
+    fns = [fn for fn in fns if "$" not in fn]
+    # fns = [
+    #     DebugConfig.abs_path(fn)
+    #     for fn in [
+    #         "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx",
+    #         "app/data/static/samples/inputs/mozzarella/2021-02-17 План по варкам.xlsx",
+    #         "app/data/static/samples/inputs/mozzarella/2021-02-19 План по варкам.xlsx",
+    #         "app/data/static/samples/inputs/mozzarella/2021-02-26 План по варкам.xlsx",
+    #         "app/data/static/samples/inputs/mozzarella/2021-05-07 План по варкам.xlsx",
+    #     ]
+    # ]
+    for fn in tqdm.tqdm(fns):
+        _test(fn, open_file=False)
+
+
+def _test(fn, open_file=False):
     utils.configure_loguru_stdout("INFO")
     utils.lazy_tester.configure_function_path()
 
-    fn = DebugConfig.abs_path(
-        "app/data/static/samples/inputs/mascarpone/2021-04-21 План по варкам маскарпоне.xlsx"
-    )
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
     boiling_plan_df = read_boiling_plan(fn)
     schedule = make_schedule(boiling_plan_df, start_batch_id=1)
@@ -27,4 +43,9 @@ def test_drawing_mascarpone(open_file=False):
 
 
 if __name__ == "__main__":
-    test_drawing_mascarpone(open_file=True)
+    test_mascarpone_batch()
+    # _test(
+    #     DebugConfig.abs_path(
+    #         "app/data/static/samples/inputs/mascarpone/2021-04-21 План по варкам маскарпоне.xlsx"
+    #     )
+    # )

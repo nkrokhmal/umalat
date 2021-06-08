@@ -2,15 +2,12 @@ import os
 
 os.environ["environment"] = "interactive"
 
-from app.scheduler.ricotta.algo.schedule import *
-from app.scheduler.ricotta.boiling_plan import *
+from app.scheduler.butter.algo.schedule import *
+from app.scheduler.butter.boiling_plan import *
 from config import DebugConfig
 
 
 def test_random():
-    from utils_ak.loguru import configure_loguru_stdout
-
-    configure_loguru_stdout("INFO")
     boiling_plan_df = generate_random_boiling_plan()
     print(make_schedule(boiling_plan_df))
 
@@ -26,4 +23,4 @@ def test_sample():
 
 
 if __name__ == "__main__":
-    test_sample()
+    test_random()
