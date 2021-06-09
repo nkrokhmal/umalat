@@ -21,7 +21,7 @@ def test_boiling_sequence():
     boiling_group_df = boiling_plan_df[boiling_plan_df["boiling_id"] == 2]
     boilings = [make_boiling(boiling_group_df) for _ in range(3)]
     utils.lazy_tester.log(make_boiling_sequence(boilings))
-    utils.lazy_tester.assert_logs()
+    utils.lazy_tester.assert_logs(reset=True)
 
 
 if __name__ == "__main__":
