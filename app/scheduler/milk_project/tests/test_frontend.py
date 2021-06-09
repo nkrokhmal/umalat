@@ -1,11 +1,11 @@
 from app.imports.runtime import *
 from app.scheduler import draw_excel_frontend
-from app.scheduler.butter.algo.schedule import *
-from app.scheduler.butter.boiling_plan import *
-from app.scheduler.butter.frontend import *
+from app.scheduler.milk_project.algo.schedule import *
+from app.scheduler.milk_project.boiling_plan import *
+from app.scheduler.milk_project.frontend import *
 
 
-def test_drawing_butter(open_file=False):
+def test_drawing_milk_project(open_file=False):
     utils.configure_loguru_stdout("INFO")
     utils.lazy_tester.configure_function_path()
 
@@ -24,4 +24,4 @@ def test_drawing_butter(open_file=False):
 
 
 if __name__ == "__main__":
-    test_drawing_butter(open_file=True)
+    test_drawing_milk_project(open_file=True)
