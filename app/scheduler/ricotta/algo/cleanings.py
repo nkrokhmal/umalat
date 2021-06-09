@@ -6,7 +6,7 @@ from utils_ak.block_tree import *
 
 def make_bath_cleaning():
     m = BlockMaker("bath_cleaning")
-
+    # todo soon: take from models
     m.row("bath_cleaning_1", size=2)
     m.row("bath_cleaning_2", size=4)
     m.row("bath_cleaning_3", size=1)
