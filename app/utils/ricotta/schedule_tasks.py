@@ -1,17 +1,22 @@
 from app.utils.features.draw_utils import *
 from app.utils.features.openpyxl_wrapper import ExcelBlock
+from app.models import RicottaSKU
 
 
 def update_total_schedule_task(date, df):
     folder = flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"]
     path = os.path.join(folder, f"{date.date()}.csv")
-    columns = ['sku', 'code', 'in_box', 'kg', 'boxes_count']
+    columns = ["sku", "code", "in_box", "kg", "boxes_count"]
     if not os.path.exists(path):
         df_task = pd.DataFrame(columns=columns)
-        df_task.to_csv(path, index=False)
+        df_task.to_csv(path, index=False, sep=";")
 
-    df_task = pd.read_csv(path)
-    skus = df_task.sku
+    df_task = pd.read_csv(path, sep=";")
+
+    sku_names = db.session.query(RicottaSKU).all()
+    sku_names = [x.name for x in sku_names]
+    df_task = df_task[~df_task['sku'].isin(sku_names)]
+
     for sku_name, grp in df.groupby("sku_name"):
         kg = round(grp["kg"].sum())
         boxes_count = math.ceil(
@@ -19,12 +24,15 @@ def update_total_schedule_task(date, df):
             / grp.iloc[0]["sku"].in_box
             / grp.iloc[0]["sku"].weight_netto
         )
-        values = [sku_name, grp.iloc[0]["sku"].code, grp.iloc[0]["sku"].in_box, kg, boxes_count]
-        if sku_name in skus:
-            df_task.loc[df_task.sku == values[0], columns] = values
-        else:
-            df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
-    df_task.to_csv(path, index=False)
+        values = [
+            sku_name,
+            grp.iloc[0]["sku"].code,
+            grp.iloc[0]["sku"].in_box,
+            kg,
+            boxes_count,
+        ]
+        df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+    df_task.to_csv(path, index=False, sep=";")
 
 
 def draw_task_original(excel_client, df, date, cur_row, task_name):
@@ -40,7 +48,14 @@ def draw_task_original(excel_client, df, date, cur_row, task_name):
             / grp.iloc[0]["sku"].in_box
             / grp.iloc[0]["sku"].weight_netto
         )
-        values = [index, sku_name, grp.iloc[0]["sku"].in_box, kg, boxes_count, grp.iloc[0]["sku"].code]
+        values = [
+            index,
+            sku_name,
+            grp.iloc[0]["sku"].in_box,
+            kg,
+            boxes_count,
+            grp.iloc[0]["sku"].code,
+        ]
         excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values)
         index += 1
     return cur_row

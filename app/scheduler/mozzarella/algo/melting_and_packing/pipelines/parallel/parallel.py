@@ -1,3 +1,5 @@
+# fmt: off
+
 from app.imports.runtime import *
 from app.models import *
 
@@ -9,6 +11,7 @@ from app.scheduler.mozzarella.algo.melting_and_packing.melting_process import (
     make_melting_and_packing_from_mpps,
 )
 
+from utils_ak.block_tree import *
 
 def make_mpp(boiling_df, left_boiling_volume):
     boiling_df["collecting_speed"] = boiling_df["sku"].apply(
@@ -116,27 +119,21 @@ def make_mpp(boiling_df, left_boiling_volume):
     round_timestamps(boiling_df, packing_team_ids)
 
     # create block
-    maker, make = init_block_maker("melting_and_packing_process", axis=1)
+    m = BlockMaker("melting_and_packing_process", axis=1)
 
     # create packing blocks
-    last_collecting_process_y = 0  # todo: redundant?
+    last_collecting_process_y = 0  # todo archived: redundant?
     for packing_team_id in packing_team_ids:
         df = boiling_df[boiling_df["packing_team_id"] == packing_team_id]
         df = df[~df["beg_ts"].isnull()]
         if len(df) > 0:
-            packing = make(
-                "packing",
-                packing_team_id=packing_team_id,
-                x=(df.iloc[0]["beg_ts"] // 5, 0),
-                push_func=add_push,
-            ).block
+            packing = m.row("packing", push_func=add_push,
+                            packing_team_id=packing_team_id,
+                            x=df.iloc[0]["beg_ts"] // 5).block
 
-            with make(
-                "collecting",
-                packing_team_id=packing_team_id,
-                x=(df.iloc[0]["beg_ts"] // 5, 0),
-                push_func=add_push,
-            ):
+            with m.row("collecting", push_func=add_push,
+                       packing_team_id=packing_team_id,
+                    x=df.iloc[0]["beg_ts"] // 5):
                 for i, (_, row) in enumerate(df.iterrows()):
                     if row["collecting_speed"] == row["packing_speed"]:
                         # add configuration if needed
@@ -147,67 +144,41 @@ def make_mpp(boiling_df, left_boiling_volume):
                                 df.iloc[i - 1]["sku"],
                             )
                             if conf_time_size:
-                                block = make(
-                                    "packing_configuration",
-                                    size=[conf_time_size // 5, 0],
-                                ).block
-                                push(packing, maker.copy(block), push_func=add_push)
-                        block = make(
-                            "process",
-                            size=(
-                                custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil")
-                                // 5,
-                                0,
-                            ),
-                            sku=row["sku"],
-                        ).block
+                                block = m.row("packing_configuration", size=conf_time_size // 5).block
+                                push(packing, m.copy(block), push_func=add_push)
+                        block = m.row("process",
+                                      size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5,
+                                      sku=row["sku"]).block
                         last_collecting_process_y = max(
                             last_collecting_process_y, block.y[0]
                         )
                         push(
                             packing,
-                            maker.create_block(
-                                "process",
-                                size=block.props["size"],
-                                x=list(block.props["x_rel"]),
-                                sku=row["sku"],
-                            ),
+                            m.create_block("process",
+                                           size=block.props["size"],
+                                           x=list(block.props["x_rel"]),
+                                           sku=row["sku"]),
                             push_func=add_push,
                         )
                     else:
                         # rubber
-                        block = make(
-                            "process",
-                            size=(
-                                custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil")
-                                // 5,
-                                0,
-                            ),
-                            sku=row["sku"],
-                        ).block
-                        last_collecting_process_y = max(
-                            last_collecting_process_y, block.y[0]
-                        )
-                        packing_size = (
-                            custom_round(
-                                row["collected"] / row["packing_speed"] * 60, 5, "ceil"
-                            )
-                            // 5
-                        )
-                        push(
-                            packing,
-                            maker.create_block(
+                        block = m.row("process",
+                                      size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5,
+                                      sku=row["sku"]).block
+                        last_collecting_process_y = max(last_collecting_process_y, block.y[0])
+                        packing_size = (custom_round(row["collected"] / row["packing_speed"] * 60, 5, "ceil") // 5)
+                        push(packing,
+                            m.create_block(
                                 "process",
                                 size=[packing_size, 0],
                                 sku=row["sku"],
-                            ),
-                        )
+                            ))
 
     bff = boiling_df.iloc[0]["bff"]
 
-    make("melting_process", size=(last_collecting_process_y, 0), bff=bff)
+    m.row("melting_process", size=last_collecting_process_y, bff=bff)
 
-    make(
+    m.block(
         make_cooling_process(
             boiling_model.line.name,
             bff.default_cooling_technology,
@@ -216,21 +187,21 @@ def make_mpp(boiling_df, left_boiling_volume):
     )
 
     # shift packing and collecting for cooling
-    for packing in utils.listify(maker.root["packing"]):
+    for packing in m.root["packing", True]:
         packing.props.update(
-            x=[packing.props["x"][0] + maker.root["cooling_process"]["start"].y[0], 0]
+            x=[packing.props["x"][0] + m.root["cooling_process"]["start"].y[0], 0]
         )
-    for collecting in utils.listify(maker.root["collecting"]):
+    for collecting in m.root["collecting", True]:
         collecting.props.update(
             x=[
-                collecting.props["x"][0] + maker.root["cooling_process"]["start"].y[0],
+                collecting.props["x"][0] + m.root["cooling_process"]["start"].y[0],
                 0,
             ]
         )
 
-    maker.root.props.update(kg=boiling_volume)
+    m.root.props.update(kg=boiling_volume)
 
-    return maker.root
+    return m.root
 
 
 def make_boilings_parallel_dynamic(boiling_group_df, first_boiling_id=1):

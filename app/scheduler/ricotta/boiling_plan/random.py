@@ -4,6 +4,7 @@ from app.models import *
 
 def generate_random_boiling_plan(n=24, seed=12):
     random.seed(seed)
+    np.random.seed(seed)
 
     skus = fetch_all(RicottaSKU)
     skus = [sku for sku in skus if sku.weight_netto]
@@ -29,4 +30,5 @@ def generate_random_boiling_plan(n=24, seed=12):
             values.append([i, sku, kg])
 
     df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])
+    df["tanks"] = 3
     return df

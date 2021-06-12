@@ -1,18 +1,23 @@
 from app.utils.features.draw_utils import *
 from app.utils.features.openpyxl_wrapper import ExcelBlock
+from app.models import MascarponeSKU
 
 
 def update_total_schedule_task(date, df):
     folder = flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"]
     path = os.path.join(folder, f"{date.date()}.csv")
-    columns = ['sku', 'code', 'in_box', 'kg', 'boxes_count']
+    columns = ["sku", "code", "in_box", "kg", "boxes_count"]
     if not os.path.exists(path):
         df_task = pd.DataFrame(columns=columns)
-        df_task.to_csv(path, index=False)
+        df_task.to_csv(path, index=False, sep=";")
 
-    df_task = pd.read_csv(path)
-    skus = df_task.sku
+    df_task = pd.read_csv(path, sep=";")
     df["sku_name"] = df["sku"].apply(lambda x: x.name)
+
+    sku_names = db.session.query(MascarponeSKU).all()
+    sku_names = [x.name for x in sku_names]
+    df_task = df_task[~df_task['sku'].isin(sku_names)]
+
     for sku_name, grp in df.groupby("sku_name"):
         kg = round(grp["kg"].sum())
         boxes_count = math.ceil(
@@ -20,12 +25,15 @@ def update_total_schedule_task(date, df):
             / grp.iloc[0]["sku"].in_box
             / grp.iloc[0]["sku"].weight_netto
         )
-        values = [sku_name, grp.iloc[0]["sku"].code, grp.iloc[0]["sku"].in_box, kg, boxes_count]
-        if sku_name in skus:
-            df_task.loc[df_task.sku == values[0], columns] = values
-        else:
-            df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
-    df_task.to_csv(path, index=False)
+        values = [
+            sku_name,
+            grp.iloc[0]["sku"].code,
+            grp.iloc[0]["sku"].in_box,
+            kg,
+            boxes_count,
+        ]
+        df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+    df_task.to_csv(path, index=False, sep=";")
 
 
 def draw_task_new(excel_client, df, date, cur_row, task_name, batch_number):
@@ -41,7 +49,14 @@ def draw_task_new(excel_client, df, date, cur_row, task_name, batch_number):
                 kg = round(row["kg"])
                 boxes_count = ""
 
-            values = [boiling_group_id + batch_number - 1, row["sku_name"], row["sku"].in_box, kg, boxes_count, row["sku"].code]
+            values = [
+                boiling_group_id + batch_number - 1,
+                row["sku_name"],
+                row["sku"].in_box,
+                kg,
+                boxes_count,
+                row["sku"].code,
+            ]
             excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values)
         excel_client = draw_blue_line(excel_client, cur_row)
         cur_row += 1

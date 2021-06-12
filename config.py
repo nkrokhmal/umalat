@@ -24,9 +24,13 @@ class BaseClass:
     SCHEDULE_PLAN_FOLDER = "app/data/dynamic/schedule_plan"
     TOTAL_SCHEDULE_TASK_FOLDER = "app/data/dynamic/schedule_task"
 
-    TEMPLATE_MOZZARELLA_BOILING_PLAN = "app/data/static/templates/constructor_mozzarella.xlsx"
+    TEMPLATE_MOZZARELLA_BOILING_PLAN = (
+        "app/data/static/templates/constructor_mozzarella.xlsx"
+    )
     TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/static/templates/constructor_ricotta.xlsx"
-    TEMPLATE_MASCARPONE_BOILING_PLAN = "app/data/static/templates/constructor_mascarpone.xlsx"
+    TEMPLATE_MASCARPONE_BOILING_PLAN = (
+        "app/data/static/templates/constructor_mascarpone.xlsx"
+    )
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
 
     IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
@@ -83,6 +87,8 @@ class BaseClass:
     # cache files for 30 seconds
     CACHE_FILE_MAX_AGE = 30
 
+    DEFAULT_RUBBER_FORM_FACTOR = "Соль: 460"
+
     @staticmethod
     def abs_path(local_path):
         return os.path.join(basedir, local_path)
@@ -105,11 +111,16 @@ class ProductionConfig(BaseClass):
 class TestConfig(BaseClass):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = (
-          os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + TEST_SQLITE_PATH
+        os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + TEST_SQLITE_PATH
     ) + "?check_same_thread=False"
     TEST_MOZZARELLA = "app/data/tests/mozzarella_plan.xlsx"
     TEST_RICOTTA = "app/data/tests/ricotta_plan.xlsx"
     TEST_MASCARPONE = "app/data/tests/mascarpone_plan.xlsx"
 
 
-configs = {"default": DebugConfig, "production": ProductionConfig, "debug": DebugConfig, "test": TestConfig,}
+configs = {
+    "default": DebugConfig,
+    "production": ProductionConfig,
+    "debug": DebugConfig,
+    "test": TestConfig,
+}

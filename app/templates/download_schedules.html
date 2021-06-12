@@ -64,7 +64,7 @@
 
                             <td class="border-0">
                                 {% if data[key].get("task", "") != "" %}
-                                    <a class="small" href="{{ url_for('main.download_schedule_plan', file_name=data[key].get('task', ''))}}">
+                                    <a class="small" href="{{ url_for('main.download_schedule_task', file_name=data[key].get('task', ''))}}">
                                         {{data[key].get("task", "")}}
                                     </a>
                                 {% else %}

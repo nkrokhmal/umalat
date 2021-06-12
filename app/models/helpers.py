@@ -43,14 +43,15 @@ def cast_model(cls, obj, int_attribute="id", str_attribute="name"):
         raise Exception(f"Unknown {cls} type")
 
 
-def cast_mozarella_form_factor(obj):
+def cast_mozzarella_form_factor(obj):
     if isinstance(obj, str):
         # 'Вода: 200'
+        # todo maybe: make 'Вода: 200' a default name for form factor, not 0.2.
         short_line_name, relative_weight = obj.split(":")
         relative_weight = relative_weight.strip()
         short_line_names_map = {"Вода": "Моцарелла в воде", "Соль": "Пицца чиз"}
 
-        form_factors = db.session.query(FormFactor).all()
+        form_factors = db.session.query(MozzarellaFormFactor).all()
         form_factors = [
             ff
             for ff in form_factors
@@ -68,7 +69,7 @@ def cast_mozarella_form_factor(obj):
         return cast_model(MozzarellaFormFactor, obj)
 
 
-def cast_mozarella_boiling(obj):
+def cast_mozzarella_boiling(obj):
     if isinstance(obj, str):
         try:
             # water, 2.7, Альче

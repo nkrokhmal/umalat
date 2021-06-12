@@ -6,6 +6,8 @@ LineName = utils.dotdict(
         "SALT": "Пицца чиз",
         "RICOTTA": "Рикотта",
         "MASCARPONE": "Маскарпоне",
+        "BUTTER": "Масло",
+        "MILK_PROJECT": "Милкпроджект",
     }
 )
 DepartmentName = utils.dotdict(
@@ -13,6 +15,8 @@ DepartmentName = utils.dotdict(
         "MOZZARELLA": "Моцарельный цех",
         "RICOTTA": "Рикоттный цех",
         "MASCARPONE": "Маскарпоновый цех",
+        "BUTTER": "Масло цех",
+        "MILK_PROJECT": "Милкпроджект",
     }
 )
 
