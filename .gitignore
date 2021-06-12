@@ -4,7 +4,7 @@
 *.DS_Store
 *.py[cod]
 
-**/schedule_*.xlsx
+**/schedule*.xlsx
 # C extensions
 *.so
 # app/**/*schedule*.xlsx
