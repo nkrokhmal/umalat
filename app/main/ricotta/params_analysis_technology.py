@@ -9,6 +9,7 @@ from .forms import AnalysisForm
 
 
 @main.route("/ricotta/get_analysis_technology", methods=["GET", "POST"])
+@flask_login.login_required
 def ricotta_get_analysis_technology():
     analysis_technologies = db.session.query(RicottaAnalysisTechnology).all()
     return flask.render_template(
@@ -22,6 +23,7 @@ def ricotta_get_analysis_technology():
     "/ricotta/edit_analysis_technology/<int:analysis_technology_id>",
     methods=["GET", "POST"],
 )
+@flask_login.login_required
 def ricotta_edit_analysis_technology(analysis_technology_id):
     form = AnalysisForm()
     analysis_technology = db.session.query(RicottaAnalysisTechnology).get_or_404(

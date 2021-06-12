@@ -11,6 +11,7 @@ from .forms import FormFactorForm
 
 
 @main.route("/mozzarella/get_form_factor", methods=["GET", "POST"])
+@flask_login.login_required
 def get_form_factor():
     form_factors = db.session.query(MozzarellaFormFactor).all()
     water_form_factors = sorted(
@@ -44,6 +45,7 @@ def get_form_factor():
 @main.route(
     "/mozzarella/edit_form_factor/<int:form_factor_id>", methods=["GET", "POST"]
 )
+@flask_login.login_required
 def edit_form_factor(form_factor_id):
     form = FormFactorForm()
     form_factor = db.session.query(MozzarellaFormFactor).get_or_404(form_factor_id)

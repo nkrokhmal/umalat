@@ -10,6 +10,7 @@ from .forms import WasherForm
 
 
 @main.route("/mozzarella/get_washer", methods=["GET", "POST"])
+@flask_login.login_required
 def get_washer():
     washers = (
         db.session.query(Washer)
@@ -23,6 +24,7 @@ def get_washer():
 
 
 @main.route("/mozzarella/edit_washer/<int:washer_id>", methods=["GET", "POST"])
+@flask_login.login_required
 def edit_washer(washer_id):
     form = WasherForm()
     washer = db.session.query(Washer).get_or_404(washer_id)

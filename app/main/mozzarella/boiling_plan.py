@@ -11,6 +11,7 @@ from .forms import BoilingPlanFastForm
 
 
 @main.route("/boiling_plan", methods=["POST", "GET"])
+@flask_login.login_required
 def boiling_plan():
     form = BoilingPlanFastForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:

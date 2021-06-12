@@ -14,6 +14,7 @@ from app.models import *
 
 
 @main.route("/ricotta_boiling_plan", methods=["POST", "GET"])
+@flask_login.login_required
 def ricotta_boiling_plan():
     form = BoilingPlanForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:

@@ -10,6 +10,7 @@ from .forms import LineForm
 
 
 @main.route("/ricotta/get_line", methods=["GET", "POST"])
+@flask_login.login_required
 def ricotta_get_line():
     lines = db.session.query(RicottaLine).all()
     return flask.render_template(
@@ -18,6 +19,7 @@ def ricotta_get_line():
 
 
 @main.route("/ricotta/edit_line/<int:line_id>", methods=["GET", "POST"])
+@flask_login.login_required
 def ricotta_edit_line(line_id):
     form = LineForm()
     line = db.session.query(RicottaLine).get_or_404(line_id)

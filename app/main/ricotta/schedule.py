@@ -1,8 +1,3 @@
-import flask
-
-from app.imports.runtime import *
-
-from app.main.errors import internal_error
 from app.main import main
 from app.scheduler import *
 from app.scheduler.ricotta import *
@@ -13,6 +8,7 @@ from .forms import ScheduleForm
 
 
 @main.route("/ricotta_schedule", methods=["GET", "POST"])
+@flask_login.login_required
 def ricotta_schedule():
 
     form = ScheduleForm(flask.request.form)

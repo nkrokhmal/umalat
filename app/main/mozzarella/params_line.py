@@ -8,6 +8,7 @@ from .forms import LineForm
 
 
 @main.route("/mozzarella/get_line", methods=["GET", "POST"])
+@flask_login.login_required
 def get_line():
     lines = db.session.query(MozzarellaLine).all()
     return flask.render_template(
@@ -16,6 +17,7 @@ def get_line():
 
 
 @main.route("/mozzarella/edit_line/<int:line_id>", methods=["GET", "POST"])
+@flask_login.login_required
 def edit_line(line_id):
     form = LineForm()
     line = db.session.query(MozzarellaLine).get_or_404(line_id)

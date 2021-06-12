@@ -6,6 +6,7 @@ from .forms import CreamCheeseBoilingTechnologyForm
 
 
 @main.route("/mascarpone/get_boiling_technology_cream_cheese", methods=["GET", "POST"])
+@flask_login.login_required
 def mascarpone_get_boiling_technology_cream_cheese():
     boiling_technologies = db.session.query(CreamCheeseBoilingTechnology).all()
     return flask.render_template(
@@ -19,6 +20,7 @@ def mascarpone_get_boiling_technology_cream_cheese():
     "/mascarpone/edit_boiling_technology_cream_cheese/<int:boiling_technology_id>",
     methods=["GET", "POST"],
 )
+@flask_login.login_required
 def mascarpone_edit_boiling_technology_cream_cheese(boiling_technology_id):
     form = CreamCheeseBoilingTechnologyForm()
     boiling_technology = db.session.query(CreamCheeseBoilingTechnology).get_or_404(
