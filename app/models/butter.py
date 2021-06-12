@@ -19,7 +19,9 @@ class ButterLine(Line):
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
     preparing_time = mdb.Column(mdb.Integer)
     displacement_time = mdb.Column(mdb.Integer)
-    output_ton = mdb.Column(mdb.Integer)
+    output_kg = mdb.Column(mdb.Integer)
+    cleaning_time = mdb.Column(mdb.Integer)
+    boiling_volume = mdb.Column(mdb.Integer)
 
 
 class ButterFormFactor(FormFactor):
@@ -61,7 +63,7 @@ class ButterBoilingTechnology(BoilingTechnology):
     def create_name(form_factor, line, percent, weight, flavoring_agent, is_lactose):
         boiling_name = [percent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, Форм фактор {}, Вес {}, Вкусовая добавка, {}, {}".format(
+        return "Линия {}, Форм фактор {}, Вес {}, Вкусовая добавка {}, {}, {}".format(
             line, form_factor, weight, flavoring_agent, 'без лактозы' if not is_lactose else '', boiling_name,
         )
 
