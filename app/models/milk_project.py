@@ -31,6 +31,7 @@ class MilkProjectBoiling(Boiling):
     __mapper_args__ = {"polymorphic_identity": "milk_project_boiling"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True)
+    name = mdb.Column(mdb.String)
     weight_netto = mdb.Column(mdb.Float)
     output_ton = mdb.Column(mdb.Integer)
     percent = mdb.Column(mdb.Integer)

@@ -62,6 +62,7 @@ def fill_boilings():
         "Процент",
         "Вес нетто",
         "Выход",
+        "Название варки",
     ]
     b_data = df[columns]
     b_data = b_data.drop_duplicates()
@@ -89,6 +90,7 @@ def fill_boilings():
         ]
         boiling = MilkProjectBoiling(
             percent=b["Процент"],
+            name=b["Название варки"],
             boiling_technologies=bts_name,
             line_id=line_id,
             weight_netto=b["Вес нетто"],
@@ -130,6 +132,7 @@ def fill_sku():
         "Коробки",
         "Скорость упаковки",
         "Kод",
+        "Название варки",
     ]
 
     sku_data = df[columns]
@@ -153,7 +156,8 @@ def fill_sku():
             for x in boilings
             if (x.percent == sku["Процент"]) &
                (x.line_id == add_sku.line.id) &
-               (x.weight_netto == sku["Вес нетто"])
+               (x.weight_netto == sku["Вес нетто"]) &
+               (x.name == sku["Название варки"])
         ]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]
