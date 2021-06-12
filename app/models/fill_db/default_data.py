@@ -1,6 +1,16 @@
 from app.models import *
 
 
+def generate_user():
+    user = User(
+        username='umalat',
+        email='umalat@mail.ru',
+        password='1',
+    )
+    db.session.add(user)
+    db.session.commit()
+
+
 def generate_departments():
     for name in ["Моцарельный цех", "Рикоттный цех", "Маскарпоновый цех", "Масло цех", "Милкпроджект"]:
         department = Department(name=name)
@@ -163,6 +173,7 @@ def generate_washer():
 
 
 def generate_all():
+    generate_user()
     generate_departments()
     generate_group()
     generate_packer()

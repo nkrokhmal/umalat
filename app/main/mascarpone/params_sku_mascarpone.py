@@ -11,6 +11,7 @@ from .forms import SKUMascarponeForm
 
 
 @main.route("/mascarpone/add_sku_mascarpone", methods=["POST", "GET"])
+@flask_login.login_required
 def mascarpone_add_sku_mascarpone():
     form = SKUMascarponeForm()
     name = flask.request.args.get("name")
@@ -42,6 +43,7 @@ def mascarpone_add_sku_mascarpone():
 
 
 @main.route("/mascarpone/get_sku_mascarpone/<int:page>", methods=["GET"])
+@flask_login.login_required
 def mascarpone_get_sku_mascarpone(page):
     flask.session.clear()
     form = SKUMascarponeForm()
@@ -66,6 +68,7 @@ def mascarpone_get_sku_mascarpone(page):
 
 
 @main.route("/mascarpone/edit_sku_mascarpone/<int:sku_id>", methods=["GET", "POST"])
+@flask_login.login_required
 def mascarpone_edit_sku_mascarpone(sku_id):
     form = SKUMascarponeForm()
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
@@ -105,6 +108,7 @@ def mascarpone_edit_sku_mascarpone(sku_id):
 
 
 @main.route("/mascarpone/delete_sku_mascarpone/<int:sku_id>", methods=["DELETE"])
+@flask_login.login_required
 def mascarpone_delete_sku_mascarpone(sku_id):
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
     if sku:

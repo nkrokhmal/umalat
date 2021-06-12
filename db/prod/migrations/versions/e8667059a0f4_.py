@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 9ea30082db1b
+Revision ID: e8667059a0f4
 Revises: 
-Create Date: 2021-06-12 13:05:28.591206
+Create Date: 2021-06-12 14:02:23.822894
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9ea30082db1b'
+revision = 'e8667059a0f4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,6 +45,15 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(), nullable=True),
+    sa.Column('email', sa.String(), nullable=True),
+    sa.Column('password', sa.Binary(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('username')
     )
     op.create_table('batch_number',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -443,6 +452,7 @@ def downgrade():
     op.drop_table('washer')
     op.drop_table('lines')
     op.drop_table('batch_number')
+    op.drop_table('users')
     op.drop_table('packers')
     op.drop_table('pack_types')
     op.drop_table('mozzarella_cooling_technologies')

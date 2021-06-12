@@ -5,6 +5,7 @@ from app.models import Department, BatchNumber
 
 
 @main.route("/save_last_batches", methods=["GET"])
+@flask_login.login_required
 def save_last_batches():
     departments = db.session.query(Department).all()
     last_batches = []
@@ -26,6 +27,7 @@ def save_last_batches():
 
 
 @main.route("/upload_last_batches", methods=["GET", "POST"])
+@flask_login.login_required
 def upload_last_batches():
     batch_number_path = os.path.join(flask.current_app.config["BATCH_NUMBERS_DIR"], "data.json")
     if os.path.exists(batch_number_path):

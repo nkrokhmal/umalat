@@ -12,6 +12,7 @@ from .forms import SKUForm
 
 
 @main.route("/ricotta/add_sku", methods=["POST", "GET"])
+@flask_login.login_required
 def ricotta_add_sku():
     form = SKUForm()
     name = flask.request.args.get("name")
@@ -44,6 +45,7 @@ def ricotta_add_sku():
 
 
 @main.route("/ricotta/get_sku/<int:page>", methods=["GET"])
+@flask_login.login_required
 def ricotta_get_sku(page):
     flask.session.clear()
 
@@ -69,6 +71,7 @@ def ricotta_get_sku(page):
 
 
 @main.route("/ricotta/edit_sku/<int:sku_id>", methods=["GET", "POST"])
+@flask_login.login_required
 def ricotta_edit_sku(sku_id):
     form = SKUForm()
     sku = db.session.query(RicottaSKU).get_or_404(sku_id)
@@ -106,6 +109,7 @@ def ricotta_edit_sku(sku_id):
 
 
 @main.route("/ricotta/delete_sku/<int:sku_id>", methods=["DELETE"])
+@flask_login.login_required
 def ricotta_delete_sku(sku_id):
     sku = db.session.query(RicottaSKU).get_or_404(sku_id)
     if sku:

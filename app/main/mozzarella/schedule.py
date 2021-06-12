@@ -15,6 +15,7 @@ from .forms import ScheduleForm
 
 
 @main.route("/schedule", methods=["GET", "POST"])
+@flask_login.login_required
 def schedule():
 
     form = ScheduleForm(flask.request.form)

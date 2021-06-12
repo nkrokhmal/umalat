@@ -14,6 +14,7 @@ from .forms import ScheduleForm
 
 
 @main.route("/mascarpone_schedule", methods=["GET", "POST"])
+@flask_login.login_required
 def mascarpone_schedule():
 
     form = ScheduleForm(flask.request.form)

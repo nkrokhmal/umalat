@@ -19,6 +19,7 @@ def get_metadata(data, offset=0, per_page=10):
 
 
 @main.route("/download_schedules/<int:page>", methods=["GET"])
+@flask_login.login_required
 def download_schedules(page):
     schedules_path = os.path.join(
         os.path.dirname(flask.current_app.root_path),

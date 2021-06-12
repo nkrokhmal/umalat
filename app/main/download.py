@@ -3,6 +3,7 @@ from app.main import main
 
 
 @main.route("/download_boiling_plan/<file_name>", methods=["POST", "GET"])
+@flask_login.login_required
 def download_boiling_plan(file_name):
     uploads = os.path.join(
         os.path.dirname(flask.current_app.root_path),
@@ -16,6 +17,7 @@ def download_boiling_plan(file_name):
 
 
 @main.route("/download_sku_plan/<file_name>", methods=["POST", "GET"])
+@flask_login.login_required
 def download_sku_plan(file_name):
     uploads = os.path.join(
         os.path.dirname(flask.current_app.root_path),
@@ -29,6 +31,7 @@ def download_sku_plan(file_name):
 
 
 @main.route("/download_stats/<file_name>", methods=["POST", "GET"])
+@flask_login.login_required
 def download_stats(file_name):
     uploads = os.path.join(
         os.path.dirname(flask.current_app.root_path),
@@ -42,6 +45,7 @@ def download_stats(file_name):
 
 
 @main.route("/download_schedule_plan/<file_name>", methods=["POST", "GET"])
+@flask_login.login_required
 def download_schedule_plan(file_name):
     uploads = os.path.join(
         os.path.dirname(flask.current_app.root_path),
@@ -55,6 +59,7 @@ def download_schedule_plan(file_name):
 
 
 @main.route("/download_schedule_task/<file_name>", methods=["POST", "GET"])
+@flask_login.login_required
 def download_schedule_task(file_name):
     uploads = os.path.join(
         os.path.dirname(flask.current_app.root_path),
@@ -68,6 +73,7 @@ def download_schedule_task(file_name):
 
 
 @main.route("/download_last_schedule_task", defaults={'check_date': False}, methods=["GET", "POST"])
+@flask_login.login_required
 def download_last_schedule_task(check_date):
     print(f"Check date id {check_date}")
     schedule_task_folder = os.path.join(
@@ -82,7 +88,7 @@ def download_last_schedule_task(check_date):
         if check_date:
             date = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
             if filename.split('.')[0] != date:
-                raise  Exception(f"There is no csv file for {date} date!")
+                raise Exception(f"There is no csv file for {date} date!")
             else:
                 response = flask.send_from_directory(
                     directory=schedule_task_folder, filename=filename, cache_timeout=0, as_attachment=True

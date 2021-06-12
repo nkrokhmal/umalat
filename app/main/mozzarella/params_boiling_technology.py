@@ -10,6 +10,7 @@ from .forms import BoilingTechnologyForm
 
 
 @main.route("/mozzarella/get_boiling_technology", methods=["GET", "POST"])
+@flask_login.login_required
 def get_boiling_technology():
     boiling_technologies = db.session.query(MozzarellaBoilingTechnology).all()
     return flask.render_template(
@@ -23,6 +24,7 @@ def get_boiling_technology():
     "/mozzarella/edit_boiling_technology/<int:boiling_technology_id>",
     methods=["GET", "POST"],
 )
+@flask_login.login_required
 def edit_boiling_technology(boiling_technology_id):
     form = BoilingTechnologyForm()
     boiling_technology = db.session.query(MozzarellaBoilingTechnology).get_or_404(

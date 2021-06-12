@@ -1,0 +1,62 @@
+{% extends "base-fullscreen.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} Login {% endblock %}
+{% block page_content %}
+    <main>
+        <section class="vh-lg-100 d-flex align-items-center">
+            <div class="container">
+                <div class="row justify-content-center form-bg-image">
+                    <div class="col-12 d-flex align-items-center justify-content-center">
+                        <div class="signin-inner my-3 my-lg-0 bg-white shadow-soft border rounded border-light p-4 p-lg-5 w-100 fmxw-500">
+
+                            <div class="text-center text-md-center mb-4 mt-md-0">
+                                <br />
+                                <p>
+                                    {% if msg %}
+                                        {{ msg | safe }}
+                                    {% else %}
+                                        <h4>Добро пожаловать!</h4>
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <form method="post" action="" class="mt-4">
+                                {{ form.hidden_tag() }}
+                                <div class="form-group mb-4">
+                                    <label for="email">Логин</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="basic-addon1"><span class="fas fa-user-circle"></span></span>
+                                        {{ form.username(placeholder="", class="form-control") }}
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-group mb-4">
+                                        <label for="password">Пароль</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="basic-addon2"><span class="fas fa-unlock-alt"></span></span>
+                                            {{ form.password(placeholder="", class="form-control", type="password") }}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="defaultCheck5">
+                                            <label class="form-check-label" for="defaultCheck5">
+                                              Запомнить меня
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <button type="submit" name="login" class="btn btn-block btn-primary">Войти</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+{% endblock page_content %}
+{% block javascripts %}{% endblock javascripts %}
