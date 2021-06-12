@@ -9,7 +9,7 @@ from app.utils.batches.batch import *
 from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
-
+from app.utils.features.openpyxl_wrapper import set_default_sheet
 
 from .forms import ScheduleForm
 
@@ -96,6 +96,7 @@ def schedule():
             schedule_wb, boiling_plan_df, additional_packing_df, date, form.batch_number.data
         )
         schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
+        set_default_sheet(schedule_wb)
 
         path_schedule = "{}/{}".format("app/data/dynamic/schedule_plan", filename_schedule)
         schedule_wb.save(path_schedule)
