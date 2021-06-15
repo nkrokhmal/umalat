@@ -107,6 +107,8 @@ def cast_volume(obj):
         return obj.made_from_boilings[0].boiling_technologies[0].output_ton
     elif isinstance(obj, CreamCheeseSKU):
         return obj.made_from_boilings[0].output_ton
+    elif isinstance(obj, ButterSKU):
+        return obj.line.output_kg
     else:
         raise Exception("Unknown sku type")
 
@@ -145,6 +147,8 @@ def parse_sheet(ws, sheet_name, excel_compiler):
             )
 
     df = pd.DataFrame(values[1:])
+    print(sheet_name)
+    print(df)
     df.columns = [
         "sku",
         "remainings - request",
@@ -158,6 +162,7 @@ def parse_sheet(ws, sheet_name, excel_compiler):
     df = df[
         df["plan"].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())
     ]
+    print(df)
     df = df[["sku", "plan"]]
     df["sku"] = df["sku"].apply(lambda x: cast_sku_name(x))
     df = df.replace(to_replace="None", value=np.nan).dropna()

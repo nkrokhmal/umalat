@@ -12,6 +12,7 @@ from .forms import BoilingPlanForm
 
 
 @main.route("/mascarpone_boiling_plan", methods=["POST", "GET"])
+@flask_login.login_required
 def mascarpone_boiling_plan():
     form = BoilingPlanForm(request.form)
     if request.method == "POST" and "submit" in request.form:

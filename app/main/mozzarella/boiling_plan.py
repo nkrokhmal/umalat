@@ -1,17 +1,16 @@
 from app.imports.runtime import *
-
 from app.utils.mozzarella.boiling_plan_create import boiling_plan_create
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan
 from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
 from app.main import main
 from app.models import *
-
 from .forms import BoilingPlanFastForm
 
 
-@main.route("/boiling_plan", methods=["POST", "GET"])
-def boiling_plan():
+@main.route("/mozzarella_boiling_plan", methods=["POST", "GET"])
+@flask_login.login_required
+def mozzarella_boiling_plan():
     form = BoilingPlanFastForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data

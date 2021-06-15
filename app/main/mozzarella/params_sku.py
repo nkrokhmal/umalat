@@ -10,6 +10,7 @@ from .forms import SKUForm
 
 
 @main.route("/mozzarella/add_sku", methods=["POST", "GET"])
+@flask_login.login_required
 def add_sku():
     form = SKUForm()
     name = flask.request.args.get("name")
@@ -34,6 +35,7 @@ def add_sku():
 
 
 @main.route("/mozzarella/get_sku/<int:page>", methods=["GET"])
+@flask_login.login_required
 def get_sku(page):
     flask.session.clear()
     form = SKUForm()
@@ -56,6 +58,7 @@ def get_sku(page):
 
 
 @main.route("/mozzarella/edit_sku/<int:sku_id>", methods=["GET", "POST"])
+@flask_login.login_required
 def edit_sku(sku_id):
     form = SKUForm()
     sku = db.session.query(MozzarellaSKU).get_or_404(sku_id)
@@ -104,6 +107,7 @@ def edit_sku(sku_id):
 
 
 @main.route("/mozzarella/delete_sku/<int:sku_id>", methods=["DELETE"])
+@flask_login.login_required
 def delete_sku(sku_id):
     sku = db.session.query(SKU).get_or_404(sku_id)
     if sku:

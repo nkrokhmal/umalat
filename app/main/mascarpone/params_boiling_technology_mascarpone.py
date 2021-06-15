@@ -8,6 +8,7 @@ from app.models import MascarponeBoilingTechnology, MascarponeSKU
 
 
 @main.route("/mascarpone/get_boiling_technology_mascarpone", methods=["GET", "POST"])
+@flask_login.login_required
 def mascarpone_get_boiling_technology_mascarpone():
     skus = db.session.query(MascarponeSKU).all()
     skus_mascarpone = [sku for sku in skus if sku.group.name == "Маскарпоне"]
@@ -24,6 +25,7 @@ def mascarpone_get_boiling_technology_mascarpone():
     "/mascarpone/edit_boiling_technology_mascarpone/<int:boiling_technology_id>",
     methods=["GET", "POST"],
 )
+@flask_login.login_required
 def mascarpone_edit_boiling_technology_mascarpone(boiling_technology_id):
     form = MascarponeBoilingTechnologyForm()
     boiling_technology = db.session.query(MascarponeBoilingTechnology).get_or_404(

@@ -14,9 +14,9 @@ from app.utils.features.openpyxl_wrapper import set_default_sheet
 from .forms import ScheduleForm
 
 
-@main.route("/schedule", methods=["GET", "POST"])
-def schedule():
-
+@main.route("/mozzarella_schedule", methods=["GET", "POST"])
+@flask_login.login_required
+def mozzarella_schedule():
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
