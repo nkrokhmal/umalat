@@ -125,6 +125,9 @@ class SKU(mdb.Model):
             "Творожный": "#CBC0D9",
             "Робиола": "#E5DFEC",
             "Сливки": "#F1DADA",
+            "Масло": "#F3B28E",
+            "Четук": "#CDFCB2",
+            "Качорикотта": "#D8EEFF",
         }
         if "Терка" not in self.form_factor.name:
             return COLOURS[self.group.name]

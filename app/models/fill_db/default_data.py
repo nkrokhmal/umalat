@@ -106,7 +106,7 @@ def generate_mozzarella_lines():
     butter_department = Department.query.filter_by(name="Масло цех").first()
     butter_line = ButterLine(
         name="Масло",
-        output_ton=450,
+        output_kg=450,
         preparing_time=70,
         displacement_time=10,
     )

@@ -19,7 +19,7 @@ class ButterLine(Line):
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
     preparing_time = mdb.Column(mdb.Integer)
     displacement_time = mdb.Column(mdb.Integer)
-    output_ton = mdb.Column(mdb.Integer)
+    output_kg = mdb.Column(mdb.Integer)
 
 
 class ButterFormFactor(FormFactor):
