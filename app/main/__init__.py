@@ -8,3 +8,4 @@ from .ricotta import *
 from .mascarpone import *
 from .additional import *
 from .butter import *
+from .milkproject import *

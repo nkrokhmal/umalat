@@ -245,16 +245,8 @@ class SkuPlanClient:
         self.wb.save(self.filepath)
 
     def fill_butter_sku_plan(self):
-        sheet = self.wb[flask.current_app.config["SHEET_NAMES"]["schedule_plan"]]
-        cur_row = 2
-        for sku_grouped in self.skus_grouped:
-            excel_client = ExcelBlock(sheet=sheet)
-            cur_row = self.fill_skus(sku_grouped, excel_client, cur_row, False, order=["Масло"])
-            cur_row += self.space_rows
+        self.fill_ricotta_sku_plan()
 
-        for sheet_number, sheet_name in enumerate(self.wb.sheetnames):
-            if sheet_number != 1:
-                self.wb[sheet_name].views.sheetView[0].tabSelected = False
-        self.wb.active = 1
-        self.wb.save(self.filepath)
+    def fill_milkproject_sku_plan(self):
+        self.fill_ricotta_sku_plan()
 
