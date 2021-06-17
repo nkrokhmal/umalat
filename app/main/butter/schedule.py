@@ -6,7 +6,10 @@ from app.main import main
 from app.main.errors import internal_error
 from app.scheduler.mascarpone import *
 from app.scheduler.mascarpone.frontend.style import STYLE
-from app.utils.mascarpone.schedule_task import schedule_task_boilings, update_total_schedule_task
+from app.utils.mascarpone.schedule_task import (
+    schedule_task_boilings,
+    update_total_schedule_task,
+)
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 
@@ -23,7 +26,9 @@ def butter_schedule():
         beg_time = form.beg_time.data
         file = flask.request.files["input_file"]
 
-        file_path = os.path.join(flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
+        file_path = os.path.join(
+            flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+        )
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
@@ -49,7 +54,9 @@ def butter_schedule():
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )
 
-        path_schedule = "{}/{}".format(flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule)
+        path_schedule = "{}/{}".format(
+            flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule
+        )
 
         schedule_wb.save(path_schedule)
         return flask.render_template(

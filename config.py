@@ -35,6 +35,9 @@ class BaseClass:
     TEMPLATE_BUTTER_BOILING_PLAN = (
         "app/data/static/templates/constructor_butter.xlsx"
     )
+    TEMPLATE_MILKPROJECT_BOILING_PLAN = (
+        "app/data/static/templates/constructor_milkproject.xlsx"
+    )
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
 
     IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"

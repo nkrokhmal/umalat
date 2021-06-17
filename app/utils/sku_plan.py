@@ -77,6 +77,7 @@ class SkuPlanClient:
         order = order if order is not None else flask.current_app.config["ORDER"]
         for group_name in order:
             block_skus = [x for x in sku_grouped.skus if x.sku.group.name == group_name]
+            print(block_skus)
             if block_skus:
                 if sorted_by_weight:
                     block_skus = sorted(
@@ -245,8 +246,31 @@ class SkuPlanClient:
         self.wb.save(self.filepath)
 
     def fill_butter_sku_plan(self):
-        self.fill_ricotta_sku_plan()
+        sheet = self.wb[flask.current_app.config["SHEET_NAMES"]["schedule_plan"]]
+        cur_row = 2
+        for sku_grouped in self.skus_grouped:
+            excel_client = ExcelBlock(sheet=sheet)
+            cur_row = self.fill_skus(sku_grouped, excel_client, cur_row, False, order=["Масло"])
+            cur_row += self.space_rows
+
+        for sheet_number, sheet_name in enumerate(self.wb.sheetnames):
+            if sheet_number != 1:
+                self.wb[sheet_name].views.sheetView[0].tabSelected = False
+        self.wb.active = 1
+        self.wb.save(self.filepath)
 
     def fill_milkproject_sku_plan(self):
-        self.fill_ricotta_sku_plan()
+        sheet = self.wb[flask.current_app.config["SHEET_NAMES"]["schedule_plan"]]
+        cur_row = 2
+        for sku_grouped in self.skus_grouped:
+            excel_client = ExcelBlock(sheet=sheet)
+            cur_row = self.fill_skus(sku_grouped, excel_client, cur_row, False,
+                                     order=["Рикотта", "Качорикотта", "Четук"])
+            cur_row += self.space_rows
+
+        for sheet_number, sheet_name in enumerate(self.wb.sheetnames):
+            if sheet_number != 1:
+                self.wb[sheet_name].views.sheetView[0].tabSelected = False
+        self.wb.active = 1
+        self.wb.save(self.filepath)
 

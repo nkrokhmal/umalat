@@ -10,11 +10,11 @@ Cell = collections.namedtuple("Cell", "col, col_name")
 
 COLUMNS = {
     "boiling_number": Cell(column_index_from_string("A"), "A"),
-    "boiling_type": Cell(column_index_from_string("B"), "B"),
-    "output": Cell(column_index_from_string("C"), "C"),
+    "output": Cell(column_index_from_string("B"), "B"),
+    "percent": Cell(column_index_from_string("C"), "C"),
     "group": Cell(column_index_from_string("D"), "D"),
     "name": Cell(column_index_from_string("E"), "E"),
-    "plan": Cell(column_index_from_string("F"), "F"),
+    "kg": Cell(column_index_from_string("F"), "F"),
     "remainings": Cell(column_index_from_string("G"), "G"),
     "delimiter": Cell(column_index_from_string("I"), "I"),
     "delimiter_int": Cell(column_index_from_string("L"), "L"),
@@ -41,8 +41,8 @@ def draw_skus(wb, data_sku, sheet_name, cur_i=None):
             cur_i,
             [
                 group_sku.name,
-                group_sku.made_from_boilings[0].to_str(),
                 group_sku.made_from_boilings[0].output_kg,
+                group_sku.made_from_boilings[0].percent,
             ],
             set_border=False,
         )
@@ -108,20 +108,21 @@ def draw_boiling_sheet(
             excel_client.draw_row(
                 row=cur_row, values=value, cols=column, set_border=False
             )
-            excel_client.color_cell(row=cur_row, col=COLUMNS["boiling_type"].col)
+            excel_client.color_cell(row=cur_row, col=COLUMNS["output"].col)
+            excel_client.color_cell(row=cur_row, col=COLUMNS["percent"].col)
             cur_row += 1
     return wb, cur_row
 
 
 def draw_boiling_plan(df, wb):
-    butter_skus = db.session.query(ButterSKU).all()
+    milkproject_skus = db.session.query(MilkProjectSKU).all()
 
-    _ = draw_skus(wb, butter_skus, SKU_SHEET_NAME)
+    _ = draw_skus(wb, milkproject_skus, SKU_SHEET_NAME)
     wb, _ = draw_boiling_sheet(
         wb=wb,
         df=df,
         sheet_name=PLAN_SHEET_NAME,
-        skus=butter_skus,
+        skus=milkproject_skus,
     )
 
     for sheet in wb.sheetnames:

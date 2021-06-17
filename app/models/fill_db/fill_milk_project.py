@@ -94,7 +94,7 @@ def fill_boilings():
             boiling_technologies=bts_name,
             line_id=line_id,
             weight_netto=b["Вес нетто"],
-            output_ton=b["Выход"],
+            output_kg=b["Выход"],
         )
         db.session.add(boiling)
         db.session.commit()

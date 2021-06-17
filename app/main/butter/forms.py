@@ -29,7 +29,7 @@ class ScheduleForm(FlaskForm):
     )
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
     beg_time = TimeField(
-        'Время начала подготовки цеха к работе',
+        "Время начала подготовки цеха к работе",
         validators=[Optional()],
         default=time(8, 0),
     )

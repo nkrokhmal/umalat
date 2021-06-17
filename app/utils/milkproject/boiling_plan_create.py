@@ -3,13 +3,14 @@ from app.models import *
 from app.utils.features.merge_boiling_utils import Boilings
 
 
-def boiling_plan_create(df, request_ton=0):
+def boiling_plan_create(df):
     df["plan"] = df["plan"].apply(lambda x: round(x))
     df["percent"] = df["sku"].apply(lambda x: x.made_from_boilings[0].percent)
     df["group"] = df["sku"].apply(lambda x: x.group.name)
     df["output"] = df["sku"].apply(lambda x: x.made_from_boilings[0].output_kg)
+    df["boiling_type"] = df["sku"].apply(lambda x: x.made_from_boilings[0].name)
 
-    result, boiling_number = handle_milkproject(df, request_ton=request_ton)
+    result, boiling_number = handle_milkproject(df)
     result["kg"] = result["plan"]
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result = result[
@@ -17,7 +18,7 @@ def boiling_plan_create(df, request_ton=0):
             "id",
             "sku",
             "group",
-            "output",
+            # "output",
             "name",
             "boiling_type",
             "kg",
