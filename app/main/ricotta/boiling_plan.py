@@ -9,7 +9,7 @@ from app.scheduler.mozzarella.boiling_plan import (
 from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
 from app.main import main
-
+from app.utils.files.utils import move_boiling_file, save_boiling_plan
 from app.models import *
 
 
@@ -64,7 +64,8 @@ def ricotta_boiling_plan():
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_ricotta_sku_plan()
 
-        excel_compiler, wb, wb_data_only, filename, filepath = move_file(
+        excel_compiler, wb, wb_data_only, filename, filepath = move_boiling_file(
+            sku_plan_client.date,
             sku_plan_client.filepath,
             sku_plan_client.filename,
             "рикотта",
@@ -76,9 +77,9 @@ def ricotta_boiling_plan():
         df_plan = boiling_plan_create(df, request_ton)
 
         wb = draw_boiling_plan(df_plan, df_extra_packing, wb, total_volume)
-        wb.save(filepath)
+        save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
         os.remove(tmp_file_path)
         return flask.render_template(
-            "ricotta/boiling_plan.html", form=form, filename=filename
+            "ricotta/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date
         )
     return flask.render_template("ricotta/boiling_plan.html", form=form, filename=None)

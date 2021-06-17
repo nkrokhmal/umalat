@@ -35,6 +35,7 @@ COLUMNS = {"BoilingVolume": 10, "SKUS_ID": 18, "BOILING_ID": 19}
 
 class SkuPlanClient:
     def __init__(self, date, remainings, skus_grouped, template_path):
+        self.date = date.strftime("%Y-%m-%d")
         self.filename = "{} План по SKU.xlsx".format(date.strftime("%Y-%m-%d"))
         self.filepath = os.path.join(
             flask.current_app.config["SKU_PLAN_FOLDER"], self.filename
@@ -77,7 +78,6 @@ class SkuPlanClient:
         order = order if order is not None else flask.current_app.config["ORDER"]
         for group_name in order:
             block_skus = [x for x in sku_grouped.skus if x.sku.group.name == group_name]
-            print(block_skus)
             if block_skus:
                 if sorted_by_weight:
                     block_skus = sorted(

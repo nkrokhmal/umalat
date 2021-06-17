@@ -18,7 +18,7 @@
     <div class="card card-body bg-white border-light shadow-sm mb-4">
         <h4 class="h5 mb-4">Загрузите файл плана по варкам и выберите дату</h4>
         <div class="row">
-            <form method="post" action="/schedule" enctype="multipart/form-data" class="mt-4">
+            <form method="post" action="/mozzarella_schedule" enctype="multipart/form-data" class="mt-4">
                 {{ form.hidden_tag() }}
                 <div class="row mb-4">
                     <div class="col-md-12 mb-3">
@@ -70,19 +70,21 @@
 
 {% if filename %}
     <script>
-        function download(url, filename) {
+        function download(url, filename, date) {
         fetch(url).then(function(t) {
             return t.blob().then((b)=>{
                 var a = document.createElement("a");
                 a.href = URL.createObjectURL(b);
                 a.setAttribute("download", filename);
+                a.setAttribute("file_name", filename);
+                a.setAttribute("date", date);
                 a.click();
             }
             );
         });
         }
-        var url = "download_schedule_plan/" + "{{filename}}";
-        download(url,"{{filename}}");
+        var url = "download_schedule_plan?file_name=" + "{{filename}}" + "&date=" + "{{date}}";
+        download(url,"{{filename}}", "{{date}}");
     </script>
 {% endif %}
 {% endblock %}

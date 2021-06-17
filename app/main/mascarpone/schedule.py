@@ -9,7 +9,7 @@ from app.scheduler.mascarpone.frontend.style import STYLE
 from app.utils.mascarpone.schedule_task import schedule_task_boilings, update_total_schedule_task
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
-
+from app.utils.files.utils import save_schedule
 from .forms import ScheduleForm
 
 
@@ -49,11 +49,9 @@ def mascarpone_schedule():
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )
 
-        path_schedule = "{}/{}".format(flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule)
-
-        schedule_wb.save(path_schedule)
+        save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         return flask.render_template(
-            "mascarpone/schedule.html", form=form, filename=filename_schedule
+            "mascarpone/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")
         )
 
     form.date.data = datetime.today() + timedelta(days=1)

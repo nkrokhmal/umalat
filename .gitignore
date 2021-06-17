@@ -67,6 +67,7 @@ app/data/dynamic/schedule_task/*.csv
 app/scheduler/butter/tests/schedules
 tests/runners/schedules/*.xlsx
 app/scheduler/**/*.xlsx
+app/data/dynamic/**
 
 # Dynamic data
 db/batch_numbers/data.json

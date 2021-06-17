@@ -5,7 +5,7 @@ from flask import url_for
 
 def test_mozzarella_get_boiling_plan(client):
     with client.test_client() as client:
-        url = url_for("main.boiling_plan", _external=False)
+        url = url_for("main.mozzarella_boiling_plan", _external=False)
         response = client.get(url)
         assert response.status_code == 200
 

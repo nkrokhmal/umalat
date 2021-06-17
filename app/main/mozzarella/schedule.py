@@ -1,5 +1,4 @@
 from app.imports.runtime import *
-
 from app.main import main
 from app.main.errors import internal_error
 from app.scheduler import *
@@ -10,7 +9,7 @@ from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
 from app.utils.features.openpyxl_wrapper import set_default_sheet
-
+from app.utils.files.utils import save_schedule
 from .forms import ScheduleForm
 
 
@@ -88,7 +87,7 @@ def mozzarella_schedule():
             frontend, open_file=False, fn=None, style=STYLE, wb=schedule_wb,
         )
 
-        filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание")
+        filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание моцарелла")
 
         update_total_schedule_task(date, boiling_plan_df, additional_packing_df)
         schedule_wb = schedule_task(schedule_wb, boiling_plan_df, additional_packing_df, date)
@@ -98,13 +97,11 @@ def mozzarella_schedule():
         schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
         set_default_sheet(schedule_wb)
 
-        path_schedule = "{}/{}".format("app/data/dynamic/schedule_plan", filename_schedule)
-        schedule_wb.save(path_schedule)
-
+        save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         os.remove(file_path)
 
         return flask.render_template(
-            "mozzarella/schedule.html", form=form, filename=filename_schedule
+            "mozzarella/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")
         )
 
     form.date.data = datetime.today() + timedelta(days=1)

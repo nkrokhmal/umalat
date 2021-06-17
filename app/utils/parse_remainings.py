@@ -169,15 +169,3 @@ def parse_sheet(ws, sheet_name, excel_compiler):
     df["sku_id"] = df["sku"].apply(lambda x: x.id)
     df["plan"] = df["plan"].apply(lambda x: abs(float(x)))
     return df, df_extra_packing
-
-
-def move_file(old_filepath, old_filename, department=""):
-    new_filename = "{} План по варкам {}.xlsx".format(
-        old_filename.split(" ")[0], department
-    )
-    filepath = os.path.join(flask.current_app.config["BOILING_PLAN_FOLDER"], new_filename)
-    shutil.copyfile(old_filepath, filepath)
-    excel_compiler = pycel.ExcelCompiler(filepath)
-    wb_data_only = openpyxl.load_workbook(filename=filepath, data_only=True)
-    wb = openpyxl.load_workbook(filename=filepath)
-    return excel_compiler, wb, wb_data_only, new_filename, filepath

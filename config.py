@@ -18,6 +18,8 @@ class BaseClass:
 
     BATCH_NUMBERS_DIR = "db/batch_numbers"
 
+    DYNAMIC_DIR = "app/data/dynamic"
+
     UPLOAD_TMP_FOLDER = "app/data/dynamic/tmp"
     STATS_FOLDER = "app/data/dynamic/stats"
     BOILING_PLAN_FOLDER = "app/data/dynamic/boiling_plan"

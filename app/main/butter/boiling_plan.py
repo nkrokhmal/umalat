@@ -3,6 +3,7 @@ from app.utils.butter.boiling_plan_create import butter_boiling_plan_create
 from app.utils.butter.boiling_plan_draw import draw_boiling_plan
 from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
+from app.utils.files.utils import move_boiling_file, save_boiling_plan
 from app.main import main
 from app.models import *
 from .forms import BoilingPlanForm
@@ -29,7 +30,8 @@ def butter_boiling_plan():
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_butter_sku_plan()
 
-        excel_compiler, wb, wb_data_only, filename, filepath = move_file(
+        excel_compiler, wb, wb_data_only, filename, filepath = move_boiling_file(
+            sku_plan_client.date,
             sku_plan_client.filepath,
             sku_plan_client.filename,
             "масло",
@@ -39,8 +41,8 @@ def butter_boiling_plan():
         df, _ = parse_sheet(ws, sheet_name, excel_compiler)
         df_plan = butter_boiling_plan_create(df)
         wb = draw_boiling_plan(df_plan, wb)
-        wb.save(filepath)
+        save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
         return flask.render_template(
-            "butter/boiling_plan.html", form=form, filename=filename
+            "butter/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date
         )
     return flask.render_template("butter/boiling_plan.html", form=form, filename=None)

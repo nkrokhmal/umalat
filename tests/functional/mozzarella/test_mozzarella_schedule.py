@@ -5,7 +5,7 @@ from flask import url_for
 
 def test_mozzarella_get_schedule(client):
     with client.test_client() as client:
-        url = url_for("main.schedule", _external=False)
+        url = url_for("main.mozzarella_schedule", _external=False)
         print(url)
         response = client.get(url)
         assert response.status_code == 200
