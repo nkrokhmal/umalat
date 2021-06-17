@@ -36,6 +36,32 @@ def update_total_schedule_task(date, df):
     df_task.to_csv(path, index=False, sep=";")
 
 
+def draw_task_original(excel_client, df, date, cur_row, task_name):
+    df_filter = df
+    index = 1
+
+    cur_row, excel_client = draw_header(excel_client, date, cur_row, task_name)
+
+    for sku_name, grp in df_filter.groupby("sku_name"):
+        kg = round(grp["kg"].sum())
+        boxes_count = math.ceil(
+            grp["kg"].sum()
+            / grp.iloc[0]["sku"].in_box
+            / grp.iloc[0]["sku"].weight_netto
+        )
+        values = [
+            index,
+            sku_name,
+            grp.iloc[0]["sku"].in_box,
+            kg,
+            boxes_count,
+            grp.iloc[0]["sku"].code,
+        ]
+        excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values)
+        index += 1
+    return cur_row
+
+
 def draw_task_new(excel_client, df, date, cur_row, task_name, batch_number):
     cur_row, excel_client = draw_header(excel_client, date, cur_row, task_name, "варки")
     for boiling_group_id, grp in df.groupby("boiling_id"):
@@ -75,13 +101,12 @@ def schedule_task_boilings(wb, df, date, batch_number):
     wb.create_sheet(sheet_name)
     excel_client = ExcelBlock(wb[sheet_name], font_size=9)
 
-    cur_row = draw_task_new(
+    cur_row = draw_task_original(
         excel_client,
         df_copy,
         date,
         cur_row,
         mascarpone_task_name,
-        batch_number,
     )
     cur_row += space_row
     return wb
