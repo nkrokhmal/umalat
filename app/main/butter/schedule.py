@@ -3,7 +3,6 @@ import flask
 from app.imports.runtime import *
 
 from app.main import main
-from app.main.errors import internal_error
 from app.scheduler.mascarpone import *
 from app.scheduler.mascarpone.frontend.style import STYLE
 from app.utils.mascarpone.schedule_task import (
