@@ -1,20 +1,18 @@
 import flask
 import pandas as pd
-
-from app.imports.runtime import *
-
-from openpyxl.styles import Alignment
-from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
-
-from app.enum import LineName
-from app.utils.features.openpyxl_wrapper import ExcelBlock
+from app.utils.files.utils import create_dir
 from app.utils.features.draw_utils import *
 from app.models import MozzarellaSKU
+from app.imports.runtime import *
 
 
 def update_total_schedule_task(date, df, df_packing=None):
-    folder = flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"]
-    path = os.path.join(folder, f"{date.date()}.csv")
+    data_dir = create_dir(
+        date.strftime(flask.current_app.config["DATE_FORMAT"]),
+        "task"
+    )
+    print(data_dir)
+    path = os.path.join(data_dir, f"{date.date()}.csv")
     columns = ["sku", "code", "in_box", "kg", "boxes_count"]
     if not os.path.exists(path):
         df_task = pd.DataFrame(columns=columns)

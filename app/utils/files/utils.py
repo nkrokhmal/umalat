@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from app.imports.runtime import *
 
@@ -44,5 +45,22 @@ def move_boiling_file(date, old_filepath, old_filename, department=""):
     wb = openpyxl.load_workbook(filename=filepath)
     return excel_compiler, wb, wb_data_only, new_filename, filepath
 
+
+def create_dir(date, folder):
+    dir = os.path.join(
+        flask.current_app.config["DYNAMIC_DIR"],
+        date,
+        folder
+    )
+    create_if_not_exists(dir)
+    return dir
+
+
+def move_to_approved(date, file_name):
+    old_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "schedule", file_name)
+    new_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "approved")
+    create_if_not_exists(new_dir)
+
+    shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
 
 

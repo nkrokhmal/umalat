@@ -20,34 +20,6 @@ def download_boiling_plan():
     return response
 
 
-@main.route("/download_sku_plan/<file_name>", methods=["POST", "GET"])
-@flask_login.login_required
-def download_sku_plan(file_name):
-    uploads = os.path.join(
-        os.path.dirname(flask.current_app.root_path),
-        flask.current_app.config["SKU_PLAN_FOLDER"],
-    )
-    response = flask.send_from_directory(
-        directory=uploads, filename=file_name, as_attachment=True
-    )
-    response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
-    return response
-
-
-@main.route("/download_stats/<file_name>", methods=["POST", "GET"])
-@flask_login.login_required
-def download_stats(file_name):
-    uploads = os.path.join(
-        os.path.dirname(flask.current_app.root_path),
-        flask.current_app.config["STATS_FOLDER"],
-    )
-    response = flask.send_from_directory(
-        directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True
-    )
-    response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
-    return response
-
-
 @main.route("/download_schedule_plan", methods=["POST", "GET"])
 @flask_login.login_required
 def download_schedule_plan():
@@ -66,12 +38,16 @@ def download_schedule_plan():
     return response
 
 
-@main.route("/download_schedule_task/<file_name>", methods=["POST", "GET"])
+@main.route("/download_schedule_task", methods=["POST", "GET"])
 @flask_login.login_required
-def download_schedule_task(file_name):
+def download_schedule_task():
+    date = flask.request.args.get("date")
+    file_name = flask.request.args.get("file_name")
     uploads = os.path.join(
         os.path.dirname(flask.current_app.root_path),
-        flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"],
+        flask.current_app.config["DYNAMIC_DIR"],
+        date,
+        "task"
     )
     response = flask.send_from_directory(
         directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True

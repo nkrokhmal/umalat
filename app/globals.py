@@ -1,5 +1,4 @@
 import flask_login
-
 from app.imports.external import *
 from app.db import create_external_db
 
