@@ -1,12 +1,12 @@
 from app.imports.runtime import *
-
+from dictalchemy
 from werkzeug.utils import redirect
 
 from app.main import main
 from app.utils.features.form_utils import *
 from app.models import MozzarellaSKU, SKU
 
-from .forms import SKUForm
+from .forms import SKUForm, CopySKUForm
 
 
 @main.route("/mozzarella/add_sku", methods=["POST", "GET"])
@@ -23,6 +23,7 @@ def add_sku():
             packing_speed=form.packing_speed.data,
             collecting_speed=form.packing_speed.data,
             in_box=form.in_box.data,
+            code=form.code.data,
         )
         sku = fill_mozzarella_sku_from_form(sku, form)
         db.session.add(sku)
@@ -57,6 +58,37 @@ def get_sku(page):
     )
 
 
+@main.route("/mozzarella/copy_sku/<int:sku_id>", methods=["GET", "POST"])
+@flask_login.login_required
+def copy_sku(sku_id):
+    form = CopySKUForm()
+    sku = db.session.query(MozzarellaSKU).get_or_404(sku_id)
+    if form.validate_on_submit() and sku is not None:
+        copy_sku = MozzarellaSKU(
+            name = form.name.data,
+            brand_name = form.brand_name.data,
+            code = form.code.data,
+            weight_netto=sku.weight_netto,
+            shelf_life=sku.shelf_life,
+            packing_speed=sku.packing_speed,
+            collecting_speed=sku.packing_speed,
+            in_box=sku.in_box,
+            group=sku.group,
+            line=sku.line,
+            form_factor=sku.form_factor,
+            pack_type=sku.pack_type,
+            made_from_boilings=sku.made_from_boilings,
+            packers=sku.packers,
+            production_by_request=sku.production_by_request,
+            packing_by_request=sku.packing_by_request
+        )
+        db.session.add(copy_sku)
+        db.session.commit()
+        flask.flash("SKU успешно добавлено", "success")
+        return redirect(flask.url_for(".get_sku", page=1))
+    return flask.render_template("mozzarella/copy_sku.html", form=form)
+
+
 @main.route("/mozzarella/edit_sku/<int:sku_id>", methods=["GET", "POST"])
 @flask_login.login_required
 def edit_sku(sku_id):
@@ -69,6 +101,7 @@ def edit_sku(sku_id):
         sku.shelf_life = form.shelf_life.data
         sku.packing_speed = form.packing_speed.data
         sku.in_box = form.in_box.data
+        sku.code = form.code.data
         fill_mozzarella_sku_from_form(sku, form)
 
         db.session.commit()
@@ -102,6 +135,7 @@ def edit_sku(sku_id):
     form.shelf_life.data = sku.shelf_life
     form.packing_speed.data = sku.packing_speed
     form.in_box.data = sku.in_box
+    form.code.data = sku.code
 
     return flask.render_template("mozzarella/edit_sku.html", form=form, sku_id=sku_id)
 

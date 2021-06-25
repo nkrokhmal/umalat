@@ -45,12 +45,19 @@ class ScheduleForm(FlaskForm):
     )
 
 
+class CopySKUForm(FlaskForm):
+    name = StringField("Введите имя SKU", validators=[Required()])
+    brand_name = StringField("Введите имя бренда", validators=[Optional()])
+    code = StringField("Введите код SKU", validators=[Optional()])
+
+
 class SKUForm(FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
     packing_speed = IntegerField("Введите скорость фасовки", validators=[Optional()])
     shelf_life = IntegerField("Введите время хранения, д", validators=[Optional()])
+    code = StringField("Введите код SKU", validators=[Optional()])
     in_box = IntegerField(
         "Введите количество упаковок в коробке, шт", validators=[Optional()]
     )
