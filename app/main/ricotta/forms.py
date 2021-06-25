@@ -26,6 +26,12 @@ class BoilingPlanForm(FlaskForm):
     )
 
 
+class CopySKUForm(FlaskForm):
+    name = StringField("Введите имя SKU", validators=[Required()])
+    brand_name = StringField("Введите имя бренда", validators=[Optional()])
+    code = StringField("Введите код SKU", validators=[Optional()])
+
+
 class SKUForm(FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])

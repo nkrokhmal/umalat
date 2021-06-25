@@ -1,5 +1,6 @@
+import dbus
+
 from app.imports.runtime import *
-from dictalchemy
 from werkzeug.utils import redirect
 
 from app.main import main
@@ -11,7 +12,7 @@ from .forms import SKUForm, CopySKUForm
 
 @main.route("/mozzarella/add_sku", methods=["POST", "GET"])
 @flask_login.login_required
-def add_sku():
+def mozzarella_add_sku():
     form = SKUForm()
     name = flask.request.args.get("name")
     if form.validate_on_submit():
@@ -29,7 +30,7 @@ def add_sku():
         db.session.add(sku)
         db.session.commit()
         flask.flash("SKU успешно добавлено", "success")
-        return redirect(flask.url_for(".get_sku", page=1))
+        return redirect(flask.url_for(".mozzarella_get_sku", page=1))
     if name:
         form.name.data = name
     return flask.render_template("mozzarella/add_sku.html", form=form)
@@ -37,8 +38,8 @@ def add_sku():
 
 @main.route("/mozzarella/get_sku/<int:page>", methods=["GET"])
 @flask_login.login_required
-def get_sku(page):
-    flask.session.clear()
+def mozzarella_get_sku(page):
+    db.session.remove()
     form = SKUForm()
     skus_count = db.session.query(MozzarellaSKU).count()
 
@@ -60,19 +61,25 @@ def get_sku(page):
 
 @main.route("/mozzarella/copy_sku/<int:sku_id>", methods=["GET", "POST"])
 @flask_login.login_required
-def copy_sku(sku_id):
+def mozzarella_copy_sku(sku_id):
     form = CopySKUForm()
     sku = db.session.query(MozzarellaSKU).get_or_404(sku_id)
     if form.validate_on_submit() and sku is not None:
+        if form.name.data == sku.name:
+            raise Exception("SKU с таким именем уже сущесвует в базе данных!")
+        if form.code.data == sku.code:
+            raise Exception("SKU с таким кодом уже существует в базе данных!")
+
         copy_sku = MozzarellaSKU(
-            name = form.name.data,
-            brand_name = form.brand_name.data,
-            code = form.code.data,
+            name=form.name.data,
+            brand_name=form.brand_name.data,
+            code=form.code.data,
             weight_netto=sku.weight_netto,
             shelf_life=sku.shelf_life,
             packing_speed=sku.packing_speed,
             collecting_speed=sku.packing_speed,
             in_box=sku.in_box,
+            type=sku.type,
             group=sku.group,
             line=sku.line,
             form_factor=sku.form_factor,
@@ -85,13 +92,16 @@ def copy_sku(sku_id):
         db.session.add(copy_sku)
         db.session.commit()
         flask.flash("SKU успешно добавлено", "success")
-        return redirect(flask.url_for(".get_sku", page=1))
-    return flask.render_template("mozzarella/copy_sku.html", form=form)
+        return redirect(flask.url_for(".mozzarella_get_sku", page=1))
+    form.name.data = sku.name
+    form.brand_name.data = sku.brand_name
+    form.code.data = sku.code
+    return flask.render_template("mozzarella/copy_sku.html", form=form, sku_id=sku.id)
 
 
 @main.route("/mozzarella/edit_sku/<int:sku_id>", methods=["GET", "POST"])
 @flask_login.login_required
-def edit_sku(sku_id):
+def mozzarella_edit_sku(sku_id):
     form = SKUForm()
     sku = db.session.query(MozzarellaSKU).get_or_404(sku_id)
     if form.validate_on_submit() and sku is not None:
@@ -107,7 +117,7 @@ def edit_sku(sku_id):
         db.session.commit()
 
         flask.flash("SKU успешно изменено", "success")
-        return redirect(flask.url_for(".get_sku", page=1))
+        return redirect(flask.url_for(".mozzarella_get_sku", page=1))
 
     if len(sku.made_from_boilings) > 0:
         default_form_value(form.boiling, sku.made_from_boilings[0].to_str())
@@ -142,11 +152,10 @@ def edit_sku(sku_id):
 
 @main.route("/mozzarella/delete_sku/<int:sku_id>", methods=["DELETE"])
 @flask_login.login_required
-def delete_sku(sku_id):
+def mozzarella_delete_sku(sku_id):
     sku = db.session.query(SKU).get_or_404(sku_id)
     if sku:
         db.session.delete(sku)
         db.session.commit()
-        flask.flash("SKU успешно удалено", "success")
-    time.sleep(1.0)
-    return redirect(flask.url_for(".get_sku", page=1))
+        # flask.flash("SKU успешно удалено", "success")
+    return redirect(flask.url_for(".mozzarella_get_sku", page=1))

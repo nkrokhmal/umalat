@@ -6,6 +6,7 @@ from flask_admin.contrib.sqla import ModelView
 import app.models as umalat_models
 
 from .main import main as main_bp
+from .main.errors import not_found
 
 
 def create_app(config_name="default"):
@@ -41,6 +42,7 @@ def create_app(config_name="default"):
     login_manager.init_app(app)
 
     app.register_blueprint(main_bp)
+    app.register_error_handler(404, not_found)
     return app
 
 

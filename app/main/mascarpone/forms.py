@@ -58,6 +58,11 @@ class SKUCreamCheeseForm(FlaskForm):
         if sku is not None:
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
+class CopySKUForm(FlaskForm):
+    name = StringField("Введите имя SKU", validators=[Required()])
+    brand_name = StringField("Введите имя бренда", validators=[Optional()])
+    code = StringField("Введите код SKU", validators=[Optional()])
+
 
 class SKUMascarponeForm(FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])

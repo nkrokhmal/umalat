@@ -9,7 +9,7 @@ from app.enum import LineName
 from app.utils.features.form_utils import *
 
 
-from .forms import SKUCreamCheeseForm
+from .forms import SKUCreamCheeseForm, CopySKUForm
 
 
 @main.route("/mascarpone/add_sku_cream_cheese", methods=["POST", "GET"])
@@ -47,7 +47,9 @@ def mascarpone_add_sku_cream_cheese():
 @main.route("/mascarpone/get_sku_cream_cheese/<int:page>", methods=["GET"])
 @flask_login.login_required
 def mascarpone_get_sku_cream_cheese(page):
-    flask.session.clear()
+    db.session.remove()
+    import time
+    time.sleep(0.1)
     form = SKUCreamCheeseForm()
     skus_count = db.session.query(CreamCheeseSKU).count()
 
@@ -69,6 +71,44 @@ def mascarpone_get_sku_cream_cheese(page):
         per_page=flask.current_app.config["SKU_PER_PAGE"],
         endopoints=".mascarpone_get_sku_cream_cheese",
     )
+
+
+@main.route("/mascarpone/copy_sku_cream_cheese/<int:sku_id>", methods=["GET", "POST"])
+@flask_login.login_required
+def mascarpone_copy_sku_cream_cheese(sku_id):
+    form = CopySKUForm()
+    sku = db.session.query(CreamCheeseSKU).get_or_404(sku_id)
+    if form.validate_on_submit() and sku is not None:
+        if form.name.data == sku.name:
+            raise Exception("SKU с таким именем уже сущесвует в базе данных!")
+        if form.code.data == sku.code:
+            raise Exception("SKU с таким кодом уже существует в базе данных!")
+
+        copy_sku = CreamCheeseSKU(
+            name=form.name.data,
+            brand_name=form.brand_name.data,
+            code=form.code.data,
+            weight_netto=sku.weight_netto,
+            shelf_life=sku.shelf_life,
+            packing_speed=sku.packing_speed,
+            collecting_speed=sku.packing_speed,
+            in_box=sku.in_box,
+            group=sku.group,
+            type=sku.type,
+            line=sku.line,
+            form_factor=sku.form_factor,
+            pack_type=sku.pack_type,
+            made_from_boilings=sku.made_from_boilings,
+            packers=sku.packers,
+        )
+        db.session.add(copy_sku)
+        db.session.commit()
+        flask.flash("SKU успешно добавлено", "success")
+        return redirect(flask.url_for(".mascarpone_get_sku_cream_cheese", page=1))
+    form.name.data = sku.name
+    form.brand_name.data = sku.brand_name
+    form.code.data = sku.code
+    return flask.render_template("mascarpone/copy_sku_cream_cheese.html", form=form, sku_id=sku.id)
 
 
 @main.route("/mascarpone/edit_sku_cream_cheese/<int:sku_id>", methods=["GET", "POST"])
@@ -117,6 +157,5 @@ def mascarpone_delete_sku_cream_cheese(sku_id):
     if sku:
         db.session.delete(sku)
         db.session.commit()
-        flask.flash("SKU успешно удалено", "success")
-    time.sleep(2.0)
+        # flask.flash("SKU успешно удалено", "success")
     return redirect(flask.url_for(".mascarpone_get_sku_cream_cheese", page=1))
