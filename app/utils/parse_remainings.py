@@ -159,6 +159,9 @@ def parse_sheet(ws, sheet_name, excel_compiler):
     df_extra_packing = df[["sku", "extra_packing"]].copy()
     df = df.fillna(0)
     df = df[df["plan"] != 0]
+    if df.empty:
+        # todo: create simple example
+        raise Exception("План варок не сформирован, потому что на текущей день заявка нулевая.")
     df = df[
         df["plan"].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())
     ]

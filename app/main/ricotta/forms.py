@@ -34,6 +34,7 @@ class CopySKUForm(FlaskForm):
 
 class SKUForm(FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
+    code = StringField("Введите код SKU", validators=[Optional()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
     packing_speed = IntegerField("Введите скорость фасовки", validators=[Optional()])

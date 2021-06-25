@@ -18,6 +18,7 @@ def mascarpone_add_sku_mascarpone():
     if form.validate_on_submit():
         sku = MascarponeSKU(
             name=form.name.data,
+            code=form.code.data,
             brand_name=form.brand_name.data,
             weight_netto=form.weight_netto.data,
             shelf_life=form.shelf_life.data,
@@ -114,6 +115,7 @@ def mascarpone_edit_sku_mascarpone(sku_id):
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
     if form.validate_on_submit() and sku is not None:
         sku.name = form.name.data
+        sku.code = form.code.data
         sku.brand_name = form.brand_name.data
         sku.weight_netto = form.weight_netto.data
         sku.shelf_life = form.shelf_life.data
@@ -136,6 +138,7 @@ def mascarpone_edit_sku_mascarpone(sku_id):
     form.process()
 
     form.name.data = sku.name
+    form.code.data = sku.code
     form.brand_name.data = sku.brand_name
     form.weight_netto.data = sku.weight_netto
     form.shelf_life.data = sku.shelf_life
