@@ -9,7 +9,7 @@ from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
 from app.utils.features.openpyxl_wrapper import set_default_sheet
-from app.utils.files.utils import save_schedule
+from app.utils.files.utils import save_schedule, save_schedule_dict
 from .forms import ScheduleForm
 
 
@@ -88,6 +88,7 @@ def mozzarella_schedule():
         )
 
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание моцарелла")
+        filename_schedule_json = "{} {}.json".format(date.strftime("%Y-%m-%d"), "Расписание моцарелла")
 
         update_total_schedule_task(date, boiling_plan_df, additional_packing_df)
         schedule_wb = schedule_task(schedule_wb, boiling_plan_df, additional_packing_df, date)
@@ -98,6 +99,7 @@ def mozzarella_schedule():
         set_default_sheet(schedule_wb)
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
+        # save_schedule_dict(schedule_json, filename_schedule_json, date.strftime("%Y-%m-%d"))
         os.remove(file_path)
 
         return flask.render_template(
