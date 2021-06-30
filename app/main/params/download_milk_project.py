@@ -31,7 +31,7 @@ def download_milkproject():
     excel_path = os.path.join(
         os.path.dirname(flask.current_app.root_path),
         flask.current_app.config["UPLOAD_TMP_FOLDER"],
-        filename
+        filename,
     )
     df.to_excel(excel_path)
     response = flask.send_from_directory(
