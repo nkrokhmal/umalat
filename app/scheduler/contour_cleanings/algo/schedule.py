@@ -3,15 +3,14 @@ from app.imports.runtime import *
 from utils_ak.block_tree import *
 from app.scheduler.time import *
 
+
 def make_contour_3(mozarella_schedule):
     m = BlockMaker("3")
 
     salt_boilings = [b for b in mozarella_schedule['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
     if salt_boilings:
-        salt_melting_start = salt_boilings[0]['melting_and_packing']['melting'].x[0]
-        m.row('cleaning', push_func=add_push,
-              size=90 // 5, x=cast_t(salt_melting_start) + 6,
-             label='Контур циркуляции рассола') # add half hour
+        salt_melting_start = salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0]
+        m.row('cleaning', push_func=add_push, size=90 // 5, x=salt_melting_start + 6, label='Контур циркуляции рассола') # add half hour
 
     last_full_cleaning_start = mozarella_schedule['master']['cleaning', True][-1].x[0]
     m.row('cleaning', push_func=add_push, size=90 // 5, x=cast_t(last_full_cleaning_start), label='Полная мойка термизатора')
@@ -27,19 +26,18 @@ def make_contour_3(mozarella_schedule):
 
         class Validator(ClassValidator):
             def __init__(self):
-                super().__init__(window=4)
+                super().__init__(window=10)
 
             @staticmethod
             def validate__cleaning__cleaning(b1, b2):
                 validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
 
-        with m.block('cheese_makers'):
-            for n, cheese_maker_end in values:
-                m.row('cleaning', n=n,
-                      push_func=AxisPusher(start_from=cheese_maker_end),
-                      push_kwargs= {'validator': Validator()},
-                      size=cast_t('01:20') // 5,
-                      label='Сыроизготовитель')
+        for n, cheese_maker_end in values:
+            m.row('cleaning',
+                  push_func=AxisPusher(start_from=cheese_maker_end),
+                  push_kwargs= {'validator': Validator()},
+                  size=cast_t('01:20'),
+                  label=f'Сыроизготовитель {int(n) + 1}')
 
     with code('melters_and_baths'):
         lines_df = pd.DataFrame(index=['water', 'salt'])
@@ -65,24 +63,17 @@ def make_contour_3(mozarella_schedule):
 
         class Validator(ClassValidator):
             def __init__(self):
-                super().__init__(window=4)
+                super().__init__(window=10)
 
             @staticmethod
             def validate__cleaning__cleaning(b1, b2):
                 validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
 
-
-            @staticmethod
-            def validate__cheese_makers__cleaning(b1, b2):
-                validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
-
-
-
         for i, row in lines_df.iterrows():
             for j, c in enumerate(row['cleanings']):
                 if j == 0:
                     b = m.block(c,
-                                push_func=AxisPusher(start_from=max(m.root['cheese_makers'].y[0], row['melting_end'] + 12)), # add hour
+                                push_func=AxisPusher(start_from=max(m.root['cleaning', True][-1].y[0], row['melting_end'] + 12)), # add hour
                                 push_kwargs= {'validator': Validator()})
                 else:
                     b = m.block(c,
@@ -100,5 +91,15 @@ def make_contour_3(mozarella_schedule):
             m.block(short_termizator_cleaning,
                 push_func=AxisPusher(start_from='last_end'),
                 push_kwargs= {'validator': Validator()})
+
+    skus = sum([list(b.props['boiling_group_df']['sku']) for b in mozarella_schedule['master']['boiling', True]], [])
+    is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
+    is_bar12_present = True
+    if is_bar12_present:
+        m.row('cleaning',
+                label='Формовщик',
+                size=cast_t('01:20'),
+                push_func=AxisPusher(start_from='last_end'),
+                push_kwargs={'validator': Validator()})
 
     return m.root

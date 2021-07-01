@@ -16,12 +16,12 @@ def wrap_contour(contour):
         if not child.is_leaf():
             continue
 
-        child.update_size(size=(child.size[0], 1))
+        child.update_size(size=(child.size[0], 2))
         m.row(m.copy(child, with_props=True), push_func=add_push)
     return m.root
 
 
-def wrap_frontend(contours, date=None, start_time="07:00"):
+def wrap_frontend(contours, date=None, start_time="00:00"):
     date = date or datetime.now()
 
     m = BlockMaker(
