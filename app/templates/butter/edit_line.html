@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Линии - Изменить линию{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="py-4">
+        <div class="d-flex justify-content-between w-100 flex-wrap">
+            <div class="mb-3 mb-lg-0">
+                <h1 class="h4">Изменение параметров линии масла<br></h1>
+            </div>
+        </div>
+    </div>
+    <form method="post" action="/butter/edit_line/{{line_id}}" class="mt-4">
+        {{ form.hidden_tag() }}
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="form-group">
+                    <label>Название линии</label>
+                    {{form.name(place_holder='Name', class='form-control', readonly=true)}}
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Выход с варки, кг</label>
+                        {{form.output_kg(place_holder='Heating', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Время подготовки, мин</label>
+                        {{form.preparing_time(place_holder='Delay', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Время смещения, мин</label>
+                        {{form.displacement_time(place_holder='Delay', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Время мойки, мин</label>
+                        {{form.cleaning_time(place_holder='Abandon', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Полный объем варки, л</label>
+                        {{form.boiling_volume(place_holder='Pumping', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-3" style="margin-top:30px;">
+                <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+{% endblock %}

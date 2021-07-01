@@ -69,7 +69,6 @@ def download_schedules(page):
                     schedules_metadata[date_dir]["task"] = {}
                     schedules_metadata[date_dir]["task"]['filename'] = task_filename
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
-    print(schedules_metadata)
 
     schedules_result = get_metadata(
         schedules_metadata,

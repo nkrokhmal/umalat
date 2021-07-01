@@ -17,6 +17,10 @@ def save_file_dir(data, filename, date, folder, data_type="xlsx"):
         data.save(os.path.join(data_dir, filename))
     elif data_type == "csv":
         data.to_csv(os.path.join(data_dir, filename), index=False, sep=";")
+    elif data_type == "json":
+        mode = 'a' if os.path.exists(os.path.join(data_dir, filename)) else 'w'
+        with open(os.path.join(data_dir, filename), mode) as outfile:
+            json.dump(data, outfile)
 
 
 def save_boiling_plan(*args, **kwargs):
@@ -29,6 +33,10 @@ def save_schedule(*args, **kwargs):
 
 def save_schedule_task(*args, **kwargs):
     save_file_dir(*args, **kwargs, folder="schedule_task", data_type="csv")
+
+
+def save_schedule_dict(*args, **kwargs):
+    save_file_dir(*args, **kwargs, folder="schedule_dict", data_type="json")
 
 
 def move_boiling_file(date, old_filepath, old_filename, department=""):

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Линии - Список линий{% endblock %}
+{% block page_content %}
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Параметры линий масла</h1>
+        </div>
+    </div>
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Название линии</th>
+                        <th class="border-0">Выход, кг</th>
+                        <th class="border-0">Подготовка, мин</th>
+                        <th class="border-0">Обработка, мин</th>
+                        <th class="border-0">Мойка, мин</th>
+                        <th class="border-0">Объем, л</th>
+                        <th class="border-0">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for line in lines %}
+                        <tr>
+                            <td class="border-0">{{loop.index}}</td>
+                            <td class="border-0"><a class="small">{{line.name}}</a></td>
+                            <td class="border-0"><a class="small">{{line.output_kg}}</a></td>
+                            <td class="border-0"><a class="small">{{line.preparing_time}}</a></td>
+                            <td class="border-0"><a class="small">{{line.displacement_time}}</a></td>
+                            <td class="border-0"><a class="small">{{line.cleaning_time}}</a></td>
+                            <td class="border-0"><a class="small">{{line.boiling_volume}}</a></td>
+                            <td class="border-0">
+                                <a href="{{ url_for('main.butter_edit_line', line_id = line.id)}}" class="edit-bt">
+                                    <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
