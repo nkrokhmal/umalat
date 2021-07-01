@@ -13,7 +13,7 @@ def make_contour_3(mozarella_schedule):
         m.row('cleaning', push_func=add_push, size=90 // 5, x=salt_melting_start + 6, label='Контур циркуляции рассола') # add half hour
 
     last_full_cleaning_start = mozarella_schedule['master']['cleaning', True][-1].x[0]
-    m.row('cleaning', push_func=add_push, size=90 // 5, x=cast_t(last_full_cleaning_start), label='Полная мойка термизатора')
+    m.row('cleaning', push_func=add_push, size=90 // 5, x=last_full_cleaning_start, label='Полная мойка термизатора')
 
     with code('cheese_makers'):
         # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
@@ -57,7 +57,6 @@ def make_contour_3(mozarella_schedule):
 
         lines_df['melting_end'] = lines_df['boilings'].apply(lambda boilings: None if not boilings else boilings[-1]['melting_and_packing']['melting'].y[0])
 
-
         short_termizator_cleaning = m.create_block('cleaning', size=(cast_t('01:00'), 0), label='Короткая мойка термизатора')
         filled_short_termizator = False
 
@@ -94,7 +93,6 @@ def make_contour_3(mozarella_schedule):
 
     skus = sum([list(b.props['boiling_group_df']['sku']) for b in mozarella_schedule['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
-    is_bar12_present = True
     if is_bar12_present:
         m.row('cleaning',
                 label='Формовщик',
