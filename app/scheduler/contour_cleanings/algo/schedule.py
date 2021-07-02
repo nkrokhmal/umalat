@@ -97,3 +97,60 @@ def make_contour_3(mozarella_schedule):
               label='Формовщик')
 
     return m.root
+
+def make_contour_4(mozarella_schedule):
+    m = BlockMaker("4 contour")
+
+    with code('drenators'):
+        # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
+        values = []
+        for boiling in mozarella_schedule['master']['boiling', True]:
+            drenator = boiling['drenator']
+            values.append([drenator.y[0], drenator.props['pouring_line'], drenator.props['drenator_num']])
+        df = pd.DataFrame(values, columns=['drenator_end', 'pouring_line', 'drenator_num'])
+        df['id'] = df['pouring_line'].astype(int) * 2 + df['drenator_num'].astype(int)
+        df = df[['id', 'drenator_end']]
+        df = df.drop_duplicates(subset='id', keep='last')
+        df = df.reset_index(drop=True)
+        df['id'] = df['id'].astype(int) + 1
+        values = df.values.tolist()
+
+        # logic
+        i = 0
+        while i < len(values):
+            drenator_id, drenator_end = values[i]
+            if i == 0:
+                ids = [str(drenator_id)]
+                block = m.row('cleaning', push_func=add_push,
+                              size=cast_t('01:20'), x=drenator_end,
+                              ids=ids,
+                              label=f'Дренатор {", ".join(ids)}').block
+            else:
+                if i + 1 < len(values) and values[i + 1][1] <= block.y[0] + 2:
+                    # clean multiple drenators
+                    ids = [str(drenator_id), str(values[i + 1][0])]
+                    block = m.row('cleaning',
+                                  push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()),
+                                  size=cast_t('01:20'),
+                                  ids=ids,
+                                  label=f'Дренатор {", ".join(ids)}').block
+                    i += 1
+                else:
+                    ids = [str(drenator_id)]
+                    block = m.row('cleaning', push_func=AxisPusher(start_from=['last_end', drenator_end],
+                                                                   validator=CleaningValidator()),
+                                  size=cast_t('01:20'),
+                                  ids=[drenator_id],
+                                  label=f'Дренатор {", ".join(ids)}').block
+            i += 1
+        # todo: do not pair before non-working days
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:30'),
+          label='Транспортер + линия кислой сыворотки')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:30'),
+          label='Линия кислой сыворотки')
+
+    return m.root
