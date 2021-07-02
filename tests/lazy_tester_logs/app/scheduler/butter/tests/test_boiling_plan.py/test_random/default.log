@@ -1,13 +1,13 @@
-    boiling_id             sku     kg
-0            0   <ButterSKU 8>   60.0
-1            0   <ButterSKU 8>   70.0
-2            0   <ButterSKU 8>   60.0
-3            0   <ButterSKU 8>   60.0
-4            1   <ButterSKU 7>   50.0
-5            1   <ButterSKU 7>   70.0
-6            1   <ButterSKU 7>   70.0
-7            1   <ButterSKU 7>   50.0
-8            2  <ButterSKU 10>  100.0
-9            2   <ButterSKU 9>   80.0
-10           2   <ButterSKU 9>   80.0
-11           2   <ButterSKU 9>   90.0
+    boiling_id              sku     kg            boiling
+0            0    <ButterSKU 8>   60.0  <ButterBoiling 7>
+1            0    <ButterSKU 8>   70.0  <ButterBoiling 7>
+2            0    <ButterSKU 8>   60.0  <ButterBoiling 7>
+3            0    <ButterSKU 8>   60.0  <ButterBoiling 7>
+4            1    <ButterSKU 4>   50.0  <ButterBoiling 4>
+5            1    <ButterSKU 4>   70.0  <ButterBoiling 4>
+6            1    <ButterSKU 4>   70.0  <ButterBoiling 4>
+7            1    <ButterSKU 4>   50.0  <ButterBoiling 4>
+8            2  <ButterSKU 123>  100.0  <ButterBoiling 8>
+9            2  <ButterSKU 123>   80.0  <ButterBoiling 8>
+10           2    <ButterSKU 9>   80.0  <ButterBoiling 8>
+11           2    <ButterSKU 9>   90.0  <ButterBoiling 8>
