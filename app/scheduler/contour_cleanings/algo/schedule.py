@@ -10,10 +10,14 @@ def make_contour_3(mozarella_schedule):
     salt_boilings = [b for b in mozarella_schedule['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
     if salt_boilings:
         salt_melting_start = salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0]
-        m.row('cleaning', push_func=add_push, size=90 // 5, x=salt_melting_start + 6, label='Контур циркуляции рассола') # add half hour
+        m.row('cleaning', push_func=add_push,
+              size=90 // 5, x=salt_melting_start + 6,
+              label='Контур циркуляции рассола') # add half hour
 
     last_full_cleaning_start = mozarella_schedule['master']['cleaning', True][-1].x[0]
-    m.row('cleaning', push_func=add_push, size=90 // 5, x=last_full_cleaning_start, label='Полная мойка термизатора')
+    m.row('cleaning', push_func=add_push,
+          size=90 // 5, x=last_full_cleaning_start,
+          label='Полная мойка термизатора')
 
     with code('cheese_makers'):
         # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
@@ -33,8 +37,7 @@ def make_contour_3(mozarella_schedule):
                 validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
 
         for n, cheese_maker_end in values:
-            m.row('cleaning',
-                  push_func=AxisPusher(start_from=cheese_maker_end, validator=Validator()),
+            m.row('cleaning', push_func=AxisPusher(start_from=cheese_maker_end, validator=Validator()),
                   size=cast_t('01:20'),
                   label=f'Сыроизготовитель {int(n) + 1}')
 
@@ -47,16 +50,28 @@ def make_contour_3(mozarella_schedule):
 
         lines_df['cleanings'] = [[] for _ in range(2)]
         if lines_df.loc['water', 'boilings']:
-            lines_df.loc['water', 'cleanings'].extend([m.create_block('cleaning', size=(cast_t('02:20'), 0), label='Линия 1 плавилка'),
-                                                       m.create_block('cleaning', size=(cast_t('01:30'), 0), label='Линия 1 ванна 1 + ванна 2')])
+            lines_df.loc['water', 'cleanings'].extend([m.create_block('cleaning',
+                                                                      size=(cast_t('02:20'), 0),
+                                                                      label='Линия 1 плавилка'),
+                                                       m.create_block('cleaning',
+                                                                      size=(cast_t('01:30'), 0),
+                                                                      label='Линия 1 ванна 1 + ванна 2')])
         if lines_df.loc['salt', 'boilings']:
-            lines_df.loc['salt', 'cleanings'].extend([m.create_block('cleaning', size=(cast_t('02:20'), 0), label='Линия 2 плавилка'),
-                                                      m.create_block('cleaning', size=(cast_t('01:30'), 0), label='Линия 2 ванна 1'),
-                                                      m.create_block('cleaning', size=(cast_t('01:30'), 0), label='Линия 2 ванна 2')])
+            lines_df.loc['salt', 'cleanings'].extend([m.create_block('cleaning',
+                                                                     size=(cast_t('02:20'), 0),
+                                                                     label='Линия 2 плавилка'),
+                                                      m.create_block('cleaning',
+                                                                     size=(cast_t('01:30'), 0),
+                                                                     label='Линия 2 ванна 1'),
+                                                      m.create_block('cleaning',
+                                                                     size=(cast_t('01:30'), 0),
+                                                                     label='Линия 2 ванна 2')])
 
         lines_df['melting_end'] = lines_df['boilings'].apply(lambda boilings: None if not boilings else boilings[-1]['melting_and_packing']['melting'].y[0])
 
-        short_termizator_cleaning = m.create_block('cleaning', size=(cast_t('01:00'), 0), label='Короткая мойка термизатора')
+        short_termizator_cleaning = m.create_block('cleaning',
+                                                   size=(cast_t('01:00'), 0),
+                                                   label='Короткая мойка термизатора')
         filled_short_termizator = False
 
         class Validator(ClassValidator):
@@ -70,28 +85,23 @@ def make_contour_3(mozarella_schedule):
         for i, row in lines_df.iterrows():
             for j, c in enumerate(row['cleanings']):
                 if j == 0:
-                    b = m.block(c,
-                                push_func=AxisPusher(start_from=max(m.root['cleaning', True][-1].y[0], row['melting_end'] + 12), validator=Validator())) # add hour
+                    b = m.block(c, push_func=AxisPusher(start_from=max(m.root['cleaning', True][-1].y[0], row['melting_end'] + 12), validator=Validator())) # add hour
                 else:
-                    b = m.block(c,
-                                push_func=AxisPusher(start_from='last_end', validator=Validator()))
+                    b = m.block(c, push_func=AxisPusher(start_from='last_end', validator=Validator()))
 
                 if not filled_short_termizator and cast_time(b.block.y[0]) >= '00:22:00':
-                    m.block(short_termizator_cleaning,
-                            push_func=AxisPusher(start_from='last_end', validator=Validator()))
+                    m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=Validator()))
 
                     filled_short_termizator = True
 
         if not filled_short_termizator:
-            m.block(short_termizator_cleaning,
-                push_func=AxisPusher(start_from='last_end', validator=Validator()))
+            m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=Validator()))
 
     skus = sum([list(b.props['boiling_group_df']['sku']) for b in mozarella_schedule['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
     if is_bar12_present:
-        m.row('cleaning',
-                label='Формовщик',
-                size=cast_t('01:20'),
-                push_func=AxisPusher(start_from='last_end', validator=Validator()))
+        m.row('cleaning', push_func=AxisPusher(start_from='last_end', validator=Validator()),
+              size=cast_t('01:20'),
+              label='Формовщик')
 
     return m.root
