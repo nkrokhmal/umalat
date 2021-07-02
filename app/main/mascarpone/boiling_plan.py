@@ -63,4 +63,5 @@ def mascarpone_boiling_plan():
         return render_template(
             "mascarpone/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date
         )
+    form.date.data = datetime.today() + timedelta(days=1)
     return render_template("mascarpone/boiling_plan.html", form=form, filename=None)

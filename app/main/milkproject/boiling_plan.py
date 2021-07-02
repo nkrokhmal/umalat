@@ -45,4 +45,5 @@ def milkproject_boiling_plan():
         return flask.render_template(
             "milkproject/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date,
         )
+    form.date.data = datetime.today() + timedelta(days=1)
     return flask.render_template("milkproject/boiling_plan.html", form=form, filename=None)
