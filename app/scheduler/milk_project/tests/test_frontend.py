@@ -37,5 +37,5 @@ def test_samples():
 
 
 if __name__ == "__main__":
-    # test_drawing_milk_project(open_file=True)
-    test_samples()
+    test_drawing_milk_project(open_file=True)
+    # test_samples()

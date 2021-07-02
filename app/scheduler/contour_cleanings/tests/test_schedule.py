@@ -3,11 +3,11 @@ import os
 os.environ["environment"] = "interactive"
 
 from app.scheduler.contour_cleanings.algo.schedule import *
-from config import DebugConfig
 
 
 def test():
-    from utils_ak.loguru import configure_loguru_stdout
+    utils.configure_loguru_stdout("INFO")
+    utils.lazy_tester.configure_function_path()
 
     import pickle
 
@@ -15,6 +15,8 @@ def test():
     with open(fn, "rb") as f:
         mozarella_schedule = ParallelepipedBlock.from_dict(pickle.load(f))
 
+    utils.lazy_tester.log(make_contour_3(mozarella_schedule))
+    utils.lazy_tester.assert_logs()
     print(make_contour_3(mozarella_schedule))
 
 

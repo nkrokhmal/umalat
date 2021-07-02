@@ -34,8 +34,7 @@ def make_contour_3(mozarella_schedule):
 
         for n, cheese_maker_end in values:
             m.row('cleaning',
-                  push_func=AxisPusher(start_from=cheese_maker_end),
-                  push_kwargs= {'validator': Validator()},
+                  push_func=AxisPusher(start_from=cheese_maker_end, validator=Validator()),
                   size=cast_t('01:20'),
                   label=f'Сыроизготовитель {int(n) + 1}')
 
@@ -72,24 +71,20 @@ def make_contour_3(mozarella_schedule):
             for j, c in enumerate(row['cleanings']):
                 if j == 0:
                     b = m.block(c,
-                                push_func=AxisPusher(start_from=max(m.root['cleaning', True][-1].y[0], row['melting_end'] + 12)), # add hour
-                                push_kwargs= {'validator': Validator()})
+                                push_func=AxisPusher(start_from=max(m.root['cleaning', True][-1].y[0], row['melting_end'] + 12), validator=Validator())) # add hour
                 else:
                     b = m.block(c,
-                                push_func=AxisPusher(start_from='last_end'),
-                                push_kwargs= {'validator': Validator()})
+                                push_func=AxisPusher(start_from='last_end', validator=Validator()))
 
                 if not filled_short_termizator and cast_time(b.block.y[0]) >= '00:22:00':
                     m.block(short_termizator_cleaning,
-                            push_func=AxisPusher(start_from='last_end'),
-                            push_kwargs= {'validator': Validator()})
+                            push_func=AxisPusher(start_from='last_end', validator=Validator()))
 
                     filled_short_termizator = True
 
         if not filled_short_termizator:
             m.block(short_termizator_cleaning,
-                push_func=AxisPusher(start_from='last_end'),
-                push_kwargs= {'validator': Validator()})
+                push_func=AxisPusher(start_from='last_end', validator=Validator()))
 
     skus = sum([list(b.props['boiling_group_df']['sku']) for b in mozarella_schedule['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
@@ -97,7 +92,6 @@ def make_contour_3(mozarella_schedule):
         m.row('cleaning',
                 label='Формовщик',
                 size=cast_t('01:20'),
-                push_func=AxisPusher(start_from='last_end'),
-                push_kwargs={'validator': Validator()})
+                push_func=AxisPusher(start_from='last_end', validator=Validator()))
 
     return m.root
