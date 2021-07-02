@@ -5,24 +5,25 @@ from app.scheduler.time import *
 
 
 class CleaningValidator(ClassValidator):
-    def __init__(self):
-        super().__init__(window=10)
+    def __init__(self, window=10, ordered=True):
+        self.ordered = ordered
+        super().__init__(window=window)
 
-    @staticmethod
-    def validate__cleaning__cleaning(b1, b2):
-        validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
+    def validate__cleaning__cleaning(self, b1, b2):
+        validate_disjoint_by_axis(b1, b2, distance=2, ordered=self.ordered)
 
-def make_contour_3(mozarella_schedule):
+
+def make_contour_3(schedules):
     m = BlockMaker("3")
 
-    salt_boilings = [b for b in mozarella_schedule['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
+    salt_boilings = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
     if salt_boilings:
         salt_melting_start = salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0]
         m.row('cleaning', push_func=add_push,
               size=90 // 5, x=salt_melting_start + 6,
               label='Контур циркуляции рассола') # add half hour
 
-    last_full_cleaning_start = mozarella_schedule['master']['cleaning', True][-1].x[0]
+    last_full_cleaning_start = schedules['mozzarella']['master']['cleaning', True][-1].x[0]
     m.row('cleaning', push_func=add_push,
           size=90 // 5, x=last_full_cleaning_start,
           label='Полная мойка термизатора')
@@ -30,7 +31,7 @@ def make_contour_3(mozarella_schedule):
     with code('cheese_makers'):
         # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
         values = []
-        for b in mozarella_schedule['master']['boiling', True]:
+        for b in schedules['mozzarella']['master']['boiling', True]:
             values.append([b.props['pouring_line'], b['pouring'].y[0]])
         df = pd.DataFrame(values, columns=['pouring_line', 'finish'])
         values = df.groupby('pouring_line').agg(max).to_dict()['finish']
@@ -45,8 +46,8 @@ def make_contour_3(mozarella_schedule):
         lines_df = pd.DataFrame(index=['water', 'salt'])
         lines_df['boilings'] = None
 
-        lines_df.loc['water', 'boilings'] = [b for b in mozarella_schedule['master']['boiling', True] if b.props['boiling_model'].line.name == 'Моцарелла в воде']
-        lines_df.loc['salt', 'boilings'] = [b for b in mozarella_schedule['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
+        lines_df.loc['water', 'boilings'] = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Моцарелла в воде']
+        lines_df.loc['salt', 'boilings'] = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
 
         lines_df['cleanings'] = [[] for _ in range(2)]
         if lines_df.loc['water', 'boilings']:
@@ -89,7 +90,7 @@ def make_contour_3(mozarella_schedule):
         if not filled_short_termizator:
             m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
 
-    skus = sum([list(b.props['boiling_group_df']['sku']) for b in mozarella_schedule['master']['boiling', True]], [])
+    skus = sum([list(b.props['boiling_group_df']['sku']) for b in schedules['mozzarella']['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
     if is_bar12_present:
         m.row('cleaning', push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()),
@@ -98,13 +99,13 @@ def make_contour_3(mozarella_schedule):
 
     return m.root
 
-def make_contour_4(mozarella_schedule):
+def make_contour_4(schedules):
     m = BlockMaker("4 contour")
 
     with code('drenators'):
         # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
         values = []
-        for boiling in mozarella_schedule['master']['boiling', True]:
+        for boiling in schedules['mozzarella']['master']['boiling', True]:
             drenator = boiling['drenator']
             values.append([drenator.y[0], drenator.props['pouring_line'], drenator.props['drenator_num']])
         df = pd.DataFrame(values, columns=['drenator_end', 'pouring_line', 'drenator_num'])
@@ -152,5 +153,74 @@ def make_contour_4(mozarella_schedule):
     m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
           size=cast_t('01:30'),
           label='Линия кислой сыворотки')
+
+    return m.root
+
+def make_contour_1(schedules):
+    m = BlockMaker("1 contour")
+    m.row('cleaning', push_func=add_push,
+          size=cast_t('01:20'), x=cast_t('06:30'),
+          label='Линиия отгрузки')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Линия приемки молока 1 + проверить фильтр')
+
+    with code('Tanks'):
+        boilings = schedules['mozzarella']['master']['boiling', True]
+
+        # get values when different percentage tanks end: [['3.6', 74], ['3.3', 94], ['2.7', 144]]
+        values = []
+        for percent in ['2.7', '3.3', '3.6']:
+            _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == percent]
+
+            if percent == '2.7':
+                assert len(_boilings) <= 18, f'Слишком много наливов на смеси {percent}'
+            else:
+                assert len(_boilings) <= 9, f'Слишком много наливов на смеси {percent}'
+
+            if len(_boilings) >= 10:
+                values.append([percent, _boilings[8]])
+            values.append([percent, _boilings[-1]])
+
+        df = pd.DataFrame(values, columns=['percent', 'boiling'])
+        df['pouring_end'] = df['boiling'].apply(lambda boiling: boiling['pouring']['first']['termizator'].y[0])
+        df = df[['percent', 'pouring_end']]
+        df = df.sort_values(by='pouring_end')
+        values = df.values.tolist()
+
+        for percent, end in values:
+            m.row('cleaning', push_func=AxisPusher(start_from=['last_end', end], validator=CleaningValidator()),
+                  size=cast_t('01:50'),
+                  label=f'Танк смесей {percent}')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Линия отгрузки')
+
+    # todo soon: add proper start_from
+    m.row('cleaning', push_func=AxisPusher(start_from=['last_end'], validator=CleaningValidator()),
+          size=cast_t('01:50'),
+          label='Линия адыгейского')
+
+    # todo soon: add proper start_from
+    m.row('cleaning',
+          push_func=AxisPusher(start_from=['last_end', schedules['milk_project'].y[0]], validator=CleaningValidator()),
+          size=cast_t('02:20'),
+          label='Милкпроджект')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Линия роникс')
+
+    for _ in range(3):
+        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False, window=30)),
+              size=cast_t('01:50'),
+              label='Танк сырого молока')
+
+    for _ in range(2):
+        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False, window=30)),
+              size=cast_t('01:50'),
+              label='Танк обрата')
 
     return m.root
