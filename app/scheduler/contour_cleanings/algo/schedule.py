@@ -77,7 +77,7 @@ def make_contour_3(mozarella_schedule):
         for i, row in lines_df.iterrows():
             for j, c in enumerate(row['cleanings']):
                 if j == 0:
-                    b = m.block(c, push_func=AxisPusher(start_from=max(m.root['cleaning', True][-1].y[0], row['melting_end'] + 12), validator=Validator())) # add hour
+                    b = m.block(c, push_func=AxisPusher(start_from=['last_end', row['melting_end'] + 12], validator=CleaningValidator())) # add hour
                 else:
                     b = m.block(c, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
 
