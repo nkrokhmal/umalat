@@ -4,6 +4,14 @@ from utils_ak.block_tree import *
 from app.scheduler.time import *
 
 
+class CleaningValidator(ClassValidator):
+    def __init__(self):
+        super().__init__(window=10)
+
+    @staticmethod
+    def validate__cleaning__cleaning(b1, b2):
+        validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
+
 def make_contour_3(mozarella_schedule):
     m = BlockMaker("3")
 
@@ -28,16 +36,8 @@ def make_contour_3(mozarella_schedule):
         values = df.groupby('pouring_line').agg(max).to_dict()['finish']
         values = list(sorted(values.items(), key=lambda kv: kv[1])) # [('1', 97), ('0', 116), ('2', 149), ('3', 160)]
 
-        class Validator(ClassValidator):
-            def __init__(self):
-                super().__init__(window=10)
-
-            @staticmethod
-            def validate__cleaning__cleaning(b1, b2):
-                validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
-
         for n, cheese_maker_end in values:
-            m.row('cleaning', push_func=AxisPusher(start_from=cheese_maker_end, validator=Validator()),
+            m.row('cleaning', push_func=AxisPusher(start_from=cheese_maker_end, validator=CleaningValidator()),
                   size=cast_t('01:20'),
                   label=f'Сыроизготовитель {int(n) + 1}')
 
@@ -74,33 +74,25 @@ def make_contour_3(mozarella_schedule):
                                                    label='Короткая мойка термизатора')
         filled_short_termizator = False
 
-        class Validator(ClassValidator):
-            def __init__(self):
-                super().__init__(window=10)
-
-            @staticmethod
-            def validate__cleaning__cleaning(b1, b2):
-                validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
-
         for i, row in lines_df.iterrows():
             for j, c in enumerate(row['cleanings']):
                 if j == 0:
                     b = m.block(c, push_func=AxisPusher(start_from=max(m.root['cleaning', True][-1].y[0], row['melting_end'] + 12), validator=Validator())) # add hour
                 else:
-                    b = m.block(c, push_func=AxisPusher(start_from='last_end', validator=Validator()))
+                    b = m.block(c, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
 
                 if not filled_short_termizator and cast_time(b.block.y[0]) >= '00:22:00':
-                    m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=Validator()))
+                    m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
 
                     filled_short_termizator = True
 
         if not filled_short_termizator:
-            m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=Validator()))
+            m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
 
     skus = sum([list(b.props['boiling_group_df']['sku']) for b in mozarella_schedule['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
     if is_bar12_present:
-        m.row('cleaning', push_func=AxisPusher(start_from='last_end', validator=Validator()),
+        m.row('cleaning', push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()),
               size=cast_t('01:20'),
               label='Формовщик')
 
