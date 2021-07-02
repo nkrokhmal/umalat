@@ -3,12 +3,8 @@ import flask
 from app.imports.runtime import *
 
 from app.main import main
-from app.scheduler.mascarpone import *
-from app.scheduler.mascarpone.frontend.style import STYLE
-from app.utils.mascarpone.schedule_task import (
-    schedule_task_boilings,
-    update_total_schedule_task,
-)
+from app.scheduler.butter import *
+from app.scheduler.butter.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 
