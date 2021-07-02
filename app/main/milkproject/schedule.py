@@ -3,12 +3,8 @@ import flask
 from app.imports.runtime import *
 
 from app.main import main
-from app.scheduler.mascarpone import *
-from app.scheduler.mascarpone.frontend.style import STYLE
-from app.utils.mascarpone.schedule_task import (
-    schedule_task_boilings,
-    update_total_schedule_task,
-)
+from app.scheduler.milk_project import *
+from app.scheduler.milk_project.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 
@@ -43,7 +39,7 @@ def milk_project_schedule():
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
         )
-        schedule = make_schedule(boiling_plan_df, form.batch_number.data)
+        schedule = make_schedule(boiling_plan_df)
         frontend = wrap_frontend(schedule, date=date, start_time=beg_time)
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.xlsx"
