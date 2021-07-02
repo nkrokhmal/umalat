@@ -224,3 +224,46 @@ def make_contour_1(schedules):
               label='Танк обрата')
 
     return m.root
+
+
+def make_contour_2(schedules):
+    m = BlockMaker("1 contour")
+    m.row('cleaning', push_func=add_push,
+          size=cast_t('01:20'), x=cast_t('12:00'),
+          label='Линия обрата в сливки')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Сливки от пастера 25')
+
+    with code('Мультиголова'):
+        def is_boiling_multihead(boiling):
+            return boiling['melting_and_packing'].props['boiling_group_df']['sku'].iloc[0].packers[0].name == 'Мультиголова'
+        boilings_with_multihead = [b for b in schedules['mozzarella']['master']['boiling', True] if is_boiling_multihead(b)]
+        multihead_end = boilings_with_multihead[-1]['melting_and_packing']['packing'].y[0]
+
+        m.row('cleaning', push_func=AxisPusher(start_from=['last_end', multihead_end], validator=CleaningValidator()),
+              size=cast_t('01:20'),  # todo soon: what name, how much time?
+              label='Комет')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Фасовочная вода')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Танк ЖВиКС 1')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Танк ЖВиКС 2')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Жирная вода на сепаратор')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Сливки от сепаратора жирной воды')
+
+    return m.root
