@@ -435,6 +435,17 @@ Flask = ">=0.8"
 visitor = "*"
 
 [[package]]
+name = "flask-login"
+version = "0.5.0"
+description = "User session management for Flask"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Flask = "*"
+
+[[package]]
 name = "flask-migrate"
 version = "2.5.3"
 description = "SQLAlchemy database migrations for Flask applications using Alembic"
@@ -1833,7 +1844,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.1"
-content-hash = "5d76c7dd1ab672eecbcbe7e783621bc8f32f820f5557eb23f5c19ee82aa17602"
+content-hash = "e21c0606dc6bd41df6a2d45aa27a1c1212b93d7838bd2fa9ef5c90764498a56a"
 
 [metadata.files]
 alembic = [
@@ -2123,6 +2134,10 @@ flask-admin = [
 ]
 flask-bootstrap = [
     {file = "Flask-Bootstrap-3.3.7.1.tar.gz", hash = "sha256:cb08ed940183f6343a64e465e83b3a3f13c53e1baabb8d72b5da4545ef123ac8"},
+]
+flask-login = [
+    {file = "Flask-Login-0.5.0.tar.gz", hash = "sha256:6d33aef15b5bcead780acc339464aae8a6e28f13c90d8b1cf9de8b549d1c0b4b"},
+    {file = "Flask_Login-0.5.0-py2.py3-none-any.whl", hash = "sha256:7451b5001e17837ba58945aead261ba425fdf7b4f0448777e597ddab39f4fba0"},
 ]
 flask-migrate = [
     {file = "Flask-Migrate-2.5.3.tar.gz", hash = "sha256:a69d508c2e09d289f6e55a417b3b8c7bfe70e640f53d2d9deb0d056a384f37ee"},
