@@ -45,6 +45,9 @@
                                 <a href="{{ url_for('main.mascarpone_edit_sku_cream_cheese', sku_id = sku.id)}}" class="edit-sku">
                                     <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>
                                 </a>
+                                <a href="{{ url_for('main.mascarpone_copy_sku_cream_cheese', sku_id = sku.id)}}" class="edit-sku">
+                                    <i class="material-icons" style="color:blue" title="Копировать"> <span class="fas fa-copy"> </i>
+                                </a>
                                 <a href="#delete_sku" class="delete-current-sku" data-id={{sku.id}} data-toggle="modal">
                                     <i class="material-icons" data-toggle="tooltip" style="color:red" title="Удалить"> <span class="fas fa-trash"> </i>
                                 </a>

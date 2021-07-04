@@ -1,3 +1,4 @@
+import flask_login
 from app.imports.external import *
 from app.db import create_external_db
 
@@ -10,6 +11,7 @@ else:
 
 bootstrap = flask_bootstrap.Bootstrap()
 page_down = flask_pagedown.PageDown()
+login_manager = flask_login.LoginManager()
 
 ERROR = 1e-5
 

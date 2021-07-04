@@ -33,9 +33,9 @@ def _test(fn, open_file=False):
 
 
 if __name__ == "__main__":
-    test_mascarpone_batch()
-    # _test(
-    #     DebugConfig.abs_path(
-    #         "app/data/static/samples/inputs/mascarpone/2021-04-21 План по варкам маскарпоне.xlsx"
-    #     )
-    # )
+    # test_mascarpone_batch()
+    _test(
+        DebugConfig.abs_path(
+            "app/data/static/samples/inputs/mascarpone/2021-04-21 План по варкам маскарпоне.xlsx"
+        )
+    )

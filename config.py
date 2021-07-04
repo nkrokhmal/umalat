@@ -1,4 +1,5 @@
 from app.imports.external import *
+from typing import Optional
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -17,6 +18,9 @@ class BaseClass:
 
     BATCH_NUMBERS_DIR = "db/batch_numbers"
 
+    DYNAMIC_DIR = "app/data/dynamic"
+    BATCH_NUMBER_DIR = "db/batch_numbers/"
+
     UPLOAD_TMP_FOLDER = "app/data/dynamic/tmp"
     STATS_FOLDER = "app/data/dynamic/stats"
     BOILING_PLAN_FOLDER = "app/data/dynamic/boiling_plan"
@@ -30,6 +34,12 @@ class BaseClass:
     TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/static/templates/constructor_ricotta.xlsx"
     TEMPLATE_MASCARPONE_BOILING_PLAN = (
         "app/data/static/templates/constructor_mascarpone.xlsx"
+    )
+    TEMPLATE_BUTTER_BOILING_PLAN = (
+        "app/data/static/templates/constructor_butter.xlsx"
+    )
+    TEMPLATE_MILKPROJECT_BOILING_PLAN = (
+        "app/data/static/templates/constructor_milkproject.xlsx"
     )
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
 
@@ -89,6 +99,9 @@ class BaseClass:
 
     DEFAULT_RUBBER_FORM_FACTOR = "Соль: 460"
 
+    TELEGRAM_BOT_TOKEN: Optional[str] = None
+    TELEGRAM_CHAT_ID: Optional[int] = None
+
     @staticmethod
     def abs_path(local_path):
         return os.path.join(basedir, local_path)
@@ -116,6 +129,9 @@ class TestConfig(BaseClass):
     TEST_MOZZARELLA = "app/data/tests/mozzarella_plan.xlsx"
     TEST_RICOTTA = "app/data/tests/ricotta_plan.xlsx"
     TEST_MASCARPONE = "app/data/tests/mascarpone_plan.xlsx"
+
+    TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"
+    TELEGRAM_CHAT_ID = -544068496
 
 
 configs = {

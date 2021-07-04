@@ -29,8 +29,8 @@ def validation_error(e):
 
 
 @main.errorhandler(404)
-def not_found_error(error):
-    return flask.render_template("404.html"), 404
+def not_found(e):
+    return flask.render_template('404.html'), 404
 
 
 @main.errorhandler(500)

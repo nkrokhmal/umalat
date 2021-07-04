@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Технолония варки - Изменить технологию варки{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="py-4">
+        <div class="d-flex justify-content-between w-100 flex-wrap">
+            <div class="mb-3 mb-lg-0">
+                <h1 class="h4">Изменение параметров технологии варки рикотты <br></h1>
+            </div>
+        </div>
+    </div>
+    <form method="post" action="/butter/edit_boiling_technology/{{boiling_technology_id}}" class="mt-4">
+        {{ form.hidden_tag() }}
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="form-group">
+                    <label>Название варки</label>
+                    {{form.name(place_holder='Name', class='form-control', readonly=true)}}
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Время сепарирования, мин</label>
+                        {{form.separator_runaway_time(place_holder='Heating', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Время пастеризации, мин</label>
+                        {{form.pasteurization_time(place_holder='Delay', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Время набора температуры, мин</label>
+                        {{form.increasing_temperature_time(place_holder='Abandon', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-3" style="margin-top:30px;">
+                <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+{% endblock %}

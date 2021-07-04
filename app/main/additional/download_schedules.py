@@ -1,8 +1,6 @@
-import os
-from itertools import groupby
 from collections import OrderedDict
 import flask_paginate
-
+from app.utils.files.update import update_data_structure
 from app.imports.runtime import *
 from app.main import main
 
@@ -18,41 +16,58 @@ def get_metadata(data, offset=0, per_page=10):
     return OrderedDict(sorted(result.items(), reverse=True))
 
 
-@main.route("/download_schedules/<int:page>", methods=["GET"])
-def download_schedules(page):
-    schedules_path = os.path.join(
-        os.path.dirname(flask.current_app.root_path),
-        flask.current_app.config["SCHEDULE_PLAN_FOLDER"],
-    )
-    schedule_task_path = os.path.join(
-        os.path.dirname(flask.current_app.root_path),
-        flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"],
+def is_approved(filename, date):
+    return os.path.exists(
+        os.path.join(
+            flask.current_app.config['DYNAMIC_DIR'],
+            date,
+            "approved",
+            filename,
+        )
     )
 
-    schedules_filenames = os.listdir(schedules_path)
-    schedules_task_filenames = os.listdir(schedule_task_path)
+
+@main.route("/update_data", methods=["GET"])
+def update_data():
+    update_data_structure("boiling_plan")
+    update_data_structure("schedule_plan")
+    update_data_structure("schedule_task")
+    response = flask.jsonify({"message": "Ok"})
+    response.status_code = 200
+    return response
+
+
+@main.route("/download_schedules/<int:page>", methods=["GET"])
+@flask_login.login_required
+def download_schedules(page):
+    date_dirs = next(os.walk(flask.current_app.config["DYNAMIC_DIR"]))[1]
     schedules_metadata = {}
 
-    for filename in schedules_filenames:
-        date = filename.split(' ')[0]
-        if date in schedules_metadata.keys():
-            department = get_department(filename)
-            if department not in schedules_metadata[date].keys():
-                schedules_metadata[date][department] = filename
-        else:
-            schedules_metadata[date] = {}
-            schedules_metadata[date][get_department(filename)] = filename
+    def is_date(string):
+        try:
+            _ = datetime.strptime(string, flask.current_app.config["DATE_FORMAT"])
+            return True
+        except:
+            return False
 
-    for filename in schedules_task_filenames:
-        date = filename.split('.')[0]
-        if date in schedules_metadata.keys():
-            department = "task"
-            schedules_metadata[date][department] = filename
-
-        else:
-            schedules_metadata[date] = {}
-            schedules_metadata[date]["task"] = filename
-
+    for date_dir in date_dirs:
+        if is_date(date_dir):
+            schedules_metadata[date_dir] = {}
+            schedule_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date_dir, "schedule")
+            if os.path.exists(schedule_dir):
+                schedules_filenames = os.listdir(schedule_dir)
+                for schedules_filename in schedules_filenames:
+                    department = get_department(schedules_filename)
+                    if department not in schedules_metadata[date_dir].keys():
+                        schedules_metadata[date_dir][department] = {}
+                        schedules_metadata[date_dir][department]['filename'] = schedules_filename
+                        schedules_metadata[date_dir][department]['is_approved'] = is_approved(schedules_filename, date_dir)
+            task_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date_dir, "task")
+            if os.path.exists(task_dir):
+                task_filename = os.listdir(task_dir)[0]
+                if "task" not in schedules_metadata[date_dir].keys():
+                    schedules_metadata[date_dir]["task"] = {}
+                    schedules_metadata[date_dir]["task"]['filename'] = task_filename
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
 
     schedules_result = get_metadata(

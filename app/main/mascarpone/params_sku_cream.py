@@ -8,16 +8,18 @@ from app.models import MascarponeSKU, MascarponeLine, Group
 from app.enum import LineName
 from app.utils.features.form_utils import *
 
-from .forms import SKUMascarponeForm
+from .forms import SKUMascarponeForm, CopySKUForm
 
 
 @main.route("/mascarpone/add_sku_cream", methods=["POST", "GET"])
+@flask_login.login_required
 def mascarpone_add_sku_cream():
     form = SKUMascarponeForm()
     name = flask.request.args.get("name")
     if form.validate_on_submit():
         sku = MascarponeSKU(
             name=form.name.data,
+            code=form.code.data,
             brand_name=form.brand_name.data,
             weight_netto=form.weight_netto.data,
             shelf_life=form.shelf_life.data,
@@ -43,8 +45,11 @@ def mascarpone_add_sku_cream():
 
 
 @main.route("/mascarpone/get_sku_cream/<int:page>", methods=["GET"])
+@flask_login.login_required
 def mascarpone_get_sku_cream(page):
-    flask.session.clear()
+    db.session.remove()
+    import time
+    time.sleep(0.1)
     form = SKUMascarponeForm()
     skus_count = db.session.query(MascarponeSKU).count()
     pagination = (
@@ -65,12 +70,52 @@ def mascarpone_get_sku_cream(page):
     )
 
 
+@main.route("/mascarpone/copy_sku_cream/<int:sku_id>", methods=["GET", "POST"])
+@flask_login.login_required
+def mascarpone_copy_sku_cream(sku_id):
+    form = CopySKUForm()
+    sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
+    if form.validate_on_submit() and sku is not None:
+        if form.name.data == sku.name:
+            raise Exception("SKU с таким именем уже сущесвует в базе данных!")
+        if form.code.data == sku.code:
+            raise Exception("SKU с таким кодом уже существует в базе данных!")
+
+        copy_sku = MascarponeSKU(
+            name=form.name.data,
+            brand_name=form.brand_name.data,
+            code=form.code.data,
+            weight_netto=sku.weight_netto,
+            shelf_life=sku.shelf_life,
+            packing_speed=sku.packing_speed,
+            collecting_speed=sku.packing_speed,
+            in_box=sku.in_box,
+            group=sku.group,
+            type=sku.type,
+            line=sku.line,
+            form_factor=sku.form_factor,
+            pack_type=sku.pack_type,
+            made_from_boilings=sku.made_from_boilings,
+            packers=sku.packers,
+        )
+        db.session.add(copy_sku)
+        db.session.commit()
+        flask.flash("SKU успешно добавлено", "success")
+        return redirect(flask.url_for(".mascarpone_get_sku_cream", page=1))
+    form.name.data = sku.name
+    form.brand_name.data = sku.brand_name
+    form.code.data = sku.code
+    return flask.render_template("mascarpone/copy_sku_cream.html", form=form, sku_id=sku.id)
+
+
 @main.route("/mascarpone/edit_sku_cream/<int:sku_id>", methods=["GET", "POST"])
+@flask_login.login_required
 def mascarpone_edit_sku_cream(sku_id):
     form = SKUMascarponeForm()
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
     if form.validate_on_submit() and sku is not None:
         sku.name = form.name.data
+        sku.code = form.code.data
         sku.brand_name = form.brand_name.data
         sku.weight_netto = form.weight_netto.data
         sku.shelf_life = form.shelf_life.data
@@ -92,6 +137,7 @@ def mascarpone_edit_sku_cream(sku_id):
     form.process()
 
     form.name.data = sku.name
+    form.code.data = sku.code
     form.brand_name.data = sku.brand_name
     form.weight_netto.data = sku.weight_netto
     form.shelf_life.data = sku.shelf_life
@@ -102,11 +148,11 @@ def mascarpone_edit_sku_cream(sku_id):
 
 
 @main.route("/mascarpone/delete_sku_cream/<int:sku_id>", methods=["DELETE"])
+@flask_login.login_required
 def mascarpone_delete_sku_cream(sku_id):
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
     if sku:
         db.session.delete(sku)
         db.session.commit()
-        flask.flash("SKU успешно удалено", "success")
-    time.sleep(1.0)
+        # flask.flash("SKU успешно удалено", "success")
     return redirect(flask.url_for(".mascarpone_get_sku_cream", page=1))

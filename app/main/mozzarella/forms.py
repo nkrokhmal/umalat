@@ -45,12 +45,19 @@ class ScheduleForm(FlaskForm):
     )
 
 
+class CopySKUForm(FlaskForm):
+    name = StringField("Введите имя SKU", validators=[Required()])
+    brand_name = StringField("Введите имя бренда", validators=[Optional()])
+    code = StringField("Введите код SKU", validators=[Optional()])
+
+
 class SKUForm(FlaskForm):
     name = StringField("Введите имя SKU", validators=[Required()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
     packing_speed = IntegerField("Введите скорость фасовки", validators=[Optional()])
     shelf_life = IntegerField("Введите время хранения, д", validators=[Optional()])
+    code = StringField("Введите код SKU", validators=[Optional()])
     in_box = IntegerField(
         "Введите количество упаковок в коробке, шт", validators=[Optional()]
     )
@@ -156,18 +163,7 @@ class WasherForm(FlaskForm):
     time = IntegerField("Введите время мойки", validators=[Optional()])
 
 
-# class FormFactorForm(FlaskForm):
-#     relative_weight = StringField('Введите вес форм фактора', validators=[Required()])
-#     first_cooling_time = IntegerField('Введите первое время охлаждения', validators=[Optional()])
-#     second_cooling_time = IntegerField('Введите второе время охлаждения', validators=[Optional()])
-#     salting_time = IntegerField('Введите время посолки', validators=[Optional()])
-#
-#     def validate_form_factor(self, percent, ferment, is_lactose, line):
-#         boiling = db.session.query(Boiling) \
-#             .filter_by(Boiling.percent == percent.data) \
-#             .filter_by(Boiling.is_lactose == is_lactose.data) \
-#             .filter_by(Boiling.ferment == ferment.data) \
-#             .filter_by(Boiling.line.name == line.data) \
-#             .first()
-#         if boiling is not None:
-#             raise flask_restplus.ValidationError('Варка с такими параметрами уже существует!')
+class ApproveForm(FlaskForm):
+    file_name = StringField("Filename", validators=[Optional()])
+    date = StringField("Date", validators=[Optional()])
+    submit = SubmitField(label="Подтвердить")

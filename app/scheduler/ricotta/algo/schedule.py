@@ -32,7 +32,7 @@ class Validator(ClassValidator):
         sku1 = b1.props["skus"][-1]
         sku2 = b2.props["skus"][0]
         if sku1.weight_netto and sku2.weight_netto and sku1.weight_netto > sku2.weight_netto:
-            assert b1["packing"].y[0] + 1 <= b2["packing"].x[0]
+            validate_disjoint_by_axis(b1['packing'], b2['packing'], distance=1, ordered=True)
 
     @staticmethod
     def validate__boiling_group__bath_cleanings(b1, b2):
@@ -42,19 +42,14 @@ class Validator(ClassValidator):
                 boiling = utils.listify(b1["boiling_sequence"].children)[
                     b1.props["line_nums"].index(line_num)
                 ]
-                validate_disjoint_by_axis(boiling, bath_cleaning)
-
-                assert boiling.y[0] + 4 <= bath_cleaning.x[0]
+                validate_disjoint_by_axis(boiling, bath_cleaning, distance=4, ordered=True)
 
     @staticmethod
     def validate__boiling_group__container_cleanings(b1, b2):
-        validate_disjoint_by_axis(
-            b1["analysis_group"]["preparation"], b2["container_cleaning_1"]
-        )
         # add extra 5 minutes
-        assert (
-            b1["analysis_group"]["preparation"].y[0] + 1 <= b2["container_cleaning_1"].x[0]
-        )
+        _b1 = b1["analysis_group"]["preparation"]
+        _b2 = b2["container_cleaning_1"]
+        validate_disjoint_by_axis(_b1, _b2, distance=1, ordered=True)
         validate_disjoint_by_axis(
             b1["analysis_group"]["analysis"], b2["container_cleaning_2"]
         )

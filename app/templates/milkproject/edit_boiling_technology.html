@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Технолония варки - Изменить технологию варки{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="py-4">
+        <div class="d-flex justify-content-between w-100 flex-wrap">
+            <div class="mb-3 mb-lg-0">
+                <h1 class="h4">Изменение параметров технологии варки рикотты <br></h1>
+            </div>
+        </div>
+    </div>
+    <form method="post" action="/milkproject/edit_boiling_technology/{{boiling_technology_id}}" class="mt-4">
+        {{ form.hidden_tag() }}
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="form-group">
+                    <label>Название варки</label>
+                    {{form.name(place_holder='Name', class='form-control', readonly=true)}}
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Набор воды, мин</label>
+                        {{form.water_collecting_time(place_holder='water', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Набор смеси, мин</label>
+                        {{form.mixture_collecting_time(place_holder='mixture', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Производство, мин</label>
+                        {{form.processing_time(place_holder='processing', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Окончание, мин</label>
+                        {{form.red_time(place_holder='red', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-3" style="margin-top:30px;">
+                <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -5,7 +5,7 @@ from flask import url_for
 
 def test_ricotta_get_schedule(client):
     with client.test_client() as client:
-        url = url_for("main.schedule", _external=False)
+        url = url_for("main.ricotta_schedule", _external=False)
         response = client.get(url)
         assert response.status_code == 200
 

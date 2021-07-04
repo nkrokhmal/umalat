@@ -107,6 +107,10 @@ def cast_volume(obj):
         return obj.made_from_boilings[0].boiling_technologies[0].output_ton
     elif isinstance(obj, CreamCheeseSKU):
         return obj.made_from_boilings[0].output_ton
+    elif isinstance(obj, ButterSKU):
+        return obj.line.output_kg
+    elif isinstance(obj, MilkProjectSKU):
+        return obj.made_from_boilings[0].output_kg
     else:
         raise Exception("Unknown sku type")
 
@@ -155,6 +159,9 @@ def parse_sheet(ws, sheet_name, excel_compiler):
     df_extra_packing = df[["sku", "extra_packing"]].copy()
     df = df.fillna(0)
     df = df[df["plan"] != 0]
+    if df.empty:
+        # todo: create simple example
+        raise Exception("План варок не сформирован, потому что на текущей день заявка нулевая.")
     df = df[
         df["plan"].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())
     ]
@@ -165,15 +172,3 @@ def parse_sheet(ws, sheet_name, excel_compiler):
     df["sku_id"] = df["sku"].apply(lambda x: x.id)
     df["plan"] = df["plan"].apply(lambda x: abs(float(x)))
     return df, df_extra_packing
-
-
-def move_file(old_filepath, old_filename, department=""):
-    new_filename = "{} План по варкам {}.xlsx".format(
-        old_filename.split(" ")[0], department
-    )
-    filepath = os.path.join(flask.current_app.config["BOILING_PLAN_FOLDER"], new_filename)
-    shutil.copyfile(old_filepath, filepath)
-    excel_compiler = pycel.ExcelCompiler(filepath)
-    wb_data_only = openpyxl.load_workbook(filename=filepath, data_only=True)
-    wb = openpyxl.load_workbook(filename=filepath)
-    return excel_compiler, wb, wb_data_only, new_filename, filepath

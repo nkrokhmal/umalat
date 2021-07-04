@@ -1,5 +1,4 @@
 from app.imports.runtime import *
-
 from app.models import *
 from app.utils.features.merge_boiling_utils import Boilings
 

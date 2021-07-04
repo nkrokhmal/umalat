@@ -1,9 +1,59 @@
-import flask
+import binascii
+import hashlib
+
+from flask_login import UserMixin
+from sqlalchemy import func, extract
+from sqlalchemy.orm import backref
 
 from app.imports.runtime import *
 
-from sqlalchemy import func, extract
-from sqlalchemy.orm import backref
+
+class User(mdb.Model, UserMixin):
+    __tablename__ = 'users'
+    id = mdb.Column(mdb.Integer, primary_key=True)
+    username = mdb.Column(mdb.String, unique=True)
+    email = mdb.Column(mdb.String, unique=True)
+    password = mdb.Column(mdb.Binary)
+
+    def __init__(self, **kwargs):
+        for property, value in kwargs.items():
+            if hasattr(value, '__iter__') and not isinstance(value, str):
+                value = value[0]
+            if property == 'password':
+                value = self.hash_pass(value)
+
+            setattr(self, property, value)
+
+    def __repr__(self):
+        return str(self.username)
+
+    @staticmethod
+    def hash_pass(password):
+        salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
+        pwd_hash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), salt, 100000)
+        pwd_hash = binascii.hexlify(pwd_hash)
+        return salt + pwd_hash
+
+    @staticmethod
+    def verify_pass(provided_password, stored_password):
+        stored_password = stored_password.decode('ascii')
+        salt = stored_password[:64]
+        stored_password = stored_password[64:]
+        pwd_hash = hashlib.pbkdf2_hmac('sha512', provided_password.encode('utf-8'), salt.encode('ascii'), 100000)
+        pwd_hash = binascii.hexlify(pwd_hash).decode('ascii')
+        return pwd_hash == stored_password
+
+
+@login_manager.user_loader
+def user_loader(id):
+    return mdb.session.query(User).filter_by(id=id).first()
+
+
+@login_manager.request_loader
+def request_loader(request):
+    username = request.form.get('username')
+    user = mdb.session.query(User).filter_by(username=username).first()
+    return user if user else None
 
 
 class Department(mdb.Model):
@@ -75,6 +125,9 @@ class SKU(mdb.Model):
             "Творожный": "#CBC0D9",
             "Робиола": "#E5DFEC",
             "Сливки": "#F1DADA",
+            "Масло": "#F3B28E",
+            "Четук": "#CDFCB2",
+            "Качорикотта": "#D8EEFF",
         }
         if "Терка" not in self.form_factor.name:
             return COLOURS[self.group.name]

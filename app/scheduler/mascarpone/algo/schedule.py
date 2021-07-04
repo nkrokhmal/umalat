@@ -23,10 +23,9 @@ class Validator(ClassValidator):
             # one is cream and one is not
             validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"])
 
-        assert (
-            b1["packing_process"]["packing_group"]["packing", True][-1].y[0] + 2
-            <= b2["packing_process"]["packing_group"]["packing", True][0].x[0]
-        )
+        _b1 = b1["packing_process"]["packing_group"]["packing", True][-1]
+        _b2 = b2["packing_process"]["packing_group"]["packing", True][0]
+        validate_disjoint_by_axis(_b1, _b2, distance=2, ordered=True)
         validate_disjoint_by_axis(
             b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
         )
@@ -34,18 +33,15 @@ class Validator(ClassValidator):
             b1["boiling_process"]["pouring"], b2["boiling_process"]["pouring"]
         )
 
-        assert (
-            b1["packing_process"]["packing_group"]["P", True][-1].x[0]
-            <= b2["boiling_process"]["pumping_off"].x[0]
-        )
+        _b1 = b1["packing_process"]["packing_group"]["P", True][-1]
+        _b2 = b2["boiling_process"]["pumping_off"]
+        assert _b1.x[0] <= _b2.x[0]
 
     @staticmethod
     def validate__mascarpone_boiling_group__cream_cheese_boiling(b1, b2):
-        b = b1["boiling", True][-1]
-        assert (
-            b["packing_process"].y[0] - 1
-            <= b2["boiling_process"]["separation", True][0].x[0]
-        )
+        _b1 = b1["boiling", True][-1]
+        _b2 = b2["boiling_process"]["separation", True][0]
+        validate_disjoint_by_axis(_b1, _b2, distance=-1, ordered=True)
 
 
     @staticmethod
@@ -55,12 +51,13 @@ class Validator(ClassValidator):
             or b1.props["line_nums"] == b2.props["sourdoughs"]
         ):
             for b in b1["boiling", True]:
-                validate_disjoint_by_axis(b["boiling_process"], b2)
-                assert b["boiling_process"].y[0] + 1 <= b2.x[0]
+                validate_disjoint_by_axis(b['boiling_process'], b2, distance=1, ordered=True)
 
     @staticmethod
     def validate__cream_cheese_boiling__cream_cheese_boiling(b1, b2):
-        assert b1["boiling_process"]["salting", True][-1].y[0] + 1 <= b2["boiling_process"]["separation", True][0].x[0]
+        _b1 = b1["boiling_process"]["salting", True][-1]
+        _b2 = b2["boiling_process"]["separation", True][0]
+        validate_disjoint_by_axis(_b1, _b2, distance=1, ordered=True)
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -71,22 +68,21 @@ class Validator(ClassValidator):
         b = all("sourdough" in sub_cls for sub_cls in subclasses)
 
         if a or b:
-            assert b1.y[0] + 3 <= b2.x[0]
+            validate_disjoint_by_axis(b1, b2, distance=3, ordered=True)
         else:
-            # validate with neighborhood
-            validate_disjoint_by_intervals((b1.x[0] - 3, b1.y[0] + 3), (b2.x[0], b2.y[0]))
+            validate_disjoint_by_axis(b1, b2, distance=3, ordered=False)
 
 
     @staticmethod
     def validate__cleaning__mascarpone_boiling_group(b1, b2):
         b = b2["boiling", True][0]
         if b1.props["entity"] == "homogenizer":
-            assert b1.y[0] + 1 <= b["packing_process"]["N"].x[0]
+            validate_disjoint_by_axis(b1, b["packing_process"]["N"], distance=1, ordered=True)
 
     @staticmethod
     def validate__cleaning__cream_cheese_boiling(b1, b2):
         if b1.props["entity"] == "homogenizer":
-            assert b1.y[0] + 1 <= b2["boiling_process"]["separation", True][0].x[0]
+            validate_disjoint_by_axis(b1, b2["boiling_process"]["separation", True][0], distance=1, ordered=True)
 
     @staticmethod
     def validate__cream_cheese_boiling__cleaning(b1, b2):
@@ -94,7 +90,9 @@ class Validator(ClassValidator):
             (b2.children[0].props["cls"] == "cleaning_sourdough_mascarpone_cream_cheese")
             and len(set(b1.props["sourdoughs"]) & set(b2.props["sourdoughs"])) > 0
         ):
-            assert b1["boiling_process"]["separation", True][-1].y[0] + 1 <= b2.x[0]
+            _b1 = b1["boiling_process"]["separation", True][-1]
+            _b2 = b2
+            validate_disjoint_by_axis(_b1, b2, distance=1, ordered=True)
 
 
 class BoilingPlanToSchedule:

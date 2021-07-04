@@ -35,6 +35,7 @@ COLUMNS = {"BoilingVolume": 10, "SKUS_ID": 18, "BOILING_ID": 19}
 
 class SkuPlanClient:
     def __init__(self, date, remainings, skus_grouped, template_path):
+        self.date = date.strftime("%Y-%m-%d")
         self.filename = "{} План по SKU.xlsx".format(date.strftime("%Y-%m-%d"))
         self.filepath = os.path.join(
             flask.current_app.config["SKU_PLAN_FOLDER"], self.filename
@@ -70,17 +71,19 @@ class SkuPlanClient:
         return 0
 
     def fill_skus(
-        self, sku_grouped, excel_client, cur_row, space_factor, sorted_by_weight=False
+        self, sku_grouped, excel_client, cur_row, space_factor, sorted_by_weight=False, order=None,
     ):
         beg_row = cur_row
         formula_group = []
-        for group_name in flask.current_app.config["ORDER"]:
+        order = order if order is not None else flask.current_app.config["ORDER"]
+        for group_name in order:
             block_skus = [x for x in sku_grouped.skus if x.sku.group.name == group_name]
             if block_skus:
                 if sorted_by_weight:
                     block_skus = sorted(
                         block_skus, key=lambda k: k.sku.form_factor.relative_weight
                     )
+
                 beg_block_row = cur_row
                 for block_sku in block_skus:
                     formula_plan = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
@@ -241,3 +244,33 @@ class SkuPlanClient:
                 self.wb[sheet_name].views.sheetView[0].tabSelected = False
         self.wb.active = 1
         self.wb.save(self.filepath)
+
+    def fill_butter_sku_plan(self):
+        sheet = self.wb[flask.current_app.config["SHEET_NAMES"]["schedule_plan"]]
+        cur_row = 2
+        for sku_grouped in self.skus_grouped:
+            excel_client = ExcelBlock(sheet=sheet)
+            cur_row = self.fill_skus(sku_grouped, excel_client, cur_row, False, order=["Масло"])
+            cur_row += self.space_rows
+
+        for sheet_number, sheet_name in enumerate(self.wb.sheetnames):
+            if sheet_number != 1:
+                self.wb[sheet_name].views.sheetView[0].tabSelected = False
+        self.wb.active = 1
+        self.wb.save(self.filepath)
+
+    def fill_milkproject_sku_plan(self):
+        sheet = self.wb[flask.current_app.config["SHEET_NAMES"]["schedule_plan"]]
+        cur_row = 2
+        for sku_grouped in self.skus_grouped:
+            excel_client = ExcelBlock(sheet=sheet)
+            cur_row = self.fill_skus(sku_grouped, excel_client, cur_row, False,
+                                     order=["Рикотта", "Качорикотта", "Четук"])
+            cur_row += self.space_rows
+
+        for sheet_number, sheet_name in enumerate(self.wb.sheetnames):
+            if sheet_number != 1:
+                self.wb[sheet_name].views.sheetView[0].tabSelected = False
+        self.wb.active = 1
+        self.wb.save(self.filepath)
+

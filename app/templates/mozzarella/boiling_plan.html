@@ -25,7 +25,7 @@
     <div class="card card-body bg-white border-light shadow-sm mb-4">
         <h2 class="h5 mb-4">Загрузите файл остатков</h2>
         <div class="row">
-            <form method="post" action="/boiling_plan" enctype="multipart/form-data" class="mt-4">
+            <form method="post" action="/mozzarella_boiling_plan" enctype="multipart/form-data" class="mt-4">
                 {{ form.hidden_tag() }}
                 <div class="col-md-12 mb-3">
                     <div class="form-group">
@@ -48,19 +48,21 @@
 
 {% if filename %}
     <script>
-        function download(url, filename) {
+        function download(url, filename, date) {
         fetch(url).then(function(t) {
             return t.blob().then((b)=>{
                 var a = document.createElement("a");
                 a.href = URL.createObjectURL(b);
                 a.setAttribute("download", filename);
+                a.setAttribute("file_name", filename);
+                a.setAttribute("date", date);
                 a.click();
             }
             );
         });
         }
-        var url = "download_boiling_plan/" + "{{filename}}";
-        download(url,"{{filename}}");
+        var url = "download_boiling_plan?file_name=" + "{{filename}}" + "&date=" + "{{date}}";
+        download(url,"{{filename}}", "{{date}}");
     </script>
 {% endif %}
 {% endblock %}

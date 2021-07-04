@@ -5,7 +5,7 @@ from flask import url_for
 
 def test_mozzarella_get_schedule(client):
     with client.test_client() as client:
-        url = url_for("main.schedule", _external=False)
+        url = url_for("main.mozzarella_schedule", _external=False)
         print(url)
         response = client.get(url)
         assert response.status_code == 200
@@ -14,7 +14,7 @@ def test_mozzarella_get_schedule(client):
 def test_mozzarella_post_schedule(client):
     filepath = client.config["TEST_MOZZARELLA"]
     with client.test_client() as client:
-        url = url_for("main.schedule", _external=False)
+        url = url_for("main.mozzarella_schedule", _external=False)
         data = {
             "date": "2021-01-01",
             "add_full_boiling": True,

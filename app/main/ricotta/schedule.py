@@ -1,18 +1,14 @@
-import flask
-
-from app.imports.runtime import *
-
-from app.main.errors import internal_error
 from app.main import main
 from app.scheduler import *
 from app.scheduler.ricotta import *
 from app.utils.ricotta.schedule_tasks import schedule_task_boilings, update_total_schedule_task
 from app.utils.batches.batch import *
-
+from app.utils.files.utils import save_schedule
 from .forms import ScheduleForm
 
 
 @main.route("/ricotta_schedule", methods=["GET", "POST"])
+@flask_login.login_required
 def ricotta_schedule():
 
     form = ScheduleForm(flask.request.form)
@@ -42,16 +38,15 @@ def ricotta_schedule():
 
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"
-        path_schedule = "{}/{}".format(flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule)
 
         update_total_schedule_task(date, boiling_plan_df)
         schedule_wb = schedule_task_boilings(
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )
 
-        schedule_wb.save(path_schedule)
+        save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         return flask.render_template(
-            "ricotta/schedule.html", form=form, filename=filename_schedule
+            "ricotta/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d"),
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
