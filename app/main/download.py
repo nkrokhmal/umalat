@@ -1,3 +1,5 @@
+import os.path
+
 from app.imports.runtime import *
 from app.main import main
 
@@ -59,31 +61,27 @@ def download_schedule_task():
 @main.route("/download_last_schedule_task", defaults={'check_date': False}, methods=["GET", "POST"])
 @flask_login.login_required
 def download_last_schedule_task(check_date):
-    schedule_task_folder = os.path.join(
-        os.path.dirname(flask.current_app.root_path),
-        flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"],
-    )
-    schedules_task_filenames = os.listdir(schedule_task_folder)
-    schedules_task_filenames = [filename for filename in schedules_task_filenames if filename.endswith(".csv")]
-    last_filename = sorted(schedules_task_filenames, reverse=True)
-    if len(last_filename) > 0:
-        filename = last_filename[0]
-        if check_date:
-            date = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
-            if filename.split('.')[0] != date:
-                raise Exception(f"There is no csv file for {date} date!")
-            else:
-                response = flask.send_from_directory(
-                    directory=schedule_task_folder, filename=filename, cache_timeout=0, as_attachment=True
-                )
-                response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
-                return response
-        else:
-            response = flask.send_from_directory(
-                directory=schedule_task_folder, filename=filename, cache_timeout=0, as_attachment=True
-            )
-            response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
-            return response
+    dates = [folder for folder in os.listdir(flask.current_app.config["DYNAMIC_DIR"]) if folder.startswith('20')]
+    task_dirs = [os.path.join(
+            os.path.dirname(flask.current_app.root_path),
+            flask.current_app.config["DYNAMIC_DIR"],
+            x,
+            "task",
+            f"{x}.csv"
+        )
+        for x in dates]
+    task_dirs = [x for x in task_dirs if os.path.exists(x)]
+    task_dirs = sorted(task_dirs, reverse=True)
+    print(task_dirs)
+    if len(task_dirs) > 0:
+        last_dir, filename = os.path.split(task_dirs[0])
+        print(last_dir)
+        print(filename)
+        response = flask.send_from_directory(
+            directory=last_dir, filename=filename, cache_timeout=0, as_attachment=True
+        )
+        response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
+        return response
     else:
         raise Exception("There is no csv files in schedule task directory!")
 
