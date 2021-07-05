@@ -44,3 +44,25 @@ def approve_mozzarella():
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mozzarella_schedule"))
 
+
+@main.route("/approve_ricotta", methods=["GET", "POST"])
+@flask_login.login_required
+def approve_ricotta():
+    date = flask.request.form.get("date")
+    file_name = flask.request.form.get("file_name")
+
+    move_to_approved(date=date, file_name=file_name)
+    flask.flash("Расписание успешно утверждено", "success")
+    return flask.redirect(flask.url_for(".ricotta_schedule"))
+
+
+@main.route("/approve_mascarpone", methods=["GET", "POST"])
+@flask_login.login_required
+def approve_mascarpone():
+    date = flask.request.form.get("date")
+    file_name = flask.request.form.get("file_name")
+
+    move_to_approved(date=date, file_name=file_name)
+    flask.flash("Расписание успешно утверждено", "success")
+    return flask.redirect(flask.url_for(".mascarpone_schedule"))
+
