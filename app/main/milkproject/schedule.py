@@ -44,6 +44,7 @@ def milkproject_schedule():
         frontend = wrap_frontend(schedule, date=date, start_time=beg_time)
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
+        filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
 
         update_total_schedule_task(date, boiling_plan_df)
         schedule_wb = schedule_task_boilings(
@@ -51,6 +52,7 @@ def milkproject_schedule():
         )
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
+        save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
         os.remove(file_path)
         return flask.render_template(
             "milkproject/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")
