@@ -3,7 +3,7 @@ from app.scheduler import *
 from app.scheduler.ricotta import *
 from app.utils.ricotta.schedule_tasks import schedule_task_boilings, update_total_schedule_task
 from app.utils.batches.batch import *
-from app.utils.files.utils import save_schedule
+from app.utils.files.utils import save_schedule, save_schedule_dict
 from .forms import ScheduleForm
 
 
@@ -38,6 +38,7 @@ def ricotta_schedule():
 
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"
+        filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.pickle"
 
         update_total_schedule_task(date, boiling_plan_df)
         schedule_wb = schedule_task_boilings(
@@ -45,6 +46,7 @@ def ricotta_schedule():
         )
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
+        save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
         return flask.render_template(
             "ricotta/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d"),
         )
