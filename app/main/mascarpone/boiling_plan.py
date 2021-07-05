@@ -55,7 +55,7 @@ def mascarpone_boiling_plan():
         )
         sheet_name = flask.current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
-        df, _ = parse_sheet(ws, sheet_name, excel_compiler)
+        df, _ = parse_sheet(ws, sheet_name, excel_compiler, MascarponeSKU)
         mascarpone_df, cream_cheese_df, cream_df = mascarpone_boiling_plan_create(df)
         wb = draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb)
         save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)

@@ -38,7 +38,7 @@ def mozzarella_boiling_plan():
         )
         sheet_name = flask.current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
-        df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler)
+        df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler, MozzarellaSKU)
         df_plan = boiling_plan_create(df)
         wb = draw_boiling_plan(df_plan, df_extra_packing, wb)
         save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
