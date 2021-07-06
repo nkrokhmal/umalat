@@ -99,6 +99,7 @@ def make_contour_3(schedules):
 
     return m.root
 
+
 def make_contour_4(schedules):
     m = BlockMaker("4 contour")
 
@@ -155,6 +156,7 @@ def make_contour_4(schedules):
           label='Линия кислой сыворотки')
 
     return m.root
+
 
 def make_contour_1(schedules):
     m = BlockMaker("1 contour")
@@ -227,7 +229,7 @@ def make_contour_1(schedules):
 
 
 def make_contour_2(schedules):
-    m = BlockMaker("1 contour")
+    m = BlockMaker("2 contour")
     m.row('cleaning', push_func=add_push,
           size=cast_t('01:20'), x=cast_t('12:00'),
           label='Линия обрата в сливки')
@@ -265,5 +267,68 @@ def make_contour_2(schedules):
     m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
           size=cast_t('01:20'),
           label='Сливки от сепаратора жирной воды')
+
+    return m.root
+
+
+def make_contour_5(schedules):
+    m = BlockMaker("5 contour")
+
+    m.row('cleaning', push_func=add_push,
+          size=cast_t('01:20'),
+          label='Танк концентрата')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Танк концентрата')
+
+    m.row('cleaning', push_func=add_push,
+          size=cast_t('01:20'), x=cast_t('09:00'),
+          label='Линия Концентрата на отгрузку')
+
+    with code('scotta'):
+        ''' Calc tanks_df
+               id     kg  n_boilings finished
+            0   6  60000          33      101
+            1   7  60000          33     None
+            2   8  80000          45     None
+        '''
+        scotta_per_boiling = 1900 - 130
+        values = [[6, 60000], [7, 60000], [8, 80000]]
+        tanks_df = pd.DataFrame(values, columns=['id', 'kg'])
+        tanks_df['n_boilings'] = tanks_df['kg'].apply(
+            lambda kg: int(custom_round(kg / scotta_per_boiling, 1, rounding='floor')))
+        tanks_df['finished'] = None
+
+        boilings = list(schedules['ricotta'].iter(cls='boiling'))
+        assert len(boilings) <= tanks_df[
+            'n_boilings'].sum(), 'Слишком много варок на линии рикотты. Скотта не помещается в танки.'
+        for i, row in tanks_df.iterrows():
+            if not boilings:
+                break
+            if len(boilings) >= row['n_boilings']:
+                cur_boiling = boilings[row['n_boilings'] - 1]
+                boilings = boilings[row['n_boilings']:]
+            else:
+                cur_boiling = boilings[-1]
+                boilings = []
+
+            tanks_df.loc[i, 'finished'] = cur_boiling.y[0] + cast_t('05:30')
+
+        # make blocks
+        tanks_df = tanks_df[~tanks_df['finished'].isnull()]
+
+        for i, row in tanks_df.iterrows():
+            m.row('cleaning', push_func=add_push,
+                  size=cast_t('01:20'), x=row['finished'],
+                  label=f'Танк рикотты {row["id"]}')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Линия Ретентата')
+
+    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+          size=cast_t('01:20'),
+          label='Линия подачи на НФ открыть кран')
 
     return m.root
