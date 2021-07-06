@@ -22,16 +22,9 @@ def test(open_file=False):
         with open(fn, "rb") as f:
             schedules[key] = ParallelepipedBlock.from_dict(pickle.load(f))
 
-    contours = [
-        make_contour_1(schedules),
-        make_contour_2(schedules),
-        make_contour_3(schedules),
-        make_contour_4(schedules),
-        make_contour_5(schedules),
-        make_contour_6(schedules),
-    ]
+    schedule = make_schedule(schedules)
 
-    frontend = wrap_frontend(contours)
+    frontend = wrap_frontend(schedule)
 
     utils.lazy_tester.log(frontend)
     draw_excel_frontend(frontend, STYLE, open_file=open_file)
