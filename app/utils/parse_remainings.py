@@ -159,19 +159,33 @@ def parse_sheet(ws, sheet_name, excel_compiler, sku_type=ButterSKU):
     df_extra_packing = df[["sku", "extra_packing"]].copy()
     df = df.fillna(0)
     df = df[df["plan"] != 0]
-    if df.empty:
-        sku = db.session.query(sku_type).all()[0]
-        df = df.append({
-            'sku': sku,
-            'remainings - request': 0,
-            'normative remainings': 0,
-            'plan': 1,
-            'extra_packing': 0,},
-            ignore_index=True)
+    if sku_type == ButterSKU:
+        df = df.iloc[0:0]
+        skus = db.session.query(sku_type).all()
+        for sku in skus:
+            df = df.append({
+                'sku': sku,
+                'remainings - request': 0,
+                'normative remainings': 0,
+                'plan': sku.line.output_kg,
+                'extra_packing': 0,
+            }, ignore_index=True)
+    else:
+        if df.empty:
+            sku = db.session.query(sku_type).all()[0]
+            df = df.append({
+                    'sku': sku,
+                    'remainings - request': 0,
+                    'normative remainings': 0,
+                    'plan': 1,
+                    'extra_packing': 0,
+                },
+                ignore_index=True
+            )
 
-        # todo: create simple example
-        # raise Exception("План варок не сформирован, потому что на текущей день заявка нулевая.")
-        flask.flash("Заявка на текущий день нулевая!")
+            # todo: create simple example
+            # raise Exception("План варок не сформирован, потому что на текущей день заявка нулевая.")
+            flask.flash("Заявка на текущий день нулевая!")
     df = df[
         df["plan"].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())
     ]
