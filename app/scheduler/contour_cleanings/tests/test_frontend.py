@@ -10,17 +10,33 @@ def test(open_file=False):
 
     from utils_ak.loguru import configure_loguru_stdout
 
-    import pickle
+    fns = {
+        "mozzarella": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/2021-02-09 Моцарелла Расписание.pickle",
+        "mascarpone": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/2021-04-21 Маскарпоне Расписание.pickle",
+        "butter": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/Sample Маслоцех Расписание.pickle",
+        "milk_project": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/Sample Милк-проджект Расписание.pickle",
+        "ricotta": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/2021-05-15 Рикотта Расписание.pickle",
+    }
+    schedules = {}
+    for key, fn in fns.items():
+        with open(fn, "rb") as f:
+            schedules[key] = ParallelepipedBlock.from_dict(pickle.load(f))
 
-    fn = "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/2021-02-09 Моцарелла Расписание.pickle"
-    with open(fn, "rb") as f:
-        mozarella_schedule = ParallelepipedBlock.from_dict(pickle.load(f))
-
-    contours = [make_contour_3(mozarella_schedule)]
+    contours = [
+        make_contour_1(schedules),
+        make_contour_2(schedules),
+        make_contour_3(schedules),
+        make_contour_4(schedules),
+        make_contour_5(schedules),
+        make_contour_6(schedules),
+    ]
 
     frontend = wrap_frontend(contours)
 
+    utils.lazy_tester.log(frontend)
     draw_excel_frontend(frontend, STYLE, open_file=open_file)
+
+    utils.lazy_tester.assert_logs(reset=True)
 
 
 if __name__ == "__main__":
