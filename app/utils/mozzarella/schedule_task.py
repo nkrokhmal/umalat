@@ -11,7 +11,6 @@ def update_total_schedule_task(date, df, df_packing=None):
         date.strftime(flask.current_app.config["DATE_FORMAT"]),
         "task"
     )
-    print(data_dir)
     path = os.path.join(data_dir, f"{date.date()}.csv")
     columns = ["sku", "code", "in_box", "kg", "boxes_count"]
     if not os.path.exists(path):

@@ -1,11 +1,15 @@
 from app.utils.features.draw_utils import *
 from app.utils.features.openpyxl_wrapper import ExcelBlock
 from app.models import MascarponeSKU
+from app.utils.files.utils import create_dir
 
 
 def update_total_schedule_task(date, df):
-    folder = flask.current_app.config["TOTAL_SCHEDULE_TASK_FOLDER"]
-    path = os.path.join(folder, f"{date.date()}.csv")
+    data_dir = create_dir(
+        date.strftime(flask.current_app.config["DATE_FORMAT"]),
+        "task"
+    )
+    path = os.path.join(data_dir, f"{date.date()}.csv")
     columns = ["sku", "code", "in_box", "kg", "boxes_count"]
     if not os.path.exists(path):
         df_task = pd.DataFrame(columns=columns)
