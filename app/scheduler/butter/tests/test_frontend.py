@@ -19,12 +19,6 @@ def test_drawing_butter(boiling_plan_obj=None, open_file=False):
 
     schedule = make_schedule(boiling_plan_df)
 
-    import pickle
-
-    fn = "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/Sample Маслоцех Расписание.pickle"
-    with open(fn, "wb") as f:
-        pickle.dump(schedule.to_dict(), f)
-
     utils.lazy_tester.log(schedule)
     frontend = wrap_frontend(schedule)
 
