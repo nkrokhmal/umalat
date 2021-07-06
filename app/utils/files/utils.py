@@ -1,6 +1,5 @@
 import os
 import shutil
-
 from app.imports.runtime import *
 
 
@@ -21,6 +20,10 @@ def save_file_dir(data, filename, date, folder, data_type="xlsx"):
         mode = 'a' if os.path.exists(os.path.join(data_dir, filename)) else 'w'
         with open(os.path.join(data_dir, filename), mode) as outfile:
             json.dump(data, outfile)
+    elif data_type == "pickle":
+        mode = 'ab' if os.path.exists(os.path.join(data_dir, filename)) else 'wb'
+        with open(os.path.join(data_dir, filename), mode) as outfile:
+            pickle.dump(data, outfile)
 
 
 def save_boiling_plan(*args, **kwargs):
@@ -36,7 +39,7 @@ def save_schedule_task(*args, **kwargs):
 
 
 def save_schedule_dict(*args, **kwargs):
-    save_file_dir(*args, **kwargs, folder="schedule_dict", data_type="json")
+    save_file_dir(*args, **kwargs, folder="schedule_dict", data_type="pickle")
 
 
 def move_boiling_file(date, old_filepath, old_filename, department=""):

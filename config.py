@@ -19,6 +19,7 @@ class BaseClass:
     BATCH_NUMBERS_DIR = "db/batch_numbers"
 
     DYNAMIC_DIR = "app/data/dynamic"
+    BATCH_NUMBER_DIR = "db/batch_numbers/"
 
     UPLOAD_TMP_FOLDER = "app/data/dynamic/tmp"
     STATS_FOLDER = "app/data/dynamic/stats"
@@ -128,6 +129,8 @@ class TestConfig(BaseClass):
     TEST_MOZZARELLA = "app/data/tests/mozzarella_plan.xlsx"
     TEST_RICOTTA = "app/data/tests/ricotta_plan.xlsx"
     TEST_MASCARPONE = "app/data/tests/mascarpone_plan.xlsx"
+    TEST_MILKPROJECT = "app/data/tests/milkproject_plan.xlsx"
+    TEST_BUTTER = "app/data/tests/butter_plan.xlsx"
 
     TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"
     TELEGRAM_CHAT_ID = -544068496

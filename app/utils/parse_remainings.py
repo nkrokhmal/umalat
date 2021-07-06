@@ -135,7 +135,7 @@ def convert_sku(sku):
     )
 
 
-def parse_sheet(ws, sheet_name, excel_compiler):
+def parse_sheet(ws, sheet_name, excel_compiler, sku_type=ButterSKU):
     values = []
     for i in range(1, ws.max_row + 1):
         if ws.cell(i, REMAININGS_COLUMN):
@@ -160,8 +160,18 @@ def parse_sheet(ws, sheet_name, excel_compiler):
     df = df.fillna(0)
     df = df[df["plan"] != 0]
     if df.empty:
+        sku = db.session.query(sku_type).all()[0]
+        df = df.append({
+            'sku': sku,
+            'remainings - request': 0,
+            'normative remainings': 0,
+            'plan': 1,
+            'extra_packing': 0,},
+            ignore_index=True)
+
         # todo: create simple example
-        raise Exception("План варок не сформирован, потому что на текущей день заявка нулевая.")
+        # raise Exception("План варок не сформирован, потому что на текущей день заявка нулевая.")
+        flask.flash("Заявка на текущий день нулевая!")
     df = df[
         df["plan"].apply(lambda x: type(x) == int or type(x) == float or x.isnumeric())
     ]

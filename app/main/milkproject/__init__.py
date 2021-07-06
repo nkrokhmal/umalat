@@ -3,4 +3,5 @@ from . import (
     params,
     params_boiling_technology,
     params_sku,
+    schedule,
 )

@@ -7,13 +7,14 @@ from app.scheduler.milk_project import *
 from app.scheduler.milk_project.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
-
+from app.utils.files.utils import save_schedule, save_schedule_dict
+from app.utils.milkproject.schedule_tasks import update_total_schedule_task, schedule_task_boilings
 from .forms import ScheduleForm
 
 
-@main.route("/milk_project_schedule", methods=["GET", "POST"])
+@main.route("/milkproject_schedule", methods=["GET", "POST"])
 @flask_login.login_required
-def milk_project_schedule():
+def milkproject_schedule():
 
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
@@ -42,20 +43,19 @@ def milk_project_schedule():
         schedule = make_schedule(boiling_plan_df)
         frontend = wrap_frontend(schedule, date=date, start_time=beg_time)
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
-        filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.xlsx"
+        filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
+        filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
 
         update_total_schedule_task(date, boiling_plan_df)
         schedule_wb = schedule_task_boilings(
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )
 
-        path_schedule = "{}/{}".format(
-            flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule
-        )
-
-        schedule_wb.save(path_schedule)
+        save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
+        save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
+        os.remove(file_path)
         return flask.render_template(
-            "milk_project/schedule.html", form=form, filename=filename_schedule
+            "milkproject/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
@@ -67,4 +67,4 @@ def milk_project_schedule():
         + 1
     )
 
-    return flask.render_template("milk_project/schedule.html", form=form, filename=None)
+    return flask.render_template("milkproject/schedule.html", form=form, filename=None)

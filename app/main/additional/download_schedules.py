@@ -75,6 +75,7 @@ def download_schedules(page):
         offset=(page - 1) * flask.current_app.config["SKU_PER_PAGE"],
         per_page=flask.current_app.config["SKU_PER_PAGE"]
     )
+    print(schedules_result)
 
     pagination = flask_paginate.Pagination(
         page=page,

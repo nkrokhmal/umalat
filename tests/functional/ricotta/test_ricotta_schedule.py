@@ -10,7 +10,7 @@ def test_ricotta_get_schedule(client):
         assert response.status_code == 200
 
 
-def test_mozzarella_post_schedule(client):
+def test_ricotta_post_schedule(client):
     filepath = client.config["TEST_RICOTTA"]
     with client.test_client() as client:
         url = url_for("main.ricotta_schedule", _external=False)

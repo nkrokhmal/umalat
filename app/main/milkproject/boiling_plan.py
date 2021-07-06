@@ -38,11 +38,12 @@ def milkproject_boiling_plan():
         )
         sheet_name = flask.current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
-        df, _ = parse_sheet(ws, sheet_name, excel_compiler)
+        df, _ = parse_sheet(ws, sheet_name, excel_compiler, MilkProjectSKU)
         df_plan = boiling_plan_create(df)
         wb = draw_boiling_plan(df_plan, wb)
         save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
         return flask.render_template(
             "milkproject/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date,
         )
+    form.date.data = datetime.today() + timedelta(days=1)
     return flask.render_template("milkproject/boiling_plan.html", form=form, filename=None)

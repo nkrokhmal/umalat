@@ -146,16 +146,19 @@
 			$(".modal-footer #testId").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    fetch(url_download).then(function(t) {
-                    return t.blob().then((b)=>{
-                        var a = document.createElement("a");
-                        a.href = URL.createObjectURL(b);
-                        a.setAttribute("download", filename);
-                        a.setAttribute("file_name", filename);
-                        a.setAttribute("date", date);
-                        a.click();
-                    });
-                });
+			    console.log(url_download);
+			    $.ajax(
+				{
+					url: url_download,
+					type: 'GET',
+					success: function(res)
+					{
+					    window.location = url_download;
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){

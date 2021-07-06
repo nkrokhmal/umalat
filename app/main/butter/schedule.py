@@ -7,7 +7,8 @@ from app.scheduler.butter import *
 from app.scheduler.butter.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
-
+from app.utils.files.utils import save_schedule, save_schedule_dict
+from app.utils.butter.schedule_tasks import update_total_schedule_task, schedule_task_boilings
 from .forms import ScheduleForm
 
 
@@ -42,20 +43,20 @@ def butter_schedule():
         schedule = make_schedule(boiling_plan_df)
         frontend = wrap_frontend(schedule, date=date, start_time=beg_time)
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
-        filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.xlsx"
+
+        filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание масло.xlsx"
+        filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание масло.pickle"
 
         update_total_schedule_task(date, boiling_plan_df)
         schedule_wb = schedule_task_boilings(
             schedule_wb, boiling_plan_df, date, form.batch_number.data
         )
 
-        path_schedule = "{}/{}".format(
-            flask.current_app.config["SCHEDULE_PLAN_FOLDER"], filename_schedule
-        )
-
-        schedule_wb.save(path_schedule)
+        save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
+        save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
+        os.remove(file_path)
         return flask.render_template(
-            "butter/schedule.html", form=form, filename=filename_schedule
+            "butter/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
