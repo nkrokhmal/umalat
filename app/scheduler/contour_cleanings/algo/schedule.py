@@ -332,3 +332,78 @@ def make_contour_5(schedules):
           label='Линия подачи на НФ открыть кран')
 
     return m.root
+
+
+def make_contour_6(schedules):
+    m = BlockMaker("6 contour")
+
+    values = []
+    values.append([m.create_block('cleaning',
+                                  size=(cast_t('01:20'), 0),
+                                  label='Линия сырого молока на роникс'), schedules['milk_project'].y[0]])
+
+    with code('Танк рикотты 1 внутри дня'):
+        boilings = list(schedules['ricotta'].iter(cls='boiling'))
+        whey_used = 1900 * len(boilings)
+        if whey_used > 50000:  # todo soon: switch to 100000
+            values.append([m.create_block('cleaning',
+                                          size=(cast_t('01:20'), 0),
+                                          label='Танк рикотты 1'), cast_t('12:00')])
+
+    with code('cream tanks'):
+        boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
+        # todo soon: спросить, что делаем если варок меньше 4?
+        boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]
+        values.append([m.create_block('cleaning',
+                                      size=(cast_t('01:20'), 0),
+                                      label='Танк сливок'),
+                       boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 12,
+                       # fourth mascarpone boiling group end + hour
+                       ])
+
+        boilings = list(schedules['ricotta'].iter(cls='boiling'))
+        values.append([m.create_block('cleaning',
+                                      size=(cast_t('01:20'), 0),
+                                      label='Танк сливок'),
+                       boilings[-1]['pumping_out'].y[0] + 12,  # ricotta end + hour
+                       ])
+
+        values.append([m.create_block('cleaning',
+                                      size=(cast_t('01:20'), 0),
+                                      label='Танк сливок'),
+                       cast_t('09:00'),  # todo soon: ставим на 09?
+                       ])
+
+    with code('mascarpone'):
+        boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
+        boiling_group = boiling_groups[-1]
+        values.append([m.create_block('cleaning',
+                                      size=(cast_t('01:20'), 0),
+                                      label='Маскарпоне'),
+                       boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 6,
+                       # last boiling separation + half hour # todo soon: кремчиза здесь считаются?
+                       ])
+
+    ricotta_end = boilings[-1]['pumping_out'].y[0] + 12
+
+    values.append([m.create_block('cleaning',
+                                  size=(cast_t('02:30'), 0),
+                                  label='Линия сладкой сыворотки'),
+                   ricotta_end])
+
+    for label in ['Танк рикотты 1', 'Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2', 'Масло цех']:
+        values.append([m.create_block('cleaning',
+                                      size=(cast_t('01:20'), 0),
+                                      label=label), ricotta_end])
+
+    df = pd.DataFrame(values, columns=['block', 'start_from'])
+    df = df.sort_values(by='start_from')
+
+    for i, row in df.iterrows():
+        if i == 0:
+            m.block(row['block'], push_func=add_push,
+                    x=(row['start_from'], 0))
+        else:
+            m.block(row['block'],
+                    push_func=AxisPusher(validator=CleaningValidator(), start_from=['last_end', row['start_from']]))
+    return m.root
