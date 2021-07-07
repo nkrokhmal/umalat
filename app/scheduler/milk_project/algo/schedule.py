@@ -3,10 +3,11 @@
 from app.imports.runtime import *
 
 from app.scheduler.milk_project.algo.boilings import *
+from app.scheduler.time import *
 from app.models import *
 
 
-def make_schedule(boiling_plan_df):
+def make_schedule(boiling_plan_df, start_time='07:00'):
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
     boilings_ids = utils.remove_duplicates(boiling_plan_df['boiling_id'])
@@ -22,4 +23,5 @@ def make_schedule(boiling_plan_df):
 
         if next_ids:
             m.row('pouring_off', size=1)
+    m.root.props.update(x=(cast_t(start_time), 0))
     return m.root

@@ -3,10 +3,11 @@
 from app.imports.runtime import *
 
 from app.scheduler.butter.algo.boilings import *
+from app.scheduler.time import *
 from app.models import *
 
 
-def make_schedule(boiling_plan_df):
+def make_schedule(boiling_plan_df, start_time='07:00'):
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
 
@@ -23,4 +24,6 @@ def make_schedule(boiling_plan_df):
 
     # todo soon: take from line model
     m.row("cleaning", size=20)
+
+    m.root.props.update(x=(cast_t(start_time), 0))
     return m.root

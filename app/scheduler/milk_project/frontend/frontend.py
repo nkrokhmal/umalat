@@ -33,7 +33,7 @@ def wrap_line(schedule):
     return m.root
 
 
-def wrap_frontend(schedule, date=None, start_time="07:00"):
+def wrap_frontend(schedule, date=None):
     date = date or datetime.now()
 
     m = BlockMaker(
@@ -44,6 +44,13 @@ def wrap_frontend(schedule, date=None, start_time="07:00"):
         axis=1,
     )
     m.row("stub", size=0)  # start with 1
+
+    # calc start time
+    start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour
+    start_time = cast_time(start_t)
+
     m.block(wrap_header(date=date, start_time=start_time, header='График работы цеха милкпроджект'))
-    m.block(wrap_line(schedule))
+
+    with m.block(start_time=start_time, axis=1):
+        m.block(wrap_line(schedule))
     return m.root
