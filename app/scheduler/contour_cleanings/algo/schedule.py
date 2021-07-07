@@ -74,7 +74,6 @@ def make_contour_1(schedules, order=('f1', 'f2', 'f3')):
               label='Линия роникс')
 
     for func_name in order:
-        print('Running function', func_name)
         locals()[func_name]()
 
     for _ in range(3):
@@ -110,11 +109,11 @@ def make_contour_2(schedules):
               size=cast_t('01:20'),  # todo soon: what name, how much time?
               label='Комет')
 
-    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
-          size=cast_t('01:20'),
-          label='Фасовочная вода')
+        m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+              size=cast_t('01:20'),
+              label='Фасовочная вода')
 
-    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+    m.row('cleaning', push_func=AxisPusher(start_from=cast_t('1:04:00'), validator=CleaningValidator()),
           size=cast_t('01:20'),
           label='Танк ЖВиКС 1')
 
