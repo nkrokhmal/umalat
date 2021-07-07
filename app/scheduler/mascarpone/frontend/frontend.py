@@ -259,7 +259,7 @@ def wrap_cleanings_line(schedule):
     return m.root
 
 
-def wrap_frontend(schedule, date=None, start_time="07:00"):
+def wrap_frontend(schedule, date=None):
     date = date or datetime.now()
 
     m = BlockMaker("frontend",
@@ -269,15 +269,21 @@ def wrap_frontend(schedule, date=None, start_time="07:00"):
                    axis=1)
 
     m.row("stub", size=0)  # start with 1
+
+    # calc start time
+    start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour
+    start_time = cast_time(start_t)
     m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
 
     with m.block(push_func=add_push,
-                 x=(6, 2), axis=1):
+                 x=(0, 2),
+                 axis=1,
+                 start_time=cast_time(start_t)):
         m.block(wrap_mascarpone_lines(schedule, with_cream_cheese=True))
         m.block(make_packing_line(schedule))
         m.row("stub", size=0)
         m.block(wrap_cleanings_line(schedule))
-        m.block("mascarpone_department_preparation", push_func=add_push,
-            size=(6, 11), x=(-6, 0))
 
+    m.block("mascarpone_department_preparation", push_func=add_push,
+        size=(6, 11), x=(0, 2))
     return m.root

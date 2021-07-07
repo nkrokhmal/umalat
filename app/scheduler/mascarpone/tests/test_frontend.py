@@ -37,5 +37,6 @@ if __name__ == "__main__":
     _test(
         DebugConfig.abs_path(
             "app/data/static/samples/inputs/mascarpone/2021-04-21 План по варкам маскарпоне.xlsx"
-        )
+        ),
+        open_file=True,
     )

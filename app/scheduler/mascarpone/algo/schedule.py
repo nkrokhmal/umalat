@@ -6,6 +6,7 @@ from app.models import *
 from app.scheduler.mascarpone.algo.mascarpone_boilings import *
 from app.scheduler.mascarpone.algo.cream_cheese_boilings import *
 from app.scheduler.mascarpone.algo.cleanings import *
+from app.scheduler.time import *
 
 from utils_ak.block_tree import *
 
@@ -211,7 +212,7 @@ class BoilingPlanToSchedule:
                          push_func=AxisPusher(start_from="last_beg"),
                          push_kwargs={'validator': Validator()})
 
-    def __call__(self, boiling_plan_df, first_batch_id=0):
+    def __call__(self, boiling_plan_df, first_batch_id=0, start_time='07:00'):
         boiling_plan_df["batch_id"] += first_batch_id - 1
         columns = boiling_plan_df.columns
         boiling_plan_df["tag"] = (
@@ -228,8 +229,9 @@ class BoilingPlanToSchedule:
                 self._make_mascarpone(grp, is_last=is_last)
             elif grp.iloc[0]["type"] == "cream_cheese":
                 self._make_cream_cheese(grp)
+        self.m.root.props.update(x=(cast_t(start_time) + 6, 0)) # add half hour for preparation
         return self.m.root
 
 
-def make_schedule(boiling_plan_df, start_batch_id=0):
-    return BoilingPlanToSchedule()(boiling_plan_df, start_batch_id)
+def make_schedule(boiling_plan_df, start_batch_id=0, start_time='07:00'):
+    return BoilingPlanToSchedule()(boiling_plan_df, start_batch_id, start_time=start_time)

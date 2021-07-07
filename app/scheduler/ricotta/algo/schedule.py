@@ -4,6 +4,7 @@ from app.imports.runtime import *
 
 from app.scheduler.ricotta.algo.boilings import *
 from app.scheduler.ricotta.algo.cleanings import *
+from app.scheduler.time import *
 from app.models import *
 
 
@@ -58,7 +59,7 @@ class Validator(ClassValidator):
         )
 
 
-def make_schedule(boiling_plan_df, first_boiling_id=0):
+def make_schedule(boiling_plan_df, first_boiling_id=0, start_time='07:00'):
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
     boiling_plan_df["boiling_id"] += first_boiling_id - 1
@@ -99,4 +100,5 @@ def make_schedule(boiling_plan_df, first_boiling_id=0):
                 push_func=AxisPusher(start_from=boiling_groups[-1]["analysis_group"].x[0]),
                 push_kwargs={'validator': Validator()})
 
+    m.root.props.update(x=(cast_t(start_time), 0))
     return m.root

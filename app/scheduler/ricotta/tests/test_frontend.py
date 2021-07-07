@@ -21,7 +21,7 @@ def test_drawing_ricotta(open_file=False):
 
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
 
-    schedule = make_schedule(boiling_plan_df)
+    schedule = make_schedule(boiling_plan_df, start_time="07:00")
     utils.lazy_tester.log(schedule)
     frontend = wrap_frontend(schedule)
 
@@ -34,4 +34,4 @@ def test_drawing_ricotta(open_file=False):
 if __name__ == "__main__":
     # test_make_frontend_boiling()
     # test_make_frontend()
-    test_drawing_ricotta(open_file=False)
+    test_drawing_ricotta(open_file=True)
