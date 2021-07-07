@@ -18,11 +18,6 @@ def test_drawing_milk_project(boiling_plan_obj=None, open_file=False):
         utils.lazy_tester.configure(local_path=os.path.basename(fn))
 
     schedule = make_schedule(boiling_plan_df)
-    import pickle
-
-    fn = "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/2021.05.06 Милк-проджект Расписание.pickle"
-    with open(fn, "wb") as f:
-        pickle.dump(schedule.to_dict(), f)
 
     utils.lazy_tester.log(schedule)
     frontend = wrap_frontend(schedule)
