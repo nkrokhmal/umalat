@@ -46,6 +46,7 @@ def make_contour_1(schedules):
         df = df.sort_values(by='pouring_end')
         values = df.values.tolist()
 
+        # todo soon: можем ли мыть раньше линии отгрузки?
         for percent, end in values:
             m.row('cleaning', push_func=AxisPusher(start_from=['last_end', end], validator=CleaningValidator()),
                   size=cast_t('01:50'),
@@ -60,7 +61,6 @@ def make_contour_1(schedules):
           size=cast_t('01:50'),
           label='Линия адыгейского')
 
-    # todo soon: add proper start_from
     m.row('cleaning',
           push_func=AxisPusher(start_from=['last_end', schedules['milk_project'].y[0]], validator=CleaningValidator()),
           size=cast_t('02:20'),
@@ -129,17 +129,18 @@ def make_contour_2(schedules):
 def make_contour_3(schedules):
     m = BlockMaker("3 contour")
 
-    salt_boilings = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
-    if salt_boilings:
-        salt_melting_start = salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0]
-        m.row('cleaning', push_func=add_push,
-              size=90 // 5, x=salt_melting_start + 6,
-              label='Контур циркуляции рассола') # add half hour
-
     last_full_cleaning_start = schedules['mozzarella']['master']['cleaning', True][-1].x[0]
     m.row('cleaning', push_func=add_push,
           size=90 // 5, x=last_full_cleaning_start,
           label='Полная мойка термизатора')
+
+    # todo soon: уточнить, что можно двигать правее, а что нельзя! (где не может быть пауз)
+    salt_boilings = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
+    if salt_boilings:
+        salt_melting_start = salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0]
+        m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator(ordered=False), start_from=salt_melting_start + 6),
+              size=90 // 5,
+              label='Контур циркуляции рассола') # add half hour
 
     with code('cheese_makers'):
         # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
@@ -345,7 +346,7 @@ def make_contour_6(schedules):
     with code('Танк рикотты 1 внутри дня'):
         boilings = list(schedules['ricotta'].iter(cls='boiling'))
         whey_used = 1900 * len(boilings)
-        if whey_used > 50000:  # todo soon: switch to 100000
+        if whey_used > 100000:
             values.append([m.create_block('cleaning',
                                           size=(cast_t('01:20'), 0),
                                           label='Танк рикотты 1'), cast_t('12:00')])
@@ -385,7 +386,7 @@ def make_contour_6(schedules):
                        ])
 
     ricotta_end = boilings[-1]['pumping_out'].y[0] + 12
-
+    print(cast_time(boilings[0]['pumping_out'].y[0]))
     values.append([m.create_block('cleaning',
                                   size=(cast_t('02:30'), 0),
                                   label='Линия сладкой сыворотки'),

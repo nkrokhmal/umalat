@@ -35,9 +35,7 @@ class BaseClass:
     TEMPLATE_MASCARPONE_BOILING_PLAN = (
         "app/data/static/templates/constructor_mascarpone.xlsx"
     )
-    TEMPLATE_BUTTER_BOILING_PLAN = (
-        "app/data/static/templates/constructor_butter.xlsx"
-    )
+    TEMPLATE_BUTTER_BOILING_PLAN = "app/data/static/templates/constructor_butter.xlsx"
     TEMPLATE_MILKPROJECT_BOILING_PLAN = (
         "app/data/static/templates/constructor_milkproject.xlsx"
     )
