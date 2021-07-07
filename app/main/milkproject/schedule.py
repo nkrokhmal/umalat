@@ -40,8 +40,8 @@ def milkproject_schedule():
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
         )
-        schedule = make_schedule(boiling_plan_df)
-        frontend = wrap_frontend(schedule, date=date, start_time=beg_time)
+        schedule = make_schedule(boiling_plan_df, start_time=beg_time)
+        frontend = wrap_frontend(schedule, date=date)
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
         filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
