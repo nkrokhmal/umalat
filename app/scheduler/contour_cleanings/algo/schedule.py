@@ -13,7 +13,7 @@ class CleaningValidator(ClassValidator):
         validate_disjoint_by_axis(b1, b2, distance=2, ordered=self.ordered)
 
 
-def make_contour_1(schedules):
+def make_contour_1(schedules, order=('f1', 'f2', 'f3')):
     m = BlockMaker("1 contour")
     m.row('cleaning', push_func=add_push,
           size=cast_t('01:20'), x=cast_t('06:30'),
@@ -46,29 +46,36 @@ def make_contour_1(schedules):
         df = df.sort_values(by='pouring_end')
         values = df.values.tolist()
 
-        # todo soon: можем ли мыть раньше линии отгрузки?
         for percent, end in values:
             m.row('cleaning', push_func=AxisPusher(start_from=['last_end', end], validator=CleaningValidator()),
                   size=cast_t('01:50'),
                   label=f'Танк смесей {percent}')
 
+    # todo soon: можем ли мыть раньше линии отгрузки?
     m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
           size=cast_t('01:20'),
           label='Линия отгрузки')
 
-    # todo soon: add proper start_from
-    m.row('cleaning', push_func=AxisPusher(start_from=['last_end'], validator=CleaningValidator()),
-          size=cast_t('01:50'),
-          label='Линия адыгейского')
+    def f1():
+        # todo soon: add proper start_from
+        m.row('cleaning', push_func=AxisPusher(start_from=['last_end'], validator=CleaningValidator()),
+              size=cast_t('01:50'),
+              label='Линия адыгейского')
 
-    m.row('cleaning',
-          push_func=AxisPusher(start_from=['last_end', schedules['milk_project'].y[0]], validator=CleaningValidator()),
-          size=cast_t('02:20'),
-          label='Милкпроджект')
+    def f2():
+        m.row('cleaning',
+              push_func=AxisPusher(start_from=schedules['milk_project'].y[0], validator=CleaningValidator()),
+              size=cast_t('02:20'),
+              label='Милкпроджект')
 
-    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
-          size=cast_t('01:20'),
-          label='Линия роникс')
+    def f3():
+        m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+              size=cast_t('01:20'),
+              label='Линия роникс')
+
+    for func_name in order:
+        print('Running function', func_name)
+        locals()[func_name]()
 
     for _ in range(3):
         m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False, window=30)),
@@ -287,6 +294,7 @@ def make_contour_5(schedules):
           size=cast_t('01:20'), x=cast_t('09:00'),
           label='Линия Концентрата на отгрузку')
 
+    # todo soon: уточнить логику
     with code('scotta'):
         ''' Calc tanks_df
                id     kg  n_boilings finished
@@ -362,6 +370,7 @@ def make_contour_6(schedules):
                        # fourth mascarpone boiling group end + hour
                        ])
 
+        # todo soon: что если очень поздно получается?
         boilings = list(schedules['ricotta'].iter(cls='boiling'))
         values.append([m.create_block('cleaning',
                                       size=(cast_t('01:20'), 0),
@@ -372,7 +381,7 @@ def make_contour_6(schedules):
         values.append([m.create_block('cleaning',
                                       size=(cast_t('01:20'), 0),
                                       label='Танк сливок'),
-                       cast_t('09:00'),  # todo soon: ставим на 09?
+                       cast_t('09:00'),
                        ])
 
     with code('mascarpone'):
