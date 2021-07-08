@@ -42,6 +42,9 @@ class BaseClass:
         "app/data/static/templates/constructor_milkproject.xlsx"
     )
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
+    TEMPLATE_ADYGEA_BOILING_PLAN = (
+        "app/data/static/templates/constructor_adygea.xlsx"
+    )
 
     IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:
@@ -70,6 +73,8 @@ class BaseClass:
         "Творожный": "#CBC0D9",
         "Робиола": "E5DFEC",
         "Сливки": "#F1DADA",
+        "Кавказский": "#E5B7B6",
+        "Черкесский": "#CBC0D9",
     }
     ORDER = [
         "Фиор Ди Латте",
