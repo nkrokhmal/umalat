@@ -12,7 +12,14 @@ def generate_user():
 
 
 def generate_departments():
-    for name in ["Моцарельный цех", "Рикоттный цех", "Маскарпоновый цех", "Масло цех", "Милкпроджект"]:
+    for name in [
+        "Моцарельный цех",
+        "Рикоттный цех",
+        "Маскарпоновый цех",
+        "Масло цех",
+        "Милкпроджект",
+        "Адыгейский цех"
+    ]:
         department = Department(name=name)
         db.session.add(department)
     db.session.commit()
@@ -36,7 +43,9 @@ def generate_group():
             "Сливки": "СЛВ",
             "Масло": "МСЛ",
             "Четук": "ЧТК",
-            "Качорикотта": "КЧРКТ"
+            "Качорикотта": "КЧРКТ",
+            "Кавказский": "КВК",
+            "Черкесский": "ЧРКС",
         }
         for name, short_name in groups.items():
             ff = Group(name=name, short_name=short_name)
@@ -121,6 +130,13 @@ def generate_mozzarella_lines():
     )
     milk_project_line.department_id = milk_project_department.id
     db.session.add(milk_project_line)
+
+    adygea_department = Department.query.filter_by(name="Адыгейский цех").first()
+    adygea_line = AdygeaLine(
+        name=LineName.ADYGEA
+    )
+    adygea_line.department_id = adygea_department.id
+    db.session.add(adygea_line)
 
     db.session.commit()
 

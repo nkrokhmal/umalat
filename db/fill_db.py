@@ -8,6 +8,7 @@ manager = create_manager(app)
 
 if __name__ == "__main__":
     from app.models.fill_db.default_data import generate_all
+    from app.models.fill_db.fill_adygea import fill_db as adygea_fill_db
     from app.models.fill_db.fill_milk_project import fill_db as milk_project_fill_db
     from app.models.fill_db.fill_butter import fill_db as butter_fill_db
     from app.models.fill_db.fill_mozzarella import fill_db as mozzarella_fill_db
@@ -17,6 +18,7 @@ if __name__ == "__main__":
 
     with app.app_context():
         generate_all()
+        adygea_fill_db()
         milk_project_fill_db()
         butter_fill_db()
         mozzarella_fill_db()

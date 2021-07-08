@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: db22249caa63
+Revision ID: 1a0bff69a6a1
 Revises: 
-Create Date: 2021-07-04 15:40:24.499448
+Create Date: 2021-07-08 12:06:46.505987
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'db22249caa63'
+revision = '1a0bff69a6a1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -78,6 +78,11 @@ def upgrade():
     sa.Column('time', sa.Integer(), nullable=True),
     sa.Column('department_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('adygea_lines',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('boilings',
@@ -155,6 +160,21 @@ def upgrade():
     sa.ForeignKeyConstraint(['ChildId'], ['form_factors.id'], ),
     sa.ForeignKeyConstraint(['ParentId'], ['form_factors.id'], ),
     sa.PrimaryKeyConstraint('ParentChildId')
+    )
+    op.create_table('adygea_boilings',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('weight_netto', sa.Float(), nullable=True),
+    sa.Column('input_kg', sa.Integer(), nullable=True),
+    sa.Column('output_kg', sa.Integer(), nullable=True),
+    sa.Column('percent', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id'], ['boilings.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('adygea_form_factors',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['form_factors.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('boiling_technologies',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -279,6 +299,19 @@ def upgrade():
     sa.ForeignKeyConstraint(['group_id'], ['groups.id'], ),
     sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
     sa.ForeignKeyConstraint(['pack_type_id'], ['pack_types.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('adygea_boiling_technologies',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('collecting_time', sa.Integer(), nullable=True),
+    sa.Column('coagulation_time', sa.Integer(), nullable=True),
+    sa.Column('pouring_off_time', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('adygea_skus',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('butter_boiling_technologies',
@@ -426,6 +459,8 @@ def downgrade():
     op.drop_table('cream_cheese_boiling_technologies')
     op.drop_table('butter_skus')
     op.drop_table('butter_boiling_technologies')
+    op.drop_table('adygea_skus')
+    op.drop_table('adygea_boiling_technologies')
     op.drop_table('skus')
     op.drop_table('ricotta_form_factors')
     op.drop_table('ricotta_boilings')
@@ -442,6 +477,8 @@ def downgrade():
     op.drop_table('butter_form_factors')
     op.drop_table('butter_boilings')
     op.drop_table('boiling_technologies')
+    op.drop_table('adygea_form_factors')
+    op.drop_table('adygea_boilings')
     op.drop_table('FormFactorMadeFromMadeTo')
     op.drop_table('steam_consumption')
     op.drop_table('ricotta_lines')
@@ -452,6 +489,7 @@ def downgrade():
     op.drop_table('cream_cheese_lines')
     op.drop_table('butter_lines')
     op.drop_table('boilings')
+    op.drop_table('adygea_lines')
     op.drop_table('washer')
     op.drop_table('lines')
     op.drop_table('batch_number')
