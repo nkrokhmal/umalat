@@ -13,7 +13,15 @@ class CleaningValidator(ClassValidator):
         validate_disjoint_by_axis(b1, b2, distance=2, ordered=self.ordered)
 
 
-def make_contour_1(schedules, order=('f1', 'f2', 'f3')):
+def run_order(function_or_generators, order):
+    for i in order:
+        obj = function_or_generators[i]
+        if callable(obj):
+            obj()
+        elif isinstance(obj, types.GeneratorType):
+            next(obj)
+
+def make_contour_1(schedules, order=(0, 1, 2)):
     m = BlockMaker("1 contour")
     m.row('cleaning', push_func=add_push,
           size=cast_t('01:20'), x=cast_t('06:30'),
@@ -73,8 +81,7 @@ def make_contour_1(schedules, order=('f1', 'f2', 'f3')):
               size=cast_t('01:20'),
               label='Линия роникс')
 
-    for func_name in order:
-        locals()[func_name]()
+    run_order([f1, f2, f3], order)
 
     for _ in range(3):
         m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False, window=30)),
@@ -132,7 +139,7 @@ def make_contour_2(schedules):
     return m.root
 
 
-def make_contour_3(schedules):
+def make_contour_3(schedules, order=(0, 1, 1, 1, 1)):
     m = BlockMaker("3 contour")
 
     last_full_cleaning_start = schedules['mozzarella']['master']['cleaning', True][-1].x[0]
@@ -140,27 +147,31 @@ def make_contour_3(schedules):
           size=90 // 5, x=last_full_cleaning_start,
           label='Полная мойка термизатора')
 
-    # todo soon: уточнить, что можно двигать правее, а что нельзя! (где не может быть пауз)
-    salt_boilings = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
-    if salt_boilings:
-        salt_melting_start = salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0]
-        m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator(ordered=False), start_from=salt_melting_start + 6),
-              size=90 // 5,
-              label='Контур циркуляции рассола') # add half hour
+    def f1():
+        salt_boilings = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
+        if salt_boilings:
+            salt_melting_start = salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0]
+            m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator(ordered=False), start_from=salt_melting_start + 6),
+                  size=90 // 5,
+                  label='Контур циркуляции рассола')
 
-    with code('cheese_makers'):
-        # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
-        values = []
-        for b in schedules['mozzarella']['master']['boiling', True]:
-            values.append([b.props['pouring_line'], b['pouring'].y[0]])
-        df = pd.DataFrame(values, columns=['pouring_line', 'finish'])
-        values = df.groupby('pouring_line').agg(max).to_dict()['finish']
-        values = list(sorted(values.items(), key=lambda kv: kv[1])) # [('1', 97), ('0', 116), ('2', 149), ('3', 160)]
+    def g2():
+        with code('cheese_makers'):
+            # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
+            values = []
+            for b in schedules['mozzarella']['master']['boiling', True]:
+                values.append([b.props['pouring_line'], b['pouring'].y[0]])
+            df = pd.DataFrame(values, columns=['pouring_line', 'finish'])
+            values = df.groupby('pouring_line').agg(max).to_dict()['finish']
+            values = list(sorted(values.items(), key=lambda kv: kv[1])) # [('1', 97), ('0', 116), ('2', 149), ('3', 160)]
 
-        for n, cheese_maker_end in values:
-            m.row('cleaning', push_func=AxisPusher(start_from=cheese_maker_end, validator=CleaningValidator()),
-                  size=cast_t('01:20'),
-                  label=f'Сыроизготовитель {int(n) + 1}')
+            for n, cheese_maker_end in values:
+                m.row('cleaning', push_func=AxisPusher(start_from=cheese_maker_end, validator=CleaningValidator()),
+                      size=cast_t('01:20'),
+                      label=f'Сыроизготовитель {int(n) + 1}')
+                yield
+
+    run_order([f1, g2()], order)
 
     with code('melters_and_baths'):
         lines_df = pd.DataFrame(index=['water', 'salt'])
