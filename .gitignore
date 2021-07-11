@@ -4,12 +4,8 @@
 *.DS_Store
 *.py[cod]
 
-**/schedule*.xlsx
 # C extensions
 *.so
-# app/**/*schedule*.xlsx
-research/akadaner/*xlsx
-schedules/*.xlsx
 
 # Distribution / packaging
 bin/
@@ -51,8 +47,10 @@ coverage.xml
 
 # Django stuff:
 *.log
-!tests/lazy_tester_logs/**/*.log
 *.pot
+
+# Pyc files
+app/**/*.pyc
 
 # Xlsx files
 app/data/dynamic/boiling_plan/*.xlsx
@@ -72,7 +70,11 @@ app/data/dynamic/**
 # Dynamic data
 db/batch_numbers/data.json
 
-# Pyc files
-app/**/*.pyc
+!tests/lazy_tester_logs/**/*.log
 
 .idea
+
+**/schedule*.xlsx
+**/outputs/*.xlsx
+research/akadaner/*xlsx
+
