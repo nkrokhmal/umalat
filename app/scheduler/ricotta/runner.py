@@ -1,30 +1,24 @@
 from app.imports.runtime import *
-from app.scheduler.mozzarella import *
+from app.scheduler.ricotta import *
 
 
-def run_mozzarella(
+def run_ricotta(
     boiling_plan_fn=None,
     schedule=None,
     open_file=False,
-    start_times=None,
-    first_boiling_id=1,
-    optimize=True,
+    start_time=None,
     output_directory="outputs/",
     output_prefix="",
 ):
     os.makedirs(output_directory)
-    start_times = start_times or {LineName.WATER: "02:00", LineName.SALT: "06:00"}
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn)
+    start_time = start_time or "07:00"
 
     if not schedule:
-        schedule = make_schedule(
-            boiling_plan_fn,
-            optimize=optimize,
-            start_times=start_times,
-            first_boiling_id=first_boiling_id,
-        )
+        schedule = make_schedule(boiling_plan_df, start_time=start_time)
 
     with code("Dump schedule as pickle file"):
-        base_fn = "Расписание моцарелла.pickle"
+        base_fn = "Расписание рикотта.pickle"
         if output_prefix:
             base_fn = output_prefix + " " + base_fn
         output_pickle_fn = os.path.join(output_directory, base_fn)
@@ -39,7 +33,7 @@ def run_mozzarella(
         raise Exception("Ошибка при построении расписания")
 
     with code("Dump frontend as excel file"):
-        base_fn = "Расписание моцарелла.xlsx"
+        base_fn = "Расписание рикотта.xlsx"
         if output_prefix:
             base_fn = output_prefix + " " + base_fn
         output_fn = os.path.join(output_directory, base_fn)
