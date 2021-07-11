@@ -1,7 +1,6 @@
 from app.imports.runtime import *
 from app.enum import LineName
-from app.scheduler.mozzarella import make_schedule, wrap_frontend, STYLE
-from app.scheduler.frontend import draw_excel_frontend
+from app.scheduler.mozzarella import run_mozzarella
 
 
 def test_batch():
@@ -25,34 +24,17 @@ def test_batch():
 
 def _test(fn, open_file=False):
     utils.lazy_tester.configure_function_path()
-
     warnings.filterwarnings("ignore")
-
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
-
-    start_times = {LineName.WATER: "02:00", LineName.SALT: "06:00"}
-
-    schedule = make_schedule(
-        fn, optimize=True, start_times=start_times, first_boiling_id=1
-    )
-    utils.lazy_tester.log(schedule)
-
-    try:
-        frontend = wrap_frontend(schedule)
-    except Exception as e:
-        raise Exception("Ошибка при построении расписания")
-    utils.lazy_tester.log(frontend)
-
-    draw_excel_frontend(
-        frontend, open_file=open_file, fn="schedules/schedule.xlsx", style=STYLE
-    )
+    outputs = run_mozzarella(fn, open_file=open_file)
+    utils.lazy_tester.log(outputs["schedule"])
     utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
     _test(
         DebugConfig.abs_path(
-            "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"
+            "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 1.xlsx"
         ),
         open_file=True,
     )

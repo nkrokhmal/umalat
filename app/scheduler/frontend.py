@@ -120,9 +120,7 @@ def draw_excel_frontend(
     wb = draw_schedule(frontend, style, O=O, wb=wb)
 
     if fn:
-        sf = utils.SplitFile(fn)
-        fn = sf.get_new()
-
+        fn = utils.SplitFile(fn).get_new()
         utils.makedirs(fn)
         wb.save(fn)
 
