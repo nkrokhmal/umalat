@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 from app.scheduler.mozzarella import *
+from app.scheduler.submit import submit
 
 
 def run_mozzarella(
@@ -9,10 +10,9 @@ def run_mozzarella(
     start_times=None,
     first_boiling_id=1,
     optimize=True,
-    output_directory="outputs/",
-    output_prefix="",
+    path="outputs/",
+    prefix="",
 ):
-    utils.makedirs(output_directory)
     start_times = start_times or {LineName.WATER: "02:00", LineName.SALT: "06:00"}
 
     if not schedule:
@@ -23,27 +23,9 @@ def run_mozzarella(
             first_boiling_id=first_boiling_id,
         )
 
-    with code("Dump schedule as pickle file"):
-        base_fn = "Расписание моцарелла.pickle"
-        if output_prefix:
-            base_fn = output_prefix + " " + base_fn
-        output_pickle_fn = os.path.join(output_directory, base_fn)
-        output_pickle_fn = utils.SplitFile(output_pickle_fn).get_new()
-
-        with open(output_pickle_fn, "wb") as f:
-            pickle.dump(schedule.to_dict(), f)
-
     try:
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
 
-    with code("Dump frontend as excel file"):
-        base_fn = "Расписание моцарелла.xlsx"
-        if output_prefix:
-            base_fn = output_prefix + " " + base_fn
-        output_fn = os.path.join(output_directory, base_fn)
-
-        draw_excel_frontend(frontend, open_file=open_file, fn=output_fn, style=STYLE)
-
-    return {"schedule": schedule, "frontend": frontend}
+    return submit(schedule, frontend, path, prefix, STYLE, open_file=open_file)
