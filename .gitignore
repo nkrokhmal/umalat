@@ -61,7 +61,7 @@ app/scheduler/butter/tests/schedules
 app/scheduler/**/*.xlsx
 db/batch_numbers/data.json
 !tests/lazy_tester_logs/**/*.log
-**/schedule*.xlsx
-**/outputs/*.xlsx
+**/schedules/*
+**/outputs/*
 research/akadaner/*xlsx
 
