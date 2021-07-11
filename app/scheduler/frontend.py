@@ -18,21 +18,7 @@ def make_steam_blocks(block, x=None):
     return maker.root
 
 
-def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
-    O = O or [0, 0]  # initial coordinates
-
-    # update styles
-    for b in schedule.iter():
-        block_style = style.get(b.props["cls"])
-
-        if block_style:
-            block_style = {
-                k: v(b) if callable(v) else v for k, v in block_style.items()
-            }
-            b.props.update(**block_style)
-
-    schedule.props.update(index_width=4)
-
+def init_schedule_workbook(wb=None):
     if not wb:
         wb = utils.init_workbook(["Расписание"])
 
@@ -48,6 +34,24 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
         wb.worksheets[0].column_dimensions[utils.get_column_letter(i + 1)].width = 2.4
     for i in range(1, 220):
         wb.worksheets[0].row_dimensions[i].height = 25
+    return wb
+
+
+def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
+    wb = init_schedule_workbook(wb)
+    O = O or [0, 0]  # initial coordinates
+
+    # update styles
+    for b in schedule.iter():
+        block_style = style.get(b.props["cls"])
+
+        if block_style:
+            block_style = {
+                k: v(b) if callable(v) else v for k, v in block_style.items()
+            }
+            b.props.update(**block_style)
+
+    schedule.props.update(index_width=4)
 
     for b in schedule.iter():
         if b.is_leaf() and b.props.get("visible", True):

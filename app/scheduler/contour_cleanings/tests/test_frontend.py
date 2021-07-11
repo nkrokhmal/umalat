@@ -31,6 +31,13 @@ def test(open_file=False):
 
     utils.lazy_tester.assert_logs(reset=True)
 
+    # todo soon: make properly
+    with open(
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/2021-01-01 Контурные мойки.pickle",
+        "wb",
+    ) as f:
+        pickle.dump(schedule.to_dict(), f)
+
 
 if __name__ == "__main__":
-    test(open_file=True)
+    test(open_file=False)
