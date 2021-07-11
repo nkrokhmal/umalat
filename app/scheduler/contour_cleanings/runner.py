@@ -6,6 +6,7 @@ from app.scheduler.submit import submit_schedule
 
 def run_contour_cleanings(
     path,
+    schedule=None,
     prefix="",
     open_file=False,
 ):
@@ -22,8 +23,8 @@ def run_contour_cleanings(
         fn = os.path.join(path, prefix + " " + b + ".pickle")
         with open(fn, "rb") as f:
             schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
-
-    schedule = make_schedule(schedules)
+    if not schedule:
+        schedule = make_schedule(schedules)
     frontend = wrap_frontend(schedule)
     return submit_schedule(
         "контурные мойки", schedule, frontend, path, prefix, STYLE, open_file=open_file
