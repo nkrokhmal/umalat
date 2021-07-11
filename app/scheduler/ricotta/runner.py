@@ -24,4 +24,6 @@ def run_ricotta(
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
-    return submit(schedule, frontend, path, prefix, STYLE, open_file=open_file)
+    return submit(
+        "рикотта", schedule, frontend, path, prefix, STYLE, open_file=open_file
+    )

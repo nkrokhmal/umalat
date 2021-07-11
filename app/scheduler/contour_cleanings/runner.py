@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 from app.scheduler.contour_cleanings import *
 from app.scheduler.frontend import *
-from app.scheduler.submit import submit
+from app.scheduler.submit import submit_schedule
 
 
 def run_contour_cleanings(
@@ -15,7 +15,7 @@ def run_contour_cleanings(
     for a, b in [
         ["mozzarella", "Расписание моцарелла"],
         ["mascarpone", "Расписание маскарпоне"],
-        ["butter", "Расписание маслоцех"],
+        ["butter", "Расписание масло"],
         ["milk_project", "Расписание милкпроджект"],
         ["ricotta", "Расписание рикотта"],
     ]:
@@ -25,4 +25,6 @@ def run_contour_cleanings(
 
     schedule = make_schedule(schedules)
     frontend = wrap_frontend(schedule)
-    return submit(schedule, frontend, path, prefix, STYLE, open_file=open_file)
+    return submit_schedule(
+        "контурные мойки", schedule, frontend, path, prefix, STYLE, open_file=open_file
+    )

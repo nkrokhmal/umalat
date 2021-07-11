@@ -5,7 +5,7 @@ from app.scheduler.butter import (
     make_schedule,
 )  # todo maybe: imports don't load up for some reason  from above
 from app.scheduler.frontend import *
-from app.scheduler.submit import submit
+from app.scheduler.submit import submit_schedule
 
 
 def run_butter(
@@ -27,4 +27,4 @@ def run_butter(
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
-    return submit(schedule, frontend, path, prefix, STYLE, open_file=open_file)
+    return submit_schedule('масло', schedule, frontend, path, prefix, STYLE, open_file=open_file)

@@ -1,6 +1,6 @@
 from app.imports.runtime import *
 from app.scheduler.mozzarella import *
-from app.scheduler.submit import submit
+from app.scheduler.submit import submit_schedule
 
 
 def run_mozzarella(
@@ -28,4 +28,4 @@ def run_mozzarella(
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
 
-    return submit(schedule, frontend, path, prefix, STYLE, open_file=open_file)
+    return submit_schedule('моцарелла', schedule, frontend, path, prefix, STYLE, open_file=open_file)

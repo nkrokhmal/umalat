@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 from app.scheduler.mascarpone import *
 from app.scheduler.frontend import *
-from app.scheduler.submit import submit
+from app.scheduler.submit import submit_schedule
 
 
 def run_mascarpone(
@@ -26,4 +26,4 @@ def run_mascarpone(
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
-    return submit(schedule, frontend, path, prefix, STYLE, open_file=open_file)
+    return submit_schedule('маскарпоне', schedule, frontend, path, prefix, STYLE, open_file=open_file)

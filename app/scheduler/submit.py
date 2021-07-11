@@ -2,10 +2,10 @@ from app.imports.runtime import *
 from app.scheduler.frontend import draw_excel_frontend
 
 
-def submit(schedule, frontend, path, prefix, style, open_file=False):
+def submit_schedule(name, schedule, frontend, path, prefix, style, open_file=False):
     utils.makedirs(path)
     with code("Dump schedule as pickle file"):
-        base_fn = "Расписание моцарелла.pickle"
+        base_fn = f"Расписание {name}.pickle"
         if prefix:
             base_fn = prefix + " " + base_fn
         output_pickle_fn = os.path.join(path, base_fn)
@@ -15,7 +15,7 @@ def submit(schedule, frontend, path, prefix, style, open_file=False):
             pickle.dump(schedule.to_dict(), f)
 
     with code("Dump frontend as excel file"):
-        base_fn = "Расписание моцарелла.xlsx"
+        base_fn = f"Расписание {name}.xlsx"
         if prefix:
             base_fn = prefix + " " + base_fn
         output_fn = os.path.join(path, base_fn)
