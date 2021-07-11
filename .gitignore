@@ -50,30 +50,17 @@ coverage.xml
 *.pot
 
 # Pyc files
-app/**/*.pyc
+**/*.pyc
 
-# Xlsx files
-app/data/dynamic/boiling_plan/*.xlsx
-app/data/dynamic/schedule_plan/*.xlsx
-app/data/dynamic/schedule/*.xlsx
-app/data/dynamic/sku_plan/*.xlsx
-app/data/dynamic/stats/*.csv
-app/data/dynamic/stats/*.xlsx
-app/data/dynamic/tmp/*.csv
-app/data/dynamic/tmp/*.xlsx
-app/data/dynamic/schedule_task/*.csv
-app/scheduler/butter/tests/schedules
-tests/runners/schedules/*.xlsx
-app/scheduler/**/*.xlsx
-app/data/dynamic/**
-
-# Dynamic data
-db/batch_numbers/data.json
-
-!tests/lazy_tester_logs/**/*.log
-
+#PyCharm
 .idea
 
+# Project files
+app/data/dynamic
+app/scheduler/butter/tests/schedules
+app/scheduler/**/*.xlsx
+db/batch_numbers/data.json
+!tests/lazy_tester_logs/**/*.log
 **/schedule*.xlsx
 **/outputs/*.xlsx
 research/akadaner/*xlsx
