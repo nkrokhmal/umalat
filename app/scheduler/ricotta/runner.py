@@ -10,7 +10,7 @@ def run_ricotta(
     output_directory="outputs/",
     output_prefix="",
 ):
-    os.makedirs(output_directory)
+    utils.makedirs(output_directory)
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
     start_time = start_time or "07:00"
 

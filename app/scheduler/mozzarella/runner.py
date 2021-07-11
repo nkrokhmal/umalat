@@ -12,7 +12,7 @@ def run_mozzarella(
     output_directory="outputs/",
     output_prefix="",
 ):
-    os.makedirs(output_directory)
+    utils.makedirs(output_directory)
     start_times = start_times or {LineName.WATER: "02:00", LineName.SALT: "06:00"}
 
     if not schedule:
