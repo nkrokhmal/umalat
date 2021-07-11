@@ -99,7 +99,7 @@ def _make_contour_1(schedules, order=(0, 1, 2)):
 
 def make_contour_1(schedules):
     df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules)
-    return df.iloc[-1]['value']
+    return df.iloc[-1]['output']
 
 
 def make_contour_2(schedules):
@@ -145,7 +145,7 @@ def make_contour_2(schedules):
     return m.root
 
 
-def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 1)):
+def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)):
     m = BlockMaker("3 contour")
 
     last_full_cleaning_start = schedules['mozzarella']['master']['cleaning', True][-1].x[0]
@@ -218,7 +218,7 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 1)):
                     yield
 
     def f4():
-        b = m.row('cleaning',
+        b = m.row('cleaning',  push_func=AxisPusher(validator=CleaningValidator()),
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
         # todo soon: make 00:10?
@@ -237,8 +237,8 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 1)):
 
 
 def make_contour_3(schedules):
-    df = utils.optimize(_make_contour_3, lambda b: -b.y[0], schedules)
-    return df.iloc[-1]['value']
+    df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), schedules)
+    return df.iloc[-1]['output']
 
 
 def make_contour_4(schedules):
@@ -447,8 +447,8 @@ def make_schedule(schedules):
         make_contour_2(schedules),
         make_contour_3(schedules),
         make_contour_4(schedules),
-        make_contour_5(schedules),
-        make_contour_6(schedules),
+        # make_contour_5(schedules),
+        # make_contour_6(schedules),
     ]
 
     for contour in contours:
