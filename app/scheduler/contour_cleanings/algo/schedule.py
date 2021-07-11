@@ -21,7 +21,8 @@ def run_order(function_or_generators, order):
         elif isinstance(obj, types.GeneratorType):
             next(obj)
 
-def make_contour_1(schedules, order=(0, 1, 2)):
+
+def _make_contour_1(schedules, order=(0, 1, 2)):
     m = BlockMaker("1 contour")
     m.row('cleaning', push_func=add_push,
           size=cast_t('01:20'), x=cast_t('06:30'),
@@ -96,6 +97,11 @@ def make_contour_1(schedules, order=(0, 1, 2)):
     return m.root
 
 
+def make_contour_1(schedules):
+    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules)
+    return df.iloc[-1]['value']
+
+
 def make_contour_2(schedules):
     m = BlockMaker("2 contour")
     m.row('cleaning', push_func=add_push,
@@ -139,7 +145,7 @@ def make_contour_2(schedules):
     return m.root
 
 
-def make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 1)):
+def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 1)):
     m = BlockMaker("3 contour")
 
     last_full_cleaning_start = schedules['mozzarella']['master']['cleaning', True][-1].x[0]
@@ -212,9 +218,11 @@ def make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 1)):
                     yield
 
     def f4():
-        m.row('cleaning',
+        b = m.row('cleaning',
               size=cast_t('01:00'),
-              label='Короткая мойка термизатора')
+              label='Короткая мойка термизатора').block
+        # todo soon: make 00:10?
+        assert cast_t('21:40') <= b.x[0] <= cast_t('01:00:10'), "Short cleaning too bad"
 
     run_order([g3(), f4], order2)
 
@@ -226,6 +234,11 @@ def make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 1)):
               label='Формовщик')
 
     return m.root
+
+
+def make_contour_3(schedules):
+    df = utils.optimize(_make_contour_3, lambda b: -b.y[0], schedules)
+    return df.iloc[-1]['value']
 
 
 def make_contour_4(schedules):

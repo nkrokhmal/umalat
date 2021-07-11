@@ -23,8 +23,8 @@ def test():
             schedules[key] = ParallelepipedBlock.from_dict(pickle.load(f))
 
     print(make_contour_3(schedules))
-    utils.lazy_tester.log(make_contour_1(schedules))
-    utils.lazy_tester.log(make_contour_2(schedules))
+    # utils.lazy_tester.log(make_contour_1(schedules))
+    # utils.lazy_tester.log(make_contour_2(schedules))
     # utils.lazy_tester.log(make_contour_3(schedules))
     # utils.lazy_tester.log(make_contour_4(schedules))
     # utils.lazy_tester.log(make_contour_5(schedules))
