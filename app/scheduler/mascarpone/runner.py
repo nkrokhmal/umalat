@@ -1,15 +1,14 @@
 from app.imports.runtime import *
-from app.scheduler.ricotta import *
+from app.scheduler.mascarpone import *
+from app.scheduler.frontend import *
 
-# todo next: first_batch_id?
 
-
-def run_ricotta(
+def run_mascarpone(
     boiling_plan_fn=None,
     schedule=None,
     open_file=False,
     start_time=None,
-    first_boiling_id=1,
+    start_batch_id=1,
     output_directory="outputs/",
     output_prefix="",
 ):
@@ -19,11 +18,11 @@ def run_ricotta(
 
     if not schedule:
         schedule = make_schedule(
-            boiling_plan_df, start_time=start_time, first_boiling_id=first_boiling_id
+            boiling_plan_df, start_time=start_time, start_batch_id=start_batch_id
         )
 
     with code("Dump schedule as pickle file"):
-        base_fn = "Расписание рикотта.pickle"
+        base_fn = "Расписание маскарпоне.pickle"
         if output_prefix:
             base_fn = output_prefix + " " + base_fn
         output_pickle_fn = os.path.join(output_directory, base_fn)
@@ -38,7 +37,7 @@ def run_ricotta(
         raise Exception("Ошибка при построении расписания")
 
     with code("Dump frontend as excel file"):
-        base_fn = "Расписание рикотта.xlsx"
+        base_fn = "Расписание маскарпоне.xlsx"
         if output_prefix:
             base_fn = output_prefix + " " + base_fn
         output_fn = os.path.join(output_directory, base_fn)
