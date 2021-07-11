@@ -139,7 +139,7 @@ def make_contour_2(schedules):
     return m.root
 
 
-def make_contour_3(schedules, order=(0, 1, 1, 1, 1)):
+def make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 1)):
     m = BlockMaker("3 contour")
 
     last_full_cleaning_start = schedules['mozzarella']['master']['cleaning', True][-1].x[0]
@@ -171,55 +171,52 @@ def make_contour_3(schedules, order=(0, 1, 1, 1, 1)):
                       label=f'Сыроизготовитель {int(n) + 1}')
                 yield
 
-    run_order([f1, g2()], order)
+    run_order([f1, g2()], order1)
 
-    with code('melters_and_baths'):
-        lines_df = pd.DataFrame(index=['water', 'salt'])
-        lines_df['boilings'] = None
+    def g3():
+        with code('melters_and_baths'):
+            lines_df = pd.DataFrame(index=['water', 'salt'])
+            lines_df['boilings'] = None
 
-        lines_df.loc['water', 'boilings'] = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Моцарелла в воде']
-        lines_df.loc['salt', 'boilings'] = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
+            lines_df.loc['water', 'boilings'] = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Моцарелла в воде']
+            lines_df.loc['salt', 'boilings'] = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
 
-        lines_df['cleanings'] = [[] for _ in range(2)]
-        if lines_df.loc['water', 'boilings']:
-            lines_df.loc['water', 'cleanings'].extend([m.create_block('cleaning',
-                                                                      size=(cast_t('02:20'), 0),
-                                                                      label='Линия 1 плавилка'),
-                                                       m.create_block('cleaning',
-                                                                      size=(cast_t('01:30'), 0),
-                                                                      label='Линия 1 ванна 1 + ванна 2')])
-        if lines_df.loc['salt', 'boilings']:
-            lines_df.loc['salt', 'cleanings'].extend([m.create_block('cleaning',
-                                                                     size=(cast_t('02:20'), 0),
-                                                                     label='Линия 2 плавилка'),
-                                                      m.create_block('cleaning',
-                                                                     size=(cast_t('01:30'), 0),
-                                                                     label='Линия 2 ванна 1'),
-                                                      m.create_block('cleaning',
-                                                                     size=(cast_t('01:30'), 0),
-                                                                     label='Линия 2 ванна 2')])
+            lines_df['cleanings'] = [[] for _ in range(2)]
+            if lines_df.loc['water', 'boilings']:
+                lines_df.loc['water', 'cleanings'].extend([m.create_block('cleaning',
+                                                                          size=(cast_t('02:20'), 0),
+                                                                          label='Линия 1 плавилка'),
+                                                           m.create_block('cleaning',
+                                                                          size=(cast_t('01:30'), 0),
+                                                                          label='Линия 1 ванна 1 + ванна 2')])
+            if lines_df.loc['salt', 'boilings']:
+                lines_df.loc['salt', 'cleanings'].extend([m.create_block('cleaning',
+                                                                         size=(cast_t('02:20'), 0),
+                                                                         label='Линия 2 плавилка'),
+                                                          m.create_block('cleaning',
+                                                                         size=(cast_t('01:30'), 0),
+                                                                         label='Линия 2 ванна 1'),
+                                                          m.create_block('cleaning',
+                                                                         size=(cast_t('01:30'), 0),
+                                                                         label='Линия 2 ванна 2')])
 
-        lines_df['melting_end'] = lines_df['boilings'].apply(lambda boilings: None if not boilings else boilings[-1]['melting_and_packing']['melting'].y[0])
+            lines_df['melting_end'] = lines_df['boilings'].apply(lambda boilings: None if not boilings else boilings[-1]['melting_and_packing']['melting'].y[0])
+            lines_df = lines_df.sort_values(by='melting_end')
 
-        short_termizator_cleaning = m.create_block('cleaning',
-                                                   size=(cast_t('01:00'), 0),
-                                                   label='Короткая мойка термизатора')
-        filled_short_termizator = False
+            for i, row in lines_df.iterrows():
+                for j, c in enumerate(row['cleanings']):
+                    if j == 0:
+                        m.block(c, push_func=AxisPusher(start_from=['last_end', row['melting_end'] + 12], validator=CleaningValidator())) # add hour
+                    else:
+                        m.block(c, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
+                    yield
 
-        for i, row in lines_df.iterrows():
-            for j, c in enumerate(row['cleanings']):
-                if j == 0:
-                    b = m.block(c, push_func=AxisPusher(start_from=['last_end', row['melting_end'] + 12], validator=CleaningValidator())) # add hour
-                else:
-                    b = m.block(c, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
+    def f4():
+        m.row('cleaning',
+              size=cast_t('01:00'),
+              label='Короткая мойка термизатора')
 
-                if not filled_short_termizator and cast_time(b.block.y[0]) >= '00:22:00':
-                    m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
-
-                    filled_short_termizator = True
-
-        if not filled_short_termizator:
-            m.block(short_termizator_cleaning, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
+    run_order([g3(), f4], order2)
 
     skus = sum([list(b.props['boiling_group_df']['sku']) for b in schedules['mozzarella']['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
