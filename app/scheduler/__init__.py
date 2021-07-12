@@ -8,3 +8,4 @@ from .butter import *
 from .milk_project import *
 from .contour_cleanings import *
 from .submit import *
+from .consolidated_schedule import *

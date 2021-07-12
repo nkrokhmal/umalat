@@ -1,9 +1,11 @@
 from app.imports.runtime import *
-from app.scheduler import draw_excel_frontend, init_schedule_workbook
+from app.scheduler import *
 from utils_ak.block_tree import *
 
 
 def run_consolidated(path, prefix="", open_file=False):
+    # calculate schedules
+
     schedules = {}
     for a, b in [
         ["mozzarella", "Расписание моцарелла"],
@@ -86,8 +88,8 @@ def run_consolidated(path, prefix="", open_file=False):
 
 def test():
     run_consolidated(
-        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
-        prefix="2021-01-01",
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/1",
+        prefix="1",
         open_file=True,
     )
 
