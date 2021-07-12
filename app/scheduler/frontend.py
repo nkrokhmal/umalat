@@ -115,12 +115,11 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
 
 
 def draw_excel_frontend(
-    frontend, style, O=None, open_file=False, fn="schedules/schedule.xlsx", wb=None
+    frontend, style, O=None, open_file=False, fn=None, wb=None
 ):
     wb = draw_schedule(frontend, style, O=O, wb=wb)
 
     if fn:
-        fn = utils.SplitFile(fn).get_new()
         utils.makedirs(fn)
         wb.save(fn)
 

@@ -3,8 +3,8 @@ from app.scheduler import *
 from utils_ak.block_tree import *
 
 
-def run_consolidated(path, prefix="", open_file=False):
-    # calculate schedules
+def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=False):
+    utils.makedirs(output_path)
 
     schedules = {}
     for a, b in [
@@ -15,7 +15,7 @@ def run_consolidated(path, prefix="", open_file=False):
         ["ricotta", "Расписание рикотта"],
         ["contour_cleanings", "Расписание контурные мойки"],
     ]:
-        fn = os.path.join(path, prefix + " " + b + ".pickle")
+        fn = os.path.join(input_path, prefix + " " + b + ".pickle")
         with open(fn, "rb") as f:
             schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
 
@@ -79,7 +79,7 @@ def run_consolidated(path, prefix="", open_file=False):
         base_fn = f"Расписание общее.xlsx"
         if prefix:
             base_fn = prefix + " " + base_fn
-        output_fn = os.path.join(path, base_fn)
+        output_fn = os.path.join(output_path, base_fn)
 
         draw_excel_frontend(
             frontend, open_file=open_file, wb=wb, fn=output_fn, style=STYLE
@@ -88,10 +88,10 @@ def run_consolidated(path, prefix="", open_file=False):
 
 def test():
     run_consolidated(
-        # "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
-        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/1",
-        # prefix="2021-01-01",
-        prefix="1",
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
+        # "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/1",
+        prefix="2021-01-01",
+        # prefix="1",
         open_file=True,
     )
 
