@@ -113,10 +113,8 @@ def make_contour_2(schedules):
           label='Сливки от пастера 25')
 
     with code('Мультиголова'):
-        def is_boiling_multihead(boiling):
-            return boiling['melting_and_packing'].props['boiling_group_df']['sku'].iloc[0].packers[0].name == 'Мультиголова'
-        boilings_with_multihead = [b for b in schedules['mozzarella']['master']['boiling', True] if is_boiling_multihead(b)]
-        multihead_end = boilings_with_multihead[-1]['melting_and_packing']['packing'].y[0]
+        multihead_packings = schedules['mozzarella'].iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова')
+        multihead_end = max(packing.y[0] for packing in multihead_packings)
         m.row('cleaning', push_func=AxisPusher(start_from=['last_end', multihead_end], validator=CleaningValidator()),
               size=cast_t('01:20'),  # todo soon: what name, how much time?
               label='Комет')

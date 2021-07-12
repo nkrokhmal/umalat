@@ -88,7 +88,9 @@ def run_consolidated(path, prefix="", open_file=False):
 
 def test():
     run_consolidated(
+        # "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
         "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/1",
+        # prefix="2021-01-01",
         prefix="1",
         open_file=True,
     )
