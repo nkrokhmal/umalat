@@ -10,8 +10,6 @@ def run_contour_cleanings(
     prefix="",
     open_file=False,
 ):
-    utils.makedirs(path)
-
     schedules = {}
     for a, b in [
         ["mozzarella", "Расписание моцарелла"],

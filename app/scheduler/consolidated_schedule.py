@@ -3,7 +3,20 @@ from app.scheduler import draw_excel_frontend, init_schedule_workbook
 from utils_ak.block_tree import *
 
 
-def draw_consolidated(schedules):
+def run_consolidated(path, prefix="", open_file=False):
+    schedules = {}
+    for a, b in [
+        ["mozzarella", "Расписание моцарелла"],
+        ["mascarpone", "Расписание маскарпоне"],
+        ["butter", "Расписание масло"],
+        ["milk_project", "Расписание милкпроджект"],
+        ["ricotta", "Расписание рикотта"],
+        ["contour_cleanings", "Расписание контурные мойки"],
+    ]:
+        fn = os.path.join(path, prefix + " " + b + ".pickle")
+        with open(fn, "rb") as f:
+            schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
+
     wb = init_schedule_workbook()
 
     cur_depth = 0
@@ -59,25 +72,24 @@ def draw_consolidated(schedules):
     frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
     cur_depth += depth
 
-    draw_excel_frontend(frontend, STYLE, wb=wb, open_file=True)
+    # todo maybe: copy-paste from submit_schedule
+    with code("Dump frontend as excel file"):
+        base_fn = f"Расписание общее.xlsx"
+        if prefix:
+            base_fn = prefix + " " + base_fn
+        output_fn = os.path.join(path, base_fn)
+
+        draw_excel_frontend(
+            frontend, open_file=open_file, wb=wb, fn=output_fn, style=STYLE
+        )
 
 
 def test():
-    fns = {
-        "mozzarella": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/2021-01-01 Расписание моцарелла.pickle",
-        "mascarpone": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/2021-01-01 Расписание маскарпоне.pickle",
-        "butter": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/2021-01-01 Расписание масло.pickle",
-        "milk_project": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/2021-01-01 Расписание милкпроджект.pickle",
-        "ricotta": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/2021-01-01 Расписание рикотта.pickle",
-        "contour_cleanings": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/2021-01-01 Контурные мойки.pickle",
-    }
-    schedules = {}
-    for key, fn in fns.items():
-        with open(fn, "rb") as f:
-            schedules[key] = ParallelepipedBlock.from_dict(pickle.load(f))
-
-    # print(schedules["ricotta"])
-    draw_consolidated(schedules)
+    run_consolidated(
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
+        prefix="2021-01-01",
+        open_file=True,
+    )
 
 
 if __name__ == "__main__":
