@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 from app.scheduler.ricotta import *
+from app.scheduler.submit import submit_schedule
 
 
 def run_ricotta(
@@ -24,6 +25,6 @@ def run_ricotta(
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
-    return submit(
+    return submit_schedule(
         "рикотта", schedule, frontend, path, prefix, STYLE, open_file=open_file
     )
