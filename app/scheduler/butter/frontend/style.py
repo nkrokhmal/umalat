@@ -19,7 +19,6 @@ STYLE = {
     },
     "packing": {
         "color": "#00B050",
-        # todo soon: rename to output_kg
         "text": lambda b: f"фасовка V{str(b.props['boiling_model'].weight_netto)} кг, {str(b.props['boiling_model'].line.output_kg)}кг",
     },  # green
     "displacement": {"color": "#FFC000", "text": "вытеснение"},  # orange

@@ -1,13 +1,5 @@
 from app.imports.runtime import *
 from app.scheduler import draw_excel_frontend, init_schedule_workbook
-from app.scheduler import (
-    run_ricotta,
-    run_mascarpone,
-    run_mozzarella,
-    run_butter,
-    run_milk_project,
-    run_contour_cleanings,
-)
 from utils_ak.block_tree import *
 
 
@@ -22,7 +14,6 @@ def draw_consolidated(schedules):
     depth = frontend.y[1]
     frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
     cur_depth += depth
-
     draw_excel_frontend(frontend, STYLE, wb=wb)
 
     from app.scheduler.ricotta import wrap_frontend, STYLE
