@@ -10,8 +10,8 @@ def test(open_file=False):
     utils.lazy_tester.configure_function_path()
 
     outputs = run_contour_cleanings(
-        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2",
-        prefix="1",
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample1",
+        prefix="sample1",
         open_file=open_file,
     )
     utils.lazy_tester.log(outputs["schedule"])
