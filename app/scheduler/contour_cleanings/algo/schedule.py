@@ -400,8 +400,8 @@ def make_contour_6(schedules):
                                       size=cast_t('01:20'),
                                       label='Танк сливок') # ricotta end + hour
 
-        m.create_block('cleaning', push_func=AxisPusher(start_from=cast_t('09:00'), validator=CleaningValidator(ordered=False)),
-                                      size=(cast_t('01:20'), 0),
+        m.row('cleaning', push_func=AxisPusher(start_from=cast_t('09:00'), validator=CleaningValidator(ordered=False)),
+                                      size=cast_t('01:20'),
                                       label='Танк сливок')
 
     with code('mascarpone'):
