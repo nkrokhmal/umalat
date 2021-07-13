@@ -3,7 +3,7 @@ from app.main import main
 from app.main.errors import internal_error
 from app.scheduler import *
 from app.scheduler.mozzarella import *
-from app.utils.mozzarella.schedule_task import schedule_task, schedule_task_boilings, update_total_schedule_task
+from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 from app.utils.batches.batch import *
 from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
@@ -90,11 +90,19 @@ def mozzarella_schedule():
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание моцарелла")
         filename_schedule_pickle = "{} {}.pickle".format(date.strftime("%Y-%m-%d"), "Расписание моцарелла")
 
-        update_total_schedule_task(date, boiling_plan_df, additional_packing_df)
-        schedule_wb = schedule_task(schedule_wb, boiling_plan_df, additional_packing_df, date)
-        schedule_wb = schedule_task_boilings(
-            schedule_wb, boiling_plan_df, additional_packing_df, date, form.batch_number.data
+        schedule_task = MozzarellaScheduleTask(
+            df=boiling_plan_df,
+            date=date,
+            model=MozzarellaSKU,
+            department="Моцарелльный цех"
         )
+
+        schedule_task.update_total_schedule_task()
+        schedule_task.update_boiling_schedule_task(form.batch_number.data)
+
+        schedule_wb = schedule_task.schedule_task_original(schedule_wb)
+        schedule_wb = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)
+
         schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
         set_default_sheet(schedule_wb)
 

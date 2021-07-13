@@ -6,7 +6,7 @@ from app.main import main
 from app.main.errors import internal_error
 from app.scheduler.mascarpone import *
 from app.scheduler.mascarpone.frontend.style import STYLE
-from app.utils.mascarpone.schedule_task import schedule_task_boilings, update_total_schedule_task
+from app.utils.mascarpone.schedule_task import MascarponeScheduleTask
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict
@@ -45,10 +45,18 @@ def mascarpone_schedule():
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.xlsx"
         filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.pickle"
 
-        update_total_schedule_task(date, boiling_plan_df)
-        schedule_wb = schedule_task_boilings(
-            schedule_wb, boiling_plan_df, date, form.batch_number.data
+        schedule_task = MascarponeScheduleTask(
+            df=boiling_plan_df,
+            date=date,
+            model=MascarponeSKU,
+            department="Маскарпонный цех"
         )
+
+        schedule_task.update_total_schedule_task()
+        schedule_task.update_boiling_schedule_task(form.batch_number.data)
+
+        schedule_wb = schedule_task.schedule_task_original(schedule_wb)
+        # schedule_wb = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
