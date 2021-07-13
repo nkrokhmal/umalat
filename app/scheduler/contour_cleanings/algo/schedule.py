@@ -373,76 +373,54 @@ def make_contour_5(schedules, input_tanks=(['4', 60], ['5', 60])):
 def make_contour_6(schedules):
     m = BlockMaker("6 contour")
 
-    values = []
-    values.append([m.create_block('cleaning',
-                                  size=(cast_t('01:20'), 0),
-                                  label='Линия сырого молока на роникс'), schedules['milk_project'].y[0]])
+    m.row('cleaning', push_func=add_push,
+          x=schedules['milk_project'].y[0],
+          size=cast_t('01:20'),
+          label='Линия сырого молока на роникс')
 
     with code('Танк рикотты 1 внутри дня'):
         boilings = list(schedules['ricotta'].iter(cls='boiling'))
         whey_used = 1900 * len(boilings)
         if whey_used > 100000:
-            values.append([m.create_block('cleaning',
-                                          size=(cast_t('01:20'), 0),
-                                          label='Танк рикотты 1'), cast_t('12:00')])
+            m.row('cleaning', push_func=AxisPusher(start_from=cast_t('12:00'), validator=CleaningValidator(ordered=False)),
+                  size=cast_t('01:20'),
+                  label='Танк рикотты 1')
 
     with code('cream tanks'):
         boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
         # todo soon: спросить, что делаем если варок меньше 4?
         boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]
-        values.append([m.create_block('cleaning',
-                                      size=(cast_t('01:20'), 0),
-                                      label='Танк сливок'),
-                       boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 12,
-                       # fourth mascarpone boiling group end + hour
-                       ])
+        m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 12, validator=CleaningValidator(ordered=False)),
+                                      size=cast_t('01:20'),
+                                      label='Танк сливок') # fourth mascarpone boiling group end + hour
 
         # todo soon: что если очень поздно получается?
         boilings = list(schedules['ricotta'].iter(cls='boiling'))
-        values.append([m.create_block('cleaning',
-                                      size=(cast_t('01:20'), 0),
-                                      label='Танк сливок'),
-                       boilings[-1]['pumping_out'].y[0] + 12,  # ricotta end + hour
-                       ])
+        m.row('cleaning', push_func=AxisPusher(start_from=boilings[-1]['pumping_out'].y[0] + 12, validator=CleaningValidator(ordered=False)),
+                                      size=cast_t('01:20'),
+                                      label='Танк сливок') # ricotta end + hour
 
-        values.append([m.create_block('cleaning',
+        m.create_block('cleaning', push_func=AxisPusher(start_from=cast_t('09:00'), validator=CleaningValidator(ordered=False)),
                                       size=(cast_t('01:20'), 0),
-                                      label='Танк сливок'),
-                       cast_t('09:00'),
-                       ])
+                                      label='Танк сливок')
 
     with code('mascarpone'):
         boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
         boiling_group = boiling_groups[-1]
-        values.append([m.create_block('cleaning',
-                                      size=(cast_t('01:20'), 0),
-                                      label='Маскарпоне'),
-                       boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 6,
-                       # last boiling separation + half hour # todo soon: кремчиза здесь считаются?
-                       ])
+        m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 6, validator=CleaningValidator(ordered=False)),
+              size=(cast_t('01:20'), 0),
+              label='Маскарпоне')
 
     ricotta_end = boilings[-1]['pumping_out'].y[0] + 12
-    print(cast_time(boilings[0]['pumping_out'].y[0]))
-    values.append([m.create_block('cleaning',
-                                  size=(cast_t('02:30'), 0),
-                                  label='Линия сладкой сыворотки'),
-                   ricotta_end])
+    m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
+          size=cast_t('02:30'),
+          label='Линия сладкой сыворотки')
 
     for label in ['Танк рикотты 1', 'Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2', 'Масло цех']:
-        values.append([m.create_block('cleaning',
-                                      size=(cast_t('01:20'), 0),
-                                      label=label), ricotta_end])
+        m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
+              size=cast_t('01:20'),
+              label=label)
 
-    df = pd.DataFrame(values, columns=['block', 'start_from'])
-    df = df.sort_values(by='start_from')
-
-    for i, row in df.iterrows():
-        if i == 0:
-            m.block(row['block'], push_func=add_push,
-                    x=(row['start_from'], 0))
-        else:
-            m.block(row['block'],
-                    push_func=AxisPusher(validator=CleaningValidator(), start_from=['last_end', row['start_from']]))
     return m.root
 
 
@@ -454,8 +432,8 @@ def make_schedule(schedules):
         # make_contour_2(schedules),
         # make_contour_3(schedules),
         # make_contour_4(schedules),
-        make_contour_5(schedules),
-        # make_contour_6(schedules),
+        # make_contour_5(schedules),
+        make_contour_6(schedules),
     ]
 
     for contour in contours:
