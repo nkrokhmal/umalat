@@ -40,10 +40,11 @@ def create_app(config_name="default"):
     bootstrap.init_app(app)
     page_down.init_app(app)
     login_manager.init_app(app)
+    rq.init_app(app)
 
     app.register_blueprint(main_bp)
     app.register_error_handler(404, not_found)
-    return app
+    return app, rq
 
 
 def create_manager(app):

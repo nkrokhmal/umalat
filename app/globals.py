@@ -11,6 +11,7 @@ else:
 
 bootstrap = flask_bootstrap.Bootstrap()
 page_down = flask_pagedown.PageDown()
+rq = flask_rq2.RQ()
 login_manager = flask_login.LoginManager()
 
 ERROR = 1e-5

@@ -9,5 +9,6 @@ from .mascarpone import *
 from .additional import *
 from .butter import *
 from .milkproject import *
+from .adygea import *
 from .approved import *
 from .params import *

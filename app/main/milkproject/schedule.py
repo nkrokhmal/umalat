@@ -8,7 +8,7 @@ from app.scheduler.milk_project.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict
-from app.utils.milkproject.schedule_tasks import update_total_schedule_task, schedule_task_boilings
+from app.utils.milkproject.schedule_tasks import MilkProjectScheduleTask
 from .forms import ScheduleForm
 
 
@@ -46,10 +46,18 @@ def milkproject_schedule():
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
         filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
 
-        update_total_schedule_task(date, boiling_plan_df)
-        schedule_wb = schedule_task_boilings(
-            schedule_wb, boiling_plan_df, date, form.batch_number.data
+        schedule_task = MilkProjectScheduleTask(
+            df=boiling_plan_df,
+            date=date,
+            model=RicottaSKU,
+            department="Милкпроджект"
         )
+
+        schedule_task.update_total_schedule_task()
+        schedule_task.update_boiling_schedule_task(form.batch_number.data)
+
+        # schedule_wb = schedule_task.schedule_task_original(schedule_wb)
+        schedule_wb = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))

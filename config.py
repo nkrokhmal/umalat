@@ -40,6 +40,9 @@ class BaseClass:
         "app/data/static/templates/constructor_milkproject.xlsx"
     )
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
+    TEMPLATE_ADYGEA_BOILING_PLAN = (
+        "app/data/static/templates/constructor_adygea.xlsx"
+    )
 
     IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:
@@ -68,6 +71,8 @@ class BaseClass:
         "Творожный": "#CBC0D9",
         "Робиола": "E5DFEC",
         "Сливки": "#F1DADA",
+        "Кавказский": "#E5B7B6",
+        "Черкесский": "#CBC0D9",
     }
     ORDER = [
         "Фиор Ди Латте",
@@ -97,8 +102,12 @@ class BaseClass:
 
     DEFAULT_RUBBER_FORM_FACTOR = "Соль: 460"
 
-    TELEGRAM_BOT_TOKEN: Optional[str] = None
-    TELEGRAM_CHAT_ID: Optional[int] = None
+    TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"
+    TELEGRAM_CHAT_ID = -544068496
+    TELEGRAM_CHAT_FILES_ID = -541375793
+
+    RQ_REDIS_URL = 'redis://redis:6379/0'
+    RQ_QUEUES = ['default']
 
     @staticmethod
     def abs_path(local_path):
@@ -132,6 +141,7 @@ class TestConfig(BaseClass):
 
     TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"
     TELEGRAM_CHAT_ID = -544068496
+    TELEGRAM_CHAT_FILES_ID = -541375793
 
 
 configs = {

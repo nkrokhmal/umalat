@@ -3,9 +3,22 @@ version: '3.3'
 services:
   umalat:
     build: .
-    command: python /app/runserver.py runserver
+    command: python -u /app/runserver.py
     volumes:
       - .:/app
       - /root/home/data/umalat:/app/app/data/dynamic
     ports:
       - 5000:5000
+    depends_on:
+      - redis
+  worker:
+    build: .
+    command: python -u /app/manage.py run_worker
+    volumes:
+      - .:/app
+      - /root/home/data/umalat:/app/app/data/dynamic
+    depends_on:
+      - redis
+  redis:
+    image: redis:6-alpine
+

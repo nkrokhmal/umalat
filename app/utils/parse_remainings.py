@@ -111,6 +111,8 @@ def cast_volume(obj):
         return obj.line.output_kg
     elif isinstance(obj, MilkProjectSKU):
         return obj.made_from_boilings[0].output_kg
+    elif isinstance(obj, AdygeaSKU):
+        return obj.made_from_boilings[0].output_kg
     else:
         raise Exception("Unknown sku type")
 

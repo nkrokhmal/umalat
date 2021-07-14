@@ -73,5 +73,6 @@ def move_to_approved(date, file_name):
     create_if_not_exists(new_dir)
 
     shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
+    return new_dir
 
 
