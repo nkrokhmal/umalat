@@ -27,6 +27,7 @@ import flask_bootstrap
 import flask_migrate
 import flask_script
 import flask_restplus
+import flask_rq2
 
 from loguru import logger
 from datetime import datetime, time, timedelta

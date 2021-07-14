@@ -104,8 +104,12 @@ class BaseClass:
 
     DEFAULT_RUBBER_FORM_FACTOR = "Соль: 460"
 
-    TELEGRAM_BOT_TOKEN: Optional[str] = None
-    TELEGRAM_CHAT_ID: Optional[int] = None
+    TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"
+    TELEGRAM_CHAT_ID = -544068496
+    TELEGRAM_CHAT_FILES_ID = -541375793
+
+    RQ_REDIS_URL = 'redis://redis:6379/0'
+    RQ_QUEUES = ['default']
 
     @staticmethod
     def abs_path(local_path):
@@ -139,6 +143,7 @@ class TestConfig(BaseClass):
 
     TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"
     TELEGRAM_CHAT_ID = -544068496
+    TELEGRAM_CHAT_FILES_ID = -541375793
 
 
 configs = {

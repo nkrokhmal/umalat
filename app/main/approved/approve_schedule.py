@@ -1,5 +1,4 @@
 import flask
-
 from app.imports.runtime import *
 from app.utils.files.utils import move_to_approved
 from app.main import main
@@ -11,7 +10,11 @@ def approve():
     date = flask.request.args.get("date")
     file_name = flask.request.args.get("file_name")
 
-    move_to_approved(date=date, file_name=file_name)
+    path = move_to_approved(date=date, file_name=file_name)
+
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name))
+
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".download_schedules", page=1))
 
