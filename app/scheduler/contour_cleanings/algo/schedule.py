@@ -416,10 +416,14 @@ def make_contour_6(schedules):
           size=cast_t('02:30'),
           label='Линия сладкой сыворотки')
 
-    for label in ['Танк рикотты 1', 'Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2', 'Масло цех']:
+    for label in ['Танк рикотты 1', 'Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
         m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
               label=label)
+
+    m.row('cleaning', push_func=AxisPusher(start_from=schedules['butter'].y[0], validator=CleaningValidator(ordered=False)),
+          size=cast_t('01:20'),
+          label='Маслоцех')
 
     return m.root
 
