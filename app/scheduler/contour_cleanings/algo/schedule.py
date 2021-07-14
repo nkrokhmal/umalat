@@ -47,7 +47,8 @@ def _make_contour_1(schedules, order=(0, 1, 2)):
 
             if len(_boilings) >= 10:
                 values.append([percent, _boilings[8]])
-            values.append([percent, _boilings[-1]])
+            elif len(_boilings) > 0:
+                values.append([percent, _boilings[-1]])
 
         df = pd.DataFrame(values, columns=['percent', 'boiling'])
         df['pouring_end'] = df['boiling'].apply(lambda boiling: boiling['pouring']['first']['termizator'].y[0])
@@ -116,7 +117,7 @@ def make_contour_2(schedules):
         multihead_packings = schedules['mozzarella'].iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова')
         multihead_end = max(packing.y[0] for packing in multihead_packings)
         m.row('cleaning', push_func=AxisPusher(start_from=['last_end', multihead_end], validator=CleaningValidator()),
-              size=cast_t('01:20'),  # todo soon: what name, how much time?
+              size=cast_t('01:20'),
               label='Комет')
 
         m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
@@ -174,6 +175,10 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                       label=f'Сыроизготовитель {int(n) + 1}')
                 yield
 
+        # make iterator longer
+        for i in range(4):
+            yield
+
     run_order([f1, g2()], order1)
 
     def g3():
@@ -213,6 +218,10 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                     else:
                         m.block(c, push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()))
                     yield
+
+            # make iterator longer
+            for _ in range(5):
+                yield
 
     def f4():
         b = m.row('cleaning',  push_func=AxisPusher(validator=CleaningValidator()),

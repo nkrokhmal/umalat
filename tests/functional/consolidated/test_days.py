@@ -67,8 +67,8 @@ def test_batch(same_output_path=False):
 
 if __name__ == "__main__":
     test_day(
-        input_path="/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample1",
-        prefix="sample1",
+        input_path="/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample2",
+        prefix="sample2",
         open_file=True,
     )
     # test_batch(True)
