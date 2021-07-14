@@ -394,11 +394,7 @@ def make_contour_6(schedules):
                                       size=cast_t('01:20'),
                                       label='Танк сливок') # fourth mascarpone boiling group end + hour
 
-        # todo soon: что если очень поздно получается?
-        boilings = list(schedules['ricotta'].iter(cls='boiling'))
-        m.row('cleaning', push_func=AxisPusher(start_from=boilings[-1]['pumping_out'].y[0] + 12, validator=CleaningValidator(ordered=False)),
-                                      size=cast_t('01:20'),
-                                      label='Танк сливок') # ricotta end + hour
+
 
         m.row('cleaning', push_func=AxisPusher(start_from=cast_t('09:00'), validator=CleaningValidator(ordered=False)),
                                       size=cast_t('01:20'),
@@ -416,6 +412,11 @@ def make_contour_6(schedules):
           size=cast_t('02:30'),
           label='Линия сладкой сыворотки')
 
+    m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end,
+                                           validator=CleaningValidator(ordered=False)),
+          size=cast_t('01:20'),
+          label='Танк сливок')  # ricotta end + hour
+
     for label in ['Танк рикотты 1', 'Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
         m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
@@ -432,11 +433,11 @@ def make_schedule(schedules):
     m = BlockMaker("schedule")
 
     contours = [
-        # make_contour_1(schedules),
-        # make_contour_2(schedules),
-        # make_contour_3(schedules),
-        # make_contour_4(schedules),
-        # make_contour_5(schedules),
+        make_contour_1(schedules),
+        make_contour_2(schedules),
+        make_contour_3(schedules),
+        make_contour_4(schedules),
+        make_contour_5(schedules),
         make_contour_6(schedules),
     ]
 
