@@ -76,3 +76,12 @@ def move_to_approved(date, file_name):
     return new_dir
 
 
+def move_to_approved_pickle(date, file_name):
+    old_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "schedule_dict", file_name)
+    new_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "approved")
+    create_if_not_exists(new_dir)
+
+    shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
+    return new_dir
+
+
