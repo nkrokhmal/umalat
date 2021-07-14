@@ -238,7 +238,7 @@ def make_contour_3(schedules):
     return df.iloc[-1]['output']
 
 
-def make_contour_4(schedules):
+def make_contour_4(schedules, is_tomorrow_day_off=False):
     m = BlockMaker("4 contour")
 
     with code('drenators'):
@@ -266,7 +266,7 @@ def make_contour_4(schedules):
                               ids=ids,
                               label=f'Дренатор {", ".join(ids)}').block
             else:
-                if i + 1 < len(values) and values[i + 1][1] <= block.y[0] + 2:
+                if i + 1 < len(values) and values[i + 1][1] <= block.y[0] + 2 and not is_tomorrow_day_off:
                     # clean multiple drenators
                     ids = [str(drenator_id), str(values[i + 1][0])]
                     block = m.row('cleaning',
@@ -283,7 +283,6 @@ def make_contour_4(schedules):
                                   ids=[drenator_id],
                                   label=f'Дренатор {", ".join(ids)}').block
             i += 1
-        # todo: do not pair before non-working days
 
     m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
           size=cast_t('01:30'),
