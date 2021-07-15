@@ -19,7 +19,7 @@ def contour_washers_schedule():
 
         try:
             path = DebugConfig.abs_path(
-                "app/data/dynamic/{}/approved/".format(date_str)
+                "app/data/dynamic/{}/schedule_dict/".format(date_str)
             )
 
             if not os.path.exists(path):
