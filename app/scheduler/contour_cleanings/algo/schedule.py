@@ -437,15 +437,15 @@ def make_contour_6(schedules):
     return m.root
 
 
-def make_schedule(schedules):
+def make_schedule(schedules, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
         make_contour_1(schedules),
         make_contour_2(schedules),
         make_contour_3(schedules),
-        make_contour_4(schedules),
-        make_contour_5(schedules),
+        make_contour_4(schedules, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
+        make_contour_5(schedules, input_tanks=kwargs.get('input_tanks', (['4', 60], ['5', 60]))),
         make_contour_6(schedules),
     ]
 

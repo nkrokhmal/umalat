@@ -10,6 +10,7 @@ def run_contour_cleanings(
     schedule=None,
     prefix="",
     open_file=False,
+    **kwargs,
 ):
     schedules = {}
     for a, b in [
@@ -20,10 +21,14 @@ def run_contour_cleanings(
         ["ricotta", "Расписание рикотта"],
     ]:
         fn = os.path.join(input_path, prefix + " " + b + ".pickle")
+
+        if not os.path.exists(fn):
+            raise Exception(f"Не найдено: {b} для данной даты")
+
         with open(fn, "rb") as f:
             schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
     if not schedule:
-        schedule = make_schedule(schedules)
+        schedule = make_schedule(schedules, **kwargs)
     frontend = wrap_frontend(schedule)
     return submit_schedule(
         "контурные мойки",
