@@ -9,5 +9,26 @@ from app.models import *
 
 class ScheduleForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
-    input_file = FileField("", validators=validators)
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+
+    butter_end_time = TimeField(
+        'Время окончания работы маслоцеха',
+        validators=[Optional()],
+    )
+    milkproject_end_time = TimeField(
+        'Время окончания работы милкпроджекта',
+        validators=[Optional()],
+    )
+    adygea_end_time = TimeField(
+        'Время окончания работы адыгейского цеха',
+        validators=[Optional()],
+    )
+
+    tank_4 = IntegerField(validators=[Optional()], default=0)
+    tank_5 = IntegerField(validators=[Optional()], default=0)
+    tank_8 = IntegerField(validators=[Optional()], default=0)
+    is_not_working_day = BooleanField(
+        "Завтра нерабочий день",
+        validators=[Optional()],
+        default=False,
+    )

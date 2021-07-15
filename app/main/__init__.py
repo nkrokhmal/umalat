@@ -10,5 +10,6 @@ from .additional import *
 from .butter import *
 from .milkproject import *
 from .adygea import *
+from .contour_washers import *
 from .approved import *
 from .params import *
