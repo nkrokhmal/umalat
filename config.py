@@ -118,6 +118,7 @@ class BaseClass:
         "butter": "масло",
         "adygea": "адыгейский",
         "contour_cleanings": "контурные мойки",
+        "ricotta": "рикотта",
     }
 
     EMPTY_ALLOWED_DEPARTMENTS = [

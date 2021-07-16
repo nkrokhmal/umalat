@@ -447,6 +447,7 @@ def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
           size=cast_t('01:20'),
           label='Танк сливок')  # ricotta end + hour
 
+
     for label in ['Танк рикотты 1', 'Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
         m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
