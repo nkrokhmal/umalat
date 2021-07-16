@@ -17,32 +17,37 @@ def contour_washers_schedule():
         tank_8 = form.tank_8.data
         is_not_working_day = form.is_not_working_day.data
 
-        try:
-            path = DebugConfig.abs_path(
-                "app/data/dynamic/{}/approved/".format(date_str)
-            )
+        path = DebugConfig.abs_path(
+            "app/data/dynamic/{}/approved/".format(date_str)
+        )
 
-            if not os.path.exists(path):
-                raise Exception(
-                    "Не найдены утвержденные расписания для данной даты: {}".format(
-                        date
-                    )
+        if not os.path.exists(path):
+            raise Exception(
+                "Не найдены утвержденные расписания для данной даты: {}".format(
+                    date
                 )
+            )
 
-            run_contour_cleanings(
-                path,
-                output_path=path,
-                prefix=date_str,
-                input_tanks=(["4", tank_4], ["5", tank_5], ["8", tank_8]),
-                is_tomorrow_day_off=is_not_working_day,
-            )
-            run_consolidated(
-                path,
-                output_path=path,
-                prefix=date_str,
-            )
-        except Exception as e:
-            return internal_error(e)
+        run_contour_cleanings(
+            path,
+            output_path=path,
+            prefix=date_str,
+            input_tanks=(["4", tank_4], ["5", tank_5], ["8", tank_8]),
+            is_tomorrow_day_off=is_not_working_day,
+        )
+        run_consolidated(
+            path,
+            output_path=path,
+            prefix=date_str,
+        )
+
+        filename = f"{date_str} Расписание общее.xlsx"
+        return flask.render_template(
+            "contour_washers/schedule.html",
+            form=form,
+            filename=filename,
+            date=date_str
+        )
 
     form.date.data = datetime.today() + timedelta(days=1)
-    return flask.render_template("contour_washers/schedule.html", form=form)
+    return flask.render_template("contour_washers/schedule.html", form=form, filename=None)

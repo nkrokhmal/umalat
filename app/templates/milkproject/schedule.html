@@ -15,6 +15,33 @@
 
 
 {% block page_content %}
+{% if filename %}
+    <div class="row" id="Approved">
+        <div class="card card-body bg-white border-light shadow-sm mb-4">
+            <h4 class="h5 mb-4">Подтвердите расписание за текущий день</h4>
+            <div class="row">
+                <p>Если текущая версия расписания является итоговой, обязательно подтвердите ее.</p>
+                <p> В случае, если уже сущетсвует подтвержденное расписание, необходимо на странице истории разутвердить текущее расписание. </p>
+            </div>
+            <div class="row">
+                <form method="post" action="/approve_milkproject" enctype="multipart/form-data" class="mt-4">
+                    <div>
+                        <input type="hidden" name="file_name" id="file_name" value="{{filename}}">
+                    </div>
+                    <div>
+                        <input type="hidden" name="date" id="date" value="{{date}}">
+                    </div>
+                    <div class="row mb-4">
+                         <button type="submit" name="submit" class="btn btn-primary mr-2 dropdown-toggle">
+                             <span class="fas fa-check mr-2"></span>Подтвердить
+                         </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
 <div class="row">
     <div class="card card-body bg-white border-light shadow-sm mb-4">
         <h4 class="h5 mb-4">Загрузите файл плана по варкам и выберите дату</h4>
