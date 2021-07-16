@@ -22,7 +22,10 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def _make_contour_1(schedules, order=(0, 1, 2)):
+def _make_contour_1(schedules, order=(0, 1, 2), milkproject_end_time=None, adygea_end_time=None):
+    milkproject_end_time = _init_end_time(schedules, 'milkproject', milkproject_end_time)
+    adygea_end_time = _init_end_time(schedules, 'adygea', adygea_end_time)
+
     m = BlockMaker("1 contour")
     m.row('cleaning', push_func=add_push,
           size=cast_t('01:20'), x=cast_t('06:30'),
@@ -67,14 +70,13 @@ def _make_contour_1(schedules, order=(0, 1, 2)):
           label='Линия отгрузки')
 
     def f1():
-        # todo soon: add proper start_from
-        m.row('cleaning', push_func=AxisPusher(start_from=['last_end'], validator=CleaningValidator()),
+        m.row('cleaning', push_func=AxisPusher(start_from=adygea_end_time, validator=CleaningValidator()),
               size=cast_t('01:50'),
               label='Линия адыгейского')
 
     def f2():
         m.row('cleaning',
-              push_func=AxisPusher(start_from=schedules['milk_project'].y[0], validator=CleaningValidator()),
+              push_func=AxisPusher(start_from=milkproject_end_time, validator=CleaningValidator()),
               size=cast_t('02:20'),
               label='Милкпроджект')
 
@@ -98,8 +100,8 @@ def _make_contour_1(schedules, order=(0, 1, 2)):
     return m.root
 
 
-def make_contour_1(schedules):
-    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules)
+def make_contour_1(schedules, milkproject_end_time=None, adygea_end_time=None):
+    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules, milkproject_end_time=milkproject_end_time, adygea_end_time=adygea_end_time)
     return df.iloc[-1]['output']
 
 
@@ -377,12 +379,28 @@ def make_contour_5(schedules, input_tanks=(['4', 60], ['5', 60])):
 
     return m.root
 
+# todo soon: make properly
+def _init_end_time(schedules, department, input_end_time):
+    if not input_end_time and 'department' not in schedules:
+        raise Exception(
+            'Не найдено утвержденное расписание по малоцеху. Укажите время окончания работы маслоцеха вручную.')
 
-def make_contour_6(schedules):
+    if not input_end_time:
+        input_end_time = schedules['department'].y[0]
+    else:
+        print(input_end_time)
+        input_end_time = cast_t(str(input_end_time))
+        print(input_end_time)
+    return input_end_time
+
+def make_contour_6(schedules, butter_end_time=None, milkproject_end_time=None):
     m = BlockMaker("6 contour")
 
+    butter_end_time = _init_end_time(schedules, 'butter', butter_end_time)
+    milkproject_end_time = _init_end_time(schedules, 'milkproject', milkproject_end_time)
+
     m.row('cleaning', push_func=add_push,
-          x=schedules['milk_project'].y[0],
+          x=milkproject_end_time,
           size=cast_t('01:20'),
           label='Линия сырого молока на роникс')
 
@@ -430,7 +448,7 @@ def make_contour_6(schedules):
               size=cast_t('01:20'),
               label=label)
 
-    m.row('cleaning', push_func=AxisPusher(start_from=schedules['butter'].y[0], validator=CleaningValidator(ordered=False)),
+    m.row('cleaning', push_func=AxisPusher(start_from=butter_end_time, validator=CleaningValidator(ordered=False)),
           size=cast_t('01:20'),
           label='Маслоцех')
 
@@ -441,12 +459,12 @@ def make_schedule(schedules, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(schedules),
+        make_contour_1(schedules, milkproject_end_time=kwargs.get('milkproject_end_time'), adygea_end_time=kwargs.get('adygea_end_time')),
         make_contour_2(schedules),
         make_contour_3(schedules),
         make_contour_4(schedules, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
         make_contour_5(schedules, input_tanks=kwargs.get('input_tanks', (['4', 60], ['5', 60]))),
-        make_contour_6(schedules),
+        make_contour_6(schedules, butter_end_time=kwargs.get('butter_end_time'), milkproject_end_time=kwargs.get('milkproject_end_time')),
     ]
 
     for contour in contours:
