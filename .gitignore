@@ -64,4 +64,4 @@ db/batch_numbers/data.json
 **/schedules/*
 **/outputs/*
 research/akadaner/*xlsx
-
+tests/lazy_tester_logs/**
