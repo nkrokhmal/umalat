@@ -1,5 +1,4 @@
 from app.imports.external import *
-from typing import Optional
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
