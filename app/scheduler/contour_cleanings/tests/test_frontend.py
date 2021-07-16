@@ -13,6 +13,8 @@ def test(open_file=False):
         "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample1",
         prefix="sample1",
         open_file=open_file,
+        butter_end_time="16:00",
+        adygea_end_time="20:00",
     )
     utils.lazy_tester.log(outputs["schedule"])
     utils.lazy_tester.assert_logs(reset=True)

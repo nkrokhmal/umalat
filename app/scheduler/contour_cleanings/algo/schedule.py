@@ -23,7 +23,7 @@ def run_order(function_or_generators, order):
 
 
 def _make_contour_1(schedules, order=(0, 1, 2), milkproject_end_time=None, adygea_end_time=None):
-    milkproject_end_time = _init_end_time(schedules, 'milkproject', milkproject_end_time)
+    milkproject_end_time = _init_end_time(schedules, 'milk_project', milkproject_end_time)
     adygea_end_time = _init_end_time(schedules, 'adygea', adygea_end_time)
 
     m = BlockMaker("1 contour")
@@ -381,23 +381,21 @@ def make_contour_5(schedules, input_tanks=(['4', 60], ['5', 60])):
 
 # todo soon: make properly
 def _init_end_time(schedules, department, input_end_time):
-    if not input_end_time and 'department' not in schedules:
+    if not input_end_time and department not in schedules:
         raise Exception(
-            'Не найдено утвержденное расписание по малоцеху. Укажите время окончания работы маслоцеха вручную.')
+            f'Не найдено утвержденное расписание по цех {department}. Укажите время окончания работы {department} вручную.')
 
     if not input_end_time:
-        input_end_time = schedules['department'].y[0]
+        input_end_time = schedules[department].y[0]
     else:
-        print(input_end_time)
-        input_end_time = cast_t(str(input_end_time))
-        print(input_end_time)
+        input_end_time = cast_t(str(input_end_time)[:-3]) # 21:00:00 -> 21:00 -> 252
     return input_end_time
 
 def make_contour_6(schedules, butter_end_time=None, milkproject_end_time=None):
     m = BlockMaker("6 contour")
 
     butter_end_time = _init_end_time(schedules, 'butter', butter_end_time)
-    milkproject_end_time = _init_end_time(schedules, 'milkproject', milkproject_end_time)
+    milkproject_end_time = _init_end_time(schedules, 'milk_project', milkproject_end_time)
 
     m.row('cleaning', push_func=add_push,
           x=milkproject_end_time,
