@@ -111,7 +111,7 @@ class BaseClass:
     def abs_path(local_path):
         return os.path.join(basedir, local_path)
 
-    EMPTY_DEPARTMENTS_ALLOWED = ["mascarpone", "milkproject", "butter", "adygea"]
+    EMPTY_DEPARTMENTS_ALLOWED = ["mascarpone", "milk_project", "butter", "adygea"]
 
 
 class DebugConfig(BaseClass):

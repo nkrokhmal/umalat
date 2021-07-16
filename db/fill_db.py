@@ -1,5 +1,5 @@
 import os
-os.environ["ENVIRONMENT"] = "runtime"
+os.environ["APP_ENVIRONMENT"] = "runtime"
 
 from app.app import *
 

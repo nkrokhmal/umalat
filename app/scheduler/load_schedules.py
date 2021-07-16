@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 from utils_ak.block_tree import *
+import flask
 
 
 def load_schedules(path, prefix):
@@ -15,16 +16,22 @@ def load_schedules(path, prefix):
         fn = os.path.join(path, prefix + " " + display_name + ".pickle")
 
         if not os.path.exists(fn):
-            # todo maybe: make properly, use generic config, not DebugConfig
             if department in config.EMPTY_DEPARTMENTS_ALLOWED:
-                pass
-
-            if department in ["mozzarella", "ricotta", "mascarpone"]:
-                raise Exception(f"Не найдено: {display_name} для данной даты")
-            else:
+                logger.warning(f"'{display_name}' не найдено.")
+                if os.environ.get("APP_ENVIRONMENT") == "runtime":
+                    flask.flash(f"'{display_name}' не найдено.", "warning")
                 continue
+            else:
+                raise Exception(f"'{display_name}' не найдено.")
 
         with open(fn, "rb") as f:
             schedules[department] = ParallelepipedBlock.from_dict(pickle.load(f))
 
     return schedules
+
+
+if __name__ == "__main__":
+    load_schedules(
+        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/approved",
+        "2021-01-01",
+    )

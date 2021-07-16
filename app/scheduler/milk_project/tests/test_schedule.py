@@ -1,6 +1,6 @@
 import os
 
-os.environ["environment"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from app.scheduler.milk_project.algo.schedule import *
 from app.scheduler.milk_project.boiling_plan import *

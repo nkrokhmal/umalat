@@ -4,7 +4,7 @@ from app.db import create_external_db
 
 model_db = mdb = flask_sqlalchemy.SQLAlchemy()
 
-if os.environ.get("ENVIRONMENT") == "runtime":
+if os.environ.get("APP_ENVIRONMENT") == "runtime":
     db = mdb
 else:
     db = create_external_db()
