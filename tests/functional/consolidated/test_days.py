@@ -1,8 +1,16 @@
 from app.imports.runtime import *
-from app.scheduler import *
+from app.scheduler import (
+    run_contour_cleanings,
+    run_consolidated,
+    run_ricotta,
+    run_butter,
+    run_mascarpone,
+    run_mozzarella,
+    run_milk_project,
+)
 
 
-def test_day(
+def _test_day(
     input_path, prefix, output_path="outputs/", input_params=None, open_file=False
 ):
     input_params = input_params or {}
@@ -51,13 +59,14 @@ def test_day(
     )
 
 
-def test_batch(same_output_path=False):
+# todo: make proper test
+def _test_batch(same_output_path=False):
     paths = glob.glob(DebugConfig.abs_path("app/data/static/samples/inputs/by_day/*"))
 
     for path in tqdm.tqdm(paths):
         prefix = os.path.basename(path)
         output_path = "outputs/" if not same_output_path else path
-        test_day(
+        _test_day(
             input_path=path,
             output_path=output_path,
             prefix=prefix,
@@ -65,10 +74,10 @@ def test_batch(same_output_path=False):
         )
 
 
-if __name__ == "__main__":
-    test_day(
-        input_path="/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample2",
-        prefix="sample2",
-        open_file=True,
-    )
-    # test_batch(True)
+# if __name__ == "__main__":
+#     test_day(
+#     input_path="/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample2",
+#     prefix="sample2",
+#     open_file=True,
+# )
+# _test_batch(True)
