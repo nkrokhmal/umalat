@@ -62,12 +62,8 @@ def download_schedules(page):
                         schedules_metadata[date_dir][department] = {}
                         schedules_metadata[date_dir][department]['filename'] = schedules_filename
                         schedules_metadata[date_dir][department]['is_approved'] = is_approved(schedules_filename, date_dir)
-            task_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date_dir, "task")
-            if os.path.exists(task_dir):
-                task_filename = os.listdir(task_dir)[0]
-                if "task" not in schedules_metadata[date_dir].keys():
-                    schedules_metadata[date_dir]["task"] = {}
-                    schedules_metadata[date_dir]["task"]['filename'] = task_filename
+
+    print(schedules_metadata)
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
 
     schedules_result = get_metadata(

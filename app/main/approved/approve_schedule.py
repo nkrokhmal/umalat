@@ -26,6 +26,7 @@ def approve():
 def disprove():
     date = flask.request.args.get("date")
     file_name = flask.request.args.get("file_name")
+    pickle_file_name = f"{file_name.split('.')[0]}.pickle"
 
     os.remove(
         os.path.join(
@@ -33,6 +34,14 @@ def disprove():
             date,
             "approved",
             file_name
+        )
+    )
+    os.remove(
+        os.path.join(
+            flask.current_app.config["DYNAMIC_DIR"],
+            date,
+            "approved",
+            pickle_file_name
         )
     )
     flask.flash("Расписание успешно удалено из утвержденных", "success")
