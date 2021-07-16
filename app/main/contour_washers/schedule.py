@@ -52,7 +52,6 @@ def contour_washers_schedule():
             output_fn = DebugConfig.abs_path(
                 f"app/data/dynamic/{date_str}/approved/{output_base_fn}"
             )
-            print(os.path.exists(output_fn))
 
         except Exception as e:
             return internal_error(e)
