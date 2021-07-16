@@ -20,7 +20,7 @@ def contour_washers_schedule():
         milkproject_end_time = form.milkproject_end_time.data
         adygea_end_time = form.adygea_end_time.data
 
-        path = DebugConfig.abs_path(
+        path = config.abs_path(
             "app/data/dynamic/{}/approved/".format(date_str)
         )
 

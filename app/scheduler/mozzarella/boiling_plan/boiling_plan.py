@@ -127,7 +127,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
         if grp["_bff"].isnull().all():
             # take from bff input if not specified
             df.loc[grp.index, "_bff"] = cast_mozzarella_form_factor(
-                DebugConfig.DEFAULT_RUBBER_FORM_FACTOR
+                config.DEFAULT_RUBBER_FORM_FACTOR
             )
         else:
             filled_grp = grp.copy()

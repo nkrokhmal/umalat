@@ -14,17 +14,17 @@ class ScheduleForm(FlaskForm):
     butter_end_time = TimeField(
         'Время окончания работы маслоцеха',
         validators=[Optional()],
-        default=time(18, 0),
+        default=time(19, 0),
     )
     milkproject_end_time = TimeField(
         'Время окончания работы милкпроджекта',
         validators=[Optional()],
-        default=time(18, 0),
+        default=time(11, 0),
     )
     adygea_end_time = TimeField(
         'Время окончания работы адыгейского цеха',
         validators=[Optional()],
-        default=time(18, 0),
+        default=time(14, 0),
     )
 
     tank_4 = IntegerField(validators=[Optional()], default=0)

@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore")
 
 def test(use_interactive_environment):
     df = read_boiling_plan(
-        DebugConfig.abs_path(
+        config.abs_path(
             "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"
         )
     )
