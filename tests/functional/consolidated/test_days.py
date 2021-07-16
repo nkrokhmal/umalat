@@ -1,5 +1,13 @@
 from app.imports.runtime import *
-from app.scheduler import *
+from app.scheduler import (
+    run_contour_cleanings,
+    run_consolidated,
+    run_ricotta,
+    run_butter,
+    run_mascarpone,
+    run_mozzarella,
+    run_milk_project,
+)
 
 
 def _test_day(
@@ -66,10 +74,10 @@ def _test_batch(same_output_path=False):
         )
 
 
-if __name__ == "__main__":
-    # test_day(
-    #     input_path="/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample2",
-    #     prefix="sample2",
-    #     open_file=True,
-    # )
-    _test_batch(True)
+# if __name__ == "__main__":
+#     test_day(
+#     input_path="/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample2",
+#     prefix="sample2",
+#     open_file=True,
+# )
+# _test_batch(True)
