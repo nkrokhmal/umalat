@@ -5,29 +5,38 @@ import flask
 
 def load_schedules(path, prefix):
     schedules = {}
-    for department, display_name in [
-        ["mozzarella", "Расписание моцарелла"],
-        ["mascarpone", "Расписание маскарпоне"],
-        ["butter", "Расписание масло"],
-        ["milk_project", "Расписание милкпроджект"],
-        ["ricotta", "Расписание рикотта"],
-        ["adygea", "Расписание адыгейский"],
-    ]:
-        fn = os.path.join(path, prefix + " " + display_name + ".pickle")
 
-        if not os.path.exists(fn):
-            if department in config.EMPTY_DEPARTMENTS_ALLOWED:
-                logger.warning(f"'{display_name}' не найдено.")
-                if os.environ.get("APP_ENVIRONMENT") == "runtime":
-                    flask.flash(f"'{display_name}' не найдено.", "warning")
-                continue
-            else:
-                raise Exception(f"'{display_name}' не найдено.")
-
-        with open(fn, "rb") as f:
-            schedules[department] = ParallelepipedBlock.from_dict(pickle.load(f))
+    for department, name in config.DEPARTMENT_NAMES.items():
+        fn = os.path.join(path, f"{prefix} Расписание {name}.pickle")
+        if os.path.exists(fn):
+            with open(fn, "rb") as f:
+                schedules[department] = ParallelepipedBlock.from_dict(pickle.load(f))
 
     return schedules
+
+
+def assert_schedules_presence(
+    schedules, raise_if_not_present=None, warn_if_not_present=None
+):
+    raise_if_not_present = raise_if_not_present or []
+    warn_if_not_present = warn_if_not_present or []
+
+    for department in raise_if_not_present:
+        if department not in schedules:
+            raise Exception(
+                f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}"
+            )
+
+    for department in warn_if_not_present:
+        if department not in schedules:
+            logger.warning(
+                f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}"
+            )
+            if os.environ.get("APP_ENVIRONEMNT") == "runtime":
+                flask.flash(
+                    f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}",
+                    "warning",
+                )
 
 
 if __name__ == "__main__":

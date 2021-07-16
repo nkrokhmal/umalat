@@ -111,7 +111,22 @@ class BaseClass:
     def abs_path(local_path):
         return os.path.join(basedir, local_path)
 
-    EMPTY_DEPARTMENTS_ALLOWED = ["mascarpone", "milk_project", "butter", "adygea"]
+    DEPARTMENT_NAMES = {
+        "mozzarella": "моцарелла",
+        "mascarpone": "маскарпоне",
+        "milk_project": "милкпроджект",
+        "butter": "масло",
+        "adygea": "адыгейский",
+        "contour_cleanings": "контурные мойки",
+    }
+
+    EMPTY_ALLOWED_DEPARTMENTS = [
+        "mascarpone",
+        "milk_project",
+        "butter",
+        "adygea",
+        "contour_cleanings",
+    ]
 
 
 class DebugConfig(BaseClass):

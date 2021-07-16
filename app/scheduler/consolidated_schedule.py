@@ -6,22 +6,7 @@ from utils_ak.block_tree import *
 def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=False):
     utils.makedirs(output_path)
 
-    schedules = {}
-    for a, b in [
-        ["mozzarella", "Расписание моцарелла"],
-        ["mascarpone", "Расписание маскарпоне"],
-        ["butter", "Расписание масло"],
-        ["milk_project", "Расписание милкпроджект"],
-        ["ricotta", "Расписание рикотта"],
-        ["contour_cleanings", "Расписание контурные мойки"],
-    ]:
-        fn = os.path.join(input_path, prefix + " " + b + ".pickle")
-
-        if not os.path.exists(fn):
-            continue
-
-        with open(fn, "rb") as f:
-            schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
+    schedules = load_schedules(input_path, prefix)
 
     wb = init_schedule_workbook()
 

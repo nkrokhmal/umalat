@@ -9,3 +9,4 @@ from .milk_project import *
 from .contour_cleanings import *
 from .submit import *
 from .consolidated_schedule import *
+from .load_schedules import load_schedules
