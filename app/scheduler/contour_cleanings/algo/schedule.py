@@ -405,8 +405,8 @@ def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
               label='Линия сырого молока на роникс')
 
     with code('Танк рикотты 1 внутри дня'):
-        boilings = list(schedules['ricotta'].iter(cls='boiling'))
-        whey_used = 1900 * len(boilings)
+        ricotta_boilings = list(schedules['ricotta'].iter(cls='boiling'))
+        whey_used = 1900 * len(ricotta_boilings)
         if whey_used > 100000:
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t('12:00'), validator=CleaningValidator(ordered=False)),
                   size=cast_t('01:20'),
@@ -437,7 +437,7 @@ def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
                   size=(cast_t('01:20'), 0),
                   label='Маскарпоне')
 
-    ricotta_end = boilings[-1]['pumping_out'].y[0] + 12
+    ricotta_end = ricotta_boilings[-1]['pumping_out'].y[0] + 12
     m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
           size=cast_t('02:30'),
           label='Линия сладкой сыворотки')
@@ -447,8 +447,18 @@ def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
           size=cast_t('01:20'),
           label='Танк сливок')  # ricotta end + hour
 
+    with code('Танк рикотты 1'):
+        if len(ricotta_boilings) < 9:
+            end_boiling = ricotta_boilings[-1]
+        else:
+            end_boiling = ricotta_boilings[-9]
 
-    for label in ['Танк рикотты 1', 'Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
+        m.row('cleaning', push_func=AxisPusher(start_from=end_boiling.x[0], validator=CleaningValidator(ordered=False)),
+              size=cast_t('01:20'),
+              label='Танк рикотты 1')
+
+
+    for label in ['Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
         m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
               label=label)
