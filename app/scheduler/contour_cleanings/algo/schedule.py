@@ -412,12 +412,11 @@ def make_contour_6(schedules, butter_end_time=None, milkproject_end_time=None):
 
     with code('cream tanks'):
         boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
-        # todo soon: спросить, что делаем если варок меньше 4?
+        # todo soon: спросить, что делаем если варок меньше 4? Иначе с лева ставим
         boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]
         m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 12, validator=CleaningValidator(ordered=False)),
                                       size=cast_t('01:20'),
                                       label='Танк сливок') # fourth mascarpone boiling group end + hour
-
 
 
         m.row('cleaning', push_func=AxisPusher(start_from=cast_t('09:00'), validator=CleaningValidator(ordered=False)),
