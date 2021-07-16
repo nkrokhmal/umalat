@@ -4,6 +4,37 @@ from utils_ak.block_tree import *
 from app.scheduler.time import *
 
 
+def calc_scotta_input_tanks(schedules):
+    scotta_per_boiling = 1900 - 130
+    values = [['4', 60000], ['5', 60000], ['8', 80000]]
+    tanks_df = pd.DataFrame(values, columns=['id', 'kg'])
+    tanks_df['max_boilings'] = tanks_df['kg'].apply(
+        lambda kg: int(custom_round(kg / scotta_per_boiling, 1, rounding='floor')))
+    tanks_df['n_boilings'] = None
+    tanks_df['scotta'] = None
+
+    boilings = list(schedules['ricotta'].iter(cls='boiling'))
+    total_scotta = len(boilings) * scotta_per_boiling
+
+    left_scotta = total_scotta
+
+    assert len(boilings) <= tanks_df[
+        'max_boilings'].sum(), 'Слишком много варок на линии рикотты. Скотта не помещается в танки.'
+    for i, row in tanks_df.iterrows():
+        if not left_scotta:
+            break
+
+        max_scotta = row['max_boilings'] * scotta_per_boiling
+        cur_scotta = min(max_scotta, left_scotta)
+        left_scotta -= cur_scotta
+
+        tanks_df.loc[i, 'scotta'] = cur_scotta
+
+    tanks_df = tanks_df.fillna(0)
+    tanks_df['scotta'] /= 1000.
+    return tanks_df[['id', 'scotta']].values.tolist()
+
+
 class CleaningValidator(ClassValidator):
     def __init__(self, window=10, ordered=True):
         self.ordered = ordered
@@ -318,43 +349,6 @@ def make_contour_5(schedules, input_tanks=(['4', 60], ['5', 60])):
           size=cast_t('01:20'),
           label='Танк концентрата')
 
-    # todo maybe: use to calculate input tanks from yesterday
-    # with code('scotta'):
-    #     ''' Calc tanks_df
-    #            id     kg  n_boilings finished
-    #         0   6  60000          33      101
-    #         1   7  60000          33     None
-    #         2   8  80000          45     None
-    #     '''
-    #     scotta_per_boiling = 1900 - 130
-    #     values = [[6, 60000], [7, 60000], [8, 80000]]
-    #     tanks_df = pd.DataFrame(values, columns=['id', 'kg'])
-    #     tanks_df['n_boilings'] = tanks_df['kg'].apply(
-    #         lambda kg: int(custom_round(kg / scotta_per_boiling, 1, rounding='floor')))
-    #     tanks_df['finished'] = None
-    #
-    #     boilings = list(schedules['ricotta'].iter(cls='boiling'))
-    #     assert len(boilings) <= tanks_df[
-    #         'n_boilings'].sum(), 'Слишком много варок на линии рикотты. Скотта не помещается в танки.'
-    #     for i, row in tanks_df.iterrows():
-    #         if not boilings:
-    #             break
-    #         if len(boilings) >= row['n_boilings']:
-    #             cur_boiling = boilings[row['n_boilings'] - 1]
-    #             boilings = boilings[row['n_boilings']:]
-    #         else:
-    #             cur_boiling = boilings[-1]
-    #             boilings = []
-    #
-    #         tanks_df.loc[i, 'finished'] = cur_boiling.y[0] + cast_t('05:30')
-    #
-    #     # make blocks
-    #     tanks_df = tanks_df[~tanks_df['finished'].isnull()]
-    #
-    #     for i, row in tanks_df.iterrows():
-    #         m.row('cleaning', push_func=add_push,
-    #               size=cast_t('01:20'), x=row['finished'],
-    #               label=f'Танк рикотты {row["id"]}')
 
     with code('scotta'):
         start_t = cast_t('06:30')
@@ -456,7 +450,6 @@ def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
         m.row('cleaning', push_func=AxisPusher(start_from=end_boiling.x[0], validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
               label='Танк рикотты 1')
-
 
     for label in ['Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
         m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),

@@ -3,10 +3,13 @@ from utils_ak.block_tree import *
 import flask
 
 
-def load_schedules(path, prefix):
+def load_schedules(path, prefix, departments=None):
     schedules = {}
+    departments = departments or []
 
     for department, name in config.DEPARTMENT_NAMES.items():
+        if departments and department not in departments:
+            continue
         fn = os.path.join(path, f"{prefix} Расписание {name}.pickle")
         if os.path.exists(fn):
             with open(fn, "rb") as f:
