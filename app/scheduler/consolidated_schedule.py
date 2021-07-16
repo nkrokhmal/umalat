@@ -16,6 +16,10 @@ def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=Fa
         ["contour_cleanings", "Расписание контурные мойки"],
     ]:
         fn = os.path.join(input_path, prefix + " " + b + ".pickle")
+
+        if not os.path.exists(fn):
+            continue
+
         with open(fn, "rb") as f:
             schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
 
@@ -23,56 +27,62 @@ def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=Fa
 
     cur_depth = 0
 
-    from app.scheduler.mozzarella import wrap_frontend, STYLE
+    if "mozzarella" in schedules:
+        from app.scheduler.mozzarella import wrap_frontend, STYLE
 
-    frontend = wrap_frontend(schedules["mozzarella"])
-    depth = frontend.y[1]
-    frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
-    cur_depth += depth
-    draw_excel_frontend(frontend, STYLE, wb=wb)
+        frontend = wrap_frontend(schedules["mozzarella"])
+        depth = frontend.y[1]
+        frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
+        cur_depth += depth
+        draw_excel_frontend(frontend, STYLE, wb=wb)
 
-    from app.scheduler.ricotta import wrap_frontend, STYLE
+    if "ricotta" in schedules:
+        from app.scheduler.ricotta import wrap_frontend, STYLE
 
-    frontend = wrap_frontend(schedules["ricotta"])
-    depth = frontend.y[1]
-    frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
-    cur_depth += depth
+        frontend = wrap_frontend(schedules["ricotta"])
+        depth = frontend.y[1]
+        frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
+        cur_depth += depth
 
-    draw_excel_frontend(frontend, STYLE, wb=wb)
+        draw_excel_frontend(frontend, STYLE, wb=wb)
 
-    from app.scheduler.mascarpone import wrap_frontend, STYLE
+    if "mascarpone" in schedules:
+        from app.scheduler.mascarpone import wrap_frontend, STYLE
 
-    frontend = wrap_frontend(schedules["mascarpone"])
-    depth = frontend.y[1]
-    frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
-    cur_depth += depth
+        frontend = wrap_frontend(schedules["mascarpone"])
+        depth = frontend.y[1]
+        frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
+        cur_depth += depth
 
-    draw_excel_frontend(frontend, STYLE, wb=wb)
+        draw_excel_frontend(frontend, STYLE, wb=wb)
 
-    from app.scheduler.butter import wrap_frontend, STYLE
+    if "butter" in schedules:
+        from app.scheduler.butter import wrap_frontend, STYLE
 
-    frontend = wrap_frontend(schedules["butter"])
-    depth = frontend.y[1]
-    frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
-    cur_depth += depth
+        frontend = wrap_frontend(schedules["butter"])
+        depth = frontend.y[1]
+        frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
+        cur_depth += depth
 
-    draw_excel_frontend(frontend, STYLE, wb=wb)
+        draw_excel_frontend(frontend, STYLE, wb=wb)
 
-    from app.scheduler.milk_project import wrap_frontend, STYLE
+    if "milkproject" in schedules:
+        from app.scheduler.milk_project import wrap_frontend, STYLE
 
-    frontend = wrap_frontend(schedules["milk_project"])
-    depth = frontend.y[1]
-    frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
-    cur_depth += depth
+        frontend = wrap_frontend(schedules["milk_project"])
+        depth = frontend.y[1]
+        frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
+        cur_depth += depth
 
-    draw_excel_frontend(frontend, STYLE, wb=wb)
+        draw_excel_frontend(frontend, STYLE, wb=wb)
 
-    from app.scheduler.contour_cleanings import wrap_frontend, STYLE
+    if "contour_cleanings" in schedules:
+        from app.scheduler.contour_cleanings import wrap_frontend, STYLE
 
-    frontend = wrap_frontend(schedules["contour_cleanings"])
-    depth = frontend.y[1]
-    frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
-    cur_depth += depth
+        frontend = wrap_frontend(schedules["contour_cleanings"])
+        depth = frontend.y[1]
+        frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
+        cur_depth += depth
 
     # todo maybe: copy-paste from submit_schedule
     with code("Dump frontend as excel file"):

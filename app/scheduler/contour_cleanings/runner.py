@@ -22,8 +22,12 @@ def run_contour_cleanings(
     ]:
         fn = os.path.join(input_path, prefix + " " + b + ".pickle")
 
+        # todo soon: make properly
         if not os.path.exists(fn):
-            raise Exception(f"Не найдено: {b} для данной даты")
+            if a in ["mozzarella", "ricotta", "mascarpone"]:
+                raise Exception(f"Не найдено: {b} для данной даты")
+            else:
+                continue
 
         with open(fn, "rb") as f:
             schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
