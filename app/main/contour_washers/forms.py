@@ -16,7 +16,7 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default=time(19, 0),
     )
-    milkproject_end_time = TimeField(
+    milk_project_end_time = TimeField(
         'Время окончания работы милкпроджекта',
         validators=[Optional()],
         default=time(11, 0),

@@ -19,6 +19,11 @@ def run_contour_cleanings(
         raise_if_not_present=["mozzarella", "ricotta"],
         warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
     )
+
+    for department in ["butter", "milk_project", "adygea"]:
+        if kwargs.get(f"{department}_end_time"):
+            schedules[department] = "manual"
+
     if not schedule:
         schedule = make_schedule(schedules, **kwargs)
     frontend = wrap_frontend(schedule)
