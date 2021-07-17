@@ -6,22 +6,7 @@ from utils_ak.block_tree import *
 def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=False):
     utils.makedirs(output_path)
 
-    schedules = {}
-    for a, b in [
-        ["mozzarella", "Расписание моцарелла"],
-        ["mascarpone", "Расписание маскарпоне"],
-        ["butter", "Расписание масло"],
-        ["milk_project", "Расписание милкпроджект"],
-        ["ricotta", "Расписание рикотта"],
-        ["contour_cleanings", "Расписание контурные мойки"],
-    ]:
-        fn = os.path.join(input_path, prefix + " " + b + ".pickle")
-
-        if not os.path.exists(fn):
-            continue
-
-        with open(fn, "rb") as f:
-            schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
+    schedules = load_schedules(input_path, prefix)
 
     wb = init_schedule_workbook()
 
@@ -99,9 +84,9 @@ def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=Fa
 def test():
     run_consolidated(
         # "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
-        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample1",
+        "/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-16/approved",
         # prefix="2021-01-01",
-        prefix="sample1",
+        prefix="2021-07-16",
         open_file=True,
     )
 

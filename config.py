@@ -1,5 +1,4 @@
 from app.imports.external import *
-from typing import Optional
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -40,9 +39,7 @@ class BaseClass:
         "app/data/static/templates/constructor_milkproject.xlsx"
     )
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
-    TEMPLATE_ADYGEA_BOILING_PLAN = (
-        "app/data/static/templates/constructor_adygea.xlsx"
-    )
+    TEMPLATE_ADYGEA_BOILING_PLAN = "app/data/static/templates/constructor_adygea.xlsx"
 
     IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:
@@ -106,12 +103,30 @@ class BaseClass:
     TELEGRAM_CHAT_ID = -544068496
     TELEGRAM_CHAT_FILES_ID = -541375793
 
-    RQ_REDIS_URL = 'redis://redis:6379/0'
-    RQ_QUEUES = ['default']
+    RQ_REDIS_URL = "redis://redis:6379/0"
+    RQ_QUEUES = ["default"]
 
     @staticmethod
     def abs_path(local_path):
         return os.path.join(basedir, local_path)
+
+    DEPARTMENT_NAMES = {
+        "mozzarella": "моцарелла",
+        "mascarpone": "маскарпоне",
+        "milk_project": "милкпроджект",
+        "butter": "масло",
+        "adygea": "адыгейский",
+        "contour_cleanings": "контурные мойки",
+        "ricotta": "рикотта",
+    }
+
+    EMPTY_ALLOWED_DEPARTMENTS = [
+        "mascarpone",
+        "milk_project",
+        "butter",
+        "adygea",
+        "contour_cleanings",
+    ]
 
 
 class DebugConfig(BaseClass):
@@ -150,3 +165,7 @@ configs = {
     "debug": DebugConfig,
     "test": TestConfig,
 }
+
+DEFAULT_ENVIRONMENT = "debug"
+ENVIRONMENT = os.environ.get("ENVIRONMENT", DEFAULT_ENVIRONMENT)
+config = configs[ENVIRONMENT]

@@ -18,7 +18,7 @@ def _test(fn):
 
 def test_samples():
     fns = glob.glob(
-        DebugConfig.abs_path("app/data/static/samples/inputs/milk_project/*.xlsx")
+        config.abs_path("app/data/static/samples/inputs/milk_project/*.xlsx")
     )
     fns = [fn for fn in fns if "$" not in fn]
     for fn in fns:

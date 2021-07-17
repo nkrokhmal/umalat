@@ -1,6 +1,6 @@
 import os
 
-os.environ["environment"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "interactive"
 from app.imports.runtime import *
 
 from app.scheduler import mark_consecutive_groups
@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore")
 
 def test(use_interactive_environment):
     df = read_boiling_plan(
-        DebugConfig.abs_path(
+        config.abs_path(
             "app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"
         )
     )

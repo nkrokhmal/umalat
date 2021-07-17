@@ -1,5 +1,5 @@
 import os
-os.environ["environment"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from app.imports.runtime import *
 

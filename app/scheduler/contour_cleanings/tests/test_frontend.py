@@ -10,11 +10,12 @@ def test(open_file=False):
     utils.lazy_tester.configure_function_path()
 
     outputs = run_contour_cleanings(
-        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample1",
-        prefix="sample1",
+        "/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-16/approved",
+        prefix="2021-07-16",
         open_file=open_file,
-        butter_end_time="16:00",
-        adygea_end_time="20:00",
+        butter_end_time="19:00:00",
+        adygea_end_time="14:00:00",
+        milk_project_end_time="11:00:00",
     )
     utils.lazy_tester.log(outputs["schedule"])
     utils.lazy_tester.assert_logs(reset=True)

@@ -4,8 +4,39 @@ from utils_ak.block_tree import *
 from app.scheduler.time import *
 
 
+def calc_scotta_input_tanks(schedules):
+    scotta_per_boiling = 1900 - 130
+    values = [['4', 60000], ['5', 60000], ['8', 80000]]
+    tanks_df = pd.DataFrame(values, columns=['id', 'kg'])
+    tanks_df['max_boilings'] = tanks_df['kg'].apply(
+        lambda kg: int(custom_round(kg / scotta_per_boiling, 1, rounding='floor')))
+    tanks_df['n_boilings'] = None
+    tanks_df['scotta'] = None
+
+    boilings = list(schedules['ricotta'].iter(cls='boiling'))
+    total_scotta = len(boilings) * scotta_per_boiling
+
+    left_scotta = total_scotta
+
+    assert len(boilings) <= tanks_df[
+        'max_boilings'].sum(), 'Слишком много варок на линии рикотты. Скотта не помещается в танки.'
+    for i, row in tanks_df.iterrows():
+        if not left_scotta:
+            break
+
+        max_scotta = row['max_boilings'] * scotta_per_boiling
+        cur_scotta = min(max_scotta, left_scotta)
+        left_scotta -= cur_scotta
+
+        tanks_df.loc[i, 'scotta'] = cur_scotta
+
+    tanks_df = tanks_df.fillna(0)
+    tanks_df['scotta'] /= 1000.
+    return tanks_df[['id', 'scotta']].values.tolist()
+
+
 class CleaningValidator(ClassValidator):
-    def __init__(self, window=10, ordered=True):
+    def __init__(self, window=30, ordered=True):
         self.ordered = ordered
         super().__init__(window=window)
 
@@ -22,8 +53,8 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def _make_contour_1(schedules, order=(0, 1, 2), milkproject_end_time=None, adygea_end_time=None):
-    milkproject_end_time = _init_end_time(schedules, 'milk_project', milkproject_end_time)
+def _make_contour_1(schedules, order=(0, 1, 2), milk_project_end_time=None, adygea_end_time=None):
+    milk_project_end_time = _init_end_time(schedules, 'milk_project', milk_project_end_time)
     adygea_end_time = _init_end_time(schedules, 'adygea', adygea_end_time)
 
     m = BlockMaker("1 contour")
@@ -49,36 +80,40 @@ def _make_contour_1(schedules, order=(0, 1, 2), milkproject_end_time=None, adyge
                 assert len(_boilings) <= 9, f'Слишком много наливов на смеси {percent}'
 
             if len(_boilings) >= 10:
-                values.append([percent, _boilings[8]])
-            elif len(_boilings) > 0:
-                values.append([percent, _boilings[-1]])
+                values.append([percent, _boilings[8]['pouring']['first']['termizator'].y[0], '01:50'])
 
-        df = pd.DataFrame(values, columns=['percent', 'boiling'])
-        df['pouring_end'] = df['boiling'].apply(lambda boiling: boiling['pouring']['first']['termizator'].y[0])
-        df = df[['percent', 'pouring_end']]
+            if len(_boilings) > 0:
+                values.append([percent, _boilings[-1]['pouring']['first']['termizator'].y[0], '01:50'])
+            else:
+                # no boilings found today
+                values.append([percent, cast_t('10:00'), '01:05'])
+
+        df = pd.DataFrame(values, columns=['percent', 'pouring_end', 'time'])
+        df = df[['percent', 'pouring_end', 'time']]
         df = df.sort_values(by='pouring_end')
         values = df.values.tolist()
 
-        for percent, end in values:
-            m.row('cleaning', push_func=AxisPusher(start_from=['last_end', end], validator=CleaningValidator()),
-                  size=cast_t('01:50'),
+        for percent, end, time in values:
+            m.row('cleaning', push_func=AxisPusher(start_from=end, validator=CleaningValidator(ordered=False)),
+                  size=cast_t(time),
                   label=f'Танк смесей {percent}')
 
-    # todo soon: можем ли мыть раньше линии отгрузки?
     m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
           size=cast_t('01:20'),
           label='Линия отгрузки')
 
     def f1():
-        m.row('cleaning', push_func=AxisPusher(start_from=adygea_end_time, validator=CleaningValidator()),
-              size=cast_t('01:50'),
-              label='Линия адыгейского')
+        if 'adygea' in schedules:
+            m.row('cleaning', push_func=AxisPusher(start_from=adygea_end_time, validator=CleaningValidator()),
+                  size=cast_t('01:50'),
+                  label='Линия адыгейского')
 
     def f2():
-        m.row('cleaning',
-              push_func=AxisPusher(start_from=milkproject_end_time, validator=CleaningValidator()),
-              size=cast_t('02:20'),
-              label='Милкпроджект')
+        if 'milk_project' in schedules:
+            m.row('cleaning',
+                  push_func=AxisPusher(start_from=milk_project_end_time, validator=CleaningValidator()),
+                  size=cast_t('02:20'),
+                  label='Милкпроджект')
 
     def f3():
         m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
@@ -88,20 +123,20 @@ def _make_contour_1(schedules, order=(0, 1, 2), milkproject_end_time=None, adyge
     run_order([f1, f2, f3], order)
 
     for _ in range(3):
-        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False, window=30)),
+        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:50'),
               label='Танк сырого молока')
 
     for _ in range(2):
-        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False, window=30)),
+        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:50'),
               label='Танк обрата')
 
     return m.root
 
 
-def make_contour_1(schedules, milkproject_end_time=None, adygea_end_time=None):
-    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules, milkproject_end_time=milkproject_end_time, adygea_end_time=adygea_end_time)
+def make_contour_1(schedules, milk_project_end_time=None, adygea_end_time=None):
+    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules, milk_project_end_time=milk_project_end_time, adygea_end_time=adygea_end_time)
     return df.iloc[-1]['output']
 
 
@@ -117,10 +152,11 @@ def make_contour_2(schedules):
 
     with code('Мультиголова'):
         multihead_packings = schedules['mozzarella'].iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова')
-        multihead_end = max(packing.y[0] for packing in multihead_packings)
-        m.row('cleaning', push_func=AxisPusher(start_from=['last_end', multihead_end], validator=CleaningValidator()),
-              size=cast_t('01:20'),
-              label='Комет')
+        if multihead_packings:
+            multihead_end = max(packing.y[0] for packing in multihead_packings)
+            m.row('cleaning', push_func=AxisPusher(start_from=['last_end', multihead_end], validator=CleaningValidator()),
+                  size=cast_t('01:20'),
+                  label='Комет')
 
         m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
               size=cast_t('01:20'),
@@ -177,9 +213,14 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                       label=f'Сыроизготовитель {int(n) + 1}')
                 yield
 
-        # make iterator longer
-        for i in range(4):
-            yield
+        with code('non-used cheesemakers'):
+            non_used_ids = set([str(x) for x in range(4)]) - set(df['pouring_line'].unique())
+            for id in non_used_ids:
+                m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:05'),
+                      label=f'Сыроизготовитель {int(id) + 1}')
+                yield
+
 
     run_order([f1, g2()], order1)
 
@@ -199,6 +240,15 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                                                            m.create_block('cleaning',
                                                                           size=(cast_t('01:30'), 0),
                                                                           label='Линия 1 ванна 1 + ванна 2')])
+            else:
+                # no water used
+                m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:45'),
+                      label=f'Линия 1 плавилка')
+                m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:15'),
+                      label=f'Линия 1 ванна 1 + ванна 2')
+
             if lines_df.loc['salt', 'boilings']:
                 lines_df.loc['salt', 'cleanings'].extend([m.create_block('cleaning',
                                                                          size=(cast_t('02:20'), 0),
@@ -209,6 +259,20 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                                                           m.create_block('cleaning',
                                                                          size=(cast_t('01:30'), 0),
                                                                          label='Линия 2 ванна 2')])
+            else:
+                # no salt used
+                m.row('cleaning',
+                      push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:45'),
+                      label=f'Линия 2 плавилка')
+                m.row('cleaning',
+                      push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:15'),
+                      label=f'Линия 2 ванна 1')
+                m.row('cleaning',
+                      push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:15'),
+                      label=f'Линия 2 ванна 2')
 
             lines_df['melting_end'] = lines_df['boilings'].apply(lambda boilings: None if not boilings else boilings[-1]['melting_and_packing']['melting'].y[0])
             lines_df = lines_df.sort_values(by='melting_end')
@@ -226,11 +290,10 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                 yield
 
     def f4():
-        b = m.row('cleaning',  push_func=AxisPusher(validator=CleaningValidator()),
+        b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('22:00'), validator=CleaningValidator()),
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
-        # todo soon: make 00:10?
-        assert cast_t('21:40') <= b.x[0] <= cast_t('01:00:10'), "Short cleaning too bad"
+        assert cast_t('22:00') <= b.x[0] <= cast_t('01:00:10'), "Short cleaning too bad"
 
     run_order([g3(), f4], order2)
 
@@ -295,6 +358,17 @@ def make_contour_4(schedules, is_tomorrow_day_off=False):
                                   label=f'Дренатор {", ".join(ids)}').block
             i += 1
 
+        # run drenators that are not present
+        non_used_ids = set(range(1, 9)) - set(df['id'].unique())
+        non_used_ids = [str(x) for x in non_used_ids]
+        for non_used_id in non_used_ids:
+            m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'),
+                                                   validator=CleaningValidator(ordered=False)),
+                  size=cast_t('01:05'),
+                  ids=[non_used_id],
+                  label=f'Дренатор {", ".join([non_used_id])}')
+
+
     m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
           size=cast_t('01:30'),
           label='Транспортер + линия кислой сыворотки')
@@ -317,43 +391,6 @@ def make_contour_5(schedules, input_tanks=(['4', 60], ['5', 60])):
           size=cast_t('01:20'),
           label='Танк концентрата')
 
-    # todo maybe: use to calculate input tanks from yesterday
-    # with code('scotta'):
-    #     ''' Calc tanks_df
-    #            id     kg  n_boilings finished
-    #         0   6  60000          33      101
-    #         1   7  60000          33     None
-    #         2   8  80000          45     None
-    #     '''
-    #     scotta_per_boiling = 1900 - 130
-    #     values = [[6, 60000], [7, 60000], [8, 80000]]
-    #     tanks_df = pd.DataFrame(values, columns=['id', 'kg'])
-    #     tanks_df['n_boilings'] = tanks_df['kg'].apply(
-    #         lambda kg: int(custom_round(kg / scotta_per_boiling, 1, rounding='floor')))
-    #     tanks_df['finished'] = None
-    #
-    #     boilings = list(schedules['ricotta'].iter(cls='boiling'))
-    #     assert len(boilings) <= tanks_df[
-    #         'n_boilings'].sum(), 'Слишком много варок на линии рикотты. Скотта не помещается в танки.'
-    #     for i, row in tanks_df.iterrows():
-    #         if not boilings:
-    #             break
-    #         if len(boilings) >= row['n_boilings']:
-    #             cur_boiling = boilings[row['n_boilings'] - 1]
-    #             boilings = boilings[row['n_boilings']:]
-    #         else:
-    #             cur_boiling = boilings[-1]
-    #             boilings = []
-    #
-    #         tanks_df.loc[i, 'finished'] = cur_boiling.y[0] + cast_t('05:30')
-    #
-    #     # make blocks
-    #     tanks_df = tanks_df[~tanks_df['finished'].isnull()]
-    #
-    #     for i, row in tanks_df.iterrows():
-    #         m.row('cleaning', push_func=add_push,
-    #               size=cast_t('01:20'), x=row['finished'],
-    #               label=f'Танк рикотты {row["id"]}')
 
     with code('scotta'):
         start_t = cast_t('06:30')
@@ -379,59 +416,64 @@ def make_contour_5(schedules, input_tanks=(['4', 60], ['5', 60])):
 
     return m.root
 
-# todo soon: make properly
-def _init_end_time(schedules, department, input_end_time):
-    if not input_end_time and department not in schedules:
-        raise Exception(
-            f'Не найдено утвержденное расписание по цех {department}. Укажите время окончания работы {department} вручную.')
 
-    if not input_end_time:
+def _init_end_time(schedules, department, input_end_time):
+    if department not in schedules:
+        return
+
+    if schedules[department] != 'manual':
         input_end_time = schedules[department].y[0]
     else:
         input_end_time = cast_t(str(input_end_time)[:-3]) # 21:00:00 -> 21:00 -> 252
     return input_end_time
 
-def make_contour_6(schedules, butter_end_time=None, milkproject_end_time=None):
+
+def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
     m = BlockMaker("6 contour")
 
     butter_end_time = _init_end_time(schedules, 'butter', butter_end_time)
-    milkproject_end_time = _init_end_time(schedules, 'milk_project', milkproject_end_time)
+    milk_project_end_time = _init_end_time(schedules, 'milk_project', milk_project_end_time)
 
-    m.row('cleaning', push_func=add_push,
-          x=milkproject_end_time,
-          size=cast_t('01:20'),
-          label='Линия сырого молока на роникс')
+    if 'milk_project' in schedules:
+        m.row('cleaning', push_func=add_push,
+              x=milk_project_end_time,
+              size=cast_t('01:20'),
+              label='Линия сырого молока на роникс')
 
     with code('Танк рикотты 1 внутри дня'):
-        boilings = list(schedules['ricotta'].iter(cls='boiling'))
-        whey_used = 1900 * len(boilings)
+        ricotta_boilings = list(schedules['ricotta'].iter(cls='boiling'))
+        whey_used = 1900 * len(ricotta_boilings)
         if whey_used > 100000:
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t('12:00'), validator=CleaningValidator(ordered=False)),
                   size=cast_t('01:20'),
                   label='Танк рикотты 1')
 
     with code('cream tanks'):
-        boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
-        # todo soon: спросить, что делаем если варок меньше 4?
-        boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]
-        m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 12, validator=CleaningValidator(ordered=False)),
-                                      size=cast_t('01:20'),
-                                      label='Танк сливок') # fourth mascarpone boiling group end + hour
-
-
+        if 'mascarpone' in schedules:
+            boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
+            boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]
+            m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 12, validator=CleaningValidator(ordered=False)),
+                                          size=cast_t('01:20'),
+                                          label='Танк сливок') # fourth mascarpone boiling group end + hour
+        else:
+            m.row('cleaning', push_func=AxisPusher(start_from=cast_t('00:00'),
+                                                   validator=CleaningValidator(ordered=False)),
+                  size=cast_t('01:20'),
+                  label='Танк сливок')
 
         m.row('cleaning', push_func=AxisPusher(start_from=cast_t('09:00'), validator=CleaningValidator(ordered=False)),
                                       size=cast_t('01:20'),
                                       label='Танк сливок')
 
     with code('mascarpone'):
-        boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
-        boiling_group = boiling_groups[-1]
-        m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 6, validator=CleaningValidator(ordered=False)),
-              size=(cast_t('01:20'), 0),
-              label='Маскарпоне')
+        if 'mascarpone' in schedules:
+            boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
+            boiling_group = boiling_groups[-1]
+            m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 6, validator=CleaningValidator(ordered=False)),
+                  size=(cast_t('01:20'), 0),
+                  label='Маскарпоне')
 
-    ricotta_end = boilings[-1]['pumping_out'].y[0] + 12
+    ricotta_end = ricotta_boilings[-1]['pumping_out'].y[0] + 12
     m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
           size=cast_t('02:30'),
           label='Линия сладкой сыворотки')
@@ -441,14 +483,25 @@ def make_contour_6(schedules, butter_end_time=None, milkproject_end_time=None):
           size=cast_t('01:20'),
           label='Танк сливок')  # ricotta end + hour
 
-    for label in ['Танк рикотты 1', 'Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
+    with code('Танк рикотты 1'):
+        if len(ricotta_boilings) < 9:
+            end_boiling = ricotta_boilings[-1]
+        else:
+            end_boiling = ricotta_boilings[-9]
+
+        m.row('cleaning', push_func=AxisPusher(start_from=end_boiling.x[0], validator=CleaningValidator(ordered=False)),
+              size=cast_t('01:20'),
+              label='Танк рикотты 1')
+
+    for label in ['Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
         m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
               label=label)
 
-    m.row('cleaning', push_func=AxisPusher(start_from=butter_end_time, validator=CleaningValidator(ordered=False)),
-          size=cast_t('01:20'),
-          label='Маслоцех')
+    if 'butter' in schedules:
+        m.row('cleaning', push_func=AxisPusher(start_from=butter_end_time, validator=CleaningValidator(ordered=False)),
+              size=cast_t('01:20'),
+              label='Маслоцех')
 
     return m.root
 
@@ -457,12 +510,12 @@ def make_schedule(schedules, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(schedules, milkproject_end_time=kwargs.get('milkproject_end_time'), adygea_end_time=kwargs.get('adygea_end_time')),
+        make_contour_1(schedules, milk_project_end_time=kwargs.get('milk_project_end_time'), adygea_end_time=kwargs.get('adygea_end_time')),
         make_contour_2(schedules),
         make_contour_3(schedules),
         make_contour_4(schedules, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
         make_contour_5(schedules, input_tanks=kwargs.get('input_tanks', (['4', 60], ['5', 60]))),
-        make_contour_6(schedules, butter_end_time=kwargs.get('butter_end_time'), milkproject_end_time=kwargs.get('milkproject_end_time')),
+        make_contour_6(schedules, butter_end_time=kwargs.get('butter_end_time'), milk_project_end_time=kwargs.get('milk_project_end_time')),
     ]
 
     for contour in contours:

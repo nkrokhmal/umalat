@@ -1,3 +1,4 @@
+from app.imports.runtime import *
 from app.scheduler.butter.boiling_plan import *
 
 
@@ -17,9 +18,7 @@ def _test(fn):
 
 
 def test_samples():
-    fns = glob.glob(
-        DebugConfig.abs_path("app/data/static/samples/inputs/butter/*.xlsx")
-    )
+    fns = glob.glob(config.abs_path("app/data/static/samples/inputs/butter/*.xlsx"))
     fns = [fn for fn in fns if "$" not in fn]
     for fn in fns:
         _test(fn)

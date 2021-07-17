@@ -1,6 +1,6 @@
 import os
 
-os.environ["environment"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from app.scheduler.milk_project.algo.schedule import *
 from app.scheduler.milk_project.boiling_plan import *
@@ -17,7 +17,7 @@ def test_sample():
 
     configure_loguru_stdout("INFO")
     # boiling_plan_df = read_boiling_plan(
-    #     DebugConfig.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx")
+    #     config.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx")
     # )
     # print(make_schedule(boiling_plan_df))
 

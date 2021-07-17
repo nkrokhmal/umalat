@@ -14,7 +14,7 @@ def _test(fn, open_file=False):
 
 def test_batch():
     fns = glob.glob(
-        DebugConfig.abs_path(
+        config.abs_path(
             "app/data/static/samples/inputs/by_department/milk_project/*.xlsx"
         )
     )

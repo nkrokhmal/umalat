@@ -5,7 +5,7 @@ from app.scheduler.mozzarella import run_mozzarella
 
 def test_batch():
     fns = glob.glob(
-        DebugConfig.abs_path(
+        config.abs_path(
             "app/data/static/samples/inputs/by_department/mozzarella/*.xlsx"
         )
     )
@@ -25,7 +25,7 @@ def _test(fn, open_file=False):
 
 if __name__ == "__main__":
     # _test(
-    #     DebugConfig.abs_path(
+    #     config.abs_path(
     #         "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 1.xlsx"
     #     ),
     #     open_file=True,
