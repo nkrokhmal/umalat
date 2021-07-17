@@ -117,9 +117,10 @@ def _make_contour_1(schedules, order=(0, 1, 2), milk_project_end_time=None, adyg
                   label='Милкпроджект')
 
     def f3():
-        m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
-              size=cast_t('01:20'),
-              label='Линия роникс')
+        if 'milk_project' in schedules:
+            m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+                  size=cast_t('01:20'),
+                  label='Танк роникс')
 
     run_order([f1, f2, f3], order)
 
