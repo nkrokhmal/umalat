@@ -21,7 +21,7 @@ def run_contour_cleanings(
     )
 
     for department in ["butter", "milk_project", "adygea"]:
-        if kwargs.get(f"{department}_end_time"):
+        if department not in schedules and kwargs.get(f"{department}_end_time"):
             schedules[department] = "manual"
 
     if not schedule:

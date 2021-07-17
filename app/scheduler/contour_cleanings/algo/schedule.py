@@ -421,7 +421,7 @@ def _init_end_time(schedules, department, input_end_time):
     if department not in schedules:
         return
 
-    if not input_end_time:
+    if schedules[department] != 'manual':
         input_end_time = schedules[department].y[0]
     else:
         input_end_time = cast_t(str(input_end_time)[:-3]) # 21:00:00 -> 21:00 -> 252
