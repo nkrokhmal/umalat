@@ -462,11 +462,6 @@ def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
             m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 12, validator=CleaningValidator(ordered=False)),
                                           size=cast_t('01:20'),
                                           label='Танк сливок') # fourth mascarpone boiling group end + hour
-        else:
-            m.row('cleaning', push_func=AxisPusher(start_from=cast_t('00:00'),
-                                                   validator=CleaningValidator(ordered=False)),
-                  size=cast_t('01:20'),
-                  label='Танк сливок')
 
         m.row('cleaning', push_func=AxisPusher(start_from=cast_t('09:00'), validator=CleaningValidator(ordered=False)),
                                       size=cast_t('01:20'),
