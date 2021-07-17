@@ -6,7 +6,7 @@ from utils_ak.block_tree import *
 def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=False):
     utils.makedirs(output_path)
 
-    schedules = load_schedules(input_path, prefix, departments=["mascarpone"])
+    schedules = load_schedules(input_path, prefix)
 
     wb = init_schedule_workbook()
 
@@ -84,9 +84,9 @@ def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=Fa
 def test():
     run_consolidated(
         # "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
-        "/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-16/approved",
+        "/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-14/approved",
         # prefix="2021-01-01",
-        prefix="2021-07-16",
+        prefix="2021-07-14",
         open_file=True,
     )
 

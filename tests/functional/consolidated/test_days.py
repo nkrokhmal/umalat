@@ -85,14 +85,15 @@ def _test_batch(same_output_path=False):
 
 if __name__ == "__main__":
     _test_day(
-        input_path="/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-16/approved",
-        prefix="2021-07-16",
+        input_path="/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-14/approved",
+        prefix="2021-07-14",
         open_file=True,
         input_params={
             "contour_cleanings": {
                 "butter_end_time": "19:00:00",
                 "milk_project_end_time": "11:00:00",
-                "adygea_end_time": "14:00:00",
+                # "adygea_end_time": "14:00:00",
+                "adygea_end_time": "",
             }
         },
         run_boiling_plans=False,
