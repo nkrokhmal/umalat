@@ -36,7 +36,7 @@ def calc_scotta_input_tanks(schedules):
 
 
 class CleaningValidator(ClassValidator):
-    def __init__(self, window=10, ordered=True):
+    def __init__(self, window=30, ordered=True):
         self.ordered = ordered
         super().__init__(window=window)
 
@@ -123,12 +123,12 @@ def _make_contour_1(schedules, order=(0, 1, 2), milk_project_end_time=None, adyg
     run_order([f1, f2, f3], order)
 
     for _ in range(3):
-        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False, window=30)),
+        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:50'),
               label='Танк сырого молока')
 
     for _ in range(2):
-        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False, window=30)),
+        m.row('cleaning', push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:50'),
               label='Танк обрата')
 
@@ -329,6 +329,17 @@ def make_contour_4(schedules, is_tomorrow_day_off=False):
                                   ids=[drenator_id],
                                   label=f'Дренатор {", ".join(ids)}').block
             i += 1
+
+        # run drenators that are not present
+        non_used_ids = set(range(1, 9)) - set(df['id'].unique())
+        non_used_ids = [str(x) for x in non_used_ids]
+        for non_used_id in non_used_ids:
+            m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'),
+                                                   validator=CleaningValidator(ordered=False)),
+                  size=cast_t('01:05'),
+                  ids=[non_used_id],
+                  label=f'Дренатор {", ".join([non_used_id])}')
+
 
     m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
           size=cast_t('01:30'),
