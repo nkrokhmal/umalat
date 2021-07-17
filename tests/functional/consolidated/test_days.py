@@ -85,8 +85,8 @@ def _test_batch(same_output_path=False):
 
 if __name__ == "__main__":
     _test_day(
-        input_path="/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-14/approved",
-        prefix="2021-07-14",
+        input_path="/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-16/approved",
+        prefix="2021-07-16",
         open_file=True,
         input_params={
             "contour_cleanings": {

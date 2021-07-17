@@ -80,18 +80,21 @@ def _make_contour_1(schedules, order=(0, 1, 2), milk_project_end_time=None, adyg
                 assert len(_boilings) <= 9, f'Слишком много наливов на смеси {percent}'
 
             if len(_boilings) >= 10:
-                values.append([percent, _boilings[8]])
-            elif len(_boilings) > 0:
-                values.append([percent, _boilings[-1]])
+                values.append([percent, _boilings[8]['pouring']['first']['termizator'].y[0]])
 
-        df = pd.DataFrame(values, columns=['percent', 'boiling'])
-        df['pouring_end'] = df['boiling'].apply(lambda boiling: boiling['pouring']['first']['termizator'].y[0])
+            if len(_boilings) > 0:
+                values.append([percent, _boilings[-1]['pouring']['first']['termizator'].y[0]])
+            else:
+                # no boilings found today
+                values.append([percent, cast_t('10:00')])
+
+        df = pd.DataFrame(values, columns=['percent', 'pouring_end'])
         df = df[['percent', 'pouring_end']]
         df = df.sort_values(by='pouring_end')
         values = df.values.tolist()
 
         for percent, end in values:
-            m.row('cleaning', push_func=AxisPusher(start_from=['last_end', end], validator=CleaningValidator()),
+            m.row('cleaning', push_func=AxisPusher(start_from=end, validator=CleaningValidator(ordered=False)),
                   size=cast_t('01:50'),
                   label=f'Танк смесей {percent}')
 
