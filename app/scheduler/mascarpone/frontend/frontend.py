@@ -271,7 +271,7 @@ def wrap_frontend(schedule, date=None):
     m.row("stub", size=0)  # start with 1
 
     # calc start time
-    start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour
+    start_t = int(utils.custom_round(schedule.x[0], 12, "floor")) - 6  # round to last hour and add half hour
     start_time = cast_time(start_t)
     m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
 
