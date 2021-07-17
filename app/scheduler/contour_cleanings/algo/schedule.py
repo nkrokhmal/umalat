@@ -240,6 +240,15 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                                                            m.create_block('cleaning',
                                                                           size=(cast_t('01:30'), 0),
                                                                           label='Линия 1 ванна 1 + ванна 2')])
+            else:
+                # no water used
+                m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:45'),
+                      label=f'Линия 1 плавилка')
+                m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:15'),
+                      label=f'Линия 1 ванна 1 + ванна 2')
+
             if lines_df.loc['salt', 'boilings']:
                 lines_df.loc['salt', 'cleanings'].extend([m.create_block('cleaning',
                                                                          size=(cast_t('02:20'), 0),
@@ -250,6 +259,20 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                                                           m.create_block('cleaning',
                                                                          size=(cast_t('01:30'), 0),
                                                                          label='Линия 2 ванна 2')])
+            else:
+                # no salt used
+                m.row('cleaning',
+                      push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:45'),
+                      label=f'Линия 2 плавилка')
+                m.row('cleaning',
+                      push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:15'),
+                      label=f'Линия 2 ванна 1')
+                m.row('cleaning',
+                      push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:15'),
+                      label=f'Линия 2 ванна 2')
 
             lines_df['melting_end'] = lines_df['boilings'].apply(lambda boilings: None if not boilings else boilings[-1]['melting_and_packing']['melting'].y[0])
             lines_df = lines_df.sort_values(by='melting_end')
