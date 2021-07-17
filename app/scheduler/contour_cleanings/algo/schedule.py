@@ -188,10 +188,12 @@ def make_contour_2(schedules):
 def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)):
     m = BlockMaker("3 contour")
 
-    last_full_cleaning_start = schedules['mozzarella']['master']['cleaning', True][-1].x[0]
-    m.row('cleaning', push_func=add_push,
-          size=90 // 5, x=last_full_cleaning_start,
-          label='Полная мойка термизатора')
+    for cleaning in schedules['mozzarella']['master']['cleaning', True]:
+        label = 'Короткая мойка термизатора' if cleaning.props['cleaning_type'] == 'short' else 'Полная мойка термизатора'
+        m.row('cleaning', push_func=add_push,
+              size=cleaning.size[0],
+              x=cleaning.x[0],
+              label=label)
 
     def f1():
         salt_boilings = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
