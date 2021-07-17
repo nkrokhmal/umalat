@@ -2,7 +2,7 @@
 from app.imports.runtime import *
 from utils_ak.block_tree import *
 from app.scheduler.time import *
-
+from app.enum import *
 
 def calc_scotta_input_tanks(schedules):
     scotta_per_boiling = 1900 - 130
@@ -151,16 +151,18 @@ def make_contour_2(schedules):
           label='Сливки от пастера 25')
 
     with code('Мультиголова'):
-        multihead_packings = schedules['mozzarella'].iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова')
+        multihead_packings = list(schedules['mozzarella'].iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова'))
         if multihead_packings:
-            multihead_end = max(packing.y[0] for packing in multihead_packings)
+            multihead_end = max(packing.y[0] for packing in multihead_packings) + 12 # add hour for preparation
             m.row('cleaning', push_func=AxisPusher(start_from=['last_end', multihead_end], validator=CleaningValidator()),
                   size=cast_t('01:20'),
                   label='Комет')
 
-        m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
-              size=cast_t('01:20'),
-              label='Фасовочная вода')
+        water_multihead_packings = list(schedules['mozzarella'].iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова' and df.iloc[0]['boiling'].line.name == LineName.WATER))
+        if water_multihead_packings:
+            m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+                  size=cast_t('01:20'),
+                  label='Фасовочная вода')
 
     m.row('cleaning', push_func=AxisPusher(start_from=cast_t('1:04:00'), validator=CleaningValidator()),
           size=cast_t('01:20'),
@@ -208,7 +210,7 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
             values = list(sorted(values.items(), key=lambda kv: kv[1])) # [('1', 97), ('0', 116), ('2', 149), ('3', 160)]
 
             for n, cheese_maker_end in values:
-                m.row('cleaning', push_func=AxisPusher(start_from=cheese_maker_end, validator=CleaningValidator()),
+                m.row('cleaning', push_func=AxisPusher(start_from=cheese_maker_end, validator=CleaningValidator(ordered=False)),
                       size=cast_t('01:20'),
                       label=f'Сыроизготовитель {int(n) + 1}')
                 yield
