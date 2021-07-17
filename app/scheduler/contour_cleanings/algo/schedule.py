@@ -364,6 +364,7 @@ def make_contour_4(schedules, is_tomorrow_day_off=False):
             df = pd.DataFrame(values, columns=['drenator_end', 'pouring_line', 'drenator_num'])
             df['id'] = df['pouring_line'].astype(int) * 2 + df['drenator_num'].astype(int)
             df = df[['id', 'drenator_end']]
+            df['drenator_end'] += 12 + 5 # add hour and 25 minutes of buffer
             df = df.drop_duplicates(subset='id', keep='last')
             df = df.reset_index(drop=True)
             df['id'] = df['id'].astype(int) + 1
