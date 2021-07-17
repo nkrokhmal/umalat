@@ -12,17 +12,17 @@ class ScheduleForm(FlaskForm):
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
 
     butter_end_time = TimeField(
-        "Время окончания работы маслоцеха",
+        "Время окончания работы маслоцеха по умолчанию",
         validators=[Optional()],
         default=time(19, 0),
     )
     milk_project_end_time = TimeField(
-        "Время окончания работы милкпроджекта",
+        "Время окончания работы милкпроджекта по умолчанию",
         validators=[Optional()],
         default=time(11, 0),
     )
     adygea_end_time = TimeField(
-        "Время окончания работы адыгейского цеха",
+        "Время окончания работы адыгейского цеха по умолчанию",
         validators=[Optional()],
         default=time(14, 0),
     )
