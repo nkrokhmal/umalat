@@ -39,16 +39,14 @@
                         </div>
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Завтра нерабочий день </label>
-                                {{form.is_not_working_day(place_holder='is_not_working_day', checked=True)}}
+                                <label>Время окончания работы милкпроджекта </label>
+                                {{form.milk_project_end_time(place_holder='milk_project_end_time', class='form-control')}}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-6 col-sm-6">
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Время окончания работы милкпроджекта </label>
-                                {{form.milkproject_end_time(place_holder='milkproject_end_time', class='form-control')}}
+                                <label>Завтра нерабочий день </label>
+                                {{form.is_not_working_day(place_holder='is_not_working_day', checked=True)}}
                             </div>
                         </div>
                     </div>
