@@ -213,9 +213,14 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                       label=f'Сыроизготовитель {int(n) + 1}')
                 yield
 
-        # make iterator longer
-        for i in range(4):
-            yield
+        with code('non-used cheesemakers'):
+            non_used_ids = set([str(x) for x in range(4)]) - set(df['pouring_line'].unique())
+            for id in non_used_ids:
+                m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
+                      size=cast_t('01:05'),
+                      label=f'Сыроизготовитель {int(id) + 1}')
+                yield
+
 
     run_order([f1, g2()], order1)
 
