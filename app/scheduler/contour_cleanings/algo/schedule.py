@@ -319,58 +319,63 @@ def make_contour_4(schedules, is_tomorrow_day_off=False):
     m = BlockMaker("4 contour")
 
     with code('drenators'):
-        # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
-        values = []
-        for boiling in schedules['mozzarella']['master']['boiling', True]:
-            drenator = boiling['drenator']
-            values.append([drenator.y[0], drenator.props['pouring_line'], drenator.props['drenator_num']])
-        df = pd.DataFrame(values, columns=['drenator_end', 'pouring_line', 'drenator_num'])
-        df['id'] = df['pouring_line'].astype(int) * 2 + df['drenator_num'].astype(int)
-        df = df[['id', 'drenator_end']]
-        df = df.drop_duplicates(subset='id', keep='last')
-        df = df.reset_index(drop=True)
-        df['id'] = df['id'].astype(int) + 1
-        values = df.values.tolist()
 
-        # logic
-        i = 0
-        while i < len(values):
-            drenator_id, drenator_end = values[i]
-            if i == 0:
-                ids = [str(drenator_id)]
-                block = m.row('cleaning', push_func=add_push,
-                              size=cast_t('01:20'), x=drenator_end,
-                              ids=ids,
-                              label=f'Дренатор {", ".join(ids)}').block
-            else:
-                if i + 1 < len(values) and values[i + 1][1] <= block.y[0] + 2 and not is_tomorrow_day_off:
-                    # clean multiple drenators
-                    ids = [str(drenator_id), str(values[i + 1][0])]
-                    block = m.row('cleaning',
-                                  push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()),
-                                  size=cast_t('01:20'),
-                                  ids=ids,
-                                  label=f'Дренатор {", ".join(ids)}').block
-                    i += 1
-                else:
+        def _make_drenators(values, cleaning_time, label_suffix='', force_pairs=False):
+            # logic
+            i = 0
+            while i < len(values):
+                drenator_id, drenator_end = values[i]
+                if i == 0 and not force_pairs:
+                    # run first drenator single if not force pairs
                     ids = [str(drenator_id)]
-                    block = m.row('cleaning', push_func=AxisPusher(start_from=['last_end', drenator_end],
-                                                                   validator=CleaningValidator()),
-                                  size=cast_t('01:20'),
-                                  ids=[drenator_id],
-                                  label=f'Дренатор {", ".join(ids)}').block
-            i += 1
+                    block = m.row('cleaning', push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator(ordered=False)),
+                                  size=cast_t(cleaning_time),
+                                  ids=ids,
+                                  label=f'Дренатор {", ".join(ids)}{label_suffix}').block
+                else:
+                    if i + 1 < len(values) and (force_pairs or values[i + 1][1] <= block.y[0] + 2 and not is_tomorrow_day_off):
+                        # run pair
+                        ids = [str(drenator_id), str(values[i + 1][0])]
+                        block = m.row('cleaning',
+                                      push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator(ordered=False)),
+                                      size=cast_t(cleaning_time),
+                                      ids=ids,
+                                      label=f'Дренатор {", ".join(ids)}{label_suffix}').block
+                        i += 1
+                    else:
+                        # run single
+                        ids = [str(drenator_id)]
+                        block = m.row('cleaning', push_func=AxisPusher(start_from=drenator_end,
+                                                                       validator=CleaningValidator(ordered=False)),
+                                      size=cast_t(cleaning_time),
+                                      ids=[drenator_id],
+                                      label=f'Дренатор {", ".join(ids)}{label_suffix}').block
+                i += 1
 
-        # run drenators that are not present
-        non_used_ids = set(range(1, 9)) - set(df['id'].unique())
-        non_used_ids = [str(x) for x in non_used_ids]
-        for non_used_id in non_used_ids:
-            m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'),
-                                                   validator=CleaningValidator(ordered=False)),
-                  size=cast_t('01:05'),
-                  ids=[non_used_id],
-                  label=f'Дренатор {", ".join([non_used_id])} (кор. мойка)')
+        with code('Main drenators'):
+            # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
+            values = []
+            for boiling in schedules['mozzarella']['master']['boiling', True]:
+                drenator = boiling['drenator']
+                values.append([drenator.y[0], drenator.props['pouring_line'], drenator.props['drenator_num']])
+            df = pd.DataFrame(values, columns=['drenator_end', 'pouring_line', 'drenator_num'])
+            df['id'] = df['pouring_line'].astype(int) * 2 + df['drenator_num'].astype(int)
+            df = df[['id', 'drenator_end']]
+            df = df.drop_duplicates(subset='id', keep='last')
+            df = df.reset_index(drop=True)
+            df['id'] = df['id'].astype(int) + 1
 
+            values = df.values.tolist()
+            _make_drenators(values, '01:20')
+
+        with code('Non used drenators'):
+            values = []
+            # run drenators that are not present
+            non_used_ids = set(range(1, 9)) - set(df['id'].unique())
+            non_used_ids = [str(x) for x in non_used_ids]
+            for non_used_id in non_used_ids:
+                values.append([non_used_id, cast_t('10:00')])
+            _make_drenators(values, '01:05', ' (кор. мойка)', force_pairs=True)
 
     m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
           size=cast_t('01:30'),
