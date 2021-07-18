@@ -456,7 +456,7 @@ def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
         if whey_used > 100000:
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t('12:00'), validator=CleaningValidator(ordered=False)),
                   size=cast_t('01:20'),
-                  label='Танк рикотты 1')
+                  label='Танк рикотты 1 (сладкая сыворотка)')
 
     with code('cream tanks'):
         if 'mascarpone' in schedules:
@@ -496,9 +496,9 @@ def make_contour_6(schedules, butter_end_time=None, milk_project_end_time=None):
 
         m.row('cleaning', push_func=AxisPusher(start_from=end_boiling.x[0], validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
-              label='Танк рикотты 1')
+              label='Танк рикотты 1 (сладкая сыворотка)')
 
-    for label in ['Линия сливок на подмес рикотта', 'Танк рикотты 3', 'Танк рикотты 2']:
+    for label in ['Линия сливок на подмес рикотта', 'Танк рикотты 3 (скотта)', 'Танк рикотты (сладкая сыворотка)']:
         m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
               label=label)
