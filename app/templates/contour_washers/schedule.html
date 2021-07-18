@@ -49,6 +49,12 @@
                                 {{form.is_not_working_day(place_holder='is_not_working_day', checked=True)}}
                             </div>
                         </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Линия отгрузки </label>
+                                {{form.shipping_line(place_holder='shipping_line', checked=True)}}
+                            </div>
+                        </div>
                     </div>
                     <button type="submit" name="submit" class="btn btn-block btn-primary">Отправить</button>
                 </div>

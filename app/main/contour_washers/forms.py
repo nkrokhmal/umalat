@@ -30,5 +30,12 @@ class ScheduleForm(FlaskForm):
     is_not_working_day = BooleanField(
         "Завтра нерабочий день",
         validators=[Optional()],
-        default=False,
+        default=(datetime.now() + timedelta(days=1)).weekday()
+        in [0, 3],  # not working mondays/thursdays by default
+    )
+
+    shipping_line = BooleanField(
+        "Линия отгрузки",
+        validators=[Optional()],
+        default=True,
     )

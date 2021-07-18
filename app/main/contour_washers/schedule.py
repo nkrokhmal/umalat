@@ -15,6 +15,7 @@ def contour_washers_schedule():
         date = form.date.data
         date_str = date.strftime("%Y-%m-%d")
         is_not_working_day = form.is_not_working_day.data
+        shipping_line = form.shipping_line.data
         butter_end_time = form.butter_end_time.data
         milk_project_end_time = form.milk_project_end_time.data
         adygea_end_time = form.adygea_end_time.data
@@ -49,6 +50,7 @@ def contour_washers_schedule():
             butter_end_time=butter_end_time,
             milk_project_end_time=milk_project_end_time,
             adygea_end_time=adygea_end_time,
+            shipping_line=shipping_line
         )
         run_consolidated(
             path,

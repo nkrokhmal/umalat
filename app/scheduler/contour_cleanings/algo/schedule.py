@@ -53,16 +53,17 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def _make_contour_1(schedules, order=(0, 1, 2), milk_project_end_time=None, adygea_end_time=None):
+def _make_contour_1(schedules, order=(0, 1, 2), milk_project_end_time=None, adygea_end_time=None, shipping_line=True):
     milk_project_end_time = _init_end_time(schedules, 'milk_project', milk_project_end_time)
     adygea_end_time = _init_end_time(schedules, 'adygea', adygea_end_time)
 
     m = BlockMaker("1 contour")
-    m.row('cleaning', push_func=add_push,
-          size=cast_t('01:20'), x=cast_t('06:30'),
-          label='Линиия отгрузки')
+    if shipping_line:
+        m.row('cleaning', push_func=add_push,
+              size=cast_t('01:20'), x=cast_t('06:30'),
+              label='Линиия отгрузки')
 
-    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+    m.row('cleaning', push_func=AxisPusher(start_from=cast_t('08:00'), validator=CleaningValidator()),
           size=cast_t('01:20'),
           label='Линия приемки молока 1 + проверить фильтр')
 
@@ -99,9 +100,10 @@ def _make_contour_1(schedules, order=(0, 1, 2), milk_project_end_time=None, adyg
                   size=cast_t(time),
                   label=label)
 
-    m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
-          size=cast_t('01:20'),
-          label='Линия отгрузки')
+    if shipping_line:
+        m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
+              size=cast_t('01:20'),
+              label='Линия отгрузки')
 
     def f1():
         if 'adygea' in schedules:
@@ -137,8 +139,8 @@ def _make_contour_1(schedules, order=(0, 1, 2), milk_project_end_time=None, adyg
     return m.root
 
 
-def make_contour_1(schedules, milk_project_end_time=None, adygea_end_time=None):
-    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules, milk_project_end_time=milk_project_end_time, adygea_end_time=adygea_end_time)
+def make_contour_1(schedules, *args, **kwargs):
+    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules, *args, **kwargs)
     return df.iloc[-1]['output']
 
 
@@ -299,10 +301,17 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
         b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('21:00'), validator=CleaningValidator()),
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
-        assert cast_t('21:00') <= b.x[0] <= cast_t('00:00:10'), "Short cleaning too bad"
+        assert cast_t('21:00') <= b.x[0] <= cast_t('01:00:10'), "Short cleaning too bad"
 
     run_order([g3(), f4], order2)
 
+    # shift short cleaning to make it as late as possible
+    # push(
+    #     m.root,
+    #     m.root.find(label='Короткая мойка термизатора')[-1],
+    #     push_func=ShiftPusher(period=-1, start_from=cast_t('01:00:00')),
+    #     validator=CleaningValidator(ordered=False),
+    # )
 
     skus = sum([list(b.props['boiling_group_df']['sku']) for b in schedules['mozzarella']['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
@@ -516,7 +525,7 @@ def make_schedule(schedules, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(schedules, milk_project_end_time=kwargs.get('milk_project_end_time'), adygea_end_time=kwargs.get('adygea_end_time')),
+        make_contour_1(schedules, milk_project_end_time=kwargs.get('milk_project_end_time'), adygea_end_time=kwargs.get('adygea_end_time'), shipping_line=kwargs.get('shipping_line', True)),
         make_contour_2(schedules),
         make_contour_3(schedules),
         make_contour_4(schedules, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
