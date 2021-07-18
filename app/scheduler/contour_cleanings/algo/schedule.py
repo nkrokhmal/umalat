@@ -296,12 +296,13 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
                 yield
 
     def f4():
-        b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('22:00'), validator=CleaningValidator()),
+        b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('21:00'), validator=CleaningValidator()),
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
-        assert cast_t('22:00') <= b.x[0] <= cast_t('01:00:10'), "Short cleaning too bad"
+        assert cast_t('21:00') <= b.x[0] <= cast_t('00:00:10'), "Short cleaning too bad"
 
     run_order([g3(), f4], order2)
+
 
     skus = sum([list(b.props['boiling_group_df']['sku']) for b in schedules['mozzarella']['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
