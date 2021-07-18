@@ -420,7 +420,7 @@ def make_contour_5(schedules, input_tanks=(['4', 60], ['5', 60])):
           size=cast_t('01:20'),
           label='Линия подачи на НФ открыть кран')
 
-    m.row('cleaning', push_func=AxisPusher(start_from=cast_t('09:00'), validator=CleaningValidator(ordered=False)),
+    m.row('cleaning', push_func=AxisPusher(start_from=cast_t('08:30'), validator=CleaningValidator(ordered=False)),
           size=cast_t('01:20'),
           label='Линия Концентрата на отгрузку')
 
