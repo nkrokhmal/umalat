@@ -4,7 +4,7 @@ from .forms import ScheduleForm
 from app.scheduler import run_consolidated, run_contour_cleanings
 from app.main.errors import internal_error
 from app.scheduler import load_schedules
-from app.scheduler.contour_cleanings import calc_scotta_input_tanks
+from app.scheduler.contour_cleanings import *
 
 
 @main.route("/contour_washers_schedule", methods=["GET", "POST"])
@@ -35,24 +35,25 @@ def contour_washers_schedule():
             )
 
         # load input tanks from yesterday
-        with code("calc input tanks"):
+        with code("calc input tanks and present of bar12"):
             yesterday = date - timedelta(days=1)
             yesterday_str = yesterday.strftime("%Y-%m-%d")
-            schedules = load_schedules(
+            yesterday_schedules = load_schedules(
                 config.abs_path("app/data/dynamic/{}/approved/".format(yesterday_str)),
                 prefix=yesterday_str,
-                departments=["ricotta"],
+                departments=["ricotta", "mozzarella"],
             )
-            if "ricotta" not in schedules:
+            if "ricotta" not in yesterday_schedules:
                 # todo soon: warning that ricotta is not found from yesterday
                 input_tanks = [["4", 0], ["5", 0], ["8", 0]]
             else:
-                print(adygea_n_boilings, milk_project_n_boilings)
                 input_tanks = calc_scotta_input_tanks(
-                    schedules,
+                    yesterday_schedules,
                     extra_scotta=adygea_n_boilings * 370
                     + milk_project_n_boilings * 2400,
                 )
+
+            is_bar12_present = calc_is_bar12_present(yesterday_schedules)
 
         run_contour_cleanings(
             path,
@@ -64,6 +65,7 @@ def contour_washers_schedule():
             milk_project_end_time=milk_project_end_time,
             adygea_end_time=adygea_end_time,
             shipping_line=shipping_line,
+            is_bar12_present=is_bar12_present,
         )
         run_consolidated(
             path,

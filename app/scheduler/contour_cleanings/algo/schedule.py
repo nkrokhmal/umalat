@@ -4,7 +4,7 @@ from utils_ak.block_tree import *
 from app.scheduler.time import *
 from app.enum import *
 
-
+# todo soon: refactor, put into more proper place
 def calc_scotta_input_tanks(schedules, extra_scotta=0):
     scotta_per_boiling = 1900 - 130
     values = [['4', 80000], ['5', 80000], ['8', 80000]]
@@ -34,6 +34,10 @@ def calc_scotta_input_tanks(schedules, extra_scotta=0):
     tanks_df = tanks_df.fillna(0)
     tanks_df['scotta'] /= 1000.
     return tanks_df[['id', 'scotta']].values.tolist()
+
+def calc_is_bar12_present(schedules):
+    skus = sum([list(b.props['boiling_group_df']['sku']) for b in schedules['mozzarella']['master']['boiling', True]], [])
+    return '1.2' in [sku.form_factor.name for sku in skus]
 
 
 class CleaningValidator(ClassValidator):
@@ -188,7 +192,7 @@ def make_contour_2(schedules):
     return m.root
 
 
-def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)):
+def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), is_bar12_present=False):
     m = BlockMaker("3 contour")
 
     for cleaning in schedules['mozzarella']['master']['cleaning', True]:
@@ -316,8 +320,6 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
         validator=CleaningValidator(ordered=False),
     )
 
-    skus = sum([list(b.props['boiling_group_df']['sku']) for b in schedules['mozzarella']['master']['boiling', True]], [])
-    is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
     if is_bar12_present:
         m.row('cleaning', push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()),
               size=cast_t('01:20'),
@@ -326,8 +328,8 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
     return m.root
 
 
-def make_contour_3(schedules):
-    df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), schedules)
+def make_contour_3(schedules, **kwargs):
+    df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), schedules, **kwargs)
     return df.iloc[-1]['output']
 
 
@@ -532,7 +534,7 @@ def make_schedule(schedules, **kwargs):
     contours = [
         make_contour_1(schedules, milk_project_end_time=kwargs.get('milk_project_end_time'), adygea_end_time=kwargs.get('adygea_end_time'), shipping_line=kwargs.get('shipping_line', True)),
         make_contour_2(schedules),
-        make_contour_3(schedules),
+        make_contour_3(schedules, is_bar12_present=kwargs.get('is_bar12_present', False)),
         make_contour_4(schedules, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
         make_contour_5(schedules, input_tanks=kwargs.get('input_tanks', (['4', 60], ['5', 60]))),
         make_contour_6(schedules, butter_end_time=kwargs.get('butter_end_time'), milk_project_end_time=kwargs.get('milk_project_end_time')),
