@@ -283,7 +283,6 @@ def wrap_frontend(schedule, date=None):
         m.block(make_packing_line(schedule))
         m.row("stub", size=0)
         m.block(wrap_cleanings_line(schedule))
-
-    m.block("mascarpone_department_preparation", push_func=add_push,
-        size=(6, 11), x=(0, 2))
+        m.block("mascarpone_department_preparation", push_func=add_push,
+                size=(6, 11), x=(schedule.x[0] - 6, 0))
     return m.root
