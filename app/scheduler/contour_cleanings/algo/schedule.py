@@ -4,6 +4,7 @@ from utils_ak.block_tree import *
 from app.scheduler.time import *
 from app.enum import *
 
+
 def calc_scotta_input_tanks(schedules, extra_scotta=0):
     scotta_per_boiling = 1900 - 130
     values = [['4', 80000], ['5', 80000], ['8', 80000]]
@@ -301,17 +302,19 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
         b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('21:00'), validator=CleaningValidator()),
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
-        assert cast_t('21:00') <= b.x[0] <= cast_t('01:00:10'), "Short cleaning too bad"
+        assert cast_t('21:00') <= b.x[0] <= cast_t('01:00:00'), "Short cleaning too bad"
 
     run_order([g3(), f4], order2)
 
     # shift short cleaning to make it as late as possible
-    # push(
-    #     m.root,
-    #     m.root.find(label='Короткая мойка термизатора')[-1],
-    #     push_func=ShiftPusher(period=-1, start_from=cast_t('01:00:00')),
-    #     validator=CleaningValidator(ordered=False),
-    # )
+    short_cleaning = m.root.find(label='Короткая мойка термизатора')[-1]
+    short_cleaning.detach_from_parent()
+    push(
+        m.root,
+        short_cleaning,
+        push_func=ShiftPusher(period=-1, start_from=cast_t('01:00:00')),
+        validator=CleaningValidator(ordered=False),
+    )
 
     skus = sum([list(b.props['boiling_group_df']['sku']) for b in schedules['mozzarella']['master']['boiling', True]], [])
     is_bar12_present = '1.2' in [sku.form_factor.name for sku in skus]
