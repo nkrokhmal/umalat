@@ -302,7 +302,7 @@ def _make_contour_3(schedules, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1)
         b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('21:00'), validator=CleaningValidator()),
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
-        assert cast_t('21:00') <= b.x[0] <= cast_t('01:00:00'), "Short cleaning too bad"
+        assert cast_t('21:00') <= b.x[0] and b.y[0] <= cast_t('01:00:00'), "Short cleaning too bad"
 
     run_order([g3(), f4], order2)
 
