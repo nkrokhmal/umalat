@@ -416,6 +416,8 @@ def make_contour_5(schedules, input_tanks=(['4', 60], ['5', 60])):
     with code('scotta'):
         start_t = cast_t('06:30')
         for id, volume in input_tanks:
+            if not volume:
+                continue
             concentration_t = utils.custom_round(volume / 15 * 12, 1, 'ceil')
             start_t += concentration_t
             m.row('cleaning', push_func=AxisPusher(start_from=start_t, validator=CleaningValidator()),
