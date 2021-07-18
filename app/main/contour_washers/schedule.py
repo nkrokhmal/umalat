@@ -20,6 +20,13 @@ def contour_washers_schedule():
         milk_project_end_time = form.milk_project_end_time.data
         adygea_end_time = form.adygea_end_time.data
 
+        # todo soon: make proper error message
+        try:
+            adygea_n_boilings = int(form.adygea_n_boilings.data)
+            milk_project_n_boilings = int(form.milk_project_n_boilings.data)
+        except Exception as e:
+            return internal_error(e)
+
         path = config.abs_path("app/data/dynamic/{}/approved/".format(date_str))
 
         if not os.path.exists(path):
@@ -37,9 +44,15 @@ def contour_washers_schedule():
                 departments=["ricotta"],
             )
             if "ricotta" not in schedules:
+                # todo soon: warning that ricotta is not found from yesterday
                 input_tanks = [["4", 0], ["5", 0], ["8", 0]]
             else:
-                input_tanks = calc_scotta_input_tanks(schedules)
+                print(adygea_n_boilings, milk_project_n_boilings)
+                input_tanks = calc_scotta_input_tanks(
+                    schedules,
+                    extra_scotta=adygea_n_boilings * 370
+                    + milk_project_n_boilings * 2400,
+                )
 
         run_contour_cleanings(
             path,
@@ -50,7 +63,7 @@ def contour_washers_schedule():
             butter_end_time=butter_end_time,
             milk_project_end_time=milk_project_end_time,
             adygea_end_time=adygea_end_time,
-            shipping_line=shipping_line
+            shipping_line=shipping_line,
         )
         run_consolidated(
             path,

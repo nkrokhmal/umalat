@@ -4,7 +4,7 @@ from utils_ak.block_tree import *
 from app.scheduler.time import *
 from app.enum import *
 
-def calc_scotta_input_tanks(schedules):
+def calc_scotta_input_tanks(schedules, extra_scotta=0):
     scotta_per_boiling = 1900 - 130
     values = [['4', 80000], ['5', 80000], ['8', 80000]]
     tanks_df = pd.DataFrame(values, columns=['id', 'kg'])
@@ -14,7 +14,7 @@ def calc_scotta_input_tanks(schedules):
     tanks_df['scotta'] = None
 
     boilings = list(schedules['ricotta'].iter(cls='boiling'))
-    total_scotta = len(boilings) * scotta_per_boiling
+    total_scotta = len(boilings) * scotta_per_boiling + extra_scotta
 
     left_scotta = total_scotta
 

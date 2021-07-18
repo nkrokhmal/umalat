@@ -45,6 +45,18 @@
                         </div>
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
+                                <label>Количество варок в адыгейском цехе вчера (используется для подсчета скотты) </label>
+                                {{form.adygea_n_boilings(place_holder='adygea_n_boilings', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Количество варок в милкпроджект вчера (используется для подсчета скотты) </label>
+                                {{form.milk_project_n_boilings(place_holder='milk_project_n_boilings', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
                                 <label>Завтра нерабочий день </label>
                                 {{form.is_not_working_day(place_holder='is_not_working_day', checked=True)}}
                             </div>

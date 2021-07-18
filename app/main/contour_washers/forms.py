@@ -27,6 +27,18 @@ class ScheduleForm(FlaskForm):
         default=time(14, 0),
     )
 
+    adygea_n_boilings = StringField(
+        "Количество варок в адыгейском цехе вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default="0",
+    )
+
+    milk_project_n_boilings = StringField(
+        "Количество варок в милкпроджект вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default="0",
+    )
+
     is_not_working_day = BooleanField(
         "Завтра нерабочий день",
         validators=[Optional()],
