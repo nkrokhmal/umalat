@@ -66,7 +66,6 @@ def download_schedules(page):
                         schedules_metadata[date_dir][department]['filename'] = schedules_filename
                         schedules_metadata[date_dir][department]['is_approved'] = is_approved(schedules_filename, date_dir)
 
-    print(schedules_metadata)
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
 
     schedules_result = get_metadata(
