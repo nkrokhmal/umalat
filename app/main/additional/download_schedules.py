@@ -21,7 +21,7 @@ def is_approved(filename, date):
         os.path.join(
             flask.current_app.config['DYNAMIC_DIR'],
             date,
-            "approved",
+            flask.current_app.config["APPROVED_FOLDER"],
             filename,
         )
     )
@@ -29,7 +29,7 @@ def is_approved(filename, date):
 
 @main.route("/update_data", methods=["GET"])
 def update_data():
-    update_data_structure("boiling_plan")
+    update_data_structure(flask.current_app.config["BOILING_PLAN_FOLDER"])
     update_data_structure("schedule_plan")
     update_data_structure("schedule_task")
     response = flask.jsonify({"message": "Ok"})
@@ -53,7 +53,10 @@ def download_schedules(page):
     for date_dir in date_dirs:
         if is_date(date_dir):
             schedules_metadata[date_dir] = {}
-            schedule_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date_dir, "schedule")
+            schedule_dir = os.path.join(
+                flask.current_app.config["DYNAMIC_DIR"],
+                date_dir,
+                flask.current_app.config["SCHEDULE_FOLDER"])
             if os.path.exists(schedule_dir):
                 schedules_filenames = os.listdir(schedule_dir)
                 for schedules_filename in schedules_filenames:

@@ -24,7 +24,7 @@ def download_contour_washers():
         os.path.dirname(flask.current_app.root_path),
         flask.current_app.config["DYNAMIC_DIR"],
         date,
-        "approved"
+        flask.current_app.config["APPROVED_FOLDER"],
     )
     response = flask.send_from_directory(
         directory=uploads, filename=file_name, as_attachment=True
@@ -41,7 +41,7 @@ def download_boiling_plan():
         os.path.dirname(flask.current_app.root_path),
         flask.current_app.config["DYNAMIC_DIR"],
         date,
-        "boiling_plan"
+        flask.current_app.config["BOILING_PLAN_FOLDER"],
     )
     response = flask.send_from_directory(
         directory=uploads, filename=file_name, as_attachment=True
@@ -59,7 +59,7 @@ def download_schedule_plan():
         os.path.dirname(flask.current_app.root_path),
         flask.current_app.config["DYNAMIC_DIR"],
         date,
-        "schedule"
+        flask.current_app.config["SCHEDULE_FOLDER"],
     )
     response = flask.send_from_directory(
         directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True
@@ -77,7 +77,7 @@ def download_schedule_task():
         os.path.dirname(flask.current_app.root_path),
         flask.current_app.config["DYNAMIC_DIR"],
         date,
-        "task"
+        flask.current_app.config["TASK_FOLDER"],
     )
     response = flask.send_from_directory(
         directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True
@@ -93,7 +93,7 @@ def download_last_schedule_task(check_date):
             os.path.dirname(flask.current_app.root_path),
             flask.current_app.config["DYNAMIC_DIR"],
             x,
-            "task",
+            flask.current_app.config["TASK_FOLDER"],
             f"{x}.csv"
         )
         for x in dates]
@@ -120,7 +120,7 @@ def download_last_boiling_schedule_task(department):
         os.path.dirname(flask.current_app.root_path),
         flask.current_app.config["DYNAMIC_DIR"],
         x,
-        "task",
+        flask.current_app.config["TASK_FOLDER"],
         f"{x} {DEPARTMENT_DICT[department]}.csv"
     )
         for x in dates]

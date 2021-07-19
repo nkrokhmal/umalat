@@ -16,17 +16,16 @@ class BaseClass:
 
     DATE_FORMAT = "%Y-%m-%d"
 
+    BOILING_PLAN_FOLDER = "boiling_plan"
+    APPROVED_FOLDER = "approved"
+    SCHEDULE_FOLDER = "schedule"
+    SCHEDULE_DICT_FOLDER = "schedule_dict"
+    TASK_FOLDER = "task"
+
     BATCH_NUMBERS_DIR = "db/batch_numbers"
-
     DYNAMIC_DIR = "app/data/dynamic"
-    BATCH_NUMBER_DIR = "db/batch_numbers/"
-
     UPLOAD_TMP_FOLDER = "app/data/dynamic/tmp"
-    STATS_FOLDER = "app/data/dynamic/stats"
-    BOILING_PLAN_FOLDER = "app/data/dynamic/boiling_plan"
     SKU_PLAN_FOLDER = "app/data/dynamic/sku_plan"
-    SCHEDULE_PLAN_FOLDER = "app/data/dynamic/schedule_plan"
-    TOTAL_SCHEDULE_TASK_FOLDER = "app/data/dynamic/schedule_task"
 
     TEMPLATE_MOZZARELLA_BOILING_PLAN = (
         "app/data/static/templates/constructor_mozzarella.xlsx"

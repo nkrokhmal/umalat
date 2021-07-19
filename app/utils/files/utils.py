@@ -27,26 +27,29 @@ def save_file_dir(data, filename, date, folder, data_type="xlsx"):
 
 
 def save_boiling_plan(*args, **kwargs):
-    save_file_dir(*args, **kwargs, folder="boiling_plan")
+    save_file_dir(*args, **kwargs, folder=flask.current_app.config["BOILING_PLAN_FOLDER"])
 
 
 def save_schedule(*args, **kwargs):
-    save_file_dir(*args, **kwargs, folder="schedule")
+    save_file_dir(*args, **kwargs, folder=flask.current_app.config["SCHEDULE_FOLDER"])
 
 
 def save_schedule_task(*args, **kwargs):
-    save_file_dir(*args, **kwargs, folder="schedule_task", data_type="csv")
+    save_file_dir(*args, **kwargs, folder=flask.current_app.config["TASK_FOLDER"], data_type="csv")
 
 
 def save_schedule_dict(*args, **kwargs):
-    save_file_dir(*args, **kwargs, folder="schedule_dict", data_type="pickle")
+    save_file_dir(*args, **kwargs, folder=flask.current_app.config["SCHEDULE_DICT_FOLDER"], data_type="pickle")
 
 
 def move_boiling_file(date, old_filepath, old_filename, department=""):
     new_filename = "{} План по варкам {}.xlsx".format(
         old_filename.split(" ")[0], department
     )
-    data_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "boiling_plan")
+    data_dir = os.path.join(
+        flask.current_app.config["DYNAMIC_DIR"],
+        date,
+        flask.current_app.config["BOILING_PLAN_FOLDER"])
     create_if_not_exists(data_dir)
 
     filepath = os.path.join(data_dir, new_filename)
@@ -68,8 +71,15 @@ def create_dir(date, folder):
 
 
 def move_to_approved(date, file_name):
-    old_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "schedule", file_name)
-    new_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "approved")
+    old_dir = os.path.join(
+        flask.current_app.config["DYNAMIC_DIR"],
+        date,
+        flask.current_app.config["SCHEDULE_FOLDER"],
+        file_name)
+    new_dir = os.path.join(
+        flask.current_app.config["DYNAMIC_DIR"],
+        date,
+        flask.current_app.config["APPROVED_FOLDER"])
     create_if_not_exists(new_dir)
 
     shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
@@ -77,8 +87,15 @@ def move_to_approved(date, file_name):
 
 
 def move_to_approved_pickle(date, file_name):
-    old_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "schedule_dict", file_name)
-    new_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, "approved")
+    old_dir = os.path.join(
+        flask.current_app.config["DYNAMIC_DIR"],
+        date,
+        flask.current_app.config["SCHEDULE_DICT_FOLDER"],
+        file_name)
+    new_dir = os.path.join(
+        flask.current_app.config["DYNAMIC_DIR"],
+        date,
+        flask.current_app.config["APPROVED_FOLDER"])
     create_if_not_exists(new_dir)
 
     shutil.copyfile(old_dir, os.path.join(new_dir, file_name))

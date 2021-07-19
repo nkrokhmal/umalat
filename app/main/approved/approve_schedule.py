@@ -32,7 +32,7 @@ def disprove():
         os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
             date,
-            "approved",
+            flask.current_app.config["APPROVED_FOLDER"],
             file_name
         )
     )
@@ -40,7 +40,7 @@ def disprove():
         os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
             date,
-            "approved",
+            flask.current_app.config["APPROVED_FOLDER"],
             pickle_file_name
         )
     )
