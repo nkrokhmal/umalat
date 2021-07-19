@@ -94,7 +94,8 @@ def mozzarella_schedule():
             df=boiling_plan_df,
             date=date,
             model=MozzarellaSKU,
-            department="Моцарелльный цех"
+            department="Моцарелльный цех",
+            df_packing=additional_packing_df,
         )
 
         schedule_task.update_total_schedule_task()

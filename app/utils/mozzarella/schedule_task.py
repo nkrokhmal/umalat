@@ -114,7 +114,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
 
         df_task.to_csv(path, index=False, sep=";")
 
-    def draw_task_original(self, excel_client, cur_row, task_name, line_name):
+    def draw_task_original(self, excel_client, cur_row, task_name, line_name, draw_packing=True):
         df_filter = self.df[self.df["line"] == line_name]
         index = 1
 
@@ -144,28 +144,29 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             index += 1
 
         if self.df_packing is not None:
-            for i, row in self.df_packing.iterrows():
-                boxes_count = math.ceil(
-                    1000 * row["kg"] / row["sku_obj"].in_box / row["sku_obj"].weight_netto
-                )
-                values = [
-                    index,
-                    row["sku"],
-                    row["sku_obj"].in_box,
-                    row["kg"],
-                    boxes_count,
-                    row["sku_obj"].code,
-                ]
-                excel_client, cur_row = draw_schedule_raw(
-                    excel_client, cur_row, values, COLOR_PACKING
-                )
-                index += 1
-                index += 1
+            if draw_packing:
+                for i, row in self.df_packing.iterrows():
+                    boxes_count = math.ceil(
+                        1000 * row["kg"] / row["sku_obj"].in_box / row["sku_obj"].weight_netto
+                    )
+                    values = [
+                        index,
+                        row["sku"],
+                        row["sku_obj"].in_box,
+                        row["kg"],
+                        boxes_count,
+                        row["sku_obj"].code,
+                    ]
+                    excel_client, cur_row = draw_schedule_raw(
+                        excel_client, cur_row, values, COLOR_PACKING
+                    )
+                    index += 1
+                    index += 1
 
         return cur_row
 
     def draw_task_boiling(
-            self, excel_client, cur_row, task_name, batch_number, line_name
+            self, excel_client, cur_row, task_name, batch_number, line_name, draw_packing=True
     ):
         df_filter = self.df[self.df["line"] == line_name]
 
@@ -197,22 +198,23 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             cur_row += 1
 
         if self.df_packing is not None:
-            for i, row in self.df_packing.iterrows():
-                kg = round(row["kg"])
-                boxes_count = math.ceil(
-                    1000 * row["kg"] / row["sku_obj"].in_box / row["sku_obj"].weight_netto
-                )
-                values = [
-                    "",
-                    row["sku"],
-                    row["sku_obj"].in_box,
-                    kg,
-                    boxes_count,
-                    row["sku_obj"].code,
-                ]
-                excel_client, cur_row = draw_schedule_raw(
-                    excel_client, cur_row, values, COLOR_PACKING
-                )
+            if draw_packing:
+                for i, row in self.df_packing.iterrows():
+                    kg = round(row["kg"])
+                    boxes_count = math.ceil(
+                        1000 * row["kg"] / row["sku_obj"].in_box / row["sku_obj"].weight_netto
+                    )
+                    values = [
+                        "",
+                        row["sku"],
+                        row["sku_obj"].in_box,
+                        kg,
+                        boxes_count,
+                        row["sku_obj"].code,
+                    ]
+                    excel_client, cur_row = draw_schedule_raw(
+                        excel_client, cur_row, values, COLOR_PACKING
+                    )
 
             _ = draw_blue_line(excel_client, cur_row)
             cur_row += 1
@@ -234,7 +236,8 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             excel_client,
             cur_row,
             water_task_name,
-            LineName.WATER
+            LineName.WATER,
+            draw_packing=False,
         )
         cur_row += space_row
 
@@ -263,6 +266,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             water_task_name,
             batch_number,
             LineName.WATER,
+            draw_packing=False,
         )
         cur_row += space_row
 
