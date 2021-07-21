@@ -10,6 +10,11 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
     m = BlockMaker("root")
 
     bt = utils.delistify(boiling_model.boiling_technologies, single=True)  # there is only one boiling technology is for every boiling model in mozzarella department
+
+    with code('termizator time'):
+        termizator_time = boiling_model.line.pouring_time * boiling_volume / boiling_model.line.output_ton
+        termizator_time = custom_round(termizator_time, 5, 'ceil')
+
     with m.block(
         "boiling",
         boiling_id=boiling_id,
@@ -18,7 +23,7 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
     ):
         with m.block("pouring"):
             with m.block("first"):
-                m.row("termizator", size=boiling_model.line.pouring_time // 5)
+                m.row("termizator", size=termizator_time // 5)
                 m.row("fermenting", size=bt.pouring_time // 5 - boiling_model.line.pouring_time // 5)
                 m.row("soldification", size=bt.soldification_time // 5)
                 m.row("cutting", size=bt.cutting_time // 5)
