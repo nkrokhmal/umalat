@@ -4,8 +4,7 @@ os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from app.imports.runtime import *
 from app.scheduler.contour_cleanings.algo.schedule import *
-from app.scheduler import load_schedules
-from app.scheduler.mozzarella.properties import *
+from app.scheduler import load_schedules, load_properties
 
 
 def test():
@@ -16,16 +15,15 @@ def test():
         "2021-07-17",
     )
 
-    properties = {"mozzarella": parse_schedule(schedules["mozzarella"])}
+    properties = load_properties(schedules)
 
-    # print(make_contour_1(schedules, properties))
     utils.lazy_tester.log(make_contour_1(schedules, properties))
     utils.lazy_tester.log(make_contour_2(schedules, properties))
     utils.lazy_tester.log(make_contour_3(schedules, properties))
     utils.lazy_tester.log(make_contour_4(schedules, properties))
     utils.lazy_tester.log(make_contour_5(schedules, properties))
     utils.lazy_tester.log(make_contour_6(schedules, properties))
-    utils.lazy_tester.assert_logs(reset=True)
+    utils.lazy_tester.assert_logs(reset=False)
 
 
 if __name__ == "__main__":

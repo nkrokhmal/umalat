@@ -12,7 +12,7 @@ class MozzarellaProperties(pydantic.BaseModel):
     line27_nine_termizator_end_time: str = ""
     line27_last_termizator_end_time: str = ""
 
-    def termizator_lines(self):
+    def termizator_times(self):
         return {'2.7': {'last': self.line27_last_termizator_end_time, 'ninth': self.line27_nine_termizator_end_time},
                 '3.3': {'last': self.line33_last_termizator_end_time},
                 '3.6': {'last': self.line36_last_termizator_end_time}}
@@ -66,15 +66,22 @@ def parse_schedule(schedule):
         boilings = schedule['master']['boiling', True]
 
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '3.3']
-        props.line33_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
+        if _boilings:
+            props.line33_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
+            assert len(_boilings) <= 9, 'Слишком много наливов на смеси 3.3'
 
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '3.6']
-        props.line36_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
+        if _boilings:
+            props.line36_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
+            assert len(_boilings) <= 9, 'Слишком много наливов на смеси 3.6'
 
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '2.7']
-        if len(_boilings) >= 10:
-            props.line27_nine_termizator_end_time = cast_time(_boilings[8]['pouring']['first']['termizator'].y[0])
-        props.line27_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
+        if _boilings:
+            assert len(_boilings) <= 18, 'Слишком много наливов на смеси 2.7'
+
+            if len(_boilings) >= 10:
+                props.line27_nine_termizator_end_time = cast_time(_boilings[8]['pouring']['first']['termizator'].y[0])
+            props.line27_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
 
     with code('multihead'):
         multihead_packings = list(schedule.iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова'))

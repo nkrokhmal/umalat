@@ -73,6 +73,14 @@ def _make_contour_1(schedules, properties, order=(0, 1, 2), milk_project_end_tim
 
         # get values when different percentage tanks end: [['3.6', 74], ['3.3', 94], ['2.7', 144]]
         values = []
+        # for percent in ['2.7', '3.3', '3.6']:
+        #     if properties['mozzarella'].termizator_times()[percent]['last']:
+        #         values.append([percent, properties['mozzarella'].termizator_times()[percent]['last'], '01:50', False])
+        #         values.append([percent, properties['mozzarella'].termizator_times()[percent].get('ninth'), '01:50', False])
+        #     else:
+        #         # no boilings found today
+        #         values.append([percent, cast_t('10:00'), '01:05', True])
+
         for percent in ['2.7', '3.3', '3.6']:
             _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == percent]
 
