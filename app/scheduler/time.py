@@ -32,7 +32,8 @@ def cast_time(obj):
             return obj
     elif isinstance(obj, time):
         return cast_time("0:" + str(obj.hour).zfill(2) + ":" + str(obj.minute).zfill(2))
-    elif isinstance(obj, int):
+    elif utils.is_int_like(obj):
+        obj = int(obj)
         days = obj // 288
         hours = (obj // 12) % 24
         minutes = (obj % 12) * 5
