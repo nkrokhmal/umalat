@@ -11,6 +11,12 @@ class MozzarellaProperties(pydantic.BaseModel):
     line36_last_termizator_end_time: str = ""
     line27_nine_termizator_end_time: str = ""
     line27_last_termizator_end_time: str = ""
+
+    def termizator_lines(self):
+        return {'2.7': {'last': self.line27_last_termizator_end_time, 'ninth': self.line27_nine_termizator_end_time},
+                '3.3': {'last': self.line33_last_termizator_end_time},
+                '3.6': {'last': self.line36_last_termizator_end_time}}
+
     multihead_end_time: str = ''
     water_multihead_present: bool = True
 
@@ -24,6 +30,9 @@ class MozzarellaProperties(pydantic.BaseModel):
     cheesemaker3_end_time: str = ''
     cheesemaker4_end_time: str = ''
 
+    def cheesemaker_times(self):
+        return [[i, getattr(self, f'cheesemaker{i}_end_time')] for i in range(1, 5)]
+
     water_melting_end_time: str = ''
     salt_melting_end_time: str = ''
 
@@ -35,6 +44,9 @@ class MozzarellaProperties(pydantic.BaseModel):
     drenator6_end_time: str = ''
     drenator7_end_time: str = ''
     drenator8_end_time: str = ''
+
+    def drenator_times(self):
+        return [[i, getattr(self, f'drenator{i}_end_time')] for i in range(1, 9)]
 
 
 def parse_schedule(schedule):
@@ -130,4 +142,4 @@ def parse_schedule(schedule):
         props.drenator7_end_time = cast_time(values[6][1])
         props.drenator8_end_time = cast_time(values[7][1])
 
-    return dict(props)
+    return props

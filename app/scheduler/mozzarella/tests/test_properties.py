@@ -5,7 +5,10 @@ from pprint import pprint
 
 def test_properties(path, prefix):
     schedules = load_schedules(path, prefix, departments=["mozzarella"])
-    pprint(parse_schedule(schedules["mozzarella"]))
+    props = parse_schedule(schedules["mozzarella"])
+    pprint(dict(props))
+    print(props.drenator_times())
+    print(props.cheesemaker_times())
 
 
 if __name__ == "__main__":
