@@ -31,7 +31,9 @@ class MozzarellaProperties(pydantic.BaseModel):
     cheesemaker4_end_time: str = ''
 
     def cheesemaker_times(self):
-        return [[i, getattr(self, f'cheesemaker{i}_end_time')] for i in range(1, 5)]
+        values = [[i, getattr(self, f'cheesemaker{i}_end_time')] for i in range(1, 5)]
+        values = [value for value in values if value[1]]
+        return values
 
     water_melting_end_time: str = ''
     salt_melting_end_time: str = ''
@@ -46,8 +48,9 @@ class MozzarellaProperties(pydantic.BaseModel):
     drenator8_end_time: str = ''
 
     def drenator_times(self):
-        return [[i, getattr(self, f'drenator{i}_end_time')] for i in range(1, 9)]
-
+        values = [[i, getattr(self, f'drenator{i}_end_time')] for i in range(1, 9)]
+        values = [value for value in values if v[1]]
+        return values
 
 def parse_schedule(schedule):
     props = MozzarellaProperties()

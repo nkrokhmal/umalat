@@ -199,37 +199,37 @@ def _make_contour_3(schedules, properties, order1=(0, 1, 1, 1, 1), order2=(0, 0,
               label='Полная мойка термизатора')
 
     def f1():
-        salt_boilings = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
-        if salt_boilings:
-            salt_melting_start = salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0]
-            m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator(ordered=False), start_from=salt_melting_start + 6),
+        if properties['mozzarella'].salt_melting_start_time:
+            m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator(ordered=False), start_from=cast_t(properties['mozzarella'].salt_melting_start_time) + 6),
                   size=90 // 5,
                   label='Контур циркуляции рассола')
 
     def g2():
         with code('cheese_makers'):
             # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
-            values = []
-            for b in schedules['mozzarella']['master']['boiling', True]:
-                values.append([b.props['pouring_line'], b['pouring'].y[0]])
-            df = pd.DataFrame(values, columns=['pouring_line', 'finish'])
-            values = df.groupby('pouring_line').agg(max).to_dict()['finish']
-            values = list(sorted(values.items(), key=lambda kv: kv[1])) # [('1', 97), ('0', 116), ('2', 149), ('3', 160)]
+            values = properties['mozzarella'].cheesemaker_times()
+
+            # convert time to t
+            for value in values:
+                value[0] = str(value[0])
+                value[1] = cast_t(value[1])
+            values = list(sorted(values, key=lambda value: value[1]))
 
             for n, cheese_maker_end in values:
                 m.row('cleaning', push_func=AxisPusher(start_from=cheese_maker_end, validator=CleaningValidator(ordered=False)),
                       size=cast_t('01:20'),
-                      label=f'Сыроизготовитель {int(n) + 1}')
+                      label=f'Сыроизготовитель {int(n)}')
                 yield
 
+            used_ids = set([value[0] for value in values])
+
         with code('non-used cheesemakers'):
-            non_used_ids = set([str(x) for x in range(4)]) - set(df['pouring_line'].unique())
+            non_used_ids = set([str(x) for x in range(1, 5)]) - used_ids
             for id in non_used_ids:
                 m.row('cleaning', push_func=AxisPusher(start_from=cast_t('10:00'), validator=CleaningValidator(ordered=False)),
                       size=cast_t('01:05'),
-                      label=f'Сыроизготовитель {int(id) + 1} (кор. мойка)')
+                      label=f'Сыроизготовитель {int(id)} (кор. мойка)')
                 yield
-
 
     run_order([f1, g2()], order1)
 
