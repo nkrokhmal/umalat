@@ -460,9 +460,7 @@ def make_contour_6(schedules, properties, butter_end_time=None, milk_project_end
 
     with code('cream tanks'):
         if 'mascarpone' in schedules:
-            boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
-            boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]
-            m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['adding_lactic_acid'].y[0] + 12, validator=CleaningValidator(ordered=False)),
+            m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['mascarpone'].fourth_boiling_group_adding_lactic_acid_time) + 12, validator=CleaningValidator(ordered=False)),
                                           size=cast_t('01:20'),
                                           label='Танк сливок') # fourth mascarpone boiling group end + hour
 
@@ -472,9 +470,7 @@ def make_contour_6(schedules, properties, butter_end_time=None, milk_project_end
 
     with code('mascarpone'):
         if 'mascarpone' in schedules:
-            boiling_groups = schedules['mascarpone']['mascarpone_boiling_group', True]
-            boiling_group = boiling_groups[-1]
-            m.row('cleaning', push_func=AxisPusher(start_from=boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0] + 6, validator=CleaningValidator(ordered=False)),
+            m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['mascarpone'].last_pumping_off) + 6, validator=CleaningValidator(ordered=False)),
                   size=(cast_t('01:20'), 0),
                   label='Маскарпоне')
 
