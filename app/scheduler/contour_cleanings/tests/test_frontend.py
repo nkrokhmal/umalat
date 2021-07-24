@@ -25,9 +25,7 @@ def _test(path, open_file=False, prefix=None):
         path,
         prefix=prefix,
         open_file=open_file,
-        butter_end_time="19:00:00",
         adygea_end_time="14:00:00",
-        milk_project_end_time="11:00:00",
     )
     utils.lazy_tester.log(outputs["schedule"])
     utils.lazy_tester.assert_logs()
@@ -35,8 +33,8 @@ def _test(path, open_file=False, prefix=None):
 
 if __name__ == "__main__":
     # _test(
-    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-07-06",
-    #     prefix="2021-07-06",
+    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-07-16",
+    #     prefix="2021-07-16",
     #     open_file=True,
     # )
 

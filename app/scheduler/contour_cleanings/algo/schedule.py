@@ -53,8 +53,7 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def _make_contour_1(schedules, properties, order=(0, 1, 2), milk_project_end_time=None, adygea_end_time=None, shipping_line=True):
-    milk_project_end_time = _init_end_time(schedules, 'milk_project', milk_project_end_time)
+def _make_contour_1(schedules, properties, order=(0, 1, 2), adygea_end_time=None, shipping_line=True):
     adygea_end_time = _init_end_time(schedules, 'adygea', adygea_end_time)
 
     m = BlockMaker("1 contour")
@@ -110,13 +109,13 @@ def _make_contour_1(schedules, properties, order=(0, 1, 2), milk_project_end_tim
     def f2():
         if 'milk_project' in schedules:
             m.row('cleaning',
-                  push_func=AxisPusher(start_from=[milk_project_end_time, adygea_end_time], validator=CleaningValidator()),
+                  push_func=AxisPusher(start_from=[cast_t(properties['milk_project'].end_time), adygea_end_time], validator=CleaningValidator()),
                   size=cast_t('02:20'),
                   label='Милкпроджект')
 
     def f3():
         if 'milk_project' in schedules:
-            m.row('cleaning', push_func=AxisPusher(start_from=milk_project_end_time, validator=CleaningValidator(ordered=False)),
+            m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['milk_project'].end_time), validator=CleaningValidator(ordered=False)),
                   size=cast_t('01:20'),
                   label='Танк роникс')
 
@@ -439,15 +438,12 @@ def _init_end_time(schedules, department, input_end_time):
     return input_end_time
 
 
-def make_contour_6(schedules, properties, butter_end_time=None, milk_project_end_time=None):
+def make_contour_6(schedules, properties):
     m = BlockMaker("6 contour")
-
-    butter_end_time = _init_end_time(schedules, 'butter', butter_end_time)
-    milk_project_end_time = _init_end_time(schedules, 'milk_project', milk_project_end_time)
 
     if 'milk_project' in schedules:
         m.row('cleaning', push_func=add_push,
-              x=milk_project_end_time,
+              x=cast_t(properties['milk_project'].end_time),
               size=cast_t('01:20'),
               label='Линия сырого молока на роникс')
 
@@ -495,7 +491,7 @@ def make_contour_6(schedules, properties, butter_end_time=None, milk_project_end
               label=label)
 
     if 'butter' in schedules:
-        m.row('cleaning', push_func=AxisPusher(start_from=butter_end_time, validator=CleaningValidator(ordered=False)),
+        m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['butter'].end_time), validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
               label='Маслоцех')
 
@@ -506,12 +502,12 @@ def make_schedule(schedules, properties, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(schedules, properties, milk_project_end_time=kwargs.get('milk_project_end_time'), adygea_end_time=kwargs.get('adygea_end_time'), shipping_line=kwargs.get('shipping_line', True)),
+        make_contour_1(schedules, properties, adygea_end_time=kwargs.get('adygea_end_time'), shipping_line=kwargs.get('shipping_line', True)),
         make_contour_2(schedules, properties),
         make_contour_3(schedules, properties, is_bar12_present=kwargs.get('is_bar12_present', False)),
         make_contour_4(schedules, properties, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
         make_contour_5(schedules, properties, input_tanks=kwargs.get('input_tanks', (['4', 60], ['5', 60]))),
-        make_contour_6(schedules, properties, butter_end_time=kwargs.get('butter_end_time'), milk_project_end_time=kwargs.get('milk_project_end_time')),
+        make_contour_6(schedules, properties),
     ]
 
     for contour in contours:
