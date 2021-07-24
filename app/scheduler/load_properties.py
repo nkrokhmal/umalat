@@ -9,8 +9,9 @@ from app.scheduler.mascarpone.properties import (
 
 
 def load_properties(schedules):
-    return {
-        "mozzarella": parse_schedule_mozzarella(schedules["mozzarella"]),
-        "ricotta": parse_schedule_ricotta(schedules["ricotta"]),
-        "mascarpone": parse_schedule_mascarpone(schedules["mascarpone"]),
-    }
+    properties = {}
+    properties["mozzarella"] = parse_schedule_mozzarella(schedules["mozzarella"])
+    properties["ricotta"] = parse_schedule_mozzarella(schedules["ricotta"])
+
+    if "mascarpone" in schedules:
+        properties["mascarpone"] - parse_schedule_mascarpone(schedules["mascarpone"])
