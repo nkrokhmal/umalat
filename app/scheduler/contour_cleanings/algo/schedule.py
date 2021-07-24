@@ -311,7 +311,6 @@ def _make_contour_3(schedules, properties, order1=(0, 1, 1, 1, 1), order2=(0, 0,
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
         assert cast_t('21:00') <= b.x[0] and b.y[0] <= cast_t('01:00:00'), "Short cleaning too bad"
-
     run_order([g3(), f4], order2)
 
     # shift short cleaning to make it as late as possible
