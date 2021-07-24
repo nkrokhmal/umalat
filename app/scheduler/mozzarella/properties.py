@@ -108,11 +108,11 @@ def parse_schedule(schedule):
         df = pd.DataFrame(values, columns=['pouring_line', 'finish'])
         values = df.groupby('pouring_line').agg(max).to_dict()['finish']
         values = list(sorted(values.items(), key=lambda kv: kv[0]))  # [('0', 116), ('1', 97), ('2', 149), ('3', 160)]
-
-        props.cheesemaker1_end_time = cast_time(values[0][1])
-        props.cheesemaker2_end_time = cast_time(values[1][1])
-        props.cheesemaker3_end_time = cast_time(values[2][1])
-        props.cheesemaker4_end_time = cast_time(values[3][1])
+        values_dict = dict(values)
+        props.cheesemaker1_end_time = cast_time(values_dict.get('0'))
+        props.cheesemaker2_end_time = cast_time(values_dict.get('1'))
+        props.cheesemaker3_end_time = cast_time(values_dict.get('2'))
+        props.cheesemaker4_end_time = cast_time(values_dict.get('3'))
 
     with code('melting end'):
         lines_df = pd.DataFrame(index=['water', 'salt'])
@@ -139,14 +139,14 @@ def parse_schedule(schedule):
         df = df.sort_values(by='id')
 
         values = df.values.tolist()
-
-        props.drenator1_end_time = cast_time(values[0][1])
-        props.drenator2_end_time = cast_time(values[1][1])
-        props.drenator3_end_time = cast_time(values[2][1])
-        props.drenator4_end_time = cast_time(values[3][1])
-        props.drenator5_end_time = cast_time(values[4][1])
-        props.drenator6_end_time = cast_time(values[5][1])
-        props.drenator7_end_time = cast_time(values[6][1])
-        props.drenator8_end_time = cast_time(values[7][1])
+        values_dict = dict(values)
+        props.drenator1_end_time = cast_time(values_dict.get(1))
+        props.drenator2_end_time = cast_time(values_dict.get(2))
+        props.drenator3_end_time = cast_time(values_dict.get(3))
+        props.drenator4_end_time = cast_time(values_dict.get(4))
+        props.drenator5_end_time = cast_time(values_dict.get(5))
+        props.drenator6_end_time = cast_time(values_dict.get(6))
+        props.drenator7_end_time = cast_time(values_dict.get(7))
+        props.drenator8_end_time = cast_time(values_dict.get(8))
 
     return props

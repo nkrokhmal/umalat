@@ -5,21 +5,39 @@ from app.scheduler.contour_cleanings.frontend import *
 from app.scheduler.contour_cleanings import run_contour_cleanings
 
 
-def test(open_file=False):
+def test_batch():
+    paths = glob.glob(
+        config.abs_path(
+            "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/*"
+        )
+    )
+    for path in tqdm.tqdm(paths):
+        _test(path, open_file=False)
+
+
+def _test(path, open_file=False, prefix=None):
+    logger.info("Test", path=path)
     utils.configure_loguru_stdout("INFO")
     utils.lazy_tester.configure_function_path()
-
+    utils.lazy_tester.configure(local_path=os.path.basename(path))
+    prefix = prefix or os.path.basename(path)
     outputs = run_contour_cleanings(
-        "/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-16/approved",
-        prefix="2021-07-16",
+        path,
+        prefix=prefix,
         open_file=open_file,
         butter_end_time="19:00:00",
         adygea_end_time="14:00:00",
         milk_project_end_time="11:00:00",
     )
     utils.lazy_tester.log(outputs["schedule"])
-    utils.lazy_tester.assert_logs(reset=True)
+    utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
-    test(open_file=True)
+    # _test(
+    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample1",
+    #     prefix="sample1",
+    #     open_file=True,
+    # )
+
+    test_batch()
