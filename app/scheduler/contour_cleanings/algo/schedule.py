@@ -363,25 +363,19 @@ def make_contour_4(schedules, properties, is_tomorrow_day_off=False):
 
         with code('Main drenators'):
             # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
-            values = []
-            for boiling in schedules['mozzarella']['master']['boiling', True]:
-                drenator = boiling['drenator']
-                values.append([drenator.y[0], drenator.props['pouring_line'], drenator.props['drenator_num']])
-            df = pd.DataFrame(values, columns=['drenator_end', 'pouring_line', 'drenator_num'])
-            df['id'] = df['pouring_line'].astype(int) * 2 + df['drenator_num'].astype(int)
-            df = df[['id', 'drenator_end']]
-            df['drenator_end'] += 12 + 5 # add hour and 25 minutes of buffer
-            df = df.drop_duplicates(subset='id', keep='last')
-            df = df.reset_index(drop=True)
-            df['id'] = df['id'].astype(int) + 1
+            values = properties['mozzarella'].drenator_times()
+            for value in values:
+                value[1] = cast_t(value[1])
+                value[1] += 17 # add hour and 25 minutes of buffer
+            values = list(sorted(values, key=lambda value: value[1]))
 
-            values = df.values.tolist()
             _make_drenators(values, '01:20')
+            used_ids = set([value[0] for value in values])
 
         with code('Non used drenators'):
             values = []
             # run drenators that are not present
-            non_used_ids = set(range(1, 9)) - set(df['id'].unique())
+            non_used_ids = set(range(1, 9)) - used_ids
             non_used_ids = [str(x) for x in non_used_ids]
             for non_used_id in non_used_ids:
                 values.append([non_used_id, cast_t('10:00')])

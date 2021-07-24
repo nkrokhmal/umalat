@@ -49,7 +49,7 @@ class MozzarellaProperties(pydantic.BaseModel):
 
     def drenator_times(self):
         values = [[i, getattr(self, f'drenator{i}_end_time')] for i in range(1, 9)]
-        values = [value for value in values if v[1]]
+        values = [value for value in values if value[1]]
         return values
 
 def parse_schedule(schedule):
