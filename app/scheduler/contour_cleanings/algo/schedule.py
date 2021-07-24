@@ -4,8 +4,9 @@ from utils_ak.block_tree import *
 from app.scheduler.time import *
 from app.enum import *
 
+
 # todo soon: refactor, put into more proper place
-def calc_scotta_input_tanks(schedules, extra_scotta=0):
+def calc_scotta_input_tanks(n_boilings, extra_scotta=0):
     scotta_per_boiling = 1900 - 130
     values = [['4', 80000], ['5', 80000], ['8', 80000]]
     tanks_df = pd.DataFrame(values, columns=['id', 'kg'])
@@ -14,13 +15,11 @@ def calc_scotta_input_tanks(schedules, extra_scotta=0):
     tanks_df['n_boilings'] = None
     tanks_df['scotta'] = None
 
-    boilings = list(schedules['ricotta'].iter(cls='boiling'))
-    total_scotta = len(boilings) * scotta_per_boiling + extra_scotta
+    total_scotta = n_boilings * scotta_per_boiling + extra_scotta
 
     left_scotta = total_scotta
 
-    assert len(boilings) <= tanks_df[
-        'max_boilings'].sum(), 'Слишком много варок на линии рикотты. Скотта не помещается в танки.'
+    assert n_boilings <= tanks_df['max_boilings'].sum(), 'Слишком много варок на линии рикотты. Скотта не помещается в танки.'
     for i, row in tanks_df.iterrows():
         if not left_scotta:
             break
@@ -453,8 +452,7 @@ def make_contour_6(schedules, properties, butter_end_time=None, milk_project_end
               label='Линия сырого молока на роникс')
 
     with code('Танк рикотты 1 внутри дня'):
-        ricotta_boilings = list(schedules['ricotta'].iter(cls='boiling'))
-        whey_used = 1900 * len(ricotta_boilings)
+        whey_used = 1900 * properties['ricotta'].n_boilings
         if whey_used > 100000:
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t('12:00'), validator=CleaningValidator(ordered=False)),
                   size=cast_t('01:20'),
@@ -480,7 +478,7 @@ def make_contour_6(schedules, properties, butter_end_time=None, milk_project_end
                   size=(cast_t('01:20'), 0),
                   label='Маскарпоне')
 
-    ricotta_end = ricotta_boilings[-1]['pumping_out'].y[0] + 12
+    ricotta_end = cast_t(properties['ricotta'].last_pumping_out_time) + 12
     m.row('cleaning', push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
           size=cast_t('02:30'),
           label='Линия сладкой сыворотки')
@@ -491,12 +489,7 @@ def make_contour_6(schedules, properties, butter_end_time=None, milk_project_end
           label='Танк сливок')  # ricotta end + hour
 
     with code('Танк рикотты 1'):
-        if len(ricotta_boilings) < 9:
-            end_boiling = ricotta_boilings[-1]
-        else:
-            end_boiling = ricotta_boilings[-9]
-
-        m.row('cleaning', push_func=AxisPusher(start_from=end_boiling.x[0], validator=CleaningValidator(ordered=False)),
+        m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['ricotta'].start_of_ninth_from_the_end_time), validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
               label='Танк рикотты (сладкая сыворотка)')
 
