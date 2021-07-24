@@ -69,8 +69,6 @@ def _make_contour_1(schedules, properties, order=(0, 1, 2), milk_project_end_tim
           label='Линия приемки молока 1 + проверить фильтр')
 
     with code('Tanks'):
-        boilings = schedules['mozzarella']['master']['boiling', True]
-
         # get values when different percentage tanks end: [['3.6', 74], ['3.3', 94], ['2.7', 144]]
         values = []
         for percent in ['2.7', '3.3', '3.6']:
@@ -154,15 +152,13 @@ def make_contour_2(schedules, properties):
           label='Сливки от пастера 25')
 
     with code('Мультиголова'):
-        multihead_packings = list(schedules['mozzarella'].iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова'))
-        if multihead_packings:
-            multihead_end = max(packing.y[0] for packing in multihead_packings) + 12 # add hour for preparation
+        if properties['mozzarella'].multihead_end_time:
+            multihead_end = cast_t(properties['mozzarella'].multihead_end_time) + 12
             m.row('cleaning', push_func=AxisPusher(start_from=['last_end', multihead_end], validator=CleaningValidator()),
                   size=cast_t('01:20'),
                   label='Комет')
 
-        water_multihead_packings = list(schedules['mozzarella'].iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова' and df.iloc[0]['boiling'].line.name == LineName.WATER))
-        if water_multihead_packings:
+        if properties['mozzarella'].water_multihead_present:
             m.row('cleaning', push_func=AxisPusher(validator=CleaningValidator()),
                   size=cast_t('01:20'),
                   label='Фасовочная вода')

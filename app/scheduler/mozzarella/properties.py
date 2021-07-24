@@ -18,7 +18,7 @@ class MozzarellaProperties(pydantic.BaseModel):
                 '3.6': {'last': self.line36_last_termizator_end_time}}
 
     multihead_end_time: str = ''
-    water_multihead_present: bool = True
+    water_multihead_present: bool = False
 
     short_cleaning_times: List[str] = []
     full_cleaning_times: List[str] = []
