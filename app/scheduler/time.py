@@ -2,7 +2,9 @@ from app.imports.runtime import *
 
 
 def cast_t(obj):
-    if isinstance(obj, int):
+    if obj is None:
+        return None
+    elif isinstance(obj, int):
         return obj
     elif isinstance(obj, time):
         return cast_t(cast_time(obj))

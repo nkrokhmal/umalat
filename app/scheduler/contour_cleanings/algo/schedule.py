@@ -236,13 +236,8 @@ def _make_contour_3(schedules, properties, order1=(0, 1, 1, 1, 1), order2=(0, 0,
     def g3():
         with code('melters_and_baths'):
             lines_df = pd.DataFrame(index=['water', 'salt'])
-            lines_df['boilings'] = None
-
-            lines_df.loc['water', 'boilings'] = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Моцарелла в воде']
-            lines_df.loc['salt', 'boilings'] = [b for b in schedules['mozzarella']['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
-
             lines_df['cleanings'] = [[] for _ in range(2)]
-            if lines_df.loc['water', 'boilings']:
+            if properties['mozzarella'].water_melting_end_time:
                 lines_df.loc['water', 'cleanings'].extend([m.create_block('cleaning',
                                                                           size=(cast_t('02:20'), 0),
                                                                           label='Линия 1 плавилка'),
@@ -258,7 +253,7 @@ def _make_contour_3(schedules, properties, order1=(0, 1, 1, 1, 1), order2=(0, 0,
                       size=cast_t('01:15'),
                       label=f'Линия 1 ванна 1 + ванна 2 (кор. мойка)')
 
-            if lines_df.loc['salt', 'boilings']:
+            if properties['mozzarella'].salt_melting_end_time:
                 lines_df.loc['salt', 'cleanings'].extend([m.create_block('cleaning',
                                                                          size=(cast_t('02:20'), 0),
                                                                          label='Линия 2 плавилка'),
@@ -283,7 +278,8 @@ def _make_contour_3(schedules, properties, order1=(0, 1, 1, 1, 1), order2=(0, 0,
                       size=cast_t('01:15'),
                       label=f'Линия 2 ванна 2 (кор. мойка)')
 
-            lines_df['melting_end'] = lines_df['boilings'].apply(lambda boilings: None if not boilings else boilings[-1]['melting_and_packing']['melting'].y[0])
+            lines_df['melting_end'] = [cast_t(properties['mozzarella'].water_melting_end_time),
+                                       cast_t(properties['mozzarella'].salt_melting_end_time)]
             lines_df = lines_df.sort_values(by='melting_end')
 
             for i, row in lines_df.iterrows():
