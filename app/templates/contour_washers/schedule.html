@@ -11,48 +11,101 @@
 
 
 {% block page_content %}
+
+<style>
+    .accordion {
+      background-color: rgb(225, 253, 255);
+      color: #444;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 18px;
+      transition: 0.4s;
+    }
+
+    .active, .accordion:hover {
+      background-color: #ccc;
+    }
+
+    .ul>li
+    {
+        margin: 5px;
+        font-size: 14px;
+    }
+
+    .panel {
+      padding: 0 20px;
+      max-height: 0;
+      margin: 10px;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+    }
+</style>
+
 <div class="row">
     <div class="card card-body bg-white border-light shadow-sm mb-4">
-        <h4 class="h5 mb-4">Загрузите файл плана по варкам и выберите дату</h4>
-        <div class="row">
-            <form method="post" action="/contour_washers_schedule" enctype="multipart/form-data" class="mt-4">
-                {{ form.hidden_tag() }}
-                <div class="row mb-4">
-                    <div class="col-lg-6 col-sm-6">
+        {% if params %}
+            <h4 class="h5 mb-4">Заполните необходимые параметры</h4>
+            <div class="row">
+                <form method="post" action="/contour_washers_schedule" enctype="multipart/form-data" class="mt-4">
+                    {{ form.hidden_tag() }}
+                    <div class="row mb-4">
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Введите дату</label>
-                                {{form.date(place_holder='date', class='form-control')}}
+                                <label>Дата</label>
+                                {{form.date(place_holder='date', class='form-control', readonly=True)}}
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <button class="accordion" type="button"><a>Параметры моцареллы</a></button>
+                                <div class="panel">
+                                    {{ wtf.quick_form(mozzarella_form) }}
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Время окончания работы маслоцеха по умолчанию </label>
-                                {{form.butter_end_time(place_holder='butter_end_time', class='form-control')}}
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <button class="accordion" type="button"><a>Параметры рикотты</a></button>
+                                <div class="panel">
+                                    {{ wtf.quick_form(ricotta_form) }}
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Время окончания работы адыгейского цеха по умолчанию </label>
-                                {{form.adygea_end_time(place_holder='adygea_end_time', class='form-control')}}
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <button class="accordion" type="button"><a>Параметры маскарпоне</a></button>
+                                <div class="panel">
+                                    {{ wtf.quick_form(mascarpone_form) }}
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Время окончания работы милкпроджекта по умолчанию </label>
-                                {{form.milk_project_end_time(place_holder='milk_project_end_time', class='form-control')}}
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <button class="accordion" type="button"><a>Параметры масла</a></button>
+                                <div class="panel">
+                                    {{ wtf.quick_form(butter_form) }}
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Количество варок в адыгейском цехе вчера (используется для подсчета скотты) </label>
-                                {{form.adygea_n_boilings(place_holder='adygea_n_boilings', class='form-control')}}
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <button class="accordion" type="button"><a>Параметры милкпроджекта</a></button>
+                                <div class="panel">
+                                    {{ wtf.quick_form(milk_project_form) }}
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Количество варок в милкпроджект вчера (используется для подсчета скотты) </label>
-                                {{form.milk_project_n_boilings(place_holder='milk_project_n_boilings', class='form-control')}}
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <button class="accordion" type="button"><a>Параметры адыгейского</a></button>
+                                <div class="panel">
+                                    {{ wtf.quick_form(adygea_form) }}
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
@@ -67,11 +120,28 @@
                                 {{form.shipping_line(place_holder='shipping_line', checked=True)}}
                             </div>
                         </div>
+                        <button type="submit" name="submit_file" class="btn btn-block btn-primary">Отправить</button>
                     </div>
-                    <button type="submit" name="submit" class="btn btn-block btn-primary">Отправить</button>
-                </div>
-            </form>
-        </div>
+                </form>
+            </div>
+        {% else %}
+            <h4 class="h5 mb-4">Введите дату для подгрузки параметров</h4>
+            <div class="row">
+                <form method="post" action="/contour_washers_schedule" enctype="multipart/form-data" class="mt-4">
+                    {{ form.hidden_tag() }}
+                    <div class="row mb-4">
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label>Введите дату</label>
+                                    {{form.date(place_holder='date', class='form-control')}}
+                                </div>
+                            </div>
+                            <button type="submit" name="submit_params" class="btn btn-block btn-primary">Подгрузить параметры</button>
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
     </div>
 </div>
 
@@ -94,5 +164,22 @@
         download(url,"{{filename}}", "{{date}}");
     </script>
 {% endif %}
+
+<script>
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+      acc[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+        if (panel.style.maxHeight) {
+          panel.style.maxHeight = null;
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+      });
+    }
+</script>
 
 {% endblock %}

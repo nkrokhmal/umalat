@@ -97,8 +97,8 @@ def move_to_approved_pickle(date, file_name):
         date,
         flask.current_app.config["APPROVED_FOLDER"])
     create_if_not_exists(new_dir)
-
-    shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
+    if os.path.exists(old_dir):
+        shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
     return new_dir
 
 
