@@ -4,7 +4,7 @@ from app.scheduler.mascarpone import *
 
 def test_batch():
     fns = glob.glob(
-        DebugConfig.abs_path(
+        config.abs_path(
             "app/data/static/samples/inputs/by_department/mascarpone/*.xlsx"
         )
     )
@@ -25,7 +25,7 @@ def _test(fn, open_file=False):
 
 if __name__ == "__main__":
     # _test(
-    #     DebugConfig.abs_path(
+    #     config.abs_path(
     #         "app/data/static/samples/inputs/by_department/mascarpone/План по варкам маскарпоне 1.xlsx"
     #     ),
     #     open_file=True,

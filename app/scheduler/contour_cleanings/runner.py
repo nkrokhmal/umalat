@@ -2,6 +2,8 @@ from app.imports.runtime import *
 from app.scheduler.contour_cleanings import *
 from app.scheduler.frontend import *
 from app.scheduler.submit import submit_schedule
+from app.scheduler.load_schedules import *
+from app.scheduler.load_properties import *
 
 
 def run_contour_cleanings(
@@ -12,27 +14,21 @@ def run_contour_cleanings(
     open_file=False,
     **kwargs,
 ):
-    schedules = {}
-    for a, b in [
-        ["mozzarella", "Расписание моцарелла"],
-        ["mascarpone", "Расписание маскарпоне"],
-        ["butter", "Расписание масло"],
-        ["milk_project", "Расписание милкпроджект"],
-        ["ricotta", "Расписание рикотта"],
-    ]:
-        fn = os.path.join(input_path, prefix + " " + b + ".pickle")
+    schedules = load_schedules(input_path, prefix=prefix)
+    properties = load_properties(schedules)
 
-        # todo soon: make properly
-        if not os.path.exists(fn):
-            if a in ["mozzarella", "ricotta", "mascarpone"]:
-                raise Exception(f"Не найдено: {b} для данной даты")
-            else:
-                continue
+    assert_schedules_presence(
+        schedules,
+        raise_if_not_present=["mozzarella", "ricotta"],
+        warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
+    )
 
-        with open(fn, "rb") as f:
-            schedules[a] = ParallelepipedBlock.from_dict(pickle.load(f))
+    for department in ["butter", "milk_project", "adygea"]:
+        if department not in schedules and kwargs.get(f"{department}_end_time"):
+            schedules[department] = "manual"
+
     if not schedule:
-        schedule = make_schedule(schedules, **kwargs)
+        schedule = make_schedule(schedules, properties, **kwargs)
     frontend = wrap_frontend(schedule)
     return submit_schedule(
         "контурные мойки",

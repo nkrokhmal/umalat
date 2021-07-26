@@ -65,3 +65,4 @@ db/batch_numbers/data.json
 **/outputs/*
 research/akadaner/*xlsx
 tests/lazy_tester_logs/**
+app/data/static/samples/inputs/**

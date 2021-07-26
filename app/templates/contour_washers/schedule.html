@@ -27,20 +27,32 @@
                         </div>
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Тонн скотты в танке 4 </label>
-                                {{form.tank_4(place_holder='tank_4', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Время окончания работы маслоцеха </label>
+                                <label>Время окончания работы маслоцеха по умолчанию </label>
                                 {{form.butter_end_time(place_holder='butter_end_time', class='form-control')}}
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Время окончания работы адыгейского цеха </label>
+                                <label>Время окончания работы адыгейского цеха по умолчанию </label>
                                 {{form.adygea_end_time(place_holder='adygea_end_time', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Время окончания работы милкпроджекта по умолчанию </label>
+                                {{form.milk_project_end_time(place_holder='milk_project_end_time', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Количество варок в адыгейском цехе вчера (используется для подсчета скотты) </label>
+                                {{form.adygea_n_boilings(place_holder='adygea_n_boilings', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Количество варок в милкпроджект вчера (используется для подсчета скотты) </label>
+                                {{form.milk_project_n_boilings(place_holder='milk_project_n_boilings', class='form-control')}}
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
@@ -49,24 +61,10 @@
                                 {{form.is_not_working_day(place_holder='is_not_working_day', checked=True)}}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-6 col-sm-6">
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Тонн скотты в танке 5</label>
-                                {{form.tank_5(place_holder='tank_5', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Тонн скотты в танке 8 </label>
-                                {{form.tank_8(place_holder='tank_8', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Время окончания работы милкпроджекта </label>
-                                {{form.milkproject_end_time(place_holder='milkproject_end_time', class='form-control')}}
+                                <label>Линия отгрузки </label>
+                                {{form.shipping_line(place_holder='shipping_line', checked=True)}}
                             </div>
                         </div>
                     </div>

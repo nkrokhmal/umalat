@@ -12,26 +12,42 @@ class ScheduleForm(FlaskForm):
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
 
     butter_end_time = TimeField(
-        'Время окончания работы маслоцеха',
+        "Время окончания работы маслоцеха по умолчанию",
         validators=[Optional()],
-        default=time(18, 0),
+        default=time(19, 0),
     )
-    milkproject_end_time = TimeField(
-        'Время окончания работы милкпроджекта',
+    milk_project_end_time = TimeField(
+        "Время окончания работы милкпроджекта по умолчанию",
         validators=[Optional()],
-        default=time(18, 0),
+        default=time(11, 0),
     )
     adygea_end_time = TimeField(
-        'Время окончания работы адыгейского цеха',
+        "Время окончания работы адыгейского цеха по умолчанию",
         validators=[Optional()],
-        default=time(18, 0),
+        default=time(14, 0),
     )
 
-    tank_4 = IntegerField(validators=[Optional()], default=0)
-    tank_5 = IntegerField(validators=[Optional()], default=0)
-    tank_8 = IntegerField(validators=[Optional()], default=0)
+    adygea_n_boilings = StringField(
+        "Количество варок в адыгейском цехе вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default="0",
+    )
+
+    milk_project_n_boilings = StringField(
+        "Количество варок в милкпроджект вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default="0",
+    )
+
     is_not_working_day = BooleanField(
         "Завтра нерабочий день",
         validators=[Optional()],
-        default=False,
+        default=(datetime.now() + timedelta(days=1)).weekday()
+        in [0, 3],  # not working mondays/thursdays by default
+    )
+
+    shipping_line = BooleanField(
+        "Линия отгрузки",
+        validators=[Optional()],
+        default=True,
     )

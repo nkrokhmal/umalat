@@ -17,6 +17,7 @@ import tqdm
 import copy
 import pickle
 import types
+import pydantic
 
 import pandas as pd
 import numpy as np

@@ -1,6 +1,6 @@
 import os
 
-os.environ["environment"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "interactive"
 
 
 from app.scheduler.mozzarella import *
@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 
 
 def test():
-    fn = DebugConfig.abs_path(
+    fn = config.abs_path(
         "app/data/inputs/samples/mozzarella/2021-05-07 План по варкам.xlsx"
     )
     df = read_boiling_plan(fn)

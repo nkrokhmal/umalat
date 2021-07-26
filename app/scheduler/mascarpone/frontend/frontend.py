@@ -271,7 +271,7 @@ def wrap_frontend(schedule, date=None):
     m.row("stub", size=0)  # start with 1
 
     # calc start time
-    start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour
+    start_t = int(utils.custom_round(schedule.x[0], 12, "floor")) - 6  # round to last hour and add half hour
     start_time = cast_time(start_t)
     m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
 
@@ -283,7 +283,7 @@ def wrap_frontend(schedule, date=None):
         m.block(make_packing_line(schedule))
         m.row("stub", size=0)
         m.block(wrap_cleanings_line(schedule))
-
-    m.block("mascarpone_department_preparation", push_func=add_push,
-        size=(6, 11), x=(0, 2))
+        # todo: put into schedule
+        m.block("mascarpone_department_preparation", push_func=add_push,
+                size=(6, 11), x=(schedule.x[0] - 6, 0))
     return m.root

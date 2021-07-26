@@ -1,6 +1,6 @@
 import os
 
-os.environ["environment"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from config import basedir
 from app.scheduler.models import *
