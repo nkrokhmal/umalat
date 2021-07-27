@@ -31,7 +31,10 @@ def contour_washers_schedule():
             flask.current_app.config["APPROVED_FOLDER"],
         )
         schedules = load_schedules(path, date_str, departments=["mozzarella"])
-        props = parse_schedule(schedules["mozzarella"])
+        if "mozzarella" in schedules.keys():
+            props = parse_schedule(schedules["mozzarella"])
+        else:
+            props = MozzarellaProperties()
 
         for key, value in props.__dict__.items():
             mozzarella_form[key].data = getattr(props, key)

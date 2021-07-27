@@ -121,7 +121,7 @@
                                                 <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответсвтвующую кнопку</p>
                                             </div>
                                             <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download {{key}}" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
                                                 <input type="submit" class="btn btn-primary btn-edit" id="testId">
                                             </div>
                                         </form>
@@ -141,7 +141,7 @@
                                                 <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответсвтвующую кнопку</p>
                                             </div>
                                             <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download {{key}}" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
                                                 <input type="submit" class="btn btn-primary btn-edit" id="testId2">
                                             </div>
                                         </form>
@@ -161,7 +161,7 @@
                                                 <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
                                             </div>
                                             <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download {{key}}" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
                                                 <input type="submit" class="btn btn-primary btn-edit" id="testId3">
                                             </div>
                                         </form>
@@ -181,7 +181,7 @@
                                                 <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
                                             </div>
                                             <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download {{key}}" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
                                                 <input type="submit" class="btn btn-primary btn-edit" id="testId4">
                                             </div>
                                         </form>
@@ -201,7 +201,7 @@
                                                 <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
                                             </div>
                                             <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download {{key}}" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
                                                 <input type="submit" class="btn btn-primary btn-edit" id="testId5">
                                             </div>
                                         </form>
@@ -248,7 +248,9 @@
             }
 
 			$(".modal-footer #testId").val(name);
-			$(".btn.btn-primary.btn-download." + date).click(function(){
+			console.log("Date 1" + date);
+			$(".btn.btn-primary.btn-download").click(function(){
+			    console.log("Date 2" + date);
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
 			    console.log(url_download);
 			    $.ajax(
@@ -263,6 +265,7 @@
 						  console.log(error);
 					}
 				});
+				$('#show_mozzarella').modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
@@ -310,7 +313,7 @@
             }
 
 			$(".modal-footer #testId2").val(name);
-			$(".btn.btn-primary.btn-download." + date).click(function(){
+			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
 			    console.log(url_download);
 			    $.ajax(
@@ -325,6 +328,7 @@
 						  console.log(error);
 					}
 				});
+				$('#show_ricotta').modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
@@ -372,7 +376,7 @@
             }
 
 			$(".modal-footer #testId3").val(name);
-			$(".btn.btn-primary.btn-download." + date).click(function(){
+			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
 			    console.log(url_download);
 			    $.ajax(
@@ -387,6 +391,7 @@
 						  console.log(error);
 					}
 				});
+				$('#show_mascarpone').modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
@@ -433,7 +438,7 @@
             }
 
 			$(".modal-footer #testId4").val(name);
-			$(".btn.btn-primary.btn-download." + date).click(function(){
+			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
 			    console.log(url_download);
 			    $.ajax(
@@ -448,6 +453,7 @@
 						  console.log(error);
 					}
 				});
+				$('#show_butter').modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
@@ -494,7 +500,7 @@
             }
 
 			$(".modal-footer #testId5").val(name);
-			$(".btn.btn-primary.btn-download." + date).click(function(){
+			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
 			    console.log(url_download);
 			    $.ajax(
@@ -509,6 +515,7 @@
 						  console.log(error);
 					}
 				});
+				$('#show_milkproject').modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
