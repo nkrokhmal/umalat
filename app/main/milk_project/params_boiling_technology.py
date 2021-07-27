@@ -9,14 +9,14 @@ from app.models import MilkProjectBoilingTechnology, MilkProjectSKU
 
 @main.route("/milk_project/get_boiling_technology", methods=["GET", "POST"])
 @flask_login.login_required
-def milkproject_get_boiling_technology():
+def milk_project_get_boiling_technology():
     skus = db.session.query(MilkProjectSKU).all()
     boiling_technologies = [sku.made_from_boilings[0].boiling_technologies for sku in skus]
     boiling_technologies = set(list(itertools.chain(*boiling_technologies)))
     return flask.render_template(
         "milk_project/get_boiling_technology.html",
         boiling_technologies=boiling_technologies,
-        endpoints=".milkproject_get_boiling_technology",
+        endpoints=".milk_project_get_boiling_technology",
     )
 
 
@@ -25,7 +25,7 @@ def milkproject_get_boiling_technology():
     methods=["GET", "POST"],
 )
 @flask_login.login_required
-def milkproject_edit_boiling_technology(boiling_technology_id):
+def milk_project_edit_boiling_technology(boiling_technology_id):
     form = MilkProjectBoilingTechnologyForm()
     boiling_technology = db.session.query(MilkProjectBoilingTechnology).get_or_404(
         boiling_technology_id
@@ -39,7 +39,7 @@ def milkproject_edit_boiling_technology(boiling_technology_id):
 
         db.session.commit()
         flask.flash("Параметры технологии успешно изменены", "success")
-        return redirect(flask.url_for(".milkproject_get_boiling_technology"))
+        return redirect(flask.url_for(".milk_project_get_boiling_technology"))
 
     form.name.data = boiling_technology.name
     form.water_collecting_time.data = boiling_technology.water_collecting_time

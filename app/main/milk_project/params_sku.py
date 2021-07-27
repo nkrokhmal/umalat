@@ -105,13 +105,13 @@ def milk_project_get_sku(page):
         page=page,
         skus_count=skus_count,
         per_page=flask.current_app.config["SKU_PER_PAGE"],
-        endopoints=".milkproject_get_sku",
+        endopoints=".milk_project_get_sku",
     )
 
 
 @main.route("/milk_project/edit_sku/<int:sku_id>", methods=["GET", "POST"])
 @flask_login.login_required
-def milkproject_edit_sku(sku_id):
+def milk_project_edit_sku(sku_id):
     form = SKUMilkProjectForm()
     sku = db.session.query(MilkProjectSKU).get_or_404(sku_id)
     if form.validate_on_submit() and sku is not None:
@@ -122,12 +122,12 @@ def milkproject_edit_sku(sku_id):
         sku.shelf_life = form.shelf_life.data
         sku.packing_speed = form.packing_speed.data
         sku.in_box = form.in_box.data
-        fill_milkproject_sku_from_form(sku, form)
+        fill_milk_project_sku_from_form(sku, form)
 
         db.session.commit()
 
         flask.flash("SKU успешно изменено", "success")
-        return redirect(flask.url_for(".milkproject_get_sku", page=1))
+        return redirect(flask.url_for(".milk_project_get_sku", page=1))
 
     if len(sku.made_from_boilings) > 0:
         print(sku.made_from_boilings[0].to_str())
@@ -153,10 +153,10 @@ def milkproject_edit_sku(sku_id):
 
 @main.route("/milk_project/delete_sku/<int:sku_id>", methods=["DELETE"])
 @flask_login.login_required
-def milkproject_delete_sku(sku_id):
+def milk_project_delete_sku(sku_id):
     sku = db.session.query(MilkProjectSKU).get_or_404(sku_id)
     if sku:
         db.session.delete(sku)
         db.session.commit()
         # flask.flash("SKU успешно удалено", "success")
-    return redirect(flask.url_for(".milkproject_get_sku", page=1))
+    return redirect(flask.url_for(".milk_project_get_sku", page=1))
