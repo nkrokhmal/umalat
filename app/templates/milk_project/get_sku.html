@@ -12,7 +12,7 @@
     </div>
 </div>
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
-    <a href="{{ url_for('main.milkproject_add_sku') }}" class="btn btn-primary btn-sm mr-2 dropdown-toggle">
+    <a href="{{ url_for('main.milk_project_add_sku') }}" class="btn btn-primary btn-sm mr-2 dropdown-toggle">
         <span class="fas fa-plus mr-2"></span>
         Добавить новое SKU
     </a>
@@ -42,10 +42,10 @@
                             <td class="border-0"><a class="small">{{sku.packing_speed|int}}</a></td>
                             <td class="border-0"><a class="small">{{sku.line.name}}</a></td>
                             <td class="border-0">
-                                <a href="{{ url_for('main.milkproject_edit_sku', sku_id = sku.id)}}" class="edit-sku">
+                                <a href="{{ url_for('main.milk_project_edit_sku', sku_id = sku.id)}}" class="edit-sku">
                                     <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>
                                 </a>
-                                <a href="{{ url_for('main.milkproject_copy_sku', sku_id = sku.id)}}" class="edit-sku">
+                                <a href="{{ url_for('main.milk_project_copy_sku', sku_id = sku.id)}}" class="edit-sku">
                                     <i class="material-icons" style="color:blue" title="Копировать"> <span class="fas fa-copy"> </i>
                                 </a>
                                 <a href="#delete_sku" class="delete-current-sku" data-id={{sku.id}} data-toggle="modal">
@@ -79,12 +79,12 @@
                 <nav aria-label="Page navigation example">
                     <ul class="pagination mb-0">
                         {% if pagination.has_prev %}
-                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.milkproject_get_sku', page=pagination.prev_num) }}">Предыдущие</a></li>
+                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.milk_project_get_sku', page=pagination.prev_num) }}">Предыдущие</a></li>
                         {% else %}
                           <li class="page-item"><a class="page-link btn disabled" href="#">Предыдущие</a></li>
                         {% endif %}
                         {% if pagination.has_next %}
-                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.milkproject_get_sku', page=pagination.next_num) }}">Следующие</a></li>
+                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.milk_project_get_sku', page=pagination.next_num) }}">Следующие</a></li>
                         {% else %}
                           <li class="page-item"><a class="page-link btn disabled" href="#">Следующие</a></li>
                         {% endif %}
@@ -104,7 +104,7 @@
             $(".btn.btn-danger.btn-ok").click(function(){
                 $.ajax(
                 {
-                    url: '/milkproject/delete_sku/' + id,
+                    url: '/milk_project/delete_sku/' + id,
                     type: 'DELETE',
                     success: function(res)
                     {

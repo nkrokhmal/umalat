@@ -35,7 +35,7 @@ class BaseClass:
     )
     TEMPLATE_BUTTER_BOILING_PLAN = "app/data/static/templates/constructor_butter.xlsx"
     TEMPLATE_MILKPROJECT_BOILING_PLAN = (
-        "app/data/static/templates/constructor_milkproject.xlsx"
+        "app/data/static/templates/constructor_milk_project.xlsx"
     )
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
     TEMPLATE_ADYGEA_BOILING_PLAN = "app/data/static/templates/constructor_adygea.xlsx"
@@ -150,7 +150,7 @@ class TestConfig(BaseClass):
     TEST_MOZZARELLA = "app/data/tests/mozzarella_plan.xlsx"
     TEST_RICOTTA = "app/data/tests/ricotta_plan.xlsx"
     TEST_MASCARPONE = "app/data/tests/mascarpone_plan.xlsx"
-    TEST_MILKPROJECT = "app/data/tests/milkproject_plan.xlsx"
+    TEST_MILKPROJECT = "app/data/tests/milk_project_plan.xlsx"
     TEST_BUTTER = "app/data/tests/butter_plan.xlsx"
 
     TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"

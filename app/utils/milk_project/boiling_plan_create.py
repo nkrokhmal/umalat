@@ -10,7 +10,7 @@ def boiling_plan_create(df):
     df["output"] = df["sku"].apply(lambda x: x.made_from_boilings[0].output_kg)
     df["boiling_type"] = df["sku"].apply(lambda x: x.made_from_boilings[0].name)
 
-    result, boiling_number = handle_milkproject(df)
+    result, boiling_number = handle_milk_project(df)
     result["kg"] = result["plan"]
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result = result[
@@ -27,21 +27,21 @@ def boiling_plan_create(df):
     return result
 
 
-def proceed_order(order, df, boilings_milkproject, boilings_count=1):
+def proceed_order(order, df, boilings_milk_project, boilings_count=1):
     df_filter = df[
         (df["group"] == order.group)
     ]
     if not df_filter.empty:
-        boilings_milkproject.init_iterator(df_filter["output"].iloc[0])
-        boilings_milkproject.add_group(
+        boilings_milk_project.init_iterator(df_filter["output"].iloc[0])
+        boilings_milk_project.add_group(
             df_filter.to_dict("records"),
             boilings_count=boilings_count,
         )
-    return boilings_milkproject
+    return boilings_milk_project
 
 
-def handle_milkproject(df):
-    boilings_milkproject = Boilings()
+def handle_milk_project(df):
+    boilings_milk_project = Boilings()
     Order = collections.namedtuple("Collection", "group")
     orders = [
         Order("Рикотта"),
@@ -49,7 +49,7 @@ def handle_milkproject(df):
         Order("Качорикотта"),
     ]
     for order in orders:
-        boilings_milkproject = proceed_order(order, df, boilings_milkproject)
-    boilings_milkproject.finish()
-    return pd.DataFrame(boilings_milkproject.boilings), boilings_milkproject.boiling_number
+        boilings_milk_project = proceed_order(order, df, boilings_milk_project)
+    boilings_milk_project.finish()
+    return pd.DataFrame(boilings_milk_project.boilings), boilings_milk_project.boiling_number
 

@@ -8,13 +8,13 @@ from app.scheduler.milk_project.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict
-from app.utils.milkproject.schedule_tasks import MilkProjectScheduleTask
+from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 from .forms import ScheduleForm
 
 
-@main.route("/milkproject_schedule", methods=["GET", "POST"])
+@main.route("/milk_project_schedule", methods=["GET", "POST"])
 @flask_login.login_required
-def milkproject_schedule():
+def milk_project_schedule():
 
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
@@ -63,7 +63,7 @@ def milkproject_schedule():
         save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
         os.remove(file_path)
         return flask.render_template(
-            "milkproject/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")
+            "milk_project/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
@@ -75,4 +75,4 @@ def milkproject_schedule():
         + 1
     )
 
-    return flask.render_template("milkproject/schedule.html", form=form, filename=None)
+    return flask.render_template("milk_project/schedule.html", form=form, filename=None)

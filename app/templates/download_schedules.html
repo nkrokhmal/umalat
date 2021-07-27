@@ -93,7 +93,7 @@
 
                             <td class="border-0">
                                 {% if data[key].get("милкпроджект", "") != "" %}
-                                    <a href="#show_milkproject" class="show_milkproject"
+                                    <a href="#show_milk_project" class="show_milk_project"
                                        data-date="{{key}}" data-filename="{{data[key].get('милкпроджект', {}).get('filename', '')}}"
                                        data-approved="{{data[key].get('милкпроджект', {}).get('is_approved', False)}}" data-toggle="modal" >
                                         {% if data[key].get('милкпроджект', {}).get('is_approved', False) %}
@@ -189,7 +189,7 @@
                                 </div>
                             </div>
 
-                            <div id="show_milkproject" class="modal fade" >
+                            <div id="show_milk_project" class="modal fade" >
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <form>
@@ -485,7 +485,7 @@
 	});
 
 	$(function () {
-		$(".show_milkproject").click(function () {
+		$(".show_milk_project").click(function () {
 		    console.log("Started");
 			var filename = $(this).data('filename');
 			var date = $(this).data('date');
@@ -515,7 +515,7 @@
 						  console.log(error);
 					}
 				});
-				$('#show_milkproject').modal('hide');
+				$('#show_milk_project').modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){

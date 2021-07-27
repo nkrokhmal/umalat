@@ -116,9 +116,9 @@ def approve_butter():
     return flask.redirect(flask.url_for(".butter_schedule"))
 
 
-@main.route("/approve_milkproject", methods=["GET", "POST"])
+@main.route("/approve_milk_project", methods=["GET", "POST"])
 @flask_login.login_required
-def approve_milkproject():
+def approve_milk_project():
     date = flask.request.form.get("date")
     file_name = flask.request.form.get("file_name")
     pickle_file_name = f"{file_name.split('.')[0]}.pickle"
@@ -130,5 +130,5 @@ def approve_milkproject():
     send_file.queue(os.path.join(path, file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
-    return flask.redirect(flask.url_for(".milkproject_schedule"))
+    return flask.redirect(flask.url_for(".milk_project_schedule"))
 

@@ -4,13 +4,13 @@ from app.imports.runtime import *
 from app.main import main
 
 
-DEPARTMENTS = ["mozzarella", "ricotta", "mascarpone", "butter", "milkproject", "adygea"]
+DEPARTMENTS = ["mozzarella", "ricotta", "mascarpone", "butter", "milk_project", "adygea"]
 DEPARTMENT_DICT = {
     "mozzarella": "Моцарелльный цех",
     "ricotta": "Рикоттный цех",
     "mascarpone": "Маскарпонный цех",
     "butter": "Маслоцех",
-    "milkproject": "Милкроджект",
+    "milk_project": "Милкроджект",
     "adygea": "Адыгейский цех",
 }
 

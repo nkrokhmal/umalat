@@ -10,9 +10,9 @@ from app.utils.features.form_utils import *
 from .forms import SKUMilkProjectForm, CopySKUForm
 
 
-@main.route("/milkproject/add_sku", methods=["POST", "GET"])
+@main.route("/milk_project/add_sku", methods=["POST", "GET"])
 @flask_login.login_required
-def milkproject_add_sku():
+def milk_project_add_sku():
     form = SKUMilkProjectForm()
     name = flask.request.args.get("name")
     if form.validate_on_submit():
@@ -28,26 +28,26 @@ def milkproject_add_sku():
             in_box=form.in_box.data,
             form_factor=form_factor,
         )
-        sku = fill_milkproject_sku_from_form(sku, form)
-        milkproject_line = (
+        sku = fill_milk_project_sku_from_form(sku, form)
+        milk_project_line = (
             db.session.query(MilkProjectLine)
             .filter(MilkProjectLine.name == LineName.MILKPROJECT)
             .first()
         )
-        sku.line = milkproject_line
+        sku.line = milk_project_line
 
         db.session.add(sku)
         db.session.commit()
         flask.flash("SKU успешно добавлено", "success")
-        return redirect(flask.url_for(".milkproject_get_sku", page=1))
+        return redirect(flask.url_for(".milk_project_get_sku", page=1))
     if name:
         form.name.data = name
-    return flask.render_template("milkproject/add_sku.html", form=form)
+    return flask.render_template("milk_project/add_sku.html", form=form)
 
 
-@main.route("/milkproject/copy_sku/<int:sku_id>", methods=["GET", "POST"])
+@main.route("/milk_project/copy_sku/<int:sku_id>", methods=["GET", "POST"])
 @flask_login.login_required
-def milkproject_copy_sku(sku_id):
+def milk_project_copy_sku(sku_id):
     form = CopySKUForm()
     sku = db.session.query(MilkProjectSKU).get_or_404(sku_id)
     if form.validate_on_submit() and sku is not None:
@@ -76,16 +76,16 @@ def milkproject_copy_sku(sku_id):
         db.session.add(copy_sku)
         db.session.commit()
         flask.flash("SKU успешно добавлено", "success")
-        return redirect(flask.url_for(".milkproject_get_sku", page=1))
+        return redirect(flask.url_for(".milk_project_get_sku", page=1))
     form.name.data = sku.name
     form.brand_name.data = sku.brand_name
     form.code.data = sku.code
-    return flask.render_template("milkproject/copy_sku.html", form=form, sku_id=sku.id)
+    return flask.render_template("milk_project/copy_sku.html", form=form, sku_id=sku.id)
 
 
-@main.route("/milkproject/get_sku/<int:page>", methods=["GET"])
+@main.route("/milk_project/get_sku/<int:page>", methods=["GET"])
 @flask_login.login_required
-def milkproject_get_sku(page):
+def milk_project_get_sku(page):
     db.session.remove()
     import time
     time.sleep(0.1)
@@ -99,7 +99,7 @@ def milkproject_get_sku(page):
         .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return flask.render_template(
-        "milkproject/get_sku.html",
+        "milk_project/get_sku.html",
         form=form,
         pagination=pagination,
         page=page,
@@ -109,7 +109,7 @@ def milkproject_get_sku(page):
     )
 
 
-@main.route("/milkproject/edit_sku/<int:sku_id>", methods=["GET", "POST"])
+@main.route("/milk_project/edit_sku/<int:sku_id>", methods=["GET", "POST"])
 @flask_login.login_required
 def milkproject_edit_sku(sku_id):
     form = SKUMilkProjectForm()
@@ -147,11 +147,11 @@ def milkproject_edit_sku(sku_id):
     form.in_box.data = sku.in_box
 
     return flask.render_template(
-        "milkproject/edit_sku.html", form=form, sku_id=sku_id
+        "milk_project/edit_sku.html", form=form, sku_id=sku_id
     )
 
 
-@main.route("/milkproject/delete_sku/<int:sku_id>", methods=["DELETE"])
+@main.route("/milk_project/delete_sku/<int:sku_id>", methods=["DELETE"])
 @flask_login.login_required
 def milkproject_delete_sku(sku_id):
     sku = db.session.query(MilkProjectSKU).get_or_404(sku_id)

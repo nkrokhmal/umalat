@@ -115,14 +115,14 @@ def draw_boiling_sheet(
 
 
 def draw_boiling_plan(df, wb):
-    milkproject_skus = db.session.query(MilkProjectSKU).all()
+    milk_project_skus = db.session.query(MilkProjectSKU).all()
 
-    _ = draw_skus(wb, milkproject_skus, SKU_SHEET_NAME)
+    _ = draw_skus(wb, milk_project_skus, SKU_SHEET_NAME)
     wb, _ = draw_boiling_sheet(
         wb=wb,
         df=df,
         sheet_name=PLAN_SHEET_NAME,
-        skus=milkproject_skus,
+        skus=milk_project_skus,
     )
 
     for sheet in wb.sheetnames:

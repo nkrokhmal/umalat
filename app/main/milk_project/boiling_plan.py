@@ -1,6 +1,6 @@
 from app.imports.runtime import *
-from app.utils.milkproject.boiling_plan_create import boiling_plan_create
-from app.utils.milkproject.boiling_plan_draw import draw_boiling_plan
+from app.utils.milk_project.boiling_plan_create import boiling_plan_create
+from app.utils.milk_project.boiling_plan_draw import draw_boiling_plan
 from app.utils.files.utils import move_boiling_file, save_boiling_plan
 from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
@@ -9,9 +9,9 @@ from app.models import *
 from .forms import BoilingPlanForm
 
 
-@main.route("/milkproject_boiling_plan", methods=["POST", "GET"])
+@main.route("/milk_project_boiling_plan", methods=["POST", "GET"])
 @flask_login.login_required
-def milkproject_boiling_plan():
+def milk_project_boiling_plan():
     form = BoilingPlanForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
@@ -28,7 +28,7 @@ def milkproject_boiling_plan():
             template_path=flask.current_app.config["TEMPLATE_MILKPROJECT_BOILING_PLAN"],
         )
         sku_plan_client.fill_remainigs_list()
-        sku_plan_client.fill_milkproject_sku_plan()
+        sku_plan_client.fill_milk_project_sku_plan()
 
         excel_compiler, wb, wb_data_only, filename, filepath = move_boiling_file(
             sku_plan_client.date,
@@ -43,7 +43,7 @@ def milkproject_boiling_plan():
         wb = draw_boiling_plan(df_plan, wb)
         save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
         return flask.render_template(
-            "milkproject/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date,
+            "milk_project/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date,
         )
     form.date.data = datetime.today() + timedelta(days=1)
-    return flask.render_template("milkproject/boiling_plan.html", form=form, filename=None)
+    return flask.render_template("milk_project/boiling_plan.html", form=form, filename=None)
