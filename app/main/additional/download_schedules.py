@@ -5,9 +5,18 @@ from app.imports.runtime import *
 from app.main import main
 
 
-def get_department(filename):
+def get_department(filename, default_mozzarella=True):
     filename_without_ext = filename.split('.')[0]
-    return "моцарелла" if len(filename_without_ext.split(' ')) < 3 else filename_without_ext.split(' ')[-1]
+    if default_mozzarella:
+        return "моцарелла" if len(filename_without_ext.split(' ')) < 3 else filename_without_ext.split(' ')[-1]
+    else:
+        return filename_without_ext.split(' ')[-1]
+
+
+def get_department_task(filename):
+    filename_without_ext = filename.split('.')[0]
+    result = ' '.join(filename_without_ext.split(' ')[1:]).lower()
+    return "default" if result == "" else result
 
 
 def get_metadata(data, offset=0, per_page=10):
@@ -67,7 +76,6 @@ def download_schedules(page):
                         schedules_metadata[date_dir][department]['is_approved'] = is_approved(schedules_filename, date_dir)
 
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
-
     schedules_result = get_metadata(
         schedules_metadata,
         offset=(page - 1) * flask.current_app.config["SKU_PER_PAGE"],
@@ -82,5 +90,56 @@ def download_schedules(page):
         items=schedules_metadata.keys(),
     )
     return flask.render_template(
-        "download_schedules.html", pagination=pagination, data=schedules_result,
+        "history/download_schedules.html", pagination=pagination, data=schedules_result,
     )
+
+
+@main.route("/download_schedule_tasks/<int:page>", methods=["GET"])
+@flask_login.login_required
+def download_schedule_tasks(page):
+    date_dirs = next(os.walk(flask.current_app.config["DYNAMIC_DIR"]))[1]
+    schedules_metadata = {}
+
+    def is_date(string):
+        try:
+            _ = datetime.strptime(string, flask.current_app.config["DATE_FORMAT"])
+            return True
+        except:
+            return False
+
+    for date_dir in date_dirs:
+        if is_date(date_dir):
+            schedules_metadata[date_dir] = {}
+            schedule_dir = os.path.join(
+                flask.current_app.config["DYNAMIC_DIR"],
+                date_dir,
+                flask.current_app.config["TASK_FOLDER"])
+            if os.path.exists(schedule_dir):
+                # schedules_metadata[date_dir] = os.listdir(schedule_dir)
+
+                schedules_filenames = os.listdir(schedule_dir)
+                for schedules_filename in schedules_filenames:
+                    department = get_department_task(schedules_filename)
+                    if department not in schedules_metadata[date_dir].keys():
+                        schedules_metadata[date_dir][department] = {}
+                        schedules_metadata[date_dir][department]['filename'] = schedules_filename
+
+    schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
+    print(schedules_metadata)
+    schedules_result = get_metadata(
+        schedules_metadata,
+        offset=(page - 1) * flask.current_app.config["SKU_PER_PAGE"],
+        per_page=flask.current_app.config["SKU_PER_PAGE"]
+    )
+
+    pagination = flask_paginate.Pagination(
+        page=page,
+        per_page=flask.current_app.config["SKU_PER_PAGE"],
+        error_out=False,
+        total=len(schedules_metadata.keys()),
+        items=schedules_metadata.keys(),
+    )
+    return flask.render_template(
+        "history/download_schedule_tasks.html", pagination=pagination, data=schedules_result,
+    )
+

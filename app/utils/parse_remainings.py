@@ -83,6 +83,7 @@ def group_skus(skus_req, boilings):
     """
     result = []
     for boiling in boilings:
+        boiling.to_str()
         sku_grouped = [
             x for x in skus_req if x.sku.made_from_boilings[0].id == boiling.id
         ]

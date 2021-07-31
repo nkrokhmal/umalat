@@ -22,12 +22,16 @@ def fill_boiling_technologies():
         "Название форм фактора",
         "Охлаждение",
         "Сепарирование",
+        "Наличие лактозы",
+        "Вкусовая добавка",
         "Посолка",
         "П",
         "Процент",
         "Вес нетто",
     ]
     bt_data = df[boiling_technologies_columns]
+    bt_data["Наличие лактозы"] = bt_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
+    bt_data["Вкусовая добавка"] = bt_data["Вкусовая добавка"].fillna("")
     bt_data = bt_data.drop_duplicates()
     bt_data = bt_data.to_dict("records")
     for bt in bt_data:
@@ -36,7 +40,9 @@ def fill_boiling_technologies():
             name=CreamCheeseBoilingTechnology.create_name(
                 line=line_name, percent=bt["Процент"],
                 weight=bt["Вес нетто"],
-                form_factor=bt["Название форм фактора"]
+                form_factor=bt["Название форм фактора"],
+                flavoring_agent=bt["Вкусовая добавка"],
+                is_lactose=bt["Наличие лактозы"],
             ),
             cooling_time=bt["Охлаждение"],
             separation_time=bt["Сепарирование"],
@@ -55,6 +61,8 @@ def fill_boilings():
     columns = [
         "Название форм фактора",
         "Процент",
+        "Наличие лактозы",
+        "Вкусовая добавка",
         "Линия",
         "Охлаждение",
         "Сепарирование",
@@ -65,6 +73,8 @@ def fill_boilings():
         "Вес нетто",
     ]
     b_data = df[columns]
+    b_data["Наличие лактозы"] = b_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
+    b_data["Вкусовая добавка"] = b_data["Вкусовая добавка"].fillna("")
     b_data = b_data.drop_duplicates()
     b_data = b_data.to_dict("records")
     for b in b_data:
@@ -83,6 +93,8 @@ def fill_boilings():
                     line=line_name, percent=b["Процент"],
                     form_factor=b["Название форм фактора"],
                     weight=b["Вес нетто"],
+                    flavoring_agent=b["Вкусовая добавка"],
+                    is_lactose=b["Наличие лактозы"],
                 )
             )
         ]
@@ -93,6 +105,8 @@ def fill_boilings():
             boiling_technologies=bts_name,
             line_id=line_id,
             weight_netto=b["Вес нетто"],
+            flavoring_agent=b["Вкусовая добавка"],
+            is_lactose=b["Наличие лактозы"],
         )
         db.session.add(boiling)
         db.session.commit()
@@ -123,6 +137,8 @@ def fill_sku():
     columns = [
         "Название SKU",
         "Процент",
+        "Наличие лактозы",
+        "Вкусовая добавка",
         "Имя бренда",
         "Вес нетто",
         "Срок хранения",
@@ -136,6 +152,8 @@ def fill_sku():
     ]
 
     sku_data = df[columns]
+    sku_data["Наличие лактозы"] = sku_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
+    sku_data["Вкусовая добавка"] = sku_data["Вкусовая добавка"].fillna("")
     sku_data = sku_data.drop_duplicates()
     sku_data = sku_data.to_dict("records")
     for sku in sku_data:
@@ -156,8 +174,11 @@ def fill_sku():
             x
             for x in boilings
             if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id) & (x.output_coeff == sku["Коэффициент"]) &
-               (x.weight_netto == sku["Вес нетто"])
+               (x.weight_netto == sku["Вес нетто"]) & (x.is_lactose == sku["Наличие лактозы"]) & (x.flavoring_agent == sku["Вкусовая добавка"])
         ]
+        if len(add_sku.made_from_boilings) == 0:
+            print(sku["Вкусовая добавка"])
+            print(add_sku.name)
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]
         db.session.add(add_sku)
