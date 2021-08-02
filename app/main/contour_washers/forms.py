@@ -10,7 +10,6 @@ from wtforms.compat import with_metaclass, iteritems, itervalues
 
 
 def create_mozzarella_form(request_form):
-
     class TempForm(FlaskForm):
         pass
 
@@ -18,12 +17,15 @@ def create_mozzarella_form(request_form):
         if isinstance(v, str):
             setattr(TempForm, k, StringField(k, validators=[Optional()], default=v))
         elif isinstance(v, list):
-            setattr(TempForm, k, StringField(k, validators=[Optional()], default=json.dumps(v)))
+            setattr(
+                TempForm,
+                k,
+                StringField(k, validators=[Optional()], default=json.dumps(v)),
+            )
         elif isinstance(v, bool):
             setattr(TempForm, k, BooleanField(k, validators=[Optional()], default=v))
 
     return TempForm(request_form)
-
 
 
 # class MozzarellaPropertiesForm(FlaskForm):
