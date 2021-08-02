@@ -60,9 +60,6 @@ app/data/dynamic
 app/scheduler/butter/tests/schedules
 app/scheduler/**/*.xlsx
 db/batch_numbers/data.json
-!tests/lazy_tester_logs/**/*.log
 **/schedules/*
 **/outputs/*
 research/akadaner/*xlsx
-tests/lazy_tester_logs/**
-app/data/static/samples/inputs/**
