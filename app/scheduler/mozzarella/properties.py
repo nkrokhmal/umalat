@@ -8,7 +8,7 @@ from pydantic import Field
 
 
 class MozzarellaProperties(pydantic.BaseModel):
-    bar12_present: bool = Field(False, description='Был ли вчера брус 1.2')
+    bar12_present: bool = Field(False, description='Присутствует ли брус 1.2')
     line33_last_termizator_end_time: str = Field("", description='Конец последнего налива термизатора на смеси 3.3%')
     line36_last_termizator_end_time: str = Field("", description='Конец последнего налива термизатора на смеси 3.6%')
     line27_nine_termizator_end_time: str = Field("", description='Конец девятого налива термизатора на смеси 2.7%')

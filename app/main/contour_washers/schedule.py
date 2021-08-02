@@ -2,8 +2,15 @@ import flask
 
 from app.imports.runtime import *
 from app.main import main
-from .forms import ScheduleForm, create_mozzarella_form, RicottaPropertiesForm, MascarponePropertiesForm, \
-    ButterPropertiesForm, MilkProjectPropertiesForm, AdygeaPropertiesForm
+from .forms import (
+    ScheduleForm,
+    create_mozzarella_form,
+    RicottaPropertiesForm,
+    MascarponePropertiesForm,
+    ButterPropertiesForm,
+    MilkProjectPropertiesForm,
+    AdygeaPropertiesForm,
+)
 from app.scheduler import run_consolidated, run_contour_cleanings
 from app.main.errors import internal_error
 from app.scheduler.mozzarella.properties import *
@@ -14,6 +21,7 @@ from app.scheduler.contour_cleanings import *
 @flask_login.login_required
 def contour_washers_schedule():
     form = ScheduleForm(flask.request.form)
+
     mozzarella_form = create_mozzarella_form(flask.request.form)
     ricotta_form = RicottaPropertiesForm(flask.request.form)
     mascarpone_form = MascarponePropertiesForm(flask.request.form)
@@ -30,14 +38,21 @@ def contour_washers_schedule():
             date_str,
             flask.current_app.config["APPROVED_FOLDER"],
         )
-        schedules = load_schedules(path, date_str, departments=["mozzarella"])
-        if "mozzarella" in schedules.keys():
-            props = parse_schedule(schedules["mozzarella"])
-        else:
-            props = MozzarellaProperties()
+        schedules = load_schedules(path, date_str)
+        props = load_properties(schedules)
 
-        for key, value in props.__dict__.items():
-            mozzarella_form[key].data = getattr(props, key)
+        for department, form in [
+            ["mozzarella", mozzarella_form],
+            ["ricotta", ricotta_form],
+            ["mascarpone", mascarpone_form],
+            ["butter", butter_form],
+            ["milk_project", milk_project_form],
+            ["adygea", adygea_form],
+        ]:
+            if department not in props:
+                continue
+            for key, value in props[department].__dict__.items():
+                form[key].data = getattr(props[key], key)
 
         return flask.render_template(
             "contour_washers/schedule.html",
@@ -49,7 +64,7 @@ def contour_washers_schedule():
             adygea_form=adygea_form,
             form=form,
             date=date_str,
-            params=True
+            params=True,
         )
 
     if flask.request.method == "POST" and "submit_file" in flask.request.form:
@@ -73,11 +88,14 @@ def contour_washers_schedule():
         with code("calc input tanks and present of bar12"):
             yesterday = date - timedelta(days=1)
             yesterday_str = yesterday.strftime("%Y-%m-%d")
+
             yesterday_schedules = load_schedules(
                 config.abs_path("app/data/dynamic/{}/approved/".format(yesterday_str)),
                 prefix=yesterday_str,
                 departments=["ricotta", "mozzarella"],
             )
+            yesterday_properties = load_properties(yesterday_schedules)
+
             if "ricotta" not in yesterday_schedules:
                 # todo soon: warning that ricotta is not found from yesterday
                 input_tanks = [["4", 0], ["5", 0], ["8", 0]]
@@ -88,7 +106,7 @@ def contour_washers_schedule():
                     + milk_project_n_boilings * 2400,
                 )
 
-            is_bar12_present = calc_is_bar12_present(yesterday_schedules)
+            is_bar12_present = yesterday_properties["mozzarella"].bar12_present
 
         run_contour_cleanings(
             path,
@@ -125,7 +143,6 @@ def contour_washers_schedule():
     return flask.render_template(
         "contour_washers/schedule.html", form=form, params=False
     )
-
 
 
 #
