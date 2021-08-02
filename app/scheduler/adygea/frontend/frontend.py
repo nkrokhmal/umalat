@@ -29,13 +29,14 @@ def wrap_boiling(boiling):
 
     return m.root
 
-def wrap_cleaning(cleaning):
+
+def wrap_pair_block(block):
     m = BlockMaker(
-        "cleaning",
+        block.props['cls'],
         font_size=9,
         axis=1,
-        x=(cleaning.x[0], 0),
-        size=(cleaning.size[0], 6),
+        x=(block.x[0], 0),
+        size=(block.size[0], 6),
     )
     return m.root
 
@@ -61,10 +62,14 @@ def wrap_boiling_lines(schedule):
         for boiling in schedule["boiling", True]:
             push(boiling_lines[boiling.props['boiler_num']], wrap_boiling(boiling), push_func=add_push)
 
-    with code('add cleanings'):
+    with code('add cleanings and lunches'):
         for pair_num in range(2):
-            cleaning = schedule.find_one(cls='cleaning', pair_num=pair_num)
-            push(boiling_lines[pair_num * 2], wrap_cleaning(cleaning), push_func=add_push)
+            for cls in ['cleaning', 'lunch']:
+                try:
+                    block = schedule.find_one(cls=cls, pair_num=pair_num)
+                except:
+                    continue
+                push(boiling_lines[pair_num * 2], wrap_pair_block(block), push_func=add_push)
 
     return m.root
 

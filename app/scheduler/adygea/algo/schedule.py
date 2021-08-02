@@ -3,7 +3,6 @@
 from app.imports.runtime import *
 
 from app.scheduler.adygea.algo.boilings import *
-from app.scheduler.adygea.algo.cleanings import *
 from app.scheduler.time import *
 from app.models import *
 
@@ -33,8 +32,31 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
             cur_boiling_id += 1
 
     for i, r in enumerate([range(0, 2), range(2, 4)]):
-        end = max(boiling.y[0] for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r)
+        range_boilings = [boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r]
+        end = max(boiling.y[0] for boiling in range_boilings)
         m.row(make_cleaning(pair_num=i), x=end + 1, push_func=add_push)
+
+
+    for i, r in enumerate([range(0, 2), range(2, 4)]):
+        range_boilings = [boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r]
+
+        # find lunch times
+        for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
+            if not b2:
+                continue
+
+            if cast_time(b2.y[0] + cast_t(start_time)) >= '00:12:00':
+                # lunch time!
+                m.row(make_lunch(pair_num=i), x=b2.y[0] + 2, push_func=add_push)
+
+                # shift boiling blocks
+                for boiling in [boiling for boiling in range_boilings if boiling.y[0] > b2.y[0]]:
+                    boiling.props.update(x=(boiling.x[0] + 9, 0)) # todo next: make properly
+
+                # shift cleaning
+                cleaning = m.root.find_one(cls='cleaning', pair_num=i)
+                cleaning.props.update(x=(cleaning.x[0] + 9, 0))
+                break
 
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root

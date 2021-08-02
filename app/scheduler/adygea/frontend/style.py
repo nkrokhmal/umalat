@@ -9,4 +9,9 @@ STYLE = {
         "text": "мойка оборудования и цеха",
         "font_size": 12,
     },  # blue
+    "lunch": {
+        "color": "#DAEEF3",
+        "text": "обед",
+        "font_size": 12,
+    },  # blue
 }

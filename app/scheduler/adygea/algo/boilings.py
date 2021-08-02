@@ -15,3 +15,14 @@ def make_boiling(boiling_model, boiling_id, boiler_num):
     m.row("pouring_off", size=bt.pouring_off_time // 5)
 
     return m.root
+
+def make_cleaning(**kwargs):
+    m = BlockMaker("cleaning", **kwargs)
+    m.row(f"cleaning", size=20)  # todo soon: take from parameters
+    return m.root
+
+
+def make_lunch(**kwargs):
+    m = BlockMaker("lunch", **kwargs)
+    m.row(f"lunch", size=7)  # todo soon: take from parameters
+    return m.root
