@@ -48,6 +48,9 @@ coverage.xml
 # Django stuff:
 *.pot
 
+# Temp files
+*.tmp
+
 # Pyc files
 **/*.pyc
 

@@ -24,7 +24,7 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
         with m.block("pouring"):
             with m.block("first"):
                 m.row("termizator", size=termizator_time // 5)
-                m.row("fermenting", size=bt.pouring_time // 5 - boiling_model.line.pouring_time // 5)
+                m.row("fermenting", size=bt.pouring_time // 5 - termizator_time // 5)
                 m.row("soldification", size=bt.soldification_time // 5)
                 m.row("cutting", size=bt.cutting_time // 5)
                 m.row("pumping_out", size=bt.pumping_out_time // 5)
