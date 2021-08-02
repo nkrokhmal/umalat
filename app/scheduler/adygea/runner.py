@@ -20,7 +20,7 @@ def run_adygea(
         schedule = make_schedule(
             boiling_plan_df, start_time=start_time, first_boiling_id=first_boiling_id
         )
-
+        print(schedule)
     try:
         frontend = wrap_frontend(schedule)
     except Exception as e:

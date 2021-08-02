@@ -3,6 +3,7 @@
 from app.imports.runtime import *
 
 from app.scheduler.adygea.algo.boilings import *
+from app.scheduler.adygea.algo.cleanings import *
 from app.scheduler.time import *
 from app.models import *
 
@@ -30,5 +31,10 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
             push(m.root, boiling, push_func=AxisPusher(start_from='last_beg'), validator=Validator())
             cur_boiler_num = (cur_boiler_num + 1) % 4
             cur_boiling_id += 1
+
+    for i, r in enumerate([range(0, 2), range(2, 4)]):
+        end = max(boiling.y[0] for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r)
+        m.row(make_cleaning(pair_num=i), x=end + 1, push_func=add_push)
+
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root
