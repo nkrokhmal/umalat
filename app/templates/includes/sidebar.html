@@ -33,6 +33,7 @@
                     <ul class="flex-column nav">
                         <li class="nav-item "><a class="nav-link" href="{{url_for('main.mozzarella_boiling_plan')}}"><span>План варок</span></a></li>
                         <li class="nav-item "><a class="nav-link" href="{{url_for('main.mozzarella_schedule')}}"><span>Расписание</span></a></li>
+                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.mozzarella_upload_schedule')}}"><span>Загрузить расписание</span></a></li>
                         <li class="nav-item "><a class="nav-link" href="{{url_for('main.mozzarella_params')}}"><span>Параметры</span></a></li>
                     </ul>
                 </div>
@@ -111,9 +112,9 @@
                 </span>
                 <div class="multi-level collapse " role="list" id="submenu-app5" aria-expanded="false">
                     <ul class="flex-column nav">
-                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.milkproject_boiling_plan')}}"><span>План варок</span></a></li>
-                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.milkproject_schedule')}}"><span>Расписание</span></a></li>
-                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.milkproject_params')}}"><span>Параметры</span></a></li>
+                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.milk_project_boiling_plan')}}"><span>План варок</span></a></li>
+                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.milk_project_schedule')}}"><span>Расписание</span></a></li>
+                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.milk_project_params')}}"><span>Параметры</span></a></li>
                     </ul>
                 </div>
             </li>
@@ -158,7 +159,7 @@
                 <span class="nav-link  collapsed  d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#submenu-app8">
                 <span>
                     <span class="sidebar-icon">
-                        <span class="fas fa-bath" height="20" width="20"></span>
+                        <span class="fas fa-history" height="20" width="20"></span>
                     </span>
                     История
                 </span>
@@ -167,7 +168,7 @@
                 <div class="multi-level collapse " role="list" id="submenu-app8" aria-expanded="false">
                     <ul class="flex-column nav">
                         <li class="nav-item "><a class="nav-link" href="{{url_for('main.download_schedules', page=1)}}"><span>Расписание</span></a></li>
-                        <li class="nav-item "><a class="nav-link" href="#"><span>Печать заданий</span></a></li>
+                        <li class="nav-item "><a class="nav-link" href="{{url_for('main.download_schedule_tasks', page=1)}}"><span>Печать заданий</span></a></li>
                     </ul>
                 </div>
             </li>

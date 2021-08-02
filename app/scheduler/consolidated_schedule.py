@@ -51,7 +51,7 @@ def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=Fa
 
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
-    if "milkproject" in schedules:
+    if "milk_project" in schedules:
         from app.scheduler.milk_project import wrap_frontend, STYLE
 
         frontend = wrap_frontend(schedules["milk_project"])

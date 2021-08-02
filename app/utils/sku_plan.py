@@ -259,7 +259,7 @@ class SkuPlanClient:
         self.wb.active = 1
         self.wb.save(self.filepath)
 
-    def fill_milkproject_sku_plan(self):
+    def fill_milk_project_sku_plan(self):
         sheet = self.wb[flask.current_app.config["SHEET_NAMES"]["schedule_plan"]]
         cur_row = 2
         for sku_grouped in self.skus_grouped:

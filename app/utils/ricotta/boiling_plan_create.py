@@ -26,6 +26,7 @@ def boiling_plan_create(df, request_ton=0):
     df["output_per_tank"] = df["sku"].apply(lambda x: x.output_per_tank)
 
     result, boiling_number = handle_ricotta(df, request_ton=request_ton)
+    print(result)
     result["kg"] = result["plan"]
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result["output"] = result["output_per_tank"] * result["number_of_tanks"]
@@ -46,6 +47,7 @@ def boiling_plan_create(df, request_ton=0):
         ]
     ]
     result = group_result(result)
+    print(result)
     return result
 
 
@@ -64,7 +66,7 @@ def group_result(df):
         "sku"
     ].apply(lambda x: x.made_from_boilings[0].number_of_tanks)
 
-    return df.groupby("name", as_index=False).agg(agg)
+    return df.groupby("name", as_index=False).agg(agg).sort_values(by='id')
 
 
 def proceed_order(order, df, boilings_ricotta, boilings_count=1):
@@ -106,6 +108,7 @@ def handle_ricotta(df, request_ton=0):
     ]
     for order in orders:
         boilings_ricotta = proceed_order(order, df, boilings_ricotta)
+
     boilings_ricotta.finish()
     sum_ton = (
         pd.DataFrame(boilings_ricotta.boilings)
@@ -135,6 +138,7 @@ def handle_ricotta(df, request_ton=0):
                             boilings_ricotta,
                             boiling_count_dict[key],
                         )
+
     boilings_ricotta.finish()
     return pd.DataFrame(boilings_ricotta.boilings), boilings_ricotta.boiling_number
 

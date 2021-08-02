@@ -21,6 +21,12 @@ class BoilingPlanFastForm(FlaskForm):
     )
 
 
+class UploadForm(FlaskForm):
+    validators = [FileRequired(message="Отсутствует файл!")]
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    input_file = FileField("", validators=validators)
+
+
 class ScheduleForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
     input_file = FileField("", validators=validators)

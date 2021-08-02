@@ -8,4 +8,5 @@ from . import (
     params_boiling_technology,
     boiling_plan,
     schedule,
+    upload_schedule,
 )

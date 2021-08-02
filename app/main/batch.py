@@ -8,7 +8,7 @@ from app.models import Department, BatchNumber
 def save_batches():
     batches = db.session.query(BatchNumber).all()
     if len(batches) > 0:
-        batch_path = os.path.join(flask.current_app.config["BATCH_NUMBER_DIR"], "batches.json")
+        batch_path = os.path.join(flask.current_app.config["BATCH_NUMBERS_DIR"], "batches.json")
         batches = [batch.serialize() for batch in batches]
         mode = 'a' if os.path.exists(batch_path) else 'w'
         with open(batch_path, mode) as file:

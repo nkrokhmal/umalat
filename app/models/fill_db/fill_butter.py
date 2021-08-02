@@ -164,7 +164,6 @@ def fill_sku():
                (x.is_lactose == (True if sku["Наличие лактозы"] == "Да" else False)) &
                (x.weight_netto == sku["Вес нетто"])
         ]
-        print(add_sku.made_from_boilings)
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]
         db.session.add(add_sku)

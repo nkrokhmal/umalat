@@ -43,11 +43,13 @@ def fill_boiling_technologies():
         "Сепарирование",
         "Внесение ингредиентов",
         "Процент",
+        "Наличие лактозы",
         "Вкусовая добавка",
         "Вес",
         "Выход",
     ]
     bt_data = df[boiling_technologies_columns]
+    bt_data["Наличие лактозы"] = bt_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
     bt_data = bt_data.drop_duplicates().fillna("")
     fermentators = db.session.query(MascarponeSourdough).all()
     big_fermentators = [x for x in fermentators if x.name == "Big"]
@@ -70,6 +72,7 @@ def fill_boiling_technologies():
                     weight=bt["Вес"][i],
                     percent=bt["Процент"],
                     flavoring_agent=bt["Вкусовая добавка"],
+                    is_lactose=bt["Наличие лактозы"],
                 ),
                 pouring_time=bt["Прием"][i],
                 heating_time=bt["Нагрев"][i],
@@ -92,11 +95,13 @@ def fill_boilings():
     columns = [
         "Вкусовая добавка",
         "Процент",
+        "Наличие лактозы",
         "Линия",
         "Вес",
         "Коэффициент",
     ]
     b_data = df[columns]
+    b_data["Наличие лактозы"] = b_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
     b_data = b_data.drop_duplicates().fillna("")
     for column_name in ["Вес"]:
         b_data[column_name] = b_data[column_name].apply(lambda x: json.loads(x))
@@ -116,12 +121,14 @@ def fill_boilings():
                         weight=b["Вес"][i],
                         percent=b["Процент"],
                         flavoring_agent=b["Вкусовая добавка"],
+                        is_lactose=b["Наличие лактозы"]
                     )
                 )
             ]
         boiling = MascarponeBoiling(
             percent=b["Процент"],
             flavoring_agent=b["Вкусовая добавка"],
+            is_lactose=b["Наличие лактозы"],
             boiling_technologies=bts_name,
             output_coeff=b["Коэффициент"],
             line_id=line_id,
@@ -158,6 +165,7 @@ def fill_sku():
         "Название SKU",
         "Процент",
         "Вкусовая добавка",
+        "Наличие лактозы",
         "Имя бренда",
         "Вес нетто",
         "Срок хранения",
@@ -170,6 +178,7 @@ def fill_sku():
     ]
 
     sku_data = df[columns]
+    sku_data["Наличие лактозы"] = sku_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
     sku_data = sku_data.drop_duplicates().fillna("")
     for column_name in ["Выход"]:
         sku_data[column_name] = sku_data[column_name].apply(lambda x: json.loads(x))
@@ -192,6 +201,7 @@ def fill_sku():
             for x in boilings
             if (x.percent == sku["Процент"])
             & (x.flavoring_agent == sku["Вкусовая добавка"])
+            & (x.is_lactose == sku["Наличие лактозы"])
             & (x.line_id == add_sku.line.id)
         ]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]

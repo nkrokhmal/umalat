@@ -2,9 +2,9 @@ from app.main import main
 from app.models import *
 
 
-@main.route("/download_milkproject", methods=["POST", "GET"])
+@main.route("/download_milk_project", methods=["POST", "GET"])
 @flask_login.login_required
-def download_milkproject():
+def download_milk_project():
     skus = db.session.query(MilkProjectSKU).all()
     data = [
         {

@@ -34,6 +34,8 @@ class CreamCheeseBoiling(Boiling):
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True)
     weight_netto = mdb.Column(mdb.Float)
     percent = mdb.Column(mdb.Integer)
+    is_lactose = mdb.Column(mdb.Boolean, default=False)
+    flavoring_agent = mdb.Column(mdb.String)
     output_ton = mdb.Column(mdb.Integer)
 
     def to_str(self):
@@ -55,11 +57,11 @@ class CreamCheeseBoilingTechnology(BoilingTechnology):
     p_time = mdb.Column(mdb.Integer)
 
     @staticmethod
-    def create_name(form_factor, line, percent, weight):
+    def create_name(form_factor, line, percent, weight, flavoring_agent, is_lactose):
         boiling_name = [percent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, Форм фактор {}, Вес {}, {}".format(
-            line, form_factor, weight, boiling_name
+        return "Линия {}, Форм фактор {}, Вес {}, {}, {}, {}".format(
+            line, form_factor, weight, boiling_name, flavoring_agent, "" if is_lactose else "без лактозы"
         )
 
 
