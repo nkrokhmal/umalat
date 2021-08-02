@@ -9,7 +9,7 @@ from app.models import *
 
 class Validator(ClassValidator):
     def __init__(self):
-        super().__init__(window=3)
+        super().__init__(window=30)
 
     @staticmethod
     def validate__boiling__boiling(b1, b2):

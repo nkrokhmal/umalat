@@ -6,7 +6,7 @@ from utils_ak.block_tree import *
 
 
 def make_boiling(boiling_model, boiler_num):
-    m = BlockMaker("boiling", boiling_model=boiling_model, kettle_num=boiler_num)
+    m = BlockMaker("boiling", boiling_model=boiling_model, boiler_num=boiler_num)
 
     bt = utils.delistify(boiling_model.boiling_technologies, single=True) # there is only one boiling technology is for every boiling model in ricotta department
 

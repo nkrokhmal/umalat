@@ -43,7 +43,7 @@ def read_boiling_plan(wb_obj):
     df = df[df["sku"] != "-"]
     df["boiling_id"] = df["boiling_id"].astype(int)
 
-    df["sku"] = df["sku"].apply(lambda sku: cast_model(MilkProjectSKU, sku))
+    df["sku"] = df["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku))
 
     df = saturate_boiling_plan(df)
 

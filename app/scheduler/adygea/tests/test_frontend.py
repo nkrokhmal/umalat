@@ -18,9 +18,7 @@ def _test(fn, open_file=False):
 
 def test_batch():
     fns = glob.glob(
-        config.abs_path(
-            "app/data/static/samples/inputs/by_department/ricotta/*.xlsx"
-        )
+        config.abs_path("app/data/static/samples/inputs/by_department/ricotta/*.xlsx")
     )
     fns = [fn for fn in fns if "$" not in fn]
     for fn in tqdm.tqdm(fns):
@@ -28,4 +26,7 @@ def test_batch():
 
 
 if __name__ == "__main__":
-    test_batch()
+    _test(
+        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 1.xlsx"
+    )
+    # test_batch()
