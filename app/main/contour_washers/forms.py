@@ -14,13 +14,27 @@ def create_mozzarella_form(request_form):
     class TempForm(FlaskForm):
         pass
 
-    for k, v in MozzarellaProperties().__dict__.items():
-        if isinstance(v, str):
-            setattr(TempForm, k, StringField(k, validators=[Optional()], default=v))
-        elif isinstance(v, list):
-            setattr(TempForm, k, StringField(k, validators=[Optional()], default=json.dumps(v)))
-        elif isinstance(v, bool):
-            setattr(TempForm, k, BooleanField(k, validators=[Optional()], default=v))
+
+    for k, v in json.loads(MozzarellaProperties().schema_json(indent=2))["properties"].items():
+
+        if isinstance(v["default"], str):
+            setattr(TempForm, k, StringField(
+                v["description"],
+                # description=v["description"],
+                validators=[Optional()],
+                default=v["default"]))
+        elif isinstance(v["default"], list):
+            setattr(TempForm, k, StringField(
+                v["description"],
+                # description=v["description"],
+                validators=[Optional()],
+                default=json.dumps(v["default"])))
+        elif isinstance(v["default"], bool):
+            setattr(TempForm, k, BooleanField(
+                v["description"],
+                # description=v["description"],
+                validators=[Optional()],
+                default=v))
 
     return TempForm(request_form)
 

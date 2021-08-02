@@ -20,7 +20,7 @@ from app.scheduler.contour_cleanings import *
 @main.route("/contour_washers_schedule", methods=["GET", "POST"])
 @flask_login.login_required
 def contour_washers_schedule():
-    form = ScheduleForm(flask.request.form)
+    main_form = ScheduleForm(flask.request.form)
 
     mozzarella_form = create_mozzarella_form(flask.request.form)
     ricotta_form = RicottaPropertiesForm(flask.request.form)
@@ -30,9 +30,8 @@ def contour_washers_schedule():
     adygea_form = AdygeaPropertiesForm(flask.request.form)
 
     if flask.request.method == "POST" and "submit_params" in flask.request.form:
-        date = form.date.data
+        date = main_form.date.data
         date_str = date.strftime("%Y-%m-%d")
-
         path = os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
             date_str,
@@ -40,7 +39,6 @@ def contour_washers_schedule():
         )
         schedules = load_schedules(path, date_str)
         props = load_properties(schedules)
-
         for department, form in [
             ["mozzarella", mozzarella_form],
             ["ricotta", ricotta_form],
@@ -62,18 +60,18 @@ def contour_washers_schedule():
             butter_form=butter_form,
             milk_project_form=milk_project_form,
             adygea_form=adygea_form,
-            form=form,
+            form=main_form,
             date=date_str,
             params=True,
         )
 
     if flask.request.method == "POST" and "submit_file" in flask.request.form:
-        date = form.date.data
+        date = main_form.date.data
         date_str = date.strftime("%Y-%m-%d")
 
         try:
-            adygea_n_boilings = int(form.adygea_n_boilings.data)
-            milk_project_n_boilings = int(form.milk_project_n_boilings.data)
+            adygea_n_boilings = int(adygea_form.adygea_n_boilings.data)
+            milk_project_n_boilings = int(adygea_form.milk_project_n_boilings.data)
         except Exception as e:
             return internal_error(e)
 
@@ -113,11 +111,11 @@ def contour_washers_schedule():
             output_path=path,
             prefix=date_str,
             input_tanks=input_tanks,
-            is_tomorrow_day_off=form.is_not_working_day.data,
-            butter_end_time=form.butter_end_time.data,
-            milk_project_end_time=form.milk_project_end_time.data,
-            adygea_end_time=form.adygea_end_time.data,
-            shipping_line=form.shipping_line.data,
+            is_tomorrow_day_off=main_form.is_not_working_day.data,
+            butter_end_time=butter_form.butter_end_time.data,
+            milk_project_end_time=milk_project_form.milk_project_end_time.data,
+            adygea_end_time=adygea_form.adygea_end_time.data,
+            shipping_line=main_form.shipping_line.data,
             is_bar12_present=is_bar12_present,
         )
         run_consolidated(
@@ -139,9 +137,9 @@ def contour_washers_schedule():
             adygea_form=adygea_form,
             params=True,
         )
-    form.date.data = datetime.today() + timedelta(days=1)
+    main_form.date.data = datetime.today() + timedelta(days=1)
     return flask.render_template(
-        "contour_washers/schedule.html", form=form, params=False
+        "contour_washers/schedule.html", form=main_form, params=False
     )
 
 
