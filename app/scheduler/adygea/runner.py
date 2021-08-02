@@ -21,11 +21,10 @@ def run_adygea(
             boiling_plan_df, start_time=start_time, first_boiling_id=first_boiling_id
         )
 
-    print(schedule)
-    # try:
-    #     frontend = wrap_frontend(schedule)
-    # except Exception as e:
-    #     raise Exception("Ошибка при построении расписания")
-    # return submit_schedule(
-    #     "адыгейский", schedule, frontend, path, prefix, STYLE, open_file=open_file
-    # )
+    try:
+        frontend = wrap_frontend(schedule)
+    except Exception as e:
+        raise Exception("Ошибка при построении расписания")
+    return submit_schedule(
+        "адыгейский", schedule, frontend, path, prefix, STYLE, open_file=open_file
+    )
