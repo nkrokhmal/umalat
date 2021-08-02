@@ -4,9 +4,10 @@ from app.scheduler.time import *
 from typing import *
 from app.enum import *
 
+from pydantic import Field
 
 class ButterProperties(pydantic.BaseModel):
-    end_time: str = ''
+    end_time: str = Field('', description='Конец работы маслоцеха')
 
 
 def parse_schedule(schedule):

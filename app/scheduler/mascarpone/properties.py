@@ -4,10 +4,12 @@ from app.scheduler.time import *
 from typing import *
 from app.enum import *
 
+from pydantic import Field
+
 
 class MascarponeProperties(pydantic.BaseModel):
-    fourth_boiling_group_adding_lactic_acid_time: str = ''
-    last_pumping_off: str = ''
+    fourth_boiling_group_adding_lactic_acid_time: str = Field('', description='Конец добавления кислоты во второй варке в 4-й группе варок')
+    last_pumping_off: str = Field('', description='Конец последнего сепарирования')
 
 def parse_schedule(schedule):
     props = MascarponeProperties()

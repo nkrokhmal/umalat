@@ -4,53 +4,56 @@ from app.scheduler.time import *
 from typing import *
 from app.enum import *
 
+from pydantic import Field
+
 
 class MozzarellaProperties(pydantic.BaseModel):
-    bar12_present: bool = False
-    line33_last_termizator_end_time: str = ""
-    line36_last_termizator_end_time: str = ""
-    line27_nine_termizator_end_time: str = ""
-    line27_last_termizator_end_time: str = ""
+    bar12_present: bool = Field(False, description='Был ли вчера брус 1.2')
+    line33_last_termizator_end_time: str = Field("", description='Конец последнего налива термизатора на смеси 3.3%')
+    line36_last_termizator_end_time: str = Field("", description='Конец последнего налива термизатора на смеси 3.6%')
+    line27_nine_termizator_end_time: str = Field("", description='Конец девятого налива термизатора на смеси 2.7%')
+    line27_last_termizator_end_time: str = Field("", description='Конец последнего налива термизатора на смеси 2.7%')
 
     def termizator_times(self):
         return {'2.7': {'last': self.line27_last_termizator_end_time, 'ninth': self.line27_nine_termizator_end_time},
                 '3.3': {'last': self.line33_last_termizator_end_time},
                 '3.6': {'last': self.line36_last_termizator_end_time}}
 
-    multihead_end_time: str = ''
-    water_multihead_present: bool = False
+    multihead_end_time: str = Field("", description='Конец работы мультиголовы (пусто, если мультиголова не работает)')
+    water_multihead_present: bool = Field(False, description='Конец работы мультиголовы на воде (пусто, если мультиголова на воде не работает)')
 
-    short_cleaning_times: List[str] = []
-    full_cleaning_times: List[str] = []
+    short_cleaning_times: List[str] = Field([], description='Короткие мойки')
+    full_cleaning_times: List[str] = Field([], description='Полные мойки')
 
-    salt_melting_start_time: str = ''
+    salt_melting_start_time: str = Field('', description='Начало плавления на линии соли')
 
-    cheesemaker1_end_time: str = ''
-    cheesemaker2_end_time: str = ''
-    cheesemaker3_end_time: str = ''
-    cheesemaker4_end_time: str = ''
+    cheesemaker1_end_time: str = Field('', description='Конец работы 1 сыроизготовителя')
+    cheesemaker2_end_time: str = Field('', description='Конец работы 2 сыроизготовителя')
+    cheesemaker3_end_time: str = Field('', description='Конец работы 3 сыроизготовителя')
+    cheesemaker4_end_time: str = Field('', description='Конец работы 4 сыроизготовителя')
 
     def cheesemaker_times(self):
         values = [[i, getattr(self, f'cheesemaker{i}_end_time')] for i in range(1, 5)]
         values = [value for value in values if value[1]]
         return values
 
-    water_melting_end_time: str = ''
-    salt_melting_end_time: str = ''
+    water_melting_end_time: str = Field('', description='Конец работы линии воды')
+    salt_melting_end_time: str = Field('', description='Конец работы линии соли')
 
-    drenator1_end_time: str = ''
-    drenator2_end_time: str = ''
-    drenator3_end_time: str = ''
-    drenator4_end_time: str = ''
-    drenator5_end_time: str = ''
-    drenator6_end_time: str = ''
-    drenator7_end_time: str = ''
-    drenator8_end_time: str = ''
+    drenator1_end_time: str = Field('', description='Конец работы 1 дренатора')
+    drenator2_end_time: str = Field('', description='Конец работы 2 дренатора')
+    drenator3_end_time: str = Field('', description='Конец работы 3 дренатора')
+    drenator4_end_time: str = Field('', description='Конец работы 4 дренатора')
+    drenator5_end_time: str = Field('', description='Конец работы 5 дренатора')
+    drenator6_end_time: str = Field('', description='Конец работы 6 дренатора')
+    drenator7_end_time: str = Field('', description='Конец работы 7 дренатора')
+    drenator8_end_time: str = Field('', description='Конец работы 8 дренатора')
 
     def drenator_times(self):
         values = [[i, getattr(self, f'drenator{i}_end_time')] for i in range(1, 9)]
         values = [value for value in values if value[1]]
         return values
+
 
 def parse_schedule(schedule):
     props = MozzarellaProperties()

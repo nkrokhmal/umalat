@@ -4,11 +4,12 @@ from app.scheduler.time import *
 from typing import *
 from app.enum import *
 
+from pydantic import Field
 
 class RicottaProperties(pydantic.BaseModel):
-    n_boilings: int = 0
-    last_pumping_out_time: str = ''
-    start_of_ninth_from_the_end_time: str = ''
+    n_boilings: int = Field(0, description='Число варок (используется для расчета скотты)')
+    last_pumping_out_time: str = Field('', description='Конец последнего слива')
+    start_of_ninth_from_the_end_time: str = Field('', description='Начало девятой варки с конца')
 
 
 def parse_schedule(schedule):
