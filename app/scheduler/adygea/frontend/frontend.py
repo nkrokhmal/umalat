@@ -11,6 +11,7 @@ def wrap_boiling(boiling):
         default_row_width=1,
         default_col_width=1,
         # props
+        font_size=9,
         axis=1,
         x=(boiling.x[0], 0),
         size=(0, 2),
@@ -22,9 +23,9 @@ def wrap_boiling(boiling):
         m.row("boiling_name", size=boiling.size[0] - 1)
 
     with m.block("Lower line"):
-        m.row("collecting", size=boiling["collecting"].size[0])
+        m.row("collecting", size=boiling["collecting"].size[0], font_size=6)
         m.row("coagulation", size=boiling["coagulation"].size[0])
-        m.row("pouring_off", size=boiling["pouring_off"].size[0])
+        m.row("pouring_off", size=boiling["pouring_off"].size[0], font_size=6)
 
     return m.root
 
