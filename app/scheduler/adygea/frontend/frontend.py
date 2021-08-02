@@ -49,7 +49,6 @@ def wrap_boiling_lines(schedule):
     with code("add boilings"):
         for boiling in schedule["boiling", True]:
             push(boiling_lines[boiling.props['boiler_num']], wrap_boiling(boiling), push_func=add_push)
-
     return m.root
 
 
