@@ -75,7 +75,16 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
                 continue
 
             if cast_time(b2.y[0]) >= '00:12:00':
-                lunch_boiling_ids.append(b2.props['boiling_id'])
+                if b3 and b1:
+                    if (b2.y[0] - b1.y[0]) >= (b3.y[0] - b2.y[0]):
+                        # wait for next boiling and make lunch
+                        lunch_boiling_ids.append(b3.props['boiling_id'])
+                    else:
+                        # make lunch now
+                        lunch_boiling_ids.append(b2.props['boiling_id'])
+                else:
+                    # make lunch now
+                    lunch_boiling_ids.append(b2.props['boiling_id'])
                 break
     print(lunch_boiling_ids)
     return _make_schedule(boiling_plan_df, first_boiling_id, start_time, lunch_boiling_ids=lunch_boiling_ids)
