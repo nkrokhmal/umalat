@@ -14,7 +14,6 @@ def create_mozzarella_form(request_form):
     class TempForm(FlaskForm):
         pass
 
-
     for k, v in json.loads(MozzarellaProperties().schema_json(indent=2))["properties"].items():
 
         if isinstance(v["default"], str):
@@ -37,8 +36,6 @@ def create_mozzarella_form(request_form):
                 default=v))
 
     return TempForm(request_form)
-
-
 
 # class MozzarellaPropertiesForm(FlaskForm):
 #     bar12_present = BooleanField("bar12_present", validators=[Optional()], default=False)
