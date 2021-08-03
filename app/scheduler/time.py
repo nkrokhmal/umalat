@@ -16,7 +16,7 @@ def cast_t(obj):
         elif obj.count(":") == 2:
             days, hours, minutes = obj.split(":")
         else:
-            raise Exception("Unknown format")
+            raise Exception(f"Unknown format: {obj}")
         minutes = int(days) * 288 * 5 + int(hours) * 60 + int(minutes)
         assert minutes % 5 == 0
         return minutes // 5

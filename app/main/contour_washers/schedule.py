@@ -2,15 +2,7 @@ import flask
 
 from app.imports.runtime import *
 from app.main import main
-from .forms import (
-    ScheduleForm,
-    create_form,
-    # RicottaPropertiesForm,
-    # MascarponePropertiesForm,
-    # ButterPropertiesForm,
-    # MilkProjectPropertiesForm,
-    # AdygeaPropertiesForm,
-)
+from .forms import ScheduleForm, create_form, fill_properties
 from app.scheduler.mozzarella.properties import MozzarellaProperties
 from app.scheduler.ricotta.properties import RicottaProperties
 from app.scheduler.mascarpone.properties import MascarponeProperties
@@ -56,8 +48,6 @@ def contour_washers_schedule():
             if department not in props:
                 continue
 
-            print(ricotta_form.__dict__)
-            print()
             for key, value in props[department].__dict__.items():
                 getattr(form, key).data = value
 
@@ -75,12 +65,26 @@ def contour_washers_schedule():
         )
 
     if flask.request.method == "POST" and "submit_file" in flask.request.form:
+        # fill properties
+        properties = {
+            "mozzarella": fill_properties(mozzarella_form, MozzarellaProperties()),
+            "ricotta": fill_properties(ricotta_form, RicottaProperties()),
+            "mascarpone": fill_properties(mascarpone_form, MascarponeProperties()),
+            "butter": fill_properties(butter_form, ButterProperties()),
+            "milk_project": fill_properties(milk_project_form, MilkProjectProperties()),
+            "adygea": fill_properties(adygea_form, AdygeaProperties()),
+        }
+        assert_properties_presence(
+            properties,
+            raise_if_not_present=["mozzarella", "ricotta"],
+            warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
+        )
         date = main_form.date.data
         date_str = date.strftime("%Y-%m-%d")
 
         try:
-            adygea_n_boilings = int(adygea_form.adygea_n_boilings.data)
-            milk_project_n_boilings = int(adygea_form.milk_project_n_boilings.data)
+            adygea_n_boilings = int(main_form.adygea_n_boilings.data)
+            milk_project_n_boilings = int(main_form.milk_project_n_boilings.data)
         except Exception as e:
             return internal_error(e)
 
@@ -117,13 +121,11 @@ def contour_washers_schedule():
 
         run_contour_cleanings(
             path,
+            properties=properties,
             output_path=path,
             prefix=date_str,
             input_tanks=input_tanks,
             is_tomorrow_day_off=main_form.is_not_working_day.data,
-            butter_end_time=butter_form.butter_end_time.data,
-            milk_project_end_time=milk_project_form.milk_project_end_time.data,
-            adygea_end_time=adygea_form.adygea_end_time.data,
             shipping_line=main_form.shipping_line.data,
             is_bar12_present=is_bar12_present,
         )
@@ -135,7 +137,7 @@ def contour_washers_schedule():
         filename = f"{date_str} Расписание общее.xlsx"
         return flask.render_template(
             "contour_washers/schedule.html",
-            form=form,
+            form=main_form,
             filename=filename,
             date=date_str,
             mozzarella_form=mozzarella_form,
