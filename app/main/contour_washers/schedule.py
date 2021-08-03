@@ -79,8 +79,8 @@ def contour_washers_schedule():
         date_str = date.strftime("%Y-%m-%d")
 
         try:
-            adygea_n_boilings = int(adygea_form.adygea_n_boilings.data)
-            milk_project_n_boilings = int(adygea_form.milk_project_n_boilings.data)
+            adygea_n_boilings = int(main_form.adygea_n_boilings.data)
+            milk_project_n_boilings = int(main_form.milk_project_n_boilings.data)
         except Exception as e:
             return internal_error(e)
 
@@ -135,7 +135,7 @@ def contour_washers_schedule():
         filename = f"{date_str} Расписание общее.xlsx"
         return flask.render_template(
             "contour_washers/schedule.html",
-            form=form,
+            form=main_form,
             filename=filename,
             date=date_str,
             mozzarella_form=mozzarella_form,

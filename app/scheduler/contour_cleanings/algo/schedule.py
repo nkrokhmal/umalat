@@ -53,9 +53,7 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def _make_contour_1(schedules, properties, order=(0, 1, 2), adygea_end_time=None, shipping_line=True):
-    adygea_end_time = _init_end_time(schedules, 'adygea', adygea_end_time)
-
+def _make_contour_1(schedules, properties, order=(0, 1, 2), shipping_line=True):
     m = BlockMaker("1 contour")
     if shipping_line:
         m.row('cleaning', push_func=add_push,
@@ -102,14 +100,14 @@ def _make_contour_1(schedules, properties, order=(0, 1, 2), adygea_end_time=None
 
     def f1():
         if 'adygea' in schedules:
-            m.row('cleaning', push_func=AxisPusher(start_from=adygea_end_time, validator=CleaningValidator()),
+            m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['adygea'].end_time), validator=CleaningValidator()),
                   size=cast_t('01:50'),
                   label='Линия адыгейского')
 
     def f2():
         if 'milk_project' in schedules:
             m.row('cleaning',
-                  push_func=AxisPusher(start_from=[cast_t(properties['milk_project'].end_time), adygea_end_time], validator=CleaningValidator()),
+                  push_func=AxisPusher(start_from=[cast_t(properties['milk_project'].end_time), cast_t(properties['adygea'].end_time)], validator=CleaningValidator()),
                   size=cast_t('02:20'),
                   label='Милкпроджект')
 
@@ -389,7 +387,7 @@ def make_contour_4(schedules, properties, is_tomorrow_day_off=False):
     return m.root
 
 
-def make_contour_5(schedules, properties, input_tanks=(['4', 60], ['5', 60])):
+def make_contour_5(schedules, properties, input_tanks=(['4', 80], ['5', 80])):
     m = BlockMaker("5 contour")
 
     m.row('cleaning', push_func=add_push,
@@ -424,17 +422,6 @@ def make_contour_5(schedules, properties, input_tanks=(['4', 60], ['5', 60])):
           label='Линия Концентрата на отгрузку')
 
     return m.root
-
-
-def _init_end_time(schedules, department, input_end_time):
-    if department not in schedules:
-        return
-
-    if schedules[department] != 'manual':
-        input_end_time = schedules[department].y[0]
-    else:
-        input_end_time = cast_t(str(input_end_time)[:-3]) # 21:00:00 -> 21:00 -> 252
-    return input_end_time
 
 
 def make_contour_6(schedules, properties):
@@ -501,11 +488,11 @@ def make_schedule(schedules, properties, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(schedules, properties, adygea_end_time=kwargs.get('adygea_end_time'), shipping_line=kwargs.get('shipping_line', True)),
+        make_contour_1(schedules, properties, shipping_line=kwargs.get('shipping_line', True)),
         make_contour_2(schedules, properties),
         make_contour_3(schedules, properties, is_bar12_present=kwargs.get('is_bar12_present', False)),
         make_contour_4(schedules, properties, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
-        make_contour_5(schedules, properties, input_tanks=kwargs.get('input_tanks', (['4', 60], ['5', 60]))),
+        make_contour_5(schedules, properties, input_tanks=kwargs.get('input_tanks')),
         make_contour_6(schedules, properties),
     ]
 
