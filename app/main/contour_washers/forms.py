@@ -4,69 +4,33 @@ from wtforms import *
 from wtforms.validators import Required, Optional
 from app.models import *
 
+# todo maybe: better list form
 
 def create_form(request_form, properties):
     class TempForm(FlaskForm):
         pass
 
-    for k, v in json.loads(properties.schema_json(indent=2))["properties"].items():
-
+    for field, v in json.loads(properties.schema_json(indent=2))["properties"].items():
         if isinstance(v["default"], str):
-            setattr(
-                TempForm,
-                k,
-                StringField(
-                    v["description"],
-                    # description=v["description"],
-                    validators=[Optional()],
-                    default=v["default"],
-                ),
-            )
+            setattr(TempForm, field, StringField(v["description"], validators=[Optional()], default=v["default"]))
         elif isinstance(v["default"], list):
-            setattr(
-                TempForm,
-                k,
-                StringField(
-                    v["description"],
-                    # description=v["description"],
-                    validators=[Optional()],
-                    default=json.dumps(v["default"]),
-                ),
-            )
+            setattr(TempForm, field, StringField(v["description"], validators=[Optional()], default=json.dumps(v["default"])))
         elif isinstance(v["default"], bool):
-            setattr(
-                TempForm,
-                k,
-                BooleanField(
-                    v["description"],
-                    # description=v["description"],
-                    validators=[Optional()],
-                    default=v,
-                ),
-            )
+            setattr(TempForm, field, BooleanField(v["description"], validators=[Optional()], default=v))
         elif isinstance(v["default"], int):
-            setattr(
-                TempForm,
-                k,
-                IntegerField(
-                    v["description"],
-                    # description=v["description"],
-                    validators=[Optional()],
-                    default=v,
-                ),
-            )
+            setattr(TempForm, field, IntegerField( v["description"], validators=[Optional()], default=v))
         elif isinstance(v["default"], float):
-            setattr(
-                TempForm,
-                k,
-                FloatField(
-                    v["description"],
-                    # description=v["description"],
-                    validators=[Optional()],
-                    default=v,
-                ),
-            )
+            setattr(TempForm, field, FloatField(v["description"], validators=[Optional()], default=v))
     return TempForm(request_form)
+
+
+def fill_properties(form, properties):
+    for field, v in json.loads(properties.schema_json(indent=2))["properties"].items():
+        if isinstance(v['default'], list):
+            # todo maybe: make properly
+            setattr(properties, field, json.loads(getattr(form, field).data.replace("'", '"')))
+        else:
+            setattr(properties, field, getattr(form, field).data)
 
 
 class ScheduleForm(FlaskForm):

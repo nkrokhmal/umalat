@@ -2,10 +2,7 @@ import flask
 
 from app.imports.runtime import *
 from app.main import main
-from .forms import (
-    ScheduleForm,
-    create_form,
-)
+from .forms import ScheduleForm, create_form, fill_properties
 from app.scheduler.mozzarella.properties import MozzarellaProperties
 from app.scheduler.ricotta.properties import RicottaProperties
 from app.scheduler.mascarpone.properties import MascarponeProperties
@@ -68,6 +65,16 @@ def contour_washers_schedule():
         )
 
     if flask.request.method == "POST" and "submit_file" in flask.request.form:
+        # fill properties
+        properties = {
+            "mozzarella": fill_properties(mozzarella_form, MozzarellaProperties()),
+            "ricotta": fill_properties(ricotta_form, RicottaProperties()),
+            "mascarpone": fill_properties(mascarpone_form, MascarponeProperties()),
+            "butter": fill_properties(butter_form, ButterProperties()),
+            "milk_project": fill_properties(milk_project_form, MilkProjectProperties()),
+            "adygea": fill_properties(adygea_form, AdygeaProperties()),
+        }
+
         date = main_form.date.data
         date_str = date.strftime("%Y-%m-%d")
 
@@ -110,6 +117,7 @@ def contour_washers_schedule():
 
         run_contour_cleanings(
             path,
+            properties=properties,
             output_path=path,
             prefix=date_str,
             input_tanks=input_tanks,
