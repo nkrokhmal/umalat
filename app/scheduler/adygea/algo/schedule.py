@@ -20,12 +20,16 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling__lunch(b1, b2):
         if b1.props['boiler_num'] >> 1 == b2.props['pair_num']: # 0, 1 -> 0, 2, 3 -> 1
-            validate_disjoint_by_axis(b1, b2, distance=2)
+            validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
 
     @staticmethod
     def validate__lunch__boiling(b1, b2):
         if b2.props['boiler_num'] >> 1 == b1.props['pair_num']: # 0, 1 -> 0, 2, 3 -> 1
-            validate_disjoint_by_axis(b1, b2)
+            validate_disjoint_by_axis(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__lunch__lunch(b1, b2):
+        pass
 
 
 def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunch_boiling_ids=None):
@@ -45,7 +49,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
 
             for pair_num, lunch_boiling_id in enumerate(lunch_boiling_ids):
                 if lunch_boiling_id == cur_boiling_id:
-                    push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from='last_beg'), validator=Validator())
+                    push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from='last_beg', start_shift=-30), validator=Validator())
 
             cur_boiling_id += 1
 
@@ -73,4 +77,5 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
             if cast_time(b2.y[0]) >= '00:12:00':
                 lunch_boiling_ids.append(b2.props['boiling_id'])
                 break
+    print(lunch_boiling_ids)
     return _make_schedule(boiling_plan_df, first_boiling_id, start_time, lunch_boiling_ids=lunch_boiling_ids)
