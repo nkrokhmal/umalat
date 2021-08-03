@@ -14,7 +14,9 @@ class AdygeaProperties(pydantic.BaseModel):
             return True
         return False
 
-def parse_schedule(schedule):
+def cast_properties(schedule=None):
     props = AdygeaProperties()
+    if not schedule:
+        return props
     props.end_time = cast_time(schedule.y[0])
     return props

@@ -106,8 +106,11 @@ def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
 
     def f2():
         if properties['milk_project'].is_present():
+            start_from = [cast_t(properties['milk_project'].end_time)]
+            if properties['adygea'].is_present():
+                start_from.append(cast_t(properties['adygea'].end_time))
             m.row('cleaning',
-                  push_func=AxisPusher(start_from=[cast_t(properties['milk_project'].end_time), cast_t(properties['adygea'].end_time)], validator=CleaningValidator()),
+                  push_func=AxisPusher(start_from=start_from, validator=CleaningValidator()),
                   size=cast_t('02:20'),
                   label='Милкпроджект')
 
@@ -387,7 +390,8 @@ def make_contour_4(properties, is_tomorrow_day_off=False):
     return m.root
 
 
-def make_contour_5(properties, input_tanks=(['4', 80], ['5', 80])):
+def make_contour_5(properties, input_tanks=None):
+    input_tanks = input_tanks or [['4', 80], ['5', 80]]
     m = BlockMaker("5 contour")
 
     m.row('cleaning', push_func=add_push,

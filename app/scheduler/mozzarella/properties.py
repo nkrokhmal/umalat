@@ -55,8 +55,10 @@ class MozzarellaProperties(pydantic.BaseModel):
         return values
 
 
-def parse_schedule(schedule):
+def cast_properties(schedule=None):
     props = MozzarellaProperties()
+    if not schedule:
+        return props
 
     with code("bar12_present"):
         skus = sum(

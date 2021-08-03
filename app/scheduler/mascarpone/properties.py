@@ -18,8 +18,10 @@ class MascarponeProperties(pydantic.BaseModel):
         return False
 
 
-def parse_schedule(schedule):
+def cast_properties(schedule=None):
     props = MascarponeProperties()
+    if not schedule:
+        return props
 
     boiling_groups = schedule['mascarpone_boiling_group', True]
     boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]

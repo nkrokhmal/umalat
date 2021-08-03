@@ -14,7 +14,9 @@ class ButterProperties(pydantic.BaseModel):
         return False
 
 
-def parse_schedule(schedule):
+def cast_properties(schedule=None):
     props = ButterProperties()
+    if not schedule:
+        return props
     props.end_time = cast_time(schedule.y[0])
     return props

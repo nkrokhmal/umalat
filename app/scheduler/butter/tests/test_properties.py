@@ -5,7 +5,7 @@ from pprint import pprint
 
 def test_properties(path, prefix):
     schedules = load_schedules(path, prefix, departments=["ricotta"])
-    props = parse_schedule(schedules["ricotta"])
+    props = cast_properties(schedules["ricotta"])
     pprint(dict(props))
 
 
