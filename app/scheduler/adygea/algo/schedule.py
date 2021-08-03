@@ -17,8 +17,19 @@ class Validator(ClassValidator):
         if b1.props['boiler_num'] == b2.props['boiler_num']:
             validate_disjoint_by_axis(b1, b2)
 
+    @staticmethod
+    def validate__boiling__lunch(b1, b2):
+        validate_disjoint_by_axis(b1, b2, distance=2)
 
-def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
+    @staticmethod
+    def validate__lunch__boiling(b1, b2):
+        validate_disjoint_by_axis(b1, b2)
+
+
+def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunch_boiling_ids=[10, 12]):
+    lunch_boiling_ids = lunch_boiling_ids or []
+    assert len(lunch_boiling_ids) in [0, 2] # no lunches or two lunches for two teams
+
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
 
@@ -27,36 +38,40 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
     for i, row in boiling_plan_df.iterrows():
         for _ in range(row['n_baths']):
             boiling = make_boiling(row['boiling'], boiling_id=cur_boiling_id, boiler_num=cur_boiler_num)
-            push(m.root, boiling, push_func=AxisPusher(start_from='last_beg'), validator=Validator())
+            push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30), validator=Validator())
             cur_boiler_num = (cur_boiler_num + 1) % 4
+
+            for pair_num, lunch_boiling_id in enumerate(lunch_boiling_ids):
+                if lunch_boiling_id == cur_boiling_id:
+                    push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from='last_beg'), validator=Validator())
+
             cur_boiling_id += 1
 
     for i, r in enumerate([range(0, 2), range(2, 4)]):
         range_boilings = [boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r]
         end = max(boiling.y[0] for boiling in range_boilings)
         m.row(make_cleaning(pair_num=i), x=end + 1, push_func=add_push)
-
-
-    for i, r in enumerate([range(0, 2), range(2, 4)]):
-        range_boilings = [boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r]
-
-        # find lunch times
-        for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
-            if not b2:
-                continue
-
-            if cast_time(b2.y[0] + cast_t(start_time)) >= '00:12:00':
-                # lunch time!
-                m.row(make_lunch(pair_num=i), x=b2.y[0] + 2, push_func=add_push)
-
-                # shift boiling blocks
-                for boiling in [boiling for boiling in range_boilings if boiling.y[0] > b2.y[0]]:
-                    boiling.props.update(x=(boiling.x[0] + 9, 0)) # todo next: make properly
-
-                # shift cleaning
-                cleaning = m.root.find_one(cls='cleaning', pair_num=i)
-                cleaning.props.update(x=(cleaning.x[0] + 9, 0))
-                break
+    #
+    # for i, r in enumerate([range(0, 2), range(2, 4)]):
+    #     range_boilings = [boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r]
+    #
+    #     # find lunch times
+    #     for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
+    #         if not b2:
+    #             continue
+    #
+    #         if cast_time(b2.y[0] + cast_t(start_time)) >= '00:12:00':
+    #             # lunch time!
+    #             m.row(make_lunch(pair_num=i), x=b2.y[0] + 2, push_func=add_push)
+    #
+    #             # shift boiling blocks
+    #             for boiling in [boiling for boiling in range_boilings if boiling.y[0] > b2.y[0]]:
+    #                 boiling.props.update(x=(boiling.x[0] + 9, 0)) # todo next: make properly
+    #
+    #             # shift cleaning
+    #             cleaning = m.root.find_one(cls='cleaning', pair_num=i)
+    #             cleaning.props.update(x=(cleaning.x[0] + 9, 0))
+    #             break
 
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root
