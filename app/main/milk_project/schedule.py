@@ -36,7 +36,7 @@ def milk_project_schedule():
         boiling_plan_df = read_boiling_plan(wb)
         add_batch(
             date,
-            "Маскарпоновый цех",
+            "Милкпроджект",
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
         )
@@ -70,7 +70,7 @@ def milk_project_schedule():
     form.batch_number.data = (
         BatchNumber.last_batch_number(
             datetime.today() + timedelta(days=1),
-            "Масло цех",
+            "Милкпроджект",
         )
         + 1
     )

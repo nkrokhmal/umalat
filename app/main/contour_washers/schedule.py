@@ -49,8 +49,9 @@ def contour_washers_schedule():
         ]:
             if department not in props:
                 continue
+
             for key, value in props[department].__dict__.items():
-                form[key].data = getattr(props[key], key)
+                getattr(form, key).data = value
 
         return flask.render_template(
             "contour_washers/schedule.html",

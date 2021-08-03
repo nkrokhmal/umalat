@@ -36,7 +36,7 @@ def butter_schedule():
         boiling_plan_df = read_boiling_plan(wb)
         add_batch(
             date,
-            "Маскарпоновый цех",
+            "Масло цех",
             form.batch_number.data,
             form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
         )

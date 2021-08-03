@@ -1,41 +1,53 @@
-from app.imports.runtime import *
-from flask_wtf.file import FileRequired, FileField
 from flask_wtf import FlaskForm
 from wtforms import *
 from wtforms.validators import Required, Optional
-from wtforms.utils import unset_value
 from app.models import *
 from app.scheduler.mozzarella.properties import MozzarellaProperties
-from wtforms.compat import with_metaclass, iteritems, itervalues
 
 
 def create_mozzarella_form(request_form):
-
     class TempForm(FlaskForm):
         pass
 
-    for k, v in json.loads(MozzarellaProperties().schema_json(indent=2))["properties"].items():
+    for k, v in json.loads(MozzarellaProperties().schema_json(indent=2))[
+        "properties"
+    ].items():
 
         if isinstance(v["default"], str):
-            setattr(TempForm, k, StringField(
-                v["description"],
-                # description=v["description"],
-                validators=[Optional()],
-                default=v["default"]))
+            setattr(
+                TempForm,
+                k,
+                StringField(
+                    v["description"],
+                    # description=v["description"],
+                    validators=[Optional()],
+                    default=v["default"],
+                ),
+            )
         elif isinstance(v["default"], list):
-            setattr(TempForm, k, StringField(
-                v["description"],
-                # description=v["description"],
-                validators=[Optional()],
-                default=json.dumps(v["default"])))
+            setattr(
+                TempForm,
+                k,
+                StringField(
+                    v["description"],
+                    # description=v["description"],
+                    validators=[Optional()],
+                    default=json.dumps(v["default"]),
+                ),
+            )
         elif isinstance(v["default"], bool):
-            setattr(TempForm, k, BooleanField(
-                v["description"],
-                # description=v["description"],
-                validators=[Optional()],
-                default=v))
-
+            setattr(
+                TempForm,
+                k,
+                BooleanField(
+                    v["description"],
+                    # description=v["description"],
+                    validators=[Optional()],
+                    default=v,
+                ),
+            )
     return TempForm(request_form)
+
 
 # class MozzarellaPropertiesForm(FlaskForm):
 #     bar12_present = BooleanField("bar12_present", validators=[Optional()], default=False)
