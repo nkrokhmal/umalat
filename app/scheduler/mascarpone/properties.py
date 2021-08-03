@@ -11,6 +11,13 @@ class MascarponeProperties(pydantic.BaseModel):
     fourth_boiling_group_adding_lactic_acid_time: str = Field('', description='Конец добавления кислоты во второй варке в 4-й группе варок')
     last_pumping_off: str = Field('', description='Конец последнего сепарирования')
 
+    # todo maybe: коряво, может отдельный checkbox сделать?
+    def is_present(self):
+        if self.last_pumping_off:
+            return True
+        return False
+
+
 def parse_schedule(schedule):
     props = MascarponeProperties()
 

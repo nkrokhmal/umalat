@@ -53,7 +53,7 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def _make_contour_1(schedules, properties, order=(0, 1, 2), shipping_line=True):
+def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
     m = BlockMaker("1 contour")
     if shipping_line:
         m.row('cleaning', push_func=add_push,
@@ -99,20 +99,20 @@ def _make_contour_1(schedules, properties, order=(0, 1, 2), shipping_line=True):
               label='Линия отгрузки')
 
     def f1():
-        if 'adygea' in schedules:
+        if properties['adygea'].is_present():
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['adygea'].end_time), validator=CleaningValidator()),
                   size=cast_t('01:50'),
                   label='Линия адыгейского')
 
     def f2():
-        if 'milk_project' in schedules:
+        if properties['milk_project'].is_present():
             m.row('cleaning',
                   push_func=AxisPusher(start_from=[cast_t(properties['milk_project'].end_time), cast_t(properties['adygea'].end_time)], validator=CleaningValidator()),
                   size=cast_t('02:20'),
                   label='Милкпроджект')
 
     def f3():
-        if 'milk_project' in schedules:
+        if properties['milk_project'].is_present():
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['milk_project'].end_time), validator=CleaningValidator(ordered=False)),
                   size=cast_t('01:20'),
                   label='Танк роникс')
@@ -132,12 +132,12 @@ def _make_contour_1(schedules, properties, order=(0, 1, 2), shipping_line=True):
     return m.root
 
 
-def make_contour_1(schedules, properties, *args, **kwargs):
-    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], schedules, properties, *args, **kwargs)
+def make_contour_1(properties, *args, **kwargs):
+    df = utils.optimize(_make_contour_1, lambda b: -b.y[0], properties, *args, **kwargs)
     return df.iloc[-1]['output']
 
 
-def make_contour_2(schedules, properties):
+def make_contour_2(properties):
     m = BlockMaker("2 contour")
     m.row('cleaning', push_func=add_push,
           size=cast_t('01:20'), x=cast_t('12:00'),
@@ -178,7 +178,7 @@ def make_contour_2(schedules, properties):
     return m.root
 
 
-def _make_contour_3(schedules, properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), is_bar12_present=False):
+def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), is_bar12_present=False):
     m = BlockMaker("3 contour")
 
     for cleaning_time in properties['mozzarella'].short_cleaning_times:
@@ -314,12 +314,12 @@ def _make_contour_3(schedules, properties, order1=(0, 1, 1, 1, 1), order2=(0, 0,
     return m.root
 
 
-def make_contour_3(schedules, properties, **kwargs):
-    df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), schedules, properties, **kwargs)
+def make_contour_3(properties, **kwargs):
+    df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, **kwargs)
     return df.iloc[-1]['output']
 
 
-def make_contour_4(schedules, properties, is_tomorrow_day_off=False):
+def make_contour_4(properties, is_tomorrow_day_off=False):
     m = BlockMaker("4 contour")
 
     with code('drenators'):
@@ -387,7 +387,7 @@ def make_contour_4(schedules, properties, is_tomorrow_day_off=False):
     return m.root
 
 
-def make_contour_5(schedules, properties, input_tanks=(['4', 80], ['5', 80])):
+def make_contour_5(properties, input_tanks=(['4', 80], ['5', 80])):
     m = BlockMaker("5 contour")
 
     m.row('cleaning', push_func=add_push,
@@ -424,10 +424,10 @@ def make_contour_5(schedules, properties, input_tanks=(['4', 80], ['5', 80])):
     return m.root
 
 
-def make_contour_6(schedules, properties):
+def make_contour_6(properties):
     m = BlockMaker("6 contour")
 
-    if 'milk_project' in schedules:
+    if properties['milk_project'].is_present():
         m.row('cleaning', push_func=add_push,
               x=cast_t(properties['milk_project'].end_time),
               size=cast_t('01:20'),
@@ -441,7 +441,7 @@ def make_contour_6(schedules, properties):
                   label='Танк рикотты (сладкая сыворотка)')
 
     with code('cream tanks'):
-        if 'mascarpone' in schedules:
+        if properties['mascarpone'].is_present():
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['mascarpone'].fourth_boiling_group_adding_lactic_acid_time) + 12, validator=CleaningValidator(ordered=False)),
                                           size=cast_t('01:20'),
                                           label='Танк сливок') # fourth mascarpone boiling group end + hour
@@ -451,7 +451,7 @@ def make_contour_6(schedules, properties):
                                       label='Танк сливок')
 
     with code('mascarpone'):
-        if 'mascarpone' in schedules:
+        if properties['mascarpone'].is_present():
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['mascarpone'].last_pumping_off) + 6, validator=CleaningValidator(ordered=False)),
                   size=(cast_t('01:20'), 0),
                   label='Маскарпоне')
@@ -476,7 +476,7 @@ def make_contour_6(schedules, properties):
               size=cast_t('01:20'),
               label=label)
 
-    if 'butter' in schedules:
+    if properties['butter'].is_present():
         m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['butter'].end_time), validator=CleaningValidator(ordered=False)),
               size=cast_t('01:20'),
               label='Маслоцех')
@@ -484,16 +484,16 @@ def make_contour_6(schedules, properties):
     return m.root
 
 
-def make_schedule(schedules, properties, **kwargs):
+def make_schedule(properties, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(schedules, properties, shipping_line=kwargs.get('shipping_line', True)),
-        make_contour_2(schedules, properties),
-        make_contour_3(schedules, properties, is_bar12_present=kwargs.get('is_bar12_present', False)),
-        make_contour_4(schedules, properties, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
-        make_contour_5(schedules, properties, input_tanks=kwargs.get('input_tanks')),
-        make_contour_6(schedules, properties),
+        make_contour_1(properties, shipping_line=kwargs.get('shipping_line', True)),
+        make_contour_2(properties),
+        make_contour_3(properties, is_bar12_present=kwargs.get('is_bar12_present', False)),
+        make_contour_4(properties, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
+        make_contour_5(properties, input_tanks=kwargs.get('input_tanks')),
+        make_contour_6(properties),
     ]
 
     for contour in contours:

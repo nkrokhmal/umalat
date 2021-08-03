@@ -10,25 +10,26 @@ def run_contour_cleanings(
     input_path,
     output_path="outputs/",
     schedule=None,
+    schedules=None,
+    properties=None,
     prefix="",
     open_file=False,
     **kwargs,
 ):
-    schedules = load_schedules(input_path, prefix=prefix)
-    properties = load_properties(schedules)
-
-    assert_schedules_presence(
-        schedules,
-        raise_if_not_present=["mozzarella", "ricotta"],
-        warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
-    )
-
-    for department in ["butter", "milk_project", "adygea"]:
-        if department not in schedules and kwargs.get(f"{department}_end_time"):
-            schedules[department] = "manual"
-
     if not schedule:
-        schedule = make_schedule(schedules, properties, **kwargs)
+        if not properties:
+            if not schedules:
+                schedules = load_schedules(input_path, prefix=prefix)
+
+            assert_schedules_presence(
+                schedules,
+                raise_if_not_present=["mozzarella", "ricotta"],
+                warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
+            )
+
+            properties = load_properties(schedules)
+
+        schedule = make_schedule(properties, **kwargs)
     frontend = wrap_frontend(schedule)
     return submit_schedule(
         "контурные мойки",

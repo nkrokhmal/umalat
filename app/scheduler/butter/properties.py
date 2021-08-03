@@ -8,6 +8,10 @@ from pydantic import Field
 
 class ButterProperties(pydantic.BaseModel):
     end_time: str = Field('', description='Конец работы маслоцеха')
+    def is_present(self):
+        if self.end_time:
+            return True
+        return False
 
 
 def parse_schedule(schedule):

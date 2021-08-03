@@ -5,11 +5,6 @@ from app.main import main
 from .forms import (
     ScheduleForm,
     create_form,
-    # RicottaPropertiesForm,
-    # MascarponePropertiesForm,
-    # ButterPropertiesForm,
-    # MilkProjectPropertiesForm,
-    # AdygeaPropertiesForm,
 )
 from app.scheduler.mozzarella.properties import MozzarellaProperties
 from app.scheduler.ricotta.properties import RicottaProperties
@@ -56,8 +51,6 @@ def contour_washers_schedule():
             if department not in props:
                 continue
 
-            print(ricotta_form.__dict__)
-            print()
             for key, value in props[department].__dict__.items():
                 getattr(form, key).data = value
 
