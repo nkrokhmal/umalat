@@ -54,6 +54,10 @@ class MozzarellaProperties(pydantic.BaseModel):
         values = [value for value in values if value[1]]
         return values
 
+    def is_present(self):
+        if self.water_melting_end_time or self.salt_melting_end_time:
+            return True
+        return False
 
 def cast_properties(schedule=None):
     props = MozzarellaProperties()
@@ -94,7 +98,7 @@ def cast_properties(schedule=None):
     with code('multihead'):
         multihead_packings = list(schedule.iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова'))
         if multihead_packings:
-            props.multihead_end_time = max(packing.y[0] for packing in multihead_packings)
+            props.multihead_end_time = cast_time(max(packing.y[0] for packing in multihead_packings))
 
         water_multihead_packings = list(schedule.iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова' and df.iloc[0]['boiling'].line.name == LineName.WATER))
         if water_multihead_packings:

@@ -16,11 +16,11 @@ def create_form(request_form, properties):
         elif isinstance(v["default"], list):
             setattr(TempForm, field, StringField(v["description"], validators=[Optional()], default=json.dumps(v["default"])))
         elif isinstance(v["default"], bool):
-            setattr(TempForm, field, BooleanField(v["description"], validators=[Optional()], default=v))
+            setattr(TempForm, field, BooleanField(v["description"], validators=[Optional()], default=v['default']))
         elif isinstance(v["default"], int):
-            setattr(TempForm, field, IntegerField( v["description"], validators=[Optional()], default=v))
+            setattr(TempForm, field, IntegerField( v["description"], validators=[Optional()], default=v['default']))
         elif isinstance(v["default"], float):
-            setattr(TempForm, field, FloatField(v["description"], validators=[Optional()], default=v))
+            setattr(TempForm, field, FloatField(v["description"], validators=[Optional()], default=v['default']))
     return TempForm(request_form)
 
 
@@ -31,6 +31,7 @@ def fill_properties(form, properties):
             setattr(properties, field, json.loads(getattr(form, field).data.replace("'", '"')))
         else:
             setattr(properties, field, getattr(form, field).data)
+    return properties
 
 
 class ScheduleForm(FlaskForm):

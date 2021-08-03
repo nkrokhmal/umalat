@@ -11,6 +11,10 @@ class RicottaProperties(pydantic.BaseModel):
     last_pumping_out_time: str = Field('', description='Конец последнего слива')
     start_of_ninth_from_the_end_time: str = Field('', description='Начало девятой варки с конца')
 
+    def is_present(self):
+        if self.last_pumping_out_time:
+            return True
+        return False
 
 def cast_properties(schedule=None):
     props = RicottaProperties()
