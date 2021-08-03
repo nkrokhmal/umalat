@@ -5,7 +5,7 @@ from app.scheduler.time import *
 from app.enum import *
 
 
-# todo soon: refactor, put into more proper place
+# todo maybe: put into more proper place
 def calc_scotta_input_tanks(n_boilings, extra_scotta=0):
     scotta_per_boiling = 1900 - 130
     values = [['4', 80000], ['5', 80000], ['8', 80000]]
@@ -183,7 +183,6 @@ def make_contour_2(schedules, properties):
 def _make_contour_3(schedules, properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), is_bar12_present=False):
     m = BlockMaker("3 contour")
 
-    # todo soon: take from parameters! Or even better - from schedule
     for cleaning_time in properties['mozzarella'].short_cleaning_times:
         m.row('cleaning', push_func=add_push,
               size=cast_t('00:40'),

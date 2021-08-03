@@ -8,9 +8,7 @@ def create_form(request_form, properties):
     class TempForm(FlaskForm):
         pass
 
-    for k, v in json.loads(properties.schema_json(indent=2))[
-        "properties"
-    ].items():
+    for k, v in json.loads(properties.schema_json(indent=2))["properties"].items():
 
         if isinstance(v["default"], str):
             setattr(
@@ -68,6 +66,7 @@ def create_form(request_form, properties):
                 ),
             )
     return TempForm(request_form)
+
 
 #
 # # class MozzarellaPropertiesForm(FlaskForm):

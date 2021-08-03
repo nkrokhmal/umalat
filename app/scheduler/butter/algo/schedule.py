@@ -11,9 +11,6 @@ def make_schedule(boiling_plan_df, start_time='07:00'):
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
 
-    # todo soon: del (after butterboiling is fixed (probably too many boilings somewhere)
-    boiling_plan_df = boiling_plan_df[boiling_plan_df['boiling'] != cast_model(ButterBoiling, 8)]
-
     sample_row = boiling_plan_df.iloc[0]
     line = sample_row['boiling'].line
 
