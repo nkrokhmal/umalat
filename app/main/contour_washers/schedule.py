@@ -74,7 +74,11 @@ def contour_washers_schedule():
             "milk_project": fill_properties(milk_project_form, MilkProjectProperties()),
             "adygea": fill_properties(adygea_form, AdygeaProperties()),
         }
-
+        assert_properties_presence(
+            properties,
+            raise_if_not_present=["mozzarella", "ricotta"],
+            warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
+        )
         date = main_form.date.data
         date_str = date.strftime("%Y-%m-%d")
 
