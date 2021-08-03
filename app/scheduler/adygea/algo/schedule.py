@@ -19,14 +19,16 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__lunch(b1, b2):
-        validate_disjoint_by_axis(b1, b2, distance=2)
+        if b1.props['boiler_num'] >> 1 == b2.props['pair_num']: # 0, 1 -> 0, 2, 3 -> 1
+            validate_disjoint_by_axis(b1, b2, distance=2)
 
     @staticmethod
     def validate__lunch__boiling(b1, b2):
-        validate_disjoint_by_axis(b1, b2)
+        if b2.props['boiler_num'] >> 1 == b1.props['pair_num']: # 0, 1 -> 0, 2, 3 -> 1
+            validate_disjoint_by_axis(b1, b2)
 
 
-def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunch_boiling_ids=[10, 12]):
+def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunch_boiling_ids=None):
     lunch_boiling_ids = lunch_boiling_ids or []
     assert len(lunch_boiling_ids) in [0, 2] # no lunches or two lunches for two teams
 
@@ -51,27 +53,24 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunch
         range_boilings = [boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r]
         end = max(boiling.y[0] for boiling in range_boilings)
         m.row(make_cleaning(pair_num=i), x=end + 1, push_func=add_push)
-    #
-    # for i, r in enumerate([range(0, 2), range(2, 4)]):
-    #     range_boilings = [boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r]
-    #
-    #     # find lunch times
-    #     for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
-    #         if not b2:
-    #             continue
-    #
-    #         if cast_time(b2.y[0] + cast_t(start_time)) >= '00:12:00':
-    #             # lunch time!
-    #             m.row(make_lunch(pair_num=i), x=b2.y[0] + 2, push_func=add_push)
-    #
-    #             # shift boiling blocks
-    #             for boiling in [boiling for boiling in range_boilings if boiling.y[0] > b2.y[0]]:
-    #                 boiling.props.update(x=(boiling.x[0] + 9, 0)) # todo next: make properly
-    #
-    #             # shift cleaning
-    #             cleaning = m.root.find_one(cls='cleaning', pair_num=i)
-    #             cleaning.props.update(x=(cleaning.x[0] + 9, 0))
-    #             break
 
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root
+
+
+def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
+    no_lunch_schedule = _make_schedule(boiling_plan_df, first_boiling_id, start_time)
+
+    lunch_boiling_ids = []
+    for i, r in enumerate([range(0, 2), range(2, 4)]):
+        range_boilings = [boiling for boiling in no_lunch_schedule['boiling', True] if boiling.props['boiler_num'] in r]
+
+        # find lunch times
+        for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
+            if not b2:
+                continue
+
+            if cast_time(b2.y[0]) >= '00:12:00':
+                lunch_boiling_ids.append(b2.props['boiling_id'])
+                break
+    return _make_schedule(boiling_plan_df, first_boiling_id, start_time, lunch_boiling_ids=lunch_boiling_ids)
