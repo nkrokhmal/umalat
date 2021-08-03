@@ -25,12 +25,16 @@ def create_form(request_form, properties):
 
 
 def fill_properties(form, properties):
+
     for field, v in json.loads(properties.schema_json(indent=2))["properties"].items():
         if isinstance(v['default'], list):
             # todo maybe: make properly
-            setattr(properties, field, json.loads(getattr(form, field).data.replace("'", '"')))
+            print(field)
+            print(form[field])
+            print(type(form[field]))
+            setattr(properties, field, json.loads(form[field]))
         else:
-            setattr(properties, field, getattr(form, field).data)
+            setattr(properties, field, form[field])
     return properties
 
 

@@ -11,7 +11,7 @@
 
 
 {% block page_content %}
-
+<script src="https://yastatic.net/jquery/3.3.1/jquery.min.js"></script>
 <style>
     .accordion {
       background-color: rgb(225, 253, 255);
@@ -50,62 +50,13 @@
         {% if params %}
             <h4 class="h5 mb-4">Заполните необходимые параметры</h4>
             <div class="row">
-                <form method="post" action="/contour_washers_schedule" enctype="multipart/form-data" class="mt-4">
+                <form id="main_form">
                     {{ form.hidden_tag() }}
                     <div class="row mb-4">
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
                                 <label>Дата</label>
                                 {{form.date(place_holder='date', class='form-control', readonly=True)}}
-                            </div>
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <div class="col-md-12 col-sm-12 col-xs-12">
-                                <button class="accordion" type="button"><a>Параметры моцареллы</a></button>
-                                <div class="panel">
-                                    {{ wtf.quick_form(mozzarella_form) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="col-md-12 col-sm-12 col-xs-12">
-                                <button class="accordion" type="button"><a>Параметры рикотты</a></button>
-                                <div class="panel">
-                                    {{ wtf.quick_form(ricotta_form) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="col-md-12 col-sm-12 col-xs-12">
-                                <button class="accordion" type="button"><a>Параметры маскарпоне</a></button>
-                                <div class="panel">
-                                    {{ wtf.quick_form(mascarpone_form) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="col-md-12 col-sm-12 col-xs-12">
-                                <button class="accordion" type="button"><a>Параметры масла</a></button>
-                                <div class="panel">
-                                    {{ wtf.quick_form(butter_form) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="col-md-12 col-sm-12 col-xs-12">
-                                <button class="accordion" type="button"><a>Параметры милкпроджекта</a></button>
-                                <div class="panel">
-                                    {{ wtf.quick_form(milk_project_form) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="col-md-12 col-sm-12 col-xs-12">
-                                <button class="accordion" type="button"><a>Параметры адыгейского</a></button>
-                                <div class="panel">
-                                    {{ wtf.quick_form(adygea_form) }}
-                                </div>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
@@ -120,9 +71,83 @@
                                 {{form.shipping_line(place_holder='shipping_line', checked=True)}}
                             </div>
                         </div>
-                        <button type="submit" name="submit_file" class="btn btn-block btn-primary">Отправить</button>
                     </div>
                 </form>
+
+                <form id="mozzarella_form">
+                    <div class="col-md-12 mb-3">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <button class="accordion" type="button"><a>Параметры моцареллы</a></button>
+                            <div class="panel">
+                                {{ wtf.quick_form(mozzarella_form) }}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="ricotta_form">
+                    <div class="col-md-12 mb-3">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <button class="accordion" type="button"><a>Параметры рикотты</a></button>
+                            <div class="panel">
+                                {{ wtf.quick_form(ricotta_form) }}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="mascarpone_form">
+                    <div class="col-md-12 mb-3">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <button class="accordion" type="button"><a>Параметры маскарпоне</a></button>
+                            <div class="panel">
+                                {{ wtf.quick_form(mascarpone_form) }}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="butter_form">
+                    <div class="col-md-12 mb-3">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <button class="accordion" type="button"><a>Параметры масла</a></button>
+                            <div class="panel">
+                                {{ wtf.quick_form(butter_form) }}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="milk_project_form">
+                    <div class="col-md-12 mb-3">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <button class="accordion" type="button"><a>Параметры милкпроджекта</a></button>
+                            <div class="panel">
+                                {{ wtf.quick_form(milk_project_form) }}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="adygea_form">
+                    <div class="col-md-12 mb-3">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <button class="accordion" type="button"><a>Параметры адыгейского</a></button>
+                            <div class="panel">
+                                {{ wtf.quick_form(adygea_form) }}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="result" action="/contour_washers_schedule" method="POST" onsubmit="merge(); return true;">
+                    <button type="submit" name="submit_file" class="btn btn-block btn-primary">Отправить</button>
+                </form>
+
+                <form method="post" action="/contour_washers_schedule" enctype="multipart/form-data" class="mt-4" id="result2" onsubmit="merge()"; return true;>
+                    <input type="button" name="submit_file" value="Click Me!" />
+                </form>
+
             </div>
         {% else %}
             <h4 class="h5 mb-4">Введите дату для подгрузки параметров</h4>
@@ -137,6 +162,7 @@
                                     {{form.date(place_holder='date', class='form-control')}}
                                 </div>
                             </div>
+
                             <button type="submit" name="submit_params" class="btn btn-block btn-primary">Подгрузить параметры</button>
                         </div>
                     </div>
@@ -165,7 +191,13 @@
     </script>
 {% endif %}
 
+
 <script>
+    src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'
+</script>
+
+<script>
+
     var acc = document.getElementsByClassName("accordion");
     var i;
 
@@ -181,5 +213,23 @@
       });
     }
 </script>
+
+<script type="text/javascript">
+    function merge() {
+        $result = $("#result");
+        $("#mozzarella_form input, #ricotta_form input, #mascarpone_form input, #butter_form input, #milkproject_form input, #adygea_form input, #main_form input").each(function() {
+            $result.append("<input type='hidden' name='"+$(this).attr('name')+"' value='"+$(this).val()+"' />");
+        });
+    }
+</script>
+
+<script>
+    submitForms = function(){
+    console.log(document.forms);
+    document.getElementById("mozzarella_form").submit();
+    document.getElementById("ricotta_form").submit();
+}
+</script>
+
 
 {% endblock %}
