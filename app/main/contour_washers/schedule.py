@@ -121,9 +121,6 @@ def contour_washers_schedule():
             prefix=date_str,
             input_tanks=input_tanks,
             is_tomorrow_day_off=main_form.is_not_working_day.data,
-            butter_end_time=butter_form.butter_end_time.data,
-            milk_project_end_time=milk_project_form.milk_project_end_time.data,
-            adygea_end_time=adygea_form.adygea_end_time.data,
             shipping_line=main_form.shipping_line.data,
             is_bar12_present=is_bar12_present,
         )

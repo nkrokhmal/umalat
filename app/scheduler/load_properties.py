@@ -10,6 +10,7 @@ from app.scheduler.milk_project.properties import (
     parse_schedule as parse_schedule_milk_project,
 )
 from app.scheduler.butter.properties import parse_schedule as parse_schedule_butter
+from app.scheduler.adygea.properties import parse_schedule as parse_schedule_adygea
 
 PARSERS = {
     "mozzarella": parse_schedule_mozzarella,
@@ -17,12 +18,20 @@ PARSERS = {
     "mascarpone": parse_schedule_mascarpone,
     "milk_project": parse_schedule_milk_project,
     "butter": parse_schedule_butter,
+    "adygea": parse_schedule_adygea,
 }
 
 
 def load_properties(schedules):
     properties = {}
-    for department in ["mozzarella", "ricotta", "milk_project", "butter", "mascarpone"]:
+    for department in [
+        "mozzarella",
+        "ricotta",
+        "milk_project",
+        "butter",
+        "mascarpone",
+        "adygea",
+    ]:
         if department in schedules and schedules[department] != "manual":
             properties[department] = PARSERS[department](schedules[department])
     return properties
