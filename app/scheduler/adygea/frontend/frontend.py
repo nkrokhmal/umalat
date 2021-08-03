@@ -16,6 +16,7 @@ def wrap_boiling(boiling):
         x=(boiling.x[0], 0),
         size=(0, 2),
         boiling_id=boiling.props["boiling_id"],
+        boiling_model=boiling.props['boiling_model']
     )
 
     with m.block("Upper line"):
