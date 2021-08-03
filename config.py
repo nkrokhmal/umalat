@@ -152,6 +152,7 @@ class TestConfig(BaseClass):
     TEST_MASCARPONE = "app/data/tests/mascarpone_plan.xlsx"
     TEST_MILKPROJECT = "app/data/tests/milk_project_plan.xlsx"
     TEST_BUTTER = "app/data/tests/butter_plan.xlsx"
+    TEST_ADYGEA = "app/data/tests/adygea_plan.xlsx"
 
     TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"
     TELEGRAM_CHAT_ID = -544068496

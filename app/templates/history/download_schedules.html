@@ -107,6 +107,18 @@
                             </td>
 
                             <td class="border-0">
+                                {% if data[key].get("адыгейский", "") != "" %}
+                                    <a href="#show_adygea" class="show_adygea"
+                                       data-date="{{key}}" data-filename="{{data[key].get('адыгейский', {}).get('filename', '')}}"
+                                       data-approved="{{data[key].get('адыгейский', {}).get('is_approved', False)}}" data-toggle="modal" >
+                                        {% if data[key].get('адыгейский', {}).get('is_approved', False) %}
+                                            <span style="color:green" class="fas fa-check mr-2"></span>
+                                        {% endif %}
+                                        <small>Адыгейский {{key}}</small>
+                                    </a>
+                                {% else %}
+                                    <a class="border-0"><a class="small"></a></a>
+                                {% endif %}
                             </td>
 
                             <div id="show_mozzarella" class="modal fade" >
@@ -203,6 +215,26 @@
                                             <div class="modal-footer">
                                                 <input type="submit" class="btn btn-primary btn-download" value="Скачать">
                                                 <input type="submit" class="btn btn-primary btn-edit" id="testId5">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="show_adygea" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-edit" id="edit_adygea">
                                             </div>
                                         </form>
                                     </div>
@@ -503,6 +535,66 @@
 			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
 			    console.log(url_download);
+			    $.ajax(
+				{
+					url: url_download,
+					type: 'GET',
+					success: function(res)
+					{
+					    window.location = url_download;
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+				$('#show_milk_project').modal('hide');
+            });
+
+            $(".btn.btn-primary.btn-edit").click(function(){
+                var url_edit = "";
+                if (name == "Утвердить"){
+			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+                }
+                else
+                {
+                    url_edit="/disprove?file_name=" + filename + "&date=" + date;
+                }
+                console.log(url_edit);
+			    $.ajax(
+				{
+					url: url_edit,
+					type: 'POST',
+					success: function(res)
+					{
+						console.log(res)
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+
+            });
+
+		});
+	});
+
+	$(function () {
+		$(".show_adygea").click(function () {
+			var filename = $(this).data('filename');
+			var date = $(this).data('date');
+			var approved = $(this).data('approved');
+			var name = ""
+
+			if (approved == "True"){
+			    name = "Удалить из утвержденного";
+			}
+            else {
+                name = "Утвердить";
+            }
+
+			$(".modal-footer #edit_adygea").val(name);
+			$(".btn.btn-primary.btn-download").click(function(){
+			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
 			    $.ajax(
 				{
 					url: url_download,

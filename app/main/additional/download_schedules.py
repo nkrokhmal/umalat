@@ -125,7 +125,6 @@ def download_schedule_tasks(page):
                         schedules_metadata[date_dir][department]['filename'] = schedules_filename
 
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
-    print(schedules_metadata)
     schedules_result = get_metadata(
         schedules_metadata,
         offset=(page - 1) * flask.current_app.config["SKU_PER_PAGE"],

@@ -4,16 +4,21 @@ from app.imports.runtime import *
 from app.main import main
 from .forms import (
     ScheduleForm,
-    create_mozzarella_form,
-    RicottaPropertiesForm,
-    MascarponePropertiesForm,
-    ButterPropertiesForm,
-    MilkProjectPropertiesForm,
-    AdygeaPropertiesForm,
+    create_form,
+    # RicottaPropertiesForm,
+    # MascarponePropertiesForm,
+    # ButterPropertiesForm,
+    # MilkProjectPropertiesForm,
+    # AdygeaPropertiesForm,
 )
+from app.scheduler.mozzarella.properties import MozzarellaProperties
+from app.scheduler.ricotta.properties import RicottaProperties
+from app.scheduler.mascarpone.properties import MascarponeProperties
+from app.scheduler.butter.properties import ButterProperties
+from app.scheduler.milk_project.properties import MilkProjectProperties
+from app.scheduler.adygea.properties import AdygeaProperties
 from app.scheduler import run_consolidated, run_contour_cleanings
 from app.main.errors import internal_error
-from app.scheduler.mozzarella.properties import *
 from app.scheduler.contour_cleanings import *
 
 
@@ -22,12 +27,12 @@ from app.scheduler.contour_cleanings import *
 def contour_washers_schedule():
     main_form = ScheduleForm(flask.request.form)
 
-    mozzarella_form = create_mozzarella_form(flask.request.form)
-    ricotta_form = RicottaPropertiesForm(flask.request.form)
-    mascarpone_form = MascarponePropertiesForm(flask.request.form)
-    butter_form = ButterPropertiesForm(flask.request.form)
-    milk_project_form = MilkProjectPropertiesForm(flask.request.form)
-    adygea_form = AdygeaPropertiesForm(flask.request.form)
+    mozzarella_form = create_form(flask.request.form, MozzarellaProperties())
+    ricotta_form = create_form(flask.request.form, RicottaProperties())
+    mascarpone_form = create_form(flask.request.form, MascarponeProperties())
+    butter_form = create_form(flask.request.form, ButterProperties())
+    milk_project_form = create_form(flask.request.form, MilkProjectProperties())
+    adygea_form = create_form(flask.request.form, AdygeaProperties())
 
     if flask.request.method == "POST" and "submit_params" in flask.request.form:
         date = main_form.date.data
@@ -39,6 +44,7 @@ def contour_washers_schedule():
         )
         schedules = load_schedules(path, date_str)
         props = load_properties(schedules)
+
         for department, form in [
             ["mozzarella", mozzarella_form],
             ["ricotta", ricotta_form],
@@ -50,6 +56,8 @@ def contour_washers_schedule():
             if department not in props:
                 continue
 
+            print(ricotta_form.__dict__)
+            print()
             for key, value in props[department].__dict__.items():
                 getattr(form, key).data = value
 

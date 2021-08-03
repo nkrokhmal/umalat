@@ -132,3 +132,19 @@ def approve_milk_project():
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".milk_project_schedule"))
 
+
+@main.route("/approve_adygea", methods=["GET", "POST"])
+@flask_login.login_required
+def approve_adygea():
+    date = flask.request.form.get("date")
+    file_name = flask.request.form.get("file_name")
+    pickle_file_name = f"{file_name.split('.')[0]}.pickle"
+
+    path = move_to_approved(date=date, file_name=file_name)
+    _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
+
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name))
+
+    flask.flash("Расписание успешно утверждено", "success")
+    return flask.redirect(flask.url_for(".adygea_schedule"))
