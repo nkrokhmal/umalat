@@ -6,33 +6,21 @@ from app.enum import *
 
 
 # todo maybe: put into more proper place
-def calc_scotta_input_tanks(n_boilings, extra_scotta=0):
+def calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings):
     scotta_per_boiling = 1900 - 130
-    values = [['4', 80000], ['5', 80000], ['8', 80000]]
-    tanks_df = pd.DataFrame(values, columns=['id', 'kg'])
-    tanks_df['max_boilings'] = tanks_df['kg'].apply(
-        lambda kg: int(custom_round(kg / scotta_per_boiling, 1, rounding='floor')))
-    tanks_df['n_boilings'] = None
-    tanks_df['scotta'] = None
+    total_scotta = scotta_per_boiling * ricotta_n_boilings + adygea_n_boilings * 370 + milk_project_n_boilings * 2400 # todo maybe: take from parameters
 
-    total_scotta = n_boilings * scotta_per_boiling + extra_scotta
+    assert total_scotta < 80000 + 60000 + 60000, 'Скотты больше, чем могут вместить танки. ' # todo maybe: take from parameters
 
     left_scotta = total_scotta
-
-    assert n_boilings <= tanks_df['max_boilings'].sum(), 'Слишком много варок на линии рикотты. Скотта не помещается в танки.'
-    for i, row in tanks_df.iterrows():
-        if not left_scotta:
-            break
-
-        max_scotta = row['max_boilings'] * scotta_per_boiling
-        cur_scotta = min(max_scotta, left_scotta)
+    values = [['4', 0], ['5', 0], ['8', 0]]
+    for value in values:
+        cur_scotta = min(80000, left_scotta)
+        value[1] = cur_scotta
         left_scotta -= cur_scotta
 
-        tanks_df.loc[i, 'scotta'] = cur_scotta
-
-    tanks_df = tanks_df.fillna(0)
-    tanks_df['scotta'] /= 1000.
-    return tanks_df[['id', 'scotta']].values.tolist()
+    print(values)
+    return values
 
 
 class CleaningValidator(ClassValidator):

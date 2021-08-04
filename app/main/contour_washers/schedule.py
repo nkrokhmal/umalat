@@ -37,6 +37,29 @@ def contour_washers_schedule():
         schedules = load_schedules(path, date_str)
         props = load_properties(schedules)
 
+        # fill main form
+        with code("fill yesterday form values"):
+            yesterday = date - timedelta(days=1)
+            yesterday_str = yesterday.strftime("%Y-%m-%d")
+
+            yesterday_schedules = load_schedules(
+                config.abs_path("app/data/dynamic/{}/approved/".format(yesterday_str)),
+                prefix=yesterday_str,
+                departments=["ricotta", "mozzarella"],
+            )
+            yesterday_properties = load_properties(yesterday_schedules)
+
+            if "mozzarella" in yesterday_schedules:
+                main_form.is_bar12_present_yesterday.data = yesterday_properties[
+                    "mozzarella"
+                ].bar12_present
+
+            if "ricotta" in yesterday_schedules:
+                main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
+                    "ricotta"
+                ].n_boilings
+
+        # fill department forms
         for department, form in [
             ["mozzarella", mozzarella_form],
             ["ricotta", ricotta_form],
@@ -86,12 +109,6 @@ def contour_washers_schedule():
         date_str = form["date"]
         date = datetime.strptime(date_str, "%Y-%m-%d")
 
-        try:
-            adygea_n_boilings = int(main_form.adygea_n_boilings.data)
-            milk_project_n_boilings = int(main_form.milk_project_n_boilings.data)
-        except Exception as e:
-            return internal_error(e)
-
         path = config.abs_path("app/data/dynamic/{}/approved/".format(date_str))
 
         if not os.path.exists(path):
@@ -99,29 +116,19 @@ def contour_washers_schedule():
                 "Не найдены утвержденные расписания для данной даты: {}".format(date)
             )
 
-        # load input tanks from yesterday
-        with code("calc input tanks and present of bar12"):
-            yesterday = date - timedelta(days=1)
-            yesterday_str = yesterday.strftime("%Y-%m-%d")
-
-            yesterday_schedules = load_schedules(
-                config.abs_path("app/data/dynamic/{}/approved/".format(yesterday_str)),
-                prefix=yesterday_str,
-                departments=["ricotta", "mozzarella"],
-            )
-            yesterday_properties = load_properties(yesterday_schedules)
-
-            if "ricotta" not in yesterday_schedules:
-                # todo soon: warning that ricotta is not found from yesterday
-                input_tanks = [["4", 0], ["5", 0], ["8", 0]]
-            else:
-                input_tanks = calc_scotta_input_tanks(
-                    yesterday_schedules,
-                    extra_scotta=adygea_n_boilings * 370
-                    + milk_project_n_boilings * 2400,
+        with code("Calc input tanks"):
+            try:
+                ricotta_n_boilings = int(main_form.ricotta_n_boilings_yesterday.data)
+                adygea_n_boilings = int(main_form.adygea_n_boilings_yesterday.data)
+                milk_project_n_boilings = int(
+                    main_form.milk_project_n_boilings_yesterday.data
                 )
+            except Exception as e:
+                return internal_error(e)
 
-            is_bar12_present = yesterday_properties["mozzarella"].bar12_present
+            input_tanks = calc_scotta_input_tanks(
+                ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings
+            )
 
         run_contour_cleanings(
             path,
@@ -131,7 +138,7 @@ def contour_washers_schedule():
             input_tanks=input_tanks,
             is_tomorrow_day_off=main_form.is_not_working_day.data,
             shipping_line=main_form.shipping_line.data,
-            is_bar12_present=is_bar12_present,
+            is_bar12_present=main_form.is_bar12_present_yesterday,
         )
         run_consolidated(
             path,

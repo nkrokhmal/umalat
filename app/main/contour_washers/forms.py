@@ -53,14 +53,26 @@ class ScheduleForm(FlaskForm):
         default=True,
     )
 
-    milk_project_n_boilings = StringField(
+    milk_project_n_boilings_yesterday = IntegerField(
         "Количество варок в милкпроджект вчера (используется для подсчета скотты)",
         validators=[Optional()],
-        default="0",
+        default=0,
     )
 
-    adygea_n_boilings = StringField(
+    adygea_n_boilings_yesterday = IntegerField(
         "Количество варок в адыгейском цехе вчера (используется для подсчета скотты)",
         validators=[Optional()],
-        default="0",
+        default=0,
+    )
+
+    ricotta_n_boilings_yesterday = IntegerField(
+        "Количество варок в рикоттном цехе вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default=0,
+    )
+
+    is_bar12_present_yesterday = BooleanField(
+        'Был ли вчера брус 1.2',
+        validators=[Optional()],
+        default=False
     )
