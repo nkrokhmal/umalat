@@ -40,19 +40,9 @@ def fill_properties(form, properties):
 
 class ScheduleForm(FlaskForm):
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
-    is_not_working_day = BooleanField(
-        "Завтра нерабочий день",
-        validators=[Optional()],
-        default=(datetime.now() + timedelta(days=1)).weekday()
-        in [0, 3],  # not working mondays/thursdays by default
-    )
 
-    shipping_line = BooleanField(
-        "Линия отгрузки",
-        validators=[Optional()],
-        default=True,
-    )
 
+class ScheduleDateForm(FlaskForm):
     milk_project_n_boilings_yesterday = IntegerField(
         "Количество варок в милкпроджект вчера (используется для подсчета скотты)",
         validators=[Optional()],
@@ -75,4 +65,15 @@ class ScheduleForm(FlaskForm):
         'Был ли вчера брус 1.2',
         validators=[Optional()],
         default=False
+    )
+    is_not_working_day = BooleanField(
+        "Завтра нерабочий день",
+        validators=[Optional()],
+        default=False
+    )
+    shipping_line = BooleanField(
+        "Линия отгрузки",
+        validators=[Optional()],
+        default=True,
+        false_values=('False', 'false', 'f', '')
     )
