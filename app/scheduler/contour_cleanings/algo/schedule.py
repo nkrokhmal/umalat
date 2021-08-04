@@ -7,19 +7,16 @@ from app.enum import *
 
 # todo maybe: put into more proper place
 def calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings):
-    scotta_per_boiling = 1900 - 130
-    total_scotta = scotta_per_boiling * ricotta_n_boilings + adygea_n_boilings * 370 + milk_project_n_boilings * 2400 # todo maybe: take from parameters
+    total_scotta = (1900 - 130) * ricotta_n_boilings + adygea_n_boilings * 370 + milk_project_n_boilings * 2400 # todo maybe: take from parameters
 
     assert total_scotta < 80000 + 60000 + 60000, 'Скотты больше, чем могут вместить танки. ' # todo maybe: take from parameters
 
     left_scotta = total_scotta
-    values = [['4', 0], ['5', 0], ['8', 0]]
+    values = [['4', 0.], ['5', 0.], ['8', 0.]]
     for value in values:
         cur_scotta = min(80000, left_scotta)
-        value[1] = cur_scotta
+        value[1] = cur_scotta / 1000. # value in ton
         left_scotta -= cur_scotta
-
-    print(values)
     return values
 
 

@@ -6,8 +6,9 @@ from app.enum import *
 
 from pydantic import Field
 
+
 class RicottaProperties(pydantic.BaseModel):
-    n_boilings: int = Field(0, description='Число варок (используется для расчета скотты)')
+    n_boilings: int = Field(0, description='Число варок')
     last_pumping_out_time: str = Field('', description='Конец последнего слива')
     start_of_ninth_from_the_end_time: str = Field('', description='Начало девятой варки с конца')
 
@@ -18,6 +19,7 @@ class RicottaProperties(pydantic.BaseModel):
 
     def department(self):
         return 'ricotta'
+
 def cast_properties(schedule=None):
     props = RicottaProperties()
     if not schedule:
