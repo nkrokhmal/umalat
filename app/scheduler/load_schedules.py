@@ -35,7 +35,7 @@ def assert_schedules_presence(
             logger.warning(
                 f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}"
             )
-            if os.environ.get("APP_ENVIRONEMNT") == "runtime":
+            if os.environ.get("APP_ENVIRONMENT") == "runtime":
                 flask.flash(
                     f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}",
                     "warning",
