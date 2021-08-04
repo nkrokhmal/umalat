@@ -6,6 +6,7 @@ from app.models import *
 
 # todo maybe: better list form
 
+
 def create_form(request_form, properties):
     class TempForm(FlaskForm):
         pass
@@ -18,17 +19,20 @@ def create_form(request_form, properties):
         elif isinstance(v["default"], bool):
             setattr(TempForm, properties.department() + '__' + field, BooleanField(v["description"], validators=[Optional()], default=v['default']))
         elif isinstance(v["default"], int):
-            setattr(TempForm, properties.department() + '__' + field, IntegerField( v["description"], validators=[Optional()], default=v['default']))
+            setattr(TempForm, properties.department() + '__' + field, IntegerField(v["description"], validators=[Optional()], default=v['default']))
         elif isinstance(v["default"], float):
             setattr(TempForm, properties.department() + '__' + field, FloatField(v["description"], validators=[Optional()], default=v['default']))
     return TempForm(request_form)
 
 
 def fill_properties(form, properties):
-    print(form)
     for field, v in json.loads(properties.schema_json(indent=2))["properties"].items():
         if isinstance(v['default'], list):
             setattr(properties, field, json.loads(form[properties.department() + '__' + field]))
+        elif v['type'] == 'integer':
+            setattr(properties, field, int(form[properties.department() + '__' + field]))
+        elif v['type'] == 'boolean':
+            setattr(properties, field, form[properties.department() + '__' + field] == 'y')
         else:
             setattr(properties, field, form[properties.department() + '__' + field])
     return properties
