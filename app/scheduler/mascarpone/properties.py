@@ -17,6 +17,8 @@ class MascarponeProperties(pydantic.BaseModel):
             return True
         return False
 
+    def department(self):
+        return 'mascarpone'
 
 def cast_properties(schedule=None):
     props = MascarponeProperties()

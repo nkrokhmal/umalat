@@ -59,6 +59,8 @@ class MozzarellaProperties(pydantic.BaseModel):
             return True
         return False
 
+    def department(self):
+        return 'mozzarella'
 def cast_properties(schedule=None):
     props = MozzarellaProperties()
     if not schedule:

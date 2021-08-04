@@ -12,29 +12,25 @@ def create_form(request_form, properties):
 
     for field, v in json.loads(properties.schema_json(indent=2))["properties"].items():
         if isinstance(v["default"], str):
-            setattr(TempForm, field, StringField(v["description"], validators=[Optional()], default=v["default"]))
+            setattr(TempForm, properties.department() + '__' + field, StringField(v["description"], validators=[Optional()], default=v["default"]))
         elif isinstance(v["default"], list):
-            setattr(TempForm, field, StringField(v["description"], validators=[Optional()], default=json.dumps(v["default"])))
+            setattr(TempForm, properties.department() + '__' + field, StringField(v["description"], validators=[Optional()], default=json.dumps(v["default"])))
         elif isinstance(v["default"], bool):
-            setattr(TempForm, field, BooleanField(v["description"], validators=[Optional()], default=v['default']))
+            setattr(TempForm, properties.department() + '__' + field, BooleanField(v["description"], validators=[Optional()], default=v['default']))
         elif isinstance(v["default"], int):
-            setattr(TempForm, field, IntegerField( v["description"], validators=[Optional()], default=v['default']))
+            setattr(TempForm, properties.department() + '__' + field, IntegerField( v["description"], validators=[Optional()], default=v['default']))
         elif isinstance(v["default"], float):
-            setattr(TempForm, field, FloatField(v["description"], validators=[Optional()], default=v['default']))
+            setattr(TempForm, properties.department() + '__' + field, FloatField(v["description"], validators=[Optional()], default=v['default']))
     return TempForm(request_form)
 
 
 def fill_properties(form, properties):
-
+    print(form)
     for field, v in json.loads(properties.schema_json(indent=2))["properties"].items():
         if isinstance(v['default'], list):
-            # todo maybe: make properly
-            print(field)
-            print(form[field])
-            print(type(form[field]))
-            setattr(properties, field, json.loads(form[field]))
+            setattr(properties, field, json.loads(form[properties.department() + '__' + field]))
         else:
-            setattr(properties, field, form[field])
+            setattr(properties, field, form[properties.department() + '__' + field])
     return properties
 
 

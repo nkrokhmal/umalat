@@ -50,9 +50,9 @@ def contour_washers_schedule():
 
             for key, value in props[department].__dict__.items():
                 if isinstance(value, list):
-                    getattr(form, key).data = json.dumps(value)
+                    getattr(form, department + "__" + key).data = json.dumps(value)
                 else:
-                    getattr(form, key).data = value
+                    getattr(form, department + "__" + key).data = value
 
         return flask.render_template(
             "contour_washers/schedule.html",

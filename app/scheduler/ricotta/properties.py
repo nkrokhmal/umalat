@@ -16,6 +16,8 @@ class RicottaProperties(pydantic.BaseModel):
             return True
         return False
 
+    def department(self):
+        return 'ricotta'
 def cast_properties(schedule=None):
     props = RicottaProperties()
     if not schedule:

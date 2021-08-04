@@ -14,6 +14,9 @@ class MilkProjectProperties(pydantic.BaseModel):
             return True
         return False
 
+    def department(self):
+        return 'milk_project'
+
 def cast_properties(schedule=None):
     props = MilkProjectProperties()
     if not schedule:
