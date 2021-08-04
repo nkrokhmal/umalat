@@ -53,11 +53,16 @@ def contour_washers_schedule():
                 main_form.is_bar12_present_yesterday.data = yesterday_properties[
                     "mozzarella"
                 ].bar12_present
-
+            else:
+                # todo next: notify
+                pass
             if "ricotta" in yesterday_schedules:
                 main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
                     "ricotta"
                 ].n_boilings
+            else:
+                # todo next: notify
+                pass
 
         # fill department forms
         for department, form in [
@@ -101,6 +106,7 @@ def contour_washers_schedule():
             "milk_project": fill_properties(form, MilkProjectProperties()),
             "adygea": fill_properties(form, AdygeaProperties()),
         }
+        # todo next: make sure that notifications work
         assert_properties_presence(
             properties,
             raise_if_not_present=["mozzarella", "ricotta"],
