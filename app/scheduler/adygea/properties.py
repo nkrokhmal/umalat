@@ -14,6 +14,9 @@ class AdygeaProperties(pydantic.BaseModel):
             return True
         return False
 
+    def department(self):
+        return 'adygea'
+
 def cast_properties(schedule=None):
     props = AdygeaProperties()
     if not schedule:

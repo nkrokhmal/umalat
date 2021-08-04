@@ -13,6 +13,8 @@ class ButterProperties(pydantic.BaseModel):
             return True
         return False
 
+    def department(self):
+        return 'butter'
 
 def cast_properties(schedule=None):
     props = ButterProperties()

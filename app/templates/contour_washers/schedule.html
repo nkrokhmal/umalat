@@ -71,6 +71,31 @@
                                 {{form.shipping_line(place_holder='shipping_line', checked=True)}}
                             </div>
                         </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Был ли вчера брус 1.2 </label>
+                                {{form.is_bar12_present_yesterday(place_holder='is_bar12_present_yesterday', checked=False)}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Количество варок в рикоттном цехе вчера (используется для подсчета скотты)</label>
+                                {{form.ricotta_n_boilings_yesterday(place_holder='ricotta_n_boilings_yesterday')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Количество варок в милкпроджект вчера (используется для подсчета скотты)</label>
+                                {{form.milk_project_n_boilings_yesterday(place_holder='milk_project_n_boilings_yesterday')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Количество варок в адыгейском цехе вчера (используется для подсчета скотты)</label>
+                                {{form.adygea_n_boilings_yesterday(place_holder='adygea_n_boilings_yesterday')}}
+                            </div>
+                        </div>
+
                     </div>
                 </form>
 
@@ -212,7 +237,7 @@
 <script type="text/javascript">
     function merge() {
         $result = $("#result");
-        $("#mozzarella_form input, #ricotta_form input, #mascarpone_form input, #butter_form input, #milkproject_form input, #adygea_form input, #main_form input").each(function() {
+        $("#mozzarella_form input, #ricotta_form input, #mascarpone_form input, #butter_form input, #milk_project_form input, #adygea_form input, #main_form input").each(function() {
             $result.append("<input type='hidden' name='"+$(this).attr('name')+"' value='"+$(this).val()+"' />");
         });
     }

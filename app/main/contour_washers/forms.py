@@ -6,35 +6,35 @@ from app.models import *
 
 # todo maybe: better list form
 
+
 def create_form(request_form, properties):
     class TempForm(FlaskForm):
         pass
 
     for field, v in json.loads(properties.schema_json(indent=2))["properties"].items():
         if isinstance(v["default"], str):
-            setattr(TempForm, field, StringField(v["description"], validators=[Optional()], default=v["default"]))
+            setattr(TempForm, properties.department() + '__' + field, StringField(v["description"], validators=[Optional()], default=v["default"]))
         elif isinstance(v["default"], list):
-            setattr(TempForm, field, StringField(v["description"], validators=[Optional()], default=json.dumps(v["default"])))
+            setattr(TempForm, properties.department() + '__' + field, StringField(v["description"], validators=[Optional()], default=json.dumps(v["default"])))
         elif isinstance(v["default"], bool):
-            setattr(TempForm, field, BooleanField(v["description"], validators=[Optional()], default=v['default']))
+            setattr(TempForm, properties.department() + '__' + field, BooleanField(v["description"], validators=[Optional()], default=v['default']))
         elif isinstance(v["default"], int):
-            setattr(TempForm, field, IntegerField( v["description"], validators=[Optional()], default=v['default']))
+            setattr(TempForm, properties.department() + '__' + field, IntegerField(v["description"], validators=[Optional()], default=v['default']))
         elif isinstance(v["default"], float):
-            setattr(TempForm, field, FloatField(v["description"], validators=[Optional()], default=v['default']))
+            setattr(TempForm, properties.department() + '__' + field, FloatField(v["description"], validators=[Optional()], default=v['default']))
     return TempForm(request_form)
 
 
 def fill_properties(form, properties):
-
     for field, v in json.loads(properties.schema_json(indent=2))["properties"].items():
         if isinstance(v['default'], list):
-            # todo maybe: make properly
-            print(field)
-            print(form[field])
-            print(type(form[field]))
-            setattr(properties, field, json.loads(form[field]))
+            setattr(properties, field, json.loads(form[properties.department() + '__' + field]))
+        elif v['type'] == 'integer':
+            setattr(properties, field, int(form[properties.department() + '__' + field]))
+        elif v['type'] == 'boolean':
+            setattr(properties, field, form[properties.department() + '__' + field] == 'y')
         else:
-            setattr(properties, field, form[field])
+            setattr(properties, field, form[properties.department() + '__' + field])
     return properties
 
 
@@ -53,14 +53,26 @@ class ScheduleForm(FlaskForm):
         default=True,
     )
 
-    milk_project_n_boilings = StringField(
+    milk_project_n_boilings_yesterday = IntegerField(
         "Количество варок в милкпроджект вчера (используется для подсчета скотты)",
         validators=[Optional()],
-        default="0",
+        default=0,
     )
 
-    adygea_n_boilings = StringField(
+    adygea_n_boilings_yesterday = IntegerField(
         "Количество варок в адыгейском цехе вчера (используется для подсчета скотты)",
         validators=[Optional()],
-        default="0",
+        default=0,
+    )
+
+    ricotta_n_boilings_yesterday = IntegerField(
+        "Количество варок в рикоттном цехе вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default=0,
+    )
+
+    is_bar12_present_yesterday = BooleanField(
+        'Был ли вчера брус 1.2',
+        validators=[Optional()],
+        default=False
     )
