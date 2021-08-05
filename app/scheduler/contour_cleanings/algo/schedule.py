@@ -52,12 +52,12 @@ def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
     with code('Tanks'):
         # get values when different percentage tanks end: [['3.6', 74], ['3.3', 94], ['2.7', 144]]
         values = []
-        for percent in ['2.7', '3.3', '3.6']:
-            if properties['mozzarella'].termizator_times()[percent]['last']:
-                values.append([percent, properties['mozzarella'].termizator_times()[percent]['last'], '01:50', False])
-                values.append([percent, properties['mozzarella'].termizator_times()[percent].get('ninth'), '01:50', False])
+        for percent, end_times in properties['mozzarella'].termizator_times().items():
+            if end_times:
+                for end_time in end_times:
+                    values.append([percent, end_time, '01:50', False])
             else:
-                # no boilings found today
+                # no tank cleaning - clean at the beginning
                 values.append([percent, '10:00', '01:05', True])
 
         # filter empty values

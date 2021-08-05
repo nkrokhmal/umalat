@@ -9,16 +9,17 @@ from pydantic import Field
 
 class MozzarellaProperties(pydantic.BaseModel):
     bar12_present: bool = Field(False, description='Присутствует ли брус 1.2')
-    line33_last_termizator_end_time: str = Field("", description='Конец последнего налива термизатора на смеси 3.3%')
-    line36_last_termizator_end_time: str = Field("", description='Конец последнего налива термизатора на смеси 3.6%')
-    line27_nine_termizator_end_time: str = Field("", description='Конец девятого налива термизатора на смеси 2.7%')
-    line27_last_termizator_end_time: str = Field("", description='Конец последнего налива термизатора на смеси 2.7%')
+    line33_last_termizator_end_times: str = Field([], description='Времена заполнения танков на смеси 3.3% (каждая 9 варка)')
+    line36_last_termizator_end_times: str = Field([], description='Времена заполнения танков на смеси 3.6% (каждая 9 варка)')
+    line27_last_termizator_end_times: str = Field([], description='Времена заполнения танков на смеси 2.7% (каждая 9 варка)')
 
     def termizator_times(self):
-        return {'2.7': {'last': self.line27_last_termizator_end_time, 'ninth': self.line27_nine_termizator_end_time},
-                '3.3': {'last': self.line33_last_termizator_end_time},
-                '3.6': {'last': self.line36_last_termizator_end_time}}
-
+        res = {'2.7': self.line27_last_termizator_end_times,
+                '3.3': self.line33_last_termizator_end_times,
+                '3.6': self.line36_last_termizator_end_times}
+        assert len(sum(res.values(), [])) <= 4, 'Указано больше 4 танков смесей. В производстве есть только 4 танка смесей. '
+        return res
+    
     multihead_end_time: str = Field("", description='Конец работы мультиголовы (пусто, если мультиголова не работает)')
     water_multihead_present: bool = Field(False, description='Конец работы мультиголовы на воде (пусто, если мультиголова на воде не работает)')
 
@@ -61,6 +62,7 @@ class MozzarellaProperties(pydantic.BaseModel):
 
     def department(self):
         return 'mozzarella'
+
 def cast_properties(schedule=None):
     props = MozzarellaProperties()
     if not schedule:
@@ -81,21 +83,18 @@ def cast_properties(schedule=None):
 
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '3.3']
         if _boilings:
-            props.line33_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
-            assert len(_boilings) <= 9, 'Слишком много наливов на смеси 3.3'
+            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+            props.line33_last_termizator_end_times = [cast_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
 
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '3.6']
         if _boilings:
-            props.line36_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
-            assert len(_boilings) <= 9, 'Слишком много наливов на смеси 3.6'
+            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+            props.line36_last_termizator_end_times = [cast_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
 
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '2.7']
         if _boilings:
-            assert len(_boilings) <= 18, 'Слишком много наливов на смеси 2.7'
-
-            if len(_boilings) >= 10:
-                props.line27_nine_termizator_end_time = cast_time(_boilings[8]['pouring']['first']['termizator'].y[0])
-            props.line27_last_termizator_end_time = cast_time(_boilings[-1]['pouring']['first']['termizator'].y[0])
+            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+            props.line27_last_termizator_end_times = [cast_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
 
     with code('multihead'):
         multihead_packings = list(schedule.iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова'))

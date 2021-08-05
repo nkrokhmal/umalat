@@ -70,6 +70,7 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
 
     with code('make_boilings'):
         for bg_prev, bg in utils.iter_pairs(boiling_groups, method="any_prefix"):
+            print(bg.props.all())
             n_tanks = bg.props["n_tanks"]
             first_tank = bg.props["first_tank"]
 
