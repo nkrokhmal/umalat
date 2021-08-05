@@ -20,13 +20,13 @@ def _test(fn, open_file=False):
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
     outputs = run_mozzarella(fn, open_file=open_file)
     utils.lazy_tester.log(outputs["schedule"])
-    utils.lazy_tester.assert_logs()
+    utils.lazy_tester.assert_logs(reset=True)
 
 
 if __name__ == "__main__":
     # _test(
     #     config.abs_path(
-    #         "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 3.xlsx"
+    #         "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 6.xlsx"
     #     ),
     #     open_file=True,
     # )

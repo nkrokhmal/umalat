@@ -86,5 +86,4 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
                     # make lunch now
                     lunch_boiling_ids.append(b2.props['boiling_id'])
                 break
-    print(lunch_boiling_ids)
     return _make_schedule(boiling_plan_df, first_boiling_id, start_time, lunch_boiling_ids=lunch_boiling_ids)
