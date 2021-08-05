@@ -2,7 +2,7 @@ sh save_batches.sh &&
 cd .. &&
 git checkout db/prod/data.sqlite  &&
 git pull &&
-python3 tests/run_tests.py &&
+python tests/run_tests.py &&
 docker-compose down &&
 docker-compose up --build -d &&
 cd scripts &&
