@@ -53,6 +53,7 @@ class Validator(ClassValidator):
 
             # if water and different boilings - cannot intersect serving with meltings
             if boiling_model1.line.name == LineName.WATER and boiling_model1 != boiling_model2:
+                # todo later: deprecated, delete
                 # validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
                 if not boiling_model1.is_lactose:
                     _df = b1.props['boiling_group_df']

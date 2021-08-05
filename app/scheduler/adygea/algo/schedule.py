@@ -20,7 +20,7 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling__lunch(b1, b2):
         if b1.props['boiler_num'] >> 1 == b2.props['pair_num']: # 0, 1 -> 0, 2, 3 -> 1
-            validate_disjoint_by_axis(b1, b2, distance=2, ordered=True)
+            validate_disjoint_by_axis(b1, b2, ordered=True)
 
     @staticmethod
     def validate__lunch__boiling(b1, b2):
@@ -53,11 +53,9 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
 
             cur_boiling_id += 1
 
-    for i, r in enumerate([range(0, 2), range(2, 4)]):
-        range_boilings = [boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] in r]
-        end = max(boiling.y[0] for boiling in range_boilings)
-        m.row(make_cleaning(pair_num=i), x=end + 1, push_func=add_push)
-
+    last_boilings = [[boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] == boiler_num][-1] for boiler_num in range(4)]
+    last_min, last_max = min(b.y[0] for b in last_boilings), max(b.y[0] for b in last_boilings)
+    m.row(make_cleaning(), x=last_min, push_func=add_push)
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root
 
