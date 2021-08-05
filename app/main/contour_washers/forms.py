@@ -32,7 +32,7 @@ def fill_properties(form, properties):
         elif v['type'] == 'integer':
             setattr(properties, field, int(form[properties.department() + '__' + field]))
         elif v['type'] == 'boolean':
-            setattr(properties, field, form[properties.department() + '__' + field] == 'y')
+            setattr(properties, field, utils.cast_bool(form[properties.department() + '__' + field]))
         else:
             setattr(properties, field, form[properties.department() + '__' + field])
     return properties
@@ -75,5 +75,4 @@ class ScheduleDateForm(FlaskForm):
         "Линия отгрузки",
         validators=[Optional()],
         default=True,
-        false_values=('False', 'false', 'f', '')
     )
