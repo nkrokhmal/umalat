@@ -57,3 +57,5 @@ notebook=6.3.0
 notifiers=1.2.1
 redis
 rq
+pydantic
+pytest
