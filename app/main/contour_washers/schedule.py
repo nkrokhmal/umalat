@@ -93,14 +93,14 @@ def contour_washers_schedule():
                         getattr(form, department + "__" + key).data = value
 
             return flask.render_template(
-                "contour_washers/schedule.html",
+                "contour_washers/schedule_date.html",
                 mozzarella_form=mozzarella_form,
                 ricotta_form=ricotta_form,
                 mascarpone_form=mascarpone_form,
                 butter_form=butter_form,
                 milk_project_form=milk_project_form,
                 adygea_form=adygea_form,
-                form=main_form,
+                main_form=main_form,
                 date=date_str,
                 params=True,
             )
@@ -122,8 +122,6 @@ def contour_washers_schedule():
                 raise_if_not_present=["mozzarella", "ricotta"],
                 warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
             )
-            date_str = form["date"]
-            date = datetime.strptime(date_str, "%Y-%m-%d")
 
             path = config.abs_path("app/data/dynamic/{}/approved/".format(date_str))
 
@@ -149,16 +147,17 @@ def contour_washers_schedule():
                 input_tanks = calc_scotta_input_tanks(
                     ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings
                 )
-
             run_contour_cleanings(
                 path,
                 properties=properties,
                 output_path=path,
                 prefix=date_str,
                 input_tanks=input_tanks,
-                is_tomorrow_day_off=main_form.is_not_working_day.data,
-                shipping_line=main_form.shipping_line.data,
-                is_bar12_present=main_form.is_bar12_present_yesterday,
+                is_tomorrow_day_off=utils.cast_bool(main_form.is_not_working_day.data),
+                shipping_line=utils.cast_bool(main_form.shipping_line.data),
+                is_bar12_present=utils.cast_bool(
+                    main_form.is_bar12_present_yesterday.data
+                ),
             )
             run_consolidated(
                 path,
