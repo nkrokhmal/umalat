@@ -19,7 +19,7 @@ def test_batch():
         )
     )
     fns = [fn for fn in fns if "$" not in fn]
-    for fn in tqdm.tqdm(fns):
+    for fn in utils.tqdm(fns, desc=lambda v: v):
         _test(fn, open_file=False)
 
 

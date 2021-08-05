@@ -18,11 +18,11 @@ def make_boiling(boiling_model, boiling_id, boiler_num):
 
 def make_cleaning(**kwargs):
     m = BlockMaker("cleaning", **kwargs)
-    m.row(f"cleaning", size=20)  # todo soon: take from parameters
+    m.row(f"cleaning", size=24)  # todo soon: take from parameters
     return m.root
 
 
 def make_lunch(**kwargs):
     m = BlockMaker("lunch", **kwargs)
-    m.row(f"lunch", size=7)  # todo soon: take from parameters
+    m.row(f"lunch", size=12)  # todo soon: take from parameters
     return m.root

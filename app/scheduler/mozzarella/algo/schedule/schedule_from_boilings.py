@@ -53,21 +53,27 @@ class Validator(ClassValidator):
 
             # if water and different boilings - cannot intersect serving with meltings
             if boiling_model1.line.name == LineName.WATER and boiling_model1 != boiling_model2:
-                validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
-                # # todo next: make properly
-                # if not boiling_model1.is_lactose:
-                #     _df = b1.props['boiling_group_df']
-                #     _df['is_lactose'] = _df['sku'].apply(lambda sku: sku.made_from_boilings[0].is_lactose)
-                #     _df = _df[~_df['is_lactose']]
-                #
-                #     if _df['kg'].sum() >= 1000:
-                #         validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
-                # elif boiling_model1.percent != boiling_model2.percent:
-                #     # 3.6, 3.3 - add extra 10 minutes
-                #     validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
-                # else:
-                #     # 3.3 Альче -> 3.3 Сакко
-                #     validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
+                # todo later: deprecated, delete
+                # validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
+                if not boiling_model1.is_lactose:
+                    _df = b1.props['boiling_group_df']
+                    _df['is_lactose'] = _df['sku'].apply(lambda sku: sku.made_from_boilings[0].is_lactose)
+                    if not _df['is_lactose'].any():
+                        if boiling_model1.percent == boiling_model2.percent:
+                            # 3.3 бл неполная -> 3.3
+                            validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-4)
+                        else:
+                            # 3.3 бл неполная -> 3.6
+                            validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                    else:
+                        # 3.3 бл полная -> 3.3/3.6
+                        validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                elif boiling_model1.percent != boiling_model2.percent:
+                    # 3.6, 3.3 - add extra 10 minutes
+                    validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                else:
+                    # 3.3 Альче Белзактозная -> 3.3 Сакко
+                    validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
 
             with code('there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors'):
                 mp1 = b1["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
