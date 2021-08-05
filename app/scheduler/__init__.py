@@ -10,3 +10,4 @@ from .contour_cleanings import *
 from .submit import *
 from .consolidated_schedule import *
 from .load_schedules import load_schedules
+from .load_properties import load_properties

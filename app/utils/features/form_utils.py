@@ -36,7 +36,7 @@ def fill_butter_sku_from_form(sku, form):
     return fill_mascarpone_sku_from_form(sku, form)
 
 
-def fill_milkproject_sku_from_form(sku, form):
+def fill_milk_project_sku_from_form(sku, form):
     return fill_mascarpone_sku_from_form(sku, form)
 
 

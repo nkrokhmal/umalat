@@ -5,8 +5,6 @@ def get_last_commit_name():
     process = subprocess.Popen(['git', 'log', 'master', '--format=%B', '-1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     last_commit_name = str(process.stdout.read()).lower()
 
-    print(last_commit_name)
-
     if "--no-tests" in last_commit_name or "--no-test" in last_commit_name:
         # todo: fast tests
         pass

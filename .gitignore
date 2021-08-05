@@ -46,8 +46,10 @@ coverage.xml
 .ropeproject
 
 # Django stuff:
-*.log
 *.pot
+
+# Temp files
+*.tmp
 
 # Pyc files
 **/*.pyc
@@ -60,8 +62,6 @@ app/data/dynamic
 app/scheduler/butter/tests/schedules
 app/scheduler/**/*.xlsx
 db/batch_numbers/data.json
-!tests/lazy_tester_logs/**/*.log
 **/schedules/*
 **/outputs/*
 research/akadaner/*xlsx
-tests/lazy_tester_logs/**

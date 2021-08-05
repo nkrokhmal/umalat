@@ -1,5 +1,7 @@
 import io
 from tests.conftest import client
+from app.imports.runtime import *
+from app.models import *
 from flask import url_for
 
 
@@ -13,6 +15,9 @@ def test_mozzarella_get_schedule(client):
 
 def test_mozzarella_post_schedule(client):
     filepath = client.config["TEST_MOZZARELLA"]
+    department_name = "Моцарельный цех"
+    BatchNumber.remove_department_batches(department_name)
+
     with client.test_client() as client:
         url = url_for("main.mozzarella_schedule", _external=False)
         data = {
@@ -28,4 +33,9 @@ def test_mozzarella_post_schedule(client):
         response = client.post(
             url, data=data, follow_redirects=True, content_type='multipart/form-data'
         )
-        assert response.status_code == 200
+        new_last_batch = BatchNumber.last_batch_department(department_name)
+        try:
+            assert response.status_code == 200
+            assert 0 < new_last_batch
+        finally:
+            BatchNumber.remove_department_batches(department_name)

@@ -2,7 +2,9 @@ from app.imports.runtime import *
 
 
 def cast_t(obj):
-    if isinstance(obj, int):
+    if obj is None:
+        return None
+    elif isinstance(obj, int):
         return obj
     elif isinstance(obj, time):
         return cast_t(cast_time(obj))
@@ -14,7 +16,7 @@ def cast_t(obj):
         elif obj.count(":") == 2:
             days, hours, minutes = obj.split(":")
         else:
-            raise Exception("Unknown format")
+            raise Exception(f"Unknown format: {obj}")
         minutes = int(days) * 288 * 5 + int(hours) * 60 + int(minutes)
         assert minutes % 5 == 0
         return minutes // 5
@@ -32,7 +34,8 @@ def cast_time(obj):
             return obj
     elif isinstance(obj, time):
         return cast_time("0:" + str(obj.hour).zfill(2) + ":" + str(obj.minute).zfill(2))
-    elif isinstance(obj, int):
+    elif utils.is_int_like(obj):
+        obj = int(obj)
         days = obj // 288
         hours = (obj // 12) % 24
         minutes = (obj % 12) * 5

@@ -41,7 +41,7 @@ class BaseScheduleTask(Generic[ModelType]):
     def update_boiling_schedule_task(self, batch_number):
         data_dir = create_dir(
             self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
-            "task"
+            flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()} {self.department}.csv")
         columns = ["batch", "sku", "code", "in_box", "kg", "boxes_count"]
@@ -79,7 +79,7 @@ class BaseScheduleTask(Generic[ModelType]):
     def update_total_schedule_task(self):
         data_dir = create_dir(
             self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
-            "task"
+            flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()}.csv")
         columns = ["sku", "code", "in_box", "kg", "boxes_count"]

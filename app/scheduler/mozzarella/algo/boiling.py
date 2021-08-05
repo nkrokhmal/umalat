@@ -10,6 +10,11 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
     m = BlockMaker("root")
 
     bt = utils.delistify(boiling_model.boiling_technologies, single=True)  # there is only one boiling technology is for every boiling model in mozzarella department
+
+    with code('termizator time'):
+        termizator_time = boiling_model.line.pouring_time * boiling_volume / boiling_model.line.output_ton
+        termizator_time = custom_round(termizator_time, 5, 'ceil')
+
     with m.block(
         "boiling",
         boiling_id=boiling_id,
@@ -18,8 +23,8 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
     ):
         with m.block("pouring"):
             with m.block("first"):
-                m.row("termizator", size=boiling_model.line.pouring_time // 5)
-                m.row("fermenting", size=bt.pouring_time // 5 - boiling_model.line.pouring_time // 5)
+                m.row("termizator", size=termizator_time // 5)
+                m.row("fermenting", size=bt.pouring_time // 5 - termizator_time // 5)
                 m.row("soldification", size=bt.soldification_time // 5)
                 m.row("cutting", size=bt.cutting_time // 5)
                 m.row("pumping_out", size=bt.pumping_out_time // 5)
@@ -32,34 +37,9 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
 
         with code('Steam consumption'):
             pass
-            # deprecated (2021.06.04). Steam consumption is not needed anymore
-            # with m.block("steams"):
-            #     m.row("steam_consumption", push_func=add_push,
-            #           x=0,
-            #           size=6,
-            #           value=1100)
-            #
-            #     if boiling_model.line.name == LineName.SALT:
-            #         m.row("steam_consumption", push_func=add_push,
-            #               x=m.root["boiling"]["pouring"]["first"]["pumping_out"].x[0] - 3,
-            #               size=3,
-            #               value=700)
 
     with code('Steam consumption'):
         pass
-        # deprecated (2021.06.04). Steam consumption is not needed anymore
-        # add steams to melting_and_packing
-        # value = 250 if boiling_model.line.name == LineName.WATER else 1200
-        # push(
-        #     melting_and_packing,
-        #     m.create_block(
-        #         "steam_consumption",
-        #         size=(melting_and_packing["melting"]["serving"].size[0] + melting_and_packing["melting"]["meltings"].size[0], 0),
-        #         value=value,
-        #         type="melting",
-        #     ),
-        #     push_func=add_push,
-        # )
 
     push(m.root["boiling"], melting_and_packing)
 

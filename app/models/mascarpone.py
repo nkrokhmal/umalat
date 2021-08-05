@@ -36,6 +36,7 @@ class MascarponeBoiling(Boiling):
     __mapper_args__ = {"polymorphic_identity": "mascarpone_boiling"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True)
+    is_lactose = mdb.Column(mdb.Boolean, default=False)
     flavoring_agent = mdb.Column(mdb.String)
     percent = mdb.Column(mdb.Integer)
 
@@ -64,10 +65,10 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     )
 
     @staticmethod
-    def create_name(line, weight, percent, flavoring_agent):
+    def create_name(line, weight, percent, flavoring_agent, is_lactose):
         boiling_name = ["{} кг".format(weight), percent, flavoring_agent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, {}".format(line, boiling_name)
+        return "Линия {}, {}, {}".format(line, boiling_name, "" if is_lactose else "без лактозы")
 
 
 boiling_technology_sourdough = mdb.Table(

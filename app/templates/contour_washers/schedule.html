@@ -11,12 +11,13 @@
 
 
 {% block page_content %}
+
 <div class="row">
     <div class="card card-body bg-white border-light shadow-sm mb-4">
-        <h4 class="h5 mb-4">Загрузите файл плана по варкам и выберите дату</h4>
+        <h4 class="h5 mb-4">Введите дату для подгрузки параметров</h4>
         <div class="row">
-            <form method="post" action="/contour_washers_schedule" enctype="multipart/form-data" class="mt-4">
-                {{ form.hidden_tag() }}
+            <form id="schedule_form">
+
                 <div class="row mb-4">
                     <div class="col-lg-6 col-sm-6">
                         <div class="col-md-12 mb-3">
@@ -25,74 +26,20 @@
                                 {{form.date(place_holder='date', class='form-control')}}
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Время окончания работы маслоцеха по умолчанию </label>
-                                {{form.butter_end_time(place_holder='butter_end_time', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Время окончания работы адыгейского цеха по умолчанию </label>
-                                {{form.adygea_end_time(place_holder='adygea_end_time', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Время окончания работы милкпроджекта по умолчанию </label>
-                                {{form.milk_project_end_time(place_holder='milk_project_end_time', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Количество варок в адыгейском цехе вчера (используется для подсчета скотты) </label>
-                                {{form.adygea_n_boilings(place_holder='adygea_n_boilings', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Количество варок в милкпроджект вчера (используется для подсчета скотты) </label>
-                                {{form.milk_project_n_boilings(place_holder='milk_project_n_boilings', class='form-control')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Завтра нерабочий день </label>
-                                {{form.is_not_working_day(place_holder='is_not_working_day', checked=True)}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Линия отгрузки </label>
-                                {{form.shipping_line(place_holder='shipping_line', checked=True)}}
-                            </div>
-                        </div>
                     </div>
-                    <button type="submit" name="submit" class="btn btn-block btn-primary">Отправить</button>
                 </div>
             </form>
-        </div>
+            <form id="result" action="/contour_washers_schedule" method="GET" onclick="submitForms()">
+                <button type="button" name="submit_file" class="btn btn-block btn-primary">Отправить</button>
+            </form>
     </div>
 </div>
 
-{% if filename %}
-    <script>
-        function download(url, filename, date) {
-        fetch(url).then(function(t) {
-            return t.blob().then((b)=>{
-                var a = document.createElement("a");
-                a.href = URL.createObjectURL(b);
-                a.setAttribute("download", filename);
-                a.setAttribute("file_name", filename);
-                a.setAttribute("date", date);
-                a.click();
-            }
-            );
-        });
-        }
-        var url = "download_contour_washers?file_name=" + "{{filename}}" + "&date=" + "{{date}}";
-        download(url,"{{filename}}", "{{date}}");
-    </script>
-{% endif %}
+<script>
+    submitForms = function(){
+        document.getElementById("schedule_form").submit();
+    }
+</script>
+
 
 {% endblock %}

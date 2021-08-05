@@ -77,6 +77,14 @@ class Department(mdb.Model):
     )
     washer = mdb.relationship("Washer", backref=backref("department", uselist=False))
 
+    @staticmethod
+    def get_by_name(department_name):
+        return (
+            mdb.session.query(Department)
+                .filter(Department.name == department_name)
+                .first()
+        )
+
     def serialize(self):
         return {"id": self.id, "name": self.name}
 
@@ -321,12 +329,30 @@ class BatchNumber(mdb.Model):
         }
 
     @staticmethod
-    def last_batch_number(date, department_name):
-        department = (
-            mdb.session.query(Department)
-            .filter(Department.name == department_name)
-            .first()
+    def remove_department_batches(department_name):
+        department = Department.get_by_name(department_name)
+        department_batches = mdb.session.query(BatchNumber).filter(BatchNumber.department_id == department.id).all()
+        for batch in department_batches:
+            mdb.session.delete(batch)
+        mdb.session.commit()
+
+    @staticmethod
+    def last_batch_department(department_name):
+        department = Department.get_by_name(department_name)
+        last_batch = (
+            mdb.session.query(BatchNumber)
+                .filter(BatchNumber.department_id == department.id)
+                .order_by(BatchNumber.datetime.desc())
+                .first()
         )
+        if last_batch:
+            return last_batch.end_number
+        else:
+            return 0
+
+    @staticmethod
+    def last_batch_number(date, department_name):
+        department = Department.get_by_name(department_name)
         last_batch = (
             mdb.session.query(BatchNumber)
             .filter(BatchNumber.department_id == department.id)

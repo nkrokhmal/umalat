@@ -16,11 +16,7 @@ def create_app(config_name="default"):
     for local_path in [
         config.BATCH_NUMBERS_DIR,
         config.UPLOAD_TMP_FOLDER,
-        config.STATS_FOLDER,
-        config.BOILING_PLAN_FOLDER,
         config.SKU_PLAN_FOLDER,
-        config.SCHEDULE_PLAN_FOLDER,
-        config.TOTAL_SCHEDULE_TASK_FOLDER,
     ]:
         utils.makedirs(config.abs_path(local_path) + "/")
 

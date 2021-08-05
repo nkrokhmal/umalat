@@ -1,0 +1,641 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Список расписаний{% endblock %}
+{% block page_content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Файлы расписания</h1>
+        </div>
+    </div>
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Моцарелла</th>
+                        <th class="border-0">Рикотта</th>
+                        <th class="border-0">Маскарпоне</th>
+                        <th class="border-0">Масло</th>
+                        <th class="border-0">Милкпроджект</th>
+                        <th class="border-0">Адыгейский</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key in data.keys() %}
+                        <tr>
+                            <td class="border-0">{{loop.index + (pagination.page - 1) * pagination.per_page}}</td>
+
+                            <td class="border-0">
+                                {% if data[key].get("моцарелла", "") != "" %}
+                                    <a href="#show_mozzarella" class="show_mozzarella"
+                                       data-date="{{key}}" data-filename="{{data[key].get('моцарелла', {}).get('filename', '')}}"
+                                       data-approved="{{data[key].get('моцарелла', {}).get('is_approved', False)}}" data-toggle="modal" >
+                                        {% if data[key].get('моцарелла', {}).get('is_approved', False) %}
+                                            <span style="color:green" class="fas fa-check mr-2"></span>
+                                        {% endif %}
+                                        <small>Моцарелла {{key}}</small>
+                                    </a>
+                                {% else %}
+                                    <a class="border-0"><a class="small"></a></a>
+                                {% endif %}
+                            </td>
+
+                            <td class="border-0">
+                                {% if data[key].get("рикотта", "") != "" %}
+                                    <a href="#show_ricotta" class="show_ricotta"
+                                       data-date="{{key}}" data-filename="{{data[key].get('рикотта', {}).get('filename', '')}}"
+                                       data-approved="{{data[key].get('рикотта', {}).get('is_approved', False)}}" data-toggle="modal" >
+                                        {% if data[key].get('рикотта', {}).get('is_approved', False) %}
+                                            <span style="color:green" class="fas fa-check mr-2"></span>
+                                        {% endif %}
+                                        <small>Рикотта {{key}}</small>
+                                    </a>
+                                {% else %}
+                                    <a class="border-0"><a class="small"></a></a>
+                                {% endif %}
+                            </td>
+
+                            <td class="border-0">
+                                {% if data[key].get("маскарпоне", "") != "" %}
+                                    <a href="#show_mascarpone" class="show_mascarpone"
+                                       data-date="{{key}}" data-filename="{{data[key].get('маскарпоне', {}).get('filename', '')}}"
+                                       data-approved="{{data[key].get('маскарпоне', {}).get('is_approved', False)}}" data-toggle="modal" >
+                                        {% if data[key].get('маскарпоне', {}).get('is_approved', False) %}
+                                            <span style="color:green" class="fas fa-check mr-2"></span>
+                                        {% endif %}
+                                        <small>Маскарпоне {{key}}</small>
+                                    </a>
+                                {% else %}
+                                    <a class="border-0"><a class="small"></a></a>
+                                {% endif %}
+                            </td>
+
+                            <td class="border-0">
+                                {% if data[key].get("масло", "") != "" %}
+                                    <a href="#show_butter" class="show_butter"
+                                       data-date="{{key}}" data-filename="{{data[key].get('масло', {}).get('filename', '')}}"
+                                       data-approved="{{data[key].get('масло', {}).get('is_approved', False)}}" data-toggle="modal" >
+                                        {% if data[key].get('масло', {}).get('is_approved', False) %}
+                                            <span style="color:green" class="fas fa-check mr-2"></span>
+                                        {% endif %}
+                                        <small>Масло {{key}}</small>
+                                    </a>
+                                {% else %}
+                                    <a class="border-0"><a class="small"></a></a>
+                                {% endif %}
+                            </td>
+
+                            <td class="border-0">
+                                {% if data[key].get("милкпроджект", "") != "" %}
+                                    <a href="#show_milk_project" class="show_milk_project"
+                                       data-date="{{key}}" data-filename="{{data[key].get('милкпроджект', {}).get('filename', '')}}"
+                                       data-approved="{{data[key].get('милкпроджект', {}).get('is_approved', False)}}" data-toggle="modal" >
+                                        {% if data[key].get('милкпроджект', {}).get('is_approved', False) %}
+                                            <span style="color:green" class="fas fa-check mr-2"></span>
+                                        {% endif %}
+                                        <small>Милкпроджект {{key}}</small>
+                                    </a>
+                                {% else %}
+                                    <a class="border-0"><a class="small"></a></a>
+                                {% endif %}
+                            </td>
+
+                            <td class="border-0">
+                                {% if data[key].get("адыгейский", "") != "" %}
+                                    <a href="#show_adygea" class="show_adygea"
+                                       data-date="{{key}}" data-filename="{{data[key].get('адыгейский', {}).get('filename', '')}}"
+                                       data-approved="{{data[key].get('адыгейский', {}).get('is_approved', False)}}" data-toggle="modal" >
+                                        {% if data[key].get('адыгейский', {}).get('is_approved', False) %}
+                                            <span style="color:green" class="fas fa-check mr-2"></span>
+                                        {% endif %}
+                                        <small>Адыгейский {{key}}</small>
+                                    </a>
+                                {% else %}
+                                    <a class="border-0"><a class="small"></a></a>
+                                {% endif %}
+                            </td>
+
+                            <div id="show_mozzarella" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответсвтвующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-edit" id="testId">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="show_ricotta" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответсвтвующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-edit" id="testId2">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="show_mascarpone" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-edit" id="testId3">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="show_butter" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-edit" id="testId4">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="show_milk_project" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-edit" id="testId5">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="show_adygea" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
+                                                <input type="submit" class="btn btn-primary btn-edit" id="edit_adygea">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="card-footer px-3 border-0 d-flex align-items-center justify-content-between">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination mb-0">
+                        {% if pagination.has_prev %}
+                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.download_schedules', page=pagination.page - 1) }}">Предыдущие</a></li>
+                        {% else %}
+                          <li class="page-item"><a class="page-link btn disabled" href="#">Предыдущие</a></li>
+                        {% endif %}
+                        {% if pagination.has_next %}
+                          <li class="page-item"> <a class="page-link" href="{{ url_for('main.download_schedules', page=pagination.page + 1) }}">Следующие</a></li>
+                        {% else %}
+                          <li class="page-item"><a class="page-link btn disabled" href="#">Следующие</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+	$(function () {
+		$(".show_mozzarella").click(function () {
+		    console.log("Started");
+			var filename = $(this).data('filename');
+			var date = $(this).data('date');
+			var approved = $(this).data('approved');
+			var name = ""
+
+			if (approved == "True"){
+			    name = "Удалить из утвержденного";
+			}
+            else {
+                name = "Утвердить";
+            }
+
+			$(".modal-footer #testId").val(name);
+			console.log("Date 1" + date);
+			$(".btn.btn-primary.btn-download").click(function(){
+			    console.log("Date 2" + date);
+			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
+			    console.log(url_download);
+			    $.ajax(
+				{
+					url: url_download,
+					type: 'GET',
+					success: function(res)
+					{
+					    window.location = url_download;
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+				$('#show_mozzarella').modal('hide');
+            });
+
+            $(".btn.btn-primary.btn-edit").click(function(){
+                var url_edit = "";
+                if (name == "Утвердить"){
+			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+                }
+                else
+                {
+                    url_edit="/disprove?file_name=" + filename + "&date=" + date;
+                }
+                console.log(url_edit);
+			    $.ajax(
+				{
+					url: url_edit,
+					type: 'POST',
+					success: function(res)
+					{
+						console.log(res)
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+
+            });
+
+		});
+	});
+
+
+	$(function () {
+		$(".show_ricotta").click(function () {
+		    console.log("Started");
+			var filename = $(this).data('filename');
+			var date = $(this).data('date');
+			var approved = $(this).data('approved');
+			var name = ""
+
+			if (approved == "True"){
+			    name = "Удалить из утвержденного";
+			}
+            else {
+                name = "Утвердить";
+            }
+
+			$(".modal-footer #testId2").val(name);
+			$(".btn.btn-primary.btn-download").click(function(){
+			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
+			    console.log(url_download);
+			    $.ajax(
+				{
+					url: url_download,
+					type: 'GET',
+					success: function(res)
+					{
+					    window.location = url_download;
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+				$('#show_ricotta').modal('hide');
+            });
+
+            $(".btn.btn-primary.btn-edit").click(function(){
+                var url_edit = "";
+                if (name == "Утвердить"){
+			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+                }
+                else
+                {
+                    url_edit="/disprove?file_name=" + filename + "&date=" + date;
+                }
+                console.log(url_edit);
+			    $.ajax(
+				{
+					url: url_edit,
+					type: 'POST',
+					success: function(res)
+					{
+						console.log(res)
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+
+            });
+
+		});
+	});
+
+
+	$(function () {
+		$(".show_mascarpone").click(function () {
+		    console.log("Started");
+			var filename = $(this).data('filename');
+			var date = $(this).data('date');
+			var approved = $(this).data('approved');
+			var name = ""
+
+			if (approved == "True"){
+			    name = "Удалить из утвержденного";
+			}
+            else {
+                name = "Утвердить";
+            }
+
+			$(".modal-footer #testId3").val(name);
+			$(".btn.btn-primary.btn-download").click(function(){
+			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
+			    console.log(url_download);
+			    $.ajax(
+				{
+					url: url_download,
+					type: 'GET',
+					success: function(res)
+					{
+					    window.location = url_download;
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+				$('#show_mascarpone').modal('hide');
+            });
+
+            $(".btn.btn-primary.btn-edit").click(function(){
+                var url_edit = "";
+                if (name == "Утвердить"){
+			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+                }
+                else
+                {
+                    url_edit="/disprove?file_name=" + filename + "&date=" + date;
+                }
+                console.log(url_edit);
+			    $.ajax(
+				{
+					url: url_edit,
+					type: 'POST',
+					success: function(res)
+					{
+						console.log(res)
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+
+            });
+
+		});
+	});
+
+	$(function () {
+		$(".show_butter").click(function () {
+		    console.log("Started");
+			var filename = $(this).data('filename');
+			var date = $(this).data('date');
+			var approved = $(this).data('approved');
+			var name = ""
+
+			if (approved == "True"){
+			    name = "Удалить из утвержденного";
+			}
+            else {
+                name = "Утвердить";
+            }
+
+			$(".modal-footer #testId4").val(name);
+			$(".btn.btn-primary.btn-download").click(function(){
+			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
+			    console.log(url_download);
+			    $.ajax(
+				{
+					url: url_download,
+					type: 'GET',
+					success: function(res)
+					{
+					    window.location = url_download;
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+				$('#show_butter').modal('hide');
+            });
+
+            $(".btn.btn-primary.btn-edit").click(function(){
+                var url_edit = "";
+                if (name == "Утвердить"){
+			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+                }
+                else
+                {
+                    url_edit="/disprove?file_name=" + filename + "&date=" + date;
+                }
+                console.log(url_edit);
+			    $.ajax(
+				{
+					url: url_edit,
+					type: 'POST',
+					success: function(res)
+					{
+						console.log(res)
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+
+            });
+
+		});
+	});
+
+	$(function () {
+		$(".show_milk_project").click(function () {
+		    console.log("Started");
+			var filename = $(this).data('filename');
+			var date = $(this).data('date');
+			var approved = $(this).data('approved');
+			var name = ""
+
+			if (approved == "True"){
+			    name = "Удалить из утвержденного";
+			}
+            else {
+                name = "Утвердить";
+            }
+
+			$(".modal-footer #testId5").val(name);
+			$(".btn.btn-primary.btn-download").click(function(){
+			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
+			    console.log(url_download);
+			    $.ajax(
+				{
+					url: url_download,
+					type: 'GET',
+					success: function(res)
+					{
+					    window.location = url_download;
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+				$('#show_milk_project').modal('hide');
+            });
+
+            $(".btn.btn-primary.btn-edit").click(function(){
+                var url_edit = "";
+                if (name == "Утвердить"){
+			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+                }
+                else
+                {
+                    url_edit="/disprove?file_name=" + filename + "&date=" + date;
+                }
+                console.log(url_edit);
+			    $.ajax(
+				{
+					url: url_edit,
+					type: 'POST',
+					success: function(res)
+					{
+						console.log(res)
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+
+            });
+
+		});
+	});
+
+	$(function () {
+		$(".show_adygea").click(function () {
+			var filename = $(this).data('filename');
+			var date = $(this).data('date');
+			var approved = $(this).data('approved');
+			var name = ""
+
+			if (approved == "True"){
+			    name = "Удалить из утвержденного";
+			}
+            else {
+                name = "Утвердить";
+            }
+
+			$(".modal-footer #edit_adygea").val(name);
+			$(".btn.btn-primary.btn-download").click(function(){
+			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
+			    $.ajax(
+				{
+					url: url_download,
+					type: 'GET',
+					success: function(res)
+					{
+					    window.location = url_download;
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+				$('#show_milk_project').modal('hide');
+            });
+
+            $(".btn.btn-primary.btn-edit").click(function(){
+                var url_edit = "";
+                if (name == "Утвердить"){
+			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+                }
+                else
+                {
+                    url_edit="/disprove?file_name=" + filename + "&date=" + date;
+                }
+                console.log(url_edit);
+			    $.ajax(
+				{
+					url: url_edit,
+					type: 'POST',
+					success: function(res)
+					{
+						console.log(res)
+					},
+					error: function(error) {
+						  console.log(error);
+					}
+				});
+
+            });
+
+		});
+	});
+</script>
+{% endblock %}

@@ -8,7 +8,7 @@ from .ricotta import *
 from .mascarpone import *
 from .additional import *
 from .butter import *
-from .milkproject import *
+from .milk_project import *
 from .adygea import *
 from .contour_washers import *
 from .approved import *

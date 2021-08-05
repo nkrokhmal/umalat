@@ -48,7 +48,7 @@ def draw_skus(wb, data_sku):
             cur_i,
             [
                 group_sku.name,
-                group_sku.made_from_boilings[0].to_str(),
+                group_sku.group.name,
                 group_sku.made_from_boilings[0].output_kg,
             ],
             set_border=False,
@@ -83,6 +83,7 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
             c = [COLUMNS[column] for column in columns]
             values.append(dict(zip(c, v)))
         empty_columns = [
+            COLUMNS["group"],
             COLUMNS["name"],
             COLUMNS["output"],
             COLUMNS["boiling_count"],
@@ -116,6 +117,7 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
         if v[COLUMNS["name"]] == "-":
             pass
         else:
+            excel_client.color_cell(col=COLUMNS["group"].col, row=cur_row)
             excel_client.color_cell(col=COLUMNS["output"].col, row=cur_row)
             excel_client.color_cell(col=COLUMNS["total_output"].col, row=cur_row)
 

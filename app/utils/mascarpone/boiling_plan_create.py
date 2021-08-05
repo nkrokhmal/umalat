@@ -45,10 +45,11 @@ def add_fields(result, type):
 def mascarpone_boiling_plan_create(df):
     df["plan"] = df["plan"].apply(lambda x: round(x))
     df["percent"] = df["sku"].apply(lambda x: x.made_from_boilings[0].percent)
+    df["is_lactose"] = df["sku"].apply(lambda x: x.made_from_boilings[0].is_lactose)
     df["weight"] = df["sku"].apply(lambda x: round(x.weight_netto))
     df["flavoring_agent"] = df["sku"].apply(
         lambda x: x.made_from_boilings[0].flavoring_agent
-        if isinstance(x, MascarponeSKU)
+        if isinstance(x, MascarponeSKU) or isinstance(x, CreamCheeseSKU)
         else ""
     )
     df["group"] = df["sku"].apply(lambda x: x.group.name)
@@ -66,11 +67,15 @@ def mascarpone_boiling_plan_create(df):
 
 
 def mascarpone_proceed_order(order, df, boilings, output_tons):
+    print(order)
     df_filter = df[
         (df["group"] == order.group)
         & (
             order.flavoring_agent is None
             or df["flavoring_agent"] == order.flavoring_agent
+        )
+        & (
+            df["is_lactose"] == order.is_lactose
         )
     ]
     if not df_filter.empty:
@@ -89,7 +94,15 @@ def mascarpone_proceed_order(order, df, boilings, output_tons):
 
 
 def cream_cheese_proceed_order(order, df, boilings):
-    df_filter = df[(df["group"].isin(order.groups))].sort_values(
+    print(order)
+    df_filter = df[
+        (df["group"].isin(order.groups)) &
+        (df["is_lactose"] == order.is_lactose) &
+        (
+            order.flavoring_agent is None
+            or df["flavoring_agent"] == order.flavoring_agent
+        )
+    ].sort_values(
         by=["group", "percent"]
     )
 
@@ -122,10 +135,11 @@ def handle_mascarpone(df):
     output_tons = [max(output_tons) + min(output_tons), 2 * min(output_tons)]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
-    Order = collections.namedtuple("Collection", "flavoring_agent, group")
+    Order = collections.namedtuple("Collection", "flavoring_agent, is_lactose, group")
     orders = [
-        Order("", "Маскарпоне"),
-        Order("Шоколад", "Маскарпоне"),
+        Order("", True, "Маскарпоне"),
+        Order("", False, "Маскарпоне"),
+        Order("Шоколад", False, "Маскарпоне"),
     ]
     for order in orders:
         boilings_mascarpone = mascarpone_proceed_order(
@@ -139,9 +153,9 @@ def handle_cream(df):
     output_tons = [250]
     boilings_mascarpone = Boilings(max_iter_weight=output_tons)
 
-    Order = collections.namedtuple("Collection", "flavoring_agent, group")
+    Order = collections.namedtuple("Collection", "flavoring_agent, is_lactose, group")
     orders = [
-        Order("", "Сливки"),
+        Order("", True, "Сливки"),
     ]
     for order in orders:
         boilings_mascarpone = mascarpone_proceed_order(
@@ -153,10 +167,14 @@ def handle_cream(df):
 
 def handle_cream_cheese(df):
     boilings_cream_cheese = Boilings()
-    Order = collections.namedtuple("Collection", "groups")
+    Order = collections.namedtuple("Collection", "flavoring_agent, is_lactose, groups")
     orders = [
-        Order(["Кремчиз"]),
-        Order(["Робиола", "Творожный"]),
+        Order("", False, ["Кремчиз"]),
+        Order("", True, ["Кремчиз"]),
+        Order("Паприка", True, ["Кремчиз"]),
+        Order("Томаты", True, ["Кремчиз"]),
+        Order("Травы", True, ["Кремчиз"]),
+        Order("", True, ["Робиола", "Творожный"]),
     ]
     for order in orders:
         boilings_cream_cheese = cream_cheese_proceed_order(

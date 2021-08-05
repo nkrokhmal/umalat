@@ -1,11 +1,11 @@
 from app.imports.runtime import *
 
-from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
+from openpyxl.utils.cell import column_index_from_string
 
 from app.utils.features.db_utils import sku_is_rubber
 from app.utils.features.openpyxl_wrapper import ExcelBlock
 from collections import namedtuple
-from app.models import MozzarellaSKU, MozzarellaBoiling, FormFactor
+from app.models import MozzarellaSKU, MozzarellaBoiling, FormFactor, MozzarellaLine
 
 Cell = namedtuple("Cell", "col, col_name")
 
@@ -98,6 +98,7 @@ def get_colour_by_name(sku_name, skus):
 
 def draw_boiling_plan(df, df_extra, wb):
     skus = db.session.query(MozzarellaSKU).all()
+    line_kg = db.session.query(MozzarellaLine).all()[0].input_ton
     form_factors = db.session.query(FormFactor).all()
     data_sku = {
         "Вода": [x for x in skus if x.made_from_boilings[0].boiling_type == "water"],
@@ -177,7 +178,7 @@ def draw_boiling_plan(df, df_extra, wb):
                 excel_client.draw_cell(
                     row=cur_row,
                     col=COLUMNS["boiling_configuration"].col,
-                    value=8000,
+                    value=line_kg,
                     set_border=False,
                 )
             else:
@@ -196,7 +197,7 @@ def draw_boiling_plan(df, df_extra, wb):
 
 
 def draw_boiling_plan_merged(df, wb):
-
+    line_kg = db.session.query(MozzarellaLine).all()[0].input_ton
     skus = db.session.query(MozzarellaSKU).all()
     sheet_name = 'План варок'
 
@@ -260,7 +261,7 @@ def draw_boiling_plan_merged(df, wb):
                 set_border=False,
             )
         else:
-            configuration = int(8000 * cur_configuration / v[COLUMNS["boiling_volume"]])
+            configuration = int(line_kg * cur_configuration / v[COLUMNS["boiling_volume"]])
         cur_row += 1
 
     return wb
