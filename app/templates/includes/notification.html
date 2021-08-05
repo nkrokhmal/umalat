@@ -1,0 +1,12 @@
+<div class="row" id="notification_block">
+    <div class="container">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            {% if category == 'warning' %}
+                <div class="alert alert-warning">
+                    <button type="button" class="close" data-dismiss="alert" style="position:absolute; top:0; right:0;">&times;</button>
+                    {{ message }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
