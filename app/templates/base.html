@@ -71,6 +71,19 @@
                     {% block header %}
                     {% endblock header %}
 
+                    <div class="row">
+                        <div class="container">
+                            {% for category, message in get_flashed_messages(with_categories=true) %}
+                                {% if category == 'warning' %}
+                                    <div class="alert alert-warning">
+                                        <button type="button" class="close" data-dismiss="alert" style="position:absolute; top:0; right:0;">&times;</button>
+                                        {{ message }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
                     {% block page_content %}
                     {% endblock page_content %}
                 </main>
