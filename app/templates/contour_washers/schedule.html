@@ -11,249 +11,34 @@
 
 
 {% block page_content %}
-<script src="https://yastatic.net/jquery/3.3.1/jquery.min.js"></script>
-<style>
-    .accordion {
-      background-color: rgb(225, 253, 255);
-      color: #444;
-      cursor: pointer;
-      padding: 18px;
-      width: 100%;
-      border: none;
-      text-align: left;
-      outline: none;
-      font-size: 18px;
-      transition: 0.4s;
-    }
-
-    .active, .accordion:hover {
-      background-color: #ccc;
-    }
-
-    .ul>li
-    {
-        margin: 5px;
-        font-size: 14px;
-    }
-
-    .panel {
-      padding: 0 20px;
-      max-height: 0;
-      margin: 10px;
-      overflow: hidden;
-      transition: max-height 0.2s ease-out;
-    }
-</style>
 
 <div class="row">
     <div class="card card-body bg-white border-light shadow-sm mb-4">
-        {% if params %}
-            <h4 class="h5 mb-4">Заполните необходимые параметры</h4>
-            <div class="row">
-                <form id="main_form">
-                    {{ form.hidden_tag() }}
-                    <div class="row mb-4">
+        <h4 class="h5 mb-4">Введите дату для подгрузки параметров</h4>
+        <div class="row">
+            <form id="schedule_form">
+
+                <div class="row mb-4">
+                    <div class="col-lg-6 col-sm-6">
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Дата</label>
-                                {{form.date(place_holder='date', class='form-control', readonly=True)}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Завтра нерабочий день </label>
-                                {{form.is_not_working_day(place_holder='is_not_working_day', checked=True)}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Линия отгрузки </label>
-                                {{form.shipping_line(place_holder='shipping_line', checked=True)}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Был ли вчера брус 1.2 </label>
-                                {{form.is_bar12_present_yesterday(place_holder='is_bar12_present_yesterday', checked=False)}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Количество варок в рикоттном цехе вчера (используется для подсчета скотты)</label>
-                                {{form.ricotta_n_boilings_yesterday(place_holder='ricotta_n_boilings_yesterday')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Количество варок в милкпроджект вчера (используется для подсчета скотты)</label>
-                                {{form.milk_project_n_boilings_yesterday(place_holder='milk_project_n_boilings_yesterday')}}
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Количество варок в адыгейском цехе вчера (используется для подсчета скотты)</label>
-                                {{form.adygea_n_boilings_yesterday(place_holder='adygea_n_boilings_yesterday')}}
-                            </div>
-                        </div>
-
-                    </div>
-                </form>
-
-                <form id="mozzarella_form">
-                    <div class="col-md-12 mb-3">
-                        <div class="col-md-12 col-sm-12 col-xs-12">
-                            <button class="accordion" type="button"><a>Параметры моцареллы</a></button>
-                            <div class="panel">
-                                {{ wtf.quick_form(mozzarella_form) }}
+                                <label>Введите дату</label>
+                                {{form.date(place_holder='date', class='form-control')}}
                             </div>
                         </div>
                     </div>
-                </form>
-
-                <form id="ricotta_form">
-                    <div class="col-md-12 mb-3">
-                        <div class="col-md-12 col-sm-12 col-xs-12">
-                            <button class="accordion" type="button"><a>Параметры рикотты</a></button>
-                            <div class="panel">
-                                {{ wtf.quick_form(ricotta_form) }}
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <form id="mascarpone_form">
-                    <div class="col-md-12 mb-3">
-                        <div class="col-md-12 col-sm-12 col-xs-12">
-                            <button class="accordion" type="button"><a>Параметры маскарпоне</a></button>
-                            <div class="panel">
-                                {{ wtf.quick_form(mascarpone_form) }}
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <form id="butter_form">
-                    <div class="col-md-12 mb-3">
-                        <div class="col-md-12 col-sm-12 col-xs-12">
-                            <button class="accordion" type="button"><a>Параметры масла</a></button>
-                            <div class="panel">
-                                {{ wtf.quick_form(butter_form) }}
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <form id="milk_project_form">
-                    <div class="col-md-12 mb-3">
-                        <div class="col-md-12 col-sm-12 col-xs-12">
-                            <button class="accordion" type="button"><a>Параметры милкпроджекта</a></button>
-                            <div class="panel">
-                                {{ wtf.quick_form(milk_project_form) }}
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <form id="adygea_form">
-                    <div class="col-md-12 mb-3">
-                        <div class="col-md-12 col-sm-12 col-xs-12">
-                            <button class="accordion" type="button"><a>Параметры адыгейского</a></button>
-                            <div class="panel">
-                                {{ wtf.quick_form(adygea_form) }}
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <form id="result" action="/contour_washers_schedule" method="POST" onsubmit="merge(); return true;">
-                    <button type="submit" name="submit_file" class="btn btn-block btn-primary">Отправить</button>
-                </form>
-
-                <form method="post" action="/contour_washers_schedule" enctype="multipart/form-data" class="mt-4" id="result2" onsubmit="merge()"; return true;>
-                    <input type="button" name="submit_file" value="Click Me!" />
-                </form>
-
-            </div>
-        {% else %}
-            <h4 class="h5 mb-4">Введите дату для подгрузки параметров</h4>
-            <div class="row">
-                <form method="post" action="/contour_washers_schedule" enctype="multipart/form-data" class="mt-4">
-                    {{ form.hidden_tag() }}
-                    <div class="row mb-4">
-                        <div class="col-lg-6 col-sm-6">
-                            <div class="col-md-12 mb-3">
-                                <div class="form-group">
-                                    <label>Введите дату</label>
-                                    {{form.date(place_holder='date', class='form-control')}}
-                                </div>
-                            </div>
-
-                            <button type="submit" name="submit_params" class="btn btn-block btn-primary">Подгрузить параметры</button>
-                        </div>
-                    </div>
-                </form>
-            {% endif %}
+                </div>
+            </form>
+            <form id="result" action="/contour_washers_schedule" method="GET" onclick="submitForms()">
+                <button type="button" name="submit_file" class="btn btn-block btn-primary">Отправить</button>
+            </form>
     </div>
 </div>
 
-{% if filename %}
-    <script>
-        function download(url, filename, date) {
-        fetch(url).then(function(t) {
-            return t.blob().then((b)=>{
-                var a = document.createElement("a");
-                a.href = URL.createObjectURL(b);
-                a.setAttribute("download", filename);
-                a.setAttribute("file_name", filename);
-                a.setAttribute("date", date);
-                a.click();
-            }
-            );
-        });
-        }
-        var url = "download_contour_washers?file_name=" + "{{filename}}" + "&date=" + "{{date}}";
-        download(url,"{{filename}}", "{{date}}");
-    </script>
-{% endif %}
-
-
-<script>
-    src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'
-</script>
-
-<script>
-
-    var acc = document.getElementsByClassName("accordion");
-    var i;
-
-    for (i = 0; i < acc.length; i++) {
-      acc[i].addEventListener("click", function() {
-        this.classList.toggle("active");
-        var panel = this.nextElementSibling;
-        if (panel.style.maxHeight) {
-          panel.style.maxHeight = null;
-        } else {
-          panel.style.maxHeight = panel.scrollHeight + "px";
-        }
-      });
-    }
-</script>
-
-<script type="text/javascript">
-    function merge() {
-        $result = $("#result");
-        $("#mozzarella_form input, #ricotta_form input, #mascarpone_form input, #butter_form input, #milk_project_form input, #adygea_form input, #main_form input").each(function() {
-            $result.append("<input type='hidden' name='"+$(this).attr('name')+"' value='"+$(this).val()+"' />");
-        });
-    }
-</script>
-
 <script>
     submitForms = function(){
-    console.log(document.forms);
-    document.getElementById("mozzarella_form").submit();
-    document.getElementById("ricotta_form").submit();
-}
+        document.getElementById("schedule_form").submit();
+    }
 </script>
 
 
