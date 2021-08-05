@@ -1,4 +1,6 @@
 import subprocess
+import sys
+import os
 
 
 def get_last_commit_name():
@@ -15,4 +17,7 @@ def get_last_commit_name():
 
 
 if __name__ == "__main__":
+    current_path = os.getcwd()
+    if current_path not in sys.path:
+        sys.path.append(current_path)
     get_last_commit_name()
