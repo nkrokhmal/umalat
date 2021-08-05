@@ -66,6 +66,7 @@ notifiers = "1.2.1"
 Flask-Login = "^0.5.0"
 Flask-RQ2 = "^18.3"
 pyTelegramBotAPI = "^3.8.1"
+pydantic = "^1.8.2"
 
 [tool.poetry.dev-dependencies]
 
