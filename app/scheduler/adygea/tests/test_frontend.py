@@ -16,7 +16,7 @@ def test_batch():
         config.abs_path("app/data/static/samples/inputs/by_department/adygea/*.xlsx")
     )
     fns = [fn for fn in fns if "$" not in fn]
-    for fn in tqdm.tqdm(fns):
+    for fn in utils.tqdm(fns, desc=lambda v: v):
         _test(fn, open_file=False)
 
 
