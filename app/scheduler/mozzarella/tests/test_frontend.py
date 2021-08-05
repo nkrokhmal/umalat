@@ -20,7 +20,7 @@ def _test(fn, open_file=False):
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
     outputs = run_mozzarella(fn, open_file=open_file)
     utils.lazy_tester.log(outputs["schedule"])
-    utils.lazy_tester.assert_logs(reset=True)
+    utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
