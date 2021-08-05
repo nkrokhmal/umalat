@@ -10,7 +10,7 @@
                             <img class="img-fluid w-75" src="/static/assets/img/illustrations/404.svg" alt="404 not found">
                             <h1 class="mt-5">Страница <span class="font-weight-bolder text-primary">не найдена</span></h1>
                             <p class="lead my-4">Вы перешли по несуществующей ссылке. Если Вы уверены, что сслыка правильная - напишите разработчикам.</p>
-                            <a class="btn btn-primary animate-hover" href="/"><i class="fas fa-chevron-left mr-3 pl-2 animate-left-3"></i>Вернуться на домашнюю страницу</a>
+                            <a class="btn btn-primary animate-hover" onclick="goBack()"><i class="fas fa-chevron-left mr-3 pl-2 animate-left-3"></i>Вернуться назад</a>
                         </div>
                     </div>
                 </div>
@@ -20,5 +20,10 @@
 
 {% endblock page_content %}
 
-<!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<script>
+    function goBack() {
+        window.history.back()
+    }
+</script>
+{% endblock javascripts %}
