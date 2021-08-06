@@ -232,9 +232,7 @@ def make_boilings_parallel_dynamic(boiling_group_df, first_boiling_id=1):
     grouped_df.pop("original_index")
 
     grouped_df["left"] = grouped_df["kg"]
-
     form_factors = utils.remove_duplicates(grouped_df["bff"])
-
     cur_form_factor = form_factors[0]
     cur_boiling_df = grouped_df[grouped_df["bff"] == cur_form_factor]
     for i, boiling_volume in enumerate(boiling_volumes):
