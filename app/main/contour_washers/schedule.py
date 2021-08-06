@@ -60,7 +60,7 @@ def contour_washers_schedule():
                 yesterday_properties = load_properties(yesterday_schedules)
 
                 if "mozzarella" in yesterday_schedules:
-                    main_form.is_bar12_present_yesterday.data = yesterday_properties[
+                    main_form.molder.data = yesterday_properties[
                         "mozzarella"
                     ].bar12_present
                 else:
@@ -180,8 +180,8 @@ def contour_washers_schedule():
                 input_tanks=input_tanks,
                 is_tomorrow_day_off=utils.cast_bool(main_form.is_not_working_day.data),
                 shipping_line=utils.cast_bool(main_form.shipping_line.data),
-                is_bar12_present=utils.cast_bool(
-                    main_form.is_bar12_present_yesterday.data
+                molder=utils.cast_bool(
+                    main_form.molder.data
                 ),
             )
             run_consolidated(

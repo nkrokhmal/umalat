@@ -175,7 +175,7 @@ def make_contour_2(properties):
     return m.root
 
 
-def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), is_bar12_present=False, alternative=False):
+def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), molder=False, alternative=False):
     m = BlockMaker("3 contour")
 
     for cleaning_time in properties['mozzarella'].short_cleaning_times:
@@ -312,7 +312,7 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
         validator=CleaningValidator(ordered=False),
     )
 
-    if is_bar12_present:
+    if molder:
         m.row('cleaning', push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()),
               size=cast_t('01:20'),
               label='Формовщик')
@@ -502,7 +502,7 @@ def make_schedule(properties, **kwargs):
     contours = [
         make_contour_1(properties, shipping_line=kwargs.get('shipping_line', True)),
         make_contour_2(properties),
-        make_contour_3(properties, is_bar12_present=kwargs.get('is_bar12_present', False)),
+        make_contour_3(properties, molder=kwargs.get('molder', False)),
         make_contour_4(properties, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
         make_contour_5(properties, input_tanks=kwargs.get('input_tanks')),
         make_contour_6(properties),
