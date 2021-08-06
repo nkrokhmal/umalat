@@ -2,10 +2,14 @@ from app.imports.runtime import *
 
 
 def cast_t(obj):
-    if obj is None:
-        return None
-    elif isinstance(obj, int):
-        return obj
+    with code("handle None"):
+        if obj == 0:
+            return 0
+        if utils.is_none(obj) or not obj:
+            return None
+
+    if utils.is_int_like(obj):
+        return int(obj)
     elif isinstance(obj, time):
         return cast_t(cast_time(obj))
     elif isinstance(obj, str):
@@ -28,7 +32,7 @@ def cast_t(obj):
         assert minutes % 5 == 0
         return minutes // 5
     else:
-        raise Exception("Unknown format")
+        raise Exception("Unknown format: {} {}".format(type(obj), obj))
 
 
 def cast_time(obj):
@@ -55,10 +59,16 @@ def cast_time(obj):
         hours = (obj // 12) % 24
         minutes = (obj % 12) * 5
         return f"{days:02}:{hours:02}:{minutes:02}"
+    else:
+        raise Exception("Unknown format: {} {}".format(type(obj), obj))
 
 
 def cast_human_time(obj):
     t = cast_t(obj)
+
+    if t is None:
+        return None
+
     days = t // 288
     hours = (t // 12) % 24
     minutes = (t % 12) * 5

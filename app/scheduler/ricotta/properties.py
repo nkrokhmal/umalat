@@ -28,10 +28,10 @@ def cast_properties(schedule=None):
     with code('scotta input tanks'):
         props.n_boilings = len(ricotta_boilings)
 
-    props.last_pumping_out_time = cast_time(ricotta_boilings[-1]['pumping_out'].y[0])
+    props.last_pumping_out_time = cast_human_time(ricotta_boilings[-1]['pumping_out'].y[0])
     if len(ricotta_boilings) < 9:
-        props.start_of_ninth_from_the_end_time = cast_time(ricotta_boilings[-1].x[0])
+        props.start_of_ninth_from_the_end_time = cast_human_time(ricotta_boilings[-1].x[0])
     else:
-        props.start_of_ninth_from_the_end_time = cast_time(ricotta_boilings[-9].x[0])
+        props.start_of_ninth_from_the_end_time = cast_human_time(ricotta_boilings[-9].x[0])
 
     return props

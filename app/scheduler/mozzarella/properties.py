@@ -84,35 +84,35 @@ def cast_properties(schedule=None):
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '3.3']
         if _boilings:
             _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-            props.line33_last_termizator_end_times = [cast_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
+            props.line33_last_termizator_end_times = [cast_human_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
 
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '3.6']
         if _boilings:
             _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-            props.line36_last_termizator_end_times = [cast_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
+            props.line36_last_termizator_end_times = [cast_human_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
 
         _boilings = [b for b in boilings if str(b.props['boiling_model'].percent) == '2.7']
         if _boilings:
             _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-            props.line27_last_termizator_end_times = [cast_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
+            props.line27_last_termizator_end_times = [cast_human_time(b['pouring']['first']['termizator'].y[0]) for b in _tank_boilings]
 
     with code('multihead'):
         multihead_packings = list(schedule.iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова'))
         if multihead_packings:
-            props.multihead_end_time = cast_time(max(packing.y[0] for packing in multihead_packings))
+            props.multihead_end_time = cast_human_time(max(packing.y[0] for packing in multihead_packings))
 
         water_multihead_packings = list(schedule.iter(cls='packing', boiling_group_df=lambda df: df['sku'].iloc[0].packers[0].name == 'Мультиголова' and df.iloc[0]['boiling'].line.name == LineName.WATER))
         if water_multihead_packings:
             props.water_multihead_present = True
 
     with code('cleanings'):
-        props.short_cleaning_times = [cast_time(cleaning.x[0]) for cleaning in schedule['master']['cleaning', True] if cleaning.props['cleaning_type'] == 'short']
-        props.full_cleaning_times = [cast_time(cleaning.x[0]) for cleaning in schedule['master']['cleaning', True] if cleaning.props['cleaning_type'] == 'full']
+        props.short_cleaning_times = [cast_human_time(cleaning.x[0]) for cleaning in schedule['master']['cleaning', True] if cleaning.props['cleaning_type'] == 'short']
+        props.full_cleaning_times = [cast_human_time(cleaning.x[0]) for cleaning in schedule['master']['cleaning', True] if cleaning.props['cleaning_type'] == 'full']
 
     with code('meltings'):
         salt_boilings = [b for b in schedule['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
         if salt_boilings:
-            props.salt_melting_start_time = cast_time(salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0])
+            props.salt_melting_start_time = cast_human_time(salt_boilings[0]['melting_and_packing']['melting']['meltings'].x[0])
 
     with code('cheesemakers'):
         values = []
@@ -122,10 +122,10 @@ def cast_properties(schedule=None):
         values = df.groupby('pouring_line').agg(max).to_dict()['finish']
         values = list(sorted(values.items(), key=lambda kv: kv[0]))  # [('0', 116), ('1', 97), ('2', 149), ('3', 160)]
         values_dict = dict(values)
-        props.cheesemaker1_end_time = cast_time(values_dict.get('0'))
-        props.cheesemaker2_end_time = cast_time(values_dict.get('1'))
-        props.cheesemaker3_end_time = cast_time(values_dict.get('2'))
-        props.cheesemaker4_end_time = cast_time(values_dict.get('3'))
+        props.cheesemaker1_end_time = cast_human_time(values_dict.get('0'))
+        props.cheesemaker2_end_time = cast_human_time(values_dict.get('1'))
+        props.cheesemaker3_end_time = cast_human_time(values_dict.get('2'))
+        props.cheesemaker4_end_time = cast_human_time(values_dict.get('3'))
 
     with code('melting end'):
         lines_df = pd.DataFrame(index=['water', 'salt'])
@@ -133,8 +133,8 @@ def cast_properties(schedule=None):
         lines_df.loc['water', 'boilings'] = [b for b in schedule['master']['boiling', True] if b.props['boiling_model'].line.name == 'Моцарелла в воде']
         lines_df.loc['salt', 'boilings'] = [b for b in schedule['master']['boiling', True] if b.props['boiling_model'].line.name == 'Пицца чиз']
         lines_df['melting_end'] = lines_df['boilings'].apply(lambda boilings: None if not boilings else boilings[-1]['melting_and_packing']['melting'].y[0])
-        props.water_melting_end_time = cast_time(lines_df.loc['water', 'melting_end'])
-        props.salt_melting_end_time = cast_time(lines_df.loc['salt', 'melting_end'])
+        props.water_melting_end_time = cast_human_time(lines_df.loc['water', 'melting_end'])
+        props.salt_melting_end_time = cast_human_time(lines_df.loc['salt', 'melting_end'])
 
     with code('drenators'):
         # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
@@ -153,13 +153,13 @@ def cast_properties(schedule=None):
 
         values = df.values.tolist()
         values_dict = dict(values)
-        props.drenator1_end_time = cast_time(values_dict.get(1))
-        props.drenator2_end_time = cast_time(values_dict.get(2))
-        props.drenator3_end_time = cast_time(values_dict.get(3))
-        props.drenator4_end_time = cast_time(values_dict.get(4))
-        props.drenator5_end_time = cast_time(values_dict.get(5))
-        props.drenator6_end_time = cast_time(values_dict.get(6))
-        props.drenator7_end_time = cast_time(values_dict.get(7))
-        props.drenator8_end_time = cast_time(values_dict.get(8))
+        props.drenator1_end_time = cast_human_time(values_dict.get(1))
+        props.drenator2_end_time = cast_human_time(values_dict.get(2))
+        props.drenator3_end_time = cast_human_time(values_dict.get(3))
+        props.drenator4_end_time = cast_human_time(values_dict.get(4))
+        props.drenator5_end_time = cast_human_time(values_dict.get(5))
+        props.drenator6_end_time = cast_human_time(values_dict.get(6))
+        props.drenator7_end_time = cast_human_time(values_dict.get(7))
+        props.drenator8_end_time = cast_human_time(values_dict.get(8))
 
     return props

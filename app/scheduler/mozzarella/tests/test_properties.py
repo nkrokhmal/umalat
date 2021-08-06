@@ -13,6 +13,6 @@ def test_properties(path, prefix):
 
 if __name__ == "__main__":
     test_properties(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample1",
-        "sample1",
+        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-07-10",
+        "2021-07-10",
     )

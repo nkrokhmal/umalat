@@ -22,6 +22,6 @@ def cast_properties(schedule=None):
     props = MilkProjectProperties()
     if not schedule:
         return props
-    props.end_time = cast_time(schedule.y[0])
+    props.end_time = cast_human_time(schedule.y[0])
     props.n_boilings = len(schedule['boiling_sequence', True])
     return props
