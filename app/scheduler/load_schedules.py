@@ -27,21 +27,19 @@ def assert_schedules_presence(
     for department in raise_if_not_present:
         if department not in schedules:
             raise Exception(
-                f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}"
+                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}"
             )
 
     for department in warn_if_not_present:
         if department not in schedules:
             logger.warning(
-                f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}"
+                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}"
             )
             if os.environ.get("APP_ENVIRONMENT") == "runtime":
                 flask.flash(
-                    f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}",
+                    f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}",
                     "warning",
                 )
-
-
 
 
 if __name__ == "__main__":

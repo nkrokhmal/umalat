@@ -45,6 +45,18 @@ def contour_washers_schedule():
             schedules = load_schedules(path, date_str)
             props = load_properties(schedules)
 
+            assert_properties_presence(
+                props,
+                warn_if_not_present=[
+                    "mozzarella",
+                    "ricotta",
+                    "butter",
+                    "adygea",
+                    "milk_project",
+                    "mascarpone",
+                ],
+            )
+
             # fill main form
             with code("fill yesterday form values"):
                 yesterday = date - timedelta(days=1)
@@ -65,7 +77,7 @@ def contour_washers_schedule():
                     ].bar12_present
                 else:
                     flask.flash(
-                        "Отсутствует утвержденное расписание по моцарелльному цеху за вчера",
+                        "Отсутствует утвержденное расписание по моцарелльному цеху за вчера (определяет, нужен ли формовщик)",
                         "warning",
                     )
 
@@ -75,7 +87,7 @@ def contour_washers_schedule():
                     ].n_boilings
                 else:
                     flask.flash(
-                        "Отсутствует утвержденное расписание по рикоттному цеху за вчера",
+                        "Отсутствует утвержденное расписание по рикоттному цеху за вчера (определяет число варок для скотты)",
                         "warning",
                     )
 
@@ -85,7 +97,7 @@ def contour_washers_schedule():
                     ].n_boilings
                 else:
                     flask.flash(
-                        "Отсутствует утвержденное расписание по милк-проджекты за вчера",
+                        "Отсутствует утвержденное расписание по милк-проджекты за вчера (определяет число варок для скотты)",
                         "warning",
                     )
 
@@ -95,7 +107,7 @@ def contour_washers_schedule():
                     ].n_boilings
                 else:
                     flask.flash(
-                        "Отсутствует утвержденное расписание по адыгейскому цеху за вчера",
+                        "Отсутствует утвержденное расписание по адыгейскому цеху за вчера (определяет число варок для скотты)",
                         "warning",
                     )
 
@@ -141,12 +153,6 @@ def contour_washers_schedule():
                 "milk_project": fill_properties(form, MilkProjectProperties()),
                 "adygea": fill_properties(form, AdygeaProperties()),
             }
-            # todo next: make sure that notifications work
-            assert_properties_presence(
-                properties,
-                raise_if_not_present=["mozzarella", "ricotta"],
-                warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
-            )
 
             path = config.abs_path("app/data/dynamic/{}/approved/".format(date_str))
 
@@ -180,9 +186,7 @@ def contour_washers_schedule():
                 input_tanks=input_tanks,
                 is_tomorrow_day_off=utils.cast_bool(main_form.is_not_working_day.data),
                 shipping_line=utils.cast_bool(main_form.shipping_line.data),
-                molder=utils.cast_bool(
-                    main_form.molder.data
-                ),
+                molder=utils.cast_bool(main_form.molder.data),
             )
             run_consolidated(
                 path,
