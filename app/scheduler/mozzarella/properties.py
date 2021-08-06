@@ -21,7 +21,7 @@ class MozzarellaProperties(pydantic.BaseModel):
         return res
     
     multihead_end_time: str = Field("", description='Конец работы мультиголовы (пусто, если мультиголова не работает)')
-    water_multihead_present: bool = Field(False, description='Конец работы мультиголовы на воде (пусто, если мультиголова на воде не работает)')
+    water_multihead_present: bool = Field(False, description='Есть ли мультиголова на воде в этот день')
 
     short_cleaning_times: List[str] = Field([], description='Короткие мойки')
     full_cleaning_times: List[str] = Field([], description='Полные мойки')
