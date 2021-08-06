@@ -11,8 +11,15 @@ def cast_t(obj):
     elif isinstance(obj, str):
         # 3:12:00
         if obj.count(":") == 1:
+            if "-" in obj:
+                obj, days = obj.split("-")
+                days = -int(days)
+            elif "+" in obj:
+                obj, days = obj.split("+")
+            else:
+                days = 0
             hours, minutes = obj.split(":")
-            days = 0
+
         elif obj.count(":") == 2:
             days, hours, minutes = obj.split(":")
         else:
@@ -26,9 +33,17 @@ def cast_t(obj):
 
 def cast_time(obj):
     if isinstance(obj, str):
+        days = 0
+        if "-" in obj:
+            obj, days = obj.split("-")
+            days = -int(days)
+        elif "+" in obj:
+            obj, days = obj.split("+")
+            days = int(days)
+
         if obj.count(":") == 1:
             assert re.search(r"(\d\d):(\d\d)", obj)
-            return "0:" + obj
+            return f"{days}:" + obj
         else:
             assert re.search(r"(\d+):(\d\d):(\d\d)", obj)
             return obj
@@ -40,6 +55,19 @@ def cast_time(obj):
         hours = (obj // 12) % 24
         minutes = (obj % 12) * 5
         return f"{days:02}:{hours:02}:{minutes:02}"
+
+
+def cast_human_time(obj):
+    t = cast_t(obj)
+    days = t // 288
+    hours = (t // 12) % 24
+    minutes = (t % 12) * 5
+
+    if days == 0:
+        return cast_time(t)[3:]
+    else:
+        sign = "+" if days > 0 else "-"
+        return f"{hours:02}:{minutes:02}{sign}{abs(days)}"
 
 
 def test():
@@ -61,6 +89,14 @@ def test():
         print(cast_time("a:08:00"))
     except AssertionError:
         print("Wrong format")
+
+    print(cast_time("21:35-1"))
+    print(cast_t("21:35-1"))
+
+    print(cast_human_time(-1))
+    print(cast_human_time("21:35"))
+    print(cast_human_time("1:21:35"))
+    print(cast_human_time("-1:21:35"))
 
 
 if __name__ == "__main__":
