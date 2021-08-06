@@ -175,7 +175,7 @@ def make_contour_2(properties):
     return m.root
 
 
-def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), is_bar12_present=False):
+def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), is_bar12_present=False, alternative=False):
     m = BlockMaker("3 contour")
 
     for cleaning_time in properties['mozzarella'].short_cleaning_times:
@@ -222,8 +222,6 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
                       size=cast_t('01:05'),
                       label=f'Сыроизготовитель {int(id)} (кор. мойка)')
                 yield
-
-    run_order([f1, g2()], order1)
 
     def g3():
         with code('melters_and_baths'):
@@ -291,7 +289,18 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
         assert cast_t('21:00') <= b.x[0] and b.y[0] <= cast_t('01:00:00'), "Short cleaning too bad"
-    run_order([g3(), f4], order2)
+
+    if not alternative:
+        run_order([f1, g2()], order1)
+        run_order([g3(), f4], order2)
+    else:
+        f1()
+        run_order([f4, g2()], order1)
+
+        it = g3()
+        for _ in range(5):
+            next(it)
+
 
     # shift short cleaning to make it as late as possible
     short_cleaning = m.root.find(label='Короткая мойка термизатора')[-1]
@@ -312,7 +321,12 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
 
 
 def make_contour_3(properties, **kwargs):
-    df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, **kwargs)
+    try:
+        df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, alternative=False, **kwargs)
+    except:
+        logger.info('Running alternative contour 3')
+        df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, alternative=True, **kwargs)
+
     return df.iloc[-1]['output']
 
 

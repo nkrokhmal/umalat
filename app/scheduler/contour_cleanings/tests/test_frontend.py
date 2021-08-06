@@ -32,8 +32,8 @@ def _test(path, open_file=False, prefix=None):
 
 if __name__ == "__main__":
     _test(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-07-16",
-        prefix="2021-07-16",
+        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-08-06",
+        prefix="2021-08-06",
         open_file=True,
     )
 
