@@ -45,6 +45,18 @@ def contour_washers_schedule():
             schedules = load_schedules(path, date_str)
             props = load_properties(schedules)
 
+            assert_properties_presence(
+                props,
+                warn_if_not_present=[
+                    "mozzarella",
+                    "ricotta",
+                    "butter",
+                    "adygea",
+                    "milk_project",
+                    "mascarpone",
+                ],
+            )
+
             # fill main form
             with code("fill yesterday form values"):
                 yesterday = date - timedelta(days=1)
@@ -55,24 +67,49 @@ def contour_washers_schedule():
                         "app/data/dynamic/{}/approved/".format(yesterday_str)
                     ),
                     prefix=yesterday_str,
-                    departments=["ricotta", "mozzarella"],
+                    departments=["ricotta", "mozzarella", "adygea", "milk_project"],
                 )
                 yesterday_properties = load_properties(yesterday_schedules)
 
                 if "mozzarella" in yesterday_schedules:
-                    main_form.is_bar12_present_yesterday.data = yesterday_properties[
+                    main_form.molder.data = yesterday_properties[
                         "mozzarella"
                     ].bar12_present
                 else:
-                    # todo next: notify
-                    pass
+                    flask.flash(
+                        "Отсутствует утвержденное расписание по моцарелльному цеху за вчера (определяет, нужен ли формовщик)",
+                        "warning",
+                    )
+
                 if "ricotta" in yesterday_schedules:
                     main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
                         "ricotta"
                     ].n_boilings
                 else:
-                    # todo next: notify
-                    pass
+                    flask.flash(
+                        "Отсутствует утвержденное расписание по рикоттному цеху за вчера (определяет число варок для скотты)",
+                        "warning",
+                    )
+
+                if "milk_project" in yesterday_schedules:
+                    main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
+                        "milk_project"
+                    ].n_boilings
+                else:
+                    flask.flash(
+                        "Отсутствует утвержденное расписание по милк-проджекты за вчера (определяет число варок для скотты)",
+                        "warning",
+                    )
+
+                if "adygea" in yesterday_schedules:
+                    main_form.adygea_n_boilings_yesterday.data = yesterday_properties[
+                        "adygea"
+                    ].n_boilings
+                else:
+                    flask.flash(
+                        "Отсутствует утвержденное расписание по адыгейскому цеху за вчера (определяет число варок для скотты)",
+                        "warning",
+                    )
 
             # fill department forms
             for department, form in [
@@ -116,12 +153,6 @@ def contour_washers_schedule():
                 "milk_project": fill_properties(form, MilkProjectProperties()),
                 "adygea": fill_properties(form, AdygeaProperties()),
             }
-            # todo next: make sure that notifications work
-            assert_properties_presence(
-                properties,
-                raise_if_not_present=["mozzarella", "ricotta"],
-                warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
-            )
 
             path = config.abs_path("app/data/dynamic/{}/approved/".format(date_str))
 
@@ -155,9 +186,7 @@ def contour_washers_schedule():
                 input_tanks=input_tanks,
                 is_tomorrow_day_off=utils.cast_bool(main_form.is_not_working_day.data),
                 shipping_line=utils.cast_bool(main_form.shipping_line.data),
-                is_bar12_present=utils.cast_bool(
-                    main_form.is_bar12_present_yesterday.data
-                ),
+                molder=utils.cast_bool(main_form.molder.data),
             )
             run_consolidated(
                 path,

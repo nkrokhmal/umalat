@@ -20,5 +20,5 @@ def cast_properties(schedule=None):
     props = ButterProperties()
     if not schedule:
         return props
-    props.end_time = cast_time(schedule.y[0])
+    props.end_time = cast_human_time(schedule.y[0])
     return props

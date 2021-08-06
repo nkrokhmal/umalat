@@ -20,7 +20,6 @@ def run_contour_cleanings(
         if not properties:
             if not schedules:
                 schedules = load_schedules(input_path, prefix=prefix)
-
             assert_schedules_presence(
                 schedules,
                 raise_if_not_present=["mozzarella", "ricotta"],

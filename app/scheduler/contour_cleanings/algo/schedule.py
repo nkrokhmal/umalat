@@ -64,13 +64,12 @@ def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
         values = [value for value in values if value[1]]
 
         with code('remove extra tanks'):
-            # todo soon: refactor
-            total_tanks = len(values)
-            extra_tanks = max(0, total_tanks - 4)
+            n_total_tanks = len(values)
+            n_extra_tanks = max(0, n_total_tanks - 4)
             full_tanks = [value for value in values if value[3] == False]
             empty_tanks = [value for value in values if value[3] == True]
-            if extra_tanks:
-                empty_tanks = empty_tanks[:-extra_tanks]
+            if n_extra_tanks:
+                empty_tanks = empty_tanks[:-n_extra_tanks]
             values = full_tanks + empty_tanks
 
         # convert time to t
@@ -176,7 +175,7 @@ def make_contour_2(properties):
     return m.root
 
 
-def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), is_bar12_present=False):
+def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), molder=False, alternative=False):
     m = BlockMaker("3 contour")
 
     for cleaning_time in properties['mozzarella'].short_cleaning_times:
@@ -223,8 +222,6 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
                       size=cast_t('01:05'),
                       label=f'Сыроизготовитель {int(id)} (кор. мойка)')
                 yield
-
-    run_order([f1, g2()], order1)
 
     def g3():
         with code('melters_and_baths'):
@@ -292,7 +289,18 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
               size=cast_t('01:00'),
               label='Короткая мойка термизатора').block
         assert cast_t('21:00') <= b.x[0] and b.y[0] <= cast_t('01:00:00'), "Short cleaning too bad"
-    run_order([g3(), f4], order2)
+
+    if not alternative:
+        run_order([f1, g2()], order1)
+        run_order([g3(), f4], order2)
+    else:
+        f1()
+        run_order([f4, g2()], order1)
+
+        it = g3()
+        for _ in range(5):
+            next(it)
+
 
     # shift short cleaning to make it as late as possible
     short_cleaning = m.root.find(label='Короткая мойка термизатора')[-1]
@@ -304,7 +312,7 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
         validator=CleaningValidator(ordered=False),
     )
 
-    if is_bar12_present:
+    if molder:
         m.row('cleaning', push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()),
               size=cast_t('01:20'),
               label='Формовщик')
@@ -313,7 +321,12 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
 
 
 def make_contour_3(properties, **kwargs):
-    df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, **kwargs)
+    try:
+        df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, alternative=False, **kwargs)
+    except:
+        logger.info('Running alternative contour 3')
+        df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, alternative=True, **kwargs)
+
     return df.iloc[-1]['output']
 
 
@@ -489,7 +502,7 @@ def make_schedule(properties, **kwargs):
     contours = [
         make_contour_1(properties, shipping_line=kwargs.get('shipping_line', True)),
         make_contour_2(properties),
-        make_contour_3(properties, is_bar12_present=kwargs.get('is_bar12_present', False)),
+        make_contour_3(properties, molder=kwargs.get('molder', False)),
         make_contour_4(properties, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
         make_contour_5(properties, input_tanks=kwargs.get('input_tanks')),
         make_contour_6(properties),

@@ -61,8 +61,8 @@ class ScheduleDateForm(FlaskForm):
         default=0,
     )
 
-    is_bar12_present_yesterday = BooleanField(
-        'Был ли вчера брус 1.2',
+    molder = BooleanField(
+        'Формовщик',
         validators=[Optional()],
         default=False
     )

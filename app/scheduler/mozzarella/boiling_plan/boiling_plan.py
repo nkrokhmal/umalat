@@ -48,6 +48,14 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     # fill group id
     df["group_id"] = (df["boiling_params"] == "-").astype(int).cumsum() + 1
 
+    with code("Convert total_volume to int safely"):
+        def _cast_int(obj):
+            try:
+                return int(obj)
+            except:
+                return np.nan
+
+        df["total_volume"] = df["total_volume"].apply(_cast_int)
     # fill total_volume
     df["total_volume"] = np.where(
         (df["sku"] == "-") & (df["total_volume"].isnull()),

@@ -1,11 +1,12 @@
 from app.scheduler import load_schedules
-from app.scheduler.ricotta.properties import *
+from app.scheduler.adygea.properties import *
 from pprint import pprint
 
 
 def test_properties(path, prefix):
-    schedules = load_schedules(path, prefix, departments=["ricotta"])
-    props = cast_properties(schedules["ricotta"])
+    schedules = load_schedules(path, prefix, departments=["adygea"])
+    print(schedules["adygea"])
+    props = cast_properties(schedules["adygea"])
     pprint(dict(props))
 
 

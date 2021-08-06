@@ -27,41 +27,17 @@ def assert_schedules_presence(
     for department in raise_if_not_present:
         if department not in schedules:
             raise Exception(
-                f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}"
+                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}"
             )
 
     for department in warn_if_not_present:
         if department not in schedules:
             logger.warning(
-                f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}"
+                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}"
             )
             if os.environ.get("APP_ENVIRONMENT") == "runtime":
                 flask.flash(
-                    f"Не найдено расписание для {config.DEPARTMENT_NAMES[department]}",
-                    "warning",
-                )
-
-
-def assert_properties_presence(
-    properties, raise_if_not_present=None, warn_if_not_present=None
-):
-    raise_if_not_present = raise_if_not_present or []
-    warn_if_not_present = warn_if_not_present or []
-
-    for department in raise_if_not_present:
-        if not properties[department].is_present():
-            raise Exception(
-                f"Не найдены параметры для {config.DEPARTMENT_NAMES[department]}"
-            )
-
-    for department in warn_if_not_present:
-        if not properties[department].is_present():
-            logger.warning(
-                f"Не найдены параметры для {config.DEPARTMENT_NAMES[department]}"
-            )
-            if os.environ.get("APP_ENVIRONMENT") == "runtime":
-                flask.flash(
-                    f"Не найдены параметры для {config.DEPARTMENT_NAMES[department]}",
+                    f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}",
                     "warning",
                 )
 
