@@ -7,6 +7,7 @@ from app.scheduler import (
     run_mascarpone,
     run_mozzarella,
     run_milk_project,
+    run_adygea
 )
 
 
@@ -47,6 +48,12 @@ def _test_day(
         )
         run_milk_project(
             os.path.join(input_path, prefix + " " + "План по варкам милкпроджект.xlsx"),
+            prefix=prefix,
+            path=output_path,
+            **input_params.get("milk_project", {})
+        )
+        run_adygea(
+            os.path.join(input_path, prefix + " " + "План по варкам адыгейский.xlsx"),
             prefix=prefix,
             path=output_path,
             **input_params.get("milk_project", {})

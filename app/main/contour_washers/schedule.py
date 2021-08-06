@@ -55,7 +55,7 @@ def contour_washers_schedule():
                         "app/data/dynamic/{}/approved/".format(yesterday_str)
                     ),
                     prefix=yesterday_str,
-                    departments=["ricotta", "mozzarella"],
+                    departments=["ricotta", "mozzarella", "adygea", "milk_project"],
                 )
                 yesterday_properties = load_properties(yesterday_schedules)
 
@@ -64,15 +64,40 @@ def contour_washers_schedule():
                         "mozzarella"
                     ].bar12_present
                 else:
-                    # todo next: notify
-                    pass
+                    flask.flash(
+                        "Отсутствует утвержденное расписание по моцарелльному цеху за вчера",
+                        "warning",
+                    )
+
                 if "ricotta" in yesterday_schedules:
                     main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
                         "ricotta"
                     ].n_boilings
                 else:
-                    # todo next: notify
-                    pass
+                    flask.flash(
+                        "Отсутствует утвержденное расписание по рикоттному цеху за вчера",
+                        "warning",
+                    )
+
+                if "milk_project" in yesterday_schedules:
+                    main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
+                        "milk_project"
+                    ].n_boilings
+                else:
+                    flask.flash(
+                        "Отсутствует утвержденное расписание по милк-проджекты за вчера",
+                        "warning",
+                    )
+
+                if "adygea" in yesterday_schedules:
+                    main_form.adygea_n_boilings_yesterday.data = yesterday_properties[
+                        "adygea"
+                    ].n_boilings
+                else:
+                    flask.flash(
+                        "Отсутствует утвержденное расписание по адыгейскому цеху за вчера",
+                        "warning",
+                    )
 
             # fill department forms
             for department, form in [
