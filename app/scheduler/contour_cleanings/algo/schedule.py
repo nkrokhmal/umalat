@@ -64,13 +64,12 @@ def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
         values = [value for value in values if value[1]]
 
         with code('remove extra tanks'):
-            # todo soon: refactor
-            total_tanks = len(values)
-            extra_tanks = max(0, total_tanks - 4)
+            n_total_tanks = len(values)
+            n_extra_tanks = max(0, n_total_tanks - 4)
             full_tanks = [value for value in values if value[3] == False]
             empty_tanks = [value for value in values if value[3] == True]
-            if extra_tanks:
-                empty_tanks = empty_tanks[:-extra_tanks]
+            if n_extra_tanks:
+                empty_tanks = empty_tanks[:-n_extra_tanks]
             values = full_tanks + empty_tanks
 
         # convert time to t
