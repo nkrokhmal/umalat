@@ -17,17 +17,24 @@ def save_file_dir(data, filename, date, folder, data_type="xlsx"):
     elif data_type == "csv":
         data.to_csv(os.path.join(data_dir, filename), index=False, sep=";")
     elif data_type == "json":
-        mode = 'a' if os.path.exists(os.path.join(data_dir, filename)) else 'w'
+        mode = "a" if os.path.exists(os.path.join(data_dir, filename)) else "w"
         with open(os.path.join(data_dir, filename), mode) as outfile:
             json.dump(data, outfile)
     elif data_type == "pickle":
-        mode = 'ab' if os.path.exists(os.path.join(data_dir, filename)) else 'wb'
+        # todo next: make properly
+        with code("Should not dump twice to the same file"):
+            if os.path.exists(os.path.join(data_dir, filename)):
+                utils.remove_path(os.path.join(data_dir, filename))
+
+        mode = "ab" if os.path.exists(os.path.join(data_dir, filename)) else "wb"
         with open(os.path.join(data_dir, filename), mode) as outfile:
             pickle.dump(data, outfile)
 
 
 def save_boiling_plan(*args, **kwargs):
-    save_file_dir(*args, **kwargs, folder=flask.current_app.config["BOILING_PLAN_FOLDER"])
+    save_file_dir(
+        *args, **kwargs, folder=flask.current_app.config["BOILING_PLAN_FOLDER"]
+    )
 
 
 def save_schedule(*args, **kwargs):
@@ -35,11 +42,18 @@ def save_schedule(*args, **kwargs):
 
 
 def save_schedule_task(*args, **kwargs):
-    save_file_dir(*args, **kwargs, folder=flask.current_app.config["TASK_FOLDER"], data_type="csv")
+    save_file_dir(
+        *args, **kwargs, folder=flask.current_app.config["TASK_FOLDER"], data_type="csv"
+    )
 
 
 def save_schedule_dict(*args, **kwargs):
-    save_file_dir(*args, **kwargs, folder=flask.current_app.config["SCHEDULE_DICT_FOLDER"], data_type="pickle")
+    save_file_dir(
+        *args,
+        **kwargs,
+        folder=flask.current_app.config["SCHEDULE_DICT_FOLDER"],
+        data_type="pickle"
+    )
 
 
 def move_boiling_file(date, old_filepath, old_filename, department=""):
@@ -49,7 +63,8 @@ def move_boiling_file(date, old_filepath, old_filename, department=""):
     data_dir = os.path.join(
         flask.current_app.config["DYNAMIC_DIR"],
         date,
-        flask.current_app.config["BOILING_PLAN_FOLDER"])
+        flask.current_app.config["BOILING_PLAN_FOLDER"],
+    )
     create_if_not_exists(data_dir)
 
     filepath = os.path.join(data_dir, new_filename)
@@ -61,11 +76,7 @@ def move_boiling_file(date, old_filepath, old_filename, department=""):
 
 
 def create_dir(date, folder):
-    dir = os.path.join(
-        flask.current_app.config["DYNAMIC_DIR"],
-        date,
-        folder
-    )
+    dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, folder)
     create_if_not_exists(dir)
     return dir
 
@@ -75,11 +86,13 @@ def move_to_approved(date, file_name):
         flask.current_app.config["DYNAMIC_DIR"],
         date,
         flask.current_app.config["SCHEDULE_FOLDER"],
-        file_name)
+        file_name,
+    )
     new_dir = os.path.join(
         flask.current_app.config["DYNAMIC_DIR"],
         date,
-        flask.current_app.config["APPROVED_FOLDER"])
+        flask.current_app.config["APPROVED_FOLDER"],
+    )
     create_if_not_exists(new_dir)
 
     shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
@@ -91,14 +104,14 @@ def move_to_approved_pickle(date, file_name):
         flask.current_app.config["DYNAMIC_DIR"],
         date,
         flask.current_app.config["SCHEDULE_DICT_FOLDER"],
-        file_name)
+        file_name,
+    )
     new_dir = os.path.join(
         flask.current_app.config["DYNAMIC_DIR"],
         date,
-        flask.current_app.config["APPROVED_FOLDER"])
+        flask.current_app.config["APPROVED_FOLDER"],
+    )
     create_if_not_exists(new_dir)
     if os.path.exists(old_dir):
         shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
     return new_dir
-
-
