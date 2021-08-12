@@ -10,7 +10,7 @@ def send_file(path, date, department):
     document = open(path, 'rb')
     tb.send_message(
         flask.current_app.config["TELEGRAM_CHAT_FILES_ID"],
-        f"{date} \n {department} \n Подтверждено расписание"
+        f"Дата: {date} \n Цех: {department} \n" + u"\xE2\x9C\x85"
     )
     tb.send_document(
         flask.current_app.config["TELEGRAM_CHAT_FILES_ID"],
