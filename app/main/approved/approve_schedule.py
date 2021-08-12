@@ -9,13 +9,15 @@ from app.main import main
 def approve():
     date = flask.request.args.get("date")
     file_name = flask.request.args.get("file_name")
+    department = flask.request.args.get("department")
+
     pickle_file_name = f"{file_name.split('.')[0]}.pickle"
 
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name))
+    send_file.queue(os.path.join(path, file_name), date, department)
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".download_schedules", page=1))
