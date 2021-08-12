@@ -3,6 +3,6 @@ version: '3.3'
 services:
   umalat:
     build: .
-    command: bash -c "rm __init__.py && python -u /app/tests/run_tests.py"
+    command: bash -c "rm -f __init__.py && python -u /app/tests/run_tests.py"
     ports:
       - 5000:5000
