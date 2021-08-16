@@ -9,13 +9,15 @@ from app.main import main
 def approve():
     date = flask.request.args.get("date")
     file_name = flask.request.args.get("file_name")
+    department = flask.request.args.get("department")
+
     pickle_file_name = f"{file_name.split('.')[0]}.pickle"
 
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name))
+    send_file.queue(os.path.join(path, file_name), date, department)
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".download_schedules", page=1))
@@ -59,7 +61,7 @@ def approve_mozzarella():
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name))
+    send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mozzarella_schedule"))
@@ -76,7 +78,7 @@ def approve_ricotta():
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name))
+    send_file.queue(os.path.join(path, file_name), date, "Рикотта")
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".ricotta_schedule"))
@@ -93,7 +95,7 @@ def approve_mascarpone():
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name))
+    send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mascarpone_schedule"))
@@ -110,7 +112,7 @@ def approve_butter():
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name))
+    send_file.queue(os.path.join(path, file_name), date, "Масло")
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".butter_schedule"))
@@ -127,7 +129,7 @@ def approve_milk_project():
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name))
+    send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".milk_project_schedule"))
@@ -144,7 +146,7 @@ def approve_adygea():
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name))
+    send_file.queue(os.path.join(path, file_name), date, "Адыгейский")
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".adygea_schedule"))

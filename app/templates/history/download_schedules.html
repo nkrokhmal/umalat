@@ -280,11 +280,8 @@
             }
 
 			$(".modal-footer #testId").val(name);
-			console.log("Date 1" + date);
 			$(".btn.btn-primary.btn-download").click(function(){
-			    console.log("Date 2" + date);
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    console.log(url_download);
 			    $.ajax(
 				{
 					url: url_download,
@@ -303,13 +300,12 @@
             $(".btn.btn-primary.btn-edit").click(function(){
                 var url_edit = "";
                 if (name == "Утвердить"){
-			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+			        url_edit="/approve?file_name=" + filename + "&date=" + date + "&department=Моцарелла";
                 }
                 else
                 {
                     url_edit="/disprove?file_name=" + filename + "&date=" + date;
                 }
-                console.log(url_edit);
 			    $.ajax(
 				{
 					url: url_edit,
@@ -331,7 +327,6 @@
 
 	$(function () {
 		$(".show_ricotta").click(function () {
-		    console.log("Started");
 			var filename = $(this).data('filename');
 			var date = $(this).data('date');
 			var approved = $(this).data('approved');
@@ -347,7 +342,6 @@
 			$(".modal-footer #testId2").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    console.log(url_download);
 			    $.ajax(
 				{
 					url: url_download,
@@ -366,13 +360,12 @@
             $(".btn.btn-primary.btn-edit").click(function(){
                 var url_edit = "";
                 if (name == "Утвердить"){
-			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+			        url_edit="/approve?file_name=" + filename + "&date=" + date + "&department=Рикотта";
                 }
                 else
                 {
                     url_edit="/disprove?file_name=" + filename + "&date=" + date;
                 }
-                console.log(url_edit);
 			    $.ajax(
 				{
 					url: url_edit,
@@ -394,7 +387,6 @@
 
 	$(function () {
 		$(".show_mascarpone").click(function () {
-		    console.log("Started");
 			var filename = $(this).data('filename');
 			var date = $(this).data('date');
 			var approved = $(this).data('approved');
@@ -410,7 +402,6 @@
 			$(".modal-footer #testId3").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    console.log(url_download);
 			    $.ajax(
 				{
 					url: url_download,
@@ -429,13 +420,12 @@
             $(".btn.btn-primary.btn-edit").click(function(){
                 var url_edit = "";
                 if (name == "Утвердить"){
-			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+			        url_edit="/approve?file_name=" + filename + "&date=" + date + "&department=Маскарпоне";
                 }
                 else
                 {
                     url_edit="/disprove?file_name=" + filename + "&date=" + date;
                 }
-                console.log(url_edit);
 			    $.ajax(
 				{
 					url: url_edit,
@@ -456,7 +446,6 @@
 
 	$(function () {
 		$(".show_butter").click(function () {
-		    console.log("Started");
 			var filename = $(this).data('filename');
 			var date = $(this).data('date');
 			var approved = $(this).data('approved');
@@ -472,7 +461,6 @@
 			$(".modal-footer #testId4").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    console.log(url_download);
 			    $.ajax(
 				{
 					url: url_download,
@@ -491,13 +479,12 @@
             $(".btn.btn-primary.btn-edit").click(function(){
                 var url_edit = "";
                 if (name == "Утвердить"){
-			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+			        url_edit="/approve?file_name=" + filename + "&date=" + date + "&department=Масло";
                 }
                 else
                 {
                     url_edit="/disprove?file_name=" + filename + "&date=" + date;
                 }
-                console.log(url_edit);
 			    $.ajax(
 				{
 					url: url_edit,
@@ -518,7 +505,6 @@
 
 	$(function () {
 		$(".show_milk_project").click(function () {
-		    console.log("Started");
 			var filename = $(this).data('filename');
 			var date = $(this).data('date');
 			var approved = $(this).data('approved');
@@ -534,7 +520,6 @@
 			$(".modal-footer #testId5").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
 			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    console.log(url_download);
 			    $.ajax(
 				{
 					url: url_download,
@@ -553,13 +538,12 @@
             $(".btn.btn-primary.btn-edit").click(function(){
                 var url_edit = "";
                 if (name == "Утвердить"){
-			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+			        url_edit="/approve?file_name=" + filename + "&date=" + date + "&department=Милкпроджект";
                 }
                 else
                 {
                     url_edit="/disprove?file_name=" + filename + "&date=" + date;
                 }
-                console.log(url_edit);
 			    $.ajax(
 				{
 					url: url_edit,
@@ -594,7 +578,7 @@
 
 			$(".modal-footer #edit_adygea").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
-			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
+			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date ;
 			    $.ajax(
 				{
 					url: url_download,
@@ -613,13 +597,12 @@
             $(".btn.btn-primary.btn-edit").click(function(){
                 var url_edit = "";
                 if (name == "Утвердить"){
-			        url_edit="/approve?file_name=" + filename + "&date=" + date;
+			        url_edit="/approve?file_name=" + filename + "&date=" + date + "&department=Адыгейский";
                 }
                 else
                 {
                     url_edit="/disprove?file_name=" + filename + "&date=" + date;
                 }
-                console.log(url_edit);
 			    $.ajax(
 				{
 					url: url_edit,

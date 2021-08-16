@@ -1,17 +1,9 @@
 Команда для сборки докер контейнера
 ```sh
-  docker build -t registry/name .
+  docker-compose up -d
 ```
 
-Запуск контейнера
+Запуск тестов
 ```sh
-  docker run -d -p 5000:5000 registry/name .
+  docker-compose -f docker-compose-test.yaml up --build
 ```
-
-Контейнер можно спулить
-```sh
-  docker push nkrokhmal/umalat-front:latest
-```
-
-
-
