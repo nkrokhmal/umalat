@@ -22,11 +22,17 @@ def run_contour_cleanings(
                 schedules = load_schedules(input_path, prefix=prefix)
             assert_schedules_presence(
                 schedules,
-                raise_if_not_present=["mozzarella", "ricotta"],
-                warn_if_not_present=["butter", "adygea", "milk_project", "mascarpone"],
+                raise_if_not_present=["ricotta"],
+                warn_if_not_present=[
+                    "mozzarella",
+                    "butter",
+                    "adygea",
+                    "milk_project",
+                    "mascarpone",
+                ],
             )
 
-            properties = load_properties(schedules)
+            properties = load_properties(schedules, path=input_path, prefix=prefix)
 
         schedule = make_schedule(properties, **kwargs)
     frontend = wrap_frontend(schedule)
