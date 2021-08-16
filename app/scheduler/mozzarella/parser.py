@@ -1,3 +1,4 @@
+# fmt: off
 from app.imports.runtime import *
 
 from app.scheduler.mozzarella import *
@@ -197,6 +198,7 @@ def fill_properties(parsed_schedule, df_bp):
 
     # parse boilings
     boilings = parsed_schedule["boilings"]["boiling", True]
+    boilings = list(sorted(boilings, key=lambda b: b.x[0]))
     salt_boilings = [b for b in boilings if b.props["line_name"] == LineName.SALT]
     water_boilings = [b for b in boilings if b.props["line_name"] == LineName.WATER]
 
@@ -209,49 +211,18 @@ def fill_properties(parsed_schedule, df_bp):
             b for b in boilings if str(b.props["boiling_model"].percent) == "3.3"
         ]
         if _boilings:
-            _tank_boilings = [
-                b
-                for i, b in enumerate(_boilings)
-                if (i + 1) % 9 == 0 or i == len(_boilings) - 1
-            ]
-            props.line33_last_termizator_end_times = [
-                cast_human_time(
-                    b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])
-                )
-                for b in _tank_boilings
-            ]
+            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+            props.line33_last_termizator_end_times = [cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings]
 
-        _boilings = [
-            b for b in boilings if str(b.props["boiling_model"].percent) == "3.6"
-        ]
+        _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.6"]
         if _boilings:
-            _tank_boilings = [
-                b
-                for i, b in enumerate(_boilings)
-                if (i + 1) % 9 == 0 or i == len(_boilings) - 1
-            ]
-            props.line36_last_termizator_end_times = [
-                cast_human_time(
-                    b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])
-                )
-                for b in _tank_boilings
-            ]
+            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+            props.line36_last_termizator_end_times = [cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings]
 
-        _boilings = [
-            b for b in boilings if str(b.props["boiling_model"].percent) == "2.7"
-        ]
+        _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "2.7"]
         if _boilings:
-            _tank_boilings = [
-                b
-                for i, b in enumerate(_boilings)
-                if (i + 1) % 9 == 0 or i == len(_boilings) - 1
-            ]
-            props.line27_last_termizator_end_times = [
-                cast_human_time(
-                    b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])
-                )
-                for b in _tank_boilings
-            ]
+            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+            props.line27_last_termizator_end_times = [cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings]
 
     with code("multihead"):
         multihead_packings = list(
@@ -313,22 +284,15 @@ def fill_properties(parsed_schedule, df_bp):
 
     with code("melting end"):
 
-        def _get_melting_end(line_boilings, water=False):
+        def _get_melting_end(line_boilings):
             if not line_boilings:
                 return None
             line_boilings = list(sorted(line_boilings, key=lambda b: b.x[0]))
             last_boiling_id = line_boilings[-1].props["boiling_id"]
-            last_melting = parsed_schedule.find_one(
-                cls="melting", boiling_id=last_boiling_id
-            )
-            if water:
-                return last_melting.y[0]
-            else:
-                return last_melting.props["melting_end"]
+            last_melting = parsed_schedule.find_one(cls="melting", boiling_id=last_boiling_id)
+            return last_melting.y[0]
 
-        props.water_melting_end_time = cast_human_time(
-            _get_melting_end(water_boilings, water=True)
-        )
+        props.water_melting_end_time = cast_human_time(_get_melting_end(water_boilings))
         props.salt_melting_end_time = cast_human_time(_get_melting_end(salt_boilings))
 
     with code("drenators"):
@@ -338,13 +302,21 @@ def fill_properties(parsed_schedule, df_bp):
                     b for b in boilings if b.props["line_num"] == str(line_num)
                 ]
                 line_boilings = list(sorted(line_boilings, key=lambda b: b.x[0]))
-                for i, b in enumerate(line_boilings):
-                    b.props.update(
-                        drenator_num=i % 2,
-                        drenator_end=b.y[0]
-                        + b.props["boiling_model"].line.chedderization_time // 5
-                        - 5,
-                    )  # todo next: make pouring off properly
+
+                cur_drenator_num = -1
+                for b1, b2 in utils.iter_pairs(line_boilings, method='any_prefix'):
+
+                    if not b1:
+                        cur_drenator_num += 1
+                    else:
+                        if (b2.y[0] - b1.y[0]) < b1.props["boiling_model"].line.chedderization_time // 5:
+                            cur_drenator_num += 1
+                        else:
+                            # use same drenator for the next boiling
+                            pass
+                    b2.props.update(drenator_num=cur_drenator_num % 2,
+                                    drenator_end=b2.y[0] + b2.props["boiling_model"].line.chedderization_time // 5 - 5)  # todo next: make pouring off properly
+
 
         with code("fill drenator properties"):
             # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
@@ -357,12 +329,8 @@ def fill_properties(parsed_schedule, df_bp):
                         boiling.props["drenator_num"],
                     ]
                 )
-            df = pd.DataFrame(
-                values, columns=["drenator_end", "pouring_line", "drenator_num"]
-            )
-            df["id"] = df["pouring_line"].astype(int) * 2 + df["drenator_num"].astype(
-                int
-            )
+            df = pd.DataFrame(values, columns=["drenator_end", "pouring_line", "drenator_num"])
+            df["id"] = df["pouring_line"].astype(int) * 2 + df["drenator_num"].astype(int)
             df = df[["id", "drenator_end"]]
             df = df.drop_duplicates(subset="id", keep="last")
             df = df.reset_index(drop=True)

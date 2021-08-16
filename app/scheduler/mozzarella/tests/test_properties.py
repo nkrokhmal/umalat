@@ -9,8 +9,8 @@ def _test(path, prefix):
     warnings.filterwarnings("ignore")
     utils.lazy_tester.configure(local_path=os.path.basename(path))
     schedules = load_schedules(path, prefix, departments=["mozzarella"])
-    # props = cast_properties(schedules["mozzarella"])
-    props = load_properties(schedules, path=path, prefix=prefix)
+    props = cast_properties(schedules["mozzarella"])
+    props = load_properties(schedules, path=path, prefix=prefix)["mozzarella"]
     utils.lazy_tester.log(props)
     utils.lazy_tester.assert_logs()
 
