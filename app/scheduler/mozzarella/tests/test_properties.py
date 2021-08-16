@@ -27,7 +27,9 @@ def test_batch():
 if __name__ == "__main__":
     utils.lazy_tester.verbose = True
 
-    _test(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-08-06",
-        "2021-08-06",
-    )
+    # _test(
+    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-08-06",
+    #     "2021-08-06",
+    # )
+
+    test_batch()

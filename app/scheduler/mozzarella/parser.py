@@ -122,8 +122,7 @@ def parse_schedule_file(wb_obj):
 
     with code('add water forming info to meltings'):
         for melting in m.root['water_meltings'].children:
-            boiling = m.root.find_one(boiling_id=melting.props['boiling_id'])
-            melting.props.update(melting_end=boiling.y[0])
+            melting.props.update(melting_end=melting.y[0])
 
     parse_block("water_packings", "packing", [split_rows[2] + 1], start_times[1])
 
