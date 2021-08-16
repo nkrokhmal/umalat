@@ -30,23 +30,22 @@ PARSERS = {
 def load_properties(schedules, path=None, prefix=None):
     properties = {}
 
-    with code("process non-mozzarella - load from pickle files"):
-        for department in [
-            "ricotta",
-            "milk_project",
-            "butter",
-            "mascarpone",
-            "adygea",
-        ]:
-            if department in schedules:
-                properties[department] = PARSERS[department](schedules[department])
+    for department in [
+        "mozzarella",
+        "ricotta",
+        "milk_project",
+        "butter",
+        "mascarpone",
+        "adygea",
+    ]:
+        if department in schedules:
+            properties[department] = PARSERS[department](schedules[department])
+        else:
+            fn = os.path.join(path, f"{prefix} Расписание моцарелла.xlsx")
+            if os.path.exists(fn):
+                properties["mozzarella"] = parse_properties_mozzarella(fn)
             else:
                 properties[department] = PARSERS[department]()
-
-    with code("process mozzarella - parse from schedule"):
-        fn = os.path.join(path, f"{prefix} Расписание моцарелла.xlsx")
-        if os.path.exists(fn):
-            properties["mozzarella"] = parse_properties_mozzarella(fn)
     return properties
 
 
