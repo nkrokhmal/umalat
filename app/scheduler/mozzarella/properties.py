@@ -144,10 +144,10 @@ def cast_properties(schedule=None):
             values.append([drenator.y[0], drenator.props['pouring_line'], drenator.props['drenator_num']])
         df = pd.DataFrame(values, columns=['drenator_end', 'pouring_line', 'drenator_num'])
         df['id'] = df['pouring_line'].astype(int) * 2 + df['drenator_num'].astype(int)
+        df['id'] = df['id'] + 1
         df = df[['id', 'drenator_end']]
         df = df.drop_duplicates(subset='id', keep='last')
         df = df.reset_index(drop=True)
-        df['id'] = df['id'].astype(int) + 1
 
         df = df.sort_values(by='id')
 

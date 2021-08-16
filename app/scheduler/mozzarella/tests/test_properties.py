@@ -2,6 +2,7 @@ from app.scheduler import load_schedules, load_properties
 from app.scheduler.mozzarella.properties import *
 from app.scheduler.mozzarella.parser import *
 from pprint import pprint
+import yaml
 
 
 def _test(path, prefix):
@@ -11,7 +12,8 @@ def _test(path, prefix):
     schedules = load_schedules(path, prefix, departments=["mozzarella"])
     props = cast_properties(schedules["mozzarella"])
     props = load_properties(schedules, path=path, prefix=prefix)["mozzarella"]
-    utils.lazy_tester.log(props)
+
+    utils.lazy_tester.log(yaml.dump(dict(props)))
     utils.lazy_tester.assert_logs()
 
 
