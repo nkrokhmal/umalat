@@ -1,8 +1,9 @@
 from app.imports.runtime import *
-from app.scheduler.frontend import *
 
 from app.scheduler.mozzarella import *
 from app.scheduler.mozzarella.properties import *
+
+from utils_ak.block_tree import *
 
 
 def _group_intervals(intervals, max_length=None, interval_func=None):
@@ -45,7 +46,7 @@ def test_group_intervals():
     ]
 
 
-def parse_schedule(wb_obj):
+def parse_schedule_file(wb_obj):
     wb = utils.cast_workbook(wb_obj)
 
     with code("Get merged cells dataframe"):
@@ -372,11 +373,14 @@ def fill_properties(parsed_schedule, df_bp):
     return props
 
 
-if __name__ == "__main__":
-    fn = "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-08-11/approved/2021-08-11 Расписание моцарелла.xlsx"
-
-    parsed_schedule = parse_schedule(fn)
+def parse_properties(fn):
+    parsed_schedule = parse_schedule_file(fn)
     df_bp = read_boiling_plan(fn)
     df_bp = prepare_boiling_plan(parsed_schedule, df_bp)
     props = fill_properties(parsed_schedule, df_bp)
-    print(dict(props))
+    return props
+
+
+if __name__ == "__main__":
+    fn = "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-08-11/approved/2021-08-11 Расписание моцарелла.xlsx"
+    print(dict(parse_properties(fn)))

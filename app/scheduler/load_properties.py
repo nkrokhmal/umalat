@@ -2,6 +2,11 @@ from app.imports.runtime import *
 from app.scheduler.mozzarella.properties import (
     cast_properties as parse_schedule_mozzarella,
 )
+from app.scheduler.mozzarella.parser import (
+    parse_properties as parse_properties_mozzarella,
+)
+
+
 from app.scheduler.ricotta.properties import cast_properties as parse_schedule_ricotta
 from app.scheduler.mascarpone.properties import (
     cast_properties as parse_schedule_mascarpone,
@@ -22,20 +27,26 @@ PARSERS = {
 }
 
 
-def load_properties(schedules):
+def load_properties(schedules, path=None, prefix=None):
     properties = {}
-    for department in [
-        "mozzarella",
-        "ricotta",
-        "milk_project",
-        "butter",
-        "mascarpone",
-        "adygea",
-    ]:
-        if department in schedules:
-            properties[department] = PARSERS[department](schedules[department])
-        else:
-            properties[department] = PARSERS[department]()
+
+    with code("process non-mozzarella - load from pickle files"):
+        for department in [
+            "ricotta",
+            "milk_project",
+            "butter",
+            "mascarpone",
+            "adygea",
+        ]:
+            if department in schedules:
+                properties[department] = PARSERS[department](schedules[department])
+            else:
+                properties[department] = PARSERS[department]()
+
+    with code("process mozzarella - parse from schedule"):
+        fn = os.path.join(path, f"{prefix} Расписание моцарелла.xlsx")
+        if os.path.exists(fn):
+            properties["mozzarella"] = parse_properties_mozzarella(fn)
     return properties
 
 
