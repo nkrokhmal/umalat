@@ -43,7 +43,7 @@ def contour_washers_schedule():
                 flask.current_app.config["APPROVED_FOLDER"],
             )
             schedules = load_schedules(path, date_str)
-            props = load_properties(schedules)
+            props = load_properties(schedules, path=path, prefix=date_str)
 
             assert_properties_presence(
                 props,
@@ -69,7 +69,13 @@ def contour_washers_schedule():
                     prefix=yesterday_str,
                     departments=["ricotta", "mozzarella", "adygea", "milk_project"],
                 )
-                yesterday_properties = load_properties(yesterday_schedules)
+                yesterday_properties = load_properties(
+                    yesterday_schedules,
+                    path=config.abs_path(
+                        "app/data/dynamic/{}/approved/".format(yesterday_str)
+                    ),
+                    prefix=yesterday_str,
+                )
 
                 if "mozzarella" in yesterday_schedules:
                     main_form.molder.data = yesterday_properties[

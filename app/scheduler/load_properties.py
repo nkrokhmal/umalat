@@ -41,9 +41,12 @@ def load_properties(schedules, path=None, prefix=None):
         if department in schedules:
             properties[department] = PARSERS[department](schedules[department])
         else:
-            fn = os.path.join(path, f"{prefix} Расписание моцарелла.xlsx")
-            if os.path.exists(fn):
-                properties["mozzarella"] = parse_properties_mozzarella(fn)
+            if department == "mozzarella" and path and prefix:
+                fn = os.path.join(path, f"{prefix} Расписание моцарелла.xlsx")
+                if os.path.exists(fn):
+                    properties["mozzarella"] = parse_properties_mozzarella(fn)
+                else:
+                    properties[department] = PARSERS[department]()
             else:
                 properties[department] = PARSERS[department]()
     return properties
