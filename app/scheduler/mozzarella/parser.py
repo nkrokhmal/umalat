@@ -120,9 +120,34 @@ def parse_schedule_file(wb_obj):
 
     parse_block("water_meltings", "melting", [split_rows[1] + 4], start_times[1])
 
-    with code('add water forming info to meltings'):
-        for melting in m.root['water_meltings'].children:
-            melting.props.update(melting_end=melting.y[0])
+    with code('meta info to water meltings'):
+        with code('melting_end'):
+            for melting in m.root['water_meltings'].children:
+                melting.props.update(melting_end=melting.y[0])
+
+        with code('melting_end_with_cooling'):
+            df_formings = df[df["label"] == "охлаждение"]
+
+            with code("fix start times and column header"):
+                df_formings["x0"] += start_times[1] - 5
+                df_formings["y0"] += start_times[1] - 5
+                df_formings["x1"] += start_times[1] - 5
+                df_formings["y1"] += start_times[1] - 5
+
+            df_formings = df_formings.sort_values(by="x0")
+            for i, row in df_formings.iterrows():
+                overlapping = [
+                    m
+                    for m in m.root["water_meltings"].children
+                    if m.x[0] < row["x0"] < m.y[0]
+                ]
+                if not overlapping:
+                    # first cooling in each boiling does not qualify the filter
+                    continue
+
+                melting = utils.delistify(overlapping, single=True)
+                cooling_length = row['y0'] - melting.x[0]
+                melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
 
     parse_block("water_packings", "packing", [split_rows[2] + 1], start_times[1])
 
@@ -131,7 +156,6 @@ def parse_schedule_file(wb_obj):
         salt_melting_rows = list(range(split_rows[3] + 1, last_melting_row, 4))
 
     parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
-
 
     with code("add salt forming info to meltings"):
         df_formings = df[
@@ -152,7 +176,11 @@ def parse_schedule_file(wb_obj):
                 if m.x[0] <= row["x0"] and m.y[0] >= row["x0"]
             ]
             melting = utils.delistify([m for m in overlapping if m.x[0] + 6 == row["x0"]], single=True)  # todo next: make properly, check
-            melting.props.update(melting_start=row['x0'], melting_end=row["y0"])
+            melting.props.update(melting_start=row['x0'],
+                                 melting_end=row["y0"],
+                                 melting_end_with_cooling=melting.y[0])
+
+
     parse_block(
         "salt_packings",
         "packing",
@@ -286,7 +314,7 @@ def fill_properties(parsed_schedule, df_bp):
             line_boilings = list(sorted(line_boilings, key=lambda b: b.x[0]))
             last_boiling_id = line_boilings[-1].props["boiling_id"]
             last_melting = parsed_schedule.find_one(cls="melting", boiling_id=last_boiling_id)
-            return last_melting.y[0]
+            return last_melting.props['melting_end_with_cooling']
 
         props.water_melting_end_time = cast_human_time(_get_melting_end(water_boilings))
         props.salt_melting_end_time = cast_human_time(_get_melting_end(salt_boilings))
@@ -358,5 +386,5 @@ def parse_properties(fn):
 
 
 if __name__ == "__main__":
-    fn = "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-08-06/approved/2021-08-06 Расписание моцарелла.xlsx"
+    fn = "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-07-14/approved/2021-07-14 Расписание моцарелла.xlsx"
     print(dict(parse_properties(fn)))
