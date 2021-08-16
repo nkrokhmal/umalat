@@ -174,7 +174,7 @@ def prepare_boiling_plan(parsed_schedule, df_bp):
             boiling_ids = water_boiling_ids
         else:
             boiling_ids = salt_boiling_ids
-
+        boiling_ids = list(sorted(set(boiling_ids)))
         for i, (_, grp) in enumerate(grp_line.groupby("group_id")):
             df_bp.loc[grp.index, "boiling_id"] = boiling_ids[i]
     df_bp["boiling_id"] = df_bp["boiling_id"].astype(int)
