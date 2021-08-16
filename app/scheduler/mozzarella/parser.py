@@ -104,22 +104,33 @@ def parse_schedule_file(wb_obj):
                 hour -= 24
             start_times.append(hour * 12)
 
-    parse_block("boilings", "boiling", [3, 7, 15, 19], start_times[0])
-    parse_block("cleanings", "cleaning", [11], start_times[0])
+    # rows for ['1 смена', '2 смена', ...
+    split_rows = list(
+        sorted(df[df["y0"] - df["x0"] >= 50]["x1"].unique())
+    )  # [2, 23, 32, 39, 60]
 
-    parse_block("water_meltings", "melting", [27], start_times[1])
+    parse_block(
+        "boilings",
+        "boiling",
+        [split_rows[0] + i for i in [1, 5, 13, 17]],
+        start_times[0],
+    )
+    parse_block("cleanings", "cleaning", [split_rows[0] + 9], start_times[0])
 
-    parse_block("water_packings", "packing", [33], start_times[1])
+    parse_block("water_meltings", "melting", [split_rows[1] + 4], start_times[1])
 
-    with code("Find rows for salt melting and packing lines"):
+    parse_block("water_packings", "packing", [split_rows[2] + 1], start_times[1])
+
+    with code("Find rows for salt melting lines"):
         last_melting_row = df[df["label"] == "посолка"]["x1"].max()
-        salt_melting_rows = list(range(40, last_melting_row, 4))
-        salt_packing_row = last_melting_row + 3
+        salt_melting_rows = list(range(split_rows[3] + 1, last_melting_row, 4))
 
     parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
 
     with code("add salt forming info to packings"):
-        df_formings = df[(df["label"] == "плавление/формирование") & (df["x1"] >= 40)]
+        df_formings = df[
+            (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[3] + 1)
+        ]
         with code("fix start times and column header"):
             df_formings["x0"] += start_times[1] - 5
             df_formings["y0"] += start_times[1] - 5
@@ -134,14 +145,14 @@ def parse_schedule_file(wb_obj):
                 for m in m.root["salt_meltings"].children
                 if m.x[0] <= row["x0"] and m.y[0] >= row["x0"]
             ]
-            melting = utils.delistify(
+            melting = delistify(
                 [m for m in overlapping if m.x[0] + 6 == row["x0"]], single=True
             )  # todo next: make properly, check
             melting.props.update(melting_end=row["y0"])
     parse_block(
         "salt_packings",
         "packing",
-        [salt_packing_row, salt_packing_row + 6],
+        [split_rows[4] + 1, split_rows[4] + 7],
         start_times[1],
     )
 
@@ -382,5 +393,5 @@ def parse_properties(fn):
 
 
 if __name__ == "__main__":
-    fn = "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-08-11/approved/2021-08-11 Расписание моцарелла.xlsx"
+    fn = "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-08-06/approved/2021-08-06 Расписание моцарелла.xlsx"
     print(dict(parse_properties(fn)))
