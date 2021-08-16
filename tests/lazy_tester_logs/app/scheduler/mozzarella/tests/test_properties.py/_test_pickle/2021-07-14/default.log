@@ -1,0 +1,29 @@
+bar12_present: true
+cheesemaker1_end_time: '10:05'
+cheesemaker2_end_time: '13:25'
+cheesemaker3_end_time: '17:25'
+cheesemaker4_end_time: '16:30'
+drenator1_end_time: '13:40'
+drenator2_end_time: '10:05'
+drenator3_end_time: '16:00'
+drenator4_end_time: '11:55'
+drenator5_end_time: '17:50'
+drenator6_end_time: '20:00'
+drenator7_end_time: '19:05'
+drenator8_end_time: '11:40'
+full_cleaning_times:
+- '12:05'
+- '16:10'
+line27_last_termizator_end_times:
+- '13:55'
+- '16:05'
+line33_last_termizator_end_times:
+- 08:15
+line36_last_termizator_end_times:
+- 02:45
+multihead_end_time: '16:15'
+salt_melting_end_time: '23:20'
+salt_melting_start_time: 06:30
+short_cleaning_times: []
+water_melting_end_time: '15:45'
+water_multihead_present: true
