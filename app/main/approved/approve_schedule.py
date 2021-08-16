@@ -1,6 +1,6 @@
 import flask
 from app.imports.runtime import *
-from app.utils.files.utils import move_to_approved, move_to_approved_pickle
+from app.utils.files.utils import move_to_approved, move_to_approved_pickle, delete_from_approved_pickle
 from app.main import main
 
 
@@ -65,6 +65,23 @@ def approve_mozzarella():
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mozzarella_schedule"))
+
+
+@main.route("/approve_upload_mozzarella", methods=["GET", "POST"])
+@flask_login.login_required
+def approve_upload_mozzarella():
+    date = flask.request.form.get("date")
+    file_name = flask.request.form.get("file_name")
+    pickle_file_name = f"{file_name.split('.')[0]}.pickle"
+
+    path = move_to_approved(date=date, file_name=file_name)
+    delete_from_approved_pickle(date=date, file_name=pickle_file_name)
+
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+
+    flask.flash("Расписание успешно утверждено", "success")
+    return flask.redirect(flask.url_for(".mozzarella_upload_schedule"))
 
 
 @main.route("/approve_ricotta", methods=["GET", "POST"])

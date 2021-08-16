@@ -115,3 +115,14 @@ def move_to_approved_pickle(date, file_name):
     if os.path.exists(old_dir):
         shutil.copyfile(old_dir, os.path.join(new_dir, file_name))
     return new_dir
+
+
+def delete_from_approved_pickle(date, file_name):
+    pickle_dir = os.path.join(
+        flask.current_app.config["DYNAMIC_DIR"],
+        date,
+        flask.current_app.config["APPROVED_FOLDER"],
+        file_name
+    )
+    if os.path.exists(pickle_dir):
+        os.remove(pickle_dir)

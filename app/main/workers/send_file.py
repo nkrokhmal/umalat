@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 import telebot
+from loguru import logger
 
 
 @rq.job
