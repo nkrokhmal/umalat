@@ -3,21 +3,6 @@ from app.imports.runtime import *
 from app.scheduler.time import *
 
 
-def make_steam_blocks(block, x=None):
-    x = x or block.x
-    maker, make = utils.init_block_maker("steam_consumption_blocks", font_size=8, x=x)
-
-    for j in range(block.size[0]):
-        make(
-            x=(j, 0),
-            size=(1, 1),
-            text=str(block.props["value"]),
-            text_rotation=90,
-            push_func=utils.add_push,
-        )
-    return maker.root
-
-
 def init_schedule_workbook(wb=None):
     if not wb:
         wb = utils.init_workbook(["Расписание"])
