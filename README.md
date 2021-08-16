@@ -2,7 +2,7 @@
 ```sh
   docker-compose up -d
 ```
-Next 1
+Next
 
 Запуск тестов
 ```sh
