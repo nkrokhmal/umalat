@@ -1,10 +1,16 @@
+import os
+
 from ...enum import LineName
 import pandas as pd
 import json
 from app.models import *
 
 
-def read_params(fn="app/data/static/params/adygea.xlsx"):
+def read_params():
+    if os.environ["DB_TYPE"] == "test":
+        fn = "app/data/static/params/adygea_test.xlsx"
+    else:
+        fn = "app/data/static/params/adygea.xlsx"
     df = pd.read_excel(fn, index_col=0)
     return df
 

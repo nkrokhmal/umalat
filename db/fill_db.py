@@ -1,5 +1,6 @@
 import os
 os.environ["APP_ENVIRONMENT"] = "runtime"
+os.environ["DB_TYPE"] = "prod"
 
 from app.app import *
 

@@ -4,7 +4,11 @@ import json
 from app.models import *
 
 
-def read_params(fn="app/data/static/params/butter.xlsx"):
+def read_params():
+    if os.environ["DB_TYPE"] == "test":
+        fn = "app/data/static/params/butter_test.xlsx"
+    else:
+        fn = "app/data/static/params/butter.xlsx"
     df = pd.read_excel(fn, index_col=0)
     return df
 

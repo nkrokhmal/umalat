@@ -5,6 +5,10 @@ from app.models import *
 
 
 def read_params(fn="app/data/static/params/creamcheese.xlsx"):
+    if os.environ["DB_TYPE"] == "test":
+        fn = "app/data/static/params/creamcheese_test.xlsx"
+    else:
+        fn = "app/data/static/params/creamcheese.xlsx"
     df = pd.read_excel(fn, index_col=0)
     return df
 
@@ -176,9 +180,6 @@ def fill_sku():
             if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id) & (x.output_coeff == sku["Коэффициент"]) &
                (x.weight_netto == sku["Вес нетто"]) & (x.is_lactose == sku["Наличие лактозы"]) & (x.flavoring_agent == sku["Вкусовая добавка"])
         ]
-        if len(add_sku.made_from_boilings) == 0:
-            print(sku["Вкусовая добавка"])
-            print(add_sku.name)
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]
         db.session.add(add_sku)
