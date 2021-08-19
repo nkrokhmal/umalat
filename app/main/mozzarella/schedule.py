@@ -82,6 +82,7 @@ def mozzarella_schedule():
         schedule_wb = openpyxl.load_workbook(
             filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN"]
         )
+
         schedule_wb = draw_boiling_plan_merged(schedule_df, schedule_wb)
         schedule_wb = draw_excel_frontend(
             frontend, open_file=False, fn=None, style=STYLE, wb=schedule_wb,
