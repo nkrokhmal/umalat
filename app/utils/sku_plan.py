@@ -265,7 +265,7 @@ class SkuPlanClient:
         for sku_grouped in self.skus_grouped:
             excel_client = ExcelBlock(sheet=sheet)
             cur_row = self.fill_skus(sku_grouped, excel_client, cur_row, False,
-                                     order=["Рикотта", "Качорикотта", "Четук"])
+                                     order=["Рикотта", "Качорикотта", "Четук", "Кавказский", "Черкесский"])
             cur_row += self.space_rows
 
         for sheet_number, sheet_name in enumerate(self.wb.sheetnames):

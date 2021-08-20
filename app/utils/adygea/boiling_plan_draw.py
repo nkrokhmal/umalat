@@ -25,6 +25,9 @@ ROWS = {
     "total_volume": 2,
 }
 
+SKU_SHEET_NAME = "SKU Адыгейский"
+PLAN_SHEET_NAME = "План варок адыгейский"
+
 
 def draw_boiling_names(wb):
     excel_client = ExcelBlock(wb["Группы"])
@@ -39,7 +42,7 @@ def draw_boiling_names(wb):
 def draw_skus(wb, data_sku):
     grouped_skus = data_sku
     grouped_skus.sort(key=lambda x: x.name, reverse=False)
-    excel_client = ExcelBlock(wb["SKU"])
+    excel_client = ExcelBlock(wb[SKU_SHEET_NAME])
     excel_client.draw_row(1, ["-", "-", "-", "-"], set_border=False)
     cur_i = 2
 
@@ -67,11 +70,10 @@ def get_colour_by_name(sku_name, skus):
 def draw_boiling_plan(df, df_extra, wb, total_volume=0):
     skus = db.session.query(AdygeaSKU).all()
     draw_boiling_names(wb=wb)
-    sheet_name = "План варок"
     draw_skus(wb, skus)
 
     values = []
-    excel_client = ExcelBlock(wb[sheet_name])
+    excel_client = ExcelBlock(wb[PLAN_SHEET_NAME])
 
     sku_names = [x.name for x in skus]
     df_filter = df[df["name"].isin(sku_names)].copy()
@@ -125,7 +127,5 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
 
     excel_client.font_size = 10
 
-    for sheet in wb.sheetnames:
-        wb[sheet].views.sheetView[0].tabSelected = False
     wb.active = 2
     return wb
