@@ -18,14 +18,6 @@
 
 {% block page_content %}
 <div class="row">
-    <div class="container">
-        {% for message in get_flashed_messages() %}
-        <div class="alert alert-warning">
-            <button type="button" class="close" data-dismiss="alert" style="position:absolute; top:0; right:0;">&times;</button>
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
     <div class="card card-body bg-white border-light shadow-sm mb-4">
         <h2 class="h5 mb-4">Загрузите файл остатков</h2>
         <div class="row">

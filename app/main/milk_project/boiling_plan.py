@@ -20,6 +20,7 @@ def milk_project_boiling_plan():
         skus = db.session.query(MilkProjectSKU).all() + db.session.query(AdygeaSKU).all()
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(MilkProjectBoiling).all() + db.session.query(AdygeaBoiling).all()
+
         skus_req, remainings_df = parse_file(flask.request.files["input_file"].read())
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
