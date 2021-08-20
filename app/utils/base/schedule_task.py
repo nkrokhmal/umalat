@@ -165,14 +165,13 @@ class BaseScheduleTask(Generic[ModelType]):
             cur_row += 1
         return cur_row
 
-    def schedule_task_original(self, wb):
-        sheet_name = "Печать заданий"
+    def schedule_task_original(self, wb, sheet_name="Печать заданий", cur_row=2):
         task_name = f"Задание на упаковку {self.department}"
 
-        cur_row = 2
         space_row = 4
 
-        wb.create_sheet(sheet_name)
+        if sheet_name not in wb.sheetnames:
+            wb.create_sheet(sheet_name)
         excel_client = ExcelBlock(wb[sheet_name], font_size=9)
 
         cur_row = self.draw_task_original(
@@ -181,16 +180,15 @@ class BaseScheduleTask(Generic[ModelType]):
             task_name,
         )
         cur_row += space_row
-        return wb
+        return wb, cur_row
 
-    def schedule_task_boilings(self, wb, batch_number):
-        sheet_name = "Печать заданий 2"
+    def schedule_task_boilings(self, wb, batch_number, sheet_name="Печать заданий 2", cur_row=2):
         task_name = f"Задание на упаковку {self.department}"
 
-        cur_row = 2
         space_row = 4
 
-        wb.create_sheet(sheet_name)
+        if sheet_name not in wb.sheetnames:
+            wb.create_sheet(sheet_name)
         excel_client = ExcelBlock(wb[sheet_name], font_size=9)
 
         cur_row = self.draw_task_boiling(
@@ -200,4 +198,4 @@ class BaseScheduleTask(Generic[ModelType]):
             batch_number,
         )
         cur_row += space_row
-        return wb
+        return wb, cur_row

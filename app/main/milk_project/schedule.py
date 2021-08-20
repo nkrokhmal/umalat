@@ -10,7 +10,9 @@ from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict
 from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
+from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from .forms import ScheduleForm
+from collections import namedtuple
 
 
 @main.route("/milk_project_schedule", methods=["GET", "POST"])
@@ -70,20 +72,39 @@ def milk_project_schedule():
             f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
         )
 
-        schedule_task = MilkProjectScheduleTask(
-            df=milk_project_output["boiling_plan_df"],
-            date=date,
-            model=MilkProjectSKU,
-            department="Милкпроджект",
-        )
+        ScheduleTaskParams = namedtuple("ScheduleTaskParams", "task,df,model,department")
 
-        schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task(form.batch_number.data)
+        schedule_task_params = [
+            ScheduleTaskParams(
+                task=MilkProjectScheduleTask,
+                df=milk_project_output["boiling_plan_df"],
+                model=MilkProjectSKU,
+                department="Милкпроджект",
+            ),
+            ScheduleTaskParams(
+                task=AdygeaScheduleTask,
+                df=adygea_output["boiling_plan_df"],
+                model=AdygeaSKU,
+                department="Адыгейский",
+            ),
+        ]
 
-        # schedule_wb = schedule_task.schedule_task_original(schedule_wb)
-        schedule_wb = schedule_task.schedule_task_boilings(
-            schedule_wb, form.batch_number.data
-        )
+        cur_row = 2
+        for schedule_task_param in schedule_task_params:
+            schedule_task = schedule_task_param.task(
+                df=schedule_task_param.df,
+                date=date,
+                model=schedule_task_param.model,
+                department=schedule_task_param.department,
+            )
+
+            schedule_task.update_total_schedule_task()
+            schedule_task.update_boiling_schedule_task(form.batch_number.data)
+
+            # schedule_wb = schedule_task.schedule_task_original(schedule_wb)
+            schedule_wb, cur_row = schedule_task.schedule_task_boilings(
+                schedule_wb, form.batch_number.data, cur_row=cur_row
+            )
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(
