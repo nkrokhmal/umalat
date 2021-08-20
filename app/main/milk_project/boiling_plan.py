@@ -1,6 +1,8 @@
 from app.imports.runtime import *
-from app.utils.milk_project.boiling_plan_create import boiling_plan_create
-from app.utils.milk_project.boiling_plan_draw import draw_boiling_plan
+from app.utils.milk_project.boiling_plan_create import boiling_plan_create as boiling_plan_create_milk_project
+from app.utils.milk_project.boiling_plan_draw import draw_boiling_plan as draw_boiling_plan_milk_project
+from app.utils.adygea.boiling_plan_create import boiling_plan_create as boiling_plan_create_adygea
+from app.utils.adygea.boiling_plan_draw import draw_boiling_plan as draw_boiling_plan_adygea
 from app.utils.files.utils import move_boiling_file, save_boiling_plan
 from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
@@ -15,9 +17,10 @@ def milk_project_boiling_plan():
     form = BoilingPlanForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
-        skus = db.session.query(MilkProjectSKU).all()
+        skus = db.session.query(MilkProjectSKU).all() + db.session.query(AdygeaSKU).all()
         total_skus = db.session.query(SKU).all()
-        boilings = db.session.query(MilkProjectBoiling).all()
+        boilings = db.session.query(MilkProjectBoiling).all() + db.session.query(AdygeaBoiling).all()
+
         skus_req, remainings_df = parse_file(flask.request.files["input_file"].read())
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
@@ -39,8 +42,16 @@ def milk_project_boiling_plan():
         sheet_name = flask.current_app.config["SHEET_NAMES"]["schedule_plan"]
         ws = wb_data_only[sheet_name]
         df, _ = parse_sheet(ws, sheet_name, excel_compiler, MilkProjectSKU)
-        df_plan = boiling_plan_create(df)
-        wb = draw_boiling_plan(df_plan, wb)
+
+        milk_project_df = df[df['sku'].apply(lambda x: isinstance(x, MilkProjectSKU))]
+        adygea_df = df[df['sku'].apply(lambda x: isinstance(x, AdygeaSKU))]
+
+        df_plan_milk_project = boiling_plan_create_milk_project(milk_project_df)
+        df_plan_adygea = boiling_plan_create_adygea(adygea_df)
+
+        wb = draw_boiling_plan_milk_project(df_plan_milk_project, wb)
+        wb = draw_boiling_plan_adygea(df_plan_adygea, None, wb)
+
         save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
         return flask.render_template(
             "milk_project/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date,

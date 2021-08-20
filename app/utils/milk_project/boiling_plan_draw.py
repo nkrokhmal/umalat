@@ -25,7 +25,7 @@ ROWS = {
 }
 
 SKU_SHEET_NAME = "SKU Милкпроджект"
-PLAN_SHEET_NAME = "План варок"
+PLAN_SHEET_NAME = "План варок милкпроджект"
 
 
 def draw_skus(wb, data_sku, sheet_name, cur_i=None):
