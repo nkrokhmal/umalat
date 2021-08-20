@@ -14,7 +14,14 @@ def read_boiling_plan(wb_obj):
     wb = utils.cast_workbook(wb_obj)
 
     cur_id = 0
-    ws = wb["План варок"]
+
+    with code("Load boiling plan"):
+        ws = None
+        for key in ["План варок", "План варок милкпроджект"]:
+            if key in wb.sheetnames:
+                ws = wb[key]
+        if not ws:
+            raise Exception("Не найдена вкладка для плана варок")
 
     values = []
 

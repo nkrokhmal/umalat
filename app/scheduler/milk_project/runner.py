@@ -24,7 +24,13 @@ def run_milk_project(
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
     res = submit_schedule(
-        "милкпроджект", schedule, frontend, path, prefix, STYLE, open_file=open_file
+        "милкпроджект",
+        schedule,
+        frontend,
+        prefix,
+        STYLE,
+        path=path,
+        open_file=open_file,
     )
     res["boiling_plan_df"] = boiling_plan_df
     return res

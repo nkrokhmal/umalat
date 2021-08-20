@@ -3,12 +3,21 @@ from app.scheduler import *
 from utils_ak.block_tree import *
 
 
-def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=False):
+def run_consolidated(
+    input_path,
+    prefix="",
+    output_path="outputs/",
+    open_file=False,
+    schedules=None,
+    wb=None,
+):
     utils.makedirs(output_path)
 
-    schedules = load_schedules(input_path, prefix)
+    if not schedules:
+        schedules = load_schedules(input_path, prefix)
 
-    wb = init_schedule_workbook()
+    if not wb:
+        wb = init_schedule_workbook()
 
     cur_depth = 0
 
@@ -61,6 +70,16 @@ def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=Fa
 
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
+    if "adygea" in schedules:
+        from app.scheduler.adygea import wrap_frontend, STYLE
+
+        frontend = wrap_frontend(schedules["adygea"])
+        depth = frontend.y[1]
+        frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
+        cur_depth += depth
+
+        draw_excel_frontend(frontend, STYLE, wb=wb)
+
     if "contour_cleanings" in schedules:
         from app.scheduler.contour_cleanings import wrap_frontend, STYLE
 
@@ -71,14 +90,19 @@ def run_consolidated(input_path, prefix="", output_path="outputs/", open_file=Fa
 
     # todo maybe: copy-paste from submit_schedule
     with code("Dump frontend as excel file"):
-        base_fn = f"Расписание общее.xlsx"
-        if prefix:
-            base_fn = prefix + " " + base_fn
-        output_fn = os.path.join(output_path, base_fn)
+        with code("Get filename"):
+            output_fn = None
+            if output_path:
+                base_fn = f"Расписание общее.xlsx"
+                if prefix:
+                    base_fn = prefix + " " + base_fn
+                output_fn = os.path.join(output_path, base_fn)
 
         draw_excel_frontend(
             frontend, open_file=open_file, wb=wb, fn=output_fn, style=STYLE
         )
+
+    return wb
 
 
 def test():

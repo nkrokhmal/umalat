@@ -3,8 +3,9 @@ import flask
 from app.imports.runtime import *
 
 from app.main import main
-from app.scheduler.milk_project import *
-from app.scheduler.milk_project.frontend.style import STYLE
+from app.scheduler import run_adygea, run_milk_project, run_consolidated
+from app.models import MilkProjectSKU, AdygeaSKU
+
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict
@@ -33,37 +34,69 @@ def milk_project_schedule():
             ),
             data_only=True,
         )
-        boiling_plan_df = read_boiling_plan(wb)
+
+        milk_project_output = run_milk_project(wb, path=None, start_time=beg_time)
+        adygea_output = run_adygea(wb, path=None, start_time=beg_time)
+
+        schedule_wb = run_consolidated(
+            input_path=None,
+            prefix=None,
+            output_path=None,
+            schedules={
+                "milk_project": milk_project_output["schedule"],
+                "adygea": adygea_output["schedule"],
+            },
+        )
+
         add_batch(
             date,
             "Милкпроджект",
             form.batch_number.data,
-            form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
+            form.batch_number.data
+            + int(milk_project_output["boiling_plan_df"]["boiling_id"].max())
+            - 1,
         )
-        schedule = make_schedule(boiling_plan_df, start_time=beg_time)
-        frontend = wrap_frontend(schedule, date=date)
-        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
+        add_batch(
+            date,
+            "Адыгейский цех",
+            form.batch_number.data,
+            form.batch_number.data
+            + int(adygea_output["boiling_plan_df"]["boiling_id"].max())
+            - 1,
+        )
+
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
-        filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
+        filename_schedule_pickle = (
+            f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
+        )
 
         schedule_task = MilkProjectScheduleTask(
-            df=boiling_plan_df,
+            df=milk_project_output["boiling_plan_df"],
             date=date,
-            model=RicottaSKU,
-            department="Милкпроджект"
+            model=MilkProjectSKU,
+            department="Милкпроджект",
         )
 
         schedule_task.update_total_schedule_task()
         schedule_task.update_boiling_schedule_task(form.batch_number.data)
 
         # schedule_wb = schedule_task.schedule_task_original(schedule_wb)
-        schedule_wb = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)
+        schedule_wb = schedule_task.schedule_task_boilings(
+            schedule_wb, form.batch_number.data
+        )
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
-        save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
+        save_schedule_dict(
+            milk_project_output["schedule"].to_dict(),
+            filename_schedule_pickle,
+            date.strftime("%Y-%m-%d"),
+        )
         os.remove(file_path)
         return flask.render_template(
-            "milk_project/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")
+            "milk_project/schedule.html",
+            form=form,
+            filename=filename_schedule,
+            date=date.strftime("%Y-%m-%d"),
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
