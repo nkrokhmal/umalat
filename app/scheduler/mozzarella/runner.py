@@ -15,9 +15,11 @@ def run_mozzarella(
 ):
     start_times = start_times or {LineName.WATER: "02:00", LineName.SALT: "06:00"}
 
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn)
+
     if not schedule:
         schedule = make_schedule(
-            boiling_plan_fn,
+            boiling_plan_df,
             optimize=optimize,
             start_times=start_times,
             first_boiling_id=first_boiling_id,
@@ -28,6 +30,9 @@ def run_mozzarella(
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
 
-    return submit_schedule(
+    res = submit_schedule(
         "моцарелла", schedule, frontend, prefix, STYLE, path=path, open_file=open_file
     )
+    res["boiling_plan_df"] = boiling_plan_df
+    return res
+
