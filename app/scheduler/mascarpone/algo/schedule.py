@@ -159,7 +159,7 @@ class BoilingPlanToSchedule:
                     push_kwargs={'validator': Validator()})
             left_cleaning_lines.remove(first_last_group.props["line_nums"])
 
-            if len(boiling_group_dfs) > 6 or is_last:
+            if len(boiling_plan_df.groupby("boiling_id")) > 6 or is_last:
                 for entity in ["separator", "homogenizer"]:
                     cleaning = make_cleaning(entity)
                     self.m.block(cleaning,
