@@ -102,23 +102,22 @@ class BoilingPlanToSchedule:
 
     def _make_mascarpone(self, boiling_plan_df, is_last=False):
         is_cream = boiling_plan_df.iloc[0]["is_cream"]
-        boiling_group_dfs = [
-            grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
+        batch_dfs = [
+            grp for batch_id, grp in boiling_plan_df.groupby("batch_id")
         ]
         if not is_cream:
-            # create by pairs
-            assert len(boiling_group_dfs) % 2 == 0
-
             boiling_groups = []
 
-            for i in range(len(boiling_group_dfs) // 2):
+            for batch_df in batch_dfs:
+                boiling_group_dfs = [grp for boiling_id, grp in batch_df.groupby("boiling_id")]
                 boiling_groups.append(
-                    make_mascarpone_boiling_group(boiling_group_dfs[i * 2 : i * 2 + 2])
+                    make_mascarpone_boiling_group(boiling_group_dfs)
                 )
         else:
+            # cream
             boiling_groups = []
-            for boiling_group_df in boiling_group_dfs:
-                boiling_groups.append(make_mascarpone_boiling_group([boiling_group_df]))
+            for batch_df in batch_dfs:
+                boiling_groups.append(make_mascarpone_boiling_group([batch_df]))
 
         all_line_nums = [[1, 2], [3, 4]]
 
