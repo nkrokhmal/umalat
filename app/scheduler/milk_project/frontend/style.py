@@ -9,7 +9,7 @@ STYLE = {
     },
     "processing": {
         "color": "#00B0F0",  # blue
-        # todo soon: add name from models
+        # todo next: add name from models
         "text": "Производство",
     },
     "red": {"color": "red"},  # yellow

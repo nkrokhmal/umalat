@@ -25,5 +25,5 @@ def run_adygea(
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
     return submit_schedule(
-        "адыгейский", schedule, frontend, path, prefix, STYLE, open_file=open_file
+        "адыгейский", schedule, frontend, prefix, STYLE, path=path, open_file=open_file
     )

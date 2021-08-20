@@ -53,7 +53,7 @@ class MilkProjectBoilingTechnology(BoilingTechnology):
     water_collecting_time = mdb.Column(mdb.Integer)
     mixture_collecting_time = mdb.Column(mdb.Integer)
     processing_time = mdb.Column(mdb.Integer)
-    # todo: rename
+    # todo maybe: rename
     red_time = mdb.Column(mdb.Integer)
 
     @staticmethod

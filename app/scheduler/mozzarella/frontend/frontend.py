@@ -351,25 +351,6 @@ def wrap_melting(boiling, line_name):
 
         with code('Steam consumption'):
             pass
-
-            # deprecated (2021.06.04). Steam consumption is not needed anymore
-            # with m.block("steams", font_size=8):
-            #     for b in boiling.iter(
-            #         cls="steam_consumption",
-            #         boiling_model=lambda bm: bm.line.name == line_name,
-            #         type="melting",
-            #     ):
-            #         for j in range(
-            #             int(b.x[0]), int(b.y[0])
-            #         ):  # todo: small hardcode (should be int already)
-            #              m.block(push_func=add_push,
-            #                      x=(j, 0),
-            #                      size=(1, 1),
-            #                      text=str(b.props["value"]),
-            #                      text_rotation=90,
-            #                 # border=None,
-            #             )
-
     return m.root
 
 

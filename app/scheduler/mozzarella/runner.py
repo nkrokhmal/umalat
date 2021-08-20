@@ -29,5 +29,5 @@ def run_mozzarella(
         raise Exception("Ошибка при построении расписания")
 
     return submit_schedule(
-        "моцарелла", schedule, frontend, path, prefix, STYLE, open_file=open_file
+        "моцарелла", schedule, frontend, prefix, STYLE, path=path, open_file=open_file
     )

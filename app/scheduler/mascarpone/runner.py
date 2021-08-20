@@ -26,4 +26,4 @@ def run_mascarpone(
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
-    return submit_schedule('маскарпоне', schedule, frontend, path, prefix, STYLE, open_file=open_file)
+    return submit_schedule('маскарпоне', schedule, frontend, prefix, STYLE, path=path, open_file=open_file)

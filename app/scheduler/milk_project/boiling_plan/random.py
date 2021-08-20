@@ -26,7 +26,7 @@ def generate_random_boiling_plan(n=10, seed=12):
         boiling_skus = list(sorted(boiling_skus, key=lambda sku: sku.name))
         for sku in boiling_skus:
             kg = 100
-            # todo soon: del (after sku.made_from_boilings == 1 is fixed)
+            # todo next: del (after sku.made_from_boilings == 1 is fixed)
             if len(sku.made_from_boilings) > 1:
                 continue
             values.append([i, sku, kg])

@@ -40,8 +40,8 @@ def run_contour_cleanings(
         "контурные мойки",
         schedule,
         frontend,
-        output_path,
         prefix,
         STYLE,
+        path=output_path,
         open_file=open_file,
     )

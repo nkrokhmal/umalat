@@ -15,18 +15,9 @@ def test_make_boiling():
 
 
 def test_make_boiling_sequence():
-    # todo: make random seed and use lazy tester for output
     boiling_plan_df = generate_random_boiling_plan()
     boiling_group_df = boiling_plan_df[boiling_plan_df["boiling_id"] == 0]
     print(make_boiling_sequence(boiling_group_df))
-
-
-# todo: archived
-# def test_make_boiling_group():
-#     # todo: make random seed and use lazy tester for output
-#     boiling_plan_df = generate_random_boiling_plan()
-#     boiling_group_df = boiling_plan_df[boiling_plan_df["boiling_id"] == 0]
-#     print(make_boiling_group(boiling_group_df))
 
 
 if __name__ == "__main__":
