@@ -11,6 +11,8 @@ from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict
 from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
+from app.scheduler.time import *
+
 from .forms import ScheduleForm
 from collections import namedtuple
 
@@ -39,6 +41,13 @@ def milk_project_schedule():
 
         milk_project_output = run_milk_project(wb, path=None, start_time=beg_time)
         adygea_output = run_adygea(wb, path=None, start_time=beg_time)
+
+        # todo maybe: hardcode
+        with code("Fix adygea start time - start 20 minutes before milk_project ends"):
+            adygea_output["schedule"].props.update(
+                x=(milk_project_output["schedule"].y[0] - 4, 0),
+                preferred_header_time=cast_time(milk_project_output["schedule"].x[0]),
+            )
 
         schedule_wb = run_consolidated(
             input_path=None,
@@ -72,7 +81,9 @@ def milk_project_schedule():
             f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
         )
 
-        ScheduleTaskParams = namedtuple("ScheduleTaskParams", "task,df,model,department")
+        ScheduleTaskParams = namedtuple(
+            "ScheduleTaskParams", "task,df,model,department"
+        )
 
         schedule_task_params = [
             ScheduleTaskParams(

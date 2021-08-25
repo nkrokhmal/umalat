@@ -10,7 +10,7 @@ def test_batch():
     )
     fns = [fn for fn in fns if "$" not in fn]
 
-    for fn in tqdm.tqdm(fns):
+    for fn in utils.tqdm(fns, desc=lambda fn: fn):
         _test(fn, open_file=False)
 
 
@@ -26,9 +26,10 @@ def _test(fn, open_file=False):
 if __name__ == "__main__":
     _test(
         config.abs_path(
-            "app/data/static/samples/inputs/by_department/mascarpone/План по варкам маскарпоне 1.xlsx"
+            "app/data/static/samples/inputs/by_department/mascarpone/План по варкам маскарпоне 3.xlsx"
         ),
         open_file=True,
     )
 
     # test_batch()
+#

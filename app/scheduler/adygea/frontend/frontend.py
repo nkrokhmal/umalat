@@ -104,9 +104,16 @@ def wrap_frontend(schedule, date=None):
     )
     m.row("stub", size=0)  # start with 1
 
-    # calc start time
-    start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour
-    start_time = cast_time(start_t)
+    with code('Calc start time'):
+        # calc start time
+        if 'preferred_header_time' in schedule.props.all():
+            # currently set in app/main/milk_project/schedule.py
+            t = cast_t(schedule.props['preferred_header_time'])
+        else:
+            t = schedule.x[0]
+
+        start_t = int(utils.custom_round(t, 12, "floor"))  # round to last hour
+        start_time = cast_time(start_t)
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы котлов"))
 
