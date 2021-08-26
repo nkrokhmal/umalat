@@ -8,7 +8,7 @@ LineName = utils.dotdict(
         "MASCARPONE": "Маскарпоне",
         "BUTTER": "Масло",
         "MILK_PROJECT": "Милкпроджект",
-        "ADYGEA": "Адыгейский"
+        "ADYGEA": "Адыгейский",
     }
 )
 DepartmentName = utils.dotdict(
@@ -21,6 +21,7 @@ DepartmentName = utils.dotdict(
         "ADYGEA": "Адыгейский цех",
     }
 )
+
 
 if __name__ == "__main__":
     print(DepartmentName.MOZZARELLA)
