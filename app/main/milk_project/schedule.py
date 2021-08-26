@@ -43,11 +43,19 @@ def milk_project_schedule():
         adygea_output = run_adygea(wb, path=None, start_time=beg_time)
 
         # todo maybe: hardcode
-        with code("Fix adygea start time - start 20 minutes before milk_project ends"):
-            adygea_output["schedule"].props.update(
-                x=(milk_project_output["schedule"].y[0] - 4, 0),
-                preferred_header_time=cast_time(milk_project_output["schedule"].x[0]),
-            )
+        if (
+            len(milk_project_output["boiling_plan_df"]) > 0
+            and len(adygea_output["boiling_plan_df"]) > 0
+        ):
+            with code(
+                "Fix adygea start time - start 20 minutes before milk_project ends"
+            ):
+                adygea_output["schedule"].props.update(
+                    x=(milk_project_output["schedule"].y[0] - 4, 0),
+                    preferred_header_time=cast_time(
+                        milk_project_output["schedule"].x[0]
+                    ),
+                )
 
         schedule_wb = run_consolidated(
             input_path=None,
@@ -59,22 +67,24 @@ def milk_project_schedule():
             },
         )
 
-        add_batch(
-            date,
-            "Милкпроджект",
-            form.batch_number.data,
-            form.batch_number.data
-            + int(milk_project_output["boiling_plan_df"]["boiling_id"].max())
-            - 1,
-        )
-        add_batch(
-            date,
-            "Адыгейский цех",
-            form.batch_number.data,
-            form.batch_number.data
-            + int(adygea_output["boiling_plan_df"]["boiling_id"].max())
-            - 1,
-        )
+        if len(milk_project_output["boiling_plan_df"]) > 0:
+            add_batch(
+                date,
+                "Милкпроджект",
+                form.batch_number.data,
+                form.batch_number.data
+                + int(milk_project_output["boiling_plan_df"]["boiling_id"].max())
+                - 1,
+            )
+        if len(adygea_output["boiling_plan_df"]) > 0:
+            add_batch(
+                date,
+                "Адыгейский цех",
+                form.batch_number.data,
+                form.batch_number.data
+                + int(adygea_output["boiling_plan_df"]["boiling_id"].max())
+                - 1,
+            )
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
         filename_schedule_pickle = (
