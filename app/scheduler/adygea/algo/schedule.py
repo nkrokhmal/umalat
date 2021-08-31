@@ -53,9 +53,12 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
 
             cur_boiling_id += 1
 
-    last_boilings = [[boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] == boiler_num][-1] for boiler_num in range(4)]
-    last_min, last_max = min(b.y[0] for b in last_boilings), max(b.y[0] for b in last_boilings)
-    m.row(make_cleaning(), x=last_min, push_func=add_push)
+    with code('Cleaning'):
+        last_boilings = [[boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] == boiler_num][-1] for boiler_num in range(4)]
+        cleaning_start = min(b.y[0] for b in last_boilings)
+        if len(m.root['lunch', True]) > 0:
+            cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root['lunch', True]))
+        m.row(make_cleaning(), x=cleaning_start, push_func=add_push)
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root
 

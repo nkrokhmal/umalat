@@ -41,9 +41,9 @@ def wrap_lunch(block):
     )
     return m.root
 
-def wrap_cleaning(block, last_boiling):
+def wrap_cleaning(block, last_block):
     a = block.x[0]
-    b = last_boiling.y[0]
+    b = last_block.y[0]
 
     m = BlockMaker(
         block.props['cls'],
@@ -87,7 +87,8 @@ def wrap_boiling_lines(schedule):
 
     with code('add cleaning'):
         block = schedule.find_one(cls='cleaning')
-        push(boiling_lines[0], wrap_cleaning(block, schedule['boiling', True][-1]), push_func=add_push)
+        last_block = max([schedule['boiling', True][-1], schedule['lunch', True][-1]], key=lambda b: b.y[0])
+        push(boiling_lines[0], wrap_cleaning(block, last_block), push_func=add_push)
 
     return m.root
 
