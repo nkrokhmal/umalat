@@ -10,7 +10,7 @@ DEPARTMENT_DICT = {
     "ricotta": "Рикоттный цех",
     "mascarpone": "Маскарпонный цех",
     "butter": "Маслоцех",
-    "milk_project": "Милкроджект",
+    "milk_project": "Милкпроджект",
     "adygea": "Адыгейский цех",
 }
 
@@ -31,6 +31,7 @@ def download_contour_washers():
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
+
 
 @main.route("/download_boiling_plan", methods=["POST", "GET"])
 @flask_login.login_required
