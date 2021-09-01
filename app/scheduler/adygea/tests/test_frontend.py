@@ -22,7 +22,7 @@ def test_batch():
 
 if __name__ == "__main__":
     _test(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 2.xlsx",
+        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 1.xlsx",
         open_file=True,
     )
     # test_batch()

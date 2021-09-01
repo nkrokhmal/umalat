@@ -32,9 +32,10 @@ class Validator(ClassValidator):
         pass
 
 
-def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunch_boiling_ids=None):
-    lunch_boiling_ids = lunch_boiling_ids or []
-    assert len(lunch_boiling_ids) in [0, 2] # no lunches or two lunches for two teams
+def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunch_times=None):
+    lunch_times = lunch_times or []
+    lunch_times = list(lunch_times)
+    assert len(lunch_times) in [0, 2] # no lunches or two lunches for two teams
 
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
@@ -47,11 +48,19 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
             push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30), validator=Validator())
             cur_boiler_num = (cur_boiler_num + 1) % 4
 
-            for pair_num, lunch_boiling_id in enumerate(lunch_boiling_ids):
-                if lunch_boiling_id == cur_boiling_id:
-                    push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from='last_beg', start_shift=-30), validator=Validator())
+            with code('Push lunch if needed'):
+                if lunch_times:
+                    pair_num = cur_boiler_num % 2
+                    if lunch_times[pair_num] and cast_time(boiling.y[0] + cast_t(start_time)) >= lunch_times[pair_num]:
+                        push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_times[pair_num]) - cast_t(start_time)), validator=Validator())
+                        lunch_times[pair_num] = None # pushed lunch, nonify lunch time
 
             cur_boiling_id += 1
+
+    with code('Push lunches if not pushed yet'):
+        for pair_num, lunch_time in enumerate(lunch_times):
+            if lunch_time:
+                push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_time) - cast_t(start_time)), validator=Validator())
 
     with code('Cleaning'):
         last_boilings = [[boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] == boiler_num][-1] for boiler_num in range(4)]
@@ -66,25 +75,34 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
 def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
     no_lunch_schedule = _make_schedule(boiling_plan_df, first_boiling_id, start_time)
 
-    lunch_boiling_ids = []
-    for i, r in enumerate([range(0, 2), range(2, 4)]):
-        range_boilings = [boiling for boiling in no_lunch_schedule['boiling', True] if boiling.props['boiler_num'] in r]
+    if cast_time(no_lunch_schedule.y[0]) <= '00:12:30':
+        lunch_times = []
+    else:
+        lunch_times = []
+        for i, r in enumerate([range(0, 2), range(2, 4)]):
+            range_boilings = [boiling for boiling in no_lunch_schedule['boiling', True] if boiling.props['boiler_num'] in r]
 
-        # find lunch times
-        for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
-            if not b2:
-                continue
+            # find lunch times
+            for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
+                if not b2 and not b3:
+                    # finished early
+                    lunch_times.append('00:12:00')
 
-            if cast_time(b2.y[0]) >= '00:12:00':
-                if b3 and b1:
-                    if (b2.y[0] - b1.y[0]) >= (b3.y[0] - b2.y[0]):
-                        # wait for next boiling and make lunch
-                        lunch_boiling_ids.append(b3.props['boiling_id'])
+                if not b2:
+                    continue
+
+                if cast_time(b2.y[0]) >= '00:12:00':
+                    if b3 and b1:
+                        if (b2.y[0] - b1.y[0]) >= (b3.y[0] - b2.y[0]):
+                            # wait for next boiling and make lunch
+                            lunch_times.append(cast_time(b3.y[0]))
+                        else:
+                            # make lunch now
+                            lunch_times.append(cast_time(b2.y[0]))
                     else:
                         # make lunch now
-                        lunch_boiling_ids.append(b2.props['boiling_id'])
-                else:
-                    # make lunch now
-                    lunch_boiling_ids.append(b2.props['boiling_id'])
-                break
-    return _make_schedule(boiling_plan_df, first_boiling_id, start_time, lunch_boiling_ids=lunch_boiling_ids)
+                        lunch_times.append(cast_time(b2.y[0]))
+                    break
+
+
+    return _make_schedule(boiling_plan_df, first_boiling_id, start_time, lunch_times=lunch_times)
