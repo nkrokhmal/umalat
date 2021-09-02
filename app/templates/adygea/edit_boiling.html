@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Параметры варки - Изменить параметры варки{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="py-4">
+        <div class="d-flex justify-content-between w-100 flex-wrap">
+            <div class="mb-3 mb-lg-0">
+                <h1 class="h4">Изменение параметров варки милкпроджект <br></h1>
+            </div>
+        </div>
+    </div>
+    <form method="post" action="/adygea/edit_boiling/{{boiling_id}}" class="mt-4">
+        {{ form.hidden_tag() }}
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="form-group">
+                    <label>Название варки</label>
+                    {{form.name(place_holder='Name', class='form-control', readonly=true)}}
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Коэффициент на выходе</label>
+                        {{form.output_coeff(place_holder='output_coeff', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Вход, кг</label>
+                        {{form.input_kg(place_holder='input_kg', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Выход, кг</label>
+                        {{form.output_kg(place_holder='output_kg', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-3" style="margin-top:30px;">
+                <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+{% endblock %}

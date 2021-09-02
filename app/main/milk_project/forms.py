@@ -35,6 +35,12 @@ class ScheduleForm(FlaskForm):
     )
 
 
+class MilkProjectBoilingForm(FlaskForm):
+    name = StringField("Название варки", validators=[Optional()])
+    output_coeff = FloatField("Коэффициент", validators=[Optional()])
+    output_kg = IntegerField("Выход", validators=[Optional()])
+
+
 class MilkProjectBoilingTechnologyForm(FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
     water_collecting_time = IntegerField("", validators=[Optional()])
@@ -63,7 +69,7 @@ class SKUMilkProjectForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(SKUMilkProjectForm, self).__init__(*args, **kwargs)
 
-        self.boilings = db.session.query(ButterBoiling).all()
+        self.boilings = db.session.query(MilkProjectBoiling).all()
         self.boiling.choices = list(enumerate(set([x.to_str() for x in self.boilings])))
         self.boiling.choices.append((-1, ""))
 
@@ -74,8 +80,8 @@ class SKUMilkProjectForm(FlaskForm):
     @staticmethod
     def validate_sku(self, name):
         sku = (
-            db.session.query(ButterSKU)
-            .filter_by(ButterSKU.name == name.data)
+            db.session.query(MilkProjectSKU)
+            .filter_by(MilkProjectSKU.name == name.data)
             .first()
         )
         if sku is not None:

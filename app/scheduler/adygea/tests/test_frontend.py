@@ -11,7 +11,7 @@ def _test(fn, open_file=False):
     utils.lazy_tester.assert_logs()
 
 
-def test_batch():
+def     test_batch():
     fns = glob.glob(
         config.abs_path("app/data/static/samples/inputs/by_department/adygea/*.xlsx")
     )
