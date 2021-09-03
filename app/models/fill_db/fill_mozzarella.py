@@ -256,8 +256,7 @@ def fill_sku():
             brand_name=sku["Имя бренда"],
             weight_netto=sku["Вес нетто"],
             shelf_life=sku["Срок хранения"],
-            collecting_speed=_cast_non_nan(sku["Скорость сборки"])
-            or _cast_non_nan(sku["Скорость упаковки"]),
+            collecting_speed=_cast_non_nan(sku["Скорость сборки"]),
             packing_speed=sku["Скорость упаковки"],
             in_box=sku["Коробки"],
             code=sku["Kод"],
