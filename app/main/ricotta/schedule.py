@@ -5,7 +5,7 @@ from app.scheduler.ricotta import *
 # from app.utils.ricotta.schedule_tasks import schedule_task_boilings, update_total_schedule_task
 from app.utils.ricotta.schedule_tasks import RicottaScheduleTask
 from app.utils.batches.batch import *
-from app.utils.files.utils import save_schedule, save_schedule_dict
+from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from .forms import ScheduleForm
 
 
@@ -19,14 +19,18 @@ def ricotta_schedule():
         beg_time = form.beg_time.data
         file = flask.request.files["input_file"]
 
-        file_path = os.path.join(
-            flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
-        )
+        data_dir = os.path.join(
+            flask.current_app.config["DYNAMIC_DIR"],
+            date.strftime("%Y-%m-%d"),
+            flask.current_app.config["BOILING_PLAN_FOLDER"])
+        create_if_not_exists(data_dir)
+
+        file_path = os.path.join(data_dir, file.filename)
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                data_dir, file.filename
             ),
             data_only=True,
         )

@@ -11,7 +11,7 @@ def download_milk_project():
             'Название SKU': sku.name,
             'Процент': sku.made_from_boilings[0].percent,
             'Название форм фактора': sku.group.name,
-            'Линия': "Масло",
+            'Линия': "Милкпроджект",
             'Имя бренда': sku.brand_name,
             'Вес нетто': sku.weight_netto,
             'Выход': sku.made_from_boilings[0].output_kg,

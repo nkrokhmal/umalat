@@ -10,7 +10,7 @@ def download_butter():
         {
             'Название SKU': sku.name,
             'Процент': sku.made_from_boilings[0].percent,
-            'Наличие лактозы': sku.made_from_boilings[0].is_lactose,
+            'Наличие лактозы': 'Да' if sku.made_from_boilings[0].is_lactose else 'Нет',
             'Вкусовая добавка': sku.made_from_boilings[0].flavoring_agent,
             'Название форм фактора': sku.group.name,
             'Линия': "Масло",

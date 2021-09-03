@@ -8,7 +8,7 @@ from app.models import MilkProjectSKU, AdygeaSKU
 
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
-from app.utils.files.utils import save_schedule, save_schedule_dict
+from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.scheduler.time import *
@@ -27,14 +27,18 @@ def milk_project_schedule():
         beg_time = form.beg_time.data
         file = flask.request.files["input_file"]
 
-        file_path = os.path.join(
-            flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
-        )
+        data_dir = os.path.join(
+            flask.current_app.config["DYNAMIC_DIR"],
+            date.strftime("%Y-%m-%d"),
+            flask.current_app.config["BOILING_PLAN_FOLDER"])
+        create_if_not_exists(data_dir)
+
+        file_path = os.path.join(data_dir, file.filename)
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                data_dir, file.filename
             ),
             data_only=True,
         )
@@ -133,7 +137,6 @@ def milk_project_schedule():
             filename_schedule_pickle,
             date.strftime("%Y-%m-%d"),
         )
-        os.remove(file_path)
         return flask.render_template(
             "milk_project/schedule.html",
             form=form,
