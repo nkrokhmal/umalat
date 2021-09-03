@@ -65,3 +65,4 @@ db/batch_numbers/data.json
 **/schedules/*
 **/outputs/*
 research/akadaner/*xlsx
+db/batch_numbers/batches.json
