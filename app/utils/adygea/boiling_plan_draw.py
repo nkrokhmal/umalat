@@ -14,8 +14,8 @@ COLUMNS = {
     "output": Cell(column_index_from_string("C"), "C"),
     "name": Cell(column_index_from_string("D"), "D"),
     "kg": Cell(column_index_from_string("E"), "E"),
+    "remainings": Cell(column_index_from_string("F"), "F"),
     "boiling_count": Cell(column_index_from_string("F"), "F"),
-    "remainings": Cell(column_index_from_string("G"), "G"),
     "total_output": Cell(column_index_from_string("H"), "H"),
     "delimiter": Cell(column_index_from_string("I"), "I"),
     "delimiter_int": Cell(column_index_from_string("L"), "L"),
@@ -67,7 +67,7 @@ def get_colour_by_name(sku_name, skus):
         return flask.current_app.config["COLORS"]["Default"]
 
 
-def draw_boiling_plan(df, df_extra, wb, total_volume=0):
+def draw_boiling_plan(df, wb, total_volume=0):
     skus = db.session.query(AdygeaSKU).all()
     draw_boiling_names(wb=wb)
     draw_skus(wb, skus)
@@ -88,7 +88,6 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
             COLUMNS["group"],
             COLUMNS["name"],
             COLUMNS["output"],
-            COLUMNS["boiling_count"],
             COLUMNS["delimiter"],
         ]
         values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
@@ -97,7 +96,7 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
 
     for v in values:
         del v[COLUMNS["output"]]
-
+        print(v)
         value = v.values()
         column = [x.col for x in v.keys()]
         formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
@@ -121,7 +120,6 @@ def draw_boiling_plan(df, df_extra, wb, total_volume=0):
         else:
             excel_client.color_cell(col=COLUMNS["group"].col, row=cur_row)
             excel_client.color_cell(col=COLUMNS["output"].col, row=cur_row)
-            excel_client.color_cell(col=COLUMNS["total_output"].col, row=cur_row)
 
         cur_row += 1
 

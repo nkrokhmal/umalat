@@ -33,7 +33,7 @@ def save_file_dir(data, filename, date, folder, data_type="xlsx"):
 
 def save_boiling_plan(*args, **kwargs):
     save_file_dir(
-        *args, **kwargs, folder=flask.current_app.config["REQUEST_FOLDER"]
+        *args, **kwargs, folder=flask.current_app.config["SCHEDULE_FOLDER"]
     )
 
 
