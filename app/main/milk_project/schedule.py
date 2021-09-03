@@ -110,7 +110,7 @@ def milk_project_schedule():
                 task=AdygeaScheduleTask,
                 df=adygea_output["boiling_plan_df"],
                 model=AdygeaSKU,
-                department="Адыгейский",
+                department="Адыгейский цех",
             ),
         ]
 
