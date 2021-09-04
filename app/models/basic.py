@@ -187,7 +187,7 @@ class Group(mdb.Model):
     name = mdb.Column(mdb.String)
     short_name = mdb.Column(mdb.String)
 
-    skus = mdb.relationship("SKU", backref="group")
+    skus = mdb.relationship("SKU", backref="group", lazy='subquery',)
 
 
 parent_child = mdb.Table(
@@ -250,10 +250,10 @@ class Boiling(mdb.Model):
     output_coeff = mdb.Column(mdb.Float, default=1)
     line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), nullable=True)
     boiling_technologies = mdb.relationship(
-        "BoilingTechnology", backref=backref("boiling")
+        "BoilingTechnology", backref=backref("boiling"), lazy='subquery',
     )
 
-    skus = mdb.relationship("SKU", secondary=sku_boiling, backref="made_from_boilings")
+    skus = mdb.relationship("SKU", secondary=sku_boiling, backref="made_from_boilings", lazy='subquery',)
 
     type = mdb.Column(mdb.String)
     __mapper_args__ = {"polymorphic_identity": "boilings", "polymorphic_on": type}

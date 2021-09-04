@@ -29,7 +29,6 @@ def boiling_plan_create(df, request_ton=0):
             "kg",
         ]
     ]
-    print(result)
     return result
 
 

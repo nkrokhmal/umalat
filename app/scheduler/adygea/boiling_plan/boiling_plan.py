@@ -4,6 +4,7 @@ from app.models import *
 from app.enum import LineName
 
 from .saturate import saturate_boiling_plan
+from app.utils.features.merge_boiling_utils import Boilings
 
 
 def read_boiling_plan(wb_obj):
@@ -35,18 +36,55 @@ def read_boiling_plan(wb_obj):
         values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
     df = pd.DataFrame(values, columns=header)
-    df = df[["Номер группы варок", "SKU", "Количество ванн", "Суммарно кг"]]
+    df = df[["Номер группы варок", "SKU", "КГ"]]
     df.columns = [
+        "group_boiling_id",
+        "sku",
+        "kg",
+    ]
+    df = df[df["sku"] != "-"]
+
+    df_plan, boiling_number = handle_adygea(df)
+
+    df_plan["boiling_id"] = df_plan["id"]
+    df_plan["kg"] = df_plan["plan"]
+    df_plan["n_baths"] = 1
+    df_plan["boiling_id"] = df_plan["boiling_id"].astype(int) + 1
+    df_plan["sku"] = df_plan["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku.name))
+    df_plan["boiling"] = df_plan["sku"].apply(lambda x: x.made_from_boilings[0])
+
+    df_plan = df_plan[[
         "boiling_id",
         "sku",
         "n_baths",
         "kg",
-    ]
-    df = df[df["sku"] != "-"]
-    df["boiling_id"] = df["boiling_id"].astype(int)
+        "boiling"
+    ]]
 
+    for i in range(df_plan.shape[0]):
+        print(df_plan["boiling"].iloc[i].boiling_technologies[0].name)
+
+    return df_plan
+
+
+def proceed_order(df_filter, boilings_adygea, boilings_count=1):
+    if not df_filter.empty:
+        boilings_adygea.init_iterator(df_filter["output"].iloc[0])
+        boilings_adygea.add_group(
+            df_filter.to_dict("records"),
+            boilings_count=boilings_count,
+        )
+    return boilings_adygea
+
+
+def handle_adygea(df):
     df["sku"] = df["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku))
+    df["plan"] = df["kg"]
+    df["output"] = df["sku"].apply(lambda x: x.made_from_boilings[0].output_kg)
 
-    df = saturate_boiling_plan(df)
+    boilings_adygea = Boilings()
+    for i, df_filter in df.groupby('group_boiling_id'):
+        boilings_adygea = proceed_order(df_filter, boilings_adygea)
+    boilings_adygea.finish()
+    return pd.DataFrame(boilings_adygea.boilings), boilings_adygea.boiling_number
 
-    return df
