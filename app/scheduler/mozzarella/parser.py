@@ -6,7 +6,6 @@ from app.scheduler.mozzarella.properties import *
 
 from utils_ak.block_tree import *
 
-
 def _group_intervals(intervals, max_length=None, interval_func=None):
     if not interval_func:
         interval_func = lambda interval: [interval[0], interval[1]]
@@ -104,20 +103,22 @@ def parse_schedule_file(wb_obj):
                 # yesterday
                 hour -= 24
             start_times.append(hour * 12)
-    # rows for ['1 смена', '2 смена', ...
-    split_rows = list(
-        sorted(df[df["y0"] - df["x0"] >= 50]["x1"].unique())
-    )  # [2, 23, 32, 39, 60]
+
+    with code('calc split rows'):
+        split_rows = []
+        split_rows.append(df[df['label'] == 'Сыроизготовитель №1 Poly 1'].iloc[0]['x1'])
+        split_rows.append(df[df['label'] == 'Линия плавления моцареллы в воде №1'].iloc[0]['x1'])
+        split_rows.append(df[df['label'] == 'Линия плавления моцареллы в рассоле №2'].iloc[0]['x1'])
+        split_rows.append(max(df[df["y0"] - df["x0"] >= 50]["x1"].unique()) + 1)  # packing one has no label - find by shift
+
     parse_block(
         "boilings",
         "boiling",
-        [split_rows[0] + i for i in [1, 5, 13, 17]],
+        [split_rows[0] + i for i in [0, 4, 12, 16]],
         start_times[0],
     )
-    parse_block("cleanings", "cleaning", [split_rows[0] + 9], start_times[0])
-
-    parse_block("water_meltings", "melting", [split_rows[1] + 4], start_times[1])
-
+    parse_block("cleanings", "cleaning", [split_rows[0] + 8], start_times[0])
+    parse_block("water_meltings", "melting", [split_rows[1] + 1], start_times[1])
     with code('meta info to water meltings'):
         with code('melting_end'):
             for melting in m.root['water_meltings'].children:
@@ -137,7 +138,7 @@ def parse_schedule_file(wb_obj):
                 overlapping = [
                     m
                     for m in m.root["water_meltings"].children
-                    if m.x[0] < row["x0"] < m.y[0]
+                    if calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row['x0'], row['y0'])) > 0
                 ]
                 if not overlapping:
                     # first cooling in each boiling does not qualify the filter
@@ -147,17 +148,18 @@ def parse_schedule_file(wb_obj):
                 cooling_length = row['y0'] - melting.x[0]
                 melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
 
-    parse_block("water_packings", "packing", [split_rows[2] + 1], start_times[1])
+    parse_block("water_packings", "packing", [split_rows[1] + 7], start_times[1])
 
     with code("Find rows for salt melting lines"):
         last_melting_row = df[df["label"] == "посолка"]["x1"].max()
-        salt_melting_rows = list(range(split_rows[3] + 1, last_melting_row, 4))
+        salt_melting_rows = list(range(split_rows[2], last_melting_row, 4))
 
     parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
     with code("add salt forming info to meltings"):
         df_formings = df[
-            (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[3] + 1)
+            (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[2])
         ]
+
         with code("fix start times and column header"):
             df_formings["x0"] += start_times[1] - 5
             df_formings["y0"] += start_times[1] - 5
@@ -181,7 +183,7 @@ def parse_schedule_file(wb_obj):
     parse_block(
         "salt_packings",
         "packing",
-        [split_rows[4] + 1, split_rows[4] + 7],
+        [split_rows[3], split_rows[3] + 6],
         start_times[1],
     )
     return m.root
