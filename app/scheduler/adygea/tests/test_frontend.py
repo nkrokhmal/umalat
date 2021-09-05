@@ -11,7 +11,7 @@ def _test(fn, open_file=False):
     utils.lazy_tester.assert_logs()
 
 
-def     test_batch():
+def test_batch():
     fns = glob.glob(
         config.abs_path("app/data/static/samples/inputs/by_department/adygea/*.xlsx")
     )
@@ -21,8 +21,8 @@ def     test_batch():
 
 
 if __name__ == "__main__":
-    _test(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 1.xlsx",
-        open_file=True,
-    )
-    # test_batch()
+    # _test(
+    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 4.xlsx",
+    #     open_file=True,
+    # )
+    test_batch()
