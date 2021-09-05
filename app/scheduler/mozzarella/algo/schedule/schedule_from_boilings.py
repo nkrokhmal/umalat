@@ -4,6 +4,7 @@ from app.imports.runtime import *
 
 from app.scheduler.time import *
 from app.scheduler.mozzarella.algo.packing import *
+from app.scheduler.shifts import *
 from app.enum import LineName
 
 from app.scheduler.mozzarella.algo.schedule.awaiting_pusher import AwaitingPusher
@@ -169,6 +170,13 @@ class ScheduleMaker:
         self.m.block("master")
         self.m.block("extra")
         self.m.block("extra_packings")
+
+        with self.m.block("shifts"):
+            self.m.block('cheese_makers')
+            self.m.block('water_melting')
+            self.m.block('water_packing')
+            self.m.block('salt_melting')
+            self.m.block('salt_packing')
 
     def _init_lines_df(self):
         # init lines df
@@ -451,6 +459,7 @@ class ScheduleMaker:
                 push_func=AxisPusher(start_from=int(packing.props["extra_props"]["start_from"])),
                 validator=ExtraValidator(),
             )
+
     def _process_cleanings(self):
 
         with code('Add cleanings if necessary'):
@@ -506,6 +515,22 @@ class ScheduleMaker:
             validator=Validator(),
         )
 
+    def _process_shifts(self):
+        # cheese makers
+        start = min(self.m.root['master']['boiling', True], key=lambda b: b.x[0]).x[0] - 6  # half hour before start
+        end = max(self.m.root['master']['boiling', True], key=lambda b: b.y[0])['pouring']['second']['pouring_off'].y[0] + 24  # two hours after last pouring off
+
+        shifts = split_shifts(start, end)
+
+        for i, (start, end) in enumerate(shifts, 1):
+            push(self.m.root['shifts']['cheese_makers'], push_func=add_push,
+                 block=self.m.create_block(
+                     "shift",
+                     x=(start, 0),
+                     size=(end - start, 0),
+                     shift_num=i
+                 ))
+
     def make(self, boilings, date=None, cleanings=None, start_times=None):
         self.date = date or datetime.now()
         self.start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
@@ -520,6 +545,7 @@ class ScheduleMaker:
         self._process_boilings()
         self._process_extras()
         self._process_cleanings()
+        self._process_shifts()
         return self.m.root
 
 

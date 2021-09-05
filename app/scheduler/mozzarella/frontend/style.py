@@ -37,4 +37,8 @@ STYLE = {
     "template": {"visible": True},
     "time": {"visible": True},
     "stub": {"visible": False},
+    "shift": {
+        "color": (149, 179, 215),
+        "text": lambda b: f"Смена {b.props['shift_num']}",
+    },
 }

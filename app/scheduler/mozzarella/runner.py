@@ -24,7 +24,6 @@ def run_mozzarella(
             start_times=start_times,
             first_boiling_id=first_boiling_id,
         )
-
     try:
         frontend = wrap_frontend(schedule)
     except Exception as e:

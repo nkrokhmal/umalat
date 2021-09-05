@@ -24,11 +24,11 @@ def _test(fn, open_file=False):
 
 
 if __name__ == "__main__":
-    # _test(
-    #     config.abs_path(
-    #         "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 7.xlsx"
-    #         # "app/data/static/samples/inputs/by_day/2021-08-06/2021-08-06 Расписание моцарелла.xlsx"
-    #     ),
-    #     open_file=True,
-    # )
-    test_batch()
+    _test(
+        config.abs_path(
+            "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 7.xlsx"
+            # "app/data/static/samples/inputs/by_day/2021-08-06/2021-08-06 Расписание моцарелла.xlsx"
+        ),
+        open_file=True,
+    )
+    # test_batch()

@@ -282,27 +282,16 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
                 if n_cooling_lines == 100:
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
-    with code('Steam consumption'):
-        pass
-
-        # deprecated (2021.06.04). Steam consumption is not needed anymore
-        # with m.block(font_size=8):
-        #     for b in master.iter(
-        #         cls="steam_consumption",
-        #         boiling_model=lambda bm: bm.line.name == line_name,
-        #         type="melting",
-        #     ):
-        #         m.block(make_steam_blocks(b), push_func=add_push)
     m.block("stub", size=(0, 2))
     return m.root
 
 
-def wrap_shifts(start_from, shifts):
-    m = BlockMaker("shifts", start_time="00:00", x=[start_from, 0])
-
-    for shift in shifts:
-        shift.setdefault("color", (149, 179, 215))
-        m.block("shift", **shift)
+def wrap_shifts(shifts):
+    m = BlockMaker("shifts", x=(shifts.x[0], 0))
+    shifts = m.copy(shifts, with_props=True)
+    for shift in shifts.iter(cls='shift'):
+        shift.update_size(size=(shift.size[0], 1)) # todo maybe: refactor. Should be better
+    m.block(shifts)
     return m.root
 
 
@@ -477,17 +466,17 @@ def wrap_frontend(schedule, coolings_mode="first"):
     start_t -= 24
     start_time = cast_time(start_t)
     m.block(wrap_header(schedule.props["date"], start_time=start_time, header='График наливов'))
-
     with m.block("pouring", start_time=start_time, axis=1):
-        m.block(wrap_shifts(0,
-                            [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена"},
-                             {"size": (cast_t("01:03:00") - cast_t("19:00") + 1 + cast_t("05:30"), 1, ), "text": "2 смена"}]))
+        # m.block(wrap_shifts(0,
+        #                     [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена"},
+        #                      {"size": (cast_t("01:03:00") - cast_t("19:00") + 1 + cast_t("05:30"), 1, ), "text": "2 смена"}]))
+        m.block(wrap_shifts(schedule['shifts']['cheese_makers']))
         m.block(wrap_cheese_makers(master, range(2)))
         # make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
         #                      {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         m.block(wrap_cleanings(master))
         m.block(wrap_cheese_makers(master, range(2, 4)))
-        m.block(wrap_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "Оператор + Помощник"}]))
+        # m.block(wrap_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "Оператор + Помощник"}]))
 
     start_t = min(
         [boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]]
@@ -508,14 +497,13 @@ def wrap_frontend(schedule, coolings_mode="first"):
             )
         )
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
-        m.block(wrap_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "бригадир упаковки + 5 рабочих"}]))
+        # m.block(wrap_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "бригадир упаковки + 5 рабочих"}]))
         m.block(wrap_packings(master, LineName.WATER))
-        m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена оператор + помощник"},
-                                {"size": (cast_t("23:55") - cast_t("19:00") + 1 + cast_t("05:30"), 1)}]))
+        # m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена оператор + помощник"},
+        #                         {"size": (cast_t("23:55") - cast_t("19:00") + 1 + cast_t("05:30"), 1)}]))
         m.block(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
-        m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "Бригадир упаковки +5 рабочих упаковки + наладчик"},
-                                {"size": (cast_t("01:03:00") - cast_t("19:00") + 1 + cast_t("05:30"), 1), "text": "бригадир + наладчик + 5 рабочих"}]))
+        # m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "Бригадир упаковки +5 рабочих упаковки + наладчик"},
+        #                         {"size": (cast_t("01:03:00") - cast_t("19:00") + 1 + cast_t("05:30"), 1), "text": "бригадир + наладчик + 5 рабочих"}]))
         m.block(wrap_packings(master, LineName.SALT))
         m.block(wrap_extra_packings(extra_packings))
-
     return m.root
