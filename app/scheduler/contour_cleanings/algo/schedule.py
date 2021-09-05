@@ -446,9 +446,17 @@ def make_contour_5(properties, input_tanks=None):
 def make_contour_6(properties):
     m = BlockMaker("6 contour")
 
-    if properties['milk_project'].is_present():
+    if properties['milk_project'].is_present() or properties['adygea'].is_present():
+        with code('calc end time'):
+            values = []
+            if properties['adygea'].is_present():
+                values.append(properties['adygea'].end_time)
+            if properties['milk_project'].is_present():
+                values.append(properties['milk_project'].end_time)
+            end_time = max(values)
+
         m.row('cleaning', push_func=add_push,
-              x=cast_t(properties['milk_project'].end_time),
+              x=cast_t(end_time),
               size=cast_t('01:20'),
               label='Линия сырого молока на роникс')
 
