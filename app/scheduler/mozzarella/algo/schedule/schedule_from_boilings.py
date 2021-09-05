@@ -531,6 +531,7 @@ class ScheduleMaker:
                          shift_num=i
                      ))
 
+        # todo maybe: refactor, code duplication
         with code('Water'):
             water_boilings = [b for b in self.m.root['master']['boiling', True] if b.props['boiling_model'].line.name == LineName.WATER]
 
@@ -557,6 +558,39 @@ class ScheduleMaker:
 
                 for i, (beg, end) in enumerate(shifts, 1):
                     push(self.m.root['shifts']['water_packings'], push_func=add_push,
+                         block=self.m.create_block(
+                             "shift",
+                             x=(beg, 0),
+                             size=(end - beg, 0),
+                             shift_num=i
+                         ))
+
+        with code('Salt'):
+            salt_boilings = [b for b in self.m.root['master']['boiling', True] if b.props['boiling_model'].line.name == LineName.SALT]
+
+            with code('salt meltings'):
+                beg = salt_boilings[0]['melting_and_packing']['melting'].x[0] - 12  # 1h before start
+                end = salt_boilings[-1]['melting_and_packing']['packing'].y[0] # end of packing
+
+                shifts = split_shifts(beg, end)
+
+                for i, (beg, end) in enumerate(shifts, 1):
+                    push(self.m.root['shifts']['salt_meltings'], push_func=add_push,
+                         block=self.m.create_block(
+                             "shift",
+                             x=(beg, 0),
+                             size=(end - beg, 0),
+                             shift_num=i
+                         ))
+
+            with code('salt packings'):
+                beg = salt_boilings[0]['melting_and_packing']['packing'].x[0] - 12  # 1h before start
+                end = salt_boilings[-1]['melting_and_packing']['packing'].y[0] + 6  # 0.5h after end
+
+                shifts = split_shifts(beg, end)
+
+                for i, (beg, end) in enumerate(shifts, 1):
+                    push(self.m.root['shifts']['salt_packings'], push_func=add_push,
                          block=self.m.create_block(
                              "shift",
                              x=(beg, 0),

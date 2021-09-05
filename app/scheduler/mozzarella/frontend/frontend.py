@@ -494,11 +494,9 @@ def wrap_frontend(schedule, coolings_mode="first"):
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
         m.block(wrap_shifts(schedule['shifts']['water_packings']))
         m.block(wrap_packings(master, LineName.WATER))
-        # m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена оператор + помощник"},
-        #                         {"size": (cast_t("23:55") - cast_t("19:00") + 1 + cast_t("05:30"), 1)}]))
+        m.block(wrap_shifts(schedule['shifts']['salt_meltings']))
         m.block(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
-        # m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "Бригадир упаковки +5 рабочих упаковки + наладчик"},
-        #                         {"size": (cast_t("01:03:00") - cast_t("19:00") + 1 + cast_t("05:30"), 1), "text": "бригадир + наладчик + 5 рабочих"}]))
+        m.block(wrap_shifts(schedule['shifts']['salt_packings']))
         m.block(wrap_packings(master, LineName.SALT))
         m.block(wrap_extra_packings(extra_packings))
     return m.root
