@@ -162,124 +162,127 @@ def make_termizator_cleaning_block(cleaning_type, **kwargs):
     return m.root
 
 
-def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times=None):
-    date = date or datetime.now()
-    start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
-    start_times = {k: v if v else None for k, v in start_times.items()}
-    cleanings = cleanings or {}  # {boiling_id: cleaning}
+class ScheduleMaker:
+    def _init_block_maker(self):
+        self.m = BlockMaker("schedule")
+        self.m.root.props.update(date=self.date)
+        self.m.block("master")
+        self.m.block("extra")
+        self.m.block("extra_packings")
 
-    m = BlockMaker("schedule", date=date)
-    m.block("master")
-    m.block("extra")
-    m.block("extra_packings")
+    def _init_lines_df(self):
+        # init lines df
+        lines_df = pd.DataFrame(
+            index=[LineName.WATER, LineName.SALT],
+            columns=["iter_props", "start_time", "boilings_left", "latest_boiling"],
+        )
+        lines_df["latest_boiling"] = None
 
-    schedule = m.root
+        # init iter_props
+        lines_df.at[LineName.WATER, "iter_props"] = [
+            {"pouring_line": str(v1), "drenator_num": str(v2)}
+            for v1, v2 in itertools.product([0, 1], [0, 1])
+        ]
+        lines_df.at[LineName.SALT, "iter_props"] = [
+            {"pouring_line": str(v1), "drenator_num": str(v2)}
+            for v1, v2 in itertools.product([2, 3], [0, 1])
+        ]
 
-    # init lines df
-    lines_df = pd.DataFrame(
-        index=[LineName.WATER, LineName.SALT],
-        columns=["iter_props", "start_time", "boilings_left", "latest_boiling"],
-    )
+        # init start times
+        for line_name in [LineName.WATER, LineName.SALT]:
+            try:
+                lines_df.at[line_name, "start_time"] = cast_time(self.start_times[line_name])
+            except:
+                raise AssertionError(
+                    f"Неверно указано время первой подачи на линии {line_name}"
+                )
 
-    # init iter_props
-    lines_df.at[LineName.WATER, "iter_props"] = [
-        {"pouring_line": str(v1), "drenator_num": str(v2)}
-        for v1, v2 in itertools.product([0, 1], [0, 1])
-    ]
-    lines_df.at[LineName.SALT, "iter_props"] = [
-        {"pouring_line": str(v1), "drenator_num": str(v2)}
-        for v1, v2 in itertools.product([2, 3], [0, 1])
-    ]
-
-    # init start times
-    for line_name in [LineName.WATER, LineName.SALT]:
-        try:
-            lines_df.at[line_name, "start_time"] = cast_time(start_times[line_name])
-        except:
+        # check for missing start time
+        if lines_df["start_time"].isnull().any():
+            missing_lines = lines_df[lines_df["start_time"].isnull()].index
             raise AssertionError(
-                f"Неверно указано время первой подачи на линии {line_name}"
+                f'Укажите время начала подачи на следующих линиях: {", ".join(missing_lines)}'
             )
 
-    # make left_df
-    values = [
-        [
-            boiling,
-            boiling.props["boiling_model"].line.name,
-            boiling.props["sheet"],
-        ]
-        for boiling in boilings
-    ]
-    left_df = (
-        pd.DataFrame(values, columns=["boiling", "line_name", "sheet"])
-        .reset_index()
-        .sort_values(by=["sheet", "index"])
-    )
-    lines_df["latest_boiling"] = None
+        self.lines_df = lines_df
 
-    # check for missing start time
-    if lines_df["start_time"].isnull().any():
-        missing_lines = lines_df[lines_df["start_time"].isnull()].index
-        raise AssertionError(
-            f'Укажите время начала подачи на следующих линиях: {", ".join(missing_lines)}'
+    def _init_left_df(self):
+
+        # make left_df
+        values = [
+            [
+                boiling,
+                boiling.props["boiling_model"].line.name,
+                boiling.props["sheet"],
+            ]
+            for boiling in self.boilings
+        ]
+        left_df = (
+            pd.DataFrame(values, columns=["boiling", "line_name", "sheet"])
+                .reset_index()
+                .sort_values(by=["sheet", "index"])
         )
 
-    # check for empty input
-    assert len(left_df) > 0, "На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания."
+        self.left_df = left_df
 
-    # init water boilings using multihead
-    multihead_water_boilings = [
-        row["boiling"]
-        for i, row in left_df.iterrows()
-        if boiling_has_multihead_packing(row["boiling"])
-        and row["boiling"].props["boiling_model"].line.name == LineName.WATER
-    ]
+        # check for empty input
+        assert len(left_df) > 0, "На вход не подано ни одной варки. Укажите хотя бы одну варку для составления расписания."
 
-    # init last multihead boiling
-    if multihead_water_boilings:
-        last_multihead_water_boiling = multihead_water_boilings[-1]
-    else:
-        last_multihead_water_boiling = None
+    def _init_multihead_water_boilings(self):
+        # init water boilings using multihead
+        self.multihead_water_boilings = [
+            row["boiling"]
+            for i, row in self.left_df.iterrows()
+            if boiling_has_multihead_packing(row["boiling"])
+               and row["boiling"].props["boiling_model"].line.name == LineName.WATER
+        ]
 
-    def add_one_block_from_line(boiling):
+        # init last multihead boiling
+        if self.multihead_water_boilings:
+            self.last_multihead_water_boiling = self.multihead_water_boilings[-1]
+        else:
+            self.last_multihead_water_boiling = None
+
+    def _process_boiling(self, boiling):
         # extract line name
         line_name = boiling.props["boiling_model"].line.name
 
         # find start_from
-        if not lines_df.at[line_name, "latest_boiling"]:
+        if not self.lines_df.at[line_name, "latest_boiling"]:
             # init
-            if lines_df.at[line_name, "start_time"]:
+            if self.lines_df.at[line_name, "start_time"]:
                 # start time present
-                start_from = cast_t(lines_df.at[line_name, "start_time"]) - boiling["melting_and_packing"].x[0]
+                start_from = cast_t(self.lines_df.at[line_name, "start_time"]) - boiling["melting_and_packing"].x[0]
             else:
                 # start time not present - start from overall latest boiling from both lines
-                latest_boiling = lines_df[~lines_df["latest_boiling"].isnull()].iloc[0]["latest_boiling"]
+                latest_boiling = self.lines_df[~self.lines_df["latest_boiling"].isnull()].iloc[0]["latest_boiling"]
                 start_from = latest_boiling.x[0]
         else:
             # start from latest boiling
-            start_from = lines_df.at[line_name, "latest_boiling"].x[0]
+            start_from = self.lines_df.at[line_name, "latest_boiling"].x[0]
 
         # add configuration if needed
-        if lines_df.at[line_name, "latest_boiling"]:
+        if self.lines_df.at[line_name, "latest_boiling"]:
             configuration_blocks = make_configuration_blocks(
-                lines_df.at[line_name, "latest_boiling"],
+                self.lines_df.at[line_name, "latest_boiling"],
                 boiling,
-                m,
+                self.m,
                 line_name,
                 between_boilings=True,
             )
             for conf in configuration_blocks:
                 conf.props.update(line_name=line_name)
                 push(
-                    schedule["master"],
+                    self.m.root["master"],
                     conf,
                     push_func=AxisPusher(start_from="beg"),
                     validator=Validator(),
                 )
 
         # filter iter_props: no two boilings allowed sequentially on the same pouring line
-        iter_props = lines_df.at[line_name, "iter_props"]
-        if lines_df.at[line_name, "latest_boiling"]:
-            current_pouring_line = lines_df.at[line_name, "latest_boiling"].props[
+        iter_props = self.lines_df.at[line_name, "iter_props"]
+        if self.lines_df.at[line_name, "latest_boiling"]:
+            current_pouring_line = self.lines_df.at[line_name, "latest_boiling"].props[
                 "pouring_line"
             ]
             iter_props = [
@@ -290,7 +293,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
 
         # push boiling
         push(
-            schedule["master"],
+            self.m.root["master"],
             boiling,
             push_func=AxisPusher(start_from=start_from),
             iter_props=iter_props,
@@ -298,10 +301,10 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
             max_tries=100,
         )
         # fix water a little bit: try to push water before - allowing awaiting in line
-        if line_name == LineName.WATER and lines_df.at[LineName.WATER, "latest_boiling"]:
+        if line_name == LineName.WATER and self.lines_df.at[LineName.WATER, "latest_boiling"]:
             boiling.detach_from_parent()
             push(
-                schedule["master"],
+                self.m.root["master"],
                 boiling,
                 push_func=AwaitingPusher(max_awaiting_period=8),
                 validator=Validator(),
@@ -311,24 +314,24 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
         # move rubber packing to extras
         for packing in boiling.iter(cls="packing"):
             if not list(
-                packing.iter(
-                    cls="process",
-                    sku=lambda sku: "Терка" in sku.form_factor.name,
-                )
+                    packing.iter(
+                        cls="process",
+                        sku=lambda sku: "Терка" in sku.form_factor.name,
+                    )
             ):
                 # rubber not present
                 continue
 
-            packing_copy = m.copy(packing, with_props=True)
+            packing_copy = self.m.copy(packing, with_props=True)
             packing_copy.props.update(extra_props={"start_from": packing.x[0]})
             packing.parent.remove_child(packing)
-            push(schedule["extra"], packing_copy, push_func=add_push)
+            push(self.m.root["extra"], packing_copy, push_func=add_push)
 
         # add multihead boiling after all water boilings if multihead was present
-        if boiling == last_multihead_water_boiling:
+        if boiling == self.last_multihead_water_boiling:
             push(
-                schedule["master"],
-                m.create_block(
+                self.m.root["master"],
+                self.m.create_block(
                     "multihead_cleaning",
                     x=(boiling.y[0], 0),
                     size=(cast_t("03:00"), 0),
@@ -336,8 +339,8 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 push_func=add_push,
             )
             push(
-                schedule["extra"],
-                m.create_block(
+                self.m.root["extra"],
+                self.m.create_block(
                     "multihead_cleaning",
                     x=(boiling.y[0], 0),
                     size=(cast_t("03:00"), 0),
@@ -346,7 +349,7 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
             )
 
         # add cleaning after boiling if needed
-        cleaning_type = cleanings.get(boiling.props["boiling_id"])
+        cleaning_type = self.cleanings.get(boiling.props["boiling_id"])
         if cleaning_type:
             start_from = boiling["pouring"]["first"]["termizator"].y[0]
             cleaning = make_termizator_cleaning_block(
@@ -355,153 +358,170 @@ def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times
                 rule='manual',
             )
             push(
-                schedule["master"],
+                self.m.root["master"],
                 cleaning,
                 push_func=AxisPusher(start_from=start_from),
                 validator=Validator(),
             )
 
         # set latest boiling
-        lines_df.at[line_name, "latest_boiling"] = boiling
+        self.lines_df.at[line_name, "latest_boiling"] = boiling
         return boiling
 
-    while True:
-        # add boilings loop
+    def _process_boilings(self):
+        while True:
+            # add boilings loop
 
-        # check if finished
-        if len(left_df) == 0:
-            break
+            # check if finished
+            if len(self.left_df) == 0:
+                break
 
-        # check if only salt left -> start working on 3 line
-        if (left_df["line_name"] == LineName.SALT).all():
-            lines_df.at[LineName.SALT, "iter_props"] = [
-                {"pouring_line": str(v1), "drenator_num": str(v2)}
-                for v1, v2 in itertools.product([2, 3, 1], [0, 1])
-            ]
+            # check if only salt left -> start working on 3 line
+            if (self.left_df["line_name"] == LineName.SALT).all():
+                self.lines_df.at[LineName.SALT, "iter_props"] = [
+                    {"pouring_line": str(v1), "drenator_num": str(v2)}
+                    for v1, v2 in itertools.product([2, 3, 1], [0, 1])
+                ]
 
-        # get next rows
-        next_rows = [grp.iloc[0] for sheet, grp in left_df.groupby("sheet")]
+            # get next rows
+            next_rows = [grp.iloc[0] for sheet, grp in self.left_df.groupby("sheet")]
 
-        # get lines left
-        lines_left = len(set([row["line_name"] for row in next_rows]))
+            # get lines left
+            lines_left = len(set([row["line_name"] for row in next_rows]))
 
-        # select next row
-        if lines_left == 1:
-            # one line of sheet left
-            next_row = utils.iter_get(next_rows)
-        elif lines_left == 2:
-            # filter rows with latest boiling (any boiling is already present for line)
-            df = lines_df[~lines_df["latest_boiling"].isnull()]
+            # select next row
+            if lines_left == 1:
+                # one line of sheet left
+                next_row = utils.iter_get(next_rows)
+            elif lines_left == 2:
+                # filter rows with latest boiling (any boiling is already present for line)
+                df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
 
-            if len(df) == 0:
-                # first boiling is salt
-                line_name = LineName.SALT
+                if len(df) == 0:
+                    # first boiling is salt
+                    line_name = LineName.SALT
+                else:
+                    # choose most latest line
+                    line_name = (
+                        max(df["latest_boiling"], key=lambda b: b.x[0])
+                            .props["boiling_model"]
+                            .line.name
+                    )
+                    # reverse
+                    line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+
+                # select next row -> first for selected line
+                next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
             else:
-                # choose most latest line
-                line_name = (
-                    max(df["latest_boiling"], key=lambda b: b.x[0])
-                    .props["boiling_model"]
-                    .line.name
-                )
-                # reverse
-                line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                raise Exception("Should not happen")
 
-            # select next row -> first for selected line
-            next_row = left_df[left_df["line_name"] == line_name].iloc[0]
-        else:
-            raise Exception("Should not happen")
+            # remove newly added row from left rows
+            self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
-        # remove newly added row from left rows
-        left_df = left_df[left_df["index"] != next_row["index"]]
+            # insert boiling
+            self._process_boiling(next_row["boiling"])
 
-        # insert boiling
-        add_one_block_from_line(next_row["boiling"])
+    def _process_extras(self):
+        # push extra packings
+        class ExtraValidator(ClassValidator):
+            def __init__(self):
+                super().__init__(window=10)
 
-    # push extra packings
-    class ExtraValidator(ClassValidator):
-        def __init__(self):
-            super().__init__(window=10)
+            @staticmethod
+            def validate__packing__packing(b1, b2):
+                return validate_disjoint_by_axis(b1, b2)
 
-        @staticmethod
-        def validate__packing__packing(b1, b2):
-            return validate_disjoint_by_axis(b1, b2)
+            @staticmethod
+            def validate__multihead_cleaning__packing(b1, b2):
+                multihead_cleaning, packing = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
+                for process in packing.iter(cls="process"):
+                    packer = utils.delistify(process.props['sku'].packers, single=True)
+                    if packer.name == 'Мультиголова':
+                        validate_disjoint_by_axis(multihead_cleaning, process, distance=1, ordered=True)
 
-        @staticmethod
-        def validate__multihead_cleaning__packing(b1, b2):
-            multihead_cleaning, packing = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
-            for process in packing.iter(cls="process"):
-                packer = utils.delistify(process.props['sku'].packers, single=True)
-                if packer.name == 'Мультиголова':
-                    validate_disjoint_by_axis(multihead_cleaning, process, distance=1, ordered=True)
+        # add multihead to "extra_packings"
+        for multihead_cleaning in self.m.root["extra"].iter(cls="multihead_cleaning"):
+            push(self.m.root["extra_packings"], multihead_cleaning, push_func=add_push)
 
-    # add multihead to "extra_packings"
-    for multihead_cleaning in schedule["extra"].iter(cls="multihead_cleaning"):
+        # add packings to "extra_packings"
+        for packing in self.m.root["extra"].iter(cls="packing"):
+            push(
+                self.m.root["extra_packings"],
+                packing,
+                push_func=AxisPusher(start_from=int(packing.props["extra_props"]["start_from"])),
+                validator=ExtraValidator(),
+            )
+    def _process_cleanings(self):
+
+        with code('Add cleanings if necessary'):
+            # extract boilings
+            boilings = self.m.root["master"]["boiling", True]
+            boilings = list(sorted(boilings, key=lambda b: b.x[0]))
+
+            for a, b in utils.iter_pairs(boilings):
+                rest = b["pouring"]["first"]["termizator"].x[0] - a["pouring"]["first"]["termizator"].y[0]
+
+                # extract current cleanings
+                cleanings = list(self.m.root["master"].iter(cls="cleaning"))
+
+                # calc in_between and previous cleanings
+                in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
+                previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
+                if previous_cleanings:
+                    previous_cleaning = max(previous_cleanings, key=lambda c: c.x[0])
+                else:
+                    previous_cleaning = None
+
+                if not in_between_cleanings:
+                    # no current in between cleanings -> try to add if needed
+
+                    # if rest is more than an hour and less than 80 minutes -> short cleaning
+                    if 12 <= rest < 18:
+                        cleaning = make_termizator_cleaning_block("short", rule='rest_between_60_and_80')
+                        cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
+                        push(self.m.root["master"], cleaning, push_func=add_push)
+
+                    # if rest is more than 80 minutes
+                    if rest >= 18:
+                        if previous_cleaning and a.x[0] - previous_cleaning.x[0] < cast_t("04:00"):
+                            # if 4 hours ago or earlier was cleaning -> make short
+                            cleaning = make_termizator_cleaning_block("short", rule='rest_after_80_4_hours_cleaning')
+                        elif a.x[0] - boilings[0].x[0] < cast_t("04:00"):
+                            # if less than 4 hours since day start -> make short
+                            cleaning = make_termizator_cleaning_block("short", rule='rest_after_80_4_hours_init')
+                        else:
+                            # otherwise -> make full
+                            cleaning = make_termizator_cleaning_block("full", rule='rest_after_80')
+                        cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
+                        push(self.m.root["master"], cleaning, push_func=add_push)
+
+        # add last full cleaning
+        last_boiling = list(self.m.root["master"].iter(cls="boiling"))[-1]
+        start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1
+        cleaning = make_termizator_cleaning_block("full", rule='closing')  # add five extra minutes
         push(
-            schedule["extra_packings"], multihead_cleaning, push_func=add_push
+            self.m.root["master"],
+            cleaning,
+            push_func=AxisPusher(start_from=start_from),
+            validator=Validator(),
         )
 
-    # add packings to "extra_packings"
-    for packing in schedule["extra"].iter(cls="packing"):
-        push(
-            schedule["extra_packings"],
-            packing,
-            push_func=AxisPusher(
-                start_from=int(packing.props["extra_props"]["start_from"])
-            ),
-            validator=ExtraValidator(),
-        )
+    def make(self, boilings, date=None, cleanings=None, start_times=None):
+        self.date = date or datetime.now()
+        self.start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
+        self.start_times = {k: v if v else None for k, v in start_times.items()}
+        self.cleanings = cleanings or {}  # {boiling_id: cleaning}
+        self.boilings = boilings
 
-    with code('Add cleanings if necessary'):
-        # extract boilings
-        boilings = schedule["master"]["boiling", True]
-        boilings = list(sorted(boilings, key=lambda b: b.x[0]))
+        self._init_block_maker()
+        self._init_lines_df()
+        self._init_left_df()
+        self._init_multihead_water_boilings()
+        self._process_boilings()
+        self._process_extras()
+        self._process_cleanings()
+        return self.m.root
 
-        for a, b in utils.iter_pairs(boilings):
-            rest = b["pouring"]["first"]["termizator"].x[0] - a["pouring"]["first"]["termizator"].y[0]
 
-            # extract current cleanings
-            cleanings = list(schedule["master"].iter(cls="cleaning"))
-
-            # calc in_between and previous cleanings
-            in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
-            previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
-            if previous_cleanings:
-                previous_cleaning = max(previous_cleanings, key=lambda c: c.x[0])
-            else:
-                previous_cleaning = None
-
-            if not in_between_cleanings:
-                # no current in between cleanings -> try to add if needed
-
-                # if rest is more than an hour and less than 80 minutes -> short cleaning
-                if 12 <= rest < 18:
-                    cleaning = make_termizator_cleaning_block("short", rule='rest_between_60_and_80')
-                    cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
-                    push(schedule["master"], cleaning, push_func=add_push)
-
-                # if rest is more than 80 minutes
-                if rest >= 18:
-                    if previous_cleaning and a.x[0] - previous_cleaning.x[0] < cast_t("04:00"):
-                        # if 4 hours ago or earlier was cleaning -> make short
-                        cleaning = make_termizator_cleaning_block("short", rule='rest_after_80_4_hours_cleaning')
-                    elif a.x[0] - boilings[0].x[0] < cast_t("04:00"):
-                        # if less than 4 hours since day start -> make short
-                        cleaning = make_termizator_cleaning_block("short", rule='rest_after_80_4_hours_init')
-                    else:
-                        # otherwise -> make full
-                        cleaning = make_termizator_cleaning_block("full", rule='rest_after_80')
-                    cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
-                    push(schedule["master"], cleaning, push_func=add_push)
-
-    # add last full cleaning
-    last_boiling = list(schedule["master"].iter(cls="boiling"))[-1]
-    start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1
-    cleaning = make_termizator_cleaning_block("full", rule='closing')  # add five extra minutes
-    push(
-        schedule["master"],
-        cleaning,
-        push_func=AxisPusher(start_from=start_from),
-        validator=Validator(),
-    )
-
-    return schedule
+def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times=None):
+    return ScheduleMaker().make(boilings, date, cleanings, start_times)
