@@ -262,9 +262,16 @@ def wrap_cleanings_line(schedule):
 def wrap_preparation(schedule):
     m = BlockMaker('preparation')
     return m.create_block('preparation',
-                   x=(schedule['preparation'].x[0], 0),
+                   x=(schedule['preparation'].x[0], 1),
                    size=(schedule['preparation'].size[0], 11))
 
+def wrap_shifts(shifts):
+    m = BlockMaker("shifts")
+    shifts = m.copy(shifts, with_props=True)
+    for shift in shifts.iter(cls='shift'):
+        shift.update_size(size=(shift.size[0], 1)) # todo maybe: refactor. Should be better
+    m.block(shifts, push_func=add_push)
+    return m.root
 
 def wrap_frontend(schedule, date=None):
     date = date or datetime.now()
@@ -281,12 +288,13 @@ def wrap_frontend(schedule, date=None):
     start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour and add half hour
     start_time = cast_time(start_t)
     m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
-
     with m.block(push_func=add_push,
                  x=(0, 2),
                  axis=1,
                  start_time=cast_time(start_t)):
+        m.col(wrap_shifts(schedule['shifts']['meltings']))
         m.block(wrap_mascarpone_lines(schedule, with_cream_cheese=True))
+        m.col(wrap_shifts(schedule['shifts']['packings']))
         m.block(make_packing_line(schedule))
         m.row("stub", size=0)
         m.block(wrap_cleanings_line(schedule))

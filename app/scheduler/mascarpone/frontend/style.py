@@ -64,4 +64,8 @@ STYLE = {
         "color": "white",
         "text": "подготовка цеха к работе, проверка оборудования",
     },
+    "shift": {
+        "color": (149, 179, 215),
+        "text": lambda b: f"Смена {b.props['shift_num']}",
+    },
 }

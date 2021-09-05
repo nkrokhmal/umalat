@@ -291,7 +291,7 @@ def wrap_shifts(shifts):
     shifts = m.copy(shifts, with_props=True)
     for shift in shifts.iter(cls='shift'):
         shift.update_size(size=(shift.size[0], 1)) # todo maybe: refactor. Should be better
-    m.block(shifts)
+    m.block(shifts, push_func=add_push)
     return m.root
 
 

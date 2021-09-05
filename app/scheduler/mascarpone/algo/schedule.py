@@ -226,13 +226,29 @@ class BoilingPlanToSchedule:
             self.m.block('packings')
 
         with code('meltings'):
-            beg = min(self.m.root['master']['boiling', True], key=lambda b: b.x[0]).x[0] - 6  # 0.5h before start
-            end = max(self.m.root['master']['boiling', True], key=lambda b: b.y[0])['pouring']['second']['pouring_off'].y[0] + 24  # 2h after last pouring off
+            beg = self.m.root.x[0]
+            end = self.m.root.y[0]
 
             shifts = split_shifts(beg, end)
 
             for i, (beg, end) in enumerate(shifts, 1):
-                push(self.m.root['shifts']['cheese_makers'], push_func=add_push,
+                push(self.m.root['shifts']['meltings'], push_func=add_push,
+                     block=self.m.create_block(
+                         "shift",
+                         x=(beg, 0),
+                         size=(end - beg, 0),
+                         shift_num=i
+                     ))
+
+        with code('packings'):
+            packings = self.m.root.find(cls='packing')
+            beg = packings[0].x[0] - 12 - self.m.root.x[0]  # 1h before and fix start time # todo maybe: refactor fixing start time
+            end = packings[-1].y[0] + 12 - self.m.root.x[0]  # 1h after and fix start time
+
+            shifts = split_shifts(beg, end)
+
+            for i, (beg, end) in enumerate(shifts, 1):
+                push(self.m.root['shifts']['packings'], push_func=add_push,
                      block=self.m.create_block(
                          "shift",
                          x=(beg, 0),
@@ -262,6 +278,7 @@ class BoilingPlanToSchedule:
     def __call__(self, boiling_plan_df, first_batch_id=0, start_time='07:00'):
         self._make_preparation()
         self._make_boilings(boiling_plan_df, first_batch_id)
+        self._make_shifts()
         self.m.root.props.update(x=(cast_t(start_time), 0))
         return self.m.root
 
