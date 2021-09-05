@@ -61,19 +61,20 @@ def download_schedules(page):
 
     for date_dir in date_dirs:
         if is_date(date_dir):
-            schedules_metadata[date_dir] = {}
             schedule_dir = os.path.join(
                 flask.current_app.config["DYNAMIC_DIR"],
                 date_dir,
                 flask.current_app.config["SCHEDULE_FOLDER"])
             if os.path.exists(schedule_dir):
                 schedules_filenames = os.listdir(schedule_dir)
-                for schedules_filename in schedules_filenames:
-                    department = get_department(schedules_filename)
-                    if department not in schedules_metadata[date_dir].keys():
-                        schedules_metadata[date_dir][department] = {}
-                        schedules_metadata[date_dir][department]['filename'] = schedules_filename
-                        schedules_metadata[date_dir][department]['is_approved'] = is_approved(schedules_filename, date_dir)
+                if schedules_filenames:
+                    schedules_metadata[date_dir] = {}
+                    for schedules_filename in schedules_filenames:
+                        department = get_department(schedules_filename)
+                        if department not in schedules_metadata[date_dir].keys():
+                            schedules_metadata[date_dir][department] = {}
+                            schedules_metadata[date_dir][department]['filename'] = schedules_filename
+                            schedules_metadata[date_dir][department]['is_approved'] = is_approved(schedules_filename, date_dir)
 
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
     schedules_result = get_metadata(
@@ -109,20 +110,19 @@ def download_schedule_tasks(page):
 
     for date_dir in date_dirs:
         if is_date(date_dir):
-            schedules_metadata[date_dir] = {}
             schedule_dir = os.path.join(
                 flask.current_app.config["DYNAMIC_DIR"],
                 date_dir,
                 flask.current_app.config["TASK_FOLDER"])
             if os.path.exists(schedule_dir):
-                # schedules_metadata[date_dir] = os.listdir(schedule_dir)
-
                 schedules_filenames = os.listdir(schedule_dir)
-                for schedules_filename in schedules_filenames:
-                    department = get_department_task(schedules_filename)
-                    if department not in schedules_metadata[date_dir].keys():
-                        schedules_metadata[date_dir][department] = {}
-                        schedules_metadata[date_dir][department]['filename'] = schedules_filename
+                if schedules_filenames:
+                    schedules_metadata[date_dir] = {}
+                    for schedules_filename in schedules_filenames:
+                        department = get_department_task(schedules_filename)
+                        if department not in schedules_metadata[date_dir].keys():
+                            schedules_metadata[date_dir][department] = {}
+                            schedules_metadata[date_dir][department]['filename'] = schedules_filename
 
     schedules_metadata = OrderedDict(sorted(schedules_metadata.items(), reverse=True))
     schedules_result = get_metadata(
