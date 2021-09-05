@@ -40,6 +40,10 @@ def fill_milk_project_sku_from_form(sku, form):
     return fill_mascarpone_sku_from_form(sku, form)
 
 
+def fill_adygea_sku_from_form(sku, form):
+    return fill_mascarpone_sku_from_form(sku, form)
+
+
 def fill_mozzarella_sku_from_form(sku, form):
     if form.boiling.data != -1:
         sku.made_from_boilings += [

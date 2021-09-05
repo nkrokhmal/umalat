@@ -9,7 +9,7 @@ from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
 from app.utils.features.openpyxl_wrapper import set_default_sheet
-from app.utils.files.utils import save_schedule, save_schedule_dict
+from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from .forms import ScheduleForm
 
 
@@ -22,12 +22,18 @@ def mozzarella_schedule():
         add_full_boiling = form.add_full_boiling.data
 
         file = flask.request.files["input_file"]
-        file_path = os.path.join(flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
+        data_dir = os.path.join(
+            flask.current_app.config["DYNAMIC_DIR"],
+            date.strftime("%Y-%m-%d"),
+            flask.current_app.config["BOILING_PLAN_FOLDER"])
+        create_if_not_exists(data_dir)
+
+        file_path = os.path.join(data_dir, file.filename)
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
             filename=os.path.join(
-                flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                data_dir, file.filename
             ),
             data_only=True,
         )
@@ -110,7 +116,6 @@ def mozzarella_schedule():
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
-        os.remove(file_path)
 
         return flask.render_template(
             "mozzarella/schedule.html", form=form, filename=filename_schedule, date=date.strftime("%Y-%m-%d")

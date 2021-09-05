@@ -63,7 +63,8 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
                 push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_time) - cast_t(start_time)), validator=Validator())
 
     with code('Cleaning'):
-        last_boilings = [[boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] == boiler_num][-1] for boiler_num in range(4)]
+        last_boilings = [utils.iter_get([boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] == boiler_num], -1) for boiler_num in range(4)]
+        last_boilings = [b for b in last_boilings if b]
         cleaning_start = min(b.y[0] for b in last_boilings)
         if len(m.root['lunch', True]) > 0:
             cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root['lunch', True]))

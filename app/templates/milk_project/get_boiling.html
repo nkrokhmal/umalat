@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Технология варки - Список варок{% endblock %}
+{% block page_content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Варки на линии милкпроджект </h1>
+        </div>
+    </div>
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Название варки</th>
+                        <th class="border-0">Вес нетто, кг</th>
+                        <th class="border-0">Выход, кг</th>
+                        <th class="border-0">Процент</th>
+                        <th class="border-0">Коэффициент на выходе</th>
+                        <th class="border-0">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in boilings %}
+                        <tr>
+                            <td class="border-0">{{loop.index}}</td>
+                            <td class="border-0"><a class="small">{{b.name}}</a></td>
+                            <td class="border-0"><a class="small">{{b.weight_netto}}</a></td>
+                            <td class="border-0"><a class="small">{{b.output_kg}}</a></td>
+                            <td class="border-0"><a class="small">{{b.percent}}</a></td>
+                            <td class="border-0"><a class="small">{{b.output_coeff}}</a></td>
+                            <td class="border-0">
+                                <a href="{{ url_for('main.milk_project_edit_boiling', boiling_id = b.id)}}" class="edit-bt">
+                                    <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -50,7 +50,7 @@ def milk_project_boiling_plan():
         df_plan_adygea = boiling_plan_create_adygea(adygea_df)
 
         wb = draw_boiling_plan_milk_project(df_plan_milk_project, wb)
-        wb = draw_boiling_plan_adygea(df_plan_adygea, None, wb)
+        wb = draw_boiling_plan_adygea(df_plan_adygea, wb)
 
         save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
         return flask.render_template(
