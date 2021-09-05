@@ -15,7 +15,7 @@ from utils_ak.block_tree import *
 
 def make_mpp(boiling_df, left_boiling_volume):
     boiling_df["collecting_speed"] = boiling_df["sku"].apply(
-        lambda sku: sku.collecting_speed
+        lambda sku: sku.collecting_speed if sku.collecting_speed else sku.packing_speed
     )
     boiling_df["packing_speed"] = boiling_df["sku"].apply(lambda sku: sku.packing_speed)
     boiling_df["cur_speed"] = 0

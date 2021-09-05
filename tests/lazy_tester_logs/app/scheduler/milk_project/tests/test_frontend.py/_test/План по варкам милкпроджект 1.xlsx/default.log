@@ -1,0 +1,7 @@
+schedule (84, 105] x (0, 0]
+  boiling_sequence (84, 105] x (0, 0]
+    water_collecting (84, 88] x (0, 0]
+    boiling (88, 105] x (0, 0]
+      mixture_collecting (88, 92] x (0, 0]
+      processing (92, 101] x (0, 0]
+      red (101, 105] x (0, 0]

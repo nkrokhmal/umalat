@@ -51,15 +51,16 @@ class SchemaToBoilingsDataframes:
             sequences = []
 
             for j, (sku, bff, kg) in enumerate(grp):
-                assert (
-                    sku.packing_speed == sku.collecting_speed
-                ), f"SKU {sku.name} имеет разные скорости сборки и фасовки. На линии воды позволяются только одинаковые скорости сборки и фасовки."
+                if sku.collecting_speed:
+                    assert (
+                        sku.packing_speed == sku.collecting_speed
+                    ), f"SKU {sku.name} имеет разные скорости сборки и фасовки. На линии воды позволяются только одинаковые скорости сборки и фасовки."
 
                 container = utils.Container(
                     f"Container{packing_team_id}-{j}",
                     item=bff,
                     limits=[kg, None],
-                    max_pressures=[sku.collecting_speed, None],
+                    max_pressures=[sku.packing_speed, None],
                 )
                 processor = utils.Processor(
                     f"Processor{packing_team_id}-{j}",

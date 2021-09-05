@@ -53,16 +53,10 @@ def read_boiling_plan(wb_obj):
     df_plan["sku"] = df_plan["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku.name))
     df_plan["boiling"] = df_plan["sku"].apply(lambda x: x.made_from_boilings[0])
 
-    df_plan = df_plan[[
-        "boiling_id",
-        "sku",
-        "n_baths",
-        "kg",
-        "boiling"
-    ]]
+    df_plan = df_plan[["boiling_id", "sku", "n_baths", "kg", "boiling"]]
 
-    for i in range(df_plan.shape[0]):
-        print(df_plan["boiling"].iloc[i].boiling_technologies[0].name)
+    # for i in range(df_plan.shape[0]):
+    #     print(df_plan["boiling"].iloc[i].boiling_technologies[0].name)
 
     return df_plan
 
@@ -83,8 +77,7 @@ def handle_adygea(df):
     df["output"] = df["sku"].apply(lambda x: x.made_from_boilings[0].output_kg)
 
     boilings_adygea = Boilings()
-    for i, df_filter in df.groupby('group_boiling_id'):
+    for i, df_filter in df.groupby("group_boiling_id"):
         boilings_adygea = proceed_order(df_filter, boilings_adygea)
     boilings_adygea.finish()
     return pd.DataFrame(boilings_adygea.boilings), boilings_adygea.boiling_number
-

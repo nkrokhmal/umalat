@@ -23,13 +23,13 @@ def get_configuration_time(line_name, sku1, sku2):
 def make_configuration_blocks(b1, b2, m, line_name, between_boilings=False):
     res = []
     for packing_team_id in range(1, 3):
-        packings = list(b1.iter(cls="packing", packing_team_id=packing_team_id))
+        packings = list(b1.iter(cls="packing", deactivated=lambda b: b is not True, packing_team_id=packing_team_id))
         if not packings:
             continue
 
         packing1 = packings[0]
 
-        packings = list(b2.iter(cls="packing", packing_team_id=packing_team_id))
+        packings = list(b2.iter(cls="packing", deactivated=lambda b: b is not True, packing_team_id=packing_team_id))
         if not packings:
             # todo archived: refactor
             if between_boilings:

@@ -100,8 +100,7 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
         m.block(container_cleanings,
                 push_func=AxisPusher(start_from=boiling_groups[-1]["analysis_group"].x[0]),
                 push_kwargs={'validator': Validator()})
-    print(m.root)
-    exit(1)
+
     with code('make_shifts'):
         with m.block("shifts", x=(0, 0), push_func=add_push):
             m.block('meltings')

@@ -10,6 +10,7 @@ from app.enum import LineName
 from app.scheduler.mozzarella.algo.schedule.awaiting_pusher import AwaitingPusher
 from utils_ak.block_tree import *
 
+
 class Validator(ClassValidator):
     def __init__(self):
         super().__init__(window=20)
@@ -332,7 +333,7 @@ class ScheduleMaker:
 
             packing_copy = self.m.copy(packing, with_props=True)
             packing_copy.props.update(extra_props={"start_from": packing.x[0]})
-            packing.parent.remove_child(packing)
+            packing.props.update(deactivated=True) # used in make_configuration_blocks function
             push(self.m.root["extra"], packing_copy, push_func=add_push)
 
         # add multihead boiling after all water boilings if multihead was present
@@ -535,68 +536,72 @@ class ScheduleMaker:
         with code('Water'):
             water_boilings = [b for b in self.m.root['master']['boiling', True] if b.props['boiling_model'].line.name == LineName.WATER]
 
-            with code('water meltings'):
-                beg = water_boilings[0]['melting_and_packing']['melting'].x[0] - 12  # 1h before start
-                end = water_boilings[-1]['melting_and_packing']['melting'].y[0] + 12  # 1h after end
+            if water_boilings:
+                with code('water meltings'):
+                    beg = water_boilings[0]['melting_and_packing']['melting'].x[0] - 12  # 1h before start
+                    end = water_boilings[-1]['melting_and_packing']['melting'].y[0] + 12  # 1h after end
 
-                shifts = split_shifts(beg, end)
+                    shifts = split_shifts(beg, end)
 
-                for i, (beg, end) in enumerate(shifts, 1):
-                    push(self.m.root['shifts']['water_meltings'], push_func=add_push,
-                         block=self.m.create_block(
-                             "shift",
-                             x=(beg, 0),
-                             size=(end - beg, 0),
-                             shift_num=i
-                         ))
+                    for i, (beg, end) in enumerate(shifts, 1):
+                        push(self.m.root['shifts']['water_meltings'], push_func=add_push,
+                             block=self.m.create_block(
+                                 "shift",
+                                 x=(beg, 0),
+                                 size=(end - beg, 0),
+                                 shift_num=i
+                             ))
 
-            with code('water packings'):
-                beg = water_boilings[0]['melting_and_packing']['packing'].x[0] - 18  # 1.5h before start
-                end = water_boilings[-1]['melting_and_packing']['packing'].y[0] + 6  # 0.5h after end
+                with code('water packings'):
+                    beg = water_boilings[0]['melting_and_packing']['packing'].x[0] - 18  # 1.5h before start
+                    end = water_boilings[-1]['melting_and_packing']['packing'].y[0] + 6  # 0.5h after end
 
-                shifts = split_shifts(beg, end)
+                    shifts = split_shifts(beg, end)
 
-                for i, (beg, end) in enumerate(shifts, 1):
-                    push(self.m.root['shifts']['water_packings'], push_func=add_push,
-                         block=self.m.create_block(
-                             "shift",
-                             x=(beg, 0),
-                             size=(end - beg, 0),
-                             shift_num=i
-                         ))
+                    for i, (beg, end) in enumerate(shifts, 1):
+                        push(self.m.root['shifts']['water_packings'], push_func=add_push,
+                             block=self.m.create_block(
+                                 "shift",
+                                 x=(beg, 0),
+                                 size=(end - beg, 0),
+                                 shift_num=i
+                             ))
 
         with code('Salt'):
             salt_boilings = [b for b in self.m.root['master']['boiling', True] if b.props['boiling_model'].line.name == LineName.SALT]
+            if salt_boilings:
+                with code('salt meltings'):
+                    beg = salt_boilings[0]['melting_and_packing']['melting'].x[0] - 12  # 1h before start
+                    end = salt_boilings[-1]['melting_and_packing']['packing', True][-1].y[0] # end of packing
 
-            with code('salt meltings'):
-                beg = salt_boilings[0]['melting_and_packing']['melting'].x[0] - 12  # 1h before start
-                end = salt_boilings[-1]['melting_and_packing']['packing'].y[0] # end of packing
+                    shifts = split_shifts(beg, end)
 
-                shifts = split_shifts(beg, end)
+                    for i, (beg, end) in enumerate(shifts, 1):
+                        push(self.m.root['shifts']['salt_meltings'], push_func=add_push,
+                             block=self.m.create_block(
+                                 "shift",
+                                 x=(beg, 0),
+                                 size=(end - beg, 0),
+                                 shift_num=i
+                             ))
 
-                for i, (beg, end) in enumerate(shifts, 1):
-                    push(self.m.root['shifts']['salt_meltings'], push_func=add_push,
-                         block=self.m.create_block(
-                             "shift",
-                             x=(beg, 0),
-                             size=(end - beg, 0),
-                             shift_num=i
-                         ))
+                with code('salt packings'):
+                    try:
+                        beg = salt_boilings[0]['melting_and_packing']['packing', True][0].x[0] - 12  # 1h before start
+                        end = salt_boilings[-1]['melting_and_packing']['packing', True][-1].y[0] + 6  # 0.5h after end
 
-            with code('salt packings'):
-                beg = salt_boilings[0]['melting_and_packing']['packing'].x[0] - 12  # 1h before start
-                end = salt_boilings[-1]['melting_and_packing']['packing'].y[0] + 6  # 0.5h after end
+                        shifts = split_shifts(beg, end)
 
-                shifts = split_shifts(beg, end)
-
-                for i, (beg, end) in enumerate(shifts, 1):
-                    push(self.m.root['shifts']['salt_packings'], push_func=add_push,
-                         block=self.m.create_block(
-                             "shift",
-                             x=(beg, 0),
-                             size=(end - beg, 0),
-                             shift_num=i
-                         ))
+                        for i, (beg, end) in enumerate(shifts, 1):
+                            push(self.m.root['shifts']['salt_packings'], push_func=add_push,
+                                 block=self.m.create_block(
+                                     "shift",
+                                     x=(beg, 0),
+                                     size=(end - beg, 0),
+                                     shift_num=i
+                                 ))
+                    except:
+                        pass
 
 
     def make(self, boilings, date=None, cleanings=None, start_times=None):
