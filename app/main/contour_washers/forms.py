@@ -66,8 +66,8 @@ class ScheduleDateForm(FlaskForm):
         validators=[Optional()],
         default=False
     )
-    is_not_working_day = BooleanField(
-        "Завтра нерабочий день",
+    is_tomorrow_not_working_day = BooleanField(
+        "Последующий день нерабочий",
         validators=[Optional()],
         default=False
     )

@@ -117,6 +117,10 @@ def contour_washers_schedule():
                         "warning",
                     )
 
+                main_form.is_tomorrow_not_working_day.data = (
+                    date + timedelta(days=1)
+                ).weekday() not in config.WORKING_WEEKDAYS
+
             # fill department forms
             for department, form in [
                 ["mozzarella", mozzarella_form],
@@ -190,7 +194,9 @@ def contour_washers_schedule():
                 output_path=path,
                 prefix=date_str,
                 input_tanks=input_tanks,
-                is_tomorrow_day_off=utils.cast_bool(main_form.is_not_working_day.data),
+                is_tomorrow_day_off=utils.cast_bool(
+                    main_form.is_tomorrow_not_working_day.data
+                ),
                 shipping_line=utils.cast_bool(main_form.shipping_line.data),
                 molder=utils.cast_bool(main_form.molder.data),
             )

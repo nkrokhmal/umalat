@@ -110,6 +110,8 @@ class BaseClass:
     RQ_REDIS_URL = "redis://redis:6379/0"
     RQ_QUEUES = ["default"]
 
+    WORKING_WEEKDAYS = [1, 2, 4, 5, 6]  # working all days buy mondays and thursday
+
     @staticmethod
     def abs_path(local_path):
         return os.path.join(basedir, local_path)
