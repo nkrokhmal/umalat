@@ -173,10 +173,10 @@ class ScheduleMaker:
 
         with self.m.block("shifts"):
             self.m.block('cheese_makers')
-            self.m.block('water_melting')
-            self.m.block('water_packing')
-            self.m.block('salt_melting')
-            self.m.block('salt_packing')
+            self.m.block('water_meltings')
+            self.m.block('water_packings')
+            self.m.block('salt_meltings')
+            self.m.block('salt_packings')
 
     def _init_lines_df(self):
         # init lines df
@@ -516,20 +516,54 @@ class ScheduleMaker:
         )
 
     def _process_shifts(self):
-        # cheese makers
-        start = min(self.m.root['master']['boiling', True], key=lambda b: b.x[0]).x[0] - 6  # half hour before start
-        end = max(self.m.root['master']['boiling', True], key=lambda b: b.y[0])['pouring']['second']['pouring_off'].y[0] + 24  # two hours after last pouring off
+        with code('cheese makers'):
+            beg = min(self.m.root['master']['boiling', True], key=lambda b: b.x[0]).x[0] - 6  # 0.5h before start
+            end = max(self.m.root['master']['boiling', True], key=lambda b: b.y[0])['pouring']['second']['pouring_off'].y[0] + 24  # 2h after last pouring off
 
-        shifts = split_shifts(start, end)
+            shifts = split_shifts(beg, end)
 
-        for i, (start, end) in enumerate(shifts, 1):
-            push(self.m.root['shifts']['cheese_makers'], push_func=add_push,
-                 block=self.m.create_block(
-                     "shift",
-                     x=(start, 0),
-                     size=(end - start, 0),
-                     shift_num=i
-                 ))
+            for i, (beg, end) in enumerate(shifts, 1):
+                push(self.m.root['shifts']['cheese_makers'], push_func=add_push,
+                     block=self.m.create_block(
+                         "shift",
+                         x=(beg, 0),
+                         size=(end - beg, 0),
+                         shift_num=i
+                     ))
+
+        with code('Water'):
+            water_boilings = [b for b in self.m.root['master']['boiling', True] if b.props['boiling_model'].line.name == LineName.WATER]
+
+            with code('water meltings'):
+                beg = water_boilings[0]['melting_and_packing']['melting'].x[0] - 12  # 1h before start
+                end = water_boilings[-1]['melting_and_packing']['melting'].y[0] + 12  # 1h after end
+
+                shifts = split_shifts(beg, end)
+
+                for i, (beg, end) in enumerate(shifts, 1):
+                    push(self.m.root['shifts']['water_meltings'], push_func=add_push,
+                         block=self.m.create_block(
+                             "shift",
+                             x=(beg, 0),
+                             size=(end - beg, 0),
+                             shift_num=i
+                         ))
+
+            with code('water packings'):
+                beg = water_boilings[0]['melting_and_packing']['packing'].x[0] - 18  # 1.5h before start
+                end = water_boilings[-1]['melting_and_packing']['packing'].y[0] + 6  # 0.5h after end
+
+                shifts = split_shifts(beg, end)
+
+                for i, (beg, end) in enumerate(shifts, 1):
+                    push(self.m.root['shifts']['water_packings'], push_func=add_push,
+                         block=self.m.create_block(
+                             "shift",
+                             x=(beg, 0),
+                             size=(end - beg, 0),
+                             shift_num=i
+                         ))
+
 
     def make(self, boilings, date=None, cleanings=None, start_times=None):
         self.date = date or datetime.now()

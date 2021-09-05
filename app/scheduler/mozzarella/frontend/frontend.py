@@ -467,16 +467,10 @@ def wrap_frontend(schedule, coolings_mode="first"):
     start_time = cast_time(start_t)
     m.block(wrap_header(schedule.props["date"], start_time=start_time, header='График наливов'))
     with m.block("pouring", start_time=start_time, axis=1):
-        # m.block(wrap_shifts(0,
-        #                     [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена"},
-        #                      {"size": (cast_t("01:03:00") - cast_t("19:00") + 1 + cast_t("05:30"), 1, ), "text": "2 смена"}]))
         m.block(wrap_shifts(schedule['shifts']['cheese_makers']))
         m.block(wrap_cheese_makers(master, range(2)))
-        # make(make_shifts(0, [{'size': (cast_t('19:00') - cast_t('07:00'), 1), 'text': '1 смена'},
-        #                      {'size': (cast_t('01:03:00') - cast_t('19:00') + 1 + cast_t('05:30'), 1), 'text': '2 смена'}]))
         m.block(wrap_cleanings(master))
         m.block(wrap_cheese_makers(master, range(2, 4)))
-        # m.block(wrap_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "Оператор + Помощник"}]))
 
     start_t = min(
         [boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]]
@@ -487,7 +481,8 @@ def wrap_frontend(schedule, coolings_mode="first"):
     m.block(wrap_header(schedule.props["date"], start_time=start_time, header='График наливов'))
 
     with m.block("melting", start_time=start_time, axis=1):
-        m.block(wrap_multihead_cleanings(master))
+        # m.block(wrap_multihead_cleanings(master))
+        m.block(wrap_shifts(schedule['shifts']['water_meltings']))
         m.block(
             wrap_meltings_1(
                 master,
@@ -497,7 +492,7 @@ def wrap_frontend(schedule, coolings_mode="first"):
             )
         )
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
-        # m.block(wrap_shifts(0, [{"size": (cast_t("19:05") - cast_t("07:00"), 1), "text": "бригадир упаковки + 5 рабочих"}]))
+        m.block(wrap_shifts(schedule['shifts']['water_packings']))
         m.block(wrap_packings(master, LineName.WATER))
         # m.block(wrap_shifts(0, [{"size": (cast_t("19:00") - cast_t("07:00"), 1), "text": "1 смена оператор + помощник"},
         #                         {"size": (cast_t("23:55") - cast_t("19:00") + 1 + cast_t("05:30"), 1)}]))
