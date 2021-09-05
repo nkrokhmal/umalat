@@ -179,7 +179,6 @@ def parse_schedule_file(wb_obj):
                                  melting_end=row["y0"],
                                  melting_end_with_cooling=melting.y[0])
 
-
     parse_block(
         "salt_packings",
         "packing",
