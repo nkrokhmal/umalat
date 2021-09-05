@@ -242,8 +242,8 @@ class BoilingPlanToSchedule:
 
         with code('packings'):
             packings = self.m.root.find(cls='packing')
-            beg = packings[0].x[0] - 12 - self.m.root.x[0]  # 1h before and fix start time # todo maybe: refactor fixing start time
-            end = packings[-1].y[0] + 12 - self.m.root.x[0]  # 1h after and fix start time
+            beg = packings[0].x[0] - 12  # 1h before
+            end = packings[-1].y[0] + 12 # 1h after
 
             shifts = split_shifts(beg, end)
 

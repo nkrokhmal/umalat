@@ -201,6 +201,15 @@ def wrap_container_cleanings(schedule):
     return m.root
 
 
+def wrap_shifts(shifts):
+    m = BlockMaker("shifts")
+    shifts = m.copy(shifts, with_props=True)
+    for shift in shifts.iter(cls='shift'):
+        shift.update_size(size=(shift.size[0], 1)) # todo maybe: refactor. Should be better
+    m.block(shifts, push_func=add_push)
+    return m.root
+
+
 def wrap_frontend(schedule, date=None):
     date = date or datetime.now()
 
@@ -214,14 +223,15 @@ def wrap_frontend(schedule, date=None):
     m.row("stub", size=0)  # start with 1
 
     # calc start time
-    start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour
+    start_t = int(utils.custom_round(schedule.x[0] - 12, 12, "floor"))  # round to last hour and add hour before for shifts
     start_time = cast_time(start_t)
 
     m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
-
     with m.block(start_time=start_time, axis=1):
+        m.block(wrap_shifts(schedule['shifts']['meltings']))
         m.block(wrap_boiling_lines(schedule))
         m.block(wrap_analysis_line(schedule))
+        m.block(wrap_shifts(schedule['shifts']['packings']))
         m.block(wrap_packing_line(schedule))
         m.block(wrap_container_cleanings(schedule))
     return m.root

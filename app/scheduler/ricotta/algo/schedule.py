@@ -5,6 +5,7 @@ from app.imports.runtime import *
 from app.scheduler.ricotta.algo.boilings import *
 from app.scheduler.ricotta.algo.cleanings import *
 from app.scheduler.time import *
+from app.scheduler.shifts import *
 from app.models import *
 
 
@@ -70,7 +71,6 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
 
     with code('make_boilings'):
         for bg_prev, bg in utils.iter_pairs(boiling_groups, method="any_prefix"):
-            print(bg.props.all())
             n_tanks = bg.props["n_tanks"]
             first_tank = bg.props["first_tank"]
 
@@ -100,6 +100,44 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
         m.block(container_cleanings,
                 push_func=AxisPusher(start_from=boiling_groups[-1]["analysis_group"].x[0]),
                 push_kwargs={'validator': Validator()})
+    print(m.root)
+    exit(1)
+    with code('make_shifts'):
+        with m.block("shifts", x=(0, 0), push_func=add_push):
+            m.block('meltings')
+            m.block('packings')
+
+        with code('meltings'):
+            beg = m.root.x[0] - 6 # 0.5h before
+            end = m.root.y[0]
+
+            shifts = split_shifts(beg, end)
+
+            for i, (beg, end) in enumerate(shifts, 1):
+                push(m.root['shifts']['meltings'], push_func=add_push,
+                     block=m.create_block(
+                         "shift",
+                         x=(beg, 0),
+                         size=(end - beg, 0),
+                         shift_num=i
+                     ))
+
+        with code('packings'):
+            packings = m.root.find(cls='packing')
+            beg = packings[0].x[0] - 12 - m.root.x[0]  # 1h before
+            end = packings[-1].y[0] + 12 - m.root.x[0]  # 1h after
+
+            shifts = split_shifts(beg, end)
+
+            for i, (beg, end) in enumerate(shifts, 1):
+                push(m.root['shifts']['packings'], push_func=add_push,
+                     block=m.create_block(
+                         "shift",
+                         x=(beg, 0),
+                         size=(end - beg, 0),
+                         shift_num=i
+                     ))
+
 
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root

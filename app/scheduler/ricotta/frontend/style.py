@@ -20,4 +20,8 @@ STYLE = {
     "container_cleaning_1": {"color": "yellow", "text": "Мойка бака №1"},
     "container_cleaning_2": {"color": "yellow", "text": "Мойка бака №2"},
     "container_cleaning_3": {"color": "yellow", "text": "Мойка бака №3 + фасовочник"},
+    "shift": {
+        "color": (149, 179, 215),
+        "text": lambda b: f"Смена {b.props['shift_num']}",
+    },
 }

@@ -287,7 +287,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
 
 
 def wrap_shifts(shifts):
-    m = BlockMaker("shifts", x=(shifts.x[0], 0))
+    m = BlockMaker("shifts")
     shifts = m.copy(shifts, with_props=True)
     for shift in shifts.iter(cls='shift'):
         shift.update_size(size=(shift.size[0], 1)) # todo maybe: refactor. Should be better
