@@ -175,7 +175,7 @@ def make_contour_2(properties):
     return m.root
 
 
-def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), molder=False, alternative=False):
+def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1), molder=False, alternative=False, is_tomorrow_day_off=False):
     m = BlockMaker("3 contour")
 
     for cleaning_time in properties['mozzarella'].short_cleaning_times:
@@ -285,10 +285,11 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
                 yield
 
     def f4():
-        b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('21:00'), validator=CleaningValidator()),
-              size=cast_t('01:00'),
-              label='Короткая мойка термизатора').block
-        assert cast_t('21:00') <= b.x[0] and b.y[0] <= cast_t('01:00:00'), "Short cleaning too bad"
+        if not is_tomorrow_day_off:
+            b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('21:00'), validator=CleaningValidator()),
+                  size=cast_t('01:00'),
+                  label='Короткая мойка термизатора').block
+            assert cast_t('21:00') <= b.x[0] and b.y[0] <= cast_t('01:00:00'), "Short cleaning too bad"
 
     if not alternative:
         run_order([f1, g2()], order1)
@@ -301,16 +302,16 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
         for _ in range(5):
             next(it)
 
-
-    # shift short cleaning to make it as late as possible
-    short_cleaning = m.root.find(label='Короткая мойка термизатора')[-1]
-    short_cleaning.detach_from_parent()
-    push(
-        m.root,
-        short_cleaning,
-        push_func=ShiftPusher(period=-1, start_from=cast_t('01:00:00')),
-        validator=CleaningValidator(ordered=False),
-    )
+    if not is_tomorrow_day_off:
+        # shift short cleaning to make it as late as possible
+        short_cleaning = m.root.find(label='Короткая мойка термизатора')[-1]
+        short_cleaning.detach_from_parent()
+        push(
+            m.root,
+            short_cleaning,
+            push_func=ShiftPusher(period=-1, start_from=cast_t('01:00:00')),
+            validator=CleaningValidator(ordered=False),
+        )
 
     if molder:
         m.row('cleaning', push_func=AxisPusher(start_from='last_end', validator=CleaningValidator()),
@@ -321,11 +322,17 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
 
 
 def make_contour_3(properties, **kwargs):
+    def value_function(b):
+        try:
+            return -b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]
+        except:
+            return -b.y[0]
+
     try:
-        df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, alternative=False, **kwargs)
+        df = utils.optimize(_make_contour_3, value_function, properties, alternative=False, **kwargs)
     except:
         logger.info('Running alternative contour 3')
-        df = utils.optimize(_make_contour_3, lambda b: (-b.y[0], -b.find_one(label='Короткая мойка термизатора').x[0]), properties, alternative=True, **kwargs)
+        df = utils.optimize(_make_contour_3, value_function, properties, alternative=True, **kwargs)
 
     return df.iloc[-1]['output']
 
@@ -502,7 +509,7 @@ def make_schedule(properties, **kwargs):
     contours = [
         make_contour_1(properties, shipping_line=kwargs.get('shipping_line', True)),
         make_contour_2(properties),
-        make_contour_3(properties, molder=kwargs.get('molder', False)),
+        make_contour_3(properties, molder=kwargs.get('molder', False), is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
         make_contour_4(properties, is_tomorrow_day_off=kwargs.get('is_tomorrow_day_off', False)),
         make_contour_5(properties, input_tanks=kwargs.get('input_tanks')),
         make_contour_6(properties),
