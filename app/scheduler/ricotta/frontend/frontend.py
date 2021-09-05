@@ -228,10 +228,12 @@ def wrap_frontend(schedule, date=None):
 
     m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
     with m.block(start_time=start_time, axis=1):
-        m.block(wrap_shifts(schedule['shifts']['meltings']))
+        if schedule['shifts']:
+            m.block(wrap_shifts(schedule['shifts']['meltings']))
         m.block(wrap_boiling_lines(schedule))
         m.block(wrap_analysis_line(schedule))
-        m.block(wrap_shifts(schedule['shifts']['packings']))
+        if schedule['shifts']:
+            m.block(wrap_shifts(schedule['shifts']['packings']))
         m.block(wrap_packing_line(schedule))
         m.block(wrap_container_cleanings(schedule))
     return m.root

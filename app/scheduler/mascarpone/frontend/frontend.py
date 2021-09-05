@@ -292,11 +292,14 @@ def wrap_frontend(schedule, date=None):
                  x=(0, 2),
                  axis=1,
                  start_time=cast_time(start_t)):
-        m.col(wrap_shifts(schedule['shifts']['meltings']))
+        if schedule['shifts']:
+            m.col(wrap_shifts(schedule['shifts']['meltings']))
         m.block(wrap_mascarpone_lines(schedule, with_cream_cheese=True))
-        m.col(wrap_shifts(schedule['shifts']['packings']))
+        if schedule['shifts']:
+            m.col(wrap_shifts(schedule['shifts']['packings']))
         m.block(make_packing_line(schedule))
         m.row("stub", size=0)
         m.block(wrap_cleanings_line(schedule))
-        m.block(wrap_preparation(schedule), push_func=add_push)
+        if schedule['preparation']:
+            m.block(wrap_preparation(schedule), push_func=add_push)
     return m.root

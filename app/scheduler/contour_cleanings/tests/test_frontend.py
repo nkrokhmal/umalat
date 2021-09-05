@@ -29,11 +29,11 @@ def _test(path, open_file=False, prefix=None, *args, **kwargs):
 
 
 if __name__ == "__main__":
-    _test(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-07-10-manual",
-        prefix="2021-07-10-manual",
-        open_file=True,
-        is_tomorrow_day_off=True,
-    )
+    # _test(
+    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-07-10-manual",
+    #     prefix="2021-07-10-manual",
+    #     open_file=True,
+    #     is_tomorrow_day_off=True,
+    # )
 
-    # test_batch()
+    test_batch()

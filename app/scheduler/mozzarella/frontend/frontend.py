@@ -467,7 +467,8 @@ def wrap_frontend(schedule, coolings_mode="first"):
     start_time = cast_time(start_t)
     m.block(wrap_header(schedule.props["date"], start_time=start_time, header='График наливов'))
     with m.block("pouring", start_time=start_time, axis=1):
-        m.block(wrap_shifts(schedule['shifts']['cheese_makers']))
+        if schedule['shifts']:
+            m.block(wrap_shifts(schedule['shifts']['cheese_makers']))
         m.block(wrap_cheese_makers(master, range(2)))
         m.block(wrap_cleanings(master))
         m.block(wrap_cheese_makers(master, range(2, 4)))
@@ -482,7 +483,8 @@ def wrap_frontend(schedule, coolings_mode="first"):
 
     with m.block("melting", start_time=start_time, axis=1):
         # m.block(wrap_multihead_cleanings(master))
-        m.block(wrap_shifts(schedule['shifts']['water_meltings']))
+        if schedule['shifts']:
+            m.block(wrap_shifts(schedule['shifts']['water_meltings']))
         m.block(
             wrap_meltings_1(
                 master,
@@ -492,11 +494,14 @@ def wrap_frontend(schedule, coolings_mode="first"):
             )
         )
         # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
-        m.block(wrap_shifts(schedule['shifts']['water_packings']))
+        if schedule['shifts']:
+            m.block(wrap_shifts(schedule['shifts']['water_packings']))
         m.block(wrap_packings(master, LineName.WATER))
-        m.block(wrap_shifts(schedule['shifts']['salt_meltings']))
+        if schedule['shifts']:
+            m.block(wrap_shifts(schedule['shifts']['salt_meltings']))
         m.block(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
-        m.block(wrap_shifts(schedule['shifts']['salt_packings']))
+        if schedule['shifts']:
+            m.block(wrap_shifts(schedule['shifts']['salt_packings']))
         m.block(wrap_packings(master, LineName.SALT))
         m.block(wrap_extra_packings(extra_packings))
     return m.root
