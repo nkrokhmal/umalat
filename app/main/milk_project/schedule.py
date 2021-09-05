@@ -40,18 +40,18 @@ def milk_project_schedule():
         )
 
         milk_project_output = run_milk_project(wb, path=None, start_time=beg_time)
+
+        if len(milk_project_output["boiling_plan_df"]) > 0:
+            beg_time = cast_time(milk_project_output["schedule"].y[0] - 4)
+
         adygea_output = run_adygea(wb, path=None, start_time=beg_time)
 
-        # todo maybe: hardcode
         if (
-            len(milk_project_output["boiling_plan_df"]) > 0
-            and len(adygea_output["boiling_plan_df"]) > 0
+            len(adygea_output["boiling_plan_df"]) > 0
+            and len(milk_project_output["boiling_plan_df"]) > 0
         ):
-            with code(
-                "Fix adygea start time - start 20 minutes before milk_project ends"
-            ):
+            with code("Set preferred header time"):
                 adygea_output["schedule"].props.update(
-                    x=(milk_project_output["schedule"].y[0] - 4, 0),
                     preferred_header_time=cast_time(
                         milk_project_output["schedule"].x[0]
                     ),
