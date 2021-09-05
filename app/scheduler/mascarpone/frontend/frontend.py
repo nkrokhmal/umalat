@@ -265,6 +265,7 @@ def wrap_preparation(schedule):
                    x=(schedule['preparation'].x[0], 1),
                    size=(schedule['preparation'].size[0], 11))
 
+
 def wrap_shifts(shifts):
     m = BlockMaker("shifts")
     shifts = m.copy(shifts, with_props=True)
