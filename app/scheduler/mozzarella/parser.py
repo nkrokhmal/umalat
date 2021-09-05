@@ -72,7 +72,7 @@ def parse_schedule_file(wb_obj):
     def parse_block(label, element_label, rows, start_time, length=2):
         with m.row(label, x=start_time, push_func=add_push):
             for i, row_num in enumerate(rows):
-                df1 = df[(df["x1"] == row_num) & (df["x0"] >= 4)]
+                df1 = df[(df["x1"] == row_num) & (df["x0"] >= 4)] # filter column header
                 groups = _group_intervals(
                     [row for i, row in df1.iterrows()],
                     max_length=length,
@@ -104,12 +104,10 @@ def parse_schedule_file(wb_obj):
                 # yesterday
                 hour -= 24
             start_times.append(hour * 12)
-
     # rows for ['1 смена', '2 смена', ...
     split_rows = list(
         sorted(df[df["y0"] - df["x0"] >= 50]["x1"].unique())
     )  # [2, 23, 32, 39, 60]
-
     parse_block(
         "boilings",
         "boiling",
@@ -156,7 +154,6 @@ def parse_schedule_file(wb_obj):
         salt_melting_rows = list(range(split_rows[3] + 1, last_melting_row, 4))
 
     parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
-
     with code("add salt forming info to meltings"):
         df_formings = df[
             (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[3] + 1)
