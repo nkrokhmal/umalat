@@ -105,11 +105,47 @@ def parse_schedule_file(wb_obj):
             start_times.append(hour * 12)
 
     with code('calc split rows'):
+        with code('find headers'):
+            df1 = df[df['x0'] >= 5]  # column header out
+
+            cheese_maker_headers = []
+            water_melting_headers = []
+            salt_melting_headers = []
+            headers = []
+
+            for row_num in df1['x1'].unique():
+                row_labels = [row['label'] for i, row in df1[df1['x1'] == row_num].iterrows()]
+                row_labels = [re.sub(r'\s+', ' ', label) for label in row_labels if label]
+
+                if {'налив/внесение закваски', 'схватка'}.issubset(set(row_labels)):
+                    cheese_maker_headers.append(row_num - 1)
+
+                if set(row_labels) == {'подача и вымешивание'}:
+                    water_melting_headers.append(row_num + 1)
+
+                if set(row_labels) == {'подача и вымешивание', 'посолка', 'плавление/формирование'}:
+                    salt_melting_headers.append(row_num - 1)
+
+                with code('find all headers'):
+                    _labels = [label.replace('налив', '') for label in row_labels]
+                    _labels = [re.sub(r'\s+', '', label) for label in _labels]
+                    int_labels = [int(label) for label in _labels if utils.is_int_like(label)]
+
+                    if not ('05' in row_labels and '55' in row_labels):
+                        # not a time header
+                        if int_labels:
+                            headers.append(row_num)
+
+            packing_headers = set(headers) - set(cheese_maker_headers) - set(water_melting_headers) - set(
+                salt_melting_headers)
+            packing_headers = list(sorted(packing_headers))[:2]
+
         split_rows = []
-        split_rows.append(df[df['label'] == 'Сыроизготовитель №1 Poly 1'].iloc[0]['x1'])
-        split_rows.append(df[df['label'] == 'Линия плавления моцареллы в воде №1'].iloc[0]['x1'])
-        split_rows.append(df[df['label'] == 'Линия плавления моцареллы в рассоле №2'].iloc[0]['x1'])
-        split_rows.append(max(df[df["y0"] - df["x0"] >= 50]["x1"].unique()) + 1)  # packing one has no label - find by shift
+        split_rows.append(cheese_maker_headers[-1] - 16)
+        split_rows.append(water_melting_headers[0] - 1)
+        split_rows.append(packing_headers[0])
+        split_rows.append(salt_melting_headers[0])
+        split_rows.append(packing_headers[1])
 
     parse_block(
         "boilings",
@@ -152,12 +188,12 @@ def parse_schedule_file(wb_obj):
 
     with code("Find rows for salt melting lines"):
         last_melting_row = df[df["label"] == "посолка"]["x1"].max()
-        salt_melting_rows = list(range(split_rows[2], last_melting_row, 4))
+        salt_melting_rows = list(range(split_rows[3], last_melting_row, 4))
 
     parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
     with code("add salt forming info to meltings"):
         df_formings = df[
-            (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[2])
+            (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[3])
         ]
 
         with code("fix start times and column header"):
@@ -182,7 +218,7 @@ def parse_schedule_file(wb_obj):
     parse_block(
         "salt_packings",
         "packing",
-        [split_rows[3], split_rows[3] + 6],
+        [split_rows[4], split_rows[4] + 6],
         start_times[1],
     )
     return m.root
@@ -384,5 +420,5 @@ def parse_properties(fn):
 
 
 if __name__ == "__main__":
-    fn = "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-07-14/approved/2021-07-14 Расписание моцарелла.xlsx"
+    fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
     print(dict(parse_properties(fn)))
