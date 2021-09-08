@@ -220,7 +220,7 @@ class BoilingPlanToSchedule:
                          push_func=AxisPusher(start_from="last_beg"),
                          push_kwargs={'validator': Validator()})
 
-    def _make_shifts(self):
+    def _make_shifts(self, start_time):
         with self.m.block("shifts", x=(0, 0), push_func=add_push):
             self.m.block('meltings')
             self.m.block('packings')
@@ -229,7 +229,10 @@ class BoilingPlanToSchedule:
             beg = self.m.root.x[0]
             end = self.m.root.y[0]
 
-            shifts = split_shifts(beg, end)
+            shifts = split_shifts_by_time(beg + cast_t(start_time), end + cast_t(start_time), cast_t('18:00'), min_shift=12)
+
+            # fix start time
+            shifts = [[beg - cast_t(start_time), end - cast_t(start_time)] for beg, end in shifts]
 
             for i, (beg, end) in enumerate(shifts, 1):
                 push(self.m.root['shifts']['meltings'], push_func=add_push,
@@ -245,8 +248,10 @@ class BoilingPlanToSchedule:
             beg = packings[0].x[0] - 12  # 1h before
             end = packings[-1].y[0] + 12 # 1h after
 
-            shifts = split_shifts(beg, end)
-
+            shifts = split_shifts_by_time(beg + cast_t(start_time), end + cast_t(start_time), cast_t('18:00'), min_shift=12)
+            # fix start time
+            shifts = [[beg - cast_t(start_time), end - cast_t(start_time)] for beg, end in shifts]
+            
             for i, (beg, end) in enumerate(shifts, 1):
                 push(self.m.root['shifts']['packings'], push_func=add_push,
                      block=self.m.create_block(
@@ -278,7 +283,7 @@ class BoilingPlanToSchedule:
     def __call__(self, boiling_plan_df, first_batch_id=0, start_time='07:00'):
         self._make_preparation()
         self._make_boilings(boiling_plan_df, first_batch_id)
-        self._make_shifts()
+        self._make_shifts(start_time)
         self.m.root.props.update(x=(cast_t(start_time), 0))
         return self.m.root
 
