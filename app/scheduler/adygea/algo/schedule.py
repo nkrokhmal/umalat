@@ -45,7 +45,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
     for i, row in boiling_plan_df.iterrows():
         for _ in range(row['n_baths']):
             boiling = make_boiling(row['boiling'], boiling_id=cur_boiling_id, boiler_num=cur_boiler_num)
-            push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30), validator=Validator())
+            push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30, min_start=0), validator=Validator())
             cur_boiler_num = (cur_boiler_num + 1) % 4
 
             with code('Push lunch if needed'):
@@ -75,7 +75,6 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
 
 def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
     no_lunch_schedule = _make_schedule(boiling_plan_df, first_boiling_id, start_time)
-
     if cast_time(no_lunch_schedule.y[0]) <= '00:12:30':
         lunch_times = []
     else:
