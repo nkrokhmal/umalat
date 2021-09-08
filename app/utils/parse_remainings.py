@@ -60,6 +60,7 @@ def get_skus(skus_req, skus, total_skus):
     result = []
     sku_for_creation = []
     for sku_req in skus_req:
+        sku_req["Name"] = "".join(sku_req["Name"].splitlines())
         sku = get_sku_by_name(total_skus, sku_req["Name"])
         if sku:
             sku = get_sku_by_name(skus, sku_req["Name"])
