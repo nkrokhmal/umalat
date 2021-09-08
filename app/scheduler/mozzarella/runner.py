@@ -13,7 +13,7 @@ def run_mozzarella(
     path="outputs/",
     prefix="",
 ):
-    start_times = start_times or {LineName.WATER: "02:00", LineName.SALT: "06:00"}
+    start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
 
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
 
@@ -34,4 +34,3 @@ def run_mozzarella(
     )
     res["boiling_plan_df"] = boiling_plan_df
     return res
-
