@@ -7,7 +7,7 @@ from app.scheduler.mozzarella.algo.packing import *
 from app.scheduler.shifts import *
 from app.enum import LineName
 
-from app.scheduler.mozzarella.algo.schedule.awaiting_pusher import AwaitingPusher
+from app.scheduler.mozzarella.algo.schedule.custom_pushers import *
 from utils_ak.block_tree import *
 
 
@@ -20,7 +20,6 @@ class Validator(ClassValidator):
         # extract boiling models
         boiling_model1 = b1.props['boiling_model']
         boiling_model2 = b2.props['boiling_model']
-
 
         with code('Basic validations'):
             validate_disjoint_by_axis(b1["pouring"]["first"]["termizator"], b2["pouring"]["first"]["termizator"])
@@ -102,7 +101,6 @@ class Validator(ClassValidator):
                         _b1 = b1["melting_and_packing"]["melting"]["meltings"]
                         _b2 = b2["melting_and_packing"]["melting"]["serving"]
                         validate_disjoint_by_axis(_b1, _b2, distance=-2, ordered=True)
-
         else:
             # different lines
 
@@ -315,9 +313,20 @@ class ScheduleMaker:
             push(
                 self.m.root["master"],
                 boiling,
-                push_func=AwaitingPusher(max_awaiting_period=8),
+                push_func=AwaitingPusher(max_period=8),
                 validator=Validator(),
                 max_tries=9,
+            )
+
+        # fix water a little bit: try to shrink drenator a little bit for compactness
+        if self.lines_df.at[LineName.WATER, "latest_boiling"]:
+            boiling.detach_from_parent()
+            push(
+                self.m.root["master"],
+                boiling,
+                push_func=DrenatorShrinkingPusher(max_period=-2),
+                validator=Validator(),
+                max_tries=3,
             )
 
         # move rubber packing to extras
