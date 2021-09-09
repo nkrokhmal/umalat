@@ -14,7 +14,7 @@ def make_boiling(boiling_group_df):
 
     m.row('mixture_collecting', size=bt.mixture_collecting_time // 5)
     m.row('processing', size=bt.processing_time // 5)
-    # todo maybe: rename
+    # todo later: rename
     m.row('red', size=bt.red_time // 5)
     return m.root
 
@@ -25,7 +25,7 @@ def make_boiling_sequence(boilings):
     sample_boiling_model = boilings[0].props['boiling_model']
     bt = utils.delistify(sample_boiling_model.boiling_technologies, single=True) # there is only one boiling technology is for every boiling model
 
-    # todo next: put water_collecting parameter to line
+    # todo later: put water_collecting parameter to line
     m.row('water_collecting', size=bt.water_collecting_time // 5)
 
     class Validator(ClassValidator):

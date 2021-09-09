@@ -9,23 +9,17 @@ STYLE = {
     },  # blue
     "pasteurization_1": {
         "color": "#FF0000",
-        # todo next: switchcom, does not work in consolidation mode
-        # "text": lambda b: f"пастеризация и сепарирование {str(b.props['boiling_model'].percent)}%",
-        "text": lambda b: f"пастеризация и сепарирование",
+        "text": lambda b: f"пастеризация и сепарирование {str(b.props['boiling_model'].percent)}%",
     },  # red
     # todo next: take from models
     "pasteurization_2": {"color": "#FFFF00", "text": "900 литров"},  # yellow
     "increasing_temperature": {
         "color": "#00B0F0",
-        # todo next: switchcom, does not work in consolidation mode
-        # "text": lambda b: f"набор tC через маслообразователь, анализ/нормализация {str(b.props['boiling_model'].percent)}%",
-        "text": lambda b: f"набор tC через маслообразователь, анализ/нормализация",
+        "text": lambda b: f"набор tC через маслообразователь, анализ/нормализация {str(b.props['boiling_model'].percent)}%",
     },
     "packing": {
         "color": "#00B050",
-        # todo next: switchcom, does not work in consolidation mode
-        # "text": lambda b: f"фасовка V{str(b.props['boiling_model'].weight_netto)} кг, {str(b.props['boiling_model'].line.output_kg)}кг",
-        "text": lambda b: f"фасовка",
+        "text": lambda b: f"фасовка V{str(b.props['boiling_model'].weight_netto)} кг, {str(b.props['boiling_model'].line.output_kg)}кг",
     },  # green
     "displacement": {"color": "#FFC000", "text": "вытеснение"},  # orange
     "cleaning": {

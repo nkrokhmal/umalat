@@ -142,10 +142,22 @@ def parse_schedule_file(wb_obj):
 
         split_rows = []
         split_rows.append(cheese_maker_headers[-1] - 16)
-        split_rows.append(water_melting_headers[0] - 1)
-        split_rows.append(packing_headers[0])
-        split_rows.append(salt_melting_headers[0])
-        split_rows.append(packing_headers[1])
+
+        if water_melting_headers:
+            # water present
+            split_rows.append(water_melting_headers[0] - 1)
+            split_rows.append(packing_headers[0])
+            packing_headers = packing_headers[1:]
+        else:
+            split_rows += [None, None]
+
+        if salt_melting_headers:
+            # salt present
+            split_rows.append(salt_melting_headers[0])
+            split_rows.append(packing_headers[0])
+        else:
+            split_rows += [None, None]
+
 
     parse_block(
         "boilings",
@@ -154,14 +166,49 @@ def parse_schedule_file(wb_obj):
         start_times[0],
     )
     parse_block("cleanings", "cleaning", [split_rows[0] + 8], start_times[0])
-    parse_block("water_meltings", "melting", [split_rows[1] + 1], start_times[1])
-    with code('meta info to water meltings'):
-        with code('melting_end'):
-            for melting in m.root['water_meltings'].children:
-                melting.props.update(melting_end=melting.y[0])
+    if water_melting_headers:
+        parse_block("water_meltings", "melting", [split_rows[1] + 1], start_times[1])
+        with code('meta info to water meltings'):
+            with code('melting_end'):
+                for melting in m.root['water_meltings'].children:
+                    melting.props.update(melting_end=melting.y[0])
 
-        with code('melting_end_with_cooling'):
-            df_formings = df[df["label"] == "охлаждение"]
+            with code('melting_end_with_cooling'):
+                df_formings = df[df["label"] == "охлаждение"]
+
+                with code("fix start times and column header"):
+                    df_formings["x0"] += start_times[1] - 5
+                    df_formings["y0"] += start_times[1] - 5
+                    df_formings["x1"] += start_times[1] - 5
+                    df_formings["y1"] += start_times[1] - 5
+
+                df_formings = df_formings.sort_values(by="x0")
+                for i, row in df_formings.iterrows():
+                    overlapping = [
+                        m
+                        for m in m.root["water_meltings"].children
+                        if calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row['x0'], row['y0'])) > 0
+                    ]
+                    if not overlapping:
+                        # first cooling in each boiling does not qualify the filter
+                        continue
+
+                    melting = utils.delistify(overlapping, single=True)
+                    cooling_length = row['y0'] - melting.x[0]
+                    melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
+
+        parse_block("water_packings", "packing", [split_rows[1] + 7], start_times[1])
+
+    if salt_melting_headers:
+        with code("Find rows for salt melting lines"):
+            last_melting_row = df[df["label"] == "посолка"]["x1"].max()
+            salt_melting_rows = list(range(split_rows[3], last_melting_row, 4))
+
+        parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
+        with code("add salt forming info to meltings"):
+            df_formings = df[
+                (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[3])
+            ]
 
             with code("fix start times and column header"):
                 df_formings["x0"] += start_times[1] - 5
@@ -170,71 +217,35 @@ def parse_schedule_file(wb_obj):
                 df_formings["y1"] += start_times[1] - 5
 
             df_formings = df_formings.sort_values(by="x0")
+
             for i, row in df_formings.iterrows():
                 overlapping = [
                     m
-                    for m in m.root["water_meltings"].children
-                    if calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row['x0'], row['y0'])) > 0
+                    for m in m.root["salt_meltings"].children
+                    if m.x[0] <= row["x0"] and m.y[0] >= row["x0"]
                 ]
-                if not overlapping:
-                    # first cooling in each boiling does not qualify the filter
-                    continue
+                melting = utils.delistify([m for m in overlapping if m.x[0] + 6 == row["x0"]], single=True)  # todo next: make properly, check
+                melting.props.update(melting_start=row['x0'],
+                                     melting_end=row["y0"],
+                                     melting_end_with_cooling=melting.y[0])
 
-                melting = utils.delistify(overlapping, single=True)
-                cooling_length = row['y0'] - melting.x[0]
-                melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
-
-    parse_block("water_packings", "packing", [split_rows[1] + 7], start_times[1])
-
-    with code("Find rows for salt melting lines"):
-        last_melting_row = df[df["label"] == "посолка"]["x1"].max()
-        salt_melting_rows = list(range(split_rows[3], last_melting_row, 4))
-
-    parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
-    with code("add salt forming info to meltings"):
-        df_formings = df[
-            (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[3])
-        ]
-
-        with code("fix start times and column header"):
-            df_formings["x0"] += start_times[1] - 5
-            df_formings["y0"] += start_times[1] - 5
-            df_formings["x1"] += start_times[1] - 5
-            df_formings["y1"] += start_times[1] - 5
-
-        df_formings = df_formings.sort_values(by="x0")
-
-        for i, row in df_formings.iterrows():
-            overlapping = [
-                m
-                for m in m.root["salt_meltings"].children
-                if m.x[0] <= row["x0"] and m.y[0] >= row["x0"]
-            ]
-            melting = utils.delistify([m for m in overlapping if m.x[0] + 6 == row["x0"]], single=True)  # todo next: make properly, check
-            melting.props.update(melting_start=row['x0'],
-                                 melting_end=row["y0"],
-                                 melting_end_with_cooling=melting.y[0])
-
-    parse_block(
-        "salt_packings",
-        "packing",
-        [split_rows[4], split_rows[4] + 6],
-        start_times[1],
-    )
+        parse_block(
+            "salt_packings",
+            "packing",
+            [split_rows[4], split_rows[4] + 6],
+            start_times[1],
+        )
     return m.root
 
 
 def prepare_boiling_plan(parsed_schedule, df_bp):
     df_bp["line_name"] = df_bp["line"].apply(lambda line: line.name)
 
-    water_boiling_ids = [b.props["label"] for b in parsed_schedule["water_packings"].children]
-    salt_boiling_ids = [b.props["label"] for b in parsed_schedule["salt_packings"].children]
-
     for line_name, grp_line in df_bp.groupby("line_name"):
         if line_name == LineName.WATER:
-            boiling_ids = water_boiling_ids
+            boiling_ids = [b.props["label"] for b in parsed_schedule["water_packings"].children]
         else:
-            boiling_ids = salt_boiling_ids
+            boiling_ids = [b.props["label"] for b in parsed_schedule["salt_packings"].children]
         boiling_ids = list(sorted(set(boiling_ids)))
         for i, (_, grp) in enumerate(grp_line.groupby("group_id")):
             df_bp.loc[grp.index, "boiling_id"] = boiling_ids[i]

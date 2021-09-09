@@ -9,8 +9,7 @@ STYLE = {
     },
     "processing": {
         "color": "#00B0F0",  # blue
-        # todo next: add name from models
-        "text": "Производство",
+        "text": lambda b: b.props['boiling_model'].name,
     },
     "red": {"color": "red"},  # yellow
     "pouring_off": {
