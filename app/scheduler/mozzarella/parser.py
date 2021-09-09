@@ -380,13 +380,13 @@ def fill_properties(parsed_schedule, df_bp):
                         cur_drenator_num += 1
                     else:
                         melting = parsed_schedule.find_one(cls='melting', boiling_id=b1.props['boiling_id'])
-                        if b2.y[0] - 5 < melting.props["melting_end"]: # todo next: make pouring off properly
+                        if b2.y[0] - 5 < melting.props["melting_end"]: # todo later: make pouring off properly
                             cur_drenator_num += 1
                         else:
                             # use same drenator for the next boiling
                             pass
                     b2.props.update(drenator_num=cur_drenator_num % 2,
-                                    drenator_end=b2.y[0] + b2.props["boiling_model"].line.chedderization_time // 5 - 5)  # todo next: make pouring off properly
+                                    drenator_end=b2.y[0] + b2.props["boiling_model"].line.chedderization_time // 5 - 5)  # todo later: make pouring off properly
 
 
         with code("fill drenator properties"):

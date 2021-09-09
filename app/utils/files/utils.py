@@ -21,13 +21,7 @@ def save_file_dir(data, filename, date, folder, data_type="xlsx"):
         with open(os.path.join(data_dir, filename), mode) as outfile:
             json.dump(data, outfile)
     elif data_type == "pickle":
-        # todo next: make properly
-        with code("Should not dump twice to the same file"):
-            if os.path.exists(os.path.join(data_dir, filename)):
-                utils.remove_path(os.path.join(data_dir, filename))
-
-        mode = "ab" if os.path.exists(os.path.join(data_dir, filename)) else "wb"
-        with open(os.path.join(data_dir, filename), mode) as outfile:
+        with open(os.path.join(data_dir, filename), "wb") as outfile:
             pickle.dump(data, outfile)
 
 

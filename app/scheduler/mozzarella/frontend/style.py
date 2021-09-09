@@ -15,9 +15,7 @@ STYLE = {
     "serving": {"color": "orange", "text": "подача и вымешивание"},
     "melting_process": {
         "color": "orange",
-        "text": lambda b: "плавление {speed} кг/ч"
-        if b.props["boiling_type"] == "water"
-        else "плавление/формирование",
+        "text": "плавление/формирование",
     },
     # 'cooling': {'text': 'охлаж <{size}[0] * 5> мин'},
     "cooling": {"text": "охлаждение"},

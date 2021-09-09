@@ -221,8 +221,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
                 with m.block("melting_row"):
                     m.row("melting_process", push_func=add_push,
                           x=boiling["melting_and_packing"]["melting"]["meltings"].x[0],
-                          size=boiling["melting_and_packing"]["melting"]["meltings"].size[0],
-                          speed=900) # todo next: ?
+                          size=boiling["melting_and_packing"]["melting"]["meltings"].size[0])
 
     n_cooling_lines = 0
     m.block("cooling_row", axis=1)
@@ -327,10 +326,10 @@ def wrap_melting(boiling, line_name):
             m.row("serving", push_func=add_push,
                   x=boiling["melting_and_packing"]["melting"]["serving"].x[0],
                   size=boiling["melting_and_packing"]["melting"]["serving"].size[0])
+
             m.row("melting_process", push_func=add_push,
                 x=(boiling["melting_and_packing"]["melting"]["meltings"].x[0], 0),
-                size=(boiling["melting_and_packing"]["melting"]["meltings"].size[0], 1),
-                speed=900) # todo next: ?
+                size=(boiling["melting_and_packing"]["melting"]["meltings"].size[0], 1))
             m.row(cooling_label, size= boiling["melting_and_packing"]["melting"]["coolings"]["cooling_process", True][-1]["start"].size[0])
 
         with m.block("cooling_row"):
