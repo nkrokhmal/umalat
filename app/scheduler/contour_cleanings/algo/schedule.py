@@ -5,7 +5,7 @@ from app.scheduler.time import *
 from app.enum import *
 
 
-# todo maybe: put into more proper place
+# todo maybe: put in more proper place
 def calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings):
     total_scotta = (1900 - 130) * ricotta_n_boilings + adygea_n_boilings * 370 + milk_project_n_boilings * 2400 # todo maybe: take from parameters
 

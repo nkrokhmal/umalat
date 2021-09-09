@@ -53,14 +53,21 @@ class MilkProjectBoilingTechnology(BoilingTechnology):
     water_collecting_time = mdb.Column(mdb.Integer)
     mixture_collecting_time = mdb.Column(mdb.Integer)
     processing_time = mdb.Column(mdb.Integer)
-    # todo maybe: rename
+    # todo later: rename
     red_time = mdb.Column(mdb.Integer)
 
     @staticmethod
-    def create_name(form_factor, line, percent, weight,):
+    def create_name(
+        form_factor,
+        line,
+        percent,
+        weight,
+    ):
         boiling_name = [percent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
         return "Линия {}, Форм фактор {}, Вес {}, {}".format(
-            line, form_factor, weight, boiling_name,
+            line,
+            form_factor,
+            weight,
+            boiling_name,
         )
-
