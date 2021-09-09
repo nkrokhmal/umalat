@@ -11,8 +11,12 @@ STYLE = {
         "color": "#FF0000",
         "text": lambda b: f"пастеризация и сепарирование {str(b.props['boiling_model'].percent)}%",
     },  # red
-    # todo next: take from models
-    "pasteurization_2": {"color": "#FFFF00", "text": "900 литров"},  # yellow
+    "pasteurization_2": {
+        "color": "#FFFF00",
+        "text": lambda b: "{} литров".format(
+            b.props["boiling_model"].line.boiling_volume
+        ),
+    },  # yellow
     "increasing_temperature": {
         "color": "#00B0F0",
         "text": lambda b: f"набор tC через маслообразователь, анализ/нормализация {str(b.props['boiling_model'].percent)}%",

@@ -30,7 +30,7 @@ if __name__ == "__main__":
         ),
         start_times={LineName.WATER: "06:00", LineName.SALT: "07:00"},
         first_boiling_id=72,
-        open_file=True,
+        open_file=False,
         prefix="new",
     )
     # test_batch()

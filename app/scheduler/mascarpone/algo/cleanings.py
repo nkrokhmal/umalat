@@ -4,7 +4,7 @@ from utils_ak.block_tree import *
 
 
 def make_cleaning(entity, **kwargs):
-    # todo next: take from models
+    # todo later: take from models
     CLEANING_SIZES = {
         "sourdough_mascarpone": 13,
         "sourdough_mascarpone_cream_cheese": 12,

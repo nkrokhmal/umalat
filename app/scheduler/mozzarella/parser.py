@@ -32,7 +32,6 @@ def _group_intervals(intervals, max_length=None, interval_func=None):
 
     if cur_group:
         groups.append(cur_group)
-
     return groups
 
 
@@ -168,6 +167,8 @@ def parse_schedule_file(wb_obj):
     parse_block("cleanings", "cleaning", [split_rows[0] + 8], start_times[0])
     if water_melting_headers:
         parse_block("water_meltings", "melting", [split_rows[1] + 1], start_times[1])
+
+        # todo maybe: make properly
         with code('meta info to water meltings'):
             with code('melting_end'):
                 for melting in m.root['water_meltings'].children:
@@ -205,26 +206,26 @@ def parse_schedule_file(wb_obj):
             salt_melting_rows = list(range(split_rows[3], last_melting_row, 4))
 
         parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
+
+        # todo maybe: make properly
         with code("add salt forming info to meltings"):
             df_formings = df[
                 (df["label"] == "плавление/формирование") & (df["x1"] >= split_rows[3])
             ]
+
+            df_formings['serving_start'] = df_formings['x0'].apply(lambda x0: df[(df['y0'] == x0) & (df['label'] == 'подача и вымешивание')].iloc[0]['x0'])
 
             with code("fix start times and column header"):
                 df_formings["x0"] += start_times[1] - 5
                 df_formings["y0"] += start_times[1] - 5
                 df_formings["x1"] += start_times[1] - 5
                 df_formings["y1"] += start_times[1] - 5
+                df_formings["serving_start"] += start_times[1] - 5
 
             df_formings = df_formings.sort_values(by="x0")
 
             for i, row in df_formings.iterrows():
-                overlapping = [
-                    m
-                    for m in m.root["salt_meltings"].children
-                    if m.x[0] <= row["x0"] and m.y[0] >= row["x0"]
-                ]
-                melting = utils.delistify([m for m in overlapping if m.x[0] + 6 == row["x0"]], single=True)  # todo next: make properly, check
+                melting = utils.delistify([m for m in m.root["salt_meltings"].children if m.x[0] == row['serving_start']], single=True)
                 melting.props.update(melting_start=row['x0'],
                                      melting_end=row["y0"],
                                      melting_end_with_cooling=melting.y[0])
