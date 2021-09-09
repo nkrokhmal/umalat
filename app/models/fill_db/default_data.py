@@ -118,7 +118,8 @@ def generate_mozzarella_lines():
         output_kg=450,
         preparing_time=70,
         displacement_time=10,
-        cleaning_time=27*5,
+        # cleaning_time=27*5,
+        cleaning_time=100,
         boiling_volume=900,
     )
     butter_line.department_id = butter_department.id
@@ -162,8 +163,8 @@ def generate_washer():
         db.session.add(washer)
 
     for data in [
-        WasherData("sourdough", 5 * 13),
-        WasherData("sourdough_cream_cheese", 5 * 12),
+        WasherData("sourdough_mascarpone", 5 * 13),
+        WasherData("sourdough_mascarpone_cream_cheese", 5 * 12),
         WasherData("separator", 5 * 15),
         WasherData("heat_exchanger", 5 * 12),
         WasherData("homogenizer", 5 * 12),
