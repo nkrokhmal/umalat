@@ -2,16 +2,15 @@
 
 from app.imports.runtime import *
 from utils_ak.block_tree import *
-
+from app.models import *
 
 def make_bath_cleaning():
     m = BlockMaker("bath_cleaning")
-    # todo later: take from models
-    m.row("bath_cleaning_1", size=2)
-    m.row("bath_cleaning_2", size=4)
-    m.row("bath_cleaning_3", size=1)
-    m.row("bath_cleaning_4", size=2)
-    m.row("bath_cleaning_5", size=2)
+    m.row("bath_cleaning_1", size=cast_model(Washer, 'bath_cleaning_1').time // 5)
+    m.row("bath_cleaning_2", size=cast_model(Washer, 'bath_cleaning_2').time // 5)
+    m.row("bath_cleaning_3", size=cast_model(Washer, 'bath_cleaning_3').time // 5)
+    m.row("bath_cleaning_4", size=cast_model(Washer, 'bath_cleaning_4').time // 5)
+    m.row("bath_cleaning_5", size=cast_model(Washer, 'bath_cleaning_5').time // 5)
 
     return m.root
 

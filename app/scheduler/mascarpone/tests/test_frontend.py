@@ -20,7 +20,7 @@ def _test(fn, *args, **kwargs):
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
     outputs = run_mascarpone(fn, *args, **kwargs)
     utils.lazy_tester.log(outputs["schedule"])
-    utils.lazy_tester.assert_logs(reset=True)
+    utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":

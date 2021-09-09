@@ -19,8 +19,7 @@ def make_schedule(boiling_plan_df, start_time='07:00'):
         m.row(make_boiling(grp))
     m.row('displacement', size=line.displacement_time // 5)
 
-    # todo later: take from line model
-    m.row("cleaning", size=20)
+    m.row("cleaning", size=line.cleaning_time // 5)
 
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root
