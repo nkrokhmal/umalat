@@ -39,6 +39,8 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
 
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
+    adygea_line = cast_model(AdygeaLine, 7)
+    adygea_cleaning = cast_model(Washer, 'adygea_cleaning')
 
     cur_boiler_num = 0
     cur_boiling_id = boiling_plan_df['boiling_id'].iloc[0] + first_boiling_id - 1
@@ -52,7 +54,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
                 if lunch_times:
                     pair_num = cur_boiler_num % 2
                     if lunch_times[pair_num] and cast_time(boiling.y[0] + cast_t(start_time)) >= lunch_times[pair_num]:
-                        push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_times[pair_num]) - cast_t(start_time)), validator=Validator())
+                        push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_times[pair_num]) - cast_t(start_time)), validator=Validator())
                         lunch_times[pair_num] = None # pushed lunch, nonify lunch time
 
             cur_boiling_id += 1
@@ -60,7 +62,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
     with code('Push lunches if not pushed yet'):
         for pair_num, lunch_time in enumerate(lunch_times):
             if lunch_time:
-                push(m.root, make_lunch(pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_time) - cast_t(start_time)), validator=Validator())
+                push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_time) - cast_t(start_time)), validator=Validator())
 
     with code('Cleaning'):
         last_boilings = [utils.iter_get([boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] == boiler_num], -1) for boiler_num in range(4)]
@@ -68,7 +70,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
         cleaning_start = min(b.y[0] for b in last_boilings)
         if len(m.root['lunch', True]) > 0:
             cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root['lunch', True]))
-        m.row(make_cleaning(), x=cleaning_start, push_func=add_push)
+        m.row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root
 
