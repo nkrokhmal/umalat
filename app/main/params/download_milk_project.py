@@ -6,6 +6,7 @@ from app.models import *
 @flask_login.login_required
 def download_milk_project():
     skus = db.session.query(MilkProjectSKU).all()
+    line = db.session.query(MilkProjectLine).all()
     data = [
         {
             'Название SKU': sku.name,
@@ -17,7 +18,7 @@ def download_milk_project():
             'Выход': sku.made_from_boilings[0].output_kg,
             'Коробки': sku.in_box,
             'Вес форм фактора': 0,
-            'Вода': sku.made_from_boilings[0].boiling_technologies[0].water_collecting_time,
+            'Вода': line[0].water_collecting_time,
             'Смесь': sku.made_from_boilings[0].boiling_technologies[0].mixture_collecting_time,
             'Производство': sku.made_from_boilings[0].boiling_technologies[0].processing_time,
             'Красный': sku.made_from_boilings[0].boiling_technologies[0].red_time,

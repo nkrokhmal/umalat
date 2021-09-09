@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ae385f7c042b
+Revision ID: 3ab853465b35
 Revises: 
-Create Date: 2021-09-07 19:12:38.751258
+Create Date: 2021-09-09 13:39:24.865611
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ae385f7c042b'
+revision = '3ab853465b35'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -82,6 +82,7 @@ def upgrade():
     )
     op.create_table('adygea_lines',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('lunch_time', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -126,6 +127,7 @@ def upgrade():
     )
     op.create_table('milk_project_lines',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('water_collecting_time', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -365,7 +367,6 @@ def upgrade():
     )
     op.create_table('milk_project_boiling_technologies',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('water_collecting_time', sa.Integer(), nullable=True),
     sa.Column('mixture_collecting_time', sa.Integer(), nullable=True),
     sa.Column('processing_time', sa.Integer(), nullable=True),
     sa.Column('red_time', sa.Integer(), nullable=True),

@@ -43,7 +43,6 @@ class MilkProjectBoilingForm(FlaskForm):
 
 class MilkProjectBoilingTechnologyForm(FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
-    water_collecting_time = IntegerField("", validators=[Optional()])
     mixture_collecting_time = IntegerField("", validators=[Optional()])
     processing_time = IntegerField("", validators=[Optional()])
     red_time = IntegerField("", validators=[Optional()])

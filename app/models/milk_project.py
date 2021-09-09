@@ -17,6 +17,7 @@ class MilkProjectLine(Line):
     __mapper_args__ = {"polymorphic_identity": "milk_project_lines"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
+    water_collecting_time = mdb.Column(mdb.Integer)
 
 
 class MilkProjectFormFactor(FormFactor):
@@ -50,7 +51,6 @@ class MilkProjectBoilingTechnology(BoilingTechnology):
         mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
     )
 
-    water_collecting_time = mdb.Column(mdb.Integer)
     mixture_collecting_time = mdb.Column(mdb.Integer)
     processing_time = mdb.Column(mdb.Integer)
     # todo later: rename

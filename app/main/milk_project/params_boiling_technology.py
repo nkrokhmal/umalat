@@ -32,7 +32,6 @@ def milk_project_edit_boiling_technology(boiling_technology_id):
     )
     if form.validate_on_submit() and boiling_technology is not None:
         boiling_technology.name = form.name.data
-        boiling_technology.water_collecting_time = form.water_collecting_time.data
         boiling_technology.mixture_collecting_time = form.mixture_collecting_time.data
         boiling_technology.processing_time = form.processing_time.data
         boiling_technology.red_time = form.red_time.data
@@ -42,7 +41,6 @@ def milk_project_edit_boiling_technology(boiling_technology_id):
         return redirect(flask.url_for(".milk_project_get_boiling_technology"))
 
     form.name.data = boiling_technology.name
-    form.water_collecting_time.data = boiling_technology.water_collecting_time
     form.mixture_collecting_time.data = boiling_technology.mixture_collecting_time
     form.processing_time.data = boiling_technology.processing_time
     form.red_time.data = boiling_technology.red_time

@@ -17,6 +17,7 @@ class AdygeaLine(Line):
     __mapper_args__ = {"polymorphic_identity": "adygea_lines"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
+    lunch_time = mdb.Column(mdb.Integer)
 
 
 class AdygeaFormFactor(FormFactor):

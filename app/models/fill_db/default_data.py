@@ -126,14 +126,16 @@ def generate_mozzarella_lines():
 
     milk_project_department = Department.query.filter_by(name="Милкпроджект").first()
     milk_project_line = MilkProjectLine(
-        name="Милкпроджект"
+        name="Милкпроджект",
+        water_collecting_time=20,
     )
     milk_project_line.department_id = milk_project_department.id
     db.session.add(milk_project_line)
 
     adygea_department = Department.query.filter_by(name="Адыгейский цех").first()
     adygea_line = AdygeaLine(
-        name=LineName.ADYGEA
+        name=LineName.ADYGEA,
+        lunch_time=60,
     )
     adygea_line.department_id = adygea_department.id
     db.session.add(adygea_line)
@@ -146,6 +148,8 @@ def generate_washer():
     mozzarella_department = Department.query.filter_by(name="Моцарельный цех").first()
     mascarpone_department = Department.query.filter_by(name="Маскарпоновый цех").first()
     ricotta_department = Department.query.filter_by(name="Рикоттный цех").first()
+    adygea_department = Department.query.filter_by(name="Адыгейский цех").first()
+
     for data in [
         WasherData("Короткая мойка термизатора", 40),
         WasherData("Длинная мойка термизатора", 80),
@@ -158,11 +162,11 @@ def generate_washer():
         db.session.add(washer)
 
     for data in [
-        WasherData("sourdough", 13),
-        WasherData("sourdough_cream_cheese", 12),
-        WasherData("separator", 15),
-        WasherData("heat_exchanger", 12),
-        WasherData("homogenizer", 12),
+        WasherData("sourdough", 5 * 13),
+        WasherData("sourdough_cream_cheese", 5 * 12),
+        WasherData("separator", 5 * 15),
+        WasherData("heat_exchanger", 5 * 12),
+        WasherData("homogenizer", 5 * 12),
     ]:
         washer = Washer(
             name=data.name,
@@ -172,14 +176,14 @@ def generate_washer():
         db.session.add(washer)
 
     for data in [
-        WasherData("bath_cleaning_1", 2),
-        WasherData("bath_cleaning_2", 4),
-        WasherData("bath_cleaning_3", 1),
-        WasherData("bath_cleaning_4", 2),
-        WasherData("bath_cleaning_5", 2),
-        WasherData("container_cleaning_1", 12),
-        WasherData("container_cleaning_2", 12),
-        WasherData("container_cleaning_3", 12),
+        WasherData("bath_cleaning_1", 5 * 2),
+        WasherData("bath_cleaning_2", 5 * 4),
+        WasherData("bath_cleaning_3", 5 * 1),
+        WasherData("bath_cleaning_4", 5 * 2),
+        WasherData("bath_cleaning_5", 5 * 2),
+        WasherData("container_cleaning_1", 5 * 12),
+        WasherData("container_cleaning_2", 5 * 12),
+        WasherData("container_cleaning_3", 5 * 12),
     ]:
         washer = Washer(
             name=data.name,
@@ -187,6 +191,17 @@ def generate_washer():
             department_id=ricotta_department.id,
         )
         db.session.add(washer)
+
+    for data in [
+        WasherData("adygea_cleaning", 120),
+    ]:
+        washer = Washer(
+            name=data.name,
+            time=data.time,
+            department_id=adygea_department.id,
+        )
+        db.session.add(washer)
+
     db.session.commit()
 
 

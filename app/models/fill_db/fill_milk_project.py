@@ -24,7 +24,6 @@ def fill_boiling_technologies():
     df = read_params()
     boiling_technologies_columns = [
         "Название форм фактора",
-        "Вода",
         "Смесь",
         "Производство",
         "Красный",
@@ -43,7 +42,6 @@ def fill_boiling_technologies():
                 weight=bt["Вес нетто"],
                 form_factor=bt["Название форм фактора"],
             ),
-            water_collecting_time=bt["Вода"],
             mixture_collecting_time=bt["Смесь"],
             processing_time=bt["Производство"],
             red_time=bt["Красный"],
@@ -59,7 +57,6 @@ def fill_boilings():
     bts = db.session.query(MilkProjectBoilingTechnology).all()
     columns = [
         "Название форм фактора",
-        "Вода",
         "Смесь",
         "Производство",
         "Красный",
@@ -78,8 +75,7 @@ def fill_boilings():
         bts_name = [
             x
             for x in bts
-            if (x.water_collecting_time == b["Вода"])
-            & (x.mixture_collecting_time == b["Смесь"])
+            if (x.mixture_collecting_time == b["Смесь"])
             & (x.processing_time == b["Производство"])
             & (x.red_time == b["Красный"])
             & (
