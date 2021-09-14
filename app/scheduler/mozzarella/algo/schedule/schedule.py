@@ -47,11 +47,9 @@ def make_schedule(
             "Calculated start configuartion", start_configuration=start_configuration
         )
 
-    # start_configuration = None
-
-    with code(
-        "Fix start time of later line - make it as early as possible in greedy manner after the first line"
-    ):
+    # Fix start time of later line - make it as early as possible in greedy manner after the first line"
+    if len(start_configuration) > 1:
+        # at least two lines present
         start_times[start_configuration[-1]] = "00:00"
 
     with code("Find optimal cleanings"):
