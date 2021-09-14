@@ -9,12 +9,12 @@ from .schedule_by_optimization import *
 
 
 def make_schedule(
-    boiling_plan_obj, optimize=False, start_times=None, first_boiling_id=1
+    boiling_plan_obj, optimize=False, start_times=None, first_boiling_id=1, **kwargs
 ):
     boiling_plan_df = cast_boiling_plan(boiling_plan_obj)
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
     if optimize:
-        cleanings = find_optimal_cleanings(boiling_plan_df, start_times)
+        cleanings = find_optimal_cleanings(boiling_plan_df, start_times, **kwargs)
     else:
         cleanings = (
             boiling_plan_df.groupby("group_id")
@@ -25,6 +25,6 @@ def make_schedule(
     cleanings = {k + first_boiling_id - 1: v for k, v in cleanings.items() if v}
     boilings = make_boilings(boiling_plan_df, first_boiling_id=first_boiling_id)
     schedule = make_schedule_from_boilings(
-        boilings, cleanings=cleanings, start_times=start_times
+        boilings, cleanings=cleanings, start_times=start_times, **kwargs
     )
     return schedule

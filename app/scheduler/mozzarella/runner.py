@@ -23,6 +23,12 @@ def run_mozzarella(
             optimize=optimize,
             start_times=start_times,
             first_boiling_id=first_boiling_id,
+            # start_configuration=[
+            #     LineName.WATER,
+            #     LineName.WATER,
+            #     LineName.WATER,
+            #     LineName.SALT,
+            # ],
         )
     try:
         frontend = wrap_frontend(schedule)

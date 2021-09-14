@@ -12,11 +12,11 @@ from utils_ak.block_tree import *
 
 
 class Validator(ClassValidator):
-    def __init__(self):
+    def __init__(self, strict_order=False):
         super().__init__(window=20)
+        self.strict_order = strict_order
 
-    @staticmethod
-    def validate__boiling__boiling(b1, b2):
+    def validate__boiling__boiling(self, b1, b2):
         # extract boiling models
         boiling_model1 = b1.props['boiling_model']
         boiling_model2 = b2.props['boiling_model']
@@ -27,9 +27,12 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(b1["pouring"]["first"]["pumping_out"], b2["pouring"]["second"]["pouring_off"])
             validate_disjoint_by_axis(b1["pouring"]["second"]["pouring_off"], b2["pouring"]["first"]["pumping_out"])
 
-        with code('Order should be strict inside one configuration sheet'):
-            if b1.props["sheet"] == b2.props["sheet"]:
-                assert b1.x[0] < b2.x[0]
+        if self.strict_order:
+            assert b1.x[0] < b2.x[0]
+
+        # with code('Order should be strict inside one configuration sheet'):
+        #     if b1.props["sheet"] == b2.props["sheet"]:
+        #         assert b1.x[0] < b2.x[0]
 
         with code('Process boilings on the same pouring line'):
             if b1["pouring"].props["pouring_line"] == b2["pouring"].props["pouring_line"]:
@@ -250,7 +253,7 @@ class ScheduleMaker:
         else:
             self.last_multihead_water_boiling = None
 
-    def _process_boiling(self, boiling):
+    def _process_boiling(self, boiling, shrink_drenators=True, strict_order=False):
         # extract line name
         line_name = boiling.props["boiling_model"].line.name
 
@@ -304,7 +307,7 @@ class ScheduleMaker:
             boiling,
             push_func=AxisPusher(start_from=start_from),
             iter_props=iter_props,
-            validator=Validator(),
+            validator=Validator(strict_order=strict_order),
             max_tries=100,
         )
         # fix water a little bit: try to push water before - allowing awaiting in line
@@ -314,20 +317,21 @@ class ScheduleMaker:
                 self.m.root["master"],
                 boiling,
                 push_func=AwaitingPusher(max_period=8),
-                validator=Validator(),
+                validator=Validator(strict_order=strict_order),
                 max_tries=9,
             )
 
-        # fix water a little bit: try to shrink drenator a little bit for compactness
-        if self.lines_df.at[LineName.WATER, "latest_boiling"]:
-            boiling.detach_from_parent()
-            push(
-                self.m.root["master"],
-                boiling,
-                push_func=DrenatorShrinkingPusher(max_period=-2),
-                validator=Validator(),
-                max_tries=3,
-            )
+        if shrink_drenators:
+            # fix water a little bit: try to shrink drenator a little bit for compactness
+            if self.lines_df.at[LineName.WATER, "latest_boiling"]:
+                boiling.detach_from_parent()
+                push(
+                    self.m.root["master"],
+                    boiling,
+                    push_func=DrenatorShrinkingPusher(max_period=-2),
+                    validator=Validator(strict_order=strict_order),
+                    max_tries=3,
+                )
 
         # move rubber packing to extras
         for packing in boiling.iter(cls="packing"):
@@ -386,7 +390,11 @@ class ScheduleMaker:
         self.lines_df.at[line_name, "latest_boiling"] = boiling
         return boiling
 
-    def _process_boilings(self):
+    def _process_boilings(self, shrink_drenators=True, start_configuration=None):
+        start_configuration = start_configuration or [LineName.SALT]
+        assert len(start_configuration) != 0, "Start configuration not specified"
+
+        cur_boiling_num = 0
         while True:
             # add boilings loop
 
@@ -401,23 +409,20 @@ class ScheduleMaker:
                     for v1, v2 in itertools.product([2, 3, 1], [0, 1])
                 ]
 
-            # get next rows
-            next_rows = [grp.iloc[0] for sheet, grp in self.left_df.groupby("sheet")]
-
             # get lines left
-            lines_left = len(set([row["line_name"] for row in next_rows]))
+            lines_left = len(set([row["line_name"] for i, row in self.left_df.iterrows()]))
 
             # select next row
             if lines_left == 1:
                 # one line of sheet left
-                next_row = utils.iter_get(next_rows)
+                next_row = self.left_df.iloc[0]
             elif lines_left == 2:
                 # filter rows with latest boiling (any boiling is already present for line)
                 df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
 
-                if len(df) == 0:
-                    # first boiling is salt
-                    line_name = LineName.SALT
+                if cur_boiling_num < len(start_configuration):
+                    # start from specified configuration
+                    line_name = start_configuration[cur_boiling_num]
                 else:
                     # choose most latest line
                     line_name = (
@@ -436,8 +441,15 @@ class ScheduleMaker:
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
+            if cur_boiling_num < len(start_configuration):
+                # all configuration blocks should start in strict order
+                strict_order = True
+            else:
+                strict_order = False
+
             # insert boiling
-            self._process_boiling(next_row["boiling"])
+            self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
+            cur_boiling_num += 1
 
     def _process_extras(self):
         # push extra packings
@@ -613,7 +625,7 @@ class ScheduleMaker:
                         pass
 
 
-    def make(self, boilings, date=None, cleanings=None, start_times=None):
+    def make(self, boilings, date=None, cleanings=None, start_times=None, start_configuration=None, shrink_drenators=True):
         self.date = date or datetime.now()
         self.start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
         self.start_times = {k: v if v else None for k, v in start_times.items()}
@@ -624,12 +636,12 @@ class ScheduleMaker:
         self._init_lines_df()
         self._init_left_df()
         self._init_multihead_water_boilings()
-        self._process_boilings()
+        self._process_boilings(shrink_drenators=shrink_drenators, start_configuration=start_configuration)
         self._process_extras()
         self._process_cleanings()
         self._process_shifts()
         return self.m.root
 
 
-def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times=None):
-    return ScheduleMaker().make(boilings, date, cleanings, start_times)
+def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times=None, shrink_drenators=True, start_configuration=None):
+    return ScheduleMaker().make(boilings, date, cleanings, start_times, shrink_drenators=shrink_drenators, start_configuration=start_configuration)

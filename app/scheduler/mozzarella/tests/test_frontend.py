@@ -24,13 +24,13 @@ def _test(fn, *args, **kwargs):
 
 
 if __name__ == "__main__":
-    _test(
-        config.abs_path(
-            "/Users/marklidenberg/Desktop/2021-09-07 Расписание моцарелла.xlsx"
-        ),
-        start_times={LineName.WATER: "06:00", LineName.SALT: "07:00"},
-        first_boiling_id=72,
-        open_file=False,
-        prefix="new",
-    )
-    # test_batch()
+    # _test(
+    #     config.abs_path(
+    #         "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2).xlsx"
+    #     ),
+    #     start_times={LineName.WATER: "06:30", LineName.SALT: "05:25"},
+    #     first_boiling_id=1,
+    #     open_file=True,
+    #     prefix="new2",
+    # )
+    test_batch()
