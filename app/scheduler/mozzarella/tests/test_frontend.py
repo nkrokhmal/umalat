@@ -26,14 +26,14 @@ def _test(fn, *args, **kwargs):
 
 if __name__ == "__main__":
     utils.configure_loguru()
-    # _test(
-    #     # config.abs_path(
-    #     #     "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2).xlsx"
-    #     # ),
-    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 4.xlsx",
-    #     start_times={LineName.WATER: "07:35", LineName.SALT: "05:25"},
-    #     first_boiling_id=1,
-    #     open_file=False,
-    #     prefix="new",
-    # )
-    test_batch()
+    _test(
+        # config.abs_path(
+        #     "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2).xlsx"
+        # ),
+        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 8 оптимизация первой варки последней линии.xlsx",
+        start_times={LineName.WATER: "07:35", LineName.SALT: "05:25"},
+        first_boiling_id=1,
+        open_file=True,
+        prefix="new",
+    )
+    # test_batch()

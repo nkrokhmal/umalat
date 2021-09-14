@@ -12,9 +12,10 @@ from utils_ak.block_tree import *
 
 
 class Validator(ClassValidator):
-    def __init__(self, strict_order=False):
-        super().__init__(window=20)
+    def __init__(self, window=20, strict_order=False, sheet_order=True):
+        super().__init__(window=window)
         self.strict_order = strict_order
+        self.sheet_order = sheet_order
 
     def validate__boiling__boiling(self, b1, b2):
         # extract boiling models
@@ -30,9 +31,9 @@ class Validator(ClassValidator):
         if self.strict_order:
             assert b1.x[0] < b2.x[0]
 
-        # with code('Order should be strict inside one configuration sheet'):
-        #     if b1.props["sheet"] == b2.props["sheet"]:
-        #         assert b1.x[0] < b2.x[0]
+        with code('Order should be strict inside one configuration sheet'):
+            if self.sheet_order and b1.props["sheet"] == b2.props["sheet"]:
+                assert b1.x[0] < b2.x[0]
 
         with code('Process boilings on the same pouring line'):
             if b1["pouring"].props["pouring_line"] == b2["pouring"].props["pouring_line"]:
@@ -390,8 +391,7 @@ class ScheduleMaker:
         self.lines_df.at[line_name, "latest_boiling"] = boiling
         return boiling
 
-    def _process_boilings(self, shrink_drenators=True, start_configuration=None):
-        start_configuration = start_configuration or [LineName.SALT]
+    def _process_boilings(self, start_configuration, shrink_drenators=True):
         assert len(start_configuration) != 0, "Start configuration not specified"
 
         cur_boiling_num = 0
@@ -625,7 +625,57 @@ class ScheduleMaker:
                         pass
 
 
+    def _fix_first_boiling_of_later_line(self, start_configuration):
+        if len(start_configuration) == 1:
+            # only one line present - no need for fix
+            return
+
+        boilings = list(sorted(self.m.root['master']['boiling', True], key=lambda b: b.x[0]))
+        boiling_line_names = [b.props['boiling_model'].line.name for b in boilings]
+        # first_boiling_of_later_line_index
+        index = boiling_line_names.index(start_configuration[-1])
+
+        if index == len(boilings) - 1:
+            # first boiling of later line is last boiling
+            return
+
+        b1, b2 = boilings[index], boilings[index + 1]
+
+        with code('Fix packing configuration if needed'):
+            boilings_on_line1 = [b for b in boilings if b.props['boiling_model'].line.name == b1.props['boiling_model'].line.name]
+            index = boilings_on_line1.index(b1)
+
+            if index != len(boilings_on_line1) - 1:
+                # not last boiling
+                b3 = boilings_on_line1[index + 1]
+                with code('Find packing configuration between b2 and b3'):
+                    packing_configurations = [pc for pc in self.m.root['master']['packing_configuration', True] if pc.x[0] >= b1['melting_and_packing']['collecting'].x[0] and pc.x[0] <= b3['melting_and_packing']['collecting'].x[0]]
+                    pc = utils.delistify(packing_configurations, single=True)
+
+                with code('Push packing configuration further'):
+                    max_push = b3['melting_and_packing']['collecting'].x[0] - pc.x[0]
+                    pc.detach_from_parent()
+                    push(
+                        self.m.root["master"],
+                        pc,
+                        push_func=BackwardsPusher(max_period=max_push),
+                        validator=Validator(window=100, sheet_order=False),
+                        max_tries=max_push + 1,
+                    )
+
+        # fix packing configuration
+        max_push = b2.x[0] - b1.x[0]
+        b1.detach_from_parent()
+        push(
+            self.m.root["master"],
+            b1,
+            push_func=BackwardsPusher(max_period=max_push),
+            validator=Validator(window=100, sheet_order=False),
+            max_tries=max_push + 1,
+        )
+
     def make(self, boilings, date=None, cleanings=None, start_times=None, start_configuration=None, shrink_drenators=True):
+        start_configuration = start_configuration or [LineName.SALT]
         self.date = date or datetime.now()
         self.start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
         self.start_times = {k: v if v else None for k, v in start_times.items()}
@@ -638,6 +688,7 @@ class ScheduleMaker:
         self._init_multihead_water_boilings()
         self._process_boilings(shrink_drenators=shrink_drenators, start_configuration=start_configuration)
         self._process_extras()
+        self._fix_first_boiling_of_later_line(start_configuration)
         self._process_cleanings()
         self._process_shifts()
         return self.m.root
