@@ -22,13 +22,7 @@ def run_mozzarella(
             boiling_plan_df,
             optimize=optimize,
             start_times=start_times,
-            first_boiling_id=first_boiling_id,
-            # start_configuration=[
-            #     LineName.WATER,
-            #     LineName.WATER,
-            #     LineName.WATER,
-            #     LineName.SALT,
-            # ],
+            first_boiling_id=first_boiling_id
         )
     try:
         frontend = wrap_frontend(schedule)

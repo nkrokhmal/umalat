@@ -11,7 +11,7 @@ def test_batch():
     )
     fns = [fn for fn in fns if "$" not in fn]
     for i, fn in enumerate(utils.tqdm(fns, desc=lambda v: v)):
-        _test(fn, open_file=False, prefix=str(i))
+        _test(fn, open_file=False, prefix="new " + str(i))
 
 
 def _test(fn, *args, **kwargs):
@@ -24,13 +24,14 @@ def _test(fn, *args, **kwargs):
 
 
 if __name__ == "__main__":
-    # _test(
-    #     config.abs_path(
-    #         "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2).xlsx"
-    #     ),
-    #     start_times={LineName.WATER: "06:30", LineName.SALT: "05:25"},
-    #     first_boiling_id=1,
-    #     open_file=True,
-    #     prefix="new2",
-    # )
-    test_batch()
+    utils.configure_loguru()
+    _test(
+        config.abs_path(
+            "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2).xlsx"
+        ),
+        start_times={LineName.WATER: "07:35", LineName.SALT: "05:25"},
+        first_boiling_id=1,
+        open_file=True,
+        prefix="new3",
+    )
+    # test_batch()

@@ -395,61 +395,61 @@ class ScheduleMaker:
         assert len(start_configuration) != 0, "Start configuration not specified"
 
         cur_boiling_num = 0
-        while True:
-            # add boilings loop
 
-            # check if finished
-            if len(self.left_df) == 0:
-                break
+        with code('add boilings loop'):
+            while True:
+                # check if finished
+                if len(self.left_df) == 0:
+                    break
 
-            # check if only salt left -> start working on 3 line
-            if (self.left_df["line_name"] == LineName.SALT).all():
-                self.lines_df.at[LineName.SALT, "iter_props"] = [
-                    {"pouring_line": str(v1), "drenator_num": str(v2)}
-                    for v1, v2 in itertools.product([2, 3, 1], [0, 1])
-                ]
+                # check if only salt left -> start working on 3 line
+                if (self.left_df["line_name"] == LineName.SALT).all():
+                    self.lines_df.at[LineName.SALT, "iter_props"] = [
+                        {"pouring_line": str(v1), "drenator_num": str(v2)}
+                        for v1, v2 in itertools.product([2, 3, 1], [0, 1])
+                    ]
 
-            # get lines left
-            lines_left = len(set([row["line_name"] for i, row in self.left_df.iterrows()]))
+                # get lines left
+                lines_left = len(set([row["line_name"] for i, row in self.left_df.iterrows()]))
 
-            # select next row
-            if lines_left == 1:
-                # one line of sheet left
-                next_row = self.left_df.iloc[0]
-            elif lines_left == 2:
-                # filter rows with latest boiling (any boiling is already present for line)
-                df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
+                # select next row
+                if lines_left == 1:
+                    # one line of sheet left
+                    next_row = self.left_df.iloc[0]
+                elif lines_left == 2:
+                    # filter rows with latest boiling (any boiling is already present for line)
+                    df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
+
+                    if cur_boiling_num < len(start_configuration):
+                        # start from specified configuration
+                        line_name = start_configuration[cur_boiling_num]
+                    else:
+                        # choose most latest line
+                        line_name = (
+                            max(df["latest_boiling"], key=lambda b: b.x[0])
+                                .props["boiling_model"]
+                                .line.name
+                        )
+                        # reverse
+                        line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+
+                    # select next row -> first for selected line
+                    next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
+                else:
+                    raise Exception("Should not happen")
+
+                # remove newly added row from left rows
+                self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
                 if cur_boiling_num < len(start_configuration):
-                    # start from specified configuration
-                    line_name = start_configuration[cur_boiling_num]
+                    # all configuration blocks should start in strict order
+                    strict_order = True
                 else:
-                    # choose most latest line
-                    line_name = (
-                        max(df["latest_boiling"], key=lambda b: b.x[0])
-                            .props["boiling_model"]
-                            .line.name
-                    )
-                    # reverse
-                    line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                    strict_order = False
 
-                # select next row -> first for selected line
-                next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
-            else:
-                raise Exception("Should not happen")
-
-            # remove newly added row from left rows
-            self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
-
-            if cur_boiling_num < len(start_configuration):
-                # all configuration blocks should start in strict order
-                strict_order = True
-            else:
-                strict_order = False
-
-            # insert boiling
-            self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
-            cur_boiling_num += 1
+                # insert boiling
+                self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
+                cur_boiling_num += 1
 
     def _process_extras(self):
         # push extra packings
