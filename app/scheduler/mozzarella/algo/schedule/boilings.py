@@ -9,7 +9,7 @@ def make_boilings(boiling_plan_df, first_boiling_id=None):
 
     res = []
 
-    for boiling_id, grp in boiling_plan_df.groupby("group_id"):
+    for boiling_id, grp in boiling_plan_df.groupby("group_id", sort=False):
         boiling_model = grp.iloc[0]["boiling"]
 
         if boiling_model.line.name == LineName.WATER:
