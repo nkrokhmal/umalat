@@ -18,93 +18,88 @@ class Validator(ClassValidator):
         self.sheet_order = sheet_order
 
     def validate__boiling__boiling(self, b1, b2):
+        b1s, b2s = min([b1, b2], key=lambda b: b.x[0]), max([b1, b2], key=lambda b: b.x[0])
+        
         # extract boiling models
-        boiling_model1 = b1.props['boiling_model']
-        boiling_model2 = b2.props['boiling_model']
-
+        boiling_model1 = b1s.props['boiling_model']
+        boiling_model2 = b2s.props['boiling_model']
+        
         with code('Basic validations'):
-            validate_disjoint_by_axis(b1["pouring"]["first"]["termizator"], b2["pouring"]["first"]["termizator"])
-            validate_disjoint_by_axis(b1["pouring"]["second"]["pouring_off"], b2["pouring"]["second"]["pouring_off"])
-            validate_disjoint_by_axis(b1["pouring"]["first"]["pumping_out"], b2["pouring"]["second"]["pouring_off"])
-            validate_disjoint_by_axis(b1["pouring"]["second"]["pouring_off"], b2["pouring"]["first"]["pumping_out"])
-
-        if self.strict_order:
-            assert b1.x[0] < b2.x[0]
-
-        with code('Order should be strict inside one configuration sheet'):
-            if self.sheet_order and b1.props["sheet"] == b2.props["sheet"]:
-                assert b1.x[0] < b2.x[0]
+            validate_disjoint_by_axis(b1s["pouring"]["first"]["termizator"], b2s["pouring"]["first"]["termizator"])
+            validate_disjoint_by_axis(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["second"]["pouring_off"])
+            validate_disjoint_by_axis(b1s["pouring"]["first"]["pumping_out"], b2s["pouring"]["second"]["pouring_off"])
+            validate_disjoint_by_axis(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["first"]["pumping_out"])
 
         with code('Process boilings on the same pouring line'):
-            if b1["pouring"].props["pouring_line"] == b2["pouring"].props["pouring_line"]:
+            if b1s["pouring"].props["pouring_line"] == b2s["pouring"].props["pouring_line"]:
                 # pourings should not intersect, but also five minutes should be between boilings
-                validate_disjoint_by_axis(b1['pouring'], b2['pouring'], distance=1, ordered=True)
+                validate_disjoint_by_axis(b1s['pouring'], b2s['pouring'], distance=1, ordered=True)
 
                 # if boilings use same drenator - drenator should not intersect with meltings
-                if b1.props["drenator_num"] == b2.props["drenator_num"]:
-                    validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["drenator"])
+                if b1s.props["drenator_num"] == b2s.props["drenator_num"]:
+                    validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["drenator"])
 
         # define line names (water/salt) that we work on (which corresponds to the pouring line)
-        wln1 = LineName.WATER if b1["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
-        wln2 = LineName.WATER if b2["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
+        wln1 = LineName.WATER if b1s["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
+        wln2 = LineName.WATER if b2s["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
 
         if boiling_model1.line.name == boiling_model2.line.name:
             # same lines
 
             # basic validation
-            validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["meltings"])
-            for p1, p2 in itertools.product(b1["melting_and_packing"]["collecting", True], b2["melting_and_packing"]["collecting", True]):
+            validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"])
+            for p1, p2 in itertools.product(b1s["melting_and_packing"]["collecting", True], b2s["melting_and_packing"]["collecting", True]):
                 validate_disjoint_by_axis(p1, p2)
 
             # if water and different boilings - cannot intersect serving with meltings
             if boiling_model1.line.name == LineName.WATER and boiling_model1 != boiling_model2:
                 # todo later: deprecated, delete
-                # validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
+                # validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
                 if not boiling_model1.is_lactose:
-                    _df = b1.props['boiling_group_df']
+                    _df = b1s.props['boiling_group_df']
                     _df['is_lactose'] = _df['sku'].apply(lambda sku: sku.made_from_boilings[0].is_lactose)
                     if not _df['is_lactose'].any():
                         if boiling_model1.percent == boiling_model2.percent:
                             # 3.3 бл неполная -> 3.3
-                            validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-4)
+                            validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"], distance=-4)
                         else:
                             # 3.3 бл неполная -> 3.6
-                            validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                            validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"], distance=-2)
                     else:
                         # 3.3 бл полная -> 3.3/3.6
-                        validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                        validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"], distance=-2)
                 elif boiling_model1.percent != boiling_model2.percent:
                     # 3.6, 3.3 - add extra 10 minutes
-                    validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                    validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"], distance=-2)
                 else:
                     # 3.3 Альче Белзактозная -> 3.3 Сакко
-                    validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
+                    validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
 
             with code('there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors'):
-                mp1 = b1["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
-                mp2 = b2["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
+                mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
+                mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
 
                 bff1_name = mp1.props["bff"].name
                 bff2_name = mp2.props["bff"].name
 
                 sticks = ["Палочки 15.0г", "Палочки 7.5г"]
                 if bff1_name not in sticks and bff2_name in sticks:
-                    _b1 = b1["melting_and_packing"]["melting"]["meltings"]
-                    _b2 = b2["melting_and_packing"]["melting"]["meltings"]
+                    _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+                    _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
                     # at least one hour should pass between meltings
-                    validate_disjoint_by_axis(_b1, _b2, distance=12, ordered=True)
+                    validate_disjoint_by_axis(_b1s, _b2s, distance=12, ordered=True)
 
             with code('Process lactose switch on salt line'):
                 if boiling_model1.line.name == LineName.SALT:
                     if boiling_model1.is_lactose and not boiling_model2.is_lactose:
-                        _b1 = b1["melting_and_packing"]["melting"]["meltings"]
-                        _b2 = b2["melting_and_packing"]["melting"]["serving"]
-                        validate_disjoint_by_axis(_b1, _b2, distance=2, ordered=True)
+                        _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+                        _b2s = b2s["melting_and_packing"]["melting"]["serving"]
+                        validate_disjoint_by_axis(_b1s, _b2s, distance=2, ordered=True)
 
                     if not boiling_model1.is_lactose and boiling_model2.is_lactose:
-                        _b1 = b1["melting_and_packing"]["melting"]["meltings"]
-                        _b2 = b2["melting_and_packing"]["melting"]["serving"]
-                        validate_disjoint_by_axis(_b1, _b2, distance=-2, ordered=True)
+                        _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+                        _b2s = b2s["melting_and_packing"]["melting"]["serving"]
+                        validate_disjoint_by_axis(_b1s, _b2s, distance=-2, ordered=True)
         else:
             # different lines
 
@@ -112,13 +107,19 @@ class Validator(ClassValidator):
                 # same working lines (means that salt and water on the same working line - due to salt switching to the first pouring_line)
 
                 # basic validations
-                validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["meltings"])
-                validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
+                validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"])
+                validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
 
-                _b1 = b1["melting_and_packing"]["melting"]["meltings"]
-                _b2 = b2["melting_and_packing"]["melting"]["meltings"]
-                validate_disjoint_by_axis(_b1, _b2, distance=7, ordered=True)
+                _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+                _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
+                validate_disjoint_by_axis(_b1s, _b2s, distance=7, ordered=True)
 
+        if self.strict_order:
+            assert b1.x[0] < b2.x[0]
+
+        with code('Order should be strict inside one configuration sheet'):
+            if self.sheet_order and b1.props["sheet"] == b2.props["sheet"]:
+                assert b1.x[0] < b2.x[0]
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
@@ -649,21 +650,32 @@ class ScheduleMaker:
                 # not last boiling
                 b3 = boilings_on_line1[index + 1]
                 with code('Find packing configuration between b2 and b3'):
-                    packing_configurations = [pc for pc in self.m.root['master']['packing_configuration', True] if pc.x[0] >= b1['melting_and_packing']['collecting'].x[0] and pc.x[0] <= b3['melting_and_packing']['collecting'].x[0]]
-                    pc = utils.delistify(packing_configurations, single=True)
+                    packing_configurations = [
+                        pc
+                        for pc in self.m.root["master"]["packing_configuration", True]
+                        if pc.x[0] >= b1["melting_and_packing"]["collecting"].x[0]
+                        and pc.x[0] <= b3["melting_and_packing"]["collecting"].x[0]
+                        and pc.props["line_name"] == b1.props["boiling_model"].line.name
+                    ]
+
+                    if packing_configurations:
+                        pc = utils.delistify(packing_configurations, single=True)
+                    else:
+                        pc = None
 
                 with code('Push packing configuration further'):
-                    max_push = b3['melting_and_packing']['collecting'].x[0] - pc.x[0]
-                    pc.detach_from_parent()
-                    push(
-                        self.m.root["master"],
-                        pc,
-                        push_func=BackwardsPusher(max_period=max_push),
-                        validator=Validator(window=100, sheet_order=False),
-                        max_tries=max_push + 1,
-                    )
+                    if pc:
+                        max_push = b3['melting_and_packing']['collecting'].x[0] - pc.x[0]
+                        pc.detach_from_parent()
+                        push(
+                            self.m.root["master"],
+                            pc,
+                            push_func=BackwardsPusher(max_period=max_push),
+                            validator=Validator(window=100, sheet_order=False),
+                            max_tries=max_push + 1,
+                        )
 
-        # fix packing configuration
+        # fix boiling
         max_push = b2.x[0] - b1.x[0]
         b1.detach_from_parent()
         push(
