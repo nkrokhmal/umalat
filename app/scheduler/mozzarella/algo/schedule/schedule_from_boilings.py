@@ -409,16 +409,16 @@ class ScheduleMaker:
                         for v1, v2 in itertools.product([2, 3, 1], [0, 1])
                     ]
 
-                # get lines left
-                lines_left = len(set([row["line_name"] for i, row in self.left_df.iterrows()]))
+                next_rows = [grp.iloc[0] for i, grp in self.left_df.groupby('sheet')] # select first rows from each sheet
+                cur_lines = len(set([row["line_name"] for row in next_rows]))
 
-                logger.debug('Lines left', lines_left=lines_left)
+                logger.debug('Current Lines', cur_lines=cur_lines)
 
                 # select next row
-                if lines_left == 1:
+                if cur_lines == 1:
                     # one line of sheet left
                     next_row = self.left_df.iloc[0]
-                elif lines_left == 2:
+                elif cur_lines == 2:
                     # filter rows with latest boiling (any boiling is already present for line)
                     df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
 
