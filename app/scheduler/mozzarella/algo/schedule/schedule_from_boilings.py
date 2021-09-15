@@ -19,7 +19,7 @@ class Validator(ClassValidator):
 
     def validate__boiling__boiling(self, b1, b2):
         b1s, b2s = min([b1, b2], key=lambda b: b.x[0]), max([b1, b2], key=lambda b: b.x[0])
-        
+
         # extract boiling models
         boiling_model1 = b1s.props['boiling_model']
         boiling_model2 = b2s.props['boiling_model']
@@ -115,17 +115,16 @@ class Validator(ClassValidator):
                 validate_disjoint_by_axis(_b1s, _b2s, distance=7, ordered=True)
 
         if self.strict_order:
-            assert b1.x[0] < b2.x[0]
+            validate_order_by_axis(b1, b2)
 
         with code('Order should be strict inside one configuration sheet'):
             if self.sheet_order and b1.props["sheet"] == b2.props["sheet"]:
-                assert b1.x[0] < b2.x[0]
+                validate_order_by_axis(b1, b2)
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
         boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
         validate_disjoint_by_axis(boiling["pouring"]["first"]["termizator"], cleaning)
-
 
     @staticmethod
     def validate__cleaning__boiling(b1, b2):
@@ -394,7 +393,7 @@ class ScheduleMaker:
 
     def _process_boilings(self, start_configuration, shrink_drenators=True):
         assert len(start_configuration) != 0, "Start configuration not specified"
-
+        logger.debug('Start configuration', start_configuration=start_configuration)
         cur_boiling_num = 0
 
         with code('add boilings loop'):
@@ -413,6 +412,8 @@ class ScheduleMaker:
                 # get lines left
                 lines_left = len(set([row["line_name"] for i, row in self.left_df.iterrows()]))
 
+                logger.debug('Lines left', lines_left=lines_left)
+
                 # select next row
                 if lines_left == 1:
                     # one line of sheet left
@@ -424,6 +425,7 @@ class ScheduleMaker:
                     if cur_boiling_num < len(start_configuration):
                         # start from specified configuration
                         line_name = start_configuration[cur_boiling_num]
+                        logger.debug('Chose line by start configuration', line_name=line_name)
                     else:
                         # choose most latest line
                         line_name = (
@@ -433,6 +435,7 @@ class ScheduleMaker:
                         )
                         # reverse
                         line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                        logger.debug('Chose line by most latest line', line_name=line_name)
 
                     # select next row -> first for selected line
                     next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
