@@ -393,7 +393,7 @@ class ScheduleMaker:
 
     def _process_boilings(self, start_configuration, shrink_drenators=True):
         assert len(start_configuration) != 0, "Start configuration not specified"
-        logger.debug('Start configuration', start_configuration=start_configuration)
+        # logger.debug('Start configuration', start_configuration=start_configuration)
         cur_boiling_num = 0
 
         with code('add boilings loop'):
@@ -412,7 +412,7 @@ class ScheduleMaker:
                 next_rows = [grp.iloc[0] for i, grp in self.left_df.groupby('sheet')] # select first rows from each sheet
                 cur_lines = len(set([row["line_name"] for row in next_rows]))
 
-                logger.debug('Current Lines', cur_lines=cur_lines)
+                # logger.debug('Current Lines', cur_lines=cur_lines)
 
                 # select next row
                 if cur_lines == 1:
@@ -425,7 +425,7 @@ class ScheduleMaker:
                     if cur_boiling_num < len(start_configuration):
                         # start from specified configuration
                         line_name = start_configuration[cur_boiling_num]
-                        logger.debug('Chose line by start configuration', line_name=line_name)
+                        # logger.debug('Chose line by start configuration', line_name=line_name)
                     else:
                         # choose most latest line
                         line_name = (
@@ -435,7 +435,7 @@ class ScheduleMaker:
                         )
                         # reverse
                         line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
-                        logger.debug('Chose line by most latest line', line_name=line_name)
+                        # logger.debug('Chose line by most latest line', line_name=line_name)
 
                     # select next row -> first for selected line
                     next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
@@ -656,8 +656,8 @@ class ScheduleMaker:
                     packing_configurations = [
                         pc
                         for pc in self.m.root["master"]["packing_configuration", True]
-                        if pc.x[0] >= b1["melting_and_packing"]["collecting"].x[0]
-                        and pc.x[0] <= b3["melting_and_packing"]["collecting"].x[0]
+                        if pc.x[0] > b1["melting_and_packing"]["collecting", True][0].x[0] # todo maybe: we take first collecting here, but this is not very straightforward
+                        and pc.x[0] <= b3["melting_and_packing"]["collecting", True][0].x[0]
                         and pc.props["line_name"] == b1.props["boiling_model"].line.name
                     ]
 
@@ -704,7 +704,7 @@ class ScheduleMaker:
         self._process_boilings(shrink_drenators=shrink_drenators, start_configuration=start_configuration)
         self._process_extras()
         self._fix_first_boiling_of_later_line(start_configuration)
-        self._process_cleanings()
+        # self._process_cleanings()
         self._process_shifts()
         return self.m.root
 

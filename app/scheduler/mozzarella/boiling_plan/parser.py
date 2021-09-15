@@ -24,4 +24,6 @@ def parse_schedule(schedule):
     for b_json in boilings_json:
         dfs.append(b_json["props"]["boiling_group_df"])
 
-    return pd.concat(dfs)
+    res = pd.concat(dfs)
+    res["sheet"] = 0
+    return res

@@ -15,9 +15,12 @@ def calc_score(schedule):
             for b in schedule["master"]["boiling", True]
             if b.props["boiling_model"].line.name == line_name
         ]
-        beg = min(b.x[0] for b in boilings)
-        end = max(b.y[0] for b in boilings)
-        line_lengths[line_name] = end - beg
+        if boilings:
+            beg = min(b.x[0] for b in boilings)
+            end = max(b.y[0] for b in boilings)
+            line_lengths[line_name] = end - beg
+        else:
+            line_lengths[line_name] = 0
     score = line_lengths[LineName.WATER] + line_lengths[LineName.SALT] / 3
     return score
 
@@ -45,6 +48,7 @@ def swap_groups(df, group_id1, group_id2):
 def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs):
     with code("Make initial schedule"):
         schedule = make_schedule_basic(boiling_plan_df, *args, **kwargs)
+        boiling_plan_df = parse_schedule(schedule)
         score = calc_score(schedule)
 
         water_boilings = [
@@ -79,6 +83,17 @@ def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs):
 
         if b_prev.props["boiling_model"].line.name == LineName.WATER:
             # swap only with salt boilings
+            logger.debug("Previous boiling is WATER. Skipping swap optimization")
+            continue
+
+        if (
+            bw_cur["melting_and_packing"]["collecting"].x[0]
+            - bw_prev["melting_and_packing"]["collecting"].y[0]
+            <= 2
+        ):
+            logger.debug(
+                "Too small distance between water packings, skipping swap optimization"
+            )
             continue
 
         bs_prev = b_prev
@@ -90,9 +105,9 @@ def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs):
         )
         swapped_schedule = make_schedule_basic(swapped_df, *args, **kwargs)
         swapped_score = calc_score(swapped_schedule)
-
+        logger.debug("Got new score", score=score, swapped_score=swapped_score)
         if swapped_score < score:
-            # success - found something betteer!
+            # success - found something better!
             logger.debug(
                 "Optimization successful", score=score, swapped_score=swapped_score
             )
