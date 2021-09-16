@@ -93,7 +93,7 @@ def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs):
             cur_water_boilings = [b for b in schedule["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.WATER]
             cur_water_ids = [b.props["boiling_group_df"].iloc[0]["group_id"] for b in cur_water_boilings]
 
-        with code("Swap first water and salt if necessary"):
+        with code("Permutate boilings a little bit if possible"):
             bw_prev, bw_cur = (
                 cur_water_boilings[cur_water_ids.index(water_id) - 1],
                 cur_water_boilings[cur_water_ids.index(water_id)],
@@ -122,9 +122,6 @@ def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs):
                 boiling_plan_df,
                 [v[1] for v in values]
             )
-
-        with code("Swap all following water boilings if possible"):
-            pass
 
         swapped_schedule = make_schedule_basic(swapped_df, *args, **kwargs)
         swapped_score = calc_score(swapped_schedule)

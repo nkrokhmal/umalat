@@ -3,6 +3,7 @@ from app.scheduler.mozzarella.boiling_plan.boiling_plan import cast_boiling_plan
 
 from .schedule_from_boilings import *
 from .schedule_by_optimization import *
+from .parse_start_configuration import *
 
 
 def make_schedule_basic(
@@ -25,35 +26,9 @@ def make_schedule_basic(
                     boilings, cleanings={}, start_times=start_times
                 )
 
-            with code("Get start configuration ob basic schedule"):
-                boilings = list(
-                    sorted(
-                        schedule["master"]["boiling", True],
-                        key=lambda boiling: boiling.x[0],
-                    )
-                )
-                line_names = set(
-                    [boiling.props["boiling_model"].line.name for boiling in boilings]
-                )
+            start_configuration = parse_start_configuration(schedule)
 
-                if len(line_names) == 1:
-                    start_configuration = list(line_names)  # single element list
-                else:
-                    start_configuration = []
-                    _cur_line_names = set()
-                    for boiling in boilings:
-                        line_name = boiling.props["boiling_model"].line.name
-                        _cur_line_names.add(line_name)
-                        start_configuration.append(line_name)
-                        if _cur_line_names == line_names:
-                            break
-            # logger.debug(
-            #     "Calculated start configuration",
-            #     start_configuration=start_configuration,
-            # )
-
-    # Fix start time of later line - make it as early as possible in greedy manner after the first line"
-    if len(start_configuration) > 1:
+    if start_configuration:
         # at least two lines present
         start_times[start_configuration[-1]] = "00:00"
 
