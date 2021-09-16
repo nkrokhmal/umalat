@@ -3,7 +3,7 @@ from app.imports.runtime import *
 
 from app.enum import LineName
 from app.scheduler.mozzarella.boiling_plan.parser import parse_schedule
-
+from .score import calc_score
 from .schedule_basic import make_schedule_basic
 from .schedule_by_optimization import *
 
@@ -51,22 +51,6 @@ def combine_groups(boiling_plan_df, groups):
     return df
 
 
-def calc_score(schedule):
-    line_lengths = {}
-    for line_name in [LineName.WATER, LineName.SALT]:
-        boilings = [
-            b
-            for b in schedule["master"]["boiling", True]
-            if b.props["boiling_model"].line.name == line_name
-        ]
-        if boilings:
-            beg = min(b.x[0] for b in boilings)
-            end = max(b.y[0] for b in boilings)
-            line_lengths[line_name] = end - beg
-        else:
-            line_lengths[line_name] = 0
-    score = line_lengths[LineName.WATER] + line_lengths[LineName.SALT] / 3
-    return score
 
 
 # todo later: del, deprecated
