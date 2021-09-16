@@ -1,6 +1,6 @@
 from app.imports.runtime import *
-from app.scheduler.mozzarella.algo.schedule.schedule import *
-from app.scheduler.mozzarella.algo.schedule.boilings import *
+from .boilings import *
+from .schedule_from_boilings import *
 from app.scheduler.mozzarella.algo.stats import *
 
 
@@ -83,8 +83,10 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     raise Exception("Failed to fill cleanings")
 
 
-def find_optimal_cleanings(boiling_plan_df, start_times=None):
+def find_optimal_cleanings(boiling_plan_df, start_times=None, **make_schedule_kwargs):
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
     boilings = make_boilings(boiling_plan_df)
-    schedule = make_schedule_from_boilings(boilings, start_times=start_times)
+    schedule = make_schedule_from_boilings(
+        boilings, start_times=start_times, **make_schedule_kwargs
+    )
     return _find_optimal_cleanings_combination_by_schedule(schedule)

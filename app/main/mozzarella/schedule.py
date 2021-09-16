@@ -5,7 +5,7 @@ from app.scheduler import *
 from app.scheduler.mozzarella import *
 from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 from app.utils.batches.batch import *
-from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
+from app.utils.mozzarella.parse_schedule_json import *
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
 from app.utils.features.openpyxl_wrapper import set_default_sheet
@@ -24,6 +24,7 @@ def mozzarella_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
+        optimize = form.optimize.data
 
         file = flask.request.files["input_file"]
         data_dir = os.path.join(
@@ -60,7 +61,8 @@ def mozzarella_schedule():
         schedule = make_schedule(
             boiling_plan_df,
             start_times=start_times,
-            optimize=add_full_boiling,
+            optimize=optimize,
+            optimize_cleanings=add_full_boiling,
             first_boiling_id=int(form.batch_number.data),
         )
 
