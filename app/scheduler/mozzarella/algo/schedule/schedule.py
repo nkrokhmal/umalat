@@ -5,6 +5,7 @@ from app.scheduler.mozzarella.boiling_plan import *
 
 def make_schedule(boiling_plan_obj, optimize=True, *args, **kwargs):
     boiling_plan_df = cast_boiling_plan(boiling_plan_obj)
+
     if optimize:
         return optimize_schedule_by_start_configuration(
             boiling_plan_df, *args, **kwargs
