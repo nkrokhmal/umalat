@@ -531,7 +531,7 @@ class ScheduleMaker:
                         push(self.m.root["master"], cleaning, push_func=add_push)
 
         # add last full cleaning
-        last_boiling = list(self.m.root["master"].iter(cls="boiling"))[-1]
+        last_boiling = max(self.m.root["master"]['boiling', True], key=lambda b: b.y[0])
         start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1
         cleaning = make_termizator_cleaning_block("full", rule='closing')  # add five extra minutes
         push(
@@ -545,7 +545,6 @@ class ScheduleMaker:
         with code('cheese makers'):
             beg = min(self.m.root['master']['boiling', True], key=lambda b: b.x[0]).x[0] - 6  # 0.5h before start
             end = max(self.m.root['master']['boiling', True], key=lambda b: b.y[0])['pouring']['second']['pouring_off'].y[0] + 24  # 2h after last pouring off
-
             shifts = split_shifts(beg, end)
 
             for i, (beg, end) in enumerate(shifts, 1):
@@ -689,6 +688,9 @@ class ScheduleMaker:
             max_tries=max_push + 1,
         )
 
+        # fix order of master blocks
+        self.m.root['master'].reorder_children(lambda b: b.x[0])
+
     def make(self, boilings, date=None, cleanings=None, start_times=None, start_configuration=None, shrink_drenators=True):
         start_configuration = start_configuration or [LineName.SALT]
         self.date = date or datetime.now()
@@ -704,7 +706,7 @@ class ScheduleMaker:
         self._process_boilings(shrink_drenators=shrink_drenators, start_configuration=start_configuration)
         self._process_extras()
         self._fix_first_boiling_of_later_line(start_configuration)
-        # self._process_cleanings()
+        self._process_cleanings()
         self._process_shifts()
         return self.m.root
 

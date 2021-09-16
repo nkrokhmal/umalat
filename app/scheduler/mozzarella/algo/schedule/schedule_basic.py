@@ -48,7 +48,7 @@ def make_schedule_basic(
                         if _cur_line_names == line_names:
                             break
             # logger.debug(
-            #     "Calculated start configuartion",
+            #     "Calculated start configuration",
             #     start_configuration=start_configuration,
             # )
 
@@ -62,14 +62,14 @@ def make_schedule_basic(
             cleanings = find_optimal_cleanings(
                 boiling_plan_df, start_times, start_configuration=start_configuration
             )
-            # logger.debug("Found optimal cleanings", cleanings=cleanings)
+            logger.debug("Found optimal cleanings", cleanings=cleanings)
         else:
             cleanings = (
                 boiling_plan_df.groupby("group_id")
                 .agg({"cleaning": "first"})
                 .to_dict()["cleaning"]
             )
-            # logger.debug("Using boiling plan cleanings", cleanings=cleanings)
+            logger.debug("Using boiling plan cleanings", cleanings=cleanings)
 
     with code("Make schedule with cleanings and start configuration "):
         cleanings = {k + first_boiling_id - 1: v for k, v in cleanings.items() if v}
