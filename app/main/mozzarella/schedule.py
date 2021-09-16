@@ -24,6 +24,7 @@ def mozzarella_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
+        optimize = form.optimize.data
 
         file = flask.request.files["input_file"]
         data_dir = os.path.join(
@@ -60,7 +61,7 @@ def mozzarella_schedule():
         schedule = make_schedule(
             boiling_plan_df,
             start_times=start_times,
-            # todo next: add optimization # optimize=todo,
+            optimize=optimize,
             optimize_cleanings=add_full_boiling,
             first_boiling_id=int(form.batch_number.data),
         )

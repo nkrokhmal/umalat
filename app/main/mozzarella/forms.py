@@ -49,6 +49,11 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default=True,
     )
+    optimize = BooleanField(
+        "Оптимизировать расписание",
+        validators=[Optional()],
+        default=True,
+    )
 
 
 class CopySKUForm(FlaskForm):
