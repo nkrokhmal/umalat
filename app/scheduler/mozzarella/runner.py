@@ -14,6 +14,7 @@ def run_mozzarella(
     start_times=None,
     first_boiling_id=1,
     optimize=True,
+    optimize_cleanings=True,
     path="outputs/",
     prefix="",
 ):
@@ -25,6 +26,7 @@ def run_mozzarella(
         schedule = make_schedule(
             boiling_plan_df,
             optimize=optimize,
+            optimize_cleanings=optimize_cleanings,
             start_times=start_times,
             first_boiling_id=first_boiling_id,
         )

@@ -7,7 +7,7 @@ from .schedule_by_optimization import *
 
 def make_schedule_basic(
     boiling_plan_obj,
-    optimize=False,
+    optimize_cleanings=False,
     start_times=None,
     start_configuration=None,
     first_boiling_id=1,
@@ -58,7 +58,7 @@ def make_schedule_basic(
         start_times[start_configuration[-1]] = "00:00"
 
     with code("Find optimal cleanings"):
-        if optimize:
+        if optimize_cleanings:
             cleanings = find_optimal_cleanings(
                 boiling_plan_df, start_times, start_configuration=start_configuration
             )
