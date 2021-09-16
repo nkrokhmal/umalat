@@ -60,7 +60,8 @@ def mozzarella_schedule():
         schedule = make_schedule(
             boiling_plan_df,
             start_times=start_times,
-            optimize=add_full_boiling,
+            # todo next: add optimization # optimize=todo,
+            optimize_cleanings=add_full_boiling,
             first_boiling_id=int(form.batch_number.data),
         )
 
