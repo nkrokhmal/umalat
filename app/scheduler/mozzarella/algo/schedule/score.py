@@ -1,3 +1,4 @@
+from app.imports.runtime import *
 from app.enum import LineName
 
 
@@ -16,4 +17,4 @@ def calc_score(schedule):
         else:
             line_lengths[line_name] = 0
     score = line_lengths[LineName.WATER] + line_lengths[LineName.SALT] / 3
-    return score
+    return utils.custom_round(score, 0.01)
