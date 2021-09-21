@@ -16,5 +16,5 @@ from utils_ak.optimizer import *
 from utils_ak.tqdm import *
 from utils_ak.portion import *
 
-from utils_ak.loguru import configure_loguru_stdout
+from utils_ak.loguru import *
 from utils_ak.lazy_tester import lazy_tester

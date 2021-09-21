@@ -12,95 +12,94 @@ from utils_ak.block_tree import *
 
 
 class Validator(ClassValidator):
-    def __init__(self):
-        super().__init__(window=20)
+    def __init__(self, window=20, strict_order=False, sheet_order=True):
+        super().__init__(window=window)
+        self.strict_order = strict_order
+        self.sheet_order = sheet_order
 
-    @staticmethod
-    def validate__boiling__boiling(b1, b2):
+    def validate__boiling__boiling(self, b1, b2):
+        b1s, b2s = min([b1, b2], key=lambda b: b.x[0]), max([b1, b2], key=lambda b: b.x[0])
+
         # extract boiling models
-        boiling_model1 = b1.props['boiling_model']
-        boiling_model2 = b2.props['boiling_model']
-
+        boiling_model1 = b1s.props['boiling_model']
+        boiling_model2 = b2s.props['boiling_model']
+        
         with code('Basic validations'):
-            validate_disjoint_by_axis(b1["pouring"]["first"]["termizator"], b2["pouring"]["first"]["termizator"])
-            validate_disjoint_by_axis(b1["pouring"]["second"]["pouring_off"], b2["pouring"]["second"]["pouring_off"])
-            validate_disjoint_by_axis(b1["pouring"]["first"]["pumping_out"], b2["pouring"]["second"]["pouring_off"])
-            validate_disjoint_by_axis(b1["pouring"]["second"]["pouring_off"], b2["pouring"]["first"]["pumping_out"])
-
-        with code('Order should be strict inside one configuration sheet'):
-            if b1.props["sheet"] == b2.props["sheet"]:
-                assert b1.x[0] < b2.x[0]
+            validate_disjoint_by_axis(b1s["pouring"]["first"]["termizator"], b2s["pouring"]["first"]["termizator"])
+            validate_disjoint_by_axis(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["second"]["pouring_off"])
+            validate_disjoint_by_axis(b1s["pouring"]["first"]["pumping_out"], b2s["pouring"]["second"]["pouring_off"])
+            validate_disjoint_by_axis(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["first"]["pumping_out"])
 
         with code('Process boilings on the same pouring line'):
-            if b1["pouring"].props["pouring_line"] == b2["pouring"].props["pouring_line"]:
+            if b1s["pouring"].props["pouring_line"] == b2s["pouring"].props["pouring_line"]:
                 # pourings should not intersect, but also five minutes should be between boilings
-                validate_disjoint_by_axis(b1['pouring'], b2['pouring'], distance=1, ordered=True)
+                validate_disjoint_by_axis(b1s['pouring'], b2s['pouring'], distance=1, ordered=True)
 
                 # if boilings use same drenator - drenator should not intersect with meltings
-                if b1.props["drenator_num"] == b2.props["drenator_num"]:
-                    validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["drenator"])
+                if b1s.props["drenator_num"] == b2s.props["drenator_num"]:
+                    validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["drenator"])
 
         # define line names (water/salt) that we work on (which corresponds to the pouring line)
-        wln1 = LineName.WATER if b1["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
-        wln2 = LineName.WATER if b2["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
+        wln1 = LineName.WATER if b1s["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
+        wln2 = LineName.WATER if b2s["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
 
         if boiling_model1.line.name == boiling_model2.line.name:
             # same lines
 
             # basic validation
-            validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["meltings"])
-            for p1, p2 in itertools.product(b1["melting_and_packing"]["collecting", True], b2["melting_and_packing"]["collecting", True]):
+            validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"])
+            for p1, p2 in itertools.product(b1s["melting_and_packing"]["collecting", True], b2s["melting_and_packing"]["collecting", True]):
                 validate_disjoint_by_axis(p1, p2)
 
             # if water and different boilings - cannot intersect serving with meltings
             if boiling_model1.line.name == LineName.WATER and boiling_model1 != boiling_model2:
                 # todo later: deprecated, delete
-                # validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
+                # validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
                 if not boiling_model1.is_lactose:
-                    _df = b1.props['boiling_group_df']
+                    _df = b1s.props['boiling_group_df']
                     _df['is_lactose'] = _df['sku'].apply(lambda sku: sku.made_from_boilings[0].is_lactose)
                     if not _df['is_lactose'].any():
                         if boiling_model1.percent == boiling_model2.percent:
                             # 3.3 бл неполная -> 3.3
-                            validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-4)
+                            validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"], distance=-4)
                         else:
                             # 3.3 бл неполная -> 3.6
-                            validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                            validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"], distance=-2)
                     else:
                         # 3.3 бл полная -> 3.3/3.6
-                        validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                        validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"], distance=-2)
                 elif boiling_model1.percent != boiling_model2.percent:
                     # 3.6, 3.3 - add extra 10 minutes
-                    validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"], distance=-2)
+                    validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"], distance=-2)
                 else:
                     # 3.3 Альче Белзактозная -> 3.3 Сакко
-                    validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
+                    validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
 
             with code('there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors'):
-                mp1 = b1["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
-                mp2 = b2["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
+                mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
+                mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
 
                 bff1_name = mp1.props["bff"].name
                 bff2_name = mp2.props["bff"].name
 
                 sticks = ["Палочки 15.0г", "Палочки 7.5г"]
                 if bff1_name not in sticks and bff2_name in sticks:
-                    _b1 = b1["melting_and_packing"]["melting"]["meltings"]
-                    _b2 = b2["melting_and_packing"]["melting"]["meltings"]
+                    _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+                    _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
                     # at least one hour should pass between meltings
-                    validate_disjoint_by_axis(_b1, _b2, distance=12, ordered=True)
+                    validate_disjoint_by_axis(_b1s, _b2s, distance=12, ordered=True)
 
             with code('Process lactose switch on salt line'):
                 if boiling_model1.line.name == LineName.SALT:
                     if boiling_model1.is_lactose and not boiling_model2.is_lactose:
-                        _b1 = b1["melting_and_packing"]["melting"]["meltings"]
-                        _b2 = b2["melting_and_packing"]["melting"]["serving"]
-                        validate_disjoint_by_axis(_b1, _b2, distance=2, ordered=True)
+                        _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+                        _b2s = b2s["melting_and_packing"]["melting"]["serving"]
+                        validate_disjoint_by_axis(_b1s, _b2s, distance=2, ordered=True)
 
                     if not boiling_model1.is_lactose and boiling_model2.is_lactose:
-                        _b1 = b1["melting_and_packing"]["melting"]["meltings"]
-                        _b2 = b2["melting_and_packing"]["melting"]["serving"]
-                        validate_disjoint_by_axis(_b1, _b2, distance=-2, ordered=True)
+                        _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+                        _b2s = b2s["melting_and_packing"]["melting"]["serving"]
+                        validate_disjoint_by_axis(_b1s, _b2s, distance=-2, ordered=True)
         else:
             # different lines
 
@@ -108,19 +107,24 @@ class Validator(ClassValidator):
                 # same working lines (means that salt and water on the same working line - due to salt switching to the first pouring_line)
 
                 # basic validations
-                validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["meltings"])
-                validate_disjoint_by_axis(b1["melting_and_packing"]["melting"]["meltings"], b2["melting_and_packing"]["melting"]["serving"])
+                validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"])
+                validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
 
-                _b1 = b1["melting_and_packing"]["melting"]["meltings"]
-                _b2 = b2["melting_and_packing"]["melting"]["meltings"]
-                validate_disjoint_by_axis(_b1, _b2, distance=7, ordered=True)
+                _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+                _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
+                validate_disjoint_by_axis(_b1s, _b2s, distance=7, ordered=True)
 
+        if self.strict_order:
+            validate_order_by_axis(b1, b2)
+
+        with code('Order should be strict inside one configuration sheet'):
+            if self.sheet_order and b1.props["sheet"] == b2.props["sheet"]:
+                validate_order_by_axis(b1, b2)
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
         boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
         validate_disjoint_by_axis(boiling["pouring"]["first"]["termizator"], cleaning)
-
 
     @staticmethod
     def validate__cleaning__boiling(b1, b2):
@@ -250,7 +254,7 @@ class ScheduleMaker:
         else:
             self.last_multihead_water_boiling = None
 
-    def _process_boiling(self, boiling):
+    def _process_boiling(self, boiling, shrink_drenators=True, strict_order=False):
         # extract line name
         line_name = boiling.props["boiling_model"].line.name
 
@@ -304,7 +308,7 @@ class ScheduleMaker:
             boiling,
             push_func=AxisPusher(start_from=start_from),
             iter_props=iter_props,
-            validator=Validator(),
+            validator=Validator(strict_order=strict_order),
             max_tries=100,
         )
         # fix water a little bit: try to push water before - allowing awaiting in line
@@ -314,20 +318,21 @@ class ScheduleMaker:
                 self.m.root["master"],
                 boiling,
                 push_func=AwaitingPusher(max_period=8),
-                validator=Validator(),
+                validator=Validator(strict_order=strict_order),
                 max_tries=9,
             )
 
-        # fix water a little bit: try to shrink drenator a little bit for compactness
-        if self.lines_df.at[LineName.WATER, "latest_boiling"]:
-            boiling.detach_from_parent()
-            push(
-                self.m.root["master"],
-                boiling,
-                push_func=DrenatorShrinkingPusher(max_period=-2),
-                validator=Validator(),
-                max_tries=3,
-            )
+        if shrink_drenators:
+            # fix water a little bit: try to shrink drenator a little bit for compactness
+            if self.lines_df.at[LineName.WATER, "latest_boiling"]:
+                boiling.detach_from_parent()
+                push(
+                    self.m.root["master"],
+                    boiling,
+                    push_func=DrenatorShrinkingPusher(max_period=-2),
+                    validator=Validator(strict_order=strict_order),
+                    max_tries=3,
+                )
 
         # move rubber packing to extras
         for packing in boiling.iter(cls="packing"):
@@ -386,58 +391,69 @@ class ScheduleMaker:
         self.lines_df.at[line_name, "latest_boiling"] = boiling
         return boiling
 
-    def _process_boilings(self):
-        while True:
-            # add boilings loop
+    def _process_boilings(self, start_configuration, shrink_drenators=True):
+        assert len(start_configuration) != 0, "Start configuration not specified"
+        # logger.debug('Start configuration', start_configuration=start_configuration)
+        cur_boiling_num = 0
 
-            # check if finished
-            if len(self.left_df) == 0:
-                break
+        with code('add boilings loop'):
+            while True:
+                # check if finished
+                if len(self.left_df) == 0:
+                    break
 
-            # check if only salt left -> start working on 3 line
-            if (self.left_df["line_name"] == LineName.SALT).all():
-                self.lines_df.at[LineName.SALT, "iter_props"] = [
-                    {"pouring_line": str(v1), "drenator_num": str(v2)}
-                    for v1, v2 in itertools.product([2, 3, 1], [0, 1])
-                ]
+                # check if only salt left -> start working on 3 line
+                if (self.left_df["line_name"] == LineName.SALT).all():
+                    self.lines_df.at[LineName.SALT, "iter_props"] = [
+                        {"pouring_line": str(v1), "drenator_num": str(v2)}
+                        for v1, v2 in itertools.product([2, 3, 1], [0, 1])
+                    ]
 
-            # get next rows
-            next_rows = [grp.iloc[0] for sheet, grp in self.left_df.groupby("sheet")]
+                next_rows = [grp.iloc[0] for i, grp in self.left_df.groupby('sheet')] # select first rows from each sheet
+                cur_lines = len(set([row["line_name"] for row in next_rows]))
 
-            # get lines left
-            lines_left = len(set([row["line_name"] for row in next_rows]))
+                # logger.debug('Current Lines', cur_lines=cur_lines)
 
-            # select next row
-            if lines_left == 1:
-                # one line of sheet left
-                next_row = utils.iter_get(next_rows)
-            elif lines_left == 2:
-                # filter rows with latest boiling (any boiling is already present for line)
-                df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
+                # select next row
+                if cur_lines == 1:
+                    # one line of sheet left
+                    next_row = self.left_df.iloc[0]
+                elif cur_lines == 2:
+                    # filter rows with latest boiling (any boiling is already present for line)
+                    df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
 
-                if len(df) == 0:
-                    # first boiling is salt
-                    line_name = LineName.SALT
+                    if cur_boiling_num < len(start_configuration):
+                        # start from specified configuration
+                        line_name = start_configuration[cur_boiling_num]
+                        # logger.debug('Chose line by start configuration', line_name=line_name)
+                    else:
+                        # choose most latest line
+                        line_name = (
+                            max(df["latest_boiling"], key=lambda b: b.x[0])
+                                .props["boiling_model"]
+                                .line.name
+                        )
+                        # reverse
+                        line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                        # logger.debug('Chose line by most latest line', line_name=line_name)
+
+                    # select next row -> first for selected line
+                    next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
                 else:
-                    # choose most latest line
-                    line_name = (
-                        max(df["latest_boiling"], key=lambda b: b.x[0])
-                            .props["boiling_model"]
-                            .line.name
-                    )
-                    # reverse
-                    line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                    raise Exception("Should not happen")
 
-                # select next row -> first for selected line
-                next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
-            else:
-                raise Exception("Should not happen")
+                # remove newly added row from left rows
+                self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
-            # remove newly added row from left rows
-            self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
+                if cur_boiling_num < len(start_configuration):
+                    # all configuration blocks should start in strict order
+                    strict_order = True
+                else:
+                    strict_order = False
 
-            # insert boiling
-            self._process_boiling(next_row["boiling"])
+                # insert boiling
+                self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
+                cur_boiling_num += 1
 
     def _process_extras(self):
         # push extra packings
@@ -515,7 +531,7 @@ class ScheduleMaker:
                         push(self.m.root["master"], cleaning, push_func=add_push)
 
         # add last full cleaning
-        last_boiling = list(self.m.root["master"].iter(cls="boiling"))[-1]
+        last_boiling = max(self.m.root["master"]['boiling', True], key=lambda b: b.y[0])
         start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1
         cleaning = make_termizator_cleaning_block("full", rule='closing')  # add five extra minutes
         push(
@@ -529,7 +545,6 @@ class ScheduleMaker:
         with code('cheese makers'):
             beg = min(self.m.root['master']['boiling', True], key=lambda b: b.x[0]).x[0] - 6  # 0.5h before start
             end = max(self.m.root['master']['boiling', True], key=lambda b: b.y[0])['pouring']['second']['pouring_off'].y[0] + 24  # 2h after last pouring off
-
             shifts = split_shifts(beg, end)
 
             for i, (beg, end) in enumerate(shifts, 1):
@@ -613,7 +628,71 @@ class ScheduleMaker:
                         pass
 
 
-    def make(self, boilings, date=None, cleanings=None, start_times=None):
+    def _fix_first_boiling_of_later_line(self, start_configuration):
+        if len(start_configuration) == 1:
+            # only one line present - no need for fix
+            return
+
+        boilings = list(sorted(self.m.root['master']['boiling', True], key=lambda b: b.x[0]))
+        boiling_line_names = [b.props['boiling_model'].line.name for b in boilings]
+        # first_boiling_of_later_line_index
+        index = boiling_line_names.index(start_configuration[-1])
+
+        if index == len(boilings) - 1:
+            # first boiling of later line is last boiling
+            return
+
+        b1, b2 = boilings[index], boilings[index + 1]
+
+        with code('Fix packing configuration if needed'):
+            boilings_on_line1 = [b for b in boilings if b.props['boiling_model'].line.name == b1.props['boiling_model'].line.name]
+            index = boilings_on_line1.index(b1)
+
+            if index != len(boilings_on_line1) - 1:
+                # not last boiling
+                b3 = boilings_on_line1[index + 1]
+                with code('Find packing configuration between b2 and b3'):
+                    packing_configurations = [
+                        pc
+                        for pc in self.m.root["master"]["packing_configuration", True]
+                        if pc.x[0] > b1["melting_and_packing"]["collecting", True][0].x[0] # todo maybe: we take first collecting here, but this is not very straightforward
+                        and pc.x[0] <= b3["melting_and_packing"]["collecting", True][0].x[0]
+                        and pc.props["line_name"] == b1.props["boiling_model"].line.name
+                    ]
+
+                    if packing_configurations:
+                        pc = utils.delistify(packing_configurations, single=True)
+                    else:
+                        pc = None
+
+                with code('Push packing configuration further'):
+                    if pc:
+                        max_push = b3['melting_and_packing']['collecting'].x[0] - pc.x[0]
+                        pc.detach_from_parent()
+                        push(
+                            self.m.root["master"],
+                            pc,
+                            push_func=BackwardsPusher(max_period=max_push),
+                            validator=Validator(window=100, sheet_order=False),
+                            max_tries=max_push + 1,
+                        )
+
+        # fix boiling
+        max_push = b2.x[0] - b1.x[0]
+        b1.detach_from_parent()
+        push(
+            self.m.root["master"],
+            b1,
+            push_func=BackwardsPusher(max_period=max_push),
+            validator=Validator(window=100, sheet_order=False),
+            max_tries=max_push + 1,
+        )
+
+        # fix order of master blocks
+        self.m.root['master'].reorder_children(lambda b: b.x[0])
+
+    def make(self, boilings, date=None, cleanings=None, start_times=None, start_configuration=None, shrink_drenators=True):
+        start_configuration = start_configuration or [LineName.SALT]
         self.date = date or datetime.now()
         self.start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
         self.start_times = {k: v if v else None for k, v in start_times.items()}
@@ -624,12 +703,13 @@ class ScheduleMaker:
         self._init_lines_df()
         self._init_left_df()
         self._init_multihead_water_boilings()
-        self._process_boilings()
+        self._process_boilings(shrink_drenators=shrink_drenators, start_configuration=start_configuration)
         self._process_extras()
+        self._fix_first_boiling_of_later_line(start_configuration)
         self._process_cleanings()
         self._process_shifts()
         return self.m.root
 
 
-def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times=None):
-    return ScheduleMaker().make(boilings, date, cleanings, start_times)
+def make_schedule_from_boilings(boilings, date=None, cleanings=None, start_times=None, shrink_drenators=True, start_configuration=None):
+    return ScheduleMaker().make(boilings, date, cleanings, start_times, shrink_drenators=shrink_drenators, start_configuration=start_configuration)

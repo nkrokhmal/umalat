@@ -1,3 +1,4 @@
+_shift_colors = {1: (149, 179, 215), 2: "yellow", 3: (0, 176, 240)}
 STYLE = {
     "termizator": {"text": "{boiling_id} налив", "bold": True},
     "pouring_name": {"text": "{boiling_label}"},
@@ -36,7 +37,9 @@ STYLE = {
     "time": {"visible": True},
     "stub": {"visible": False},
     "shift": {
-        "color": (149, 179, 215),
+        "color": lambda b: _shift_colors[b.props["shift_num"]],
         "text": lambda b: f"Смена {b.props['shift_num']}",
+        "font_size": 16,
+        "bold": True,
     },
 }
