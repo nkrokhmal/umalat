@@ -64,6 +64,7 @@ def mozzarella_schedule():
             optimize=optimize,
             optimize_cleanings=add_full_boiling,
             first_boiling_id=int(form.batch_number.data),
+            date=date,
         )
 
         try:
