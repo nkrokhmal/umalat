@@ -61,13 +61,15 @@ def draw_skus_sheet(wb, type_sku, data_sku):
     grouped_skus = data_sku[type_sku]
     grouped_skus.sort(key=lambda x: x.name, reverse=False)
     excel_client = ExcelBlock(wb["{} SKU".format(type_sku)])
-    excel_client.draw_row(1, ["-", "-"], set_border=False)
+    excel_client.draw_row(1, ["-", "-", "-"], set_border=False)
     cur_i = 2
 
     for group_sku in grouped_skus:
+        team_number = "2" if "Терка" in group_sku.form_factor.name else "1"
+
         excel_client.draw_row(
             cur_i,
-            [group_sku.name, group_sku.made_from_boilings[0].to_str()],
+            [group_sku.name, group_sku.made_from_boilings[0].to_str(), team_number],
             set_border=False,
         )
         cur_i += 1
@@ -161,13 +163,14 @@ def draw_boiling_plan(df, df_extra, wb):
                 row=cur_row, values=value, cols=column, set_border=False
             )
             if sku_is_rubber(skus, v[COLUMNS["name"]]):
-                excel_client.draw_cell(
-                    row=cur_row,
-                    col=COLUMNS["team_number"].col,
-                    value=2,
-                    set_border=False,
-                    set_colour=False,
-                )
+                pass
+                # excel_client.draw_cell(
+                #     row=cur_row,
+                #     col=COLUMNS["team_number"].col,
+                #     value=2,
+                #     set_border=False,
+                #     set_colour=False,
+                # )
             elif v[COLUMNS["name"]] == "-":
                 excel_client.draw_cell(
                     row=cur_row,
@@ -182,13 +185,14 @@ def draw_boiling_plan(df, df_extra, wb):
                     set_border=False,
                 )
             else:
-                excel_client.draw_cell(
-                    row=cur_row,
-                    col=COLUMNS["team_number"].col,
-                    value=1,
-                    set_border=False,
-                    set_colour=False,
-                )
+                pass
+                # excel_client.draw_cell(
+                #     row=cur_row,
+                #     col=COLUMNS["team_number"].col,
+                #     value=1,
+                #     set_border=False,
+                #     set_colour=False,
+                # )
             cur_row += 1
     for sheet in wb.sheetnames:
         wb[sheet].views.sheetView[0].tabSelected = False
