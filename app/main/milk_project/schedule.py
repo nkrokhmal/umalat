@@ -20,7 +20,6 @@ from collections import namedtuple
 @main.route("/milk_project_schedule", methods=["GET", "POST"])
 @flask_login.login_required
 def milk_project_schedule():
-
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
@@ -42,7 +41,6 @@ def milk_project_schedule():
             ),
             data_only=True,
         )
-
         milk_project_output = run_milk_project(wb, path=None, start_time=beg_time)
 
         if len(milk_project_output["boiling_plan_df"]) > 0:
@@ -126,10 +124,10 @@ def milk_project_schedule():
             schedule_task.update_total_schedule_task()
             schedule_task.update_boiling_schedule_task(form.batch_number.data)
 
-            # schedule_wb = schedule_task.schedule_task_original(schedule_wb)
-            schedule_wb, cur_row = schedule_task.schedule_task_boilings(
-                schedule_wb, form.batch_number.data, cur_row=cur_row
-            )
+            schedule_wb, cur_row = schedule_task.schedule_task_original(schedule_wb, cur_row=cur_row)
+            # schedule_wb, cur_row = schedule_task.schedule_task_boilings(
+            #     schedule_wb, form.batch_number.data, cur_row=cur_row
+            # )
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(

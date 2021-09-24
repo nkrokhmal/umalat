@@ -227,6 +227,7 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
         dfs.append(df)
 
     df = update_boiling_plan(dfs, normalization, saturate, validate)
+    df["packing_team_id"] = df["packing_team_id"].apply(lambda x: int(x))
     return df
 
 

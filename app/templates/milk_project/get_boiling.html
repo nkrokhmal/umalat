@@ -14,7 +14,7 @@
 <div class="card border-light shadow-sm mb-4">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-centered table-nowrap mb-0 rounded">
+            <table class="table table-centered mb-0 rounded" border=1 frame=hsides rules=rows>
                 <thead class="thead-light">
                     <tr>
                         <th class="border-0">#</th>
@@ -30,7 +30,7 @@
                     {% for b in boilings %}
                         <tr>
                             <td class="border-0">{{loop.index}}</td>
-                            <td class="border-0"><a class="small">{{b.name}}</a></td>
+                            <td class="border-0"><a class="small">{{b.skus[0].group.name}}</a></td>
                             <td class="border-0"><a class="small">{{b.weight_netto}}</a></td>
                             <td class="border-0"><a class="small">{{b.output_kg}}</a></td>
                             <td class="border-0"><a class="small">{{b.percent}}</a></td>

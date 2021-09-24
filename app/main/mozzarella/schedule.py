@@ -58,7 +58,6 @@ def mozzarella_schedule():
             LineName.SALT: form.salt_beg_time.data,
         }
 
-        logger.info(boiling_plan_df['packing_team_id'])
         schedule = make_schedule(
             boiling_plan_df,
             start_times=start_times,
