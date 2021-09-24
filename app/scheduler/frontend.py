@@ -22,9 +22,9 @@ def init_schedule_workbook(wb=None):
     for i in range(1, 220):
         wb.worksheets[0].row_dimensions[i].height = 25
 
-    utils.set_border_grid(
-        wb.worksheets[0], 1, 1, 288 * 2, 220, Side(border_style=BORDER_THIN)
-    )
+    # utils.set_border_grid(
+    #     wb.worksheets[0], 1, 1, 288 * 2, 220, Side(border_style=BORDER_THIN)
+    # )
     return wb
 
 
