@@ -11,10 +11,17 @@ def run_milk_project(
     start_time=None,
     path="outputs/",
     prefix="",
+    template_wb=None,
 ):
     utils.makedirs(path)
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
     start_time = start_time or "07:00"
+
+    if not template_wb:
+        template_wb = openpyxl.load_workbook(
+            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
+            data_only=True,
+        )
 
     if not schedule:
         schedule = make_schedule(boiling_plan_df, start_time=start_time)
@@ -30,6 +37,7 @@ def run_milk_project(
         prefix,
         STYLE,
         path=path,
+        template_wb=template_wb,
         open_file=open_file,
     )
     res["boiling_plan_df"] = boiling_plan_df

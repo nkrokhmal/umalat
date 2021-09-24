@@ -43,7 +43,11 @@ def adygea_schedule():
         )
         schedule = make_schedule(boiling_plan_df, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)
-        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None)
+        schedule_template = openpyxl.load_workbook(
+            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
+            data_only=True,
+        )
+        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=schedule_template)
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание адыгейский.xlsx"
         filename_schedule_pickle = (

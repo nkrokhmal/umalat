@@ -11,6 +11,7 @@ def run_adygea(
     first_boiling_id=1,
     path="outputs/",
     prefix="",
+    template_wb=None,
 ):
     utils.makedirs(path)
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
@@ -19,12 +20,18 @@ def run_adygea(
         schedule = make_schedule(
             boiling_plan_df, start_time=start_time, first_boiling_id=first_boiling_id
         )
+
+    if not template_wb:
+        template_wb = openpyxl.load_workbook(
+            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
+            data_only=True,
+        )
     try:
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
     res = submit_schedule(
-        "адыгейский", schedule, frontend, prefix, STYLE, path=path, open_file=open_file
+        "адыгейский", schedule, frontend, prefix, STYLE, path=path, open_file=open_file, template_wb=template_wb
     )
     res["boiling_plan_df"] = boiling_plan_df
     return res

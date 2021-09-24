@@ -17,7 +17,11 @@ def run_consolidated(
         schedules = load_schedules(input_path, prefix)
 
     if not wb:
-        wb = init_schedule_workbook()
+        wb = openpyxl.load_workbook(
+            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
+            data_only=True,
+        )
+        # wb = init_schedule_workbook()
 
     cur_depth = 0
 

@@ -9,22 +9,23 @@ def init_schedule_workbook(wb=None):
     if not wb:
         wb = utils.init_workbook(["Расписание"])
 
-    if "Расписание" not in wb.sheetnames:
-        wb.create_sheet("Расписание")
+        if "Расписание" not in wb.sheetnames:
+            wb.create_sheet("Расписание")
 
-    for ws in wb.worksheets:
-        ws.sheet_view.zoomScale = 55
+        for ws in wb.worksheets:
+            ws.sheet_view.zoomScale = 55
 
-    for i in range(4):
-        wb.worksheets[0].column_dimensions[utils.get_column_letter(i + 1)].width = 21
-    for i in range(4, 288 * 2):
-        wb.worksheets[0].column_dimensions[utils.get_column_letter(i + 1)].width = 2.4
-    for i in range(1, 220):
-        wb.worksheets[0].row_dimensions[i].height = 25
+        for i in range(4):
+            wb.worksheets[0].column_dimensions[utils.get_column_letter(i + 1)].width = 21
+        for i in range(4, 288 * 2):
+            wb.worksheets[0].column_dimensions[utils.get_column_letter(i + 1)].width = 2.4
+        for i in range(1, 220):
+            wb.worksheets[0].row_dimensions[i].height = 25
 
-    # utils.set_border_grid(
-    #     wb.worksheets[0], 1, 1, 288 * 2, 220, Side(border_style=BORDER_THIN)
-    # )
+        logger.info("Setting grid")
+        utils.set_border_grid(
+            wb.worksheets[0], 1, 1, 288 * 2, 220, Side(border_style=BORDER_THIN)
+        )
     return wb
 
 
