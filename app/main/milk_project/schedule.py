@@ -47,7 +47,7 @@ def milk_project_schedule():
         if len(milk_project_output["boiling_plan_df"]) > 0:
             beg_time = cast_time(milk_project_output["schedule"].y[0] - 4)
 
-        adygea_output = run_adygea(wb, path=None, start_time=beg_time, template_wb=schedule_template_adygea)
+        adygea_output = run_adygea(wb, path=None, start_time=beg_time)
 
         if (
             len(adygea_output["boiling_plan_df"]) > 0
