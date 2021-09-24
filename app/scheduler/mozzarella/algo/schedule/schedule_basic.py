@@ -12,6 +12,7 @@ def make_schedule_basic(
     start_times=None,
     start_configuration=None,
     first_boiling_id=1,
+    date=None,
 ):
     boiling_plan_df = cast_boiling_plan(boiling_plan_obj)
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
@@ -54,5 +55,6 @@ def make_schedule_basic(
             cleanings=cleanings,
             start_times=start_times,
             start_configuration=start_configuration,
+            date=date
         )
     return schedule

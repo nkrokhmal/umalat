@@ -2,6 +2,8 @@ from app.imports.runtime import *
 
 from app.scheduler.time import *
 
+from openpyxl.styles.borders import Border, Side, BORDER_THIN
+
 
 def init_schedule_workbook(wb=None):
     if not wb:
@@ -19,6 +21,10 @@ def init_schedule_workbook(wb=None):
         wb.worksheets[0].column_dimensions[utils.get_column_letter(i + 1)].width = 2.4
     for i in range(1, 220):
         wb.worksheets[0].row_dimensions[i].height = 25
+
+    utils.set_border_grid(
+        wb.worksheets[0], 1, 1, 288 * 2, 220, Side(border_style=BORDER_THIN)
+    )
     return wb
 
 
@@ -99,9 +105,7 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
     return wb
 
 
-def draw_excel_frontend(
-    frontend, style, O=None, open_file=False, fn=None, wb=None
-):
+def draw_excel_frontend(frontend, style, O=None, open_file=False, fn=None, wb=None):
     wb = draw_schedule(frontend, style, O=O, wb=wb)
 
     if fn:
