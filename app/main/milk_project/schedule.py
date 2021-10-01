@@ -68,6 +68,7 @@ def milk_project_schedule():
                 "milk_project": milk_project_output["schedule"],
                 "adygea": adygea_output["schedule"],
             },
+            draw_mozzarella=False,
         )
 
         if len(milk_project_output["boiling_plan_df"]) > 0:

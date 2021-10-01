@@ -12,6 +12,7 @@ def run_consolidated(
     open_file=False,
     schedules=None,
     wb=None,
+    draw_mozzarella=True,
 ):
     utils.makedirs(output_path)
 
@@ -37,11 +38,12 @@ def run_consolidated(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     else:
-        wb = openpyxl.load_workbook(os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx"))
-        for sheet_name in wb.sheetnames:
-            if sheet_name != "Расписание":
-                wb.remove(wb[sheet_name])
-        cur_depth += 65
+        if draw_mozzarella:
+            wb = openpyxl.load_workbook(os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx"))
+            for sheet_name in wb.sheetnames:
+                if sheet_name != "Расписание":
+                    wb.remove(wb[sheet_name])
+            cur_depth += 65
 
     if "ricotta" in schedules:
         from app.scheduler.ricotta import wrap_frontend, STYLE
