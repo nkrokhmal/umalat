@@ -1,3 +1,5 @@
+import openpyxl
+
 from app.imports.runtime import *
 from app.scheduler import *
 from utils_ak.block_tree import *
@@ -33,6 +35,13 @@ def run_consolidated(
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
         draw_excel_frontend(frontend, STYLE, wb=wb)
+
+    else:
+        wb = openpyxl.load_workbook(os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx"))
+        for sheet_name in wb.sheetnames:
+            if sheet_name != "Расписание":
+                wb.remove(wb[sheet_name])
+        cur_depth += 65
 
     if "ricotta" in schedules:
         from app.scheduler.ricotta import wrap_frontend, STYLE

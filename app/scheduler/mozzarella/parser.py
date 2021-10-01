@@ -96,8 +96,9 @@ def parse_schedule_file(wb_obj):
 
     with code("fetch start times"):
         start_times = []
-        for row_num in [1, 24]:
-            hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
+        for row_num in [1, 23]:
+            hour = ws.cell(row_num, 5).value
+            hour = int(ws.cell(row_num, 5).value)
             if hour >= 12:
                 # yesterday
                 hour -= 24

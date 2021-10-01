@@ -23,9 +23,9 @@ def init_schedule_workbook(wb=None):
             wb.worksheets[0].row_dimensions[i].height = 25
 
         logger.info("Setting grid")
-        utils.set_border_grid(
-            wb.worksheets[0], 1, 1, 288 * 2, 220, Side(border_style=BORDER_THIN)
-        )
+        # utils.set_border_grid(
+        #     wb.worksheets[0], 1, 1, 288 * 2, 220, Side(border_style=BORDER_THIN)
+        # )
     return wb
 
 
