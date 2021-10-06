@@ -43,7 +43,7 @@ def run_consolidated(
             for sheet_name in wb.sheetnames:
                 if sheet_name != "Расписание":
                     wb.remove(wb[sheet_name])
-            cur_depth += 65
+            cur_depth += 68
 
     if "ricotta" in schedules:
         from app.scheduler.ricotta import wrap_frontend, STYLE
