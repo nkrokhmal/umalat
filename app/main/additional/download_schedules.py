@@ -68,7 +68,6 @@ def download_contour_washer_history(page):
             if os.path.exists(cw_dir):
                 cw_filenames = os.listdir(cw_dir)
                 if cw_filenames:
-                    cw_metadata[date_dir] = {}
                     for cw_filename in cw_filenames:
                         if "контурные мойки.xlsx" in cw_filename:
                             cw_metadata[date_dir] = {}
