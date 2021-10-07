@@ -36,7 +36,7 @@ def mozzarella_boiling_plan():
                     filename=tmp_file_path,
                     data_only=True,
                 )
-                yesterday_boiling_plan_df = read_boiling_plan(wb_not_calculated,)[['sku_name', 'original_kg']]
+                yesterday_boiling_plan_df = read_boiling_plan(wb_not_calculated, validate=False)[['sku_name', 'original_kg']]
                 yesterday_boiling_plan_df = yesterday_boiling_plan_df.groupby('sku_name').sum()
 
         skus_req = get_skus(skus_req, skus, total_skus)
