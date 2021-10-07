@@ -148,7 +148,7 @@ def parse_sheet(ws, sheet_name, excel_compiler, sku_type=ButterSKU):
                     excel_compiler.evaluate(
                         "'{}'!{}".format(sheet_name, ws.cell(i, j).coordinate)
                     )
-                    for j in range(4, 9)
+                    for j in range(4, 10)
                 ]
             )
 
@@ -157,6 +157,7 @@ def parse_sheet(ws, sheet_name, excel_compiler, sku_type=ButterSKU):
         "sku",
         "remainings - request",
         "normative remainings",
+        "not_calculated",
         "plan",
         "extra_packing",
     ]

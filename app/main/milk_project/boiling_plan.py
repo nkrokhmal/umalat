@@ -3,7 +3,7 @@ from app.utils.milk_project.boiling_plan_create import boiling_plan_create as bo
 from app.utils.milk_project.boiling_plan_draw import draw_boiling_plan as draw_boiling_plan_milk_project
 from app.utils.adygea.boiling_plan_create import boiling_plan_create as boiling_plan_create_adygea
 from app.utils.adygea.boiling_plan_draw import draw_boiling_plan as draw_boiling_plan_adygea
-from app.utils.files.utils import move_boiling_file, save_boiling_plan
+from app.utils.files.utils import move_boiling_file, save_request
 from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
 from app.main import main
@@ -52,7 +52,7 @@ def milk_project_boiling_plan():
         wb = draw_boiling_plan_milk_project(df_plan_milk_project, wb)
         wb = draw_boiling_plan_adygea(df_plan_adygea, wb)
 
-        save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
+        save_request(data=wb, filename=filename, date=sku_plan_client.date)
         return flask.render_template(
             "milk_project/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date,
         )

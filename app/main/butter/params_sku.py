@@ -131,7 +131,6 @@ def butter_edit_sku(sku_id):
         return redirect(flask.url_for(".butter_get_sku", page=1))
 
     if len(sku.made_from_boilings) > 0:
-        print(sku.made_from_boilings[0].to_str())
         default_form_value(form.boiling, sku.made_from_boilings[0].to_str())
 
     if sku.group is not None:

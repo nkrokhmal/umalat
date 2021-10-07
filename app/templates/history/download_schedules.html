@@ -32,8 +32,8 @@
 
                             <td class="border-0">
                                 {% if data[key].get("моцарелла", "") != "" %}
-                                    <a href="#show_mozzarella" class="show_mozzarella"
-                                       data-date="{{key}}" data-filename="{{data[key].get('моцарелла', {}).get('filename', '')}}"
+                                    <a href="#show_mozzarella_{{key}}" class="show_mozzarella"
+                                       data-filename="{{data[key].get('моцарелла', {}).get('filename', '')}}" data-date="{{key}}"
                                        data-approved="{{data[key].get('моцарелла', {}).get('is_approved', False)}}" data-toggle="modal" >
                                         {% if data[key].get('моцарелла', {}).get('is_approved', False) %}
                                             <span style="color:green" class="fas fa-check mr-2"></span>
@@ -45,9 +45,33 @@
                                 {% endif %}
                             </td>
 
+                            <div id="show_mozzarella_{{key}}" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответсвтвующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="/download_mozzarella_schedule?date={{key}}">
+                                                    <div class="btn btn-primary btn-download">
+                                                        Скачать
+                                                    </div>
+                                                </a>
+                                                <input type="submit" class="btn btn-primary btn-edit" id="mozzarella_approve">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             <td class="border-0">
                                 {% if data[key].get("рикотта", "") != "" %}
-                                    <a href="#show_ricotta" class="show_ricotta"
+                                    <a href="#show_ricotta_{{key}}" class="show_ricotta"
                                        data-date="{{key}}" data-filename="{{data[key].get('рикотта', {}).get('filename', '')}}"
                                        data-approved="{{data[key].get('рикотта', {}).get('is_approved', False)}}" data-toggle="modal" >
                                         {% if data[key].get('рикотта', {}).get('is_approved', False) %}
@@ -60,9 +84,33 @@
                                 {% endif %}
                             </td>
 
+                            <div id="show_ricotta_{{key}}" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответсвтвующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="/download_ricotta_schedule?date={{key}}">
+                                                    <div class="btn btn-primary btn-download">
+                                                        Скачать
+                                                    </div>
+                                                </a>
+                                                <input type="submit" class="btn btn-primary btn-edit" id="ricotta_approve">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             <td class="border-0">
                                 {% if data[key].get("маскарпоне", "") != "" %}
-                                    <a href="#show_mascarpone" class="show_mascarpone"
+                                    <a href="#show_mascarpone_{{key}}" class="show_mascarpone"
                                        data-date="{{key}}" data-filename="{{data[key].get('маскарпоне', {}).get('filename', '')}}"
                                        data-approved="{{data[key].get('маскарпоне', {}).get('is_approved', False)}}" data-toggle="modal" >
                                         {% if data[key].get('маскарпоне', {}).get('is_approved', False) %}
@@ -75,9 +123,33 @@
                                 {% endif %}
                             </td>
 
+                            <div id="show_mascarpone_{{key}}" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="/download_mascarpone_schedule?date={{key}}">
+                                                    <div class="btn btn-primary btn-download">
+                                                        Скачать
+                                                    </div>
+                                                </a>
+                                                <input type="submit" class="btn btn-primary btn-edit" id="mascarpone_approve">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             <td class="border-0">
                                 {% if data[key].get("масло", "") != "" %}
-                                    <a href="#show_butter" class="show_butter"
+                                    <a href="#show_butter_{{key}}" class="show_butter"
                                        data-date="{{key}}" data-filename="{{data[key].get('масло', {}).get('filename', '')}}"
                                        data-approved="{{data[key].get('масло', {}).get('is_approved', False)}}" data-toggle="modal" >
                                         {% if data[key].get('масло', {}).get('is_approved', False) %}
@@ -90,9 +162,33 @@
                                 {% endif %}
                             </td>
 
+                            <div id="show_butter_{{key}}" class="modal fade" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Управление файлом расписания</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Выберите действие</p>
+                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="/download_butter_schedule?date={{key}}">
+                                                    <div class="btn btn-primary btn-download">
+                                                        Скачать
+                                                    </div>
+                                                </a>
+                                                <input type="submit" class="btn btn-primary btn-edit" id="butter_approve">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             <td class="border-0">
                                 {% if data[key].get("милкпроджект", "") != "" %}
-                                    <a href="#show_milk_project" class="show_milk_project"
+                                    <a href="#show_milk_project_{{key}}" class="show_milk_project"
                                        data-date="{{key}}" data-filename="{{data[key].get('милкпроджект', {}).get('filename', '')}}"
                                        data-approved="{{data[key].get('милкпроджект', {}).get('is_approved', False)}}" data-toggle="modal" >
                                         {% if data[key].get('милкпроджект', {}).get('is_approved', False) %}
@@ -105,47 +201,7 @@
                                 {% endif %}
                             </td>
 
-                            <div id="show_mozzarella" class="modal fade" >
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <form>
-                                            <div class="modal-header">
-                                                <h4 class="modal-title">Управление файлом расписания</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Выберите действие</p>
-                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответсвтвующую кнопку</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
-                                                <input type="submit" class="btn btn-primary btn-edit" id="testId">
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="show_ricotta" class="modal fade" >
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <form>
-                                            <div class="modal-header">
-                                                <h4 class="modal-title">Управление файлом расписания</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Выберите действие</p>
-                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответсвтвующую кнопку</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
-                                                <input type="submit" class="btn btn-primary btn-edit" id="testId2">
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="show_mascarpone" class="modal fade" >
+                            <div id="show_milk_project_{{key}}" class="modal fade" >
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <form>
@@ -157,48 +213,12 @@
                                                 <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
                                             </div>
                                             <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
-                                                <input type="submit" class="btn btn-primary btn-edit" id="testId3">
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="show_butter" class="modal fade" >
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <form>
-                                            <div class="modal-header">
-                                                <h4 class="modal-title">Управление файлом расписания</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Выберите действие</p>
-                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
-                                                <input type="submit" class="btn btn-primary btn-edit" id="testId4">
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="show_milk_project" class="modal fade" >
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <form>
-                                            <div class="modal-header">
-                                                <h4 class="modal-title">Управление файлом расписания</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Выберите действие</p>
-                                                <p>Для того, чтобы утвердить или удалить файл из утвержденных, нажмите соответствующую кнопку</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <input type="submit" class="btn btn-primary btn-download" value="Скачать">
-                                                <input type="submit" class="btn btn-primary btn-edit" id="testId5">
+                                                <a href="/download_milk_project_schedule?date={{key}}">
+                                                    <div class="btn btn-primary btn-download">
+                                                        Скачать
+                                                    </div>
+                                                </a>
+                                                <input type="submit" class="btn btn-primary btn-edit" id="milk_project_approve">
                                             </div>
                                         </form>
                                     </div>
@@ -231,7 +251,6 @@
 <script type="text/javascript">
 	$(function () {
 		$(".show_mozzarella").click(function () {
-		    console.log("Started");
 			var filename = $(this).data('filename');
 			var date = $(this).data('date');
 			var approved = $(this).data('approved');
@@ -243,23 +262,10 @@
             else {
                 name = "Утвердить";
             }
+			$(".modal-footer #mozzarella_approve").val(name);
 
-			$(".modal-footer #testId").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
-			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    $.ajax(
-				{
-					url: url_download,
-					type: 'GET',
-					success: function(res)
-					{
-					    window.location = url_download;
-					},
-					error: function(error) {
-						  console.log(error);
-					}
-				});
-				$('#show_mozzarella').modal('hide');
+				$('#show_mozzarella_' + date).modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
@@ -304,22 +310,9 @@
                 name = "Утвердить";
             }
 
-			$(".modal-footer #testId2").val(name);
+			$(".modal-footer #ricotta_approve").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
-			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    $.ajax(
-				{
-					url: url_download,
-					type: 'GET',
-					success: function(res)
-					{
-					    window.location = url_download;
-					},
-					error: function(error) {
-						  console.log(error);
-					}
-				});
-				$('#show_ricotta').modal('hide');
+				$('#show_ricotta_' + date).modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
@@ -364,22 +357,9 @@
                 name = "Утвердить";
             }
 
-			$(".modal-footer #testId3").val(name);
+			$(".modal-footer #mascarpone_approve").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
-			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    $.ajax(
-				{
-					url: url_download,
-					type: 'GET',
-					success: function(res)
-					{
-					    window.location = url_download;
-					},
-					error: function(error) {
-						  console.log(error);
-					}
-				});
-				$('#show_mascarpone').modal('hide');
+				$('#show_mascarpone_' + date).modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
@@ -423,22 +403,9 @@
                 name = "Утвердить";
             }
 
-			$(".modal-footer #testId4").val(name);
+			$(".modal-footer #butter_approve").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
-			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    $.ajax(
-				{
-					url: url_download,
-					type: 'GET',
-					success: function(res)
-					{
-					    window.location = url_download;
-					},
-					error: function(error) {
-						  console.log(error);
-					}
-				});
-				$('#show_butter').modal('hide');
+				$('#show_butter_' + date).modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){
@@ -482,22 +449,9 @@
                 name = "Утвердить";
             }
 
-			$(".modal-footer #testId5").val(name);
+			$(".modal-footer #milk_project_approve").val(name);
 			$(".btn.btn-primary.btn-download").click(function(){
-			    var url_download="/download_schedule_plan?file_name=" + filename + "&date=" + date;
-			    $.ajax(
-				{
-					url: url_download,
-					type: 'GET',
-					success: function(res)
-					{
-					    window.location = url_download;
-					},
-					error: function(error) {
-						  console.log(error);
-					}
-				});
-				$('#show_milk_project').modal('hide');
+				$('#show_milk_project_' + date).modal('hide');
             });
 
             $(".btn.btn-primary.btn-edit").click(function(){

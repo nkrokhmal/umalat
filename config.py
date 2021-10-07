@@ -16,7 +16,7 @@ class BaseClass:
     DATE_FORMAT = "%Y-%m-%d"
 
     BOILING_PLAN_FOLDER = "boiling_plan"
-    REQUEST_FOLDER = "request_folder"
+    REQUEST_FOLDER = "request"
     APPROVED_FOLDER = "approved"
     SCHEDULE_FOLDER = "schedule"
     SCHEDULE_DICT_FOLDER = "schedule_dict"

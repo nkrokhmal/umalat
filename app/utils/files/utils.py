@@ -31,6 +31,12 @@ def save_boiling_plan(*args, **kwargs):
     )
 
 
+def save_request(*args, **kwargs):
+    save_file_dir(
+        *args, **kwargs, folder=flask.current_app.config["REQUEST_FOLDER"]
+    )
+
+
 def save_schedule(*args, **kwargs):
     save_file_dir(*args, **kwargs, folder=flask.current_app.config["SCHEDULE_FOLDER"])
 
@@ -57,7 +63,7 @@ def move_boiling_file(date, old_filepath, old_filename, department=""):
     data_dir = os.path.join(
         flask.current_app.config["DYNAMIC_DIR"],
         date,
-        flask.current_app.config["BOILING_PLAN_FOLDER"],
+        flask.current_app.config["REQUEST_FOLDER"],
     )
     create_if_not_exists(data_dir)
 

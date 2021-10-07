@@ -9,4 +9,5 @@ from . import (
     boiling_plan,
     schedule,
     upload_schedule,
+    download,
 )

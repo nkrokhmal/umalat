@@ -32,6 +32,13 @@
 
                 <div class="col-md-12 mb-3">
                     <div class="form-group">
+                        <label>Выберите файл не посчитанной на складе продукции(не обязательно)</label>
+                        {{form.file_not_calculated(place_holder='NotCalcFile', class='form-control')}}
+                    </div>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
                         <label>Введите дату</label>
                         {{form.date(place_holder='Date', class='form-control')}}
                     </div>
@@ -57,7 +64,7 @@
             );
         });
         }
-        var url = "download_boiling_plan?file_name=" + "{{filename}}" + "&date=" + "{{date}}";
+        var url = "download_request_plan?file_name=" + "{{filename}}" + "&date=" + "{{date}}";
         download(url,"{{filename}}", "{{date}}");
     </script>
 {% endif %}

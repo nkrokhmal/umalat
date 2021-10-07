@@ -129,7 +129,6 @@ def mascarpone_edit_sku_mascarpone(sku_id):
         return redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
 
     if len(sku.made_from_boilings) > 0:
-        print(sku.made_from_boilings[0].to_str())
         default_form_value(form.boiling, sku.made_from_boilings[0].to_str())
 
     if sku.group is not None:

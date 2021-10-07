@@ -1,5 +1,5 @@
 from flask import render_template, request
-from app.utils.files.utils import move_boiling_file, save_boiling_plan
+from app.utils.files.utils import move_boiling_file, save_request
 from app.utils.mascarpone.boiling_plan_create import mascarpone_boiling_plan_create
 from app.utils.mascarpone.boiling_plan_draw import draw_boiling_plan
 from app.utils.sku_plan import *
@@ -58,7 +58,7 @@ def mascarpone_boiling_plan():
         df, _ = parse_sheet(ws, sheet_name, excel_compiler, MascarponeSKU)
         mascarpone_df, cream_cheese_df, cream_df = mascarpone_boiling_plan_create(df)
         wb = draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb)
-        save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
+        save_request(data=wb, filename=filename, date=sku_plan_client.date)
         os.remove(tmp_file_path)
         return render_template(
             "mascarpone/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date

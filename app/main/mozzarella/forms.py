@@ -13,6 +13,11 @@ class BoilingPlanFastForm(FlaskForm):
         label="Выберите файл",
         validators=validators,
     )
+    file_not_calculated = FileField(
+        label="Выберите файл не посчитанного на складе",
+        validators=[Optional()],
+    )
+
     date = DateTimeField(
         "Введите дату",
         format="%Y-%m-%d",

@@ -1,3 +1,5 @@
+import pandas as pd
+
 from app.imports.runtime import *
 
 from openpyxl.styles import Alignment
@@ -20,21 +22,22 @@ CELLS = {
     "SKU": Cell(1, 4, "Номенклатура"),
     "FactRemains": Cell(1, 5, "Факт.остатки, заявка"),
     "NormativeRemains": Cell(1, 6, "Нормативные остатки"),
-    "ProductionPlan": Cell(1, 7, "План производства"),
-    "ExtraPacking": Cell(1, 8, "Дополнительная фасовка"),
-    "Volume": Cell(1, 10, "Объем варки"),
-    "Estimation": Cell(1, 11, "Расчет"),
-    "Plan": Cell(1, 12, "План"),
-    "BoilingVolumes": Cell(1, 13, "Объемы варок"),
-    "Name1": Cell(1, 15, "Фактические остатки на складах - Заявлено, кг:"),
-    "Name2": Cell(2, 15, "Нормативные остатки, кг"),
+    "NotCalculatedRemainings": Cell(1, 7, "Не учтенные остатки"),
+    "ProductionPlan": Cell(1, 8, "План производства"),
+    "ExtraPacking": Cell(1, 9, "Дополнительная фасовка"),
+    "Volume": Cell(1, 11, "Объем варки"),
+    "Estimation": Cell(1, 12, "Расчет"),
+    "Plan": Cell(1, 13, "План"),
+    "BoilingVolumes": Cell(1, 14, "Объемы варок"),
+    "Name1": Cell(1, 16, "Фактические остатки на складах - Заявлено, кг:"),
+    "Name2": Cell(2, 16, "Нормативные остатки, кг"),
 }
 
 COLUMNS = {"BoilingVolume": 10, "SKUS_ID": 18, "BOILING_ID": 19}
 
 
 class SkuPlanClient:
-    def __init__(self, date, remainings, skus_grouped, template_path):
+    def __init__(self, date, remainings, skus_grouped, template_path, yesterday_boiling_plan_df=pd.DataFrame()):
         self.date = date.strftime("%Y-%m-%d")
         self.filename = "{} План по SKU.xlsx".format(date.strftime("%Y-%m-%d"))
         self.filepath = os.path.join(
@@ -42,6 +45,7 @@ class SkuPlanClient:
         )
         self.skus_grouped = skus_grouped
         self.remainings = remainings
+        self.yesterday_boiling_plan_df = yesterday_boiling_plan_df
         self.space_rows = 2
         self.template_path = template_path
         self.wb = self.create_file()
@@ -59,6 +63,14 @@ class SkuPlanClient:
             )
             writer.save()
         self.wb = openpyxl.load_workbook(self.filepath)
+
+    def _not_calc_remainings(self, sku_name):
+        if self.yesterday_boiling_plan_df.empty:
+            return 0
+        if sku_name not in self.yesterday_boiling_plan_df.index:
+            return 0
+        else:
+            return self.yesterday_boiling_plan_df.loc[sku_name][0]
 
     def _set_production_plan(self, obj, value):
         if isinstance(obj, MozzarellaSKU):
@@ -86,13 +98,13 @@ class SkuPlanClient:
 
                 beg_block_row = cur_row
                 for block_sku in block_skus:
-                    formula_plan = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($O$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
+                    formula_plan = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($P$1,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
                         flask.current_app.config["SHEET_NAMES"]["remainings"],
                         excel_client.sheet.cell(
                             cur_row, CELLS["SKU"].column
                         ).coordinate,
                     )
-                    formula_remains = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($O$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
+                    formula_remains = "=IFERROR(INDEX('{0}'!$A$5:$FG$265,MATCH($P$2,'{0}'!$A$5:$A$228,0),MATCH({1},'{0}'!$A$5:$FG$5,0)), 0)".format(
                         flask.current_app.config["SHEET_NAMES"]["remainings"],
                         excel_client.sheet.cell(
                             cur_row, CELLS["SKU"].column
@@ -105,6 +117,12 @@ class SkuPlanClient:
                         col=CELLS["Brand"].column,
                         value=block_sku.sku.brand_name,
                     )
+                    excel_client.draw_cell(
+                        row=cur_row,
+                        col=CELLS["NotCalculatedRemainings"].column,
+                        value=-self._not_calc_remainings(block_sku.sku.name)
+                    )
+
                     excel_client.draw_cell(
                         row=cur_row, col=CELLS["SKU"].column, value=block_sku.sku.name
                     )
@@ -121,10 +139,13 @@ class SkuPlanClient:
                         col=CELLS["ProductionPlan"].column,
                         value=self._set_production_plan(
                             block_sku.sku,
-                            "=MIN({}, 0)".format(
+                            "=MIN({} - {}, 0)".format(
                                 excel_client.sheet.cell(
                                     cur_row, CELLS["FactRemains"].column
-                                ).coordinate
+                                ).coordinate,
+                                excel_client.sheet.cell(
+                                    cur_row, CELLS["NotCalculatedRemainings"].column
+                                ).coordinate,
                             ),
                         ),
                     )

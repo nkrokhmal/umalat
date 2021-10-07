@@ -46,6 +46,101 @@ def update_data():
     return response
 
 
+@main.route("/download_contour_washer_history/<int:page>", methods=["GET"])
+@flask_login.login_required
+def download_contour_washer_history(page):
+    date_dirs = next(os.walk(flask.current_app.config["DYNAMIC_DIR"]))[1]
+    cw_metadata = {}
+
+    def is_date(string):
+        try:
+            _ = datetime.strptime(string, flask.current_app.config["DATE_FORMAT"])
+            return True
+        except:
+            return False
+
+    for date_dir in date_dirs:
+        if is_date(date_dir):
+            cw_dir = os.path.join(
+                flask.current_app.config["DYNAMIC_DIR"],
+                date_dir,
+                flask.current_app.config["APPROVED_FOLDER"])
+            if os.path.exists(cw_dir):
+                cw_filenames = os.listdir(cw_dir)
+                if cw_filenames:
+                    cw_metadata[date_dir] = {}
+                    for cw_filename in cw_filenames:
+                        if "контурные мойки.xlsx" in cw_filename:
+                            cw_metadata[date_dir] = {}
+                            cw_metadata[date_dir]['filename'] = cw_filename
+
+    cw_metadata = OrderedDict(sorted(cw_metadata.items(), reverse=True))
+    cw_result = get_metadata(
+        cw_metadata,
+        offset=(page - 1) * flask.current_app.config["SKU_PER_PAGE"],
+        per_page=flask.current_app.config["SKU_PER_PAGE"]
+    )
+
+    pagination = flask_paginate.Pagination(
+        page=page,
+        per_page=flask.current_app.config["SKU_PER_PAGE"],
+        error_out=False,
+        total=len(cw_metadata.keys()),
+        items=cw_metadata.keys(),
+    )
+    return flask.render_template(
+        "history/download_contour_washers.html", pagination=pagination, data=cw_result,
+    )
+
+
+@main.route("/download_boiling_plans/<int:page>", methods=["GET"])
+@flask_login.login_required
+def download_boiling_plans(page):
+    date_dirs = next(os.walk(flask.current_app.config["DYNAMIC_DIR"]))[1]
+    bp_metadata = {}
+
+    def is_date(string):
+        try:
+            _ = datetime.strptime(string, flask.current_app.config["DATE_FORMAT"])
+            return True
+        except:
+            return False
+
+    for date_dir in date_dirs:
+        if is_date(date_dir):
+            bp_dir = os.path.join(
+                flask.current_app.config["DYNAMIC_DIR"],
+                date_dir,
+                flask.current_app.config["BOILING_PLAN_FOLDER"])
+            if os.path.exists(bp_dir):
+                bp_filenames = os.listdir(bp_dir)
+                if bp_filenames:
+                    bp_metadata[date_dir] = {}
+                    for bp_filename in bp_filenames:
+                        department = get_department(bp_filename)
+                        if department not in bp_metadata[date_dir].keys():
+                            bp_metadata[date_dir][department] = {}
+                            bp_metadata[date_dir][department]['filename'] = bp_filename
+
+    bp_metadata = OrderedDict(sorted(bp_metadata.items(), reverse=True))
+    bp_result = get_metadata(
+        bp_metadata,
+        offset=(page - 1) * flask.current_app.config["SKU_PER_PAGE"],
+        per_page=flask.current_app.config["SKU_PER_PAGE"]
+    )
+
+    pagination = flask_paginate.Pagination(
+        page=page,
+        per_page=flask.current_app.config["SKU_PER_PAGE"],
+        error_out=False,
+        total=len(bp_metadata.keys()),
+        items=bp_metadata.keys(),
+    )
+    return flask.render_template(
+        "history/download_boiling_plans.html", pagination=pagination, data=bp_result,
+    )
+
+
 @main.route("/download_schedules/<int:page>", methods=["GET"])
 @flask_login.login_required
 def download_schedules(page):

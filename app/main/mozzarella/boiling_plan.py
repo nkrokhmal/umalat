@@ -1,7 +1,8 @@
 from app.imports.runtime import *
 from app.utils.mozzarella.boiling_plan_create import boiling_plan_create
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan
-from app.utils.files.utils import move_boiling_file, save_boiling_plan
+from app.utils.files.utils import move_boiling_file, save_request
+from app.scheduler.mozzarella import *
 from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
 from app.main import main
@@ -18,7 +19,26 @@ def mozzarella_boiling_plan():
         skus = db.session.query(MozzarellaSKU).all()
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(MozzarellaBoiling).all()
+
         skus_req, remainings_df = parse_file(flask.request.files["input_file"].read())
+        yesterday_boiling_plan_df = pd.DataFrame()
+
+        if "file_not_calculated" in flask.request.files:
+            if flask.request.files["file_not_calculated"]:
+                file_not_calculated = flask.request.files["file_not_calculated"]
+                tmp_file_path = os.path.join(
+                    flask.current_app.config["UPLOAD_TMP_FOLDER"], file_not_calculated.filename
+                )
+                if file_not_calculated:
+                    file_not_calculated.save(tmp_file_path)
+
+                wb_not_calculated = openpyxl.load_workbook(
+                    filename=tmp_file_path,
+                    data_only=True,
+                )
+                yesterday_boiling_plan_df = read_boiling_plan(wb_not_calculated,)[['sku_name', 'original_kg']]
+                yesterday_boiling_plan_df = yesterday_boiling_plan_df.groupby('sku_name').sum()
+
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
         sku_plan_client = SkuPlanClient(
@@ -26,6 +46,7 @@ def mozzarella_boiling_plan():
             remainings=remainings_df,
             skus_grouped=skus_grouped,
             template_path=flask.current_app.config["TEMPLATE_MOZZARELLA_BOILING_PLAN"],
+            yesterday_boiling_plan_df=yesterday_boiling_plan_df,
         )
         sku_plan_client.fill_remainigs_list()
         sku_plan_client.fill_mozzarella_sku_plan()
@@ -41,7 +62,7 @@ def mozzarella_boiling_plan():
         df, df_extra_packing = parse_sheet(ws, sheet_name, excel_compiler, MozzarellaSKU)
         df_plan = boiling_plan_create(df)
         wb = draw_boiling_plan(df_plan, df_extra_packing, wb)
-        save_boiling_plan(data=wb, filename=filename, date=sku_plan_client.date)
+        save_request(data=wb, filename=filename, date=sku_plan_client.date)
         return flask.render_template(
             "mozzarella/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date
         )
