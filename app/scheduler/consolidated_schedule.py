@@ -12,23 +12,22 @@ def run_consolidated(
     open_file=False,
     schedules=None,
     wb=None,
-    draw_mozzarella=True,
 ):
     utils.makedirs(output_path)
 
     if not schedules:
         schedules = load_schedules(input_path, prefix)
 
-    if not wb:
-        wb = openpyxl.load_workbook(
-            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
-            data_only=True,
-        )
-        # wb = init_schedule_workbook()
-
     cur_depth = 0
 
     if "mozzarella" in schedules:
+        # init workbook with mozzarella
+        if not wb:
+            wb = openpyxl.load_workbook(
+                filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
+                data_only=True,
+            )
+
         from app.scheduler.mozzarella import wrap_frontend, STYLE
 
         frontend = wrap_frontend(schedules["mozzarella"])
@@ -36,14 +35,19 @@ def run_consolidated(
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
         draw_excel_frontend(frontend, STYLE, wb=wb)
-
     else:
-        if draw_mozzarella:
-            wb = openpyxl.load_workbook(os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx"))
+        if not wb:
+            # init workbook with schedule file #todo maybe: better to crop mozzarella part and paste into empty workbook, so can be generalized for other departments
+            wb = openpyxl.load_workbook(
+                os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx")
+            )
+
             for sheet_name in wb.sheetnames:
                 if sheet_name != "Расписание":
                     wb.remove(wb[sheet_name])
-            cur_depth += 68
+
+        df = load_cells_df(wb)
+        cur_depth += df["y1"].max()
 
     if "ricotta" in schedules:
         from app.scheduler.ricotta import wrap_frontend, STYLE
