@@ -10,6 +10,7 @@ from app.enum import LineName
 from app.scheduler.mozzarella.algo.schedule.custom_pushers import *
 from utils_ak.block_tree import *
 
+STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
 
 class Validator(ClassValidator):
     def __init__(self, window=20, strict_order=False, sheet_order=True):
@@ -82,12 +83,26 @@ class Validator(ClassValidator):
                 bff1_name = mp1.props["bff"].name
                 bff2_name = mp2.props["bff"].name
 
-                sticks = ["Палочки 15.0г", "Палочки 7.5г"]
+                sticks = STICK_FORM_FACTOR_NAMES
                 if bff1_name not in sticks and bff2_name in sticks:
                     _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
                     _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
                     # at least one hour should pass between meltings
                     validate_disjoint_by_axis(_b1s, _b2s, distance=12, ordered=True)
+
+            with code('there should be one two hour pause between "Палочки 15/7" and non-"Палочки 15/7" form-factors'):
+                mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
+                mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
+
+                bff1_name = mp1.props["bff"].name
+                bff2_name = mp2.props["bff"].name
+
+                sticks = STICK_FORM_FACTOR_NAMES
+                if bff1_name in sticks and bff2_name not in sticks:
+                    _b1s = b1s["melting_and_packing"]["collecting", True][-1]
+                    _b2s = b2s["melting_and_packing"]["collecting", True][0]
+                    # at least one hour should pass between meltings
+                    validate_disjoint_by_axis(_b1s, _b2s, distance=24, ordered=True)
 
             with code('Process lactose switch on salt line'):
                 if boiling_model1.line.name == LineName.SALT:
