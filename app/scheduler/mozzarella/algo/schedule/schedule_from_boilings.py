@@ -667,14 +667,7 @@ class ScheduleMaker:
 
                 with code('Push packing configuration further'):
                     if pc:
-                        # todo: change
-                        if isinstance(b3['melting_and_packing']['collecting'], list):
-                            something = b3['melting_and_packing']['collecting'][0]
-                        else:
-                            something = b3['melting_and_packing']['collecting']
-
-                        # max_push = b3['melting_and_packing']['collecting'].x[0] - pc.x[0]
-                        max_push = something.x[0] - pc.x[0]
+                        max_push = b3['melting_and_packing']['collecting', True][0].x[0] - pc.x[0]
                         pc.detach_from_parent()
                         push(
                             self.m.root["master"],
