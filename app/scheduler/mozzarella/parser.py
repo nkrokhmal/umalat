@@ -6,6 +6,10 @@ from app.scheduler.mozzarella.properties import *
 
 from utils_ak.block_tree import *
 
+
+TIME_INDEX_ROW_NUMS = [1, 23]
+
+
 def _group_intervals(intervals, max_length=None, interval_func=None):
     if not interval_func:
         interval_func = lambda interval: [interval[0], interval[1]]
@@ -45,7 +49,7 @@ def test_group_intervals():
     ]
 
 
-def parse_schedule_file(wb_obj):
+def load_cells_df(wb_obj):
     wb = utils.cast_workbook(wb_obj)
 
     with code("Get merged cells dataframe"):
@@ -64,6 +68,10 @@ def parse_schedule_file(wb_obj):
         df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
 
         df = df.sort_values(by=["x1", "x0", "y1", "y0"])
+    return df
+
+def parse_schedule_file(wb_obj):
+    df = load_cells_df(wb_obj)
 
     m = BlockMaker("root")
 
@@ -96,7 +104,7 @@ def parse_schedule_file(wb_obj):
 
     with code("fetch start times"):
         start_times = []
-        for row_num in [1, 24]:
+        for row_num in TIME_INDEX_ROW_NUMS:
             hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
             if hour >= 12:
                 # yesterday
