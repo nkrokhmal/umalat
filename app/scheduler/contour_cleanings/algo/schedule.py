@@ -284,8 +284,12 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
             for _ in range(5):
                 yield
 
+    def _should_make_last_short_cleaning():
+        last_full_cleaning = max(m.root.find(label='Полная мойка термизатора'), key=lambda b: b.y[0])
+        return last_full_cleaning.y[0] <= cast_t('21:00') and not is_tomorrow_day_off
+
     def f4():
-        if not is_tomorrow_day_off:
+        if _should_make_last_short_cleaning():
             b = m.row('cleaning',  push_func=AxisPusher(start_from=cast_t('21:00'), validator=CleaningValidator()),
                   size=cast_t('01:00'),
                   label='Короткая мойка термизатора').block
@@ -302,7 +306,7 @@ def _make_contour_3(properties, order1=(0, 1, 1, 1, 1), order2=(0, 0, 0, 0, 0, 1
         for _ in range(5):
             next(it)
 
-    if not is_tomorrow_day_off:
+    if _should_make_last_short_cleaning():
         # shift short cleaning to make it as late as possible
         short_cleaning = m.root.find(label='Короткая мойка термизатора')[-1]
         short_cleaning.detach_from_parent()
