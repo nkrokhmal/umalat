@@ -51,6 +51,14 @@ def run_consolidated(
             df = load_cells_df(wb)
             cur_depth += df["y1"].max()
 
+        if not wb:
+            wb = openpyxl.load_workbook(
+                filename=os.path.join(
+                    basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT
+                ),
+                data_only=True,
+            )
+
     if "ricotta" in schedules:
         from app.scheduler.ricotta import wrap_frontend, STYLE
 
@@ -122,7 +130,6 @@ def run_consolidated(
         draw_excel_frontend(
             frontend, open_file=open_file, wb=wb, fn=output_fn, style=STYLE
         )
-
     return wb
 
 
