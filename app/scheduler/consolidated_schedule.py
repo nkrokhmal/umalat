@@ -36,18 +36,20 @@ def run_consolidated(
         cur_depth += depth
         draw_excel_frontend(frontend, STYLE, wb=wb)
     else:
-        if not wb:
-            # init workbook with schedule file #todo maybe: better to crop mozzarella part and paste into empty workbook, so can be generalized for other departments
-            wb = openpyxl.load_workbook(
-                os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx")
-            )
+        if input_path:
+            # draw mozzarella
+            if not wb:
+                # init workbook with schedule file #todo maybe: better to crop mozzarella part and paste into empty workbook, so can be generalized for other departments
+                wb = openpyxl.load_workbook(
+                    os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx")
+                )
 
-            for sheet_name in wb.sheetnames:
-                if sheet_name != "Расписание":
-                    wb.remove(wb[sheet_name])
+                for sheet_name in wb.sheetnames:
+                    if sheet_name != "Расписание":
+                        wb.remove(wb[sheet_name])
 
-        df = load_cells_df(wb)
-        cur_depth += df["y1"].max()
+            df = load_cells_df(wb)
+            cur_depth += df["y1"].max()
 
     if "ricotta" in schedules:
         from app.scheduler.ricotta import wrap_frontend, STYLE

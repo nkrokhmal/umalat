@@ -19,7 +19,7 @@ def run_milk_project(
 
     if not template_wb:
         template_wb = openpyxl.load_workbook(
-            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
+            filename=os.path.join(basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT),
             data_only=True,
         )
 

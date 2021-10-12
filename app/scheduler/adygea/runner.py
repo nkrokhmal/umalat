@@ -23,7 +23,7 @@ def run_adygea(
 
     if not template_wb:
         template_wb = openpyxl.load_workbook(
-            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
+            filename=os.path.join(basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT),
             data_only=True,
         )
     try:
@@ -31,7 +31,14 @@ def run_adygea(
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
     res = submit_schedule(
-        "адыгейский", schedule, frontend, prefix, STYLE, path=path, open_file=open_file, template_wb=template_wb
+        "адыгейский",
+        schedule,
+        frontend,
+        prefix,
+        STYLE,
+        path=path,
+        open_file=open_file,
+        template_wb=template_wb,
     )
     res["boiling_plan_df"] = boiling_plan_df
     return res
