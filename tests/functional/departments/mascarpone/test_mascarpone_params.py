@@ -15,6 +15,9 @@ def test_mascarpone_download_params(client):
         df = df.reindex(sorted(df.columns), axis=1)
         params_df = params_df.reindex(sorted(df.columns), axis=1)
 
+        print(df)
+        print(params_df)
+
         assert sorted(df.columns) == sorted(params_df.columns)
         assert df.equals(params_df)
         assert response.status_code == 200
