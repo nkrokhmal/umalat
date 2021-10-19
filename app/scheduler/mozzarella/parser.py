@@ -267,9 +267,16 @@ def fill_properties(parsed_schedule, df_bp):
     props = MozzarellaProperties()
 
     # save boiling_model to parsed_schedule blocks
-    for block in parsed_schedule.iter(
+    for block in list(parsed_schedule.iter(
         cls=lambda cls: cls in ["boiling", "melting", "packing"]
-    ):
+    )):
+        # todo later: del, should not happen
+        with code('remove little blocks'):
+            if 'boiling_id' not in block.props.all() or not is_int(block.props['boiling_id']):
+                logger.info('Removing small block', block=block)
+                block.detach_from_parent()
+                continue
+
         boiling_group_df = df_bp[df_bp["boiling_id"] == int(block.props["boiling_id"])]
         block.props.update(
             boiling_group_df=boiling_group_df,
