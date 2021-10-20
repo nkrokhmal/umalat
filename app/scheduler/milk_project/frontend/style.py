@@ -16,6 +16,7 @@ STYLE = {
     },
     "processing": {
         "color": "#00B0F0",  # blue
+        # todo next: fix session bug: sqlalchemy.orm.exc.DetachedInstanceError: Instance <MilkProjectBoiling at 0x7f0b52a93f90> is not bound to a Session; attribute refresh operation cannot proceed
         # "text": lambda b: b.props['boiling_model'].name,
         "text": f,
     },
