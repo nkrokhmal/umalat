@@ -229,7 +229,13 @@ class BoilingPlanToSchedule:
             beg = self.m.root.x[0]
             end = self.m.root.y[0]
 
-            shifts = split_shifts_by_time(beg + cast_t(start_time), end + cast_t(start_time), cast_t('18:00'), min_shift=12)
+            with code('Calc shift time properly'):
+                shift_t = cast_t('18:00')
+                if shift_t <= beg + cast_t(start_time):
+                    # add day
+                    shift_t += cast_t('00:00+1')
+
+            shifts = split_shifts_by_time(beg + cast_t(start_time), end + cast_t(start_time), shift_t, min_shift=12)
 
             # fix start time
             shifts = [[beg - cast_t(start_time), end - cast_t(start_time)] for beg, end in shifts]
@@ -248,7 +254,13 @@ class BoilingPlanToSchedule:
             beg = packings[0].x[0] - 12  # 1h before
             end = packings[-1].y[0] + 12 # 1h after
 
-            shifts = split_shifts_by_time(beg + cast_t(start_time), end + cast_t(start_time), cast_t('18:00'), min_shift=12)
+            with code('Calc shift time properly'):
+                shift_t = cast_t('18:00')
+                if shift_t <= beg + cast_t(start_time):
+                    # add day
+                    shift_t += cast_t('00:00+1')
+
+            shifts = split_shifts_by_time(beg + cast_t(start_time), end + cast_t(start_time), shift_t, min_shift=12)
             # fix start time
             shifts = [[beg - cast_t(start_time), end - cast_t(start_time)] for beg, end in shifts]
             
