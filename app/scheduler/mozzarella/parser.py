@@ -270,7 +270,7 @@ def fill_properties(parsed_schedule, df_bp):
     for block in list(parsed_schedule.iter(
         cls=lambda cls: cls in ["boiling", "melting", "packing"]
     )):
-        # todo later: del, should not happen
+        # todo later: make that should not happen and then del
         with code('remove little blocks'):
             if 'boiling_id' not in block.props.all() or not is_int(block.props['boiling_id']):
                 logger.info('Removing small block', block=block)
