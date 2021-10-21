@@ -49,6 +49,7 @@ EXCEL_PARSERS = {
 
 
 def load_properties(schedules, path=None, prefix=None):
+    # NOTE: RETURN BLANK PROPERTIES IF NOT PRESENT
     properties = {}
 
     for department in [
