@@ -1,0 +1,55 @@
+# fmt: off
+from app.imports.runtime import *
+from app.scheduler.butter import *
+from app.scheduler.butter.properties import *
+from app.scheduler.parsing import *
+
+from utils_ak.block_tree import *
+
+
+TIME_INDEX_ROW_NUMS = [1]
+
+
+def parse_schedule_file(wb_obj):
+    df = load_cells_df(wb_obj, 'Расписание')
+
+    m = BlockMaker("root")
+
+    with code("fetch start times"):
+        start_times = []
+
+        for row_num in TIME_INDEX_ROW_NUMS:
+            hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
+            if hour >= 12:
+                # yesterday
+                hour -= 24
+            start_times.append(hour * 12)
+
+    parse_block(m, df,
+        "boilings",
+        "boiling",
+        [i + 1 for i in TIME_INDEX_ROW_NUMS],
+        start_times[0],
+        length=100)
+
+    return m.root
+
+
+def fill_properties(parsed_schedule):
+    props = ButterProperties()
+
+    # save boiling_model to parsed_schedule blocks
+    props.end_time = cast_human_time(parsed_schedule.y[0])
+    return props
+
+
+def parse_properties(fn):
+    parsed_schedule = parse_schedule_file(fn)
+    props = fill_properties(parsed_schedule)
+    return props
+
+
+if __name__ == "__main__":
+    # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
+    fn = '/Users/marklidenberg/Downloads/Telegram Desktop/2021-10-14 Расписание масло.xlsx'
+    print(dict(parse_properties(fn)))
