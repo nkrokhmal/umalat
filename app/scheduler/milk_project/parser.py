@@ -1,10 +1,13 @@
 # fmt: off
 from app.imports.runtime import *
-from app.scheduler.adygea import *
-from app.scheduler.adygea.properties import *
+from app.scheduler.milk_project import *
+from app.scheduler.milk_project.properties import *
 from app.scheduler.parsing import *
 
 from utils_ak.block_tree import *
+
+
+TIME_INDEX_ROW_NUMS = [1]
 
 
 def parse_schedule_file(wb_obj):
@@ -12,13 +15,14 @@ def parse_schedule_file(wb_obj):
 
     m = BlockMaker("root")
 
-    with code('Find time index row nums'):
-        time_index_row_nums = df[df['label'].astype(str).str.contains('График работы')]['x1'].unique()
+    with code('Find split rows'):
+        df1 = df[df['label'] == 'Набор смеси']
+        split_rows = df1['x1'].unique()
 
-    with code('Find start times'):
+    with code("fetch start times"):
         start_times = []
 
-        for row_num in time_index_row_nums:
+        for row_num in TIME_INDEX_ROW_NUMS:
             hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
             if hour >= 12:
                 # yesterday
@@ -27,43 +31,28 @@ def parse_schedule_file(wb_obj):
 
     def _split_func(row):
         try:
-            return is_int_like(row["label"].split(" ")[0])
-        except:
-            return False
-
-    def _filter_func(group):
-        try:
-            return is_int_like(group[0]["label"].split(" ")[0])
+            return row["label"].split(" ")[0] == 'Набор воды в машину'
         except:
             return False
 
     parse_block(m, df,
         "boilings",
         "boiling",
-        [time_index_row_nums[-1] + i for i in [1, 5, 9, 13]],
-        start_times[-1],
-        length=100,
-        split_func=_split_func,
-        filter=_filter_func)
-
-    # parse all blocks at once
-    parse_block(m, df,
-        "blocks",
-        "block",
-        [time_index_row_nums[-1] + i for i in [1, 5, 9, 13]],
-        start_times[-1],
+        [i for i in split_rows],
+        start_times[0],
         length=100,
         split_func=_split_func)
+
     return m.root
 
 
 def fill_properties(parsed_schedule):
-    props = AdygeaProperties()
+    props = MilkProjectProperties()
 
     # save boiling_model to parsed_schedule blocks
     boilings = list(sorted(parsed_schedule.iter(cls='boiling'), key=lambda boiling: boiling.y[0]))
     props.n_boilings = len(boilings)
-    props.end_time = cast_human_time(parsed_schedule.y[0])
+    props.end_time = cast_human_time(boilings[-1].y[0])
     return props
 
 
