@@ -13,7 +13,7 @@ def parse_schedule_file(wb_obj):
     m = BlockMaker("root")
 
     with code('Find start times'):
-        time_index_row_nums = df[df['label'].astype(str).str.contains('График работы')]['x1'].unique()
+        time_index_row_nums = df[df['label'].astype(str).str.contains('График')]['x1'].unique()
 
         start_times = []
 
@@ -74,5 +74,5 @@ def parse_properties(fn):
 
 if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = '/Users/marklidenberg/Downloads/Telegram Desktop/2021-08-25 Расписание милкпроджект.xlsx'
+    fn = '/Users/marklidenberg/Downloads/Telegram Desktop/2021-09-03 Расписание милкпроджект.xlsx'
     print(dict(parse_properties(fn)))

@@ -17,7 +17,7 @@ def parse_schedule_file(wb_obj):
         split_rows = df1['x1'].unique()
 
     with code('Find start times'):
-        time_index_row_nums = df[df['label'].astype(str).str.contains('График работы')]['x1'].unique()
+        time_index_row_nums = df[df['label'].astype(str).str.contains('График')]['x1'].unique()
 
         start_times = []
 

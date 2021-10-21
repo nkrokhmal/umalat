@@ -14,7 +14,7 @@ def parse_schedule_file(wb_obj):
     m = BlockMaker("root")
 
     with code('Find start times'):
-        time_index_row_nums = df[df['label'].astype(str).str.contains('График работы')]['x1'].unique()
+        time_index_row_nums = df[df['label'].astype(str).str.contains('График')]['x1'].unique()
 
         start_times = []
 
@@ -24,7 +24,6 @@ def parse_schedule_file(wb_obj):
                 # yesterday
                 hour -= 24
             start_times.append(hour * 12)
-
     parse_block(m, df,
         "boilings",
         "boiling",

@@ -44,7 +44,7 @@ EXCEL_PARSERS = {
     # "mascarpone": ,
     "milk_project": parse_properties_milk_project,
     "butter": parse_properties_butter,
-    "adygea": parse_schedule_adygea,
+    "adygea": parse_properties_adygea,
 }
 
 
