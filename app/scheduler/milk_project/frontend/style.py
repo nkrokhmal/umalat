@@ -1,7 +1,12 @@
+from app.imports.runtime import *
+
+
 def f(b):
     try:
-        return b.props["boiling_model"].name
+        # NOTE: SHOULD NOT HAPPEN IN NEWER VERSIONS SINCE 2021.10.21 (# update 2021.10.21)
+        return b.props["boiling_model_name"]
     except:
+        logger.error("Boiling model name not found")
         return ""
 
 
@@ -16,8 +21,6 @@ STYLE = {
     },
     "processing": {
         "color": "#00B0F0",  # blue
-        # todo next: fix session bug: sqlalchemy.orm.exc.DetachedInstanceError: Instance <MilkProjectBoiling at 0x7f0b52a93f90> is not bound to a Session; attribute refresh operation cannot proceed
-        # "text": lambda b: b.props['boiling_model'].name,
         "text": f,
     },
     "red": {"color": "red"},  # yellow
