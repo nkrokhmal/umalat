@@ -270,10 +270,10 @@ def fill_properties(parsed_schedule, df_bp):
     for block in list(parsed_schedule.iter(
         cls=lambda cls: cls in ["boiling", "melting", "packing"]
     )):
-        # todo later: make that should not happen and then del
         with code('remove little blocks'):
             if 'boiling_id' not in block.props.all() or not is_int(block.props['boiling_id']):
-                logger.info('Removing small block', block=block)
+                # NOTE: SHOULD NOT HAPPEN IN NEWER FILES SINCE update 2021.10.21 (# update 2021.10.21)
+                logger.error('Removing small block', block=block)
                 block.detach_from_parent()
                 continue
 
@@ -448,5 +448,6 @@ def parse_properties(fn):
 
 
 if __name__ == "__main__":
-    fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
+    # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
+    fn = '/Users/marklidenberg/Downloads/test.xlsx'
     print(dict(parse_properties(fn)))
