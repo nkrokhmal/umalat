@@ -12,10 +12,9 @@ def parse_schedule_file(wb_obj):
 
     m = BlockMaker("root")
 
-    with code('Find time index row nums'):
+    with code('Find start times'):
         time_index_row_nums = df[df['label'].astype(str).str.contains('График работы')]['x1'].unique()
 
-    with code('Find start times'):
         start_times = []
 
         for row_num in time_index_row_nums:

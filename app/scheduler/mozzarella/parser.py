@@ -7,23 +7,24 @@ from app.scheduler.parsing import *
 from utils_ak.block_tree import *
 
 
-TIME_INDEX_ROW_NUMS = [1, 23]
-
 
 def parse_schedule_file(wb_obj):
     df = load_cells_df(wb_obj, 'Расписание')
 
     m = BlockMaker("root")
 
-    with code("fetch start times"):
+    with code('Find start times'):
+        time_index_row_nums = df[df['label'].astype(str).str.contains('График работы')]['x1'].unique()
+
         start_times = []
 
-        for row_num in TIME_INDEX_ROW_NUMS:
+        for row_num in time_index_row_nums:
             hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
             if hour >= 12:
                 # yesterday
                 hour -= 24
             start_times.append(hour * 12)
+
 
     with code('calc split rows'):
         with code('find headers'):
