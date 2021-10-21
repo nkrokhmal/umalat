@@ -77,7 +77,7 @@ def contour_washers_schedule():
                     prefix=yesterday_str,
                 )
 
-                if "mozzarella" in yesterday_schedules:
+                if yesterday_properties["mozzarella"].is_present():
                     main_form.molder.data = yesterday_properties[
                         "mozzarella"
                     ].bar12_present
@@ -87,7 +87,7 @@ def contour_washers_schedule():
                         "warning",
                     )
 
-                if "ricotta" in yesterday_schedules:
+                if yesterday_properties["ricotta"].is_present():
                     main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
                         "ricotta"
                     ].n_boilings
@@ -97,7 +97,7 @@ def contour_washers_schedule():
                         "warning",
                     )
 
-                if "milk_project" in yesterday_schedules:
+                if yesterday_properties["milk_project"].is_present():
                     main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
                         "milk_project"
                     ].n_boilings
@@ -107,7 +107,7 @@ def contour_washers_schedule():
                         "warning",
                     )
 
-                if "adygea" in yesterday_schedules:
+                if yesterday_properties["adygea"].is_present():
                     main_form.adygea_n_boilings_yesterday.data = yesterday_properties[
                         "adygea"
                     ].n_boilings
