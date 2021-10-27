@@ -17,7 +17,8 @@ class MozzarellaProperties(pydantic.BaseModel):
         res = {'2.7': self.line27_last_termizator_end_times,
                 '3.3': self.line33_last_termizator_end_times,
                 '3.6': self.line36_last_termizator_end_times}
-        assert len(sum(res.values(), [])) <= 4, 'Указано больше 4 танков смесей. В производстве есть только 4 танка смесей. '
+        # todo: maybe, make proper checks, maybe make some warnings or something
+        # assert len(sum(res.values(), [])) <= 4, 'Указано больше 4 танков смесей. В производстве есть только 4 танка смесей. '
         return res
     
     multihead_end_time: str = Field("", description='Конец работы мультиголовы (пусто, если мультиголова не работает)')
