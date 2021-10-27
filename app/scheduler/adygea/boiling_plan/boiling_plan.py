@@ -46,14 +46,18 @@ def read_boiling_plan(wb_obj):
 
     df_plan, boiling_number = handle_adygea(df)
 
-    df_plan["boiling_id"] = df_plan["id"]
-    df_plan["kg"] = df_plan["plan"]
-    df_plan["n_baths"] = 1
-    df_plan["boiling_id"] = df_plan["boiling_id"].astype(int) + 1
-    df_plan["sku"] = df_plan["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku.name))
-    df_plan["boiling"] = df_plan["sku"].apply(lambda x: x.made_from_boilings[0])
+    if df_plan.empty:
+        logger.info("Empty data frame")
+        df_plan = pd.DataFrame(columns=["boiling_id", "sku", "n_baths", "kg", "boiling"])
+    else:
+        df_plan["boiling_id"] = df_plan["id"]
+        df_plan["kg"] = df_plan["plan"]
+        df_plan["n_baths"] = 1
+        df_plan["boiling_id"] = df_plan["boiling_id"].astype(int) + 1
+        df_plan["sku"] = df_plan["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku.name))
+        df_plan["boiling"] = df_plan["sku"].apply(lambda x: x.made_from_boilings[0])
 
-    df_plan = df_plan[["boiling_id", "sku", "n_baths", "kg", "boiling"]]
+        df_plan = df_plan[["boiling_id", "sku", "n_baths", "kg", "boiling"]]
 
     # for i in range(df_plan.shape[0]):
     #     print(df_plan["boiling"].iloc[i].boiling_technologies[0].name)

@@ -78,6 +78,7 @@ def mascarpone_proceed_order(order, df, boilings, output_tons):
             df["is_lactose"] == order.is_lactose
         )
     ]
+    print(df_filter)
     if not df_filter.empty:
         df_filter_groups = [group for _, group in df_filter.groupby("percent")]
 
@@ -139,7 +140,7 @@ def handle_mascarpone(df):
     orders = [
         Order("", True, "Маскарпоне"),
         Order("", False, "Маскарпоне"),
-        Order("Шоколад", False, "Маскарпоне"),
+        Order("Шоколад", True, "Маскарпоне"),
     ]
     for order in orders:
         boilings_mascarpone = mascarpone_proceed_order(
