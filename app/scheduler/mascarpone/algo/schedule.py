@@ -146,17 +146,26 @@ class BoilingPlanToSchedule:
                  # props
                  line_nums=line_nums)
 
+        def _is_on_line_num(line_nums, compared_line_nums):
+            if compared_line_nums == line_nums:
+                return True
+
+            if len(line_nums) == 1:
+                return line_nums[0] in compared_line_nums
+
+            return False
         left_cleaning_lines = list(all_line_nums)
         if not is_cream:
             # clean first sourdoughs asap
             last_groups = []
             for line_nums in all_line_nums:
                 cur_groups = [
-                    bg for bg in boiling_groups if bg.props["line_nums"] == line_nums
+                    bg for bg in boiling_groups if _is_on_line_num(bg.props["line_nums"], line_nums)
                 ]
                 if len(cur_groups) == 0:
                     continue
                 last_groups.append(cur_groups[-1])
+
             first_last_group = min(last_groups, key=lambda bg: bg.x[0])
 
             block = make_cleaning(
@@ -167,7 +176,7 @@ class BoilingPlanToSchedule:
             self.m.block(block,
                     push_func=AxisPusher(start_from="last_beg", start_shift=-30),
                     push_kwargs={'validator': Validator()})
-            left_cleaning_lines.remove(first_last_group.props["line_nums"])
+            left_cleaning_lines.remove([x for x in left_cleaning_lines if _is_on_line_num(first_last_group.props["line_nums"], x)][0])
 
             if len(boiling_plan_df.groupby("boiling_id")) > 6 or is_last:
                 for entity in ["separator", "homogenizer"]:
