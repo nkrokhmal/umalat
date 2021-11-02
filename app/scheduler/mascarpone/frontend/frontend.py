@@ -37,9 +37,9 @@ def wrap_frontend_mascarpone_boiling(boiling_process):
         if boiling_process["waiting"].size[0]:
             m.row("waiting", size=boiling_process["waiting"].size[0])
         m.row("adding_lactic_acid", size=boiling_process["adding_lactic_acid"].size[0])
-        m.row("pumping_off", size=boiling_process["pumping_off"].size[0])
-        m.row("pumping_off_pause", size=boiling_process["pumping_off_pause"].size[0])
-        m.row("pumping_off_2", size=boiling_process["pumping_off_2"].size[0])
+        m.row("pumping_off", size=boiling_process["pumping_off"]['1'].size[0])
+        m.row("pumping_off_pause", size=boiling_process["pumping_off"]['pause'].size[0])
+        m.row("pumping_off", size=boiling_process["pumping_off"]['2'].size[0])
     return m.root
 
 
