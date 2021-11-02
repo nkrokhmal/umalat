@@ -62,6 +62,13 @@ class SkuPlanClient:
                 writer, sheet_name=flask.current_app.config["SHEET_NAMES"]["remainings"]
             )
             writer.save()
+        wb = openpyxl.load_workbook(self.filepath)
+        ws_remainings = wb[flask.current_app.config["SHEET_NAMES"]["remainings"]]
+        for i in range(1, ws_remainings.max_column + 1):
+            cell_value = ws_remainings.cell(row=5, column=i).value
+            ws_remainings.cell(row=5, column=i).value = "".join(cell_value.splitlines()) if cell_value else ""
+
+        wb.save(self.filepath)
         self.wb = openpyxl.load_workbook(self.filepath)
 
     def _not_calc_remainings(self, sku_name):

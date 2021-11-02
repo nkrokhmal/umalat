@@ -55,13 +55,15 @@ def wrap_mascarpone_lines(schedule, with_cream_cheese=False):
             boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 2)).block)
             m.row("stub", size=0)
 
+        for i in range(3):
+            boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 2)).block)
+
     with code('Make mascarpone'):
         for mbg in schedule.iter(
             cls="mascarpone_boiling_group",
             boiling_group_dfs=lambda dfs: not dfs[0].iloc[0]["is_cream"],
         ):
             line_nums = mbg.props["line_nums"]
-
             for i, boiling in enumerate(mbg["boiling", True]):
                 frontend_boiling = wrap_frontend_mascarpone_boiling(boiling["boiling_process"])
                 push(
