@@ -49,6 +49,7 @@ def make_mascorpone_boiling(boiling_group_df, **props):
 
         return utils.delistify(boiling_technologies, single=True)
 
+
     bt = get_boiling_technology_from_boiling_model(boiling_model)
 
     with m.row("boiling_process"):
