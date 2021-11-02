@@ -6,8 +6,6 @@ from app.scheduler.parsing import *
 
 from utils_ak.block_tree import *
 
-
-
 def parse_schedule_file(wb_obj):
     df = load_cells_df(wb_obj, 'Расписание')
 

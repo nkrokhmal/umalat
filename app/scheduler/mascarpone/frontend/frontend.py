@@ -51,12 +51,10 @@ def wrap_mascarpone_lines(schedule, with_cream_cheese=False):
 
     with code('Init lines'):
         boiling_lines = []
-        for i in range(4):
-            boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 2)).block)
-            m.row("stub", size=0)
-
-        for i in range(3):
-            boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 2)).block)
+        for i in range(7):
+            boiling_line = m.block(f"boiling_line_{i}", size=(0, 2)).block
+            boiling_lines.append(boiling_line)
+            m.row("stub", size=0, boiling_line=boiling_line) # create  reference for upper boiling line in stub
 
     with code('Make mascarpone'):
         for mbg in schedule.iter(
@@ -142,6 +140,15 @@ def wrap_mascarpone_lines(schedule, with_cream_cheese=False):
                             continue
 
                     break
+
+    with code('Remove empty boiling lines and corresponding stubs'):
+        for boiling_line in list(boiling_lines):
+            if boiling_line.size[0] == 0:
+                boiling_line.detach_from_parent()
+
+            # remove stub
+            for stub in m.root.iter(cls='stub', boiling_line=boiling_line):
+                stub.detach_from_parent()
 
     return m.root
 
@@ -276,6 +283,7 @@ def wrap_shifts(shifts):
     m.block(shifts, push_func=add_push)
     return m.root
 
+
 def wrap_frontend(schedule, date=None):
     date = date or datetime.now()
 
@@ -291,18 +299,22 @@ def wrap_frontend(schedule, date=None):
     start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour and add half hour
     start_time = cast_time(start_t)
     m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
-    with m.block(push_func=add_push,
-                 x=(0, 2),
-                 axis=1,
+    with m.block(axis=1,
                  start_time=cast_time(start_t)):
         if schedule['shifts']:
             m.col(wrap_shifts(schedule['shifts']['meltings']))
         m.block(wrap_mascarpone_lines(schedule, with_cream_cheese=True))
+
+    m.block(wrap_header(date=date, start_time=start_time, header="График паковки"))
+
+    with m.block(axis=1,
+                 start_time=cast_time(start_t)):
         if schedule['shifts']:
             m.col(wrap_shifts(schedule['shifts']['packings']))
         m.block(make_packing_line(schedule))
         m.row("stub", size=0)
         m.block(wrap_cleanings_line(schedule))
-        if schedule['preparation']:
-            m.block(wrap_preparation(schedule), push_func=add_push)
+
+    if schedule['preparation']:
+        m.block(wrap_preparation(schedule), x=(0, 3), push_func=add_push)
     return m.root
