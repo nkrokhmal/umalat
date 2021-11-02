@@ -77,7 +77,8 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
 
 def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
     no_lunch_schedule = _make_schedule(boiling_plan_df, first_boiling_id, start_time)
-    if cast_time(no_lunch_schedule.y[0]) <= '00:12:30':
+    if cast_time(no_lunch_schedule.y[0]) <= '00:12:30' or len(no_lunch_schedule['boiling', True]) < 24:
+        # no lunch in these cases
         lunch_times = []
     else:
         lunch_times = []
