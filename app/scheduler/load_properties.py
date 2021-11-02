@@ -13,8 +13,9 @@ from app.scheduler.ricotta.parser import parse_properties as parse_properties_ri
 from app.scheduler.mascarpone.properties import (
     cast_properties as parse_schedule_mascarpone,
 )
-
-# from app.scheduler.mascarpone.parser import (parse_properties as parse_properties_mascarpone)
+from app.scheduler.mascarpone.parser import (
+    parse_properties as parse_properties_mascarpone,
+)
 
 from app.scheduler.milk_project.properties import (
     cast_properties as parse_schedule_milk_project,
@@ -41,7 +42,7 @@ SCHEDULE_PARSERS = {
 EXCEL_PARSERS = {
     "mozzarella": parse_properties_mozzarella,
     "ricotta": parse_properties_ricotta,
-    # "mascarpone": ,
+    "mascarpone": parse_properties_mascarpone,
     "milk_project": parse_properties_milk_project,
     "butter": parse_properties_butter,
     "adygea": parse_properties_adygea,
@@ -63,7 +64,7 @@ def load_properties(schedules, path=None, prefix=None):
         if department in schedules:
             properties[department] = SCHEDULE_PARSERS[department](schedules[department])
         else:
-            if department not in ["mascarpone"] and path and prefix:
+            if path and prefix:
                 fn = os.path.join(
                     path,
                     f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES[department]}.xlsx",
