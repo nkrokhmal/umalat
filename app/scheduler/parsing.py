@@ -103,6 +103,7 @@ def parse_block(
                     x=group[0]["x0"] - 5,  # subtract column header
                     boiling_id=boiling_id,
                     line_num=str(i),
+                    row_num=row_num,
                     group=group,
                     label=str(boiling_id),
                     push_func=add_push,
