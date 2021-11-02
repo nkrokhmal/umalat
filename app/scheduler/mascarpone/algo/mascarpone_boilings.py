@@ -58,9 +58,11 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         m.row("waiting", size=0)
         m.row("adding_lactic_acid", size=bt.adding_lactic_acid_time // 5)
         m.row("pumping_off", size=bt.pumping_off_time // 5)
+        m.row("pumping_off_pause", size=bt.pumping_off_pause_time // 5)
+        m.row("pumping_off_2", size=bt.pumping_off_2_time // 5)
 
     packing_process_start = (
-        m.root["boiling_process"].y[0]
+        m.root["boiling_process"]['pumping_off'].y[0]
         if not is_cream
         else m.root["boiling_process"]["pumping_off"].x[0] + 2
     )
