@@ -2,7 +2,9 @@ def _get_boiling_name(b):
     if b.props["is_cream"]:
         return "производство сливок"
     elif b.props["n"] == 0:
-        return "производство маскарпоне на линии/варка ({boiling_volume} литров)"
+        # return "производство маскарпоне на линии/варка ({boiling_volume} литров)"
+        # todo maybe: return number of litres
+        return "производство маскарпоне на линии/варка"
     else:
         return "производство маскарпоне на линии/produz. Mascarpone"
 
