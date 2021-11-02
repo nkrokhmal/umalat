@@ -5,7 +5,7 @@ from app.models import *
 def duplicate(l):
     if isinstance(l, list):
         if len(l) == 1:
-            return l * 2
+            return l * 3
         else:
             return l
     else:
@@ -35,7 +35,7 @@ def download_mascarpone():
             'Нагрев': json.dumps(duplicate([x.heating_time for x in sku.made_from_boilings[0].boiling_technologies])),
             'Молочная кислота': json.dumps(duplicate([x.adding_lactic_acid_time for x in sku.made_from_boilings[0].boiling_technologies])),
             'Сепарирование': json.dumps(duplicate([x.pumping_off_time for x in sku.made_from_boilings[0].boiling_technologies])),
-            'Вес': "[500,300]",
+            'Вес': "[500,300,600]",
             'Выход': json.dumps(duplicate([x.output_ton for x in sku.made_from_boilings[0].boiling_technologies])),
             'Коэффициент': sku.made_from_boilings[0].output_coeff,
             'Внесение ингредиентов': sku.made_from_boilings[0].boiling_technologies[0].ingredient_time,

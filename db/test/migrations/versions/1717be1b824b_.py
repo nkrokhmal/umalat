@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: c437ee44d582
+Revision ID: 1717be1b824b
 Revises: 
-Create Date: 2021-10-18 18:08:09.565185
+Create Date: 2021-11-02 22:03:51.561201
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c437ee44d582'
+revision = '1717be1b824b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -354,6 +354,7 @@ def upgrade():
     sa.Column('adding_lactic_acid_time', sa.Integer(), nullable=True),
     sa.Column('output_ton', sa.Integer(), nullable=True),
     sa.Column('pumping_off_time', sa.Integer(), nullable=True),
+    sa.Column('pumping_off_pause_time', sa.Integer(), nullable=True),
     sa.Column('ingredient_time', sa.Integer(), nullable=True),
     sa.Column('line_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),
