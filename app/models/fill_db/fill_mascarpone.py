@@ -26,7 +26,7 @@ def fill_fermentators():
     lines = db.session.query(MascarponeLine).all()
     mascarpone_line = [x for x in lines if x.name == line_name][0]
     for i, name in enumerate([
-        "Big", "Small", "Small", "Small", "Small", "Small", "Small",
+        "Big", "Small", "Small", "Small", "Huge", "Huge", "Huge",
     ]):
         fermentator = MascarponeSourdough(
             number=i+1,
@@ -51,6 +51,7 @@ def fill_boiling_technologies():
         "Вкусовая добавка",
         "Вес",
         "Выход",
+        "pumping_off_pause_time",
     ]
     bt_data = df[boiling_technologies_columns]
     bt_data["Наличие лактозы"] = bt_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
@@ -58,16 +59,18 @@ def fill_boiling_technologies():
     fermentators = db.session.query(MascarponeSourdough).all()
     big_fermentators = [x for x in fermentators if x.name == "Big"]
     small_fermentators = [x for x in fermentators if x.name == "Small"]
+    huge_fermentators = [x for x in fermentators if x.name == "Huge"]
     fermentators_dict = {
         0: big_fermentators,
         1: small_fermentators,
+        2: huge_fermentators,
     }
 
-    for column_name in ["Прием", "Нагрев", "Молочная кислота", "Сепарирование", "Вес", "Выход"]:
+    for column_name in ["Прием", "Нагрев", "Молочная кислота", "Сепарирование", "Вес", "pumping_off_pause_time", "Выход"]:
         bt_data[column_name] = bt_data[column_name].apply(lambda x: json.loads(x))
     bt_data = bt_data.to_dict("records")
     for bt in bt_data:
-        n = 1 if bt["Название форм фактора"] == "Сливки" else 2
+        n = 1 if bt["Название форм фактора"] == "Сливки" else 3
         for i in range(n):
             line_name = LineName.MASCARPONE
             technology = MascarponeBoilingTechnology(
@@ -82,6 +85,7 @@ def fill_boiling_technologies():
                 heating_time=bt["Нагрев"][i],
                 adding_lactic_acid_time=bt["Молочная кислота"][i],
                 pumping_off_time=bt["Сепарирование"][i],
+                pumping_off_pause_time=bt["pumping_off_pause_time"][i],
                 ingredient_time=bt["Внесение ингредиентов"],
                 weight=bt["Вес"][i],
                 output_ton=bt["Выход"][i],
@@ -112,7 +116,7 @@ def fill_boilings():
     b_data = b_data.to_dict("records")
     for b in b_data:
         bts_name = []
-        for i in range(2):
+        for i in range(3):
             line_name = LineName.MASCARPONE
             line_id = [x for x in lines if x.name == LineName.MASCARPONE][0].id
             bts_name += [
