@@ -7,4 +7,5 @@ from . import (
     params_boiling_technology,
     params_analysis_technology,
     download,
+    upload_schedule,
 )
