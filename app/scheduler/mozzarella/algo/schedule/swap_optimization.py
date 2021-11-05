@@ -123,6 +123,7 @@ def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs):
                 [v[1] for v in values]
             )
 
+
         swapped_schedule = make_schedule_basic(swapped_df, *args, **kwargs)
         swapped_score = calc_score(swapped_schedule)
         logger.debug("Got new score", score=score, swapped_score=swapped_score)
