@@ -20,23 +20,23 @@ def send_file(path, date, department):
     document = open(path, 'rb')
     tb.send_message(
         flask.current_app.config["TELEGRAM_CHAT_FILES_ID"],
-        f"ТЕСТЫ!!! Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode('utf-8')
+        f"Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode('utf-8')
     )
     tb.send_document(
         flask.current_app.config["TELEGRAM_CHAT_FILES_ID"],
         document
     )
-    # try:
-    #     document = open(path, 'rb')
-    #     tb.send_message(
-    #         DEPARTMENT_CHAT_ID[department],
-    #         f"Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode('utf-8')
-    #     )
-    #     tb.send_document(
-    #         DEPARTMENT_CHAT_ID[department],
-    #         document
-    #     )
-    # except:
-    #     pass
+    try:
+        document = open(path, 'rb')
+        tb.send_message(
+            DEPARTMENT_CHAT_ID[department],
+            f"Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode('utf-8')
+        )
+        tb.send_document(
+            DEPARTMENT_CHAT_ID[department],
+            document
+        )
+    except:
+        pass
 
 
