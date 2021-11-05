@@ -51,6 +51,8 @@ def fill_boiling_technologies():
         "Вкусовая добавка",
         "Вес",
         "Выход",
+        "pumping_off_pause_time",
+        "pumping_off_2_time",
     ]
     bt_data = df[boiling_technologies_columns]
     bt_data["Наличие лактозы"] = bt_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
@@ -63,7 +65,16 @@ def fill_boiling_technologies():
         1: small_fermentators,
     }
 
-    for column_name in ["Прием", "Нагрев", "Молочная кислота", "Сепарирование", "Вес", "Выход"]:
+    for column_name in [
+        "Прием",
+        "Нагрев",
+        "Молочная кислота",
+        "Сепарирование",
+        "Вес",
+        "pumping_off_pause_time",
+        "pumping_off_2_time",
+        "Выход"
+    ]:
         bt_data[column_name] = bt_data[column_name].apply(lambda x: json.loads(x))
     bt_data = bt_data.to_dict("records")
     for bt in bt_data:
@@ -82,6 +93,8 @@ def fill_boiling_technologies():
                 heating_time=bt["Нагрев"][i],
                 adding_lactic_acid_time=bt["Молочная кислота"][i],
                 pumping_off_time=bt["Сепарирование"][i],
+                pumping_off_2_time=bt["pumping_off_2_time"][i],
+                pumping_off_pause_time=bt["pumping_off_pause_time"][i],
                 ingredient_time=bt["Внесение ингредиентов"],
                 weight=bt["Вес"][i],
                 output_ton=bt["Выход"][i],

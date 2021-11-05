@@ -6,4 +6,5 @@ from . import (
     params_sku,
     schedule,
     download,
+    upload_schedule,
 )

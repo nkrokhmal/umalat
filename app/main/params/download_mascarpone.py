@@ -37,6 +37,8 @@ def download_mascarpone():
             'Сепарирование': json.dumps(duplicate([x.pumping_off_time for x in sku.made_from_boilings[0].boiling_technologies])),
             'Вес': "[500,300]",
             'Выход': json.dumps(duplicate([x.output_ton for x in sku.made_from_boilings[0].boiling_technologies])),
+            'pumping_off_pause_time': json.dumps(duplicate([x.pumping_off_pause_time for x in sku.made_from_boilings[0].boiling_technologies])),
+            'pumping_off_2_time': json.dumps(duplicate([x.pumping_off_2_time for x in sku.made_from_boilings[0].boiling_technologies])),
             'Коэффициент': sku.made_from_boilings[0].output_coeff,
             'Внесение ингредиентов': sku.made_from_boilings[0].boiling_technologies[0].ingredient_time,
             'Kод': sku.code,

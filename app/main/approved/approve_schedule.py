@@ -101,6 +101,23 @@ def approve_ricotta():
     return flask.redirect(flask.url_for(".ricotta_schedule"))
 
 
+@main.route("/approve_upload_ricotta", methods=["GET", "POST"])
+@flask_login.login_required
+def approve_upload_ricotta():
+    date = flask.request.form.get("date")
+    file_name = flask.request.form.get("file_name")
+    pickle_file_name = f"{file_name.split('.')[0]}.pickle"
+
+    path = move_to_approved(date=date, file_name=file_name)
+    delete_from_approved_pickle(date=date, file_name=pickle_file_name)
+
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Рикотта")
+
+    flask.flash("Расписание успешно утверждено", "success")
+    return flask.redirect(flask.url_for(".ricotta_upload_schedule"))
+
+
 @main.route("/approve_mascarpone", methods=["GET", "POST"])
 @flask_login.login_required
 def approve_mascarpone():
@@ -116,6 +133,23 @@ def approve_mascarpone():
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mascarpone_schedule"))
+
+
+@main.route("/approve_upload_mascarpone", methods=["GET", "POST"])
+@flask_login.login_required
+def approve_upload_mascarpone():
+    date = flask.request.form.get("date")
+    file_name = flask.request.form.get("file_name")
+    pickle_file_name = f"{file_name.split('.')[0]}.pickle"
+
+    path = move_to_approved(date=date, file_name=file_name)
+    delete_from_approved_pickle(date=date, file_name=pickle_file_name)
+
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
+
+    flask.flash("Расписание успешно утверждено", "success")
+    return flask.redirect(flask.url_for(".mascarpone_upload_schedule"))
 
 
 @main.route("/approve_butter", methods=["GET", "POST"])
@@ -135,6 +169,23 @@ def approve_butter():
     return flask.redirect(flask.url_for(".butter_schedule"))
 
 
+@main.route("/approve_upload_butter", methods=["GET", "POST"])
+@flask_login.login_required
+def approve_upload_butter():
+    date = flask.request.form.get("date")
+    file_name = flask.request.form.get("file_name")
+    pickle_file_name = f"{file_name.split('.')[0]}.pickle"
+
+    path = move_to_approved(date=date, file_name=file_name)
+    delete_from_approved_pickle(date=date, file_name=pickle_file_name)
+
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Масло")
+
+    flask.flash("Расписание успешно утверждено", "success")
+    return flask.redirect(flask.url_for(".butter_upload_schedule"))
+
+
 @main.route("/approve_milk_project", methods=["GET", "POST"])
 @flask_login.login_required
 def approve_milk_project():
@@ -152,18 +203,20 @@ def approve_milk_project():
     return flask.redirect(flask.url_for(".milk_project_schedule"))
 
 
-@main.route("/approve_adygea", methods=["GET", "POST"])
+@main.route("/approve_upload_milk_project", methods=["GET", "POST"])
 @flask_login.login_required
-def approve_adygea():
+def approve_upload_milk_project():
     date = flask.request.form.get("date")
     file_name = flask.request.form.get("file_name")
     pickle_file_name = f"{file_name.split('.')[0]}.pickle"
 
     path = move_to_approved(date=date, file_name=file_name)
-    _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
+    delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
     from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Адыгейский")
+    send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
 
     flask.flash("Расписание успешно утверждено", "success")
-    return flask.redirect(flask.url_for(".adygea_schedule"))
+    return flask.redirect(flask.url_for(".milk_project_upload_schedule"))
+
+
