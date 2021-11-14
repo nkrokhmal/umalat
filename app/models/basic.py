@@ -2,7 +2,7 @@ import binascii
 import hashlib
 
 from flask_login import UserMixin
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, or_
 from sqlalchemy.orm import backref
 
 from app.imports.runtime import *
@@ -187,7 +187,7 @@ class Group(mdb.Model):
     name = mdb.Column(mdb.String)
     short_name = mdb.Column(mdb.String)
 
-    skus = mdb.relationship("SKU", backref="group", lazy='subquery',)
+    skus = mdb.relationship("SKU", backref="group", lazy='subquery', )
 
 
 parent_child = mdb.Table(
@@ -253,7 +253,7 @@ class Boiling(mdb.Model):
         "BoilingTechnology", backref=backref("boiling"), lazy='subquery',
     )
 
-    skus = mdb.relationship("SKU", secondary=sku_boiling, backref="made_from_boilings", lazy='subquery',)
+    skus = mdb.relationship("SKU", secondary=sku_boiling, backref="made_from_boilings", lazy='subquery', )
 
     type = mdb.Column(mdb.String)
     __mapper_args__ = {"polymorphic_identity": "boilings", "polymorphic_on": type}
@@ -315,6 +315,7 @@ class BatchNumber(mdb.Model):
     datetime = mdb.Column(mdb.Date)
     beg_number = mdb.Column(mdb.Integer)
     end_number = mdb.Column(mdb.Integer)
+    group = mdb.Column(mdb.String)
     department_id = mdb.Column(
         mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True
     )
@@ -351,11 +352,12 @@ class BatchNumber(mdb.Model):
             return 0
 
     @staticmethod
-    def last_batch_number(date, department_name):
+    def last_batch_number(date, department_name, group=None):
         department = Department.get_by_name(department_name)
         last_batch = (
             mdb.session.query(BatchNumber)
             .filter(BatchNumber.department_id == department.id)
+            .filter(or_(group is None, BatchNumber.group == group))
             .filter(func.DATE(BatchNumber.datetime) < date.date())
             .filter(extract("month", BatchNumber.datetime) == date.month)
             .filter(extract("year", BatchNumber.datetime) == date.year)
@@ -368,10 +370,11 @@ class BatchNumber(mdb.Model):
             return 0
 
     @staticmethod
-    def get_batch_by_date(date, department_id):
+    def get_batch_by_date(date, department_id, group=None):
         return (
             mdb.session.query(BatchNumber)
-            .filter(func.DATE(BatchNumber.datetime) == date.date())
-            .filter(BatchNumber.department_id == department_id)
-            .first()
+                .filter(func.DATE(BatchNumber.datetime) == date.date())
+                .filter(BatchNumber.department_id == department_id)
+                .filter(or_(group is None, BatchNumber.group == group))
+                .first()
         )
