@@ -282,9 +282,26 @@ class BoilingPlanToSchedule:
                          shift_num=i
                      ))
 
-    def _make_boilings(self, boiling_plan_df, first_batch_id=0):
-        boiling_plan_df["batch_id"] += first_batch_id - 1
+    def _make_boilings(self, boiling_plan_df,
+                       first_mascarpone_batch_id=1,
+                       first_cream_batch_id=10,
+                       first_robiola_batch_id=100,
+                       first_cream_cheese_batch_id=1000,
+                       first_cottage_cheese_batch_id=10000
+                       ):
 
+
+        with code('Set proper batch ids'):
+            first_batch_ids = {
+                'mascarpone': first_mascarpone_batch_id,
+                'robiola': first_robiola_batch_id,
+                'cream': first_cream_batch_id,
+                'cottage_cheese': first_cottage_cheese_batch_id,
+                'cream_cheese': first_cream_cheese_batch_id,
+            }
+            for type, grp in pd.DataFrame(boiling_plan_df).groupby('full_type'): # make a copy and iterate
+                for i, (batch_id, grp1) in enumerate(grp.groupby('batch_id')):
+                    boiling_plan_df.loc[grp1.index, 'batch_id'] = first_batch_ids[type] + i
         columns = boiling_plan_df.columns
 
         boiling_plan_df["tag"] = (
@@ -301,13 +318,36 @@ class BoilingPlanToSchedule:
             elif grp.iloc[0]["type"] == "cream_cheese":
                 self._make_cream_cheese(grp)
 
-    def __call__(self, boiling_plan_df, first_batch_id=0, start_time='07:00'):
+    def __call__(self, boiling_plan_df,
+                 first_mascarpone_batch_id=1,
+                 first_cream_batch_id=1,
+                 first_robiola_batch_id=1,
+                 first_cream_cheese_batch_id=1,
+                 first_cottage_cheese_batch_id=1,
+                 start_time='07:00'):
         self._make_preparation()
-        self._make_boilings(boiling_plan_df, first_batch_id)
+        self._make_boilings(boiling_plan_df,
+                            first_mascarpone_batch_id,
+                            first_cream_batch_id,
+                            first_robiola_batch_id,
+                            first_cream_cheese_batch_id,
+                            first_cottage_cheese_batch_id)
         self._make_shifts(start_time)
         self.m.root.props.update(x=(cast_t(start_time), 0))
         return self.m.root
 
 
-def make_schedule(boiling_plan_df, start_batch_id=0, start_time='07:00'):
-    return BoilingPlanToSchedule()(boiling_plan_df, start_batch_id, start_time=start_time)
+def make_schedule(boiling_plan_df,
+                  first_mascarpone_batch_id,
+                  first_cream_batch_id,
+                  first_robiola_batch_id,
+                  first_cream_cheese_batch_id,
+                  first_cottage_cheese_batch_id,
+                  start_time='07:00'):
+    return BoilingPlanToSchedule()(boiling_plan_df,
+                                   first_mascarpone_batch_id,
+                                   first_cream_batch_id,
+                                   first_robiola_batch_id,
+                                   first_cream_cheese_batch_id,
+                                   first_cottage_cheese_batch_id,
+                                   start_time=start_time)

@@ -2,7 +2,9 @@ def _get_boiling_name(b):
     if b.props["is_cream"]:
         return "производство сливок"
     elif b.props["n"] == 0:
-        return "производство маскарпоне на линии/варка ({boiling_volume} литров)"
+        # return "производство маскарпоне на линии/варка ({boiling_volume} литров)"
+        # todo maybe: return number of litres
+        return "производство маскарпоне на линии/варка"
     else:
         return "производство маскарпоне на линии/produz. Mascarpone"
 
@@ -21,6 +23,9 @@ STYLE = {
         if b.props["is_cream"]
         else "сепарирование",
     },  # blue
+    "pumping_off_pause": {
+        "color": "grey",
+    },
     "separation": {"color": "#00B0F0", "text": "сепарирование"},  # blue
     "packing_num": {"color": "#92D050", "text": "{batch_id}"},  # light-green
     "packing": {"color": "#C0504D", "text": "фасовка"},  # brown

@@ -9,7 +9,9 @@ def make_boiling(boiling_group_df):
     sample_row = boiling_group_df.iloc[0]
     boiling_model = sample_row['boiling']
 
-    m = BlockMaker("boiling", boiling_model=boiling_model)
+    # update 2021.10.21
+    m = BlockMaker("boiling", boiling_model=boiling_model, boiling_model_name=boiling_model.name)
+
     bt = utils.delistify(boiling_model.boiling_technologies, single=True) # there is only one boiling technology is for every boiling modelt
 
     m.row('mixture_collecting', size=bt.mixture_collecting_time // 5)

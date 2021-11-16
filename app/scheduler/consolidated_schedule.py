@@ -48,7 +48,7 @@ def run_consolidated(
                     if sheet_name != "Расписание":
                         wb.remove(wb[sheet_name])
 
-            df = load_cells_df(wb)
+            df = load_cells_df(wb, "Расписание")
             cur_depth += df["y1"].max()
 
         if not wb:

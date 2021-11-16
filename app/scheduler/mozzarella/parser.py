@@ -1,111 +1,24 @@
 # fmt: off
 from app.imports.runtime import *
-
 from app.scheduler.mozzarella import *
 from app.scheduler.mozzarella.properties import *
+from app.scheduler.parsing import *
 
 from utils_ak.block_tree import *
 
 
-TIME_INDEX_ROW_NUMS = [1, 23]
-
-
-def _group_intervals(intervals, max_length=None, interval_func=None):
-    if not interval_func:
-        interval_func = lambda interval: [interval[0], interval[1]]
-    groups = []
-
-    intervals = list(sorted(intervals, key=lambda interval: interval_func(interval)[0]))
-
-    cur_group = []
-    for interval in intervals:
-        if not cur_group:
-            cur_group.append(interval)
-            continue
-
-        if interval_func(cur_group[-1])[-1] == interval_func(interval)[0]:
-            # subsequent
-            cur_group.append(interval)
-            if max_length and len(cur_group) == max_length:
-                groups.append(cur_group)
-                cur_group = []
-        else:
-            # gap between
-            groups.append(cur_group)
-            cur_group = [interval]
-
-    if cur_group:
-        groups.append(cur_group)
-    return groups
-
-
-def test_group_intervals():
-    intervals = [[1, 2], [4, 5], [2, 4], [10, 11]]
-    intervals = list(sorted(intervals, key=lambda interval: interval[0]))
-    assert _group_intervals(intervals, max_length=2) == [
-        [[1, 2], [2, 4]],
-        [[4, 5]],
-        [[10, 11]],
-    ]
-
-
-def load_cells_df(wb_obj):
-    wb = utils.cast_workbook(wb_obj)
-
-    with code("Get merged cells dataframe"):
-        ws = wb["Расписание"]
-        df = pd.DataFrame()
-        df["cell"] = ws.merged_cells.ranges
-
-        bound_names = ("x0", "x1", "y0", "y1")
-
-        df["bounds"] = df["cell"].apply(lambda cell: cell.bounds)
-        for i in range(4):
-            df[bound_names[i]] = df["bounds"].apply(lambda bound: bound[i])
-
-        df["y0"] += 1
-        df["y1"] += 1
-        df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
-
-        df = df.sort_values(by=["x1", "x0", "y1", "y0"])
-    return df
 
 def parse_schedule_file(wb_obj):
-    df = load_cells_df(wb_obj)
+    df = load_cells_df(wb_obj, 'Расписание')
 
     m = BlockMaker("root")
 
-    def parse_block(label, element_label, rows, start_time, length=2):
-        with m.row(label, x=start_time, push_func=add_push):
-            for i, row_num in enumerate(rows):
-                df1 = df[(df["x1"] == row_num) & (df["x0"] >= 4)] # filter column header
-                groups = _group_intervals(
-                    [row for i, row in df1.iterrows()],
-                    max_length=length,
-                    interval_func=lambda row: [row["x0"], row["y0"]],
-                )
+    with code('Find start times'):
+        time_index_row_nums = df[df['label'].astype(str).str.contains('График')]['x1'].unique()
 
-                for group in groups:
-                    try:
-                        boiling_id = int(group[0]["label"].split(" ")[0])
-                    except Exception as e:
-                        boiling_id = None
-
-                    m.row(
-                        element_label,
-                        size=group[-1]["y0"] - group[0]["x0"],
-                        x=group[0]["x0"] - 5,  # subtract column header
-                        boiling_id=boiling_id,
-                        line_num=str(i),
-                        group=group,
-                        label=str(boiling_id),
-                        push_func=add_push,
-                    )
-
-    with code("fetch start times"):
         start_times = []
 
-        for row_num in TIME_INDEX_ROW_NUMS:
+        for row_num in time_index_row_nums:
             hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
             if hour >= 12:
                 # yesterday
@@ -166,16 +79,15 @@ def parse_schedule_file(wb_obj):
         else:
             split_rows += [None, None]
 
-
-    parse_block(
+    parse_block(m, df,
         "boilings",
         "boiling",
         [split_rows[0] + i for i in [0, 4, 12, 16]],
         start_times[0],
     )
-    parse_block("cleanings", "cleaning", [split_rows[0] + 8], start_times[0])
+    parse_block(m, df, "cleanings", "cleaning", [split_rows[0] + 8], start_times[0])
     if water_melting_headers:
-        parse_block("water_meltings", "melting", [split_rows[1] + 1], start_times[1])
+        parse_block(m, df, "water_meltings", "melting", [split_rows[1] + 1], start_times[1])
 
         # todo maybe: make properly
         with code('meta info to water meltings'):
@@ -207,14 +119,14 @@ def parse_schedule_file(wb_obj):
                     cooling_length = row['y0'] - melting.x[0]
                     melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
 
-        parse_block("water_packings", "packing", [split_rows[1] + 7], start_times[1])
+        parse_block(m, df, "water_packings", "packing", [split_rows[1] + 7], start_times[1])
 
     if salt_melting_headers:
         with code("Find rows for salt melting lines"):
             last_melting_row = df[df["label"] == "посолка"]["x1"].max()
             salt_melting_rows = list(range(split_rows[3], last_melting_row, 4))
 
-        parse_block("salt_meltings", "melting", salt_melting_rows, start_times[1])
+        parse_block(m, df, "salt_meltings", "melting", salt_melting_rows, start_times[1])
 
         # todo maybe: make properly
         with code("add salt forming info to meltings"):
@@ -239,7 +151,7 @@ def parse_schedule_file(wb_obj):
                                      melting_end=row["y0"],
                                      melting_end_with_cooling=melting.y[0])
 
-        parse_block(
+        parse_block(m, df,
             "salt_packings",
             "packing",
             [split_rows[4], split_rows[4] + 6],
@@ -270,10 +182,10 @@ def fill_properties(parsed_schedule, df_bp):
     for block in list(parsed_schedule.iter(
         cls=lambda cls: cls in ["boiling", "melting", "packing"]
     )):
-        # todo later: make that should not happen and then del
         with code('remove little blocks'):
             if 'boiling_id' not in block.props.all() or not is_int(block.props['boiling_id']):
-                logger.info('Removing small block', block=block)
+                # NOTE: SHOULD NOT HAPPEN IN NEWER FILES SINCE update 2021.10.21 (# update 2021.10.21)
+                logger.error('Removing small block', block=block)
                 block.detach_from_parent()
                 continue
 
@@ -448,5 +360,6 @@ def parse_properties(fn):
 
 
 if __name__ == "__main__":
-    fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
+    # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
+    fn = '/Users/marklidenberg/Downloads/test.xlsx'
     print(dict(parse_properties(fn)))

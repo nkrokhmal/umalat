@@ -389,8 +389,13 @@ def wrap_packing_block(packing_block, boiling_id):
         if packing_block.size[0] >= 4:
             m.row("packing_label", size=3)
             m.row("packing_name", size=packing_block.size[0] - 3)
-        else:
-            m.row("packing_name", size=packing_block.size[0])
+        elif packing_block.size[0] >= 2:
+            # update 2021.10.21
+            m.row("packing_label", size=1)
+            m.row("packing_name", size=packing_block.size[0] - 1)
+        elif packing_block.size[0] == 1:
+            # update 2021.10.21
+            m.row("packing_label", size=1)
 
     with m.block():
         m.row("packing_brand", size=packing_block.size[0])

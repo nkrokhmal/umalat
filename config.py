@@ -40,7 +40,9 @@ class BaseClass:
     )
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
     TEMPLATE_ADYGEA_BOILING_PLAN = "app/data/static/templates/constructor_adygea.xlsx"
-    TEMPLATE_SCHEDULE_PLAN_DEPARTMENT = "app/data/static/templates/constructor_schedule_department.xlsx"
+    TEMPLATE_SCHEDULE_PLAN_DEPARTMENT = (
+        "app/data/static/templates/constructor_schedule_department.xlsx"
+    )
 
     IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:
@@ -124,6 +126,15 @@ class BaseClass:
         "milk_project": "милкпроджект",
         "butter": "масло",
         "adygea": "адыгейский",
+        "contour_cleanings": "контурные мойки",
+        "ricotta": "рикотта",
+    }
+    DEPARTMENT_ROOT_NAMES = {
+        "mozzarella": "моцарелла",
+        "mascarpone": "маскарпоне",
+        "milk_project": "милкпроджект",
+        "butter": "масло",
+        "adygea": "милкпроджект",
         "contour_cleanings": "контурные мойки",
         "ricotta": "рикотта",
     }

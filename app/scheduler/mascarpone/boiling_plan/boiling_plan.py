@@ -116,4 +116,24 @@ def read_boiling_plan(wb_obj, as_boilings=True):
             new_grp["boiling_id"] += values[-1]["boiling_id"] + 1
         values += new_grp.to_dict(orient="records")
 
-    return pd.DataFrame(values)
+    df = pd.DataFrame(values)
+
+
+    with code("Get type"):
+        def get_type(name):
+            if 'сливки' in name.lower():
+                return 'cream'
+            elif 'кремчиз' in name.lower():
+                return 'cream_cheese'
+            elif 'робиола' in name.lower():
+                return 'robiola'
+            elif 'творожный' in name.lower():
+                return 'cottage_cheese'
+            elif 'маскарпоне' in name.lower():
+                return 'mascarpone'
+            else:
+                raise Exception(
+                    'Неизвестный тип максарпоне. В названии должен присутствовать один из типов: Сливки, Кремчиз, Робиола, Творожный, Маскарпоне')
+
+        df['full_type'] = df['sku'].apply(lambda sku: get_type(sku.name))
+    return df

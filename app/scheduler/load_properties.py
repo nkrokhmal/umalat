@@ -8,16 +8,29 @@ from app.scheduler.mozzarella.parser import (
 
 
 from app.scheduler.ricotta.properties import cast_properties as parse_schedule_ricotta
+from app.scheduler.ricotta.parser import parse_properties as parse_properties_ricotta
+
 from app.scheduler.mascarpone.properties import (
     cast_properties as parse_schedule_mascarpone,
 )
+from app.scheduler.mascarpone.parser import (
+    parse_properties as parse_properties_mascarpone,
+)
+
 from app.scheduler.milk_project.properties import (
     cast_properties as parse_schedule_milk_project,
 )
-from app.scheduler.butter.properties import cast_properties as parse_schedule_butter
-from app.scheduler.adygea.properties import cast_properties as parse_schedule_adygea
+from app.scheduler.milk_project.parser import (
+    parse_properties as parse_properties_milk_project,
+)
 
-PARSERS = {
+from app.scheduler.butter.properties import cast_properties as parse_schedule_butter
+from app.scheduler.butter.parser import parse_properties as parse_properties_butter
+
+from app.scheduler.adygea.properties import cast_properties as parse_schedule_adygea
+from app.scheduler.adygea.parser import parse_properties as parse_properties_adygea
+
+SCHEDULE_PARSERS = {
     "mozzarella": parse_schedule_mozzarella,
     "ricotta": parse_schedule_ricotta,
     "mascarpone": parse_schedule_mascarpone,
@@ -26,8 +39,18 @@ PARSERS = {
     "adygea": parse_schedule_adygea,
 }
 
+EXCEL_PARSERS = {
+    "mozzarella": parse_properties_mozzarella,
+    "ricotta": parse_properties_ricotta,
+    "mascarpone": parse_properties_mascarpone,
+    "milk_project": parse_properties_milk_project,
+    "butter": parse_properties_butter,
+    "adygea": parse_properties_adygea,
+}
+
 
 def load_properties(schedules, path=None, prefix=None):
+    # NOTE: RETURN BLANK PROPERTIES IF NOT PRESENT
     properties = {}
 
     for department in [
@@ -39,16 +62,19 @@ def load_properties(schedules, path=None, prefix=None):
         "adygea",
     ]:
         if department in schedules:
-            properties[department] = PARSERS[department](schedules[department])
+            properties[department] = SCHEDULE_PARSERS[department](schedules[department])
         else:
-            if department == "mozzarella" and path and prefix:
-                fn = os.path.join(path, f"{prefix} Расписание моцарелла.xlsx")
+            if path and prefix:
+                fn = os.path.join(
+                    path,
+                    f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES[department]}.xlsx",
+                )
                 if os.path.exists(fn):
-                    properties["mozzarella"] = parse_properties_mozzarella(fn)
+                    properties[department] = EXCEL_PARSERS[department](fn)
                 else:
-                    properties[department] = PARSERS[department]()
+                    properties[department] = SCHEDULE_PARSERS[department]()
             else:
-                properties[department] = PARSERS[department]()
+                properties[department] = SCHEDULE_PARSERS[department]()
     return properties
 
 
@@ -74,3 +100,17 @@ def assert_properties_presence(
                     f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}",
                     "warning",
                 )
+
+
+def test_load_properties():
+    print(
+        load_properties(
+            schedules={},
+            path="/Users/marklidenberg/Downloads/Telegram Desktop/",
+            prefix="2021-09-03",
+        )
+    )
+
+
+if __name__ == "__main__":
+    test_load_properties()

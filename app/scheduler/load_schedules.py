@@ -4,6 +4,7 @@ import flask
 
 
 def load_schedules(path, prefix, departments=None):
+    # NOTE: DOES NOT RETURN DEPARTMENT IF NOT PRESENT
     schedules = {}
     departments = departments or []
 
