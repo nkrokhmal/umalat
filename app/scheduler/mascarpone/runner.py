@@ -9,7 +9,11 @@ def run_mascarpone(
     schedule=None,
     open_file=False,
     start_time=None,
-    start_batch_id=1,
+    first_mascarpone_batch_id=1,
+    first_cream_batch_id=1,
+    first_robiola_batch_id=1,
+    first_cream_cheese_batch_id=1,
+    first_cottage_cheese_batch_id=1,
     path="outputs/",
     prefix="",
 ):
@@ -19,7 +23,13 @@ def run_mascarpone(
 
     if not schedule:
         schedule = make_schedule(
-            boiling_plan_df, start_time=start_time, start_batch_id=start_batch_id
+            boiling_plan_df,
+            first_mascarpone_batch_id,
+            first_cream_batch_id,
+            first_robiola_batch_id,
+            first_cream_cheese_batch_id,
+            first_cottage_cheese_batch_id,
+            start_time=start_time
         )
 
     try:
