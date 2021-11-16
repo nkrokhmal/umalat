@@ -16,6 +16,7 @@ def make_schedule_basic(
 ):
     boiling_plan_df = cast_boiling_plan(boiling_plan_obj)
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
+    start_times = dict(start_times)
 
     with code("Get start configuration"):
         if not start_configuration:
@@ -55,6 +56,6 @@ def make_schedule_basic(
             cleanings=cleanings,
             start_times=start_times,
             start_configuration=start_configuration,
-            date=date
+            date=date,
         )
     return schedule
