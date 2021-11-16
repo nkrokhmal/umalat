@@ -337,5 +337,17 @@ class BoilingPlanToSchedule:
         return self.m.root
 
 
-def make_schedule(boiling_plan_df, start_batch_id=0, start_time='07:00'):
-    return BoilingPlanToSchedule()(boiling_plan_df, start_batch_id, start_time=start_time)
+def make_schedule(boiling_plan_df,
+                  first_mascarpone_batch_id,
+                  first_cream_batch_id,
+                  first_robiola_batch_id,
+                  first_cream_cheese_batch_id,
+                  first_cottage_cheese_batch_id,
+                  start_time='07:00'):
+    return BoilingPlanToSchedule()(boiling_plan_df,
+                                   first_mascarpone_batch_id,
+                                   first_cream_batch_id,
+                                   first_robiola_batch_id,
+                                   first_cream_cheese_batch_id,
+                                   first_cottage_cheese_batch_id,
+                                   start_time=start_time)

@@ -33,14 +33,13 @@ def mascarpone_schedule():
 
         # Маскарпоне, кремчиз, робиолла, творожный, сливки
         mascarpone_batch_number = form.mascarpone_batch_number.data
-        cream_cheese_batch_number = form.cream_cheese_batch_number.data
-        robiola_batch_number = form.robiola_batch_number.data
-        cottage_cheese_batch_number = form.cottage_cheese_batch_number.data
         cream_batch_number = form.cream_batch_number.data
+        robiola_batch_number = form.robiola_batch_number.data
+        cream_cheese_batch_number = form.cream_cheese_batch_number.data
+        cottage_cheese_batch_number = form.cottage_cheese_batch_number.data
 
-        # todo: refactor
+        # todo next: make properly @nkrokhmal
         batch_number = mascarpone_batch_number
-
 
         data_dir = os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
@@ -72,7 +71,12 @@ def mascarpone_schedule():
                     group=group,
                 )
 
-        schedule = make_schedule(boiling_plan_df, batch_number, start_time=beg_time)
+        schedule = make_schedule(boiling_plan_df,
+                                 mascarpone_batch_number,
+                                 cream_batch_number,
+                                 robiola_batch_number,
+                                 cream_cheese_batch_number,
+                                 cottage_cheese_batch_number, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)
         schedule_template = openpyxl.load_workbook(
             filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
