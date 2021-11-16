@@ -9,7 +9,6 @@ from utils_ak.block_tree import *
 
 def wrap_frontend_mascarpone_boiling(boiling_process):
     is_cream = boiling_process.props["boiling_group_dfs"][0].iloc[0]["is_cream"]
-
     m = BlockMaker(
         "boiling",
         default_row_width=1,
