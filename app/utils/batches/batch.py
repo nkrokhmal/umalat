@@ -2,11 +2,11 @@ from app.imports.runtime import *
 from app.models import BatchNumber, Department
 
 
-def add_batch(date, department_name, beg_number, end_number):
+def add_batch(date, department_name, beg_number, end_number, group=None):
     mozzarella_department = (
         db.session.query(Department).filter(Department.name == department_name).first()
     )
-    batch = BatchNumber.get_batch_by_date(date, mozzarella_department.id)
+    batch = BatchNumber.get_batch_by_date(date, mozzarella_department.id, group)
 
     if batch is not None:
         batch.beg_number = beg_number
@@ -15,6 +15,7 @@ def add_batch(date, department_name, beg_number, end_number):
         batch = BatchNumber(
             datetime=date,
             department_id=mozzarella_department.id,
+            group=group,
             beg_number=beg_number,
             end_number=end_number,
         )

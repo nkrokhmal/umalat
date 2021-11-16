@@ -7,6 +7,12 @@ from wtforms.validators import Required, Optional
 from app.models import *
 
 
+class UploadForm(FlaskForm):
+    validators = [FileRequired(message="Отсутствует файл!")]
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    input_file = FileField("", validators=validators)
+
+
 class BoilingPlanForm(FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
     input_file = FileField(

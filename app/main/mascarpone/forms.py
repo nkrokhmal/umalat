@@ -8,6 +8,12 @@ from wtforms.validators import Required, Optional
 from app.models import *
 
 
+class UploadForm(FlaskForm):
+    validators = [FileRequired(message="Отсутствует файл!")]
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    input_file = FileField("", validators=validators)
+
+
 class BoilingPlanForm(FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
     input_file = FileField(
@@ -129,9 +135,23 @@ class CreamCheeseBoilingTechnologyForm(FlaskForm):
 class ScheduleForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
     input_file = FileField("", validators=validators)
-    batch_number = IntegerField(
+
+    mascarpone_batch_number = IntegerField(
         "Введите номер первой партии в текущем дне", validators=[Optional()]
     )
+    cream_cheese_batch_number = IntegerField(
+        "Введите номер первой партии в текущем дне", validators=[Optional()]
+    )
+    robiola_batch_number = IntegerField(
+        "Введите номер первой партии в текущем дне", validators=[Optional()]
+    )
+    cottage_cheese_batch_number = IntegerField(
+        "Введите номер первой партии в текущем дне", validators=[Optional()]
+    )
+    cream_batch_number = IntegerField(
+        "Введите номер первой партии в текущем дне", validators=[Optional()]
+    )
+
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
     beg_time = TimeField(
         'Начало первой подачи"',

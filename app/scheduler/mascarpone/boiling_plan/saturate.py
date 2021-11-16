@@ -19,6 +19,7 @@ def saturate_boiling_plan(boiling_plan_df):
     df["sourdoughs"] = df["sourdoughs"].apply(format_sourdoughs)
 
     df["sku_cls_name"] = df["sku"].apply(lambda sku: str(sku.__class__))
+    df['sku_name'] = df['sku'].apply(lambda sku: sku.name)
 
     def get_type(cls_name):
         if "Mascarpone" in cls_name:
