@@ -21,7 +21,11 @@ def test_mascarpone_post_schedule(client):
         url = url_for("main.mascarpone_schedule", _external=False)
         data = {
             "date": "2021-01-01",
-            "batch_number": 1,
+            "mascarpone_batch_number": 1,
+            "cream_cheese_batch_number": 1,
+            "robiola_batch_number": 1,
+            "cottage_cheese_batch_number": 1,
+            "cream_batch_number": 1,
             "beg_time": "07:00",
             "submit": "submit"
         }
