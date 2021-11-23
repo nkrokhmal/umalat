@@ -47,13 +47,17 @@ def parse_schedule_file(wb_obj):
         length=100)
 
     with code('Find fourth_boiling_group_adding_lactic_acid_time'):
-        # find first label
-        first_label = min(int(boiling.props['label']) for boiling in m.root['boilings']['boiling', True])
-        last_label = max(int(boiling.props['label']) for boiling in m.root['boilings']['boiling', True])
+        values = [[boiling, boiling.props['label'], boiling.x[0]] for boiling in m.root['boilings']['boiling', True]]
+        df1 = pd.DataFrame(values, columns=['boiling', 'label', 'start'])
+        df1 = df1.sort_values(by='start').reset_index(drop=True)
+        df1 = df1.drop_duplicates(subset='label', keep='first')
 
-        # find fourth label
-        fourth_or_last_label = min(first_label + 3, last_label)
-        last_fourth_or_last_boiling = max([boiling for boiling in m.root['boilings']['boiling', True] if int(boiling.props['label']) == fourth_or_last_label], key=lambda boiling: boiling.x[0])
+        if len(df1['label'].unique()) < 4:
+            fourth_or_last_label = df1.iloc[-1]['label']
+        else:
+            fourth_or_last_label = df1.iloc[3]['label']
+
+        last_fourth_or_last_boiling = max([boiling for boiling in m.root['boilings']['boiling', True] if int(boiling.props['label']) == int(fourth_or_last_label)], key=lambda boiling: boiling.x[0])
         # find adding_lactic_acid block (with 4 number on it)
         blocks_df = df[(df['x1'] == int(last_fourth_or_last_boiling.props['row_num']) + 1) & (df['label'] == '4')]
         blocks_df = blocks_df[blocks_df['x0'] + cast_t(start_times[0]) >= last_fourth_or_last_boiling.x[0]]
@@ -80,4 +84,5 @@ def parse_properties(fn):
 if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
     fn = '/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/by_department/mascarpone/Расписание маскарпоне 1.xlsx'
+    # fn = '/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/by_department/mascarpone/Расписание маскарпоне 4.xlsx'
     print(dict(parse_properties(fn)))
