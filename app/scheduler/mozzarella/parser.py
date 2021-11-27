@@ -115,7 +115,10 @@ def parse_schedule_file(wb_obj):
                         # first cooling in each boiling does not qualify the filter
                         continue
 
-                    melting = utils.delistify(overlapping, single=True)
+                    # todo: on the way, make properly
+                    # choose melting with maxixum coverage
+                    melting = max(overlapping, key=lambda m: calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row['x0'], row['y0'])) / calc_interval_length(cast_interval(m.x[0], m.y[0])))
+                    # melting = utils.delistify(overlapping, single=True)
                     cooling_length = row['y0'] - melting.x[0]
                     melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
 
@@ -162,7 +165,6 @@ def parse_schedule_file(wb_obj):
 
 def prepare_boiling_plan(parsed_schedule, df_bp):
     df_bp["line_name"] = df_bp["line"].apply(lambda line: line.name)
-
     for line_name, grp_line in df_bp.groupby("line_name"):
         if line_name == LineName.WATER:
             boiling_ids = [b.props["label"] for b in parsed_schedule["water_packings"].children]
@@ -361,5 +363,5 @@ def parse_properties(fn):
 
 if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = '/Users/marklidenberg/Downloads/test.xlsx'
+    fn = '/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-11-27/approved/2021-11-27 Расписание моцарелла.xlsx'
     print(dict(parse_properties(fn)))
