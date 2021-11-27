@@ -40,6 +40,8 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
     adygea_line = cast_model(AdygeaLine, 7)
+    # todo next: del
+    adygea_line.lunch_time = 30
     adygea_cleaning = cast_model(Washer, 'adygea_cleaning')
 
     cur_boiler_num = 0
@@ -77,35 +79,65 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', lunc
 
 def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
     no_lunch_schedule = _make_schedule(boiling_plan_df, first_boiling_id, start_time)
-    if cast_time(no_lunch_schedule.y[0]) <= '00:12:30' or len(no_lunch_schedule['boiling', True]) < 24:
+    need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12 # work more than 8 hours
+
+    if not need_a_break:
         # no lunch in these cases
         lunch_times = []
+        # print('No lunch needed')
     else:
         lunch_times = []
         for i, r in enumerate([range(0, 2), range(2, 4)]):
             range_boilings = [boiling for boiling in no_lunch_schedule['boiling', True] if boiling.props['boiler_num'] in r]
 
-            # find lunch times
-            for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
-                if not b2 and not b3:
-                    # finished early
-                    lunch_times.append('00:12:00')
+            def find_first_after(time):
+                for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
+                    if not b2:
+                        continue
 
-                if not b2:
-                    continue
-
-                if cast_time(b2.y[0]) >= '00:12:00':
-                    if b3 and b1:
-                        if (b2.y[0] - b1.y[0]) >= (b3.y[0] - b2.y[0]):
-                            # wait for next boiling and make lunch
-                            lunch_times.append(cast_time(b3.y[0]))
+                    if cast_time(b2.y[0]) >= time:
+                        if b3 and b1:
+                            if b2.y[0] - b1.y[0] >= b3.y[0] - b2.y[0]:
+                                # wait for next boiling and make lunch
+                                return cast_time(b3.y[0])
+                            else:
+                                # make lunch now
+                                return cast_time(b2.y[0])
                         else:
                             # make lunch now
-                            lunch_times.append(cast_time(b2.y[0]))
-                    else:
-                        # make lunch now
-                        lunch_times.append(cast_time(b2.y[0]))
-                    break
+                            return cast_time(b2.y[0])
+
+                raise Exception('Did not find lunch time')
+
+            working_interval = cast_interval(no_lunch_schedule.x[0], no_lunch_schedule.y[0])
+            lunch_interval = cast_interval(cast_t('12:00'), cast_t('14:30'))
+
+            if lunch_interval.upper - working_interval.lower <= working_interval.upper - lunch_interval.lower:
+                # lunch is closer to the start
+                if lunch_interval.upper - working_interval.lower >= 2 * 12:
+                    lunch_times.append(find_first_after('00:13:30'))
+                    # print(1, lunch_times)
+                    continue
+
+            else:
+                # lunch is close to the end
+                if working_interval.upper - lunch_interval.lower >= 2 * 12:
+                    lunch_times.append(find_first_after('00:12:00'))
+                    # print(2, lunch_times)
+                    continue
+                elif working_interval.upper - lunch_interval.lower >= 0:
+                    # less than two hours till end - still possibly need a break
+                    if need_a_break:
+                        if lunch_interval.lower - working_interval.lower <= 7 * 12:
+                            # work around 7 hours
+                            lunch_times.append(find_first_after('00:12:00'))
+                            # print(3, lunch_times)
+                            continue
+
+            if need_a_break:
+                lunch_times.append(find_first_after(cast_time(no_lunch_schedule.x[0] + 6 * 12)))
+                # print(4, lunch_times)
+                continue
 
 
     return _make_schedule(boiling_plan_df, first_boiling_id, start_time, lunch_times=lunch_times)
