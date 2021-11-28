@@ -20,17 +20,18 @@ class MascarponeProperties(pydantic.BaseModel):
     def department(self):
         return 'mascarpone'
 
+
 def cast_properties(schedule=None):
     props = MascarponeProperties()
     if not schedule:
         return props
 
     boiling_groups = schedule['mascarpone_boiling_group', True]
-    boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]
-    props.fourth_boiling_group_adding_lactic_acid_time = cast_human_time(boiling_group['boiling', True][-1]['boiling_process']['adding_lactic_acid'].y[0])
+    if boiling_groups:
+        boiling_group = boiling_groups[-1] if len(boiling_groups) < 4 else boiling_groups[3]
+        props.fourth_boiling_group_adding_lactic_acid_time = cast_human_time(boiling_group['boiling', True][-1]['boiling_process']['adding_lactic_acid'].y[0])
 
-    boiling_groups = schedule['mascarpone_boiling_group', True]
-    boiling_group = boiling_groups[-1]
-    props.last_pumping_off = cast_human_time(boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0])
+        boiling_group = boiling_groups[-1]
+        props.last_pumping_off = cast_human_time(boiling_group['boiling', True][-1]['boiling_process']['pumping_off'].y[0])
 
     return props
