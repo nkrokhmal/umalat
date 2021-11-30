@@ -18,6 +18,7 @@ class AdygeaLine(Line):
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
     lunch_time = mdb.Column(mdb.Integer)
+    preparation_time = mdb.Column(mdb.Integer)
 
 
 class AdygeaFormFactor(FormFactor):
