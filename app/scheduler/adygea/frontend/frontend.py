@@ -41,6 +41,16 @@ def wrap_lunch(block):
     )
     return m.root
 
+def wrap_preparation(block):
+    m = BlockMaker(
+        block.props['cls'],
+        font_size=9,
+        axis=1,
+        x=(block.x[0], 0),
+        size=(block.size[0], 2),
+    )
+    return m.root
+
 def wrap_cleaning(block, last_block):
     a = block.x[0]
     b = last_block.y[0]
@@ -72,6 +82,8 @@ def wrap_boiling_lines(schedule):
             boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 3)).block)
             if i <= n_lines - 2:
                 m.row("stub", size=0)
+
+    push(boiling_lines[0], wrap_preparation(schedule['preparation']), push_func=add_push)
 
     with code("add boilings"):
         for boiling in schedule["boiling", True]:
@@ -113,7 +125,7 @@ def wrap_frontend(schedule, date=None):
             # currently set in app/main/milk_project/schedule.py
             t = cast_t(schedule.props['preferred_header_time'])
         else:
-            t = schedule.x[0]
+            t = min(schedule.children, key=lambda block: block.x[0]).x[0]
 
         start_t = int(utils.custom_round(t, 12, "floor"))  # round to last hour
         start_time = cast_time(start_t)

@@ -9,7 +9,7 @@ def _test(fn, open_file=False):
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
     outputs = run_milk_project(fn, open_file=open_file)
     utils.lazy_tester.log(outputs["schedule"])
-    utils.lazy_tester.assert_logs()
+    utils.lazy_tester.assert_logs(reset=False)
 
 
 def test_batch():
@@ -25,7 +25,7 @@ def test_batch():
 
 if __name__ == "__main__":
     # _test(
-    #     "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/milk_project/План по варкам милкпроджект 1.xlsx",
+    #     "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/milk_project/План по варкам милкпроджект 3.xlsx",
     #     open_file=True,
     # )
 

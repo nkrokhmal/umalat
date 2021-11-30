@@ -11,6 +11,6 @@ def test_properties(path, prefix):
 
 if __name__ == "__main__":
     test_properties(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/sample1",
-        "sample1",
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-11-28/approved",
+        "2021-11-28",
     )

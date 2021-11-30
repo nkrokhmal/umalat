@@ -6,9 +6,9 @@ def _test(fn, open_file=False):
     utils.lazy_tester.configure_function_path()
     warnings.filterwarnings("ignore")
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
-    outputs = run_adygea(fn, open_file=open_file)
+    outputs = run_adygea(fn, open_file=open_file, start_time='09:40', prepare_start_time='08:00')
     utils.lazy_tester.log(outputs["schedule"])
-    utils.lazy_tester.assert_logs()
+    utils.lazy_tester.assert_logs(reset=False)
 
 
 def test_batch():
