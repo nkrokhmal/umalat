@@ -107,6 +107,7 @@ def test():
     print(cast_human_time("21:35"))
     print(cast_human_time("1:21:35"))
     print(cast_human_time("-1:21:35"))
+    # print(cast_t("08:00:00"))
 
 
 if __name__ == "__main__":

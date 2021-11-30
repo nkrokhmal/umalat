@@ -57,14 +57,14 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
     for i, row in boiling_plan_df.iterrows():
         for _ in range(row['n_baths']):
             boiling = make_boiling(row['boiling'], boiling_id=cur_boiling_id, boiler_num=cur_boiler_num)
-            push(m.root, boiling, push_func=AxisPusher(start_from=['last_beg', cast_t(start_time)], start_shift=-30, min_start=0), validator=Validator())
+            push(m.root, boiling, push_func=AxisPusher(start_from=['last_beg', cast_t(start_time)], start_shift=-30, min_start=cast_t(start_time)), validator=Validator())
             cur_boiler_num = (cur_boiler_num + 1) % 4
 
             with code('Push lunch if needed'):
                 if lunch_times:
                     pair_num = cur_boiler_num % 2
                     if lunch_times[pair_num] and cast_time(boiling.y[0]) >= lunch_times[pair_num]:
-                        push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_times[pair_num])), validator=Validator())
+                        push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_times[pair_num]), min_start=cast_t(start_time)), validator=Validator())
                         lunch_times[pair_num] = None # pushed lunch, nonify lunch time
 
             cur_boiling_id += 1
@@ -72,7 +72,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
     with code('Push lunches if not pushed yet'):
         for pair_num, lunch_time in enumerate(lunch_times):
             if lunch_time:
-                push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_time)), validator=Validator())
+                push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(lunch_time), min_start=cast_t(start_time)), validator=Validator())
 
     with code('Cleaning'):
         last_boilings = [utils.iter_get([boiling for boiling in m.root['boiling', True] if boiling.props['boiler_num'] == boiler_num], -1) for boiler_num in range(4)]
@@ -83,6 +83,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
         m.row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
 
     # fix timings
+    # todo maybe: make schedule.x[0] start with start_time
     # m.root.props.update(x=(cast_t(prepare_start_time), 0))
     # for child in m.root.children:
     #     child.props.update(x=(child.x[0] - cast_t(prepare_start_time), 0))

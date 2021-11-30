@@ -125,7 +125,7 @@ def wrap_frontend(schedule, date=None):
             # currently set in app/main/milk_project/schedule.py
             t = cast_t(schedule.props['preferred_header_time'])
         else:
-            t = schedule.x[0]
+            t = min(schedule.children, key=lambda block: block.x[0]).x[0]
 
         start_t = int(utils.custom_round(t, 12, "floor"))  # round to last hour
         start_time = cast_time(start_t)
