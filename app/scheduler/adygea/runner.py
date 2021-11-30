@@ -20,7 +20,6 @@ def run_adygea(
         schedule = make_schedule(
             boiling_plan_df, start_time=start_time, first_boiling_id=first_boiling_id
         )
-
     if not template_wb:
         template_wb = openpyxl.load_workbook(
             filename=os.path.join(basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT),
@@ -30,6 +29,7 @@ def run_adygea(
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
+
     res = submit_schedule(
         "адыгейский",
         schedule,

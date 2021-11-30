@@ -15,7 +15,7 @@ def wrap_line(schedule):
         if child.props['cls'] == 'boiling_sequence':
             for i, block in enumerate(child.children):
 
-                if i == 0:
+                if i <= 1:
                     # water collecting
                     _block = m.copy(block, with_props=True)
                     _block.update_size(size=(block.size[0], 2))
@@ -24,7 +24,7 @@ def wrap_line(schedule):
                     for element in block.children:
                         _element = m.copy(element, with_props=True)
                         _element.update_size(size=(element.size[0], 2))
-                        _element.props.update(x=(element.x[0], (i - 1) * 2))
+                        _element.props.update(x=(element.x[0], (i - 2) * 2))
                         m.block(_element, push_func=add_push)
         elif child.props['cls'] == 'pouring_off':
             _child = m.copy(child, with_props=True)

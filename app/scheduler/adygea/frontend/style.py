@@ -11,6 +11,11 @@ STYLE = {
         "text": "мойка оборудования и цеха",
         "font_size": 12,
     },  # blue
+    "preparation": {
+        "color": "red",
+        "text": "подготовка и мойка оборудования",
+        "font_size": 12,
+    },  # blue
     "lunch": {
         "color": "#DAEEF3",
         "text": "обед",

@@ -3,6 +3,7 @@ from app.imports.runtime import *
 from app.models import *
 
 from utils_ak.block_tree import *
+from app.scheduler.time import *
 
 
 def make_boiling(boiling_model, boiling_id, boiler_num):
@@ -16,9 +17,15 @@ def make_boiling(boiling_model, boiling_id, boiler_num):
 
     return m.root
 
+
 def make_cleaning(size, **kwargs):
     m = BlockMaker("cleaning", **kwargs)
     m.row(f"cleaning", size=size)
+    return m.root
+
+
+def make_preparation(size, start_time, **kwargs):
+    m = BlockMaker("preparation", size=(size, 0), x=(cast_t(start_time), 0), **kwargs)
     return m.root
 
 
