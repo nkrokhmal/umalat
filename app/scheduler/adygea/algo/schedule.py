@@ -81,11 +81,20 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
         if len(m.root['lunch', True]) > 0:
             cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root['lunch', True]))
         m.row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
+
+    # fix timings
+    # m.root.props.update(x=(cast_t(prepare_start_time), 0))
+    # for child in m.root.children:
+    #     child.props.update(x=(child.x[0] - cast_t(prepare_start_time), 0))
     return m.root
 
 
 def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prepare_start_time='07:00'):
-    no_lunch_schedule = _make_schedule(boiling_plan_df, first_boiling_id, start_time, prepare_start_time)
+    no_lunch_schedule = _make_schedule(boiling_plan_df,
+                                       first_boiling_id,
+                                       start_time=start_time,
+                                       prepare_start_time=prepare_start_time)
+
     need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12 # work more than 8 hours
 
     if not need_a_break:
@@ -146,5 +155,8 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prepa
                 # print(4, lunch_times)
                 continue
 
-
-    return _make_schedule(boiling_plan_df, first_boiling_id, start_time, lunch_times=lunch_times)
+    return _make_schedule(boiling_plan_df,
+                          first_boiling_id,
+                          start_time=start_time,
+                          prepare_start_time=prepare_start_time,
+                          lunch_times=lunch_times)
