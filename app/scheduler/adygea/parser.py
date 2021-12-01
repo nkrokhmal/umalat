@@ -74,5 +74,5 @@ def parse_properties(fn):
 
 if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = '/Users/marklidenberg/Downloads/Telegram Desktop/2021-09-03 Расписание милкпроджект.xlsx'
+    fn = '/Users/arsenijkadaner/Desktop/2021-01-02 Расписание милкпроджект-2.xlsx'
     print(dict(parse_properties(fn)))

@@ -7,6 +7,19 @@ from app.scheduler.parsing import *
 from utils_ak.block_tree import *
 
 
+def _filter_func(group):
+    try:
+        return is_int_like(group[0]["label"].split(" ")[0])
+    except:
+        return False
+
+
+def _split_func(row):
+    try:
+        return is_int_like(row["label"].split(" ")[0])
+    except:
+        return False
+
 
 def parse_schedule_file(wb_obj):
     df = load_cells_df(wb_obj, 'Расписание')
@@ -79,15 +92,26 @@ def parse_schedule_file(wb_obj):
         else:
             split_rows += [None, None]
 
+
     parse_block(m, df,
         "boilings",
         "boiling",
         [split_rows[0] + i for i in [0, 4, 12, 16]],
         start_times[0],
+        filter=_filter_func,
+        split_func=_split_func,
     )
     parse_block(m, df, "cleanings", "cleaning", [split_rows[0] + 8], start_times[0])
     if water_melting_headers:
-        parse_block(m, df, "water_meltings", "melting", [split_rows[1] + 1], start_times[1])
+        parse_block(m,
+                    df,
+                    "water_meltings",
+                    "melting",
+                    [split_rows[1] + 1],
+                    start_times[1],
+                    filter=_filter_func,
+                    split_func=_split_func,
+                    )
 
         # todo maybe: make properly
         with code('meta info to water meltings'):
@@ -122,14 +146,28 @@ def parse_schedule_file(wb_obj):
                     cooling_length = row['y0'] - melting.x[0]
                     melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
 
-        parse_block(m, df, "water_packings", "packing", [split_rows[1] + 7], start_times[1])
+        parse_block(m,
+                    df,
+                    "water_packings",
+                    "packing",
+                    [split_rows[1] + 7],
+                    start_times[1],
+                    split_func=_split_func,
+                    filter=_filter_func)
 
     if salt_melting_headers:
         with code("Find rows for salt melting lines"):
             last_melting_row = df[df["label"] == "посолка"]["x1"].max()
             salt_melting_rows = list(range(split_rows[3], last_melting_row, 4))
 
-        parse_block(m, df, "salt_meltings", "melting", salt_melting_rows, start_times[1])
+        parse_block(m,
+                    df,
+                    "salt_meltings",
+                    "melting",
+                    salt_melting_rows,
+                    start_times[1],
+                    split_func=_split_func,
+                    filter=_filter_func)
 
         # todo maybe: make properly
         with code("add salt forming info to meltings"):
@@ -159,6 +197,8 @@ def parse_schedule_file(wb_obj):
             "packing",
             [split_rows[4], split_rows[4] + 6],
             start_times[1],
+            split_func=_split_func,
+            filter=_filter_func
         )
     return m.root
 
@@ -170,6 +210,7 @@ def prepare_boiling_plan(parsed_schedule, df_bp):
             boiling_ids = [b.props["label"] for b in parsed_schedule["water_packings"].children]
         else:
             boiling_ids = [b.props["label"] for b in parsed_schedule["salt_packings"].children]
+
         boiling_ids = list(sorted(set(boiling_ids)))
         for i, (_, grp) in enumerate(grp_line.groupby("group_id")):
             df_bp.loc[grp.index, "boiling_id"] = boiling_ids[i]
@@ -363,5 +404,5 @@ def parse_properties(fn):
 
 if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = '/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-11-27/approved/2021-11-27 Расписание моцарелла.xlsx'
-    print(dict(parse_properties(fn)))
+    fn = '/Users/arsenijkadaner/Desktop/2021-11-30 Расписание моцарелла.xlsx'
+    pprint(dict(parse_properties(fn)))
