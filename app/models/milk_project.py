@@ -18,6 +18,7 @@ class MilkProjectLine(Line):
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
     water_collecting_time = mdb.Column(mdb.Integer)
+    equipment_check_time = mdb.Column(mdb.Integer)
 
 
 class MilkProjectFormFactor(FormFactor):
@@ -36,6 +37,7 @@ class MilkProjectBoiling(Boiling):
     weight_netto = mdb.Column(mdb.Float)
     output_kg = mdb.Column(mdb.Integer)
     percent = mdb.Column(mdb.Integer)
+    # todo: delete
     equipment_check_time = mdb.Column(mdb.Integer)
 
     def to_str(self):

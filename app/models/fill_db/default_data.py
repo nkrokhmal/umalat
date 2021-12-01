@@ -129,6 +129,7 @@ def generate_mozzarella_lines():
     milk_project_line = MilkProjectLine(
         name="Милкпроджект",
         water_collecting_time=20,
+        equipment_check_time=10,
     )
     milk_project_line.department_id = milk_project_department.id
     db.session.add(milk_project_line)
