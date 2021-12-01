@@ -42,9 +42,6 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
     assert len(lunch_times) in [0, 2] # no lunches or two lunches for two teams
 
     adygea_line = cast_model(AdygeaLine, 7)
-    # todo next: del
-    adygea_line.lunch_time = 30
-    adygea_line.preparation_time = 60
 
     local_start_t = cast_t(start_time) - cast_t(prepare_start_time)
     normed_lunch_times = [cast_time(cast_t(lt) - cast_t(prepare_start_time)) for lt in lunch_times]
