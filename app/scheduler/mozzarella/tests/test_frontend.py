@@ -29,12 +29,13 @@ if __name__ == "__main__":
         # config.abs_path(
         #     "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2) 1.xlsx"
         # ),
-        "/Users/marklidenberg/Downloads/test.xlsx",
+        # "/Users/marklidenberg/Downloads/test.xlsx",
+        '/Users/arsenijkadaner/Desktop/2021-11-28 План по варкам моцарелла.xlsx',
         # "/Users/marklidenberg/Desktop/2021_09_22_План_по_варкам_моцарелла_1.xlsx",
         # start_times={LineName.WATER: "07:35", LineName.SALT: "05:25"},
         first_boiling_id=1,
         open_file=True,
         prefix="new5",
-        optimize=False,
+        optimize=True,
     )
     # test_batch()

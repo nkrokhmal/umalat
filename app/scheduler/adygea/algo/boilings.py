@@ -24,8 +24,8 @@ def make_cleaning(size, **kwargs):
     return m.root
 
 
-def make_preparation(size, start_time, **kwargs):
-    m = BlockMaker("preparation", size=(size, 0), x=(cast_t(start_time), 0), **kwargs)
+def make_preparation(size, **kwargs):
+    m = BlockMaker("preparation", size=(size, 0), **kwargs)
     return m.root
 
 
