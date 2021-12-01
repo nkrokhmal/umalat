@@ -136,7 +136,8 @@ def generate_mozzarella_lines():
     adygea_department = Department.query.filter_by(name="Адыгейский цех").first()
     adygea_line = AdygeaLine(
         name=LineName.ADYGEA,
-        lunch_time=60,
+        lunch_time=30,
+        preparation_time=60,
     )
     adygea_line.department_id = adygea_department.id
     db.session.add(adygea_line)
