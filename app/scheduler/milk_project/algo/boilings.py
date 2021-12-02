@@ -26,9 +26,7 @@ def make_boiling_sequence(boilings):
 
     sample_boiling_model = boilings[0].props['boiling_model']
 
-    # todo next: switchcom
-    # m.row('equipment_check', size=sample_boiling_model.line.equipment_check_time // 5)
-    m.row('equipment_check', size=sample_boiling_model.equipment_check_time // 5)
+    m.row('equipment_check', size=sample_boiling_model.line.equipment_check_time // 5)
     m.row('water_collecting', size=sample_boiling_model.line.water_collecting_time // 5)
 
     class Validator(ClassValidator):

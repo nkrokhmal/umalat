@@ -56,7 +56,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
     cur_boiling_id = boiling_plan_df['boiling_id'].iloc[0] + first_boiling_id - 1
     for i, row in boiling_plan_df.iterrows():
         for _ in range(row['n_baths']):
-            boiling = make_boiling(row['boiling'], boiling_id=cur_boiling_id, boiler_num=cur_boiler_num)
+            boiling = make_boiling(row['boiling'], boiling_id=cur_boiling_id, boiler_num=cur_boiler_num, group_name=row['sku'].group.name)
             push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30, min_start=local_start_t), validator=Validator())
             cur_boiler_num = (cur_boiler_num + 1) % 4
 
