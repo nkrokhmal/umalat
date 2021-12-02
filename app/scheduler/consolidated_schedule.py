@@ -12,6 +12,7 @@ def run_consolidated(
     open_file=False,
     schedules=None,
     wb=None,
+    date=None
 ):
     utils.makedirs(output_path)
 
@@ -62,7 +63,7 @@ def run_consolidated(
     if "ricotta" in schedules:
         from app.scheduler.ricotta import wrap_frontend, STYLE
 
-        frontend = wrap_frontend(schedules["ricotta"])
+        frontend = wrap_frontend(schedules["ricotta"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
@@ -72,7 +73,7 @@ def run_consolidated(
     if "mascarpone" in schedules:
         from app.scheduler.mascarpone import wrap_frontend, STYLE
 
-        frontend = wrap_frontend(schedules["mascarpone"])
+        frontend = wrap_frontend(schedules["mascarpone"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
@@ -82,7 +83,7 @@ def run_consolidated(
     if "butter" in schedules:
         from app.scheduler.butter import wrap_frontend, STYLE
 
-        frontend = wrap_frontend(schedules["butter"])
+        frontend = wrap_frontend(schedules["butter"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
@@ -92,7 +93,7 @@ def run_consolidated(
     if "milk_project" in schedules:
         from app.scheduler.milk_project import wrap_frontend, STYLE
 
-        frontend = wrap_frontend(schedules["milk_project"])
+        frontend = wrap_frontend(schedules["milk_project"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
@@ -102,7 +103,7 @@ def run_consolidated(
     if "adygea" in schedules:
         from app.scheduler.adygea import wrap_frontend, STYLE
 
-        frontend = wrap_frontend(schedules["adygea"])
+        frontend = wrap_frontend(schedules["adygea"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
@@ -112,7 +113,7 @@ def run_consolidated(
     if "contour_cleanings" in schedules:
         from app.scheduler.contour_cleanings import wrap_frontend, STYLE
 
-        frontend = wrap_frontend(schedules["contour_cleanings"])
+        frontend = wrap_frontend(schedules["contour_cleanings"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
