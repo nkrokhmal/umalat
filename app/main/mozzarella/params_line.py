@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from werkzeug.utils import redirect
 
 from app.main import main
-from app.models import MozzarellaLine
+from app.models import MozzarellaLine, MozzarellaBoiling
 from .forms import LineForm
 
 
@@ -27,6 +27,8 @@ def edit_line(line_id):
         line.serving_time = form.serving_time.data
         line.chedderization_time = form.chedderization_time.data
         line.melting_speed = form.melting_speed.data
+        line.output_ton = form.output_kg.data
+
         db.session.commit()
 
         flask.flash("Параметры линии успешно изменены", "success")
@@ -37,5 +39,6 @@ def edit_line(line_id):
     form.serving_time.data = line.serving_time
     form.chedderization_time.data = line.chedderization_time
     form.melting_speed.data = line.melting_speed
+    form.output_kg.data = line.output_ton
 
     return flask.render_template("mozzarella/edit_line.html", form=form, line_id=line.id)

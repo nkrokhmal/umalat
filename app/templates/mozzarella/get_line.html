@@ -22,6 +22,7 @@
                         <th class="border-0">Подача и вымешивание, мин</th>
                         <th class="border-0">Чеддеризация, мин</th>
                         <th class="border-0">Скорость плавления, кг/ч</th>
+                        <th class="border-0">Выход, кг</th>
                         <th class="border-0">Действия</th>
                     </tr>
                 </thead>
@@ -34,6 +35,7 @@
                             <td class="border-0"><a class="small">{{line.serving_time}}</a></td>
                             <td class="border-0"><a class="small">{{line.chedderization_time}}</a></td>
                             <td class="border-0"><a class="small">{{line.melting_speed}}</a></td>
+                            <td class="border-0"><a class="small">{{line.output_ton}}</a></td>
                             <td class="border-0">
                                 <a href="{{ url_for('main.edit_line', line_id = line.id)}}" class="edit-bt">
                                     <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"></i>

@@ -138,6 +138,7 @@ class LineForm(FlaskForm):
         "Введите время чеддеризации", validators=[Required()]
     )
     melting_speed = IntegerField("Введите скорость плавления", validators=[Required()])
+    output_kg = IntegerField("Выход", validators=[Required()])
 
 
 class BoilingTechnologyForm(FlaskForm):

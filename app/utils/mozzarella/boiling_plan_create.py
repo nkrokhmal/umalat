@@ -2,6 +2,7 @@ from app.imports.runtime import *
 
 from app.utils.features.merge_boiling_utils import Boilings
 from app.models import cast_mozzarella_boiling
+from app.models.mozzarella import MozzarellaLine
 
 
 def boiling_plan_create(df):
@@ -30,7 +31,11 @@ def boiling_plan_create(df):
     result["boiling"] = result["boiling_id"].apply(lambda x: cast_mozzarella_boiling(x))
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result["boiling_name"] = result["boiling"].apply(lambda b: b.to_str())
-    result["boiling_volume"] = np.where(result["boiling_type"] == "salt", 850, 1000)
+
+    salt_kg = db.session.query(MozzarellaLine).filter(MozzarellaLine.name == "Пицца чиз").first().output_ton
+    water_kg = db.session.query(MozzarellaLine).filter(MozzarellaLine.name == "Моцарелла в воде").first().output_ton
+
+    result["boiling_volume"] = np.where(result["boiling_type"] == "salt", salt_kg, water_kg)
     result["packer"] = result["sku"].apply(lambda sku: sku.packers_str)
     result["form_factor"] = result["sku"].apply(
         lambda sku: sku.form_factor.weight_with_line
