@@ -186,6 +186,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
             "configuration",
             "cleaning",
             "sheet",
+            "total_volume"
         ]
     ]
 
