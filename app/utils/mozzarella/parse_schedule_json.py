@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 from app.utils.mozzarella.boiling_plan_create import get_boiling_form_factor
+from app.models import *
 
 
 def prepare_schedule_json(schedule_json, cleanings):
@@ -34,7 +35,9 @@ def prepare_schedule_json(schedule_json, cleanings):
     )
     schedule_df["boiling_type"] = schedule_df["boiling"].apply(lambda x: x.boiling_type)
     schedule_df["boiling_volume"] = np.where(
-        schedule_df["boiling_type"] == "salt", 850, 1050
+        schedule_df["boiling_type"] == "salt",
+        cast_model(MozzarellaLine, LineName.SALT).output_ton,
+        cast_model(MozzarellaLine, LineName.WATER).output_ton
     )
     schedule_df["boiling_name"] = schedule_df["boiling"].apply(lambda b: b.to_str())
     schedule_df["boiling_id"] = schedule_df["boiling"].apply(lambda b: b.id)
