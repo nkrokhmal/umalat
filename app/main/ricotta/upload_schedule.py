@@ -11,7 +11,7 @@ def ricotta_upload_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         file = flask.request.files["input_file"]
-        filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание рикотты")
+        filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание рикотта")
         if file:
             save_schedule(file, filename_schedule, date.strftime("%Y-%m-%d"))
 
