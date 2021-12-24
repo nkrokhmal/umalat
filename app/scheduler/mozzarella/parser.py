@@ -145,7 +145,6 @@ def parse_schedule_file(wb_obj):
                     # melting = utils.delistify(overlapping, single=True)
                     cooling_length = row['y0'] - melting.x[0]
                     melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
-
         parse_block(m,
                     df,
                     "water_packings",
@@ -212,6 +211,10 @@ def prepare_boiling_plan(parsed_schedule, df_bp):
             boiling_ids = [b.props["label"] for b in parsed_schedule["salt_packings"].children]
 
         boiling_ids = list(sorted(set(boiling_ids)))
+
+        if len(boiling_ids) != len(grp_line['group_id'].unique()):
+            raise Exception(f'Wrong number of boiling ids: {len(boiling_ids)}, should be: {len(grp_line["group_id"].unique())}')
+
         for i, (_, grp) in enumerate(grp_line.groupby("group_id")):
             df_bp.loc[grp.index, "boiling_id"] = boiling_ids[i]
     df_bp["boiling_id"] = df_bp["boiling_id"].astype(int)

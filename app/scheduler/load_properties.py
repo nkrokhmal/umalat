@@ -70,7 +70,11 @@ def load_properties(schedules, path=None, prefix=None):
                     f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES[department]}.xlsx",
                 )
                 if os.path.exists(fn):
-                    properties[department] = EXCEL_PARSERS[department](fn)
+                    try:
+                        properties[department] = EXCEL_PARSERS[department](fn)
+                    except:
+                        raise
+                        raise Exception(f'Произошла ошибка во время чтения параметров расписания из файла: {os.path.basename(fn)}')
                 else:
                     properties[department] = SCHEDULE_PARSERS[department]()
             else:
