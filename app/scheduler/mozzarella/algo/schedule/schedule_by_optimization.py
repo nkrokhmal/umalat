@@ -41,13 +41,13 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     df["is_water_done"] = ~df["is_water_done"]
 
     def _is_cleaning_combination_fit(cleaning_combination):
-        # check that distance between boilings without cleaning is less than 12 hours
+        # check that distance between boilings without cleaning is less than 15 hours
         separators = [-1] + list(cleaning_combination) + [df.index[-1]]
         for s1, s2 in utils.iter_pairs(separators):
             group = df.loc[s1 + 1 : s2]
 
             group_length = group.iloc[-1]["y"] - group.iloc[0]["x"]
-            if group_length > cast_t("12:00"):
+            if group_length > cast_t("15:00"):
                 return False
         return True
 
@@ -84,7 +84,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
 
         # take first one
         combo = df1.iloc[0]["combo"]
-        return {df.loc[s]["group_id"]: "full" for s in combo}
+        return {df.loc[s]["group_id"]: "short" for s in combo}
 
     raise Exception("Failed to fill cleanings")
 
