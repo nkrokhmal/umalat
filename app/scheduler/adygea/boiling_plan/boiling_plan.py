@@ -52,7 +52,7 @@ def read_boiling_plan(wb_obj):
     else:
         df_plan["boiling_id"] = df_plan["id"]
         df_plan["kg"] = df_plan["plan"]
-        df_plan["n_baths"] = 1
+        df_plan["n_baths"] = 1 # todo maybe: redundant
         df_plan["boiling_id"] = df_plan["boiling_id"].astype(int) + 1
         df_plan["sku"] = df_plan["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku.name))
         df_plan["boiling"] = df_plan["sku"].apply(lambda x: x.made_from_boilings[0])

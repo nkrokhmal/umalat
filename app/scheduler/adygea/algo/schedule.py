@@ -50,11 +50,39 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
     m.row(make_preparation(adygea_line.preparation_time // 5), push_func=add_push)
 
     boiling_plan_df = boiling_plan_df.copy()
-    adygea_cleaning = cast_model(Washer, 'adygea_cleaning')
 
+
+    """example: boiling_plan_df example
+     boiling_id            sku  n_baths    kg            boiling
+0            1  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+1            2  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+2            3  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+3            4  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+4            5  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+5            6  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+6            7  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+7            8  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+8            9  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+9           10  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+10          11  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
+11          12  <AdygeaSKU 1>        1   8.0  <AdygeaBoiling 1>
+12          12  <AdygeaSKU 2>        1   9.0  <AdygeaBoiling 1>
+13          12  <AdygeaSKU 3>        1  33.0  <AdygeaBoiling 1>
+14          13  <AdygeaSKU 3>        1  50.0  <AdygeaBoiling 1>
+15          14  <AdygeaSKU 3>        1  44.0  <AdygeaBoiling 1>
+16          14  <AdygeaSKU 4>        1   6.0  <AdygeaBoiling 1>
+17          15  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>
+18          16  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>
+19          17  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>
+20          18  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>"""
+
+    adygea_cleaning = cast_model(Washer, 'adygea_cleaning')
     cur_boiler_num = 0
     cur_boiling_id = boiling_plan_df['boiling_id'].iloc[0] + first_boiling_id - 1
-    for i, row in boiling_plan_df.iterrows():
+
+    # todo maybe: a little bit messy with boiling_id, cur_boiling_id and n_baths
+    for ind, grp in boiling_plan_df.groupby('boiling_id'):
+        row = grp.iloc[0]
         for _ in range(row['n_baths']):
             boiling = make_boiling(row['boiling'], boiling_id=cur_boiling_id, boiler_num=cur_boiler_num, group_name=row['sku'].group.name)
             push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30, min_start=local_start_t), validator=Validator())
