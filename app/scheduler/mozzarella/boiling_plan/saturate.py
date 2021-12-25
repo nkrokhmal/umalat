@@ -7,7 +7,7 @@ def saturate_boiling_plan(boiling_plan_df):
     for i, row in df.iterrows():
         values.append(
             [
-                float(x.strip()) * row["total_volume"] / row["line"].input_ton
+                float(x.strip()) * row["line"].output_ton / row["line"].input_ton
                 for x in row["configuration"].split(",")
             ]
         )
