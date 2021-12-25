@@ -22,11 +22,15 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     df = pd.DataFrame(values, columns=["x", "y", "group_id", "line_name"])
 
     df["time_till_next_boiling"] = (df["x"].shift(-1) - df["y"]).fillna(0).astype(int)
+
+    # conflict_time - main objective (how much we lose by adding a cleaning here approximately)
     df["conflict_time"] = np.where(
         df["time_till_next_boiling"] < full_cleaning_length,
         full_cleaning_length - df["time_till_next_boiling"],
         0,
     )
+
+    # is_water_done - has water been finished at this point
     df["is_water_done"] = df["line_name"]
     df["is_water_done"] = np.where(
         df["is_water_done"] == "Моцарелла в воде", True, np.nan
@@ -37,6 +41,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     df["is_water_done"] = ~df["is_water_done"]
 
     def _is_cleaning_combination_fit(cleaning_combination):
+        # check that distance between boilings without cleaning is less than 12 hours
         separators = [-1] + list(cleaning_combination) + [df.index[-1]]
         for s1, s2 in utils.iter_pairs(separators):
             group = df.loc[s1 + 1 : s2]
@@ -47,6 +52,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
         return True
 
     for n_cleanings in range(5):
+        # find first available combination
         available_combinations = [
             combo
             for combo in itertools.combinations(range(len(df) - 1), n_cleanings)

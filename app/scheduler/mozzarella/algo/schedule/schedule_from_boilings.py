@@ -525,22 +525,8 @@ class ScheduleMaker:
                     # no current in between cleanings -> try to add if needed
 
                     # if rest is more than an hour and less than 80 minutes -> short cleaning
-                    if 12 <= rest < 18:
-                        cleaning = make_termizator_cleaning_block("short", rule='rest_between_60_and_80')
-                        cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
-                        push(self.m.root["master"], cleaning, push_func=add_push)
-
-                    # if rest is more than 80 minutes
-                    if rest >= 18:
-                        if previous_cleaning and a.x[0] - previous_cleaning.x[0] < cast_t("04:00"):
-                            # if 4 hours ago or earlier was cleaning -> make short
-                            cleaning = make_termizator_cleaning_block("short", rule='rest_after_80_4_hours_cleaning')
-                        elif a.x[0] - boilings[0].x[0] < cast_t("04:00"):
-                            # if less than 4 hours since day start -> make short
-                            cleaning = make_termizator_cleaning_block("short", rule='rest_after_80_4_hours_init')
-                        else:
-                            # otherwise -> make full
-                            cleaning = make_termizator_cleaning_block("full", rule='rest_after_80')
+                    if rest >= 24:
+                        cleaning = make_termizator_cleaning_block("short", rule='rest_after_two_hours')
                         cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
                         push(self.m.root["master"], cleaning, push_func=add_push)
 
