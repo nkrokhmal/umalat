@@ -76,15 +76,23 @@ def make_mascorpone_boiling(boiling_group_df, **props):
         start_from = 0
 
         with m.row("packing_group"):
+            prev_p = None
+            prev_packing = None
             for ind, grp in utils.df_to_ordered_tree(
                 boiling_group_df, column="boiling_key", recursive=False
             ):
                 bt = get_boiling_technology_from_boiling_model(grp.iloc[0]["boiling"])
 
-                m.row("ingredient", push_func=add_push,
+                ingredient = m.row("ingredient", push_func=add_push,
                       size=bt.ingredient_time // 5,
-                      x=start_from)
-                p = m.row("P", size=2).block
+                      x=start_from).block
+
+                if not prev_p:
+                    p = m.row("P", size=2).block
+                else:
+                    p = m.row("P", push_func=add_push,
+                              x=max([prev_p.y[0], prev_packing.y[0] - 1, ingredient.y[0]]) - m.root['packing_process']['N', True][-1].y[0],
+                              size=2).block
 
                 packing_time = sum(
                     [
@@ -94,11 +102,14 @@ def make_mascorpone_boiling(boiling_group_df, **props):
                 )
                 packing_time = int(utils.custom_round(packing_time, 5, "ceil"))
 
-                m.row("packing", push_func=add_push,
+                packing = m.row("packing", push_func=add_push,
                       x=p.props.relative_props["x"][0] + 1,
-                      size=packing_time // 5)
+                      size=packing_time // 5).block
 
                 start_from = p.props.relative_props["x"][0] + 2
+
+                prev_p = p
+                prev_packing = packing
     return m.root
 
 
