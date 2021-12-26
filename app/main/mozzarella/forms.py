@@ -50,7 +50,7 @@ class ScheduleForm(FlaskForm):
         default=time(8, 0),
     )
     add_full_boiling = BooleanField(
-        "Вставить полную мойку внутри дня по правилу 12 часов",
+        "Вставить короткую мойку внутри дня по правилу 15 часов",
         validators=[Optional()],
         default=True,
     )
