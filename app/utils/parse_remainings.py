@@ -4,6 +4,7 @@ from urllib.parse import quote
 
 from app.models import *
 from app.utils.features.db_utils import *
+from copy import deepcopy
 
 
 REMAININGS_COLUMN = 4
@@ -15,6 +16,7 @@ COLUMNS = {
 }
 
 
+
 def parse_file(file_bytes):
     """
     :param file_bytes: файл остатков
@@ -22,17 +24,44 @@ def parse_file(file_bytes):
     файл остатков в виде Pandas DataFrame
     """
     df = pd.read_excel(io.BytesIO(file_bytes), index_col=0)
-    df_original = df.copy()
-    df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
-    df = (
-        df.loc[
-            [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
-        ]
-        .fillna(0)
-        .T
-    )
-    df.columns = ["Name", "Total", "Fact", "Norm"]
-    return df.to_dict("records"), df_original
+    df_original = deepcopy(df)
+
+    if df.index[0] == "Отчет от" or len(df.index) > 150:
+        df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
+        df = (
+            df.loc[
+                [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
+            ]
+            .fillna(0)
+            .T
+        )
+        df.columns = ["Name", "Total", "Fact", "Norm"]
+        return df.to_dict("records"), df_original
+
+    else:
+        df = (
+            df.loc[
+                [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
+            ]
+            .fillna(0)
+            .T
+        )
+
+        df.columns = ["Name", "Total", "Fact", "Norm"]
+        df["Fact"] = df["Fact"].apply(lambda x: -float(x))
+        df_original.loc[COLUMNS["Fact"]] = df["Fact"]
+
+        print(df_original.columns)
+        print(len(df_original.columns))
+
+        zero_df = pd.DataFrame(['-'] * df_original.shape[1]).T
+        zero_df.columns = df_original.columns
+        print(zero_df.shape)
+        print(df_original.shape)
+
+        df_original = pd.concat([zero_df, df_original])
+
+        return df.to_dict("records"), df_original
 
 
 def parse_file_path(path):

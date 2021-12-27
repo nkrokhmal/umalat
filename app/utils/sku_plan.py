@@ -58,6 +58,7 @@ class SkuPlanClient:
         with pd.ExcelWriter(self.filepath, engine="openpyxl") as writer:
             writer.book = self.wb
             writer.sheets = dict((ws.title, ws) for ws in self.wb.worksheets)
+            print('Save to excel')
             self.remainings.to_excel(
                 writer, sheet_name=flask.current_app.config["SHEET_NAMES"]["remainings"]
             )
