@@ -7,6 +7,8 @@ from app.scheduler.header import wrap_header
 from utils_ak.block_tree import *
 
 
+PREPARATION_HEIGHT = 11
+
 def wrap_frontend_mascarpone_boiling(boiling_process):
     is_cream = boiling_process.props["boiling_group_dfs"][0].iloc[0]["is_cream"]
     m = BlockMaker(
@@ -273,7 +275,7 @@ def wrap_preparation(schedule):
     m = BlockMaker('preparation')
     return m.create_block('preparation',
                    x=(schedule['preparation'].x[0], 1),
-                   size=(schedule['preparation'].size[0], 11))
+                   size=(schedule['preparation'].size[0], PREPARATION_HEIGHT))
 
 
 def wrap_shifts(shifts):
@@ -306,8 +308,8 @@ def wrap_frontend(schedule, date=None):
             m.col(wrap_shifts(schedule['shifts']['meltings']))
         m.block(wrap_mascarpone_lines(schedule, with_cream_cheese=True))
 
-    m.block(wrap_header(date=date, start_time=start_time, header="График паковки"))
-
+    m.block(wrap_header(date=date, start_time=start_time, header="График паковки"), push_func=add_push,
+            x=(0, max(PREPARATION_HEIGHT + 3, m.root.y[1])))
     with m.block(axis=1,
                  start_time=cast_time(start_t)):
         if schedule['shifts']:

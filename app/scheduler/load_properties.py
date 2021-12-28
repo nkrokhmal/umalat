@@ -73,7 +73,7 @@ def load_properties(schedules, path=None, prefix=None):
                     try:
                         properties[department] = EXCEL_PARSERS[department](fn)
                     except:
-                        raise
+                        # raise
                         raise Exception(f'Произошла ошибка во время чтения параметров расписания из файла: {os.path.basename(fn)}')
                 else:
                     properties[department] = SCHEDULE_PARSERS[department]()
