@@ -13,70 +13,178 @@ COLUMNS = {
     "Total": "Заявлено всего, кг:",
     "Fact": "Фактические остатки на складах - Заявлено, кг:",
     "Normative": "Нормативные остатки, кг",
+    "Code": 'Код номенклатуры в 1C',
 }
 
 
+def string_to_float(x):
+    try:
+        return float(x)
+    except:
+        return float(x.replace(',', '.').replace(' ', ''))
 
-def parse_file(file_bytes):
+
+# def parse_file(file):
+#     """
+#     :param file_bytes: файл остатков
+#     :return: преобразованный словарь с ключами Name, Total, Fact, Normative и изначальный
+#     файл остатков в виде Pandas DataFrame
+#     """
+#     file_bytes = file.read()
+#     filename = file.filename
+#     if filename.split('.')[-1] == 'csv':
+#         df = pd.read_csv(io.BytesIO(file_bytes), sep=';')
+#         df.columns = [COLUMNS["Code"], COLUMNS["Date"], COLUMNS["Fact"]]
+#         df[COLUMNS["Normative"]] = 0
+#         df[COLUMNS["Total"]] = 0
+#
+#         df = df[[COLUMNS["Date"], COLUMNS["Code"], COLUMNS["Fact"], COLUMNS["Normative"], COLUMNS["Total"]]]
+#         df[COLUMNS["Fact"]] = df[COLUMNS["Fact"]].apply(lambda x: -abs(string_to_float(x)))
+#
+#         df_original = deepcopy(df).T
+#         zero_df = pd.DataFrame(3 * [[''] * df_original.shape[1]])
+#         zero_df.columns = df_original.columns
+#
+#         df_original = pd.concat([zero_df, df_original])
+#
+#         df_dict = deepcopy(df)
+#         df_dict = df_dict[[COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]]
+#         df_dict.columns = ["Name", "Total", "Fact", "Norm"]
+#         return df_dict.to_dict("records"), df_original
+#
+#     else:
+#         df = pd.read_excel(io.BytesIO(file_bytes), index_col=0)
+#         df_original = deepcopy(df)
+#
+#         if df.index[0] == "Отчет от" or len(df.index) > 150:
+#             df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
+#             df = (
+#                 df.loc[
+#                     [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
+#                 ]
+#                 .fillna(0)
+#                 .T
+#             )
+#             df.columns = ["Name", "Total", "Fact", "Norm"]
+#             return df.to_dict("records"), df_original
+#
+#         else:
+#             df = (
+#                 df.loc[
+#                     [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
+#                 ]
+#                 .fillna(0)
+#                 .T
+#             )
+#
+#             df.columns = ["Name", "Total", "Fact", "Norm"]
+#             df["Fact"] = df["Fact"].apply(lambda x: -string_to_float(x))
+#             df_original.loc[COLUMNS["Fact"]] = df["Fact"]
+#
+#             zero_df = pd.DataFrame(['-'] * df_original.shape[1]).T
+#             zero_df.columns = df_original.columns
+#
+#             df_original = pd.concat([zero_df, df_original])
+#
+#             return df.to_dict("records"), df_original
+
+
+def parse_df(df, mode):
+    if mode == 'csv':
+        df.columns = [COLUMNS["Code"], COLUMNS["Date"], COLUMNS["Fact"]]
+        df[COLUMNS["Normative"]] = 0
+        df[COLUMNS["Total"]] = 0
+
+        df = df[[COLUMNS["Date"], COLUMNS["Code"], COLUMNS["Fact"], COLUMNS["Normative"], COLUMNS["Total"]]]
+        df[COLUMNS["Fact"]] = df[COLUMNS["Fact"]].apply(lambda x: -abs(string_to_float(x)))
+
+        df_original = deepcopy(df).T
+        zero_df = pd.DataFrame(3 * [[''] * df_original.shape[1]])
+        zero_df.columns = df_original.columns
+
+        df_original = pd.concat([zero_df, df_original])
+
+        df_dict = deepcopy(df)
+        df_dict = df_dict[[COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]]
+        df_dict.columns = ["Name", "Total", "Fact", "Norm"]
+        return df_dict.to_dict("records"), df_original
+    else:
+        df_original = deepcopy(df)
+
+        if df.index[0] == "Отчет от" or len(df.index) > 150:
+            df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
+            df = (
+                df.loc[
+                    [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
+                ]
+                    .fillna(0)
+                    .T
+            )
+            df.columns = ["Name", "Total", "Fact", "Norm"]
+            return df.to_dict("records"), df_original
+
+        else:
+            df = (
+                df.loc[
+                    [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
+                ]
+                    .fillna(0)
+                    .T
+            )
+
+            df.columns = ["Name", "Total", "Fact", "Norm"]
+            df["Fact"] = df["Fact"].apply(lambda x: -abs(string_to_float(x)))
+            df_original.loc[COLUMNS["Fact"]] = df["Fact"]
+
+            if list(df_original.index).index(COLUMNS["Date"]) == 2:
+                zero_df = pd.DataFrame(['-'] * df_original.shape[1]).T
+                zero_df.columns = df_original.columns
+
+                df_original = pd.concat([zero_df, df_original])
+
+            return df.to_dict("records"), df_original
+
+
+def parse_file(file):
     """
     :param file_bytes: файл остатков
     :return: преобразованный словарь с ключами Name, Total, Fact, Normative и изначальный
     файл остатков в виде Pandas DataFrame
     """
-    df = pd.read_excel(io.BytesIO(file_bytes), index_col=0)
-    df_original = deepcopy(df)
+    file_bytes = file.read()
+    filename = file.filename
 
-    if df.index[0] == "Отчет от" or len(df.index) > 150:
-        df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
-        df = (
-            df.loc[
-                [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
-            ]
-            .fillna(0)
-            .T
-        )
-        df.columns = ["Name", "Total", "Fact", "Norm"]
-        return df.to_dict("records"), df_original
-
+    if filename.split('.')[-1] == 'csv':
+        df = pd.read_csv(io.BytesIO(file_bytes), sep=';')
+        return  parse_df(df, 'csv')
     else:
-        df = (
-            df.loc[
-                [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
-            ]
-            .fillna(0)
-            .T
-        )
-
-        df.columns = ["Name", "Total", "Fact", "Norm"]
-        df["Fact"] = df["Fact"].apply(lambda x: -float(x))
-        df_original.loc[COLUMNS["Fact"]] = df["Fact"]
-
-        print(df_original.columns)
-        print(len(df_original.columns))
-
-        zero_df = pd.DataFrame(['-'] * df_original.shape[1]).T
-        zero_df.columns = df_original.columns
-        print(zero_df.shape)
-        print(df_original.shape)
-
-        df_original = pd.concat([zero_df, df_original])
-
-        return df.to_dict("records"), df_original
+        df = pd.read_excel(io.BytesIO(file_bytes), index_col=0)
+        return parse_df(df, 'xlsx')
 
 
 def parse_file_path(path):
-    df = pd.read_excel(path, index_col=0)
-    df_original = df.copy()
-    df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
-    df = (
-        df.loc[
-            [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
-        ]
-        .fillna(0)
-        .T
-    )
-    df.columns = ["Name", "Total", "Fact", "Norm"]
-    return df.to_dict("records"), df_original
+    mode = path.split('.')[-1]
+    if mode == 'csv':
+        df = pd.read_csv(path, sep=';')
+        return parse_df(df, 'csv')
+    else:
+        df = pd.read_excel(path, index_col=0)
+        return parse_df(df, 'xlsx')
+
+
+# def parse_file_path(path):
+#     df = pd.read_excel(path, index_col=0)
+#     df_original = df.copy()
+#     df = df[df.loc[COLUMNS["Date"]].dropna()[:-1].index]
+#     df = (
+#         df.loc[
+#             [COLUMNS["Date"], COLUMNS["Total"], COLUMNS["Fact"], COLUMNS["Normative"]]
+#         ]
+#         .fillna(0)
+#         .T
+#     )
+#     df.columns = ["Name", "Total", "Fact", "Norm"]
+#     return df.to_dict("records"), df_original
 
 
 def get_skus(skus_req, skus, total_skus):

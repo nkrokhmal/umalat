@@ -27,7 +27,9 @@ def adygea_boiling_plan():
 
         if file:
             file.save(tmp_file_path)
-        skus_req, remainings_df = parse_file_path(tmp_file_path)
+
+        # skus_req, remainings_df = parse_file_path(tmp_file_path)
+        skus_req, remainings_df = parse_file(file)
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
         sku_plan_client = SkuPlanClient(

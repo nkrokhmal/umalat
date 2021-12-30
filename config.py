@@ -173,6 +173,8 @@ class TestConfig(BaseClass):
     TEST_MILKPROJECT = "app/data/tests/milk_project_plan.xlsx"
     TEST_BUTTER = "app/data/tests/butter_plan.xlsx"
     TEST_ADYGEA = "app/data/tests/adygea_plan.xlsx"
+    TEST_BOILING_CSV = "app/data/tests/test_boiling.csv"
+    TEST_BOILING_NEW_FORMAT = "app/data/tests/test_boiling.xlsx"
 
     TELEGRAM_BOT_TOKEN = "1101281504:AAEbWzUXem-FK7Yb2RHvkg-h8sMilZAuFpA"
     TELEGRAM_CHAT_ID = -544068496

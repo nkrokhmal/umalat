@@ -20,7 +20,8 @@ def mozzarella_boiling_plan():
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(MozzarellaBoiling).all()
 
-        skus_req, remainings_df = parse_file(flask.request.files["input_file"].read())
+        file = flask.request.files["input_file"]
+        skus_req, remainings_df = parse_file(file)
         yesterday_boiling_plan_df = pd.DataFrame()
 
         if "file_not_calculated" in flask.request.files:
