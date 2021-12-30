@@ -18,7 +18,10 @@ def butter_boiling_plan():
         skus = db.session.query(ButterSKU).all()
         total_skus = db.session.query(SKU).all()
         boilings = db.session.query(ButterBoiling).all()
-        skus_req, remainings_df = parse_file(flask.request.files["input_file"].read())
+
+        file = flask.request.files["input_file"]
+        skus_req, remainings_df = parse_file(file)
+
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
         sku_plan_client = SkuPlanClient(

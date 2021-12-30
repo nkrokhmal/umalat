@@ -27,32 +27,40 @@ def ricotta_boiling_plan():
         total_volume = 0
 
         file = flask.request.files["input_file"]
+        filename_ext = file.filename.split('.')[-1]
+
         tmp_file_path = os.path.join(
             flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
         )
 
         if file:
             file.save(tmp_file_path)
-        wb = openpyxl.load_workbook(
-            filename=os.path.join(
-                flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
-            ),
-            data_only=True,
-        )
-        request_ton = 0
-        if ("Вода" in wb.sheetnames) and ("Соль" in wb.sheetnames):
-            boiling_plan_df = mozzarella_read_boiling_plan(wb, validate=False)
-            boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(
-                lambda x: int(x)
+
+        if filename_ext == 'csv':
+            wb = openpyxl.Workbook()
+            request_ton = 0
+        else:
+            wb = openpyxl.load_workbook(
+                filename=os.path.join(
+                    flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
+                ),
+                data_only=True,
             )
-            total_volume = int(
-                boiling_plan_df.groupby("group_id").first()["configuration"].sum()
-                * 0.81
-            )
-            if add_auto_boilings:
-                request_ton = total_volume
+            request_ton = 0
+            if ("Вода" in wb.sheetnames) and ("Соль" in wb.sheetnames):
+                boiling_plan_df = mozzarella_read_boiling_plan(wb, validate=False)
+                boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(
+                    lambda x: int(x)
+                )
+                total_volume = int(
+                    boiling_plan_df.groupby("group_id").first()["configuration"].sum()
+                    * 0.81
+                )
+                if add_auto_boilings:
+                    request_ton = total_volume
 
         skus_req, remainings_df = parse_file_path(tmp_file_path)
+
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
         sku_plan_client = SkuPlanClient(
