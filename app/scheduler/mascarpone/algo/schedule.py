@@ -20,6 +20,9 @@ class Validator(ClassValidator):
         b1 = b1["boiling", True][-1]
         b2 = b2["boiling", True][0]
 
+        if b1.props['sourdough'] == b2.props['sourdough']:
+            validate_disjoint_by_axis(b1['boiling_process'], b2['boiling_process'], ordered=True)
+
         if sum([b1.props.get("is_cream", False), b2.props.get("is_cream", False)]) == 1:
             # one is cream and one is not
             validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"])
@@ -139,6 +142,10 @@ class BoilingPlanToSchedule:
                     int(boiling_group_df.iloc[0]["sourdough"])
                     for boiling_group_df in bg.props["boiling_group_dfs"]
                 ]
+
+            # set sourdough for each boiling
+            for i, boiling in enumerate(bg['boiling', True]):
+                boiling.props.update(sourdough=line_nums[i])
 
             self.m.block(bg,
                  push_func=AxisPusher(start_from="last_beg", start_shift=-50),
