@@ -21,7 +21,9 @@ def string_to_float(x):
     try:
         return float(x)
     except:
-        return float(x.replace(',', '.').replace(' ', ''))
+        res = x.replace(',', '.').replace(' ', '').replace('\xa0', '')
+        return float(res)
+        # return float(x.replace(',', '.').replace(' ', ''))
 
 
 # def parse_file(file):
@@ -91,12 +93,15 @@ def string_to_float(x):
 
 def parse_df(df, mode):
     if mode == 'csv':
+        print('Csv')
         df.columns = [COLUMNS["Code"], COLUMNS["Date"], COLUMNS["Fact"]]
         df[COLUMNS["Normative"]] = 0
         df[COLUMNS["Total"]] = 0
 
         df = df[[COLUMNS["Date"], COLUMNS["Code"], COLUMNS["Fact"], COLUMNS["Normative"], COLUMNS["Total"]]]
         df[COLUMNS["Fact"]] = df[COLUMNS["Fact"]].apply(lambda x: -abs(string_to_float(x)))
+
+        print(df)
 
         df_original = deepcopy(df).T
         zero_df = pd.DataFrame(3 * [[''] * df_original.shape[1]])
@@ -156,7 +161,8 @@ def parse_file(file):
 
     if filename.split('.')[-1] == 'csv':
         df = pd.read_csv(io.BytesIO(file_bytes), sep=';')
-        return  parse_df(df, 'csv')
+        print(df)
+        return parse_df(df, 'csv')
     else:
         df = pd.read_excel(io.BytesIO(file_bytes), index_col=0)
         return parse_df(df, 'xlsx')
