@@ -93,15 +93,14 @@ def string_to_float(x):
 
 def parse_df(df, mode):
     if mode == 'csv':
-        print('Csv')
         df.columns = [COLUMNS["Code"], COLUMNS["Date"], COLUMNS["Fact"]]
         df[COLUMNS["Normative"]] = 0
         df[COLUMNS["Total"]] = 0
 
         df = df[[COLUMNS["Date"], COLUMNS["Code"], COLUMNS["Fact"], COLUMNS["Normative"], COLUMNS["Total"]]]
-        df[COLUMNS["Fact"]] = df[COLUMNS["Fact"]].apply(lambda x: -abs(string_to_float(x)))
+        df[COLUMNS["Fact"]] = df[COLUMNS["Fact"]].apply(lambda x: string_to_float(x))
 
-        print(df)
+        print(df[COLUMNS["Fact"]])
 
         df_original = deepcopy(df).T
         zero_df = pd.DataFrame(3 * [[''] * df_original.shape[1]])
@@ -138,7 +137,7 @@ def parse_df(df, mode):
             )
 
             df.columns = ["Name", "Total", "Fact", "Norm"]
-            df["Fact"] = df["Fact"].apply(lambda x: -abs(string_to_float(x)))
+            df["Fact"] = df["Fact"].apply(lambda x: (string_to_float(x)))
             df_original.loc[COLUMNS["Fact"]] = df["Fact"]
 
             if list(df_original.index).index(COLUMNS["Date"]) == 2:
