@@ -20,24 +20,25 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
         df_task = pd.read_csv(path, sep=";")
         df_task.drop(df_task.index, inplace=True)
         self.df["coeff"] = self.df["boiling"].apply(lambda x: x.output_coeff)
-        for boiling_group_id, grp in self.df.groupby("batch_id"):
-            for i, row in grp.iterrows():
-                kg = round(row["original_kg"] * row["coeff"])
-                boxes_count = math.ceil(
-                    row["original_kg"]
-                    / row["sku"].in_box
-                    / row["sku"].weight_netto
-                )
+        for group_name, group_df in self.df.groupby("group"):
+            for boiling_group_id, grp in group_df.groupby("batch_id"):
+                for i, row in grp.iterrows():
+                    kg = round(row["original_kg"] * row["coeff"])
+                    boxes_count = math.ceil(
+                        row["original_kg"]
+                        / row["sku"].in_box
+                        / row["sku"].weight_netto
+                    )
 
-                values = [
-                    boiling_group_id + batch_number - 1,
-                    row["sku_name"],
-                    row["sku"].code,
-                    row["sku"].in_box,
-                    kg,
-                    boxes_count,
-                ]
-                df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+                    values = [
+                        boiling_group_id,
+                        row["sku_name"],
+                        row["sku"].code,
+                        row["sku"].in_box,
+                        kg,
+                        boxes_count,
+                    ]
+                    df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
         df_task.to_csv(path, index=False, sep=";")
 
     def draw_task_original(self, excel_client, cur_row, task_name):
