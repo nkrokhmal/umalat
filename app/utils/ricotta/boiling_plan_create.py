@@ -101,12 +101,12 @@ def handle_ricotta(df, request_ton=0):
         Order(False, ""),
         Order(False, "Ваниль"),
         Order(False, "Мед"),
+        Order(False, "Вишня"),
         Order(False, "Шоколад"),
         Order(False, "Шоколад-орех"),
     ]
     for order in orders:
         boilings_ricotta = proceed_order(order, df, boilings_ricotta)
-
     boilings_ricotta.finish()
     sum_ton = (
         pd.DataFrame(boilings_ricotta.boilings)
