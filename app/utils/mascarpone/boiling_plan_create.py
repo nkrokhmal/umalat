@@ -175,6 +175,7 @@ def handle_cream_cheese(df):
         Order("Паприка", True, ["Кремчиз"]),
         Order("Томаты", True, ["Кремчиз"]),
         Order("Травы", True, ["Кремчиз"]),
+        Order("Огурец", True, ["Кремчиз"]),
         Order("", True, ["Робиола", "Творожный"]),
     ]
     for order in orders:
