@@ -63,6 +63,9 @@ app/scheduler/butter/tests/schedules
 app/scheduler/**/*.xlsx
 db/batch_numbers/data.json
 **/schedules/*
+
 **/outputs/*
+!**/outputs/by_department
+
 research/akadaner/*xlsx
 db/batch_numbers/batches.json
