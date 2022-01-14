@@ -1,5 +1,4 @@
 from app.imports.runtime import *
-from app.scheduler import draw_excel_frontend
 from app.scheduler.butter import *
 
 
