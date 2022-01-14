@@ -156,5 +156,5 @@ class ScheduleForm(FlaskForm):
     beg_time = TimeField(
         'Начало первой подачи"',
         validators=[Optional()],
-        default=time(7, 0),
+        default=time(6, 0),
     )
