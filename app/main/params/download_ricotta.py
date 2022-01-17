@@ -11,6 +11,7 @@ def download_ricotta():
             'Название SKU': sku.name,
             'Процент': sku.made_from_boilings[0].percent,
             'Вкусовая добавка':  sku.made_from_boilings[0].flavoring_agent,
+            'Вначале': "Да" if sku.at_first else "Нет",
             'Название форм фактора': 'Рикотта',
             'Линия': 'Рикотта',
             'Имя бренда': sku.brand_name,

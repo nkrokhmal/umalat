@@ -24,6 +24,7 @@ def boiling_plan_create(df, request_ton=0):
     df["group"] = df["sku"].apply(lambda x: x.group.name)
     df["is_cream"] = df["sku"].apply(lambda x: x.made_from_boilings[0].is_cream)
     df["output_per_tank"] = df["sku"].apply(lambda x: x.output_per_tank)
+    df["at_first"] = df["sku"].apply(lambda x: x.at_first)
 
     result, boiling_number = handle_ricotta(df, request_ton=request_ton)
     result["kg"] = result["plan"]
@@ -68,13 +69,22 @@ def group_result(df):
 
 
 def proceed_order(order, df, boilings_ricotta, boilings_count=1):
-    df_filter = df[
-        (df["is_cream"] == order.is_cream)
-        & (
-            order.flavoring_agent is None
-            or df["flavoring_agent"] == order.flavoring_agent
-        )
-    ]
+    if order.at_first:
+        print('At first')
+        df_filter = df[
+            (df["at_first"] == True)
+        ]
+        print(df_filter)
+    else:
+        df_filter = df[
+            (df["at_first"] == False) &
+            (df["is_cream"] == order.is_cream)
+            & (
+                order.flavoring_agent is None
+                or df["flavoring_agent"] == order.flavoring_agent
+            )
+        ]
+
     if not df_filter.empty:
         df_filter["output"] = (
             df_filter["number_of_tanks"] * df_filter["output_per_tank"]
@@ -95,15 +105,16 @@ def proceed_order(order, df, boilings_ricotta, boilings_count=1):
 def handle_ricotta(df, request_ton=0):
     boilings_ricotta = Boilings()
     input_ton = db.session.query(RicottaLine).first().input_ton
-    Order = collections.namedtuple("Collection", "is_cream, flavoring_agent")
+    Order = collections.namedtuple("Collection", "at_first, is_cream, flavoring_agent")
     orders = [
-        Order(True, None),
-        Order(False, ""),
-        Order(False, "Ваниль"),
-        Order(False, "Мед"),
-        Order(False, "Вишня"),
-        Order(False, "Шоколад"),
-        Order(False, "Шоколад-орех"),
+        Order(True, None, None),
+        Order(False, True, None),
+        Order(False, False, ""),
+        Order(False, False, "Ваниль"),
+        Order(False, False, "Мед"),
+        Order(False, False, "Вишня"),
+        Order(False, False, "Шоколад"),
+        Order(False, False, "Шоколад-орех"),
     ]
     for order in orders:
         boilings_ricotta = proceed_order(order, df, boilings_ricotta)

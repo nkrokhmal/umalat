@@ -11,6 +11,7 @@ class RicottaSKU(SKU):
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("skus.id"), primary_key=True)
     output_per_tank = mdb.Column(mdb.Float)
+    at_first = mdb.Column(mdb.Boolean)
 
 
 class RicottaLine(Line):

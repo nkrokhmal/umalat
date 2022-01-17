@@ -157,6 +157,7 @@ def fill_sku():
     columns = [
         "Название SKU",
         "Процент",
+        "Вначале",
         "Вкусовая добавка",
         "Имя бренда",
         "Вес нетто",
@@ -183,6 +184,7 @@ def fill_sku():
             in_box=sku["Коробки"],
             output_per_tank=sku["Выход"] / sku["Количество баков"],
             code=sku["Kод"],
+            at_first=sku["Вначале"] == "Да"
         )
 
         line_name = LineName.RICOTTA
