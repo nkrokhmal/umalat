@@ -54,10 +54,10 @@ def parse_schedule_file(wb_obj):
                 if {'налив/внесение закваски', 'схватка'}.issubset(set(row_labels)):
                     cheese_maker_headers.append(row_num - 1)
 
-                if set(row_labels) == {'подача и вымешивание'}:
+                if 'подача и вымешивание' in row_labels and 'посолка' not in row_labels:
                     water_melting_headers.append(row_num + 1)
 
-                if set(row_labels) == {'подача и вымешивание', 'посолка', 'плавление/формирование'}:
+                if {'подача и вымешивание', 'посолка', 'плавление/формирование'}.issubset(set(row_labels)):
                     salt_melting_headers.append(row_num - 1)
 
                 with code('find all headers'):
@@ -82,7 +82,6 @@ def parse_schedule_file(wb_obj):
             water_melting_headers = list(sorted(water_melting_headers))
             salt_melting_headers = list(sorted(salt_melting_headers))
             packing_headers = list(sorted(packing_headers))
-
 
     parse_block(m, df,
         "boilings",
@@ -396,6 +395,6 @@ if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
     # fn = '/Users/arsenijkadaner/Desktop/2021-11-30 Расписание моцарелла.xlsx'
     fn = config.abs_path(
-            "app/data/static/samples/outputs/by_department/mozzarella/Расписание моцарелла 6.xlsx"
+            "app/data/static/samples/outputs/by_department/mozzarella/Расписание моцарелла 4.xlsx"
         )
     pprint(dict(parse_properties(fn)))
