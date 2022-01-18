@@ -140,7 +140,6 @@ def handle_ricotta(df, request_ton=0):
                         additional_df_05 = pd.DataFrame.from_dict(
                             get_popular_sku(POPULAR_NAMES[key])
                         )
-                        print("Additional")
                         boilings_ricotta = proceed_order(
                             order,
                             additional_df_05,
