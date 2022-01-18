@@ -69,12 +69,11 @@ def group_result(df):
 
 
 def proceed_order(order, df, boilings_ricotta, boilings_count=1):
+
     if order.at_first:
-        print('At first')
         df_filter = df[
             (df["at_first"] == True)
         ]
-        print(df_filter)
     else:
         df_filter = df[
             (df["at_first"] == False) &
@@ -141,6 +140,7 @@ def handle_ricotta(df, request_ton=0):
                         additional_df_05 = pd.DataFrame.from_dict(
                             get_popular_sku(POPULAR_NAMES[key])
                         )
+                        print("Additional")
                         boilings_ricotta = proceed_order(
                             order,
                             additional_df_05,
@@ -166,4 +166,5 @@ def get_popular_sku(name):
         "group": [sku.group.name],
         "is_cream": [sku.made_from_boilings[0].is_cream],
         "output_per_tank": [sku.output_per_tank],
+        "at_first": False
     }
