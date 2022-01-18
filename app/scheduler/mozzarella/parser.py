@@ -92,7 +92,8 @@ def parse_schedule_file(wb_obj):
         split_func=_split_func,
     )
 
-    parse_block(m, df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 7], start_times[0])
+    parse_block(m, df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 8], start_times[0])
+
     if water_melting_headers:
         parse_block(m,
                     df,
@@ -395,6 +396,6 @@ if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
     # fn = '/Users/arsenijkadaner/Desktop/2021-11-30 Расписание моцарелла.xlsx'
     fn = config.abs_path(
-            "app/data/static/samples/outputs/by_department/mozzarella/Расписание моцарелла 4.xlsx"
+            "app/data/static/samples/outputs/by_department/mozzarella/Расписание моцарелла 7.xlsx"
         )
     pprint(dict(parse_properties(fn)))
