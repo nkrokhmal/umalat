@@ -2,6 +2,12 @@ from utils_ak.color import *
 from utils_ak.openpyxl import *
 from app.scheduler.time import *
 
+def prepare_schedule_worksheet(ws_obj):
+    ws = cast_worksheet(ws_obj)
+    set_zoom(ws, 55)
+    set_dimensions(ws, 'column', range(1, 5), 21)
+    set_dimensions(ws, 'column', range(5, 288 * 2), 2.4)
+    set_dimensions(ws, 'row', range(1, 220), 25)
 
 def draw_schedule(schedule, style, fn=None, wb=None):
     # update styles
@@ -24,10 +30,7 @@ def draw_schedule(schedule, style, fn=None, wb=None):
 
     schedule_sheet = get_sheet_by_name(wb, 'Расписание')
 
-    set_zoom(schedule_sheet, 55)
-    set_dimensions(schedule_sheet, 'column', range(1, 5), 21)
-    set_dimensions(schedule_sheet, 'column', range(5, 288 * 2), 2.4)
-    set_dimensions(schedule_sheet, 'row', range(1, 220), 25)
+    prepare_schedule_worksheet(schedule_sheet)
 
     for b in schedule.iter():
         if b.is_leaf() and b.props.get("visible", True):
@@ -52,7 +55,7 @@ def draw_schedule(schedule, style, fn=None, wb=None):
                 font_size = b.props.get("font_size", 12)
                 # print(b.props['cls'], x1, b.x[1], b.size[0], b.size[1])
 
-                draw_block(
+                draw_merged_cell(
                     wb.worksheets[0],
                     x1,
                     b.x[1],

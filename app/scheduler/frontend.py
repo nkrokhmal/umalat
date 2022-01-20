@@ -76,7 +76,7 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
                 # print(b.props['cls'], x1, b.x[1], b.size[0], b.size[1])
 
                 try:
-                    utils.draw_block(
+                    utils.draw_merged_cell(
                         wb.worksheets[0],
                         x1 + O[0],
                         b.x[1] + O[1],
