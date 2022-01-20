@@ -45,7 +45,12 @@ def milk_project_schedule():
         milk_project_output = run_milk_project(wb, path=None, start_time=beg_time)
         prepare_start_time = beg_time
         if len(milk_project_output["boiling_plan_df"]) > 0:
-            beg_time = cast_time(milk_project_output["schedule"].y[0] - 3) # 15 minutes before milk project ends
+            beg_time = cast_time(milk_project_output["schedule"].y[0] - 3) # 15 minutes before milk project ends # todo maybe: take from parameters
+        else:
+            # when no milk project - prepare start time is before beg_time
+            prepare_start_time = cast_time(cast_t(prepare_start_time) - 12)
+            # run milk project output again to match the new timing (will be empty, but with a timeline)
+            milk_project_output = run_milk_project(wb, path=None, start_time=prepare_start_time)
 
         adygea_output = run_adygea(wb, path=None, start_time=beg_time, prepare_start_time=prepare_start_time)
 
