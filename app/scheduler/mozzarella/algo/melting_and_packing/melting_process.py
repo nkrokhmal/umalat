@@ -120,7 +120,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
 
             if "packing_configuration" in [
                 block.props["cls"] for block in mp.children
-            ]:  # todo archived: refactor
+            ]:  # todo archive: refactor
                 for block in [
                     b
                     for b in mp["packing_configuration", True]

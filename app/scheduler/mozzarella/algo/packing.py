@@ -31,7 +31,7 @@ def make_configuration_blocks(b1, b2, m, line_name, between_boilings=False):
 
         packings = list(b2.iter(cls="packing", deactivated=lambda b: b is not True, packing_team_id=packing_team_id))
         if not packings:
-            # todo archived: refactor
+            # todo archive: refactor
             if between_boilings:
                 # add one between boilings anyway
                 conf_block = m.create_block(

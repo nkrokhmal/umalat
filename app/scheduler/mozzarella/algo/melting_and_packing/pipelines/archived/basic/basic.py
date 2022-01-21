@@ -10,7 +10,7 @@ def make_melting_and_packing_basic(boiling_plan):
     boiling_plan = boiling_plan.copy()
     boiling_model = boiling_plan.iloc[0]["boiling"]
 
-    # todo archived: test and refactor
+    # todo archive: test and refactor
     assert boiling_plan[
         "bff"
     ].any(), "At least one sku should be non-Терка for now"
@@ -38,7 +38,7 @@ def make_melting_and_packing_basic(boiling_plan):
             if i >= 1 and boiling_model.line.name == LineName.WATER:
                 # non-first group - reconfigure time
                 push(meltings, maker.create_block("melting_configuration", size=(1, 0)))
-                # todo archived: remove reconfiguration when neighbour form_factors are the same
+                # todo archive: remove reconfiguration when neighbour form_factors are the same
 
             bff, ct = grp.iloc[0]["bff"], grp.iloc[0]["ct"]
 

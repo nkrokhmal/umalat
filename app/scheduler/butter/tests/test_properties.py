@@ -1,5 +1,5 @@
 from app.scheduler import load_schedules
-from app.scheduler.ricotta.properties import *
+from app.scheduler.butter.properties import *
 from pprint import pprint
 
 
@@ -21,11 +21,13 @@ def _test(path, path_prefix, *args, **kwargs):
     warnings.filterwarnings("ignore")
     utils.lazy_tester.configure(local_path=os.path.basename(path + path_prefix))
 
-    schedules = load_schedules(path, path_prefix, departments=["ricotta"])
-    outputs = cast_properties(schedules["ricotta"])
+    schedules = load_schedules(path, path_prefix, departments=["butter"])
+    outputs = cast_properties(schedules["butter"])
+
     utils.lazy_tester.log(outputs)
     utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
+    utils.lazy_tester.verbose = True
     test_batch()

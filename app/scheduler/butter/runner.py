@@ -3,7 +3,7 @@ from app.scheduler.butter import *
 from app.scheduler.butter import (
     read_boiling_plan,
     make_schedule,
-)  # todo archived: imports don't load up for some reason  from above
+)  # todo archive: imports don't load up for some reason  from above
 from app.scheduler.frontend import *
 from app.scheduler.submit import submit_schedule
 
