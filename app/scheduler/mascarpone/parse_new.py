@@ -82,6 +82,45 @@ def parse_schedule(ws_obj):
 
                     parsed_schedule['mascarpone_boilings'].append(boiling)
 
+    with code('cream cheese boilings'):
+        for i, row in enumerate(cream_cheese_rows):
+            with code('find line blocks for mascarpone'):
+                def _filter_func(group):
+                    try:
+                        return group.iloc[0]['label'] == 'охлаждение'
+                    except:
+                        return False
+
+                def _split_func(prev_row, row):
+                    try:
+                        return utils.is_int_like(row["label"].split(" ")[0]) or 'охлаждение' in row['label']
+                    except:
+                        return False
+
+                line_blocks = parse_line(df, row, split_criteria=basic_criteria(split_func=_split_func))
+                line_blocks = [line_block for line_block in line_blocks if _filter_func(line_block)]
+
+            with code('expand blocks'):
+                def expand_block(df, df_block):
+                    return df[(df['x1'].isin([df_block['x1'].min(), df_block['x1'].min() + 1])) &
+                              (df_block['x0'].min() <= df['x0']) &
+                              (df['x0'] < df_block['y0'].max())]
+
+                boiling_dfs = [expand_block(df, line_block) for line_block in line_blocks]
+
+            with code('Convert boilings to dictionaries'):
+                for boiling_df in boiling_dfs:
+                    boiling_df['label'] = np.where(boiling_df['label'].isnull(), boiling_df['color'], boiling_df['label'])
+                    boiling_df['id'] = boiling_df.apply(lambda row: row['label'] + '-' + str(row['color']), axis=1)
+                    boiling_df = boiling_df.drop_duplicates(subset='id', keep='last') # NOTE: LOSE SOME INFORMATION (since we all duplicates block from the start), unnesecary for this point. If needed duplicated blocks - another solution needed
+                    boiling = boiling_df.set_index('id').to_dict(orient='index')
+                    boiling = {'blocks': {k: [v['x0'] + cast_t(start_time) - COLUMN_SHIFT, v['y0'] + cast_t(start_time) - COLUMN_SHIFT] for k, v in boiling.items()}}
+                    boiling['boiling_id'] = None
+                    boiling['interval'] = [boiling_df['x0'].min() + cast_t(start_time) - COLUMN_SHIFT, boiling_df['y0'].max() + cast_t(start_time) - COLUMN_SHIFT]
+                    boiling['interval_time'] = list(map(cast_time, boiling['interval']))
+
+                    parsed_schedule['cream_cheese_boilings'].append(boiling)
+
     # calc boilings
     df = pd.DataFrame(parsed_schedule['mascarpone_boilings'])
 
@@ -98,6 +137,7 @@ def parse_schedule(ws_obj):
 def test():
     fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/mascarpone/Расписание маскарпоне 1.xlsx')
     df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['mascarpone_boiling_groups'])
+    df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['cream_cheese_boilings'])
     print(df)
 
 
