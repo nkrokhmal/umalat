@@ -2,6 +2,7 @@ from app.imports.runtime import *
 from app.scheduler.time import *
 from app.scheduler.parsing_new import *
 
+COLUMN_SHIFT = 5 # header 4 + 1 for one-indexing
 
 def parse_schedule(ws_obj):
     df = utils.read_merged_cells_df(ws_obj, basic_features=False)
@@ -40,7 +41,7 @@ def parse_schedule(ws_obj):
                     return False
 
 
-            def _split_func(row):
+            def _split_func(prev_row, row):
                 try:
                     return utils.is_int_like(row["label"].split(" ")[0])
                 except:
@@ -48,6 +49,7 @@ def parse_schedule(ws_obj):
 
             line_blocks = parse_line(df, row, split_criteria=basic_criteria(max_length=2, split_func=_split_func))
             line_blocks = [line_block for line_block in line_blocks if _filter_func(line_block)]
+
         with code('expand blocks'):
             def expand_block(df, df_block):
                 return df[(df['x1'].isin([df_block['x1'].min(), df_block['x1'].min() + 1])) &
@@ -59,14 +61,14 @@ def parse_schedule(ws_obj):
         with code('Convert boilings to dictionaries'):
             for boiling_df in boiling_dfs:
                 boiling = boiling_df.set_index('label').to_dict(orient='index')
-                boiling = {'blocks': {k: [v['x0'] + cast_t(start_time), v['y0'] + cast_t(start_time)] for k, v in boiling.items()}}
+                boiling = {'blocks': {k: [v['x0'] + cast_t(start_time) - COLUMN_SHIFT, v['y0'] + cast_t(start_time) - COLUMN_SHIFT] for k, v in boiling.items()}}
 
                 try:
                     boiling['boiling_id'] = int(boiling_df.iloc[0]["label"].split(" ")[0])
                 except Exception as e:
                     boiling['boiling_id'] = None
-                boiling['interval'] = [boiling_df['x0'].min() + cast_t(start_time), boiling_df['y0'].max() + cast_t(start_time)]
-                boiling['interval_time'] = [cast_time(boiling_df['x0'].min() + cast_t(start_time)), cast_time(boiling_df['y0'].max() + cast_t(start_time))]
+                boiling['interval'] = [boiling_df['x0'].min() + cast_t(start_time) - COLUMN_SHIFT, boiling_df['y0'].max() + cast_t(start_time) - COLUMN_SHIFT]
+                boiling['interval_time'] = list(map(cast_time, boiling['interval']))
                 boiling['line'] = i + 1
 
                 parsed_schedule['boilings'].append(boiling)

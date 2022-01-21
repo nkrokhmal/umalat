@@ -1,3 +1,5 @@
+from app.imports.runtime import *
+import utils_ak.iteration
 
 
 def group_intervals(intervals, split_criteria=None, interval_func=None):
@@ -8,29 +10,30 @@ def group_intervals(intervals, split_criteria=None, interval_func=None):
     intervals = list(sorted(intervals, key=lambda interval: interval_func(interval)[0]))
 
     cur_group = []
-    for interval in intervals:
+    for prev_interval, cur_interval in utils.iter_pairs(intervals, method='any_prefix'):
         if not cur_group:
-            cur_group.append(interval)
+            cur_group.append(cur_interval)
             continue
 
-        if split_criteria(cur_group, interval, interval_func):
+        if split_criteria(cur_group, prev_interval, cur_interval, interval_func):
             groups.append(cur_group)
-            cur_group = [interval]
+            cur_group = [cur_interval]
         else:
             # subsequent
-            cur_group.append(interval)
+            cur_group.append(cur_interval)
 
     if cur_group:
+        # cur_group is initialized and
         groups.append(cur_group)
     return groups
 
 
-def basic_criteria(max_length, split_func=None):
-    def _criteria(cur_group, interval, interval_func):
-        if interval_func(cur_group[-1])[-1] != interval_func(interval)[0]:
+def basic_criteria(max_length=None, split_func=None):
+    def _criteria(cur_group, prev_interval, cur_interval, interval_func):
+        if interval_func(cur_group[-1])[-1] != interval_func(cur_interval)[0]:
             return True
 
-        if split_func and split_func(interval):
+        if split_func and split_func(prev_interval, cur_interval):
             return True
 
         if max_length and len(cur_group) == max_length:
@@ -44,6 +47,7 @@ def basic_criteria(max_length, split_func=None):
 def test_group_intervals():
     intervals = [[1, 2], [4, 5], [2, 4], [10, 11]]
     intervals = list(sorted(intervals, key=lambda interval: interval[0]))
+    print(group_intervals(intervals, split_criteria=basic_criteria(max_length=2)))
     assert group_intervals(intervals, split_criteria=basic_criteria(max_length=2)) == [
         [[1, 2], [2, 4]],
         [[4, 5]],
