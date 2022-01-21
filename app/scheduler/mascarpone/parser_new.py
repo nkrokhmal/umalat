@@ -121,12 +121,13 @@ def parse_schedule(ws_obj):
     # calc boilings
     df = pd.DataFrame(parsed_schedule['mascarpone_boilings'])
 
-    parsed_schedule['mascarpone_boiling_groups'] = []
-    for boiling_id, grp in df.groupby('boiling_id'):
-        boiling = {'boiling_id': boiling_id}
-        boiling['interval'] = [min(grp['interval'].apply(lambda interval: interval[0])), max(grp['interval'].apply(lambda interval: interval[1]))]
-        boiling['interval_time'] = list(map(cast_time, boiling['interval']))
-        parsed_schedule['mascarpone_boiling_groups'].append(boiling)
+    if len(df) > 0:
+        parsed_schedule['mascarpone_boiling_groups'] = []
+        for boiling_id, grp in df.groupby('boiling_id'):
+            boiling = {'boiling_id': boiling_id}
+            boiling['interval'] = [min(grp['interval'].apply(lambda interval: interval[0])), max(grp['interval'].apply(lambda interval: interval[1]))]
+            boiling['interval_time'] = list(map(cast_time, boiling['interval']))
+            parsed_schedule['mascarpone_boiling_groups'].append(boiling)
     return parsed_schedule
 
 

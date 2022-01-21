@@ -93,6 +93,8 @@ def parse_schedule(ws_obj):
     return parsed_schedule
 
 
+
+
 def test():
     fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/ricotta/Расписание рикотта 1.xlsx')
     df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['boilings'])[['boiling_id', 'interval_time']]

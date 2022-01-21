@@ -73,9 +73,6 @@ def parse_schedule(ws_obj):
     return parsed_schedule
 
 
-def test():
-    fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/mozzarella/Расписание моцарелла 8.xlsx')
-    print(pd.DataFrame(parse_schedule((fn, 'Расписание'))))
 
 
 if __name__ == '__main__':
