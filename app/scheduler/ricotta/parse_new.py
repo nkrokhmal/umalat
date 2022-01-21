@@ -74,10 +74,7 @@ def parse_schedule(ws_obj):
                 boiling = boiling_df.set_index('label').to_dict(orient='index')
                 boiling = {'blocks': {k: [v['x0'] + cast_t(start_time) - COLUMN_SHIFT, v['y0'] + cast_t(start_time) - COLUMN_SHIFT] for k, v in boiling.items()}}
 
-                try:
-                    boiling['boiling_id'] = int(boiling_df.iloc[0]["label"].split(" ")[0])
-                except Exception as e:
-                    boiling['boiling_id'] = None
+                boiling['boiling_id'] = int(boiling_df.iloc[0]["label"].split(" ")[0])
                 boiling['interval'] = [boiling_df['x0'].min() + cast_t(start_time) - COLUMN_SHIFT, boiling_df['y0'].max() + cast_t(start_time) - COLUMN_SHIFT]
                 boiling['interval_time'] = list(map(cast_time, boiling['interval']))
                 boiling['line'] = i + 1
@@ -100,6 +97,7 @@ def test():
     fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/ricotta/Расписание рикотта 1.xlsx')
     df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['boilings'])[['boiling_id', 'interval_time']]
     print(df)
+
 
 if __name__ == '__main__':
     test()
