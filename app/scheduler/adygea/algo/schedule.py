@@ -6,6 +6,7 @@ from app.scheduler.adygea.algo.boilings import *
 from app.scheduler.time import *
 from app.models import *
 
+BOILING_NUMS = [0, 2, 1, 3]
 
 class Validator(ClassValidator):
     def __init__(self):
@@ -23,12 +24,12 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__lunch(b1, b2):
-        if b1.props['boiler_num'] >> 1 == b2.props['pair_num']: # 0, 1 -> 0, 2, 3 -> 1
+        if BOILING_NUMS.index(b1.props['boiler_num']) % 2 == b2.props['pair_num']:
             validate_disjoint_by_axis(b1, b2, ordered=True)
 
     @staticmethod
     def validate__lunch__boiling(b1, b2):
-        if b2.props['boiler_num'] >> 1 == b1.props['pair_num']: # 0, 1 -> 0, 2, 3 -> 1
+        if BOILING_NUMS.index(b2.props['boiler_num']) % 2 == b1.props['pair_num']:
             validate_disjoint_by_axis(b1, b2, ordered=True)
 
     @staticmethod
@@ -77,20 +78,19 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
 20          18  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>"""
 
     adygea_cleaning = cast_model(Washer, 'adygea_cleaning')
-    cur_boiler_num = 0
     cur_boiling_id = boiling_plan_df['boiling_id'].iloc[0] + first_boiling_id - 1
 
+    boiling_num_generator = itertools.cycle(BOILING_NUMS)
     # todo maybe: a little bit messy with boiling_id, cur_boiling_id and n_baths
     for ind, grp in boiling_plan_df.groupby('boiling_id'):
         row = grp.iloc[0]
         for _ in range(row['n_baths']):
+            cur_boiler_num = next(boiling_num_generator)
             boiling = make_boiling(row['boiling'], boiling_id=cur_boiling_id, boiler_num=cur_boiler_num, group_name=row['sku'].group.name)
             push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30, min_start=local_start_t), validator=Validator())
-            cur_boiler_num = (cur_boiler_num + 1) % 4
-
             with code('Push lunch if needed'):
                 if normed_lunch_times:
-                    pair_num = cur_boiler_num % 2
+                    pair_num = BOILING_NUMS.index(cur_boiler_num) % 2
                     if normed_lunch_times[pair_num] and cast_time(boiling.y[0]) >= normed_lunch_times[pair_num]:
                         push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(normed_lunch_times[pair_num]), min_start=local_start_t), validator=Validator())
                         normed_lunch_times[pair_num] = None # pushed lunch, nonify lunch time
