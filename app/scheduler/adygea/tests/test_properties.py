@@ -1,11 +1,11 @@
 from app.imports.runtime import *
-from app.scheduler.mozzarella.parser import parse_properties
+from app.scheduler.adygea.parser import parse_properties
 
 
 def test_batch():
     fns = glob.glob(
         config.abs_path(
-            "app/data/static/samples/outputs/by_department/mozzarella/*.xlsx"
+            "app/data/static/samples/outputs/by_department/milk_project/*.xlsx"
         )
     )
     fns = [fn for fn in fns if "$" not in fn]
@@ -14,6 +14,7 @@ def test_batch():
 
 
 def _test(fn, *args, **kwargs):
+    utils.lazy_tester.verbose = True
     utils.lazy_tester.configure_function_path()
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
     output = parse_properties(fn)

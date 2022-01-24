@@ -50,8 +50,9 @@ def fill_properties(parsed_schedule):
 
     # save boiling_model to parsed_schedule blocks
     boilings = list(sorted(parsed_schedule.iter(cls='boiling'), key=lambda boiling: boiling.y[0]))
-    props.n_boilings = len(boilings)
-    props.end_time = cast_human_time(boilings[-1].y[0])
+    if boilings:
+        props.n_boilings = len(boilings)
+        props.end_time = cast_human_time(boilings[-1].y[0])
     return props
 
 
