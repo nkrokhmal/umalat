@@ -17,14 +17,14 @@ def test_batch():
     )
     fns = [fn for fn in fns if "$" not in fn]
     for fn in utils.tqdm(fns, desc=lambda v: v):
-        _test(fn, open_file=False)
+        _test(fn, open_file=True)
 
 
 if __name__ == "__main__":
-    _test(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 3.xlsx",
-        open_file=True,
-    )
-    # test_batch()
+    # _test(
+    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 2.xlsx",
+    #     open_file=True,
+    # )
+    test_batch()
 
 
