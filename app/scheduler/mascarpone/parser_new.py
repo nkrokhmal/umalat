@@ -68,6 +68,7 @@ def parse_schedule(ws_obj):
             with code('Convert boilings to dictionaries'):
                 for boiling_df in boiling_dfs:
                     boiling_df['label'] = np.where(boiling_df['label'].isnull(), boiling_df['color'], boiling_df['label'])
+                    boiling_df['is_cream'] = boiling_df['label'].apply(lambda s: 'сливок' in s)
                     boiling_df['id'] = boiling_df.apply(lambda row: row['label'] + '-' + str(row['color']), axis=1)
                     boiling = boiling_df.set_index('id').to_dict(orient='index')
                     boiling = {'blocks': {k: [v['x0'] + cast_t(start_time) - COLUMN_SHIFT, v['y0'] + cast_t(start_time) - COLUMN_SHIFT] for k, v in boiling.items()}}
@@ -76,7 +77,7 @@ def parse_schedule(ws_obj):
                     boiling['interval'] = [boiling_df['x0'].min() + cast_t(start_time) - COLUMN_SHIFT, boiling_df['y0'].max() + cast_t(start_time) - COLUMN_SHIFT]
                     boiling['interval_time'] = list(map(cast_time, boiling['interval']))
                     boiling['line'] = i + 1
-
+                    boiling['type'] = 'cream' if boiling_df['is_cream'].any() else 'mascarpone'
                     parsed_schedule['mascarpone_boilings'].append(boiling)
 
     with code('cream cheese boilings'):
@@ -115,7 +116,7 @@ def parse_schedule(ws_obj):
                     boiling['boiling_id'] = None
                     boiling['interval'] = [boiling_df['x0'].min() + cast_t(start_time) - COLUMN_SHIFT, boiling_df['y0'].max() + cast_t(start_time) - COLUMN_SHIFT]
                     boiling['interval_time'] = list(map(cast_time, boiling['interval']))
-
+                    boiling['type'] = 'cream_cheese'
                     parsed_schedule['cream_cheese_boilings'].append(boiling)
 
     # calc boilings
@@ -127,6 +128,7 @@ def parse_schedule(ws_obj):
             boiling = {'boiling_id': boiling_id}
             boiling['interval'] = [min(grp['interval'].apply(lambda interval: interval[0])), max(grp['interval'].apply(lambda interval: interval[1]))]
             boiling['interval_time'] = list(map(cast_time, boiling['interval']))
+            boiling['type'] = grp.iloc[0]['type']
             parsed_schedule['mascarpone_boiling_groups'].append(boiling)
     return parsed_schedule
 
@@ -137,7 +139,6 @@ def test():
     df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['mascarpone_boiling_groups'])
     df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['cream_cheese_boilings'])
     print(df)
-
 
 if __name__ == '__main__':
     test()
