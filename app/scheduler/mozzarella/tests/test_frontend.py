@@ -20,7 +20,7 @@ def _test(fn, *args, **kwargs):
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
     outputs = run_mozzarella(fn, *args, **kwargs)
     utils.lazy_tester.log(outputs["schedule"])
-    utils.lazy_tester.assert_logs()
+    utils.lazy_tester.assert_logs(reset=False)
 
 
 if __name__ == "__main__":
@@ -30,12 +30,12 @@ if __name__ == "__main__":
     #     #     "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2) 1.xlsx"
     #     # ),
     #     # "/Users/marklidenberg/Downloads/test.xlsx",
-    #     '/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 11.xlsx',
+    #     '/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 16.xlsx',
     #     # "/Users/marklidenberg/Desktop/2021_09_22_План_по_варкам_моцарелла_1.xlsx",
     #     # start_times={LineName.WATER: "07:35", LineName.SALT: "05:25"},
     #     first_boiling_id=1,
     #     open_file=True,
-    #     prefix="new5",
-    #     optimize=False,
+    #     prefix="new6",
+    #     optimize=True,
     # )
     test_batch()
