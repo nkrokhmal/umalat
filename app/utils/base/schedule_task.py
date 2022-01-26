@@ -23,12 +23,6 @@ class BaseScheduleTask(Generic[ModelType]):
         if "sku_name" not in self.df.columns:
             self.df["sku_name"] = self.df["sku"].apply(lambda x: x.name)
 
-        if "group_id" not in self.df.columns:
-            if "boiling_id" not in self.df.columns:
-                raise Exception("No column with boiling number in dataframe")
-            else:
-                self.df["group_id"] = self.df["boiling_id"]
-
         if "original_kg" not in self.df.columns:
             if "kg" not in self.df.columns:
                 raise Exception("No column with kg in dataframe")
@@ -38,7 +32,7 @@ class BaseScheduleTask(Generic[ModelType]):
         if "line" in self.df.columns:
             self.df["line"] = self.df["line"].apply(lambda x: x.name)
 
-    def update_boiling_schedule_task(self, batch_number):
+    def update_boiling_schedule_task(self):
         data_dir = create_dir(
             self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
             flask.current_app.config["TASK_FOLDER"]
@@ -52,7 +46,7 @@ class BaseScheduleTask(Generic[ModelType]):
         df_task = pd.read_csv(path, sep=";")
         df_task.drop(df_task.index, inplace=True)
 
-        for boiling_group_id, grp in self.df.groupby("group_id"):
+        for batch_id, grp in self.df.groupby("absolute_batch_id"):
             for i, row in grp.iterrows():
                 if row["sku"].group.name != "Качокавалло":
                     kg = round(row["original_kg"])
@@ -66,7 +60,7 @@ class BaseScheduleTask(Generic[ModelType]):
                     boxes_count = ""
 
                 values = [
-                    boiling_group_id + batch_number - 1,
+                    batch_id,
                     row["sku_name"],
                     row["sku"].code,
                     row["sku"].in_box,
@@ -136,10 +130,10 @@ class BaseScheduleTask(Generic[ModelType]):
         return cur_row
 
     def draw_task_boiling(
-            self, excel_client, cur_row, task_name, batch_number
+            self, excel_client, cur_row, task_name
     ):
         cur_row, excel_client = draw_header(excel_client, self.date, cur_row, task_name, "варки")
-        for boiling_group_id, grp in self.df.groupby("group_id"):
+        for batch_id, grp in self.df.groupby("absolute_batch_id"):
             for i, row in grp.iterrows():
                 if row["sku"].group.name != "Качокавалло":
                     kg = round(row["original_kg"])
@@ -153,7 +147,7 @@ class BaseScheduleTask(Generic[ModelType]):
                     boxes_count = ""
 
                 values = [
-                    boiling_group_id + batch_number - 1,
+                    batch_id,
                     row["sku_name"],
                     row["sku"].in_box,
                     kg,
@@ -182,7 +176,7 @@ class BaseScheduleTask(Generic[ModelType]):
         cur_row += space_row
         return wb, cur_row
 
-    def schedule_task_boilings(self, wb, batch_number, sheet_name="Печать заданий 2", cur_row=2):
+    def schedule_task_boilings(self, wb, sheet_name="Печать заданий 2", cur_row=2):
         task_name = f"Задание на упаковку {self.department}"
 
         space_row = 4
@@ -195,7 +189,6 @@ class BaseScheduleTask(Generic[ModelType]):
             excel_client,
             cur_row,
             task_name,
-            batch_number,
         )
         cur_row += space_row
         return wb, cur_row

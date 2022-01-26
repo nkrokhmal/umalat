@@ -38,9 +38,6 @@ def mascarpone_schedule():
         cream_cheese_batch_number = form.cream_cheese_batch_number.data
         cottage_cheese_batch_number = form.cottage_cheese_batch_number.data
 
-        # todo next: make properly @nkrokhmal
-        batch_number = mascarpone_batch_number
-
         data_dir = os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
             date.strftime("%Y-%m-%d"),
@@ -94,7 +91,7 @@ def mascarpone_schedule():
         )
 
         schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task(batch_number)
+        schedule_task.update_boiling_schedule_task()
 
         schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
         # schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)

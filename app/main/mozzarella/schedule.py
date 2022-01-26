@@ -63,7 +63,7 @@ def mozzarella_schedule():
             start_times=start_times,
             optimize=optimize,
             optimize_cleanings=add_full_boiling,
-            first_boiling_id=int(form.batch_number.data),
+            first_batch_id=int(form.batch_number.data),
             date=date,
         )
 

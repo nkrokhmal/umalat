@@ -217,4 +217,5 @@ def read_boiling_plan(wb_obj, saturate=True):
 
     if saturate:
         df = saturate_boiling_plan(df)
+    df['batch_type'] = 'ricotta'
     return df

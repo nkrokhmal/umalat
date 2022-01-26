@@ -34,7 +34,7 @@ def adygea_schedule():
             data_only=True,
         )
 
-        boiling_plan_df = read_boiling_plan(wb)
+        boiling_plan_df = read_boiling_plan(wb, first_batch_id=form.batch_number.data)
         add_batch(
             date,
             "Адыгейский цех",
@@ -59,7 +59,7 @@ def adygea_schedule():
         )
 
         schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task(form.batch_number.data)
+        schedule_task.update_boiling_schedule_task()
 
         schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
         # schedule_wb, _ = schedule_task.schedule_task_boilings(

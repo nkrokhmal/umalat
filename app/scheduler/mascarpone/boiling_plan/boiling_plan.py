@@ -121,7 +121,6 @@ def read_boiling_plan(wb_obj, as_boilings=True):
 
     df = pd.DataFrame(values)
 
-
     with code("Get type"):
         def get_type(name):
             if 'сливки' in name.lower():
@@ -139,4 +138,6 @@ def read_boiling_plan(wb_obj, as_boilings=True):
                     'Неизвестный тип максарпоне. В названии должен присутствовать один из типов: Сливки, Кремчиз, Робиола, Творожный, Маскарпоне')
 
         df['full_type'] = df['sku'].apply(lambda sku: get_type(sku.name))
+
+    df['batch_type'] = df['full_type']
     return df

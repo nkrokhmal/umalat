@@ -40,7 +40,7 @@ class Validator(ClassValidator):
         pass
 
 
-def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prepare_start_time='07:00', lunch_times=None):
+def _make_schedule(boiling_plan_df, start_time='07:00', prepare_start_time='07:00', lunch_times=None):
     lunch_times = lunch_times or []
     lunch_times = list(lunch_times)
     assert len(lunch_times) in [0, 2] # no lunches or two lunches for two teams
@@ -57,7 +57,7 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
 
 
     """example: boiling_plan_df example
-     boiling_id            sku  n_baths    kg            boiling
+     batch_id            sku  n_baths    kg            boiling
 0            1  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
 1            2  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
 2            3  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
@@ -81,24 +81,20 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
 20          18  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>"""
 
     adygea_cleaning = cast_model(Washer, 'adygea_cleaning')
-    cur_boiling_id = boiling_plan_df['boiling_id'].iloc[0] + first_boiling_id - 1
 
     boiling_num_generator = itertools.cycle(BOILING_NUMS)
-    # todo maybe: a little bit messy with boiling_id, cur_boiling_id and n_baths
-    for ind, grp in boiling_plan_df.groupby('boiling_id'):
+    # todo maybe: a little bit messy with batch_id, cur_batch_id and n_baths
+    for batch_id, grp in boiling_plan_df.groupby('batch_id'):
         row = grp.iloc[0]
-        for _ in range(row['n_baths']):
-            cur_boiler_num = next(boiling_num_generator)
-            pair_num = BOILING_NUMS.index(cur_boiler_num) % 2
-            boiling = make_boiling(row['boiling'], boiling_id=cur_boiling_id, boiler_num=cur_boiler_num, group_name=row['sku'].group.name, pair_num=pair_num)
-            push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30, min_start=local_start_t), validator=Validator())
-            with code('Push lunch if needed'):
-                if normed_lunch_times:
-                    if normed_lunch_times[pair_num] and cast_time(boiling.y[0]) >= normed_lunch_times[pair_num]:
-                        push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(normed_lunch_times[pair_num]), min_start=local_start_t), validator=Validator())
-                        normed_lunch_times[pair_num] = None # pushed lunch, nonify lunch time
-
-            cur_boiling_id += 1
+        cur_boiler_num = next(boiling_num_generator)
+        pair_num = BOILING_NUMS.index(cur_boiler_num) % 2
+        boiling = make_boiling(row['boiling'], batch_id=batch_id, boiler_num=cur_boiler_num, group_name=row['sku'].group.name, pair_num=pair_num)
+        push(m.root, boiling, push_func=AxisPusher(start_from='last_beg', start_shift=-30, min_start=local_start_t), validator=Validator())
+        with code('Push lunch if needed'):
+            if normed_lunch_times:
+                if normed_lunch_times[pair_num] and cast_time(boiling.y[0]) >= normed_lunch_times[pair_num]:
+                    push(m.root, make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num), push_func=AxisPusher(start_from=cast_t(normed_lunch_times[pair_num]), min_start=local_start_t), validator=Validator())
+                    normed_lunch_times[pair_num] = None # pushed lunch, nonify lunch time
 
     with code('Push lunches if not pushed yet'):
         for pair_num, lunch_time in enumerate(normed_lunch_times):
@@ -117,9 +113,8 @@ def _make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prep
     return m.root
 
 
-def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prepare_start_time='07:00'):
+def make_schedule(boiling_plan_df, start_time='07:00', prepare_start_time='07:00'):
     no_lunch_schedule = _make_schedule(boiling_plan_df,
-                                       first_boiling_id,
                                        start_time=start_time,
                                        prepare_start_time=prepare_start_time)
 
@@ -184,7 +179,6 @@ def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00', prepa
                 continue
 
     return _make_schedule(boiling_plan_df,
-                          first_boiling_id,
                           start_time=start_time,
                           prepare_start_time=prepare_start_time,
                           lunch_times=lunch_times)

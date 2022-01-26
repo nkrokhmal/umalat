@@ -6,7 +6,7 @@ from app.utils.features.draw_utils import *
 
 
 class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
-    def update_boiling_schedule_task(self, batch_number):
+    def update_boiling_schedule_task(self):
         data_dir = create_dir(
             self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
             flask.current_app.config["TASK_FOLDER"]

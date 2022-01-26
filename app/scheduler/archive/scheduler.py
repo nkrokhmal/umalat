@@ -45,7 +45,7 @@ class Scheduler:
         schedule = self.scheduler_maker.make_schedule(
             boiling_plan_df,
             start_times=start_times,
-            first_boiling_id=first_boiling_id,
+            first_batch_id=first_boiling_id,
         )
 
         try:

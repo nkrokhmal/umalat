@@ -15,7 +15,6 @@ def run_ricotta(
     utils.makedirs(path)
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
     start_time = start_time or "07:00"
-
     if not schedule:
         schedule = make_schedule(
             boiling_plan_df, start_time=start_time, first_boiling_id=first_boiling_id

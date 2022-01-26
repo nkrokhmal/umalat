@@ -57,5 +57,5 @@ def read_boiling_plan(wb_obj):
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MilkProjectSKU, sku))
 
     df = saturate_boiling_plan(df)
-
+    df['batch_type'] = 'milk_project'
     return df

@@ -233,6 +233,7 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
     # batch_id and boiling_id are the same as group_id
     df['batch_id'] = df['group_id']
     df['boiling_id'] = df['group_id']
+    df['batch_type'] = 'mozzarella'
     return df
 
 

@@ -48,7 +48,7 @@ def read_boiling_plan(wb_obj):
     # batch_id and boiling_id are the same with group_id
     df["batch_id"] = df["group_id"]
     df["boiling_id"] = df["group_id"]
-
+    df['batch_type'] = 'butter'
     df["sku"] = df["sku"].apply(lambda sku: cast_model(ButterSKU, sku))
 
     df = saturate_boiling_plan(df)

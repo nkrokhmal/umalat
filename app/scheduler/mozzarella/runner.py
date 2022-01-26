@@ -21,7 +21,7 @@ def run_mozzarella(
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
 
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
-
+    print(boiling_plan_df.iloc[0])
     if not schedule:
         schedule = make_schedule(
             boiling_plan_df,
@@ -30,6 +30,8 @@ def run_mozzarella(
             start_times=start_times,
             first_boiling_id=first_boiling_id,
         )
+    print(boiling_plan_df.iloc[0])
+    exit(1)
     try:
         frontend = wrap_frontend(schedule)
     except Exception as e:
