@@ -55,12 +55,12 @@ def mascarpone_schedule():
         boiling_plan_df['group'] = boiling_plan_df['sku'].apply(lambda x: x.group.name)
 
         for batch_type, grp in boiling_plan_df.groupby('batch_type'):
-            group = [g for g in MASCARPONE_GROUPS if g[0] == f'{batch_type}_batch_number']
+            group = [g for g in MASCARPONE_GROUPS if g[0] == f'{batch_type}_batch_number'][0][1]
             add_batch(
                 date=date,
                 department_name="Маскарпоновый цех",
-                beg_number=grp['absolute_batch_id'].min(),
-                end_number=grp['absolute_batch_id'].max(),
+                beg_number=int(grp['absolute_batch_id'].min()),
+                end_number=int(grp['absolute_batch_id'].max()),
                 group=group,
             )
 

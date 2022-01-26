@@ -45,12 +45,11 @@ def mozzarella_schedule():
         boiling_plan_df = cast_boiling_plan(wb, first_batch_id=form.batch_number.data)
         additional_packing_df = read_additional_packing(wb)
         # todo: check boiling_plan_task
-
         add_batch(
             date,
             "Моцарельный цех",
-            boiling_plan_df['absolute_batch_id'].min(),
-            boiling_plan_df['absolute_batch_id'].max(),
+            int(boiling_plan_df['absolute_batch_id'].min()),
+            int(boiling_plan_df['absolute_batch_id'].max()),
         )
 
         start_times = {
@@ -140,6 +139,7 @@ def mozzarella_schedule():
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
+
     form.batch_number.data = (
         BatchNumber.last_batch_number(
             datetime.today() + timedelta(days=1),

@@ -2,6 +2,7 @@ import openpyxl
 
 from app.imports.runtime import *
 from app.scheduler import *
+from app.scheduler.drawing import prepare_schedule_worksheet
 
 from utils_ak.block_tree import *
 
@@ -10,7 +11,7 @@ def run_consolidated(
     input_path,
     prefix="",
     departments=None,
-    add_contour_cleanings=False,
+    add_contour_cleanings=True,
     output_path="outputs/",
     wb=None,
     open_file=False
@@ -21,7 +22,6 @@ def run_consolidated(
         "milk_project",
         "butter",
         "mascarpone",
-        "adygea",
     ]
     utils.makedirs(output_path)
 

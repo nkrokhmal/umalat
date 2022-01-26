@@ -8,6 +8,7 @@ def prepare_schedule_worksheet(ws_obj):
     set_dimensions(ws, 'column', range(1, 5), 21)
     set_dimensions(ws, 'column', range(5, 288 * 2), 2.4)
     set_dimensions(ws, 'row', range(1, 220), 25)
+    return ws
 
 def draw_schedule(schedule, style, fn=None, wb=None):
     # update styles

@@ -3,7 +3,7 @@ import flask
 from app.imports.runtime import *
 
 from app.main import main
-from app.scheduler import run_adygea, run_milk_project, run_consolidated
+from app.scheduler import run_adygea, run_milk_project, run_consolidated_old
 from app.models import MilkProjectSKU, AdygeaSKU
 
 from app.utils.batches.batch import *
@@ -72,26 +72,30 @@ def milk_project_schedule():
                     ),
                 )
 
-        schedule_wb = run_consolidated(
-            departments=['milk_project', 'adygea'],
+        schedule_wb = run_consolidated_old(
             input_path=None,
             prefix=None,
             output_path=None,
+            schedules={
+                "milk_project": milk_project_output["schedule"],
+                "adygea": adygea_output["schedule"],
+            },
+            date=date
         )
 
         if len(milk_project_output["boiling_plan_df"]) > 0:
             add_batch(
                 date,
                 "Милкпроджект",
-                milk_project_output["boiling_plan_df"]['absolute_batch_id'].min(),
-                milk_project_output["boiling_plan_df"]['absolute_batch_id'].max()
+                int(milk_project_output["boiling_plan_df"]['absolute_batch_id'].min()),
+                int(milk_project_output["boiling_plan_df"]['absolute_batch_id'].max())
             )
         if len(adygea_output["boiling_plan_df"]) > 0:
             add_batch(
                 date,
                 "Адыгейский цех",
-                adygea_output["boiling_plan_df"]['absolute_batch_id'].min(),
-                adygea_output["boiling_plan_df"]['absolute_batch_id'].max()
+                int(adygea_output["boiling_plan_df"]['absolute_batch_id'].min()),
+                int(adygea_output["boiling_plan_df"]['absolute_batch_id'].max())
             )
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"

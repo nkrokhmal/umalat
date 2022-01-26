@@ -42,8 +42,8 @@ def butter_schedule():
         add_batch(
             date,
             "Масло цех",
-            boiling_plan_df['absolute_batch_id'].min(),
-            boiling_plan_df['absolute_batch_id'].max(),
+            int(boiling_plan_df['absolute_batch_id'].min()),
+            int(boiling_plan_df['absolute_batch_id'].max()),
         )
         schedule = make_schedule(boiling_plan_df, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)
