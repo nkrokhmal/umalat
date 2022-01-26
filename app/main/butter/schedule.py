@@ -8,7 +8,7 @@ from app.scheduler.butter.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
-from app.utils.butter.schedule_tasks import ButterScheduleTask
+from app.main.butter.update_task_and_batches import update_task_and_batches
 from .forms import ScheduleForm
 
 
@@ -52,10 +52,8 @@ def butter_schedule():
         )
 
         add_batch_from_boiling_plan_df(date, 'Масло цех', boiling_plan_df)
-        schedule_task = ButterScheduleTask(
-            df=boiling_plan_df, date=date, model=ButterSKU, department="Маслоцех"
-        )
-        schedule_task.update_schedule_task()
+
+        schedule_task = update_task_and_batches(schedule_wb)
 
         schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb)
 

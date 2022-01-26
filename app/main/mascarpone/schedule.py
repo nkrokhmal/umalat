@@ -13,13 +13,7 @@ from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_n
 from .forms import ScheduleForm
 
 
-MASCARPONE_GROUPS = [
-    ('mascarpone_batch_number', 'Маскарпоне'),
-    ('cream_cheese_batch_number', 'Кремчиз'),
-    ('robiola_batch_number', 'Робиола'),
-    ('cottage_cheese_batch_number', 'Творожный'),
-    ('cream_batch_number', 'Сливки'),
-]
+BATCH_TYPES = ['mascarpone', 'cream_cheese', 'robiola', 'cottage_cheese', 'cream']
 
 @main.route("/mascarpone_schedule", methods=["GET", "POST"])
 @flask_login.login_required
@@ -54,15 +48,7 @@ def mascarpone_schedule():
                                                                   'cottage_cheese': form.cottage_cheese_batch_number.data})
         boiling_plan_df['group'] = boiling_plan_df['sku'].apply(lambda x: x.group.name)
 
-        for batch_type, grp in boiling_plan_df.groupby('batch_type'):
-            group = [g for g in MASCARPONE_GROUPS if g[0] == f'{batch_type}_batch_number'][0][1]
-            add_batch(
-                date=date,
-                department_name="Маскарпоновый цех",
-                beg_number=int(grp['absolute_batch_id'].min()),
-                end_number=int(grp['absolute_batch_id'].max()),
-                group=group,
-            )
+        add_batch_from_boiling_plan_df(date, 'Маскарпонный цех', boiling_plan_df)
 
         schedule = make_schedule(boiling_plan_df, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)
@@ -94,11 +80,12 @@ def mascarpone_schedule():
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
-    for attr, group in MASCARPONE_GROUPS:
-        getattr(form, attr).data = BatchNumber.last_batch_number(
+
+    for batch_type in BATCH_TYPES:
+        getattr(form, f'{batch_type}_batch_number').data = BatchNumber.last_batch_number(
             date=datetime.today() + timedelta(days=1),
             department_name="Маскарпоновый цех",
-            group=group,
+            group=batch_type,
         ) + 1
 
     return flask.render_template("mascarpone/schedule.html", form=form, filename=None)
