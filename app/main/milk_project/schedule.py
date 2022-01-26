@@ -12,6 +12,8 @@ from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_n
 from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.scheduler.time import *
+from app.main.adygea.update_task_and_batches import update_task_and_batches as update_task_and_batches_adygea
+from app.main.milk_project.update_task_and_batches import update_task_and_batches as update_task_and_batches_milk_project
 
 from .forms import ScheduleForm
 from collections import namedtuple
@@ -41,11 +43,10 @@ def milk_project_schedule():
             ),
             data_only=True,
         )
-
+        first_batch_ids = {'milk_project': form.batch_number.data}
         milk_project_output = run_milk_project(wb,
                                                path=None,
-                                               start_time=beg_time,
-                                               first_batch_id=form.batch_number.data)
+                                               start_time=beg_time)
         prepare_start_time = beg_time
         if len(milk_project_output["boiling_plan_df"]) > 0:
             beg_time = cast_time(milk_project_output["schedule"].y[0] - 3) # 15 minutes before milk project ends # todo maybe: take from parameters
@@ -58,8 +59,7 @@ def milk_project_schedule():
         adygea_output = run_adygea(wb,
                                    path=None,
                                    start_time=beg_time,
-                                   prepare_start_time=prepare_start_time,
-                                   first_batch_id=form.batch_number.data)
+                                   prepare_start_time=prepare_start_time)
 
         if (
             len(adygea_output["boiling_plan_df"]) > 0
@@ -80,65 +80,26 @@ def milk_project_schedule():
                 "milk_project": milk_project_output["schedule"],
                 "adygea": adygea_output["schedule"],
             },
-            date=date
+            date=date,
+            wb=wb
         )
+        utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))
 
-        if len(milk_project_output["boiling_plan_df"]) > 0:
-            add_batch(
-                date,
-                "Милкпроджект",
-                int(milk_project_output["boiling_plan_df"]['absolute_batch_id'].min()),
-                int(milk_project_output["boiling_plan_df"]['absolute_batch_id'].max())
-            )
-        if len(adygea_output["boiling_plan_df"]) > 0:
-            add_batch(
-                date,
-                "Адыгейский цех",
-                int(adygea_output["boiling_plan_df"]['absolute_batch_id'].min()),
-                int(adygea_output["boiling_plan_df"]['absolute_batch_id'].max())
-            )
-
-        filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
-        filename_schedule_pickle = (
-            f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
-        )
-
-        ScheduleTaskParams = namedtuple(
-            "ScheduleTaskParams", "task,df,model,department"
-        )
-
-        schedule_task_params = [
-            ScheduleTaskParams(
-                task=MilkProjectScheduleTask,
-                df=milk_project_output["boiling_plan_df"],
-                model=MilkProjectSKU,
-                department="Милкпроджект",
-            ),
-            ScheduleTaskParams(
-                task=AdygeaScheduleTask,
-                df=adygea_output["boiling_plan_df"],
-                model=AdygeaSKU,
-                department="Адыгейский цех",
-            ),
+        schedule_tasks = [
+            update_task_and_batches_milk_project(schedule_wb), update_task_and_batches_adygea(schedule_wb)
         ]
 
         cur_row = 2
-        for schedule_task_param in schedule_task_params:
-            schedule_task = schedule_task_param.task(
-                df=schedule_task_param.df,
-                date=date,
-                model=schedule_task_param.model,
-                department=schedule_task_param.department,
-            )
-
-            schedule_task.update_total_schedule_task()
-            schedule_task.update_boiling_schedule_task()
-
+        for schedule_task in schedule_tasks:
             schedule_wb, cur_row = schedule_task.schedule_task_original(schedule_wb, cur_row=cur_row)
             # schedule_wb, cur_row = schedule_task.schedule_task_boilings(
             #     schedule_wb, form.batch_number.data, cur_row=cur_row
             # )
 
+        filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
+        filename_schedule_pickle = (
+            f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
+        )
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(
             milk_project_output["schedule"].to_dict(),
