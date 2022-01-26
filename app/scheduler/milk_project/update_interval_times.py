@@ -1,9 +1,10 @@
-from app.scheduler.butter.parser_new import  parse_schedule
+from app.imports.runtime import *
+from app.scheduler.milk_project.parser_new import  parse_schedule
 
 
 def update_interval_times(schedule_wb, boiling_plan_df):
     schedule_info = parse_schedule((schedule_wb, 'Расписание'))
-    boilings = schedule_info['boilings']
+    boilings = schedule_info['milk_project_boilings']
     boilings = list(sorted(boilings, key=lambda b: b['interval'][0]))
 
     for i, (batch_id, grp) in enumerate(boiling_plan_df.groupby('absolute_batch_id')):
