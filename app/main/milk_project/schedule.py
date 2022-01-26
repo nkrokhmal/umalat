@@ -42,7 +42,10 @@ def milk_project_schedule():
             data_only=True,
         )
 
-        milk_project_output = run_milk_project(wb, path=None, start_time=beg_time)
+        milk_project_output = run_milk_project(wb,
+                                               path=None,
+                                               start_time=beg_time,
+                                               first_batch_id=form.batch_number.data)
         prepare_start_time = beg_time
         if len(milk_project_output["boiling_plan_df"]) > 0:
             beg_time = cast_time(milk_project_output["schedule"].y[0] - 3) # 15 minutes before milk project ends # todo maybe: take from parameters
@@ -52,7 +55,11 @@ def milk_project_schedule():
             # run milk project output again to match the new timing (will be empty, but with a timeline)
             milk_project_output = run_milk_project(wb, path=None, start_time=prepare_start_time)
 
-        adygea_output = run_adygea(wb, path=None, start_time=beg_time, prepare_start_time=prepare_start_time)
+        adygea_output = run_adygea(wb,
+                                   path=None,
+                                   start_time=beg_time,
+                                   prepare_start_time=prepare_start_time,
+                                   first_batch_id=form.batch_number.data)
 
         if (
             len(adygea_output["boiling_plan_df"]) > 0
@@ -66,33 +73,25 @@ def milk_project_schedule():
                 )
 
         schedule_wb = run_consolidated(
+            departments=['milk_project', 'adygea'],
             input_path=None,
             prefix=None,
             output_path=None,
-            schedules={
-                "milk_project": milk_project_output["schedule"],
-                "adygea": adygea_output["schedule"],
-            },
-            date=date
         )
 
         if len(milk_project_output["boiling_plan_df"]) > 0:
             add_batch(
                 date,
                 "Милкпроджект",
-                form.batch_number.data,
-                form.batch_number.data
-                + int(milk_project_output["boiling_plan_df"]["boiling_id"].max())
-                - 1,
+                milk_project_output["boiling_plan_df"]['absolute_batch_id'].min(),
+                milk_project_output["boiling_plan_df"]['absolute_batch_id'].max()
             )
         if len(adygea_output["boiling_plan_df"]) > 0:
             add_batch(
                 date,
                 "Адыгейский цех",
-                form.batch_number.data,
-                form.batch_number.data
-                + int(adygea_output["boiling_plan_df"]["boiling_id"].max())
-                - 1,
+                adygea_output["boiling_plan_df"]['absolute_batch_id'].min(),
+                adygea_output["boiling_plan_df"]['absolute_batch_id'].max()
             )
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
@@ -129,7 +128,7 @@ def milk_project_schedule():
             )
 
             schedule_task.update_total_schedule_task()
-            schedule_task.update_boiling_schedule_task(form.batch_number.data)
+            schedule_task.update_boiling_schedule_task()
 
             schedule_wb, cur_row = schedule_task.schedule_task_original(schedule_wb, cur_row=cur_row)
             # schedule_wb, cur_row = schedule_task.schedule_task_boilings(

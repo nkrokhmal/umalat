@@ -21,8 +21,8 @@ def test_batch():
 
 
 if __name__ == "__main__":
-    # _test(
-    #     "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/butter/План по варкам масло.xlsx",
-    #     open_file=True,
-    # )
-    test_batch()
+    _test(
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/butter/План по варкам масло.xlsx",
+        open_file=True,
+    )
+    # test_batch()

@@ -10,25 +10,24 @@ def run_mascarpone(
     open_file=False,
     start_time=None,
     first_mascarpone_batch_id=1,
-    first_cream_batch_id=1,
-    first_robiola_batch_id=1,
-    first_cream_cheese_batch_id=1,
-    first_cottage_cheese_batch_id=1,
+    first_cream_batch_id=10,
+    first_robiola_batch_id=100,
+    first_cream_cheese_batch_id=1000,
+    first_cottage_cheese_batch_id=10000,
     path="outputs/",
     prefix="",
 ):
     utils.makedirs(path)
-    boiling_plan_df = read_boiling_plan(boiling_plan_fn)
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={'mascarpone': first_mascarpone_batch_id,
+                                                                          'cream': first_cream_batch_id,
+                                                                          'robiola': first_robiola_batch_id,
+                                                                          'cream_cheese': first_cream_cheese_batch_id,
+                                                                          'cottage_cheese': first_cottage_cheese_batch_id})
     start_time = start_time or "07:00"
 
     if not schedule:
         schedule = make_schedule(
             boiling_plan_df,
-            first_mascarpone_batch_id,
-            first_cream_batch_id,
-            first_robiola_batch_id,
-            first_cream_cheese_batch_id,
-            first_cottage_cheese_batch_id,
             start_time=start_time
         )
 

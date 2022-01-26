@@ -50,7 +50,7 @@ def make_boiling_group(boiling_group_df):
 
     m = BlockMaker("boiling_group",
                    skus=boiling_group_df["sku"].tolist(),
-                   boiling_id=sample_row["boiling_id"],
+                   boiling_id=sample_row["absolute_batch_id"],
                    boiling_model=boiling_model,
                    n_tanks=sample_row["tanks"],
                    group_tanks=sample_row["group_tanks"],

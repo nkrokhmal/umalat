@@ -3,7 +3,7 @@ from app.models.mozzarella import MozzarellaSKU
 
 
 class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
-    def update_boiling_schedule_task(self, batch_number):
+    def update_boiling_schedule_task(self):
         data_dir = create_dir(
             self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
             flask.current_app.config["TASK_FOLDER"]
@@ -17,7 +17,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
         df_task = pd.read_csv(path, sep=";")
         df_task.drop(df_task.index, inplace=True)
 
-        for boiling_group_id, grp in self.df.groupby("group_id"):
+        for batch_id, grp in self.df.groupby("absolute_batch_id"):
             for i, row in grp.iterrows():
                 if row["sku"].group.name != "Качокавалло":
                     kg = round(row["original_kg"])
@@ -32,7 +32,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                     boxes_count = ""
 
                 values = [
-                    boiling_group_id + batch_number - 1,
+                    batch_id,
                     row["sku_name"],
                     row["sku"].code,
                     row["sku"].in_box,
@@ -166,12 +166,12 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
         return cur_row
 
     def draw_task_boiling(
-            self, excel_client, cur_row, task_name, batch_number, line_name, draw_packing=True
+            self, excel_client, cur_row, task_name, line_name, draw_packing=True
     ):
         df_filter = self.df[self.df["line"] == line_name]
 
         cur_row, excel_client = draw_header(excel_client, self.date, cur_row, task_name, "варки")
-        for boiling_group_id, grp in df_filter.groupby("group_id"):
+        for batch_id, grp in df_filter.groupby("absolute_batch_id"):
             for i, row in grp.iterrows():
                 if row["sku"].group.name != "Качокавалло":
                     kg = round(row["original_kg"])
@@ -186,7 +186,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                     boxes_count = ""
 
                 values = [
-                    boiling_group_id + batch_number - 1,
+                    batch_id,
                     row["sku_name"],
                     row["sku"].in_box,
                     kg,
@@ -249,7 +249,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
         )
         return wb
 
-    def schedule_task_boilings(self, wb, batch_number):
+    def schedule_task_boilings(self, wb):
         sheet_name = "Печать заданий 2"
         water_task_name = f"Задание на упаковку линии воды {self.department}"
         salt_task_name = f"Задание на упаковку линии пиццы {self.department}"
@@ -264,7 +264,6 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             excel_client,
             cur_row,
             water_task_name,
-            batch_number,
             LineName.WATER,
             draw_packing=False,
         )
@@ -274,7 +273,6 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             excel_client,
             cur_row,
             salt_task_name,
-            batch_number,
             LineName.SALT,
         )
         return wb

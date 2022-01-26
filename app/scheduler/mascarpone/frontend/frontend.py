@@ -19,7 +19,7 @@ def wrap_frontend_mascarpone_boiling(boiling_process):
         axis=1,
         x=(boiling_process.x[0], 0),
         size=(0, 2),
-        batch_id=boiling_process.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
+        batch_id=boiling_process.props["boiling_group_dfs"][0].iloc[0]["absolute_batch_id"],
         is_cream=is_cream,
     )
 
@@ -198,7 +198,7 @@ def make_packing_line(schedule):
                 packing_processes[0]["packing_group"]["P", True][0].x[0] - 1,
                 1,
             ),
-            batch_id=mbg.props["boiling_group_dfs"][0].iloc[0]["batch_id"],
+            batch_id=mbg.props["boiling_group_dfs"][0].iloc[0]["absolute_batch_id"],
             push_func=add_push,
         )
         for p in packing_processes:
@@ -229,7 +229,7 @@ def wrap_frontend_cream_cheese_boiling(boiling):
         axis=1,
         x=(boiling.x[0], 0),
         size=(0, 2),
-        batch_id=boiling.props["boiling_plan_df"].iloc[0]["batch_id"],
+        batch_id=boiling.props["boiling_plan_df"].iloc[0]["absolute_batch_id"],
     )
 
     bp = boiling["boiling_process"]

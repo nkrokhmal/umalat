@@ -4,7 +4,7 @@ from app.models import *
 from app.enum import LineName
 from .saturate import saturate_boiling_plan
 import openpyxl as opx
-
+from app.scheduler.boiling_plan import *
 
 def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     ws = wb[sheet_name]
@@ -197,7 +197,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     return df
 
 
-def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
+def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True, first_batch_id=1):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -234,6 +234,7 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
     df['batch_id'] = df['group_id']
     df['boiling_id'] = df['group_id']
     df['batch_type'] = 'mozzarella'
+    df = update_absolute_batch_id(df, {'mozzarella': first_batch_id})
     return df
 
 
@@ -255,9 +256,9 @@ def read_additional_packing(wb_obj):
     return df
 
 
-def cast_boiling_plan(boiling_plan_obj):
+def cast_boiling_plan(boiling_plan_obj, *args, **kwargs):
     if isinstance(boiling_plan_obj, (str, opx.Workbook)):
-        return read_boiling_plan(boiling_plan_obj)
+        return read_boiling_plan(boiling_plan_obj, *args, **kwargs)
     elif isinstance(boiling_plan_obj, pd.DataFrame):
         return boiling_plan_obj
     else:

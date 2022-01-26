@@ -3,8 +3,8 @@ from app.scheduler.mozzarella.algo.melting_and_packing import *
 from app.enum import LineName
 
 
-def make_boilings(boiling_plan_df, first_boiling_id=None):
-    first_boiling_id = first_boiling_id or 1
+def make_boilings(boiling_plan_df):
+    first_boiling_id = boiling_plan_df['absolute_batch_id'].min()
     boiling_plan_df = boiling_plan_df.copy()
 
     with code("Count boilings per line"):

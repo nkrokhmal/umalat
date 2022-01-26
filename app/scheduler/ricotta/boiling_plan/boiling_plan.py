@@ -4,6 +4,7 @@ from app.models import *
 from app.scheduler.ricotta.boiling_plan.saturate import (
     saturate_boiling_plan,
 )
+from app.scheduler.boiling_plan import *
 
 from openpyxl.utils.cell import column_index_from_string
 
@@ -108,7 +109,7 @@ class BoilingParser:
         return result
 
 
-def read_boiling_plan(wb_obj, saturate=True):
+def read_boiling_plan(wb_obj, saturate=True, first_batch_id=1):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -162,6 +163,7 @@ def read_boiling_plan(wb_obj, saturate=True):
     )
 
     # group_id is the same with batch_id
+    df["batch_id"] = df["batch_id"].astype(int)
     df['group_id'] = df['batch_id']
     df['boiling_id'] = None # do not calculate boiling id
 
@@ -170,12 +172,11 @@ def read_boiling_plan(wb_obj, saturate=True):
     df["full_tank_number"] = df["sku"].apply(
         lambda sku: sku.made_from_boilings[0].number_of_tanks
     )
-    df["boiling_id"] = df["boiling_id"].astype(int)
     df["kg"] = df["kg"].apply(lambda x: int(x))
     df["first_tank"] = np.where(df["first_tank"] == "", 0, df["first_tank"])
     df["first_tank"] = df["first_tank"].astype(int)
 
-    for idx, grp in df.groupby("boiling_id"):
+    for idx, grp in df.groupby("batch_id"):
         assert (
             len(grp["boiling"].unique()) == 1
         ), "В одной варке должен быть только один тип варки"
@@ -218,4 +219,5 @@ def read_boiling_plan(wb_obj, saturate=True):
     if saturate:
         df = saturate_boiling_plan(df)
     df['batch_type'] = 'ricotta'
+    df = update_absolute_batch_id(df, first_batch_ids={'ricotta': first_batch_id})
     return df

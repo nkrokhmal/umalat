@@ -11,7 +11,7 @@ def _test(fn, open_file=False):
     utils.lazy_tester.configure_function_path()
     warnings.filterwarnings("ignore")
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
-    outputs = run_ricotta(fn, open_file=open_file)
+    outputs = run_ricotta(fn, open_file=open_file, first_batch_id=100)
     utils.lazy_tester.log(outputs["schedule"])
     utils.lazy_tester.assert_logs()
 

@@ -38,8 +38,8 @@ def adygea_schedule():
         add_batch(
             date,
             "Адыгейский цех",
-            form.batch_number.data,
-            form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
+            boiling_plan_df['absolute_batch_id'].min(),
+            boiling_plan_df['absolute_batch_id'].max(),
         )
         schedule = make_schedule(boiling_plan_df, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)

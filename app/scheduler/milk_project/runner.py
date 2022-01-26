@@ -12,9 +12,10 @@ def run_milk_project(
     path="outputs/",
     prefix="",
     template_wb=None,
+    first_batch_id=1
 ):
     utils.makedirs(path)
-    boiling_plan_df = read_boiling_plan(boiling_plan_fn)
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_id=first_batch_id)
     start_time = start_time or "07:00"
 
     if not template_wb:

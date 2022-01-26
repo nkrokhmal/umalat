@@ -32,12 +32,6 @@ def mascarpone_schedule():
         file = flask.request.files["input_file"]
 
         # Маскарпоне, кремчиз, робиолла, творожный, сливки
-        mascarpone_batch_number = form.mascarpone_batch_number.data
-        cream_batch_number = form.cream_batch_number.data
-        robiola_batch_number = form.robiola_batch_number.data
-        cream_cheese_batch_number = form.cream_cheese_batch_number.data
-        cottage_cheese_batch_number = form.cottage_cheese_batch_number.data
-
         data_dir = os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
             date.strftime("%Y-%m-%d"),
@@ -53,27 +47,24 @@ def mascarpone_schedule():
             ),
             data_only=True,
         )
-        boiling_plan_df = read_boiling_plan(wb)
+        boiling_plan_df = read_boiling_plan(wb, first_batch_ids={'mascarpone': form.mascarpone_batch_number.data,
+                                                                  'cream': form.cream_batch_number.data,
+                                                                  'robiola': form.robiola_batch_number.data,
+                                                                  'cream_cheese': form.cream_cheese_batch_number.data,
+                                                                  'cottage_cheese': form.cottage_cheese_batch_number.data})
         boiling_plan_df['group'] = boiling_plan_df['sku'].apply(lambda x: x.group.name)
 
-        for attr, group in MASCARPONE_GROUPS:
-            boiling_plan_grouped = boiling_plan_df.groupby("boiling_id").agg({"group": "first"})
-            boilings_grouped = boiling_plan_grouped[boiling_plan_grouped["group"] == group].count()
-            if int(boilings_grouped) > 0:
-                add_batch(
-                    date=date,
-                    department_name="Маскарпоновый цех",
-                    beg_number=getattr(form, attr).data,
-                    end_number=getattr(form, attr).data + int(boilings_grouped) - 1,
-                    group=group,
-                )
+        for batch_type, grp in boiling_plan_df.groupby('batch_type'):
+            group = [g for g in MASCARPONE_GROUPS if g[0] == f'{batch_type}_batch_number']
+            add_batch(
+                date=date,
+                department_name="Маскарпоновый цех",
+                beg_number=grp['absolute_batch_id'].min(),
+                end_number=grp['absolute_batch_id'].max(),
+                group=group,
+            )
 
-        schedule = make_schedule(boiling_plan_df,
-                                 mascarpone_batch_number,
-                                 cream_batch_number,
-                                 robiola_batch_number,
-                                 cream_cheese_batch_number,
-                                 cottage_cheese_batch_number, start_time=beg_time)
+        schedule = make_schedule(boiling_plan_df, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)
         schedule_template = openpyxl.load_workbook(
             filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],

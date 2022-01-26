@@ -4,9 +4,9 @@ from app.models import *
 from app.enum import LineName
 
 from .saturate import saturate_boiling_plan
+from app.scheduler.boiling_plan import *
 
-
-def read_boiling_plan(wb_obj):
+def read_boiling_plan(wb_obj, first_batch_id=1):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -58,4 +58,5 @@ def read_boiling_plan(wb_obj):
 
     df = saturate_boiling_plan(df)
     df['batch_type'] = 'milk_project'
+    df = update_absolute_batch_id(df, {'milk_project': first_batch_id})
     return df

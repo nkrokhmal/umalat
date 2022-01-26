@@ -5,6 +5,7 @@ from app.imports.runtime import *
 from app.utils.features.draw_utils import *
 
 
+# todo maybe: possible
 class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
     def update_boiling_schedule_task(self):
         data_dir = create_dir(
@@ -21,7 +22,7 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
         df_task.drop(df_task.index, inplace=True)
         self.df["coeff"] = self.df["boiling"].apply(lambda x: x.output_coeff)
         for group_name, group_df in self.df.groupby("group"):
-            for boiling_group_id, grp in group_df.groupby("batch_id"):
+            for batch_id, grp in group_df.groupby("absolute_batch_id"):
                 for i, row in grp.iterrows():
                     kg = round(row["original_kg"] * row["coeff"])
                     boxes_count = math.ceil(
@@ -31,7 +32,7 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
                     )
 
                     values = [
-                        boiling_group_id,
+                        batch_id,
                         row["sku_name"],
                         row["sku"].code,
                         row["sku"].in_box,

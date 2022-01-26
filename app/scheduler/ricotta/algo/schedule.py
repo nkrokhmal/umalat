@@ -60,13 +60,12 @@ class Validator(ClassValidator):
         )
 
 
-def make_schedule(boiling_plan_df, first_boiling_id=1, start_time='07:00'):
+def make_schedule(boiling_plan_df,  start_time='07:00'):
     m = BlockMaker("schedule")
     boiling_plan_df = boiling_plan_df.copy()
-    boiling_plan_df["boiling_id"] += first_boiling_id - 1
 
     boiling_groups = []
-    for boiling_id, grp in boiling_plan_df.groupby("boiling_id"):
+    for batch_id, grp in boiling_plan_df.groupby("batch_id"):
         boiling_groups.append(make_boiling_group(grp))
 
     with code('make_boilings'):

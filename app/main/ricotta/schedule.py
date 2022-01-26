@@ -34,12 +34,12 @@ def ricotta_schedule():
             ),
             data_only=True,
         )
-        boiling_plan_df = read_boiling_plan(wb)
+        boiling_plan_df = read_boiling_plan(wb, first_batch_id=form.batch_number.data)
         add_batch(
             date,
             "Рикоттный цех",
-            form.batch_number.data,
-            form.batch_number.data + int(boiling_plan_df["boiling_id"].max()) - 1,
+            boiling_plan_df['absolute_batch_id'].min(),
+            boiling_plan_df['absolute_batch_id'].max(),
         )
         schedule = make_schedule(
             boiling_plan_df, form.batch_number.data, start_time=beg_time
@@ -61,7 +61,7 @@ def ricotta_schedule():
         )
 
         schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task(form.batch_number.data)
+        schedule_task.update_boiling_schedule_task()
 
         schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
         # schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)

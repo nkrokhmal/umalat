@@ -11,7 +11,6 @@ def make_schedule_basic(
     optimize_cleanings=False,
     start_times=None,
     start_configuration=None,
-    first_boiling_id=1,
     date=None,
 ):
     boiling_plan_df = cast_boiling_plan(boiling_plan_obj)
@@ -21,9 +20,7 @@ def make_schedule_basic(
     with code("Get start configuration"):
         if not start_configuration:
             with code("Make basic schedule"):
-                boilings = make_boilings(
-                    boiling_plan_df, first_boiling_id=first_boiling_id
-                )
+                boilings = make_boilings(boiling_plan_df)
                 schedule = make_schedule_from_boilings(
                     boilings, cleanings={}, start_times=start_times
                 )
@@ -49,8 +46,8 @@ def make_schedule_basic(
             logger.debug("Using boiling plan cleanings", cleanings=cleanings)
 
     with code("Make schedule with cleanings and start configuration "):
-        cleanings = {k + first_boiling_id - 1: v for k, v in cleanings.items() if v}
-        boilings = make_boilings(boiling_plan_df, first_boiling_id=first_boiling_id)
+        cleanings = {k + boiling_plan_df['absolute_batch_id'].min() - 1: v for k, v in cleanings.items() if v}
+        boilings = make_boilings(boiling_plan_df)
         schedule = make_schedule_from_boilings(
             boilings,
             cleanings=cleanings,

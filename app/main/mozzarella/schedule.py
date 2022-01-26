@@ -42,15 +42,15 @@ def mozzarella_schedule():
             data_only=True,
         )
 
-        boiling_plan_df = cast_boiling_plan(wb)
+        boiling_plan_df = cast_boiling_plan(wb, first_batch_id=form.batch_number.data)
         additional_packing_df = read_additional_packing(wb)
         # todo: check boiling_plan_task
 
         add_batch(
             date,
             "Моцарельный цех",
-            form.batch_number.data,
-            form.batch_number.data + int(boiling_plan_df["group_id"].max()) - 1,
+            boiling_plan_df['absolute_batch_id'].min(),
+            boiling_plan_df['absolute_batch_id'].max(),
         )
 
         start_times = {
@@ -63,7 +63,6 @@ def mozzarella_schedule():
             start_times=start_times,
             optimize=optimize,
             optimize_cleanings=add_full_boiling,
-            first_batch_id=int(form.batch_number.data),
             date=date,
         )
 
@@ -120,12 +119,10 @@ def mozzarella_schedule():
         )
 
         schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task(form.batch_number.data)
+        schedule_task.update_boiling_schedule_task()
 
         schedule_wb = schedule_task.schedule_task_original(schedule_wb)
-        schedule_wb = schedule_task.schedule_task_boilings(
-            schedule_wb, form.batch_number.data
-        )
+        schedule_wb = schedule_task.schedule_task_boilings(schedule_wb)
 
         schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
         set_default_sheet(schedule_wb)

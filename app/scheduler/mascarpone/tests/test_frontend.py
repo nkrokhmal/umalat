@@ -28,7 +28,7 @@ if __name__ == "__main__":
         config.abs_path(
             "app/data/static/samples/inputs/by_department/mascarpone/План по варкам маскарпоне 3.xlsx"
         ),
-        open_file=False,
+        open_file=True,
     )
 
     # test_batch()

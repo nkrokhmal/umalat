@@ -8,16 +8,16 @@ def run_ricotta(
     schedule=None,
     open_file=False,
     start_time=None,
-    first_boiling_id=1,
+    first_batch_id=1,
     path="outputs/",
     prefix="",
 ):
     utils.makedirs(path)
-    boiling_plan_df = read_boiling_plan(boiling_plan_fn)
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_id=first_batch_id)
     start_time = start_time or "07:00"
     if not schedule:
         schedule = make_schedule(
-            boiling_plan_df, start_time=start_time, first_boiling_id=first_boiling_id
+            boiling_plan_df, start_time=start_time
         )
 
     try:
