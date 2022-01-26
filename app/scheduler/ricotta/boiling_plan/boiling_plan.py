@@ -109,11 +109,12 @@ class BoilingParser:
         return result
 
 
-def read_boiling_plan(wb_obj, saturate=True, first_batch_id=1):
+def read_boiling_plan(wb_obj, saturate=True, first_batch_ids=None):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
+    first_batch_ids = first_batch_ids or {'ricotta': 1}
     wb = utils.cast_workbook(wb_obj)
 
     ws_name = "План варок"
@@ -219,5 +220,5 @@ def read_boiling_plan(wb_obj, saturate=True, first_batch_id=1):
     if saturate:
         df = saturate_boiling_plan(df)
     df['batch_type'] = 'ricotta'
-    df = update_absolute_batch_id(df, first_batch_ids={'ricotta': first_batch_id})
+    df = update_absolute_batch_id(df, first_batch_ids=first_batch_ids)
     return df

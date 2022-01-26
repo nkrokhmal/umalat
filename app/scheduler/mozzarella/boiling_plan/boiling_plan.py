@@ -197,11 +197,12 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     return df
 
 
-def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True, first_batch_id=1):
+def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True, first_batch_ids=None):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
+    first_batch_ids = first_batch_ids or {'mozzarella': 1}
     wb = utils.cast_workbook(wb_obj)
 
     dfs = []
@@ -234,7 +235,7 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True, 
     df['batch_id'] = df['group_id']
     df['boiling_id'] = df['group_id']
     df['batch_type'] = 'mozzarella'
-    df = update_absolute_batch_id(df, {'mozzarella': first_batch_id})
+    df = update_absolute_batch_id(df, first_batch_ids)
     return df
 
 
