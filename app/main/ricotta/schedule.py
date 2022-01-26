@@ -6,6 +6,7 @@ from app.scheduler.ricotta import *
 from app.utils.ricotta.schedule_tasks import RicottaScheduleTask
 from app.utils.batches.batch import *
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
+from app.main.ricotta.update_task_and_batches import update_task_and_batches
 from .forms import ScheduleForm
 
 
@@ -34,37 +35,26 @@ def ricotta_schedule():
             ),
             data_only=True,
         )
-        boiling_plan_df = read_boiling_plan(wb, first_batch_id=form.batch_number.data)
-        add_batch(
-            date,
-            "Рикоттный цех",
-            int(boiling_plan_df['absolute_batch_id'].min()),
-            int(boiling_plan_df['absolute_batch_id'].max()),
-        )
+        first_batch_ids = {'ricotta': form.batch_number.data}
+        boiling_plan_df = read_boiling_plan(wb, first_batch_ids=first_batch_ids)
+
         schedule = make_schedule(
             boiling_plan_df, start_time=beg_time
         )
         frontend = wrap_frontend(schedule, date=date)
 
-        schedule_template = openpyxl.load_workbook(
-            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
-            data_only=True,
-        )
-        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=schedule_template)
+        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=wb)
+        utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))
+
+        schedule_task = update_task_and_batches(schedule_wb)
+
+        schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
+        # schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)
+
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"
         filename_schedule_pickle = (
             f"{date.strftime('%Y-%m-%d')} Расписание рикотта.pickle"
         )
-
-        schedule_task = RicottaScheduleTask(
-            df=boiling_plan_df, date=date, model=RicottaSKU, department="Рикоттный цех"
-        )
-
-        schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task()
-
-        schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
-        # schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(

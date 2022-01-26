@@ -9,6 +9,7 @@ from app.utils.mozzarella.parse_schedule_json import *
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
 from app.utils.features.openpyxl_wrapper import set_default_sheet
+from app.main.mozzarella.update_task_and_batches import update_task_and_batches
 from app.utils.files.utils import (
     save_schedule,
     save_schedule_dict,
@@ -41,16 +42,9 @@ def mozzarella_schedule():
             filename=os.path.join(data_dir, file.filename),
             data_only=True,
         )
-
-        boiling_plan_df = cast_boiling_plan(wb, first_batch_id=form.batch_number.data)
+        first_batch_ids = {'mozzarella': form.batch_number.data}
+        boiling_plan_df = cast_boiling_plan(wb, first_batch_ids=first_batch_ids)
         additional_packing_df = read_additional_packing(wb)
-        # todo: check boiling_plan_task
-        add_batch(
-            date,
-            "Моцарельный цех",
-            int(boiling_plan_df['absolute_batch_id'].min()),
-            int(boiling_plan_df['absolute_batch_id'].max()),
-        )
 
         start_times = {
             LineName.WATER: form.water_beg_time.data,
@@ -101,6 +95,15 @@ def mozzarella_schedule():
             style=STYLE,
             wb=schedule_wb,
         )
+        utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))
+
+        schedule_task = update_task_and_batches(schedule_wb, additional_packing_df)
+
+        schedule_wb = schedule_task.schedule_task_original(schedule_wb)
+        schedule_wb = schedule_task.schedule_task_boilings(schedule_wb)
+
+        schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
+        set_default_sheet(schedule_wb)
 
         filename_schedule = "{} {}.xlsx".format(
             date.strftime("%Y-%m-%d"), "Расписание моцарелла"
@@ -108,23 +111,6 @@ def mozzarella_schedule():
         filename_schedule_pickle = "{} {}.pickle".format(
             date.strftime("%Y-%m-%d"), "Расписание моцарелла"
         )
-
-        schedule_task = MozzarellaScheduleTask(
-            df=boiling_plan_df,
-            date=date,
-            model=MozzarellaSKU,
-            department="Моцарелльный цех",
-            df_packing=additional_packing_df,
-        )
-
-        schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task()
-
-        schedule_wb = schedule_task.schedule_task_original(schedule_wb)
-        schedule_wb = schedule_task.schedule_task_boilings(schedule_wb)
-
-        schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
-        set_default_sheet(schedule_wb)
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(

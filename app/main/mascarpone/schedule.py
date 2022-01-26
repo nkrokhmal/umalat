@@ -10,6 +10,8 @@ from app.utils.mascarpone.schedule_task import MascarponeScheduleTask
 from app.utils.batches.batch import *
 from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
+from app.main.mascarpone.update_task_and_batches import update_task_and_batches
+
 from .forms import ScheduleForm
 
 
@@ -41,34 +43,24 @@ def mascarpone_schedule():
             ),
             data_only=True,
         )
-        boiling_plan_df = read_boiling_plan(wb, first_batch_ids={'mascarpone': form.mascarpone_batch_number.data,
-                                                                  'cream': form.cream_batch_number.data,
-                                                                  'robiola': form.robiola_batch_number.data,
-                                                                  'cream_cheese': form.cream_cheese_batch_number.data,
-                                                                  'cottage_cheese': form.cottage_cheese_batch_number.data})
+        first_batch_ids = {'mascarpone': form.mascarpone_batch_number.data,
+                           'cream': form.cream_batch_number.data,
+                           'robiola': form.robiola_batch_number.data,
+                           'cream_cheese': form.cream_cheese_batch_number.data,
+                           'cottage_cheese': form.cottage_cheese_batch_number.data}
+        boiling_plan_df = read_boiling_plan(wb, first_batch_ids=first_batch_ids)
         boiling_plan_df['group'] = boiling_plan_df['sku'].apply(lambda x: x.group.name)
 
-        add_batch_from_boiling_plan_df(date, 'Маскарпонный цех', boiling_plan_df)
 
         schedule = make_schedule(boiling_plan_df, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)
-        schedule_template = openpyxl.load_workbook(
-            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
-            data_only=True,
-        )
-        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=schedule_template)
+        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=wb)
+        utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))
+
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.xlsx"
         filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.pickle"
 
-        schedule_task = MascarponeScheduleTask(
-            df=boiling_plan_df,
-            date=date,
-            model=MascarponeSKU,
-            department="Маскарпонный цех"
-        )
-
-        schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task()
+        schedule_task = update_task_and_batches(schedule_wb)
 
         schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
         # schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)

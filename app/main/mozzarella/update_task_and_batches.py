@@ -9,13 +9,13 @@ from app.scheduler.mozzarella.update_interval_times import update_interval_times
 from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 
 
-def init_task(date, boiling_plan_df):
+def init_task(date, boiling_plan_df, df_packing):
     return MozzarellaScheduleTask(
-        df=boiling_plan_df, date=date, model=MozzarellaSKU, department="Моцарелльный цех"
+        df=boiling_plan_df, date=date, model=MozzarellaSKU, department="Моцарелльный цех", df_packing=df_packing
     )
 
 
-def update_task_and_batches(schedule_obj):
+def update_task_and_batches(schedule_obj, df_packing):
     with code('Prepare'):
         wb = cast_schedule(schedule_obj)
         metadata = json.loads(utils.read_metadata(wb))
@@ -25,6 +25,6 @@ def update_task_and_batches(schedule_obj):
     logger.debug('Updating mozzarella task', date=date)
     with code('Update'):
         add_batch_from_boiling_plan_df(date, 'Моцарелльный цех', boiling_plan_df)
-        schedule_task = init_task(date, boiling_plan_df)
+        schedule_task = init_task(date, boiling_plan_df, df_packing)
         schedule_task.update_schedule_task()
     return schedule_task
