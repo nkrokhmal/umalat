@@ -3,38 +3,32 @@ from app.imports.runtime import *
 from app.scheduler.time import *
 
 from openpyxl.styles.borders import Border, Side, BORDER_THIN
+from utils_ak.openpyxl.openpyxl_tools import *
+
+
+def prepare_schedule_worksheet(ws_obj):
+    ws = cast_worksheet(ws_obj)
+    set_zoom(ws, 55)
+    set_dimensions(ws, 'column', range(1, 5), 21)
+    set_dimensions(ws, 'column', range(5, 288 * 2), 2.4)
+    set_dimensions(ws, 'row', range(1, 220), 25)
+    return ws
 
 
 def init_schedule_workbook(wb=None):
     if not wb:
         wb = utils.init_workbook(["Расписание"])
 
-        if "Расписание" not in wb.sheetnames:
-            wb.create_sheet("Расписание")
+    if "Расписание" not in wb.sheetnames:
+        wb.create_sheet("Расписание")
 
-        for ws in wb.worksheets:
-            ws.sheet_view.zoomScale = 55
-
-        for i in range(4):
-            wb.worksheets[0].column_dimensions[
-                utils.get_column_letter(i + 1)
-            ].width = 21
-        for i in range(4, 288 * 2):
-            wb.worksheets[0].column_dimensions[
-                utils.get_column_letter(i + 1)
-            ].width = 2.4
-        for i in range(1, 220):
-            wb.worksheets[0].row_dimensions[i].height = 25
-
-        # logger.info("Setting grid")
-        # utils.set_border_grid(
-        #     wb.worksheets[0], 1, 1, 288 * 2, 220, Side(border_style=BORDER_THIN)
-        # )
+    prepare_schedule_worksheet(utils.cast_worksheet((wb, 'Расписание')))
     return wb
 
 
 def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
     wb = init_schedule_workbook(wb)
+    ws = cast_worksheet((wb, 'Расписание'))
     O = O or [0, 0]  # initial coordinates
 
     # update styles
@@ -77,7 +71,7 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
 
                 try:
                     utils.draw_merged_cell(
-                        wb.worksheets[0],
+                        ws,
                         x1 + O[0],
                         b.x[1] + O[1],
                         b.size[0],

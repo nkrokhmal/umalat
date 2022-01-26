@@ -2,7 +2,7 @@ import openpyxl
 
 from app.imports.runtime import *
 from app.scheduler import *
-from app.scheduler.drawing import prepare_schedule_worksheet
+from app.scheduler.frontend import prepare_schedule_worksheet
 
 from utils_ak.block_tree import *
 

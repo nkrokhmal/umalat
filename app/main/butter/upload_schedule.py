@@ -1,7 +1,10 @@
+import time
+
 from app.imports.runtime import *
 from app.main import main
 from .forms import UploadForm
-from app.utils.files.utils import save_schedule
+from app.utils.files.utils import save_schedule, cast_dynamic_fn
+from app.utils.batches import *
 
 
 @main.route("/butter_upload_schedule", methods=["GET", "POST"])
@@ -12,6 +15,7 @@ def butter_upload_schedule():
         date = form.date.data
         file = flask.request.files["input_file"]
         filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание масло")
+
         if file:
             save_schedule(file, filename_schedule, date.strftime("%Y-%m-%d"))
 

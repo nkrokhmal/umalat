@@ -3,25 +3,29 @@ import shutil
 from app.imports.runtime import *
 
 
+def cast_dynamic_fn(date, folder, basename):
+    return os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, folder, basename)
+
+
 def create_if_not_exists(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
 
 def save_file_dir(data, filename, date, folder, data_type="xlsx"):
-    data_dir = os.path.join(flask.current_app.config["DYNAMIC_DIR"], date, folder)
-    create_if_not_exists(data_dir)
+    fn = cast_dynamic_fn(date, folder, filename)
+    utils.makedirs(fn)
 
     if data_type == "xlsx":
-        data.save(os.path.join(data_dir, filename))
+        data.save(fn)
     elif data_type == "csv":
-        data.to_csv(os.path.join(data_dir, filename), index=False, sep=";")
+        data.to_csv(fn, index=False, sep=";")
     elif data_type == "json":
-        mode = "a" if os.path.exists(os.path.join(data_dir, filename)) else "w"
-        with open(os.path.join(data_dir, filename), mode) as outfile:
+        mode = "a" if os.path.exists(fn) else "w"
+        with open(fn, mode) as outfile:
             json.dump(data, outfile)
     elif data_type == "pickle":
-        with open(os.path.join(data_dir, filename), "wb") as outfile:
+        with open(fn, "wb") as outfile:
             pickle.dump(data, outfile)
 
 

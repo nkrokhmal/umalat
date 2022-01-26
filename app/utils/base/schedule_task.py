@@ -38,7 +38,7 @@ class BaseScheduleTask(Generic[ModelType]):
             flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()} {self.department}.csv")
-        columns = ["batch", "sku", "code", "in_box", "kg", "boxes_count"]
+        columns = ["batch", "sku", "code", "in_box", "kg", "boxes_count", 'start', 'finish']
         if not os.path.exists(path):
             df_task = pd.DataFrame(columns=columns)
             df_task.to_csv(path, index=False, sep=";")
@@ -66,6 +66,8 @@ class BaseScheduleTask(Generic[ModelType]):
                     row["sku"].in_box,
                     kg,
                     boxes_count,
+                    row['start'],
+                    row['finish']
                 ]
                 df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
         df_task.to_csv(path, index=False, sep=";")
@@ -76,7 +78,7 @@ class BaseScheduleTask(Generic[ModelType]):
             flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()}.csv")
-        columns = ["sku", "code", "in_box", "kg", "boxes_count"]
+        columns = ["sku", "code", "in_box", "kg", "boxes_count", 'start', 'finish']
         if not os.path.exists(path):
             df_task = pd.DataFrame(columns=columns)
             df_task.to_csv(path, index=False, sep=";")
@@ -100,6 +102,8 @@ class BaseScheduleTask(Generic[ModelType]):
                 grp.iloc[0]["sku"].in_box,
                 kg,
                 boxes_count,
+                grp.iloc[0]['start'],
+                grp.iloc[0]['finish']
             ]
             df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
         df_task.to_csv(path, index=False, sep=";")
@@ -192,3 +196,7 @@ class BaseScheduleTask(Generic[ModelType]):
         )
         cur_row += space_row
         return wb, cur_row
+
+    def update_schedule_task(self):
+        self.update_boiling_schedule_task()
+        self.update_total_schedule_task()
