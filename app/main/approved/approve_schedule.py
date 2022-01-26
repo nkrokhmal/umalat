@@ -3,6 +3,10 @@ from app.utils.files.utils import move_to_approved, move_to_approved_pickle, del
 from app.main import main
 
 from app.main.butter.update_task_and_batches import update_task_and_batches as update_task_and_batches_butter
+from app.main.mascarpone.update_task_and_batches import update_task_and_batches as update_task_and_batches_mascarpone
+from app.main.milk_project.update_task_and_batches import update_task_and_batches as update_task_and_batches_milk_project
+from app.main.mozzarella.update_task_and_batches import update_task_and_batches as update_task_and_batches_mozzarella
+from app.main.ricotta.update_task_and_batches import update_task_and_batches as update_task_and_batches_ricotta
 
 @main.route("/approve", methods=["GET", "POST"])
 @flask_login.login_required
@@ -60,8 +64,10 @@ def approve_mozzarella():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+
+    update_task_and_batches_mozzarella((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mozzarella_schedule"))
@@ -77,8 +83,10 @@ def approve_upload_mozzarella():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+
+    update_task_and_batches_mozzarella((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mozzarella_upload_schedule"))
@@ -94,8 +102,10 @@ def approve_ricotta():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Рикотта")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Рикотта")
+
+    update_task_and_batches_ricotta((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".ricotta_schedule"))
@@ -111,8 +121,10 @@ def approve_upload_ricotta():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Рикотта")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Рикотта")
+
+    update_task_and_batches_ricotta((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".ricotta_upload_schedule"))
@@ -128,8 +140,11 @@ def approve_mascarpone():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
+
+    update_task_and_batches_mascarpone((date, 'approved', file_name))
+
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mascarpone_schedule"))
@@ -145,8 +160,10 @@ def approve_upload_mascarpone():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
+
+    update_task_and_batches_mascarpone((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mascarpone_upload_schedule"))
@@ -200,8 +217,10 @@ def approve_milk_project():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
+
+    update_task_and_batches_milk_project((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".milk_project_schedule"))
@@ -217,8 +236,10 @@ def approve_upload_milk_project():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
+
+    update_task_and_batches_milk_project((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".milk_project_upload_schedule"))
