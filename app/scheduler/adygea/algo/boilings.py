@@ -6,8 +6,8 @@ from utils_ak.block_tree import *
 from app.scheduler.time import *
 
 
-def make_boiling(boiling_model, boiling_id, boiler_num, group_name):
-    m = BlockMaker("boiling", boiling_model=boiling_model, boiling_id=boiling_id, boiler_num=boiler_num, group_name=group_name)
+def make_boiling(boiling_model, boiling_id, boiler_num, group_name, pair_num):
+    m = BlockMaker("boiling", boiling_model=boiling_model, boiling_id=boiling_id, boiler_num=boiler_num, group_name=group_name, pair_num=pair_num)
 
     bt = utils.delistify(boiling_model.boiling_technologies, single=True) # there is only one boiling technology is for every boiling model in ricotta department
 

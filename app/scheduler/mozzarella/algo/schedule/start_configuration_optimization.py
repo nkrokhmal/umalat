@@ -37,7 +37,6 @@ def test_seq():
 
 
 def optimize_schedule_by_start_configuration(boiling_plan_df, *args, **kwargs):
-
     start_times = kwargs.get("start_times")
     start_configuration = kwargs.get("start_configuration")
 
@@ -56,12 +55,21 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, *args, **kwargs):
     else:
         start_configurations = []
         n = _parse_seq(start_configuration, a=LineName.WATER, b=LineName.SALT)
-        for i in range(-2, 2):
-            _n = n + i
-            if _n != 0:
-                start_configurations.append(
-                    _gen_seq(_n, a=LineName.WATER, b=LineName.SALT)
-                )
+        with code('Calc neighborhood'):
+            # -1 -> -3, -2, -1, skip, 1,  2
+            n_neighborhood = [n + i for i in range(-2, 3) if n + i != 0]
+
+            # add one if skipped
+            if 0 < n <= 2:
+                n_neighborhood.append(n - 2 - 1)
+            if -2 <= n < 0:
+                n_neighborhood.append(n + 2 + 1)
+            n_neighborhood = list(sorted(n_neighborhood))
+
+        for _n in n_neighborhood:
+            start_configurations.append(
+                _gen_seq(_n, a=LineName.WATER, b=LineName.SALT)
+            )
 
     logger.debug("Start configurations", start_configurations=start_configurations)
 
@@ -94,6 +102,6 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, *args, **kwargs):
             )
             res.append(schedule)
     logger.debug(
-        "Optimization results", results=[calc_score(schedule) for schedule in res]
+        "Optimization results", results=[calc_score(schedule, start_times=start_times) for schedule in res]
     )
-    return min(res, key=calc_score)  # return minimum score time
+    return min(res, key=lambda schedule: calc_score(schedule, start_times=start_times))  # return minimum score time
