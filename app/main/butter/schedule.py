@@ -37,38 +37,30 @@ def butter_schedule():
             ),
             data_only=True,
         )
+        first_batch_ids = {'butter': form.batch_number.data}
+        boiling_plan_df = read_boiling_plan(wb, first_batch_ids=first_batch_ids)
 
-        boiling_plan_df = read_boiling_plan(wb, first_batch_id=form.batch_number.data)
-        add_batch(
-            date,
-            "Масло цех",
-            int(boiling_plan_df['absolute_batch_id'].min()),
-            int(boiling_plan_df['absolute_batch_id'].max()),
-        )
         schedule = make_schedule(boiling_plan_df, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)
-        schedule_template = openpyxl.load_workbook(
-            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
-            data_only=True,
-        )
-        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=schedule_template)
+
+        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=wb)
+        utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание масло.xlsx"
         filename_schedule_pickle = (
             f"{date.strftime('%Y-%m-%d')} Расписание масло.pickle"
         )
 
+        add_batch_from_boiling_plan_df(date, 'Масло цех', boiling_plan_df)
         schedule_task = ButterScheduleTask(
             df=boiling_plan_df, date=date, model=ButterSKU, department="Маслоцех"
         )
+        schedule_task.update_schedule_task()
 
-        schedule_task.update_total_schedule_task()
-        schedule_task.update_boiling_schedule_task()
+        schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb)
 
-        # schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
-        schedule_wb, _ = schedule_task.schedule_task_boilings(
-            schedule_wb, form.batch_number.data
-        )
+        utils.set_visible_sheets(schedule_wb, [sn for sn in schedule_wb.sheetnames if sn in ['Расписание', 'Печать заданий', 'Печать заданий 2', 'План варок']])
+        utils.set_active_sheet(schedule_wb, 'Расписание')
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(
@@ -86,6 +78,7 @@ def butter_schedule():
         BatchNumber.last_batch_number(
             datetime.today() + timedelta(days=1),
             "Масло цех",
+            group='butter'
         )
         + 1
     )
