@@ -43,12 +43,16 @@ def read_boiling_plan(wb_obj):
         ]
     ]
     df.columns = [
-        "boiling_id",
+        "group_id",
         "sku",
         "kg",
     ]
     df = df[df["sku"] != "-"]
-    df["boiling_id"] = df["boiling_id"].astype(int)
+    df["group_id"] = df["group_id"].astype(int)
+
+    # batch_id and boiling_id are the same with group_id
+    df["batch_id"] = df["group_id"]
+    df["boiling_id"] = df["group_id"]
 
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MilkProjectSKU, sku))
 

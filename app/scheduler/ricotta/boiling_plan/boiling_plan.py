@@ -151,7 +151,7 @@ def read_boiling_plan(wb_obj, saturate=True):
     df = pd.DataFrame(
         values,
         columns=[
-            "boiling_id",
+            "batch_id",
             "boiling_type",
             "output",
             "tanks",
@@ -160,6 +160,11 @@ def read_boiling_plan(wb_obj, saturate=True):
             "kg",
         ],
     )
+
+    # group_id is the same with batch_id
+    df['group_id'] = df['batch_id']
+    df['boiling_id'] = None # do not calculate boiling id
+
     df["sku"] = df["sku"].apply(lambda sku: cast_model(RicottaSKU, sku))
     df["boiling"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0])
     df["full_tank_number"] = df["sku"].apply(

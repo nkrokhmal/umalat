@@ -229,6 +229,10 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True):
 
     df = update_boiling_plan(dfs, normalization, saturate, validate)
     df["packing_team_id"] = df["packing_team_id"].apply(lambda x: int(x))
+
+    # batch_id and boiling_id are the same as group_id
+    df['batch_id'] = df['group_id']
+    df['boiling_id'] = df['group_id']
     return df
 
 

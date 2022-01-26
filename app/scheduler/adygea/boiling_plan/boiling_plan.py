@@ -38,13 +38,13 @@ def read_boiling_plan(wb_obj):
     df = pd.DataFrame(values, columns=header)
     df = df[["Номер группы варок", "SKU", "КГ"]]
     df.columns = [
-        "group_boiling_id",
+        "group_id",
         "sku",
         "kg",
     ]
     df = df[df["sku"] != "-"]
 
-    df_plan, boiling_number = handle_adygea(df)
+    df_plan, boiling_number = handle_adygea(df) # convert to boiligns
 
     if df_plan.empty:
         logger.info("Empty data frame")
@@ -59,9 +59,8 @@ def read_boiling_plan(wb_obj):
 
         df_plan = df_plan[["boiling_id", "sku", "n_baths", "kg", "boiling"]]
 
-    # for i in range(df_plan.shape[0]):
-    #     print(df_plan["boiling"].iloc[i].boiling_technologies[0].name)
-
+    # batch_id and boiling_id are the same
+    df_plan['batch_id'] = df_plan['boiling_id']
     return df_plan
 
 
@@ -81,7 +80,7 @@ def handle_adygea(df):
     df["output"] = df["sku"].apply(lambda x: x.made_from_boilings[0].output_kg)
 
     boilings_adygea = Boilings()
-    for i, df_filter in df.groupby("group_boiling_id"):
+    for i, df_filter in df.groupby("group_id"):
         boilings_adygea = proceed_order(df_filter, boilings_adygea)
     boilings_adygea.finish()
     return pd.DataFrame(boilings_adygea.boilings), boilings_adygea.boiling_number

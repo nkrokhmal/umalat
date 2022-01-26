@@ -43,20 +43,23 @@ def read_boiling_plan(wb_obj, as_boilings=True):
             ]
         ]
         df.columns = [
-            "batch_id",
+            "group_id",
             "output",
             "sourdough_range",
             "sku",
             "kg",
         ]
-        max_id = df["batch_id"].max()
-        df["batch_id"] += cur_id
+        max_id = df["group_id"].max()
+        df["group_id"] += cur_id
         cur_id += max_id
         dfs.append(df)
 
     df = pd.concat(dfs).reset_index(drop=True)
     df = df[df["sku"] != "-"]
-    df["batch_id"] = df["batch_id"].astype(int)
+    df["group_id"] = df["group_id"].astype(int)
+
+    # batch_id and group_id are the same
+    df['batch_id'] = df['group_id']
 
     df["sku"] = df["sku"].apply(
         lambda sku: cast_model([MascarponeSKU, CreamCheeseSKU], sku)
@@ -69,7 +72,7 @@ def read_boiling_plan(wb_obj, as_boilings=True):
 
     # convert to boilings
     values = []
-    for boiling_id, grp in df.groupby("batch_id"):
+    for _, grp in df.groupby("batch_id"):
         sourdough_range = str(grp.iloc[0]["sourdough_range"])
 
         if grp.iloc[0]["type"] == "mascarpone" and not grp.iloc[0]["is_cream"]:
