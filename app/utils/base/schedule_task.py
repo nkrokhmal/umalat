@@ -80,7 +80,7 @@ class BaseScheduleTask(Generic[ModelType]):
             flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()}.csv")
-        columns = ["sku", "code", "in_box", "kg", "boxes_count", 'start', 'finish']
+        columns = ["sku", "code", "in_box", "kg", "boxes_count"]
         if not os.path.exists(path):
             df_task = pd.DataFrame(columns=columns)
             df_task.to_csv(path, index=False, sep=";")
@@ -103,9 +103,7 @@ class BaseScheduleTask(Generic[ModelType]):
                 grp.iloc[0]["sku"].code,
                 grp.iloc[0]["sku"].in_box,
                 kg,
-                boxes_count,
-                grp.iloc[0]['start'],
-                grp.iloc[0]['finish']
+                boxes_count
             ]
             df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
         df_task = df_task[columns] # fix order just in case

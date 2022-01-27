@@ -98,7 +98,7 @@ def mozzarella_schedule():
         schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
         utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))
 
-        schedule_task = update_task_and_batches(schedule_wb)
+        schedule_task = update_task_and_batches(schedule_wb, boiling_plan_df=boiling_plan_df)
 
         schedule_wb = schedule_task.schedule_task_original(schedule_wb)
         schedule_wb = schedule_task.schedule_task_boilings(schedule_wb)

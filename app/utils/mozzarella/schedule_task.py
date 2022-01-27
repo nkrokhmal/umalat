@@ -55,8 +55,8 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                     row["sku_obj"].in_box,
                     kg,
                     boxes_count,
-                    row['start'],
-                    row['finish']
+                    '',
+                    ''
                 ]
                 df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
         df_task = df_task[columns] # fix order just in case
@@ -68,7 +68,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()}.csv")
-        columns = ["sku", "code", "in_box", "kg", "boxes_count", 'start', 'finish']
+        columns = ["sku", "code", "in_box", "kg", "boxes_count"]
         if not os.path.exists(path):
             df_task = pd.DataFrame(columns=columns)
             df_task.to_csv(path, index=False, sep=";")
@@ -94,8 +94,6 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                     grp.iloc[0]["sku"].in_box,
                     kg,
                     boxes_count,
-                    grp.iloc[0]['start'],
-                    grp.iloc[0]['finish']
                 ]
                 df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
 
@@ -111,8 +109,8 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                     row["sku_obj"].in_box,
                     row["kg"],
                     boxes_count,
-                    row['start'],
-                    row['finish']
+                    '',
+                    ''
                 ]
                 if row["sku"] in skus:
                     df_task.loc[df_task.sku == values[0], columns] = values
@@ -199,8 +197,6 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                     kg,
                     boxes_count,
                     row["sku"].code,
-                    row['start'],
-                    row['finish']
                 ]
                 excel_client, cur_row = draw_schedule_raw(excel_client, cur_row, values)
             excel_client = draw_blue_line(excel_client, cur_row)
@@ -220,8 +216,6 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                         kg,
                         boxes_count,
                         row["sku_obj"].code,
-                        row['start'],
-                        row['finish']
                     ]
                     excel_client, cur_row = draw_schedule_raw(
                         excel_client, cur_row, values, COLOR_PACKING
