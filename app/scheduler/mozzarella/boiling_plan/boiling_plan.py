@@ -121,6 +121,9 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
             dfs[1]["group_id"] += dfs[0].iloc[-1]["group_id"]
 
     df = pd.concat(dfs).reset_index(drop=True)
+    if len(df) == 0:
+        return pd.DataFrame()
+
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
 
     df["boiling"] = df["boiling_params"].apply(cast_mozzarella_boiling)
@@ -152,6 +155,8 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
         ), "В одной группе варок должен быть только один тип варки."
 
     df["original_kg"] = df["kg"]
+
+    assert not df['total_volume'].isnull().any(), "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
 
     # validate kilograms
     if validate:

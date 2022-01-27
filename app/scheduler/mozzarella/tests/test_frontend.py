@@ -11,8 +11,15 @@ def test_batch():
     )
     fns = [fn for fn in fns if "$" not in fn]
     for i, fn in enumerate(utils.tqdm(fns, desc=lambda v: v)):
+        if 'несохраненное' not in fn:
+            continue
+
         _test(fn, open_file=False, prefix=str(i))
 
+    try:
+        _test(config.abs_path("app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 5 расписание несохраненное.xlsx"))
+    except Exception as e:
+        assert str(e) == "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
 
 def _test(fn, *args, **kwargs):
     utils.lazy_tester.configure_function_path()
@@ -25,17 +32,17 @@ def _test(fn, *args, **kwargs):
 
 if __name__ == "__main__":
     utils.configure_loguru(level="DEBUG")
-    _test(
-        # config.abs_path(
-        #     "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2) 1.xlsx"
-        # ),
-        # "/Users/marklidenberg/Downloads/test.xlsx",
-        '/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 2 без воды.xlsx',
-        # "/Users/marklidenberg/Desktop/2021_09_22_План_по_варкам_моцарелла_1.xlsx",
-        # start_times={LineName.WATER: "07:35", LineName.SALT: "05:25"},
-        first_batch_id=100,
-        open_file=True,
-        prefix="new5",
-        optimize=False,
-    )
-    # test_batch()
+    # _test(
+    #     # config.abs_path(
+    #     #     "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2) 1.xlsx"
+    #     # ),
+    #     # "/Users/marklidenberg/Downloads/test.xlsx",
+    #     '/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 5 расписание несохраненное.xlsx',
+    #     # "/Users/marklidenberg/Desktop/2021_09_22_План_по_варкам_моцарелла_1.xlsx",
+    #     # start_times={LineName.WATER: "07:35", LineName.SALT: "05:25"},
+    #     first_batch_id=100,
+    #     open_file=True,
+    #     prefix="new5",
+    #     optimize=False,
+    # )
+    test_batch()

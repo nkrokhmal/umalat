@@ -33,6 +33,7 @@ class BaseScheduleTask(Generic[ModelType]):
             self.df["line"] = self.df["line"].apply(lambda x: x.name)
 
     def update_boiling_schedule_task(self):
+        logger.debug('update_boiling_schedule_task')
         data_dir = create_dir(
             self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
             flask.current_app.config["TASK_FOLDER"]
@@ -70,6 +71,7 @@ class BaseScheduleTask(Generic[ModelType]):
                     row['finish']
                 ]
                 df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+        df_task = df_task[columns] # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 
     def update_total_schedule_task(self):
@@ -106,6 +108,7 @@ class BaseScheduleTask(Generic[ModelType]):
                 grp.iloc[0]['finish']
             ]
             df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+        df_task = df_task[columns] # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 
     def draw_task_original(self, excel_client, cur_row, task_name):
