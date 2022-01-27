@@ -29,7 +29,7 @@ def parse_schedule(ws_obj):
             row_labels = [str(row['label']) for i, row in df1[df1['x1'] == row_num].iterrows()]
             row_labels = [re.sub(r'\s+', ' ', label) for label in row_labels if label]
 
-            if 'Проверка' in row_labels:
+            if 'Набор смеси' in row_labels:
                 milk_project_rows.append(row_num)
 
             with code('find all adygea rows '):
@@ -120,7 +120,7 @@ def parse_schedule(ws_obj):
 
 
 def test():
-    fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/milk_project/Расписание милк проджект 2.xlsx')
+    fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/milk_project/Расписание милкпроджект 3 несколько милок.xlsx')
     df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['milk_project_boilings'])[['boiling_id', 'interval_time']]
     print(df)
 
