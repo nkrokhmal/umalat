@@ -67,7 +67,7 @@ def parse_schedule(ws_obj):
 
             with code('Convert boilings to dictionaries'):
                 for boiling_df in boiling_dfs:
-                    boiling_df['label'] = np.where(boiling_df['label'].isnull(), boiling_df['color'], boiling_df['label'])
+                    boiling_df['label'] = np.where(boiling_df['label'].isnull() | (boiling_df['label'] == ''), boiling_df['color'], boiling_df['label'])
                     boiling_df['is_cream'] = boiling_df['label'].apply(lambda s: 'сливок' in s)
                     boiling_df['id'] = boiling_df.apply(lambda row: row['label'] + '-' + str(row['color']), axis=1)
                     boiling = boiling_df.set_index('id').to_dict(orient='index')
@@ -108,7 +108,7 @@ def parse_schedule(ws_obj):
 
             with code('Convert boilings to dictionaries'):
                 for boiling_df in boiling_dfs:
-                    boiling_df['label'] = np.where(boiling_df['label'].isnull(), boiling_df['color'], boiling_df['label'])
+                    boiling_df['label'] = np.where(boiling_df['label'].isnull() | (boiling_df['label'] == ''), boiling_df['color'], boiling_df['label'])
                     boiling_df['id'] = boiling_df.apply(lambda row: row['label'] + '-' + str(row['color']), axis=1)
                     boiling_df = boiling_df.drop_duplicates(subset='id', keep='last') # NOTE: LOSE SOME INFORMATION (since we all duplicates block from the start), unnesecary for this point. If needed duplicated blocks - another solution needed
                     boiling = boiling_df.set_index('id').to_dict(orient='index')

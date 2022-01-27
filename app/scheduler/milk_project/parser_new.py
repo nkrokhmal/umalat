@@ -104,7 +104,7 @@ def parse_schedule(ws_obj):
 
             with code('Convert boilings to dictionaries'):
                 for boiling_df in boiling_dfs:
-                    boiling_df['label'] = np.where(boiling_df['label'].isnull(), boiling_df['color'], boiling_df['label'])
+                    boiling_df['label'] = np.where(boiling_df['label'].isnull() | (boiling_df['label'] == ''), boiling_df['color'], boiling_df['label'])
                     boiling = boiling_df.set_index('label').to_dict(orient='index')
                     boiling = {'blocks': {
                         k: [v['x0'] + cast_t(start_time) - COLUMN_SHIFT, v['y0'] + cast_t(start_time) - COLUMN_SHIFT] for

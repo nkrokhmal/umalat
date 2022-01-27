@@ -70,7 +70,7 @@ def parse_schedule(ws_obj):
 
         with code('Convert boilings to dictionaries'):
             for boiling_df in baths_df:
-                boiling_df['label'] = np.where(boiling_df['label'].isnull(), boiling_df['color'], boiling_df['label'])
+                boiling_df['label'] = np.where(boiling_df['label'].isnull() | (boiling_df['label'] == ''), boiling_df['color'], boiling_df['label'])
                 boiling = boiling_df.set_index('label').to_dict(orient='index')
                 boiling = {'blocks': {k: [v['x0'] + cast_t(start_time) - COLUMN_SHIFT, v['y0'] + cast_t(start_time) - COLUMN_SHIFT] for k, v in boiling.items()}}
 
@@ -94,7 +94,7 @@ def parse_schedule(ws_obj):
 
 
 def test():
-    fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/ricotta/Расписание рикотта 1.xlsx')
+    fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/ricotta/Расписание рикотта 2.xlsx')
     df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['boilings'])[['boiling_id', 'interval_time']]
     print(df)
 
