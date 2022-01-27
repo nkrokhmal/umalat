@@ -30,7 +30,7 @@ if __name__ == "__main__":
         #     "/Users/marklidenberg/Desktop/2021-09-11 Расписание моцарелла (2) 1.xlsx"
         # ),
         # "/Users/marklidenberg/Downloads/test.xlsx",
-        '/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 15.xlsx',
+        '/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 2 без воды.xlsx',
         # "/Users/marklidenberg/Desktop/2021_09_22_План_по_варкам_моцарелла_1.xlsx",
         # start_times={LineName.WATER: "07:35", LineName.SALT: "05:25"},
         first_batch_id=100,

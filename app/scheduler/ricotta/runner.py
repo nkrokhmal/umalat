@@ -13,7 +13,7 @@ def run_ricotta(
     prefix="",
 ):
     utils.makedirs(path)
-    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_id=first_batch_id)
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={'ricotta': first_batch_id})
     start_time = start_time or "07:00"
     if not schedule:
         schedule = make_schedule(

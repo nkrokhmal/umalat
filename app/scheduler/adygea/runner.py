@@ -17,7 +17,7 @@ def run_adygea(
     start_time = start_time or "07:00"
     prepare_start_time = prepare_start_time or start_time
     utils.makedirs(path)
-    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_id=first_batch_id)
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={'adygea': first_batch_id})
 
     if not schedule:
         schedule = make_schedule(

@@ -7,7 +7,7 @@ def test_make_frontend_boiling():
     print(wrap_boiling(make_boiling(boiling_model)))
 
 
-def _test(fn, open_file=False):
+def _test(fn, open_file=False, *args, **kwargs):
     utils.lazy_tester.configure_function_path()
     warnings.filterwarnings("ignore")
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
@@ -21,13 +21,13 @@ def test_batch():
         config.abs_path("app/data/static/samples/inputs/by_department/ricotta/*.xlsx")
     )
     fns = [fn for fn in fns if "$" not in fn]
-    for fn in utils.tqdm(fns, desc=lambda v: v):
-        _test(fn, open_file=False)
+    for i, fn in enumerate(utils.tqdm(fns, desc=lambda v: v)):
+        _test(fn, open_file=True, prefix=str(i))
 
 
 if __name__ == "__main__":
-    # test_batch()
-    _test(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/ricotta/План по варкам рикотта.xlsx",
-        open_file=True,
-    )
+    # _test(
+    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/ricotta/План по варкам рикотта.xlsx",
+    #     open_file=True,
+    # )
+    test_batch()

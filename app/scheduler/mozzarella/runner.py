@@ -20,7 +20,7 @@ def run_mozzarella(
 ):
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
 
-    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_id=first_batch_id)
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={'mozzarella': first_batch_id})
     if not schedule:
         schedule = make_schedule(
             boiling_plan_df,

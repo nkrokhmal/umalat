@@ -26,7 +26,7 @@ def _test(fn, *args, **kwargs):
 if __name__ == "__main__":
     _test(
         config.abs_path(
-            "app/data/static/samples/inputs/by_department/mascarpone/План по варкам маскарпоне 3.xlsx"
+            "app/data/static/samples/inputs/by_department/mascarpone/План по варкам маскарпоне 1 все.xlsx"
         ),
         open_file=True,
     )
