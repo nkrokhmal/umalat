@@ -64,8 +64,9 @@ def approve_mozzarella():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+
     # update_task_and_batches_mozzarella((date, 'approved', file_name), boiling_plan_df=flask.request.form.get("boiling_plan_df"))
 
     flask.flash("Расписание успешно утверждено", "success")
@@ -82,8 +83,8 @@ def approve_upload_mozzarella():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
 
     update_task_and_batches_mozzarella((date, 'approved', file_name))
 
@@ -101,8 +102,9 @@ def approve_ricotta():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Рикотта")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Рикотта")
+
     # update_task_and_batches_ricotta((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
@@ -119,8 +121,8 @@ def approve_upload_ricotta():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Рикотта")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Рикотта")
 
     update_task_and_batches_ricotta((date, 'approved', file_name))
 
@@ -138,8 +140,8 @@ def approve_mascarpone():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
 
     # update_task_and_batches_mascarpone((date, 'approved', file_name))
 
@@ -158,8 +160,8 @@ def approve_upload_mascarpone():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
 
     update_task_and_batches_mascarpone((date, 'approved', file_name))
 
@@ -177,8 +179,8 @@ def approve_butter():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Масло")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Масло")
 
     # update_task_and_batches_butter((date, 'approved', file_name))
 
@@ -196,8 +198,8 @@ def approve_upload_butter():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Масло")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Масло")
 
     update_task_and_batches_butter((date, 'approved', file_name))
 
@@ -215,8 +217,8 @@ def approve_milk_project():
     path = move_to_approved(date=date, file_name=file_name)
     _ = move_to_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
 
     # update_task_and_batches_milk_project((date, 'approved', file_name))
 
@@ -234,8 +236,8 @@ def approve_upload_milk_project():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    # from app.main.workers.send_file import send_file
-    # send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
+    from app.main.workers.send_file import send_file
+    send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
 
     update_task_and_batches_milk_project((date, 'approved', file_name))
 
