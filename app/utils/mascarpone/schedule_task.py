@@ -21,7 +21,7 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
         df_task = pd.read_csv(path, sep=";")
         df_task.drop(df_task.index, inplace=True)
         self.df["coeff"] = self.df["boiling"].apply(lambda x: x.output_coeff)
-        for group_name, group_df in self.df.groupby("group"):
+        for _, group_df in self.df.groupby("batch_type"):
             for batch_id, grp in group_df.groupby("absolute_batch_id"):
                 for i, row in grp.iterrows():
                     kg = round(row["original_kg"] * row["coeff"])

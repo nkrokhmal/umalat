@@ -24,7 +24,7 @@ def update_task_and_batches(schedule_obj):
         date = utils.cast_datetime(metadata['date'])
     logger.debug('Updating mascarpone task', date=date)
     with code('Update'):
-        add_batch_from_boiling_plan_df(date, 'Маскарпонный цех', boiling_plan_df)
+        add_batch_from_boiling_plan_df(date, 'Маскарпоновый цех', boiling_plan_df)
         schedule_task = init_task(date, boiling_plan_df)
         schedule_task.update_schedule_task()
     return schedule_task

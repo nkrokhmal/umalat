@@ -10,8 +10,9 @@ def update_interval_times(schedule_wb, boiling_plan_df):
         boilings = [b for b in schedule_info['cream_cheese_boilings'] if b['type'] == 'cream_cheese']
         boilings = list(sorted(boilings, key=lambda b: b['interval'][0]))
 
-        for i, ((full_type, batch_id), grp) in enumerate(
-                boiling_plan_df[boiling_plan_df['type'] == 'cream_cheese'].groupby(['full_type', 'absolute_batch_id'])):
+        grouped = list(boiling_plan_df[boiling_plan_df['type'] == 'cream_cheese'].groupby(['full_type', 'absolute_batch_id']))
+        grouped = sorted(grouped, key=lambda v: v[1].index[0])
+        for i, ((full_type, batch_id), grp) in enumerate(grouped):
             boiling_plan_df.loc[grp.index, 'start'] = boilings[i]['interval_time'][0]
             boiling_plan_df.loc[grp.index, 'finish'] = boilings[i]['interval_time'][1]
 
