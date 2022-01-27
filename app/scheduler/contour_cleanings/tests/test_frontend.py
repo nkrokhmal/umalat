@@ -11,7 +11,7 @@ def test_batch():
             "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/*"
         )
     )
-    for path in utils.tqdm(paths, desc=lambda v: v):
+    for i, path in enumerate(utils.tqdm(paths, desc=lambda v: v)):
         _test(path, open_file=False)
 
 
