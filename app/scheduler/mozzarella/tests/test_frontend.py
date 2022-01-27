@@ -11,7 +11,7 @@ def test_batch():
     )
     fns = [fn for fn in fns if "$" not in fn]
     for i, fn in enumerate(utils.tqdm(fns, desc=lambda v: v)):
-        if 'несохраненное' not in fn:
+        if 'несохраненное' in fn:
             continue
 
         _test(fn, open_file=False, prefix=str(i))
