@@ -6,9 +6,9 @@ def update_interval_times(schedule_wb, boiling_plan_df):
 
     interval_times = {}
 
-    for boiling in schedule_info['adygea_boilings']:
+    for boiling in schedule_info.get('adygea_boilings', []):
         interval_times[boiling['boiling_id']] = boiling['interval_time']
 
-    boiling_plan_df['start'] = boiling_plan_df['batch_id'].apply(lambda batch_id: interval_times.get(batch_id)[0])
-    boiling_plan_df['finish'] = boiling_plan_df['batch_id'].apply(lambda batch_id: interval_times.get(batch_id)[1])
+    boiling_plan_df['start'] = boiling_plan_df['batch_id'].apply(lambda batch_id: interval_times.get(batch_id, ['', ''])[0])
+    boiling_plan_df['finish'] = boiling_plan_df['batch_id'].apply(lambda batch_id: interval_times.get(batch_id, ['', ''])[1])
     return boiling_plan_df
