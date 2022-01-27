@@ -155,7 +155,6 @@ def merge_workbooks(wb1, wb2):
 def set_default_sheet(wb, sheet_name='Расписание'):
     for s in range(len(wb.sheetnames)):
         if wb.sheetnames[s] == sheet_name:
-            print(s)
             wb.active = s
             break
 

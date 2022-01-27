@@ -112,7 +112,7 @@ def parse_schedule(ws_obj):
                     boiling['boiling_id'] = int(boiling_df.iloc[0]["label"].split(" ")[0])
                     boiling['interval'] = [boiling_df['x0'].min() + cast_t(start_time) - COLUMN_SHIFT,
                                            boiling_df['y0'].max() + cast_t(start_time) - COLUMN_SHIFT]
-                    boiling['interval_time'] = list(map(cast_time, boiling['interval']))
+                    boiling['interval_time'] = list(map(cast_human_time, boiling['interval']))
 
                     parsed_schedule['adygea_boilings'].append(boiling)
 

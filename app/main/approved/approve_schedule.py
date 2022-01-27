@@ -66,8 +66,7 @@ def approve_mozzarella():
 
     # from app.main.workers.send_file import send_file
     # send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
-
-    update_task_and_batches_mozzarella((date, 'approved', file_name))
+    # update_task_and_batches_mozzarella((date, 'approved', file_name), boiling_plan_df=flask.request.form.get("boiling_plan_df"))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".mozzarella_schedule"))
@@ -104,8 +103,7 @@ def approve_ricotta():
 
     # from app.main.workers.send_file import send_file
     # send_file.queue(os.path.join(path, file_name), date, "Рикотта")
-
-    update_task_and_batches_ricotta((date, 'approved', file_name))
+    # update_task_and_batches_ricotta((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".ricotta_schedule"))
@@ -143,7 +141,7 @@ def approve_mascarpone():
     # from app.main.workers.send_file import send_file
     # send_file.queue(os.path.join(path, file_name), date, "Маскарпоне")
 
-    update_task_and_batches_mascarpone((date, 'approved', file_name))
+    # update_task_and_batches_mascarpone((date, 'approved', file_name))
 
 
     flask.flash("Расписание успешно утверждено", "success")
@@ -182,7 +180,7 @@ def approve_butter():
     # from app.main.workers.send_file import send_file
     # send_file.queue(os.path.join(path, file_name), date, "Масло")
 
-    update_task_and_batches_butter((date, 'approved', file_name))
+    # update_task_and_batches_butter((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".butter_schedule"))
@@ -220,7 +218,7 @@ def approve_milk_project():
     # from app.main.workers.send_file import send_file
     # send_file.queue(os.path.join(path, file_name), date, "Милкпроджект")
 
-    update_task_and_batches_milk_project((date, 'approved', file_name))
+    # update_task_and_batches_milk_project((date, 'approved', file_name))
 
     flask.flash("Расписание успешно утверждено", "success")
     return flask.redirect(flask.url_for(".milk_project_schedule"))
