@@ -73,6 +73,7 @@ def ricotta_schedule():
         BatchNumber.last_batch_number(
             datetime.today() + timedelta(days=1),
             "Рикоттный цех",
+            group='ricotta'
         )
         + 1
     )

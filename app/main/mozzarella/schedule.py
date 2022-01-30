@@ -130,6 +130,7 @@ def mozzarella_schedule():
         BatchNumber.last_batch_number(
             datetime.today() + timedelta(days=1),
             "Моцарельный цех",
+            group='mozzarella'
         )
         + 1
     )

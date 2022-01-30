@@ -118,6 +118,7 @@ def milk_project_schedule():
         BatchNumber.last_batch_number(
             datetime.today() + timedelta(days=1),
             "Милкпроджект",
+            group='milk_project'
         )
         + 1
     )
