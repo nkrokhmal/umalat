@@ -131,7 +131,7 @@ def parse_schedule(ws_obj):
 
 
 def test():
-    fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/mascarpone/Расписание маскарпоне 7.xlsx')
+    fn = os.path.join(basedir, 'app/data/static/samples/outputs/by_department/mascarpone/Расписание маскарпоне 8.xlsx')
     df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['mascarpone_boiling_groups'])
     # df = pd.DataFrame(parse_schedule((fn, 'Расписание'))['cream_cheese_boilings'])
     # print(df[['type', 'interval_time']])

@@ -18,7 +18,7 @@ def parse_schedule_file(wb_obj):
 
         for row_num in time_index_row_nums:
             hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
-            if hour >= 12:
+            if hour >= 18:
                 # yesterday
                 hour -= 24
             start_times.append(hour * 12)
@@ -57,13 +57,18 @@ def parse_schedule_file(wb_obj):
                 fourth_or_last_label = df1.iloc[-1]['label']
             else:
                 fourth_or_last_label = df1.iloc[3]['label']
-
             last_fourth_or_last_boiling = max([boiling for boiling in m.root['boilings']['boiling', True] if int(boiling.props['label']) == int(fourth_or_last_label)], key=lambda boiling: boiling.x[0])
+
             # find adding_lactic_acid block (with 4 number on it)
             blocks_df = df[(df['x1'] == int(last_fourth_or_last_boiling.props['row_num']) + 1) & (df['label'] == '4')]
             blocks_df = blocks_df[blocks_df['x0'] + cast_t(start_times[0]) >= last_fourth_or_last_boiling.x[0]]
 
-            m.root.props.update(fourth_boiling_group_adding_lactic_acid_time=cast_time(blocks_df.iloc[0]['y0'] + start_times[0] - 5)) # don't forget the column header
+            try:
+                m.root.props.update(fourth_boiling_group_adding_lactic_acid_time=cast_time(blocks_df.iloc[0]['y0'] + start_times[0] - 5)) # don't forget the column header
+            except:
+                # todo maybe: cream-only case, where there are no 4 labels
+                m.root.props.update(fourth_boiling_group_adding_lactic_acid_time=None)
+
             m.root.props.update(last_pumping_off=m.root.y[0]) # don't forget the column header
 
     return m.root
@@ -87,6 +92,6 @@ def parse_properties(fn):
 
 if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = '/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/by_department/mascarpone/Расписание маскарпоне 5.xlsx'
+    fn = '/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/by_department/mascarpone/Расписание маскарпоне 8.xlsx'
     # fn = '/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/by_department/mascarpone/Расписание маскарпоне 4.xlsx'
     print(dict(parse_properties(fn)))

@@ -472,7 +472,7 @@ def make_contour_6(properties):
                   label='Танк рикотты (сладкая сыворотка)')
 
     with code('cream tanks'):
-        if properties['mascarpone'].is_present():
+        if properties['mascarpone'].fourth_boiling_group_adding_lactic_acid_time:
             m.row('cleaning', push_func=AxisPusher(start_from=cast_t(properties['mascarpone'].fourth_boiling_group_adding_lactic_acid_time) + 12, validator=CleaningValidator(ordered=False)),
                                           size=cast_t('01:20'),
                                           label='Танк сливок') # fourth mascarpone boiling group end + hour
