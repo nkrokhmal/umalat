@@ -18,7 +18,7 @@ def parse_schedule_file(wb_obj):
 
         for row_num in time_index_row_nums:
             hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
-            if hour >= 18:
+            if hour >= 15:
                 # yesterday
                 hour -= 24
             start_times.append(hour * 12)
