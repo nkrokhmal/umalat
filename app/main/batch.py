@@ -35,6 +35,7 @@ def upload_batches():
                     beg_number=batch["beg_number"],
                     end_number=batch["end_number"],
                     department_id=batch["department_id"],
+                    group=batch['group']
                 )
                 db.session.add(batch)
             db.session.commit()
@@ -76,6 +77,7 @@ def upload_last_batches():
                     beg_number=department["beg_number"],
                     end_number=department["end_number"],
                     department_id=department["department_id"],
+                    group=department['group']
                 )
                 db.session.add(batch)
             db.session.commit()
