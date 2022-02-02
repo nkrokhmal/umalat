@@ -327,6 +327,7 @@ class BatchNumber(mdb.Model):
             "beg_number": self.beg_number,
             "end_number": self.end_number,
             "department_id": self.department_id,
+            'group': self.group
         }
 
     @staticmethod
