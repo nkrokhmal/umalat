@@ -112,6 +112,13 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
         lambda row: row["sku_obj"] + "," + row["boiling_params"], axis=1
     )
     df["sheet"] = sheet_number
+
+    with code('Fix group ids: first water -> then salt'):
+        cur_group_id = 1
+        for line_name in [LineName.WATER, LineName.SALT]:
+            for ind, grp in df[df['sku_obj'] == line_name].groupby('group_id'):
+                df.loc[grp.index, 'group_id'] = cur_group_id
+                cur_group_id += 1
     return df
 
 
