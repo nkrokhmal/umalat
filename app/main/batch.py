@@ -23,7 +23,6 @@ def save_batches():
         return response
 
 
-
 @main.route("/upload_batches", methods=["GET", "POST"])
 def upload_batches():
     batch_path = os.path.join(flask.current_app.config["BATCH_NUMBERS_DIR"], "batches.json")
