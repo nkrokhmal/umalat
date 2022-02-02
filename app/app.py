@@ -43,6 +43,7 @@ def create_app(config_name="default"):
     return app, rq
 
 
+
 def create_manager(app):
     DB_FOLDER = 'test' if app.config["TESTING"] else 'prod'
     MIGRATION_DIR = os.path.join('db', DB_FOLDER, 'migrations')
