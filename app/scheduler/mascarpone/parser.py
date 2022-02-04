@@ -24,6 +24,10 @@ def parse_schedule_file(wb_obj):
         # todo maybe: refactor, start_times -> start_ts
         start_times = [cast_t(v) for v in start_times]
 
+        with code('Precaution for minimum start time'):
+            minimum_start_time = '21:00'
+            start_times = [t if t <= cast_t(minimum_start_time) else t - 24 * 12 for t in start_times]
+
     n_boiling_lines = (time_index_row_nums[1] - time_index_row_nums[0]) // 3
 
     def _split_func(row):

@@ -15,6 +15,10 @@ def parse_schedule(ws_obj):
         # extract time
         start_time = cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row)].iloc[0]["label"])
 
+        with code('Precaution for minimum start time'):
+            minimum_start_time = '21:00'
+            start_time = start_time if cast_t(start_time) <= cast_t(minimum_start_time) else cast_time(cast_t(start_time) - 24 * 12)
+
     with code('find rows'):
         df1 = df[df['x0'] >= 5]  # column header out
 

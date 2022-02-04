@@ -34,7 +34,13 @@ def parse_schedule_file(wb_obj):
 
         for row_num in time_index_row_nums:
             start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
+
         start_times = [cast_t(v) for v in start_times]
+
+        with code('Precaution for minimum start time'):
+            minimum_start_time = '21:00'
+            start_times = [t if t <= cast_t(minimum_start_time) else t - 24 * 12 for t in start_times]
+
 
     with code('calc split rows'):
         with code('find headers'):
