@@ -45,6 +45,7 @@ from app.scheduler.contour_cleanings.tests.test_frontend import (
 )
 
 
+
 if __name__ == "__main__":
     test_mozzarella_batch()
     test_mascarpone_batch()
