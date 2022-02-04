@@ -19,7 +19,6 @@ def run_test(local_path, config_name="test", notify_if_failed=True):
     if code == ExitCode.TESTS_FAILED:
         if notify_if_failed:
             telegram = notifiers.get_notifier("telegram")
-            print(local_path)
             telegram.notify(
                 message=f"Failed to run tests under: {local_path}",
                 token=config.TELEGRAM_BOT_TOKEN,

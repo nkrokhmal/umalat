@@ -1,6 +1,7 @@
 import flask_login
 from app.imports.external import *
 from app.db import create_external_db
+from app.notifier import Notifier
 
 model_db = mdb = flask_sqlalchemy.SQLAlchemy()
 
@@ -16,9 +17,10 @@ login_manager = flask_login.LoginManager()
 
 ERROR = 1e-5
 
-
 basedir = os.path.dirname(os.path.dirname(__file__))
 
 utils.lazy_tester.configure(
     root=os.path.join(basedir, "tests/lazy_tester_logs"), app_path=basedir
 )
+
+notifier = Notifier()
