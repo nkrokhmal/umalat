@@ -19,7 +19,9 @@ def parse_schedule_file(wb_obj):
         start_times = []
 
         for row_num in time_index_row_nums:
-            start_times.append(cast_t(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])))
+            start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
+        # todo maybe: refactor, start_times -> start_ts
+        start_times = [cast_t(v) for v in start_times]
 
     def _split_func(row):
         try:

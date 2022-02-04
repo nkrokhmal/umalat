@@ -4,7 +4,7 @@ from app.scheduler.milk_project.boiling_plan import *
 def test_random():
     utils.lazy_tester.configure_function_path()
     utils.lazy_tester.log(generate_random_boiling_plan())
-    utils.lazy_tester.assert_logs(reset=True)
+    utils.lazy_tester.assert_logs(reset=False)
 
 
 def _test(fn):
