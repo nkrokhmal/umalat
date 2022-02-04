@@ -35,5 +35,4 @@ def add_batch_from_boiling_plan_df(date, department_name, boiling_plan_df):
                 group=batch_type,
             )
     except:
-        # todo later: add warning!
-        pass
+        logger.exception('Failed to add batch', date=date, department_name=department_name)

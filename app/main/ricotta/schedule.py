@@ -7,6 +7,7 @@ from app.utils.ricotta.schedule_tasks import RicottaScheduleTask
 from app.utils.batches.batch import *
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from app.main.ricotta.update_task_and_batches import update_task_and_batches
+from app.main.validators import *
 from .forms import ScheduleForm
 
 
@@ -18,6 +19,10 @@ def ricotta_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         beg_time = form.beg_time.data
+
+        # validate time
+        time_validator(form, form.beg_time)
+
         file = flask.request.files["input_file"]
 
         data_dir = os.path.join(

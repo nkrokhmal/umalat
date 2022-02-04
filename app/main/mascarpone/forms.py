@@ -153,8 +153,8 @@ class ScheduleForm(FlaskForm):
     )
 
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
-    beg_time = TimeField(
+    beg_time = StringField(
         'Начало первой подачи"',
         validators=[Optional()],
-        default=time(6, 0),
+        default='06:00',
     )

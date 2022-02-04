@@ -34,10 +34,10 @@ class ScheduleForm(FlaskForm):
         "Введите номер первой партии в текущем дне", validators=[Optional()]
     )
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
-    beg_time = TimeField(
+    beg_time = StringField(
         "Время начала подготовки цеха к работе",
         validators=[Optional()],
-        default=time(8, 0),
+        default='08:00',
     )
     add_full_boiling = BooleanField(
         "Вставить полную мойку внутри дня по правилу 12 часов",

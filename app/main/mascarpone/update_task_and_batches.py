@@ -29,7 +29,8 @@ def update_task_and_batches(schedule_obj):
         try:
             update_interval_times(wb, boiling_plan_df)
         except:
-            # todo later: warning
+            logger.exception('Failed to update intervals', date=date, department_name='mascarpone')
+
             boiling_plan_df['start'] = ''
             boiling_plan_df['finish'] = ''
 

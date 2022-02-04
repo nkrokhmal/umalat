@@ -5,7 +5,7 @@ from wtforms import *
 from wtforms.validators import Required, Optional
 
 from app.models import *
-
+from app.main.validators import *
 
 class BoilingPlanFastForm(FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
@@ -39,15 +39,15 @@ class ScheduleForm(FlaskForm):
         "Введите номер первой партии в текущем дне", validators=[Optional()]
     )
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
-    salt_beg_time = TimeField(
+    salt_beg_time = StringField(
         'Начало первой подачи на линии "Пицца Чиз"',
         validators=[Optional()],
-        default=time(7, 0),
+        default='07:00',
     )
-    water_beg_time = TimeField(
+    water_beg_time = StringField(
         'Начало первой подачи на линии "Моцарелла в воде"',
         validators=[Optional()],
-        default=time(8, 0),
+        default='08:00',
     )
     add_full_boiling = BooleanField(
         "Вставить короткую мойку внутри дня по правилу 15 часов",

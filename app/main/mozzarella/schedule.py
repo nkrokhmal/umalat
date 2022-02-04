@@ -15,6 +15,7 @@ from app.utils.files.utils import (
     save_schedule_dict,
     create_if_not_exists,
 )
+from app.main.validators import *
 from .forms import ScheduleForm
 
 
@@ -26,6 +27,10 @@ def mozzarella_schedule():
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
         optimize = form.optimize.data
+
+        # validate time
+        time_validator(form, form.water_beg_time)
+        time_validator(form, form.salt_beg_time)
 
         file = flask.request.files["input_file"]
         data_dir = os.path.join(
@@ -50,6 +55,7 @@ def mozzarella_schedule():
             LineName.WATER: form.water_beg_time.data,
             LineName.SALT: form.salt_beg_time.data,
         }
+
 
         schedule = make_schedule(
             boiling_plan_df,

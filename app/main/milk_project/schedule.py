@@ -14,6 +14,7 @@ from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.scheduler.time import *
 from app.main.adygea.update_task_and_batches import update_task_and_batches as update_task_and_batches_adygea
 from app.main.milk_project.update_task_and_batches import update_task_and_batches as update_task_and_batches_milk_project
+from app.main.validators import *
 
 from .forms import ScheduleForm
 from collections import namedtuple
@@ -26,6 +27,10 @@ def milk_project_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         beg_time = form.beg_time.data
+
+        # validate time
+        time_validator(form, form.beg_time)
+
         file = flask.request.files["input_file"]
 
         data_dir = os.path.join(

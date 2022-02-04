@@ -1,7 +1,10 @@
 import flask_login
+
+import utils_ak.loguru
 from app.imports.external import *
 from app.db import create_external_db
 from app.notifier import Notifier
+from config import config
 
 model_db = mdb = flask_sqlalchemy.SQLAlchemy()
 
@@ -24,3 +27,9 @@ utils.lazy_tester.configure(
 )
 
 notifier = Notifier()
+
+# configure loguru for telegram notifications
+logger.add(NotificationHandler("telegram",
+                               defaults={'token': config.TELEGRAM_BOT_TOKEN,
+                                         'chat_id': config.TELEGRAM_CHAT_ID}),
+                               level="WARNING", format=utils_ak.loguru.format_with_trace)
