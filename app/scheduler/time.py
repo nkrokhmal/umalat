@@ -1,8 +1,15 @@
 from app.imports.runtime import *
 
+"""
+Formats
+time: [-]1:23:55 
+human_time: 23:55 or 23:55[+-]1 
+t: 575
+"""
+
 
 def cast_t(obj):
-    with code("handle None"):
+    with code("Handle None"):
         if obj == 0:
             return 0
         if utils.is_none(obj) or not obj:
@@ -10,11 +17,17 @@ def cast_t(obj):
 
     if utils.is_int_like(obj):
         return int(obj)
+    elif isinstance(obj, (tuple, list)) and all(utils.is_int_like(v) for v in obj):
+        days, hours, minutes = obj # unpack
+        days, hours, minutes = list(map(int, (days, hours, minutes))) # convert to int
+        total_minutes = int(days) * 288 * 5 + int(hours) * 60 + int(minutes)
+        assert total_minutes % 5 == 0
+        return total_minutes // 5
     elif isinstance(obj, time):
-        return cast_t(cast_time(obj))
+        return cast_t((0, obj.hour, obj.minute))
     elif isinstance(obj, str):
-        # 3:12:00
         if obj.count(":") == 1:
+            # human time format: 23:55+1
             if "-" in obj:
                 obj, days = obj.split("-")
                 days = -int(days)
@@ -23,91 +36,56 @@ def cast_t(obj):
             else:
                 days = 0
             hours, minutes = obj.split(":")
-
         elif obj.count(":") == 2:
+            # classic time format: 1:23:55
             days, hours, minutes = obj.split(":")
         else:
             raise Exception(f"Unknown format: {obj}")
-        minutes = int(days) * 288 * 5 + int(hours) * 60 + int(minutes)
-        assert minutes % 5 == 0
-        return minutes // 5
+        return cast_t((days, hours, minutes))
     else:
         raise Exception("Unknown format: {} {}".format(type(obj), obj))
 
 
 def cast_time(obj):
-    if isinstance(obj, str):
-        days = 0
-        if "-" in obj:
-            obj, days = obj.split("-")
-            days = -int(days)
-        elif "+" in obj:
-            obj, days = obj.split("+")
-            days = int(days)
-
-        if obj.count(":") == 1:
-            assert re.search(r"(\d\d):(\d\d)", obj)
-            return f"{days}:" + obj
-        else:
-            assert re.search(r"(\d+):(\d\d):(\d\d)", obj)
-            return obj
-    elif isinstance(obj, time):
-        return cast_time("0:" + str(obj.hour).zfill(2) + ":" + str(obj.minute).zfill(2))
-    elif utils.is_int_like(obj):
-        obj = int(obj)
-        days = obj // 288
-        hours = (obj // 12) % 24
-        minutes = (obj % 12) * 5
-        return f"{days:02}:{hours:02}:{minutes:02}"
-    else:
-        raise Exception("Unknown format: {} {}".format(type(obj), obj))
+    days, hours, minutes = parse_time(obj)
+    return f"{days}:{hours:02}:{minutes:02}"
 
 
 def cast_human_time(obj):
-    t = cast_t(obj)
-
-    if t is None:
-        return None
-
-    days = t // 288
-    hours = (t // 12) % 24
-    minutes = (t % 12) * 5
-
+    days, hours, minutes = parse_time(obj)
     if days == 0:
-        return cast_time(t)[3:]
+        return ':'.join(cast_time(obj).split(':')[1:])
     else:
         sign = "+" if days > 0 else "-"
         return f"{hours:02}:{minutes:02}{sign}{abs(days)}"
 
 
+def parse_time(time_obj):
+    t = cast_t(time_obj)
+    days = t // 288
+    hours = (t // 12) % 24
+    minutes = (t % 12) * 5
+    return days, hours, minutes
+
+
 def test():
-    print(cast_t("1:23:55"))
-    print(cast_t("0:23:55"))
-    print(cast_t("-1:23:55"))
-    print(cast_time(1))
-    print(cast_time(0))
-    print(cast_time(-1))
+    for value in ['1:23:55', '0:23:55', '-1:23:55', 1, 0, -1, '08:00', '0:08:00', '21:35-1', '10:08:00']:
+        assert cast_t(value) == cast_t(cast_time(cast_t(value)))
+        assert cast_t(value) == cast_t(cast_human_time(cast_t(value)))
+        assert cast_time(value) == cast_time(cast_t(cast_time(value)))
+        print()
+        print(value)
+        print(cast_t(value))
+        print(cast_time(value))
+        print(cast_human_time(value))
 
-    try:
-        print(cast_time("08:00"))
-        print(cast_time("08:0a"))
-    except AssertionError:
-        print("Wrong format")
-
-    try:
-        print(cast_time("0:08:00"))
-        print(cast_time("a:08:00"))
-    except AssertionError:
-        print("Wrong format")
-
-    print(cast_time("21:35-1"))
-    print(cast_t("21:35-1"))
-
-    print(cast_human_time(-1))
-    print(cast_human_time("21:35"))
-    print(cast_human_time("1:21:35"))
-    print(cast_human_time("-1:21:35"))
-    # print(cast_t("08:00:00"))
+    for wrong_value in ['a:08:00', '08:0a']:
+        try:
+            cast_time(wrong_value)
+        except Exception:
+            pass
+        else:
+            raise Exception('Should not happen')
 
 
 if __name__ == "__main__":
