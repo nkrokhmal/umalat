@@ -16,10 +16,10 @@ def test_batch():
 
         _test(fn, open_file=False, prefix=str(i))
 
-    try:
-        _test(config.abs_path("app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 5 расписание несохраненное.xlsx"))
-    except Exception as e:
-        assert str(e) == "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
+    # try:
+    #     _test(config.abs_path("app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 5 расписание несохраненное.xlsx"))
+    # except Exception as e:
+    #     assert str(e) == "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
 
 def _test(fn, *args, **kwargs):
     utils.lazy_tester.configure_function_path()
