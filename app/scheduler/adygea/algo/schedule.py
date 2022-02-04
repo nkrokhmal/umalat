@@ -119,7 +119,6 @@ def make_schedule(boiling_plan_df, start_time='07:00', prepare_start_time='07:00
                                        prepare_start_time=prepare_start_time)
 
     need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12 # work more than 8 hours
-
     if not need_a_break:
         # no lunch in these cases
         lunch_times = []
@@ -133,8 +132,7 @@ def make_schedule(boiling_plan_df, start_time='07:00', prepare_start_time='07:00
                 for b1, b2, b3 in utils.iter_sequences(range_boilings, 3, method='any'):
                     if not b2:
                         continue
-
-                    if cast_time(b2.y[0]) >= time:
+                    if b2.y[0] >= cast_t(time):
                         if b3 and b1:
                             if b2.y[0] - b1.y[0] >= b3.y[0] - b2.y[0]:
                                 # wait for next boiling and make lunch
@@ -177,7 +175,6 @@ def make_schedule(boiling_plan_df, start_time='07:00', prepare_start_time='07:00
                 lunch_times.append(find_first_after(cast_time(no_lunch_schedule.x[0] + 6 * 12)))
                 # print(4, lunch_times)
                 continue
-
     return _make_schedule(boiling_plan_df,
                           start_time=start_time,
                           prepare_start_time=prepare_start_time,

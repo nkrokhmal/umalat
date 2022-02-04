@@ -12,7 +12,7 @@ def test_batch():
         )
     )
     for i, path in enumerate(utils.tqdm(paths, desc=lambda v: v)):
-        _test(path, open_file=False)
+        _test(path, open_file=True)
 
 
 def _test(path, open_file=False, prefix=None, *args, **kwargs):

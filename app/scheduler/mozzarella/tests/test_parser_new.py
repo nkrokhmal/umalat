@@ -18,11 +18,13 @@ def _test(fn, *args, **kwargs):
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
 
     outputs = pd.DataFrame(parse_schedule((fn, 'Расписание')))
-
     utils.lazy_tester.log(outputs)
     utils.lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
     utils.configure_loguru(level="DEBUG")
-    test_batch()
+    # test_batch()
+    _test(
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/outputs/by_department/mozzarella/Расписание моцарелла 4.xlsx",
+    )

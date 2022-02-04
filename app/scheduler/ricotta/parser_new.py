@@ -14,7 +14,6 @@ def parse_schedule(ws_obj):
 
         start_time = cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row)].iloc[0]["label"])
 
-
     with code('find rows'):
         df1 = df[df['x0'] >= 5]  # column header out
 
@@ -71,7 +70,7 @@ def parse_schedule(ws_obj):
 
                 boiling['boiling_id'] = int(boiling_df.iloc[0]["label"].split(" ")[0])
                 boiling['interval'] = [boiling_df['x0'].min() + cast_t(start_time) - COLUMN_SHIFT, boiling_df['y0'].max() + cast_t(start_time) - COLUMN_SHIFT]
-                boiling['interval_time'] = list(map(cast_time, boiling['interval']))
+                boiling['interval_time'] = list(map(cast_human_time, boiling['interval']))
                 boiling['line'] = i + 1
 
                 parsed_schedule['baths'].append(boiling)

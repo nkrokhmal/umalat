@@ -20,7 +20,7 @@ def _test(fn, *args, **kwargs):
     outputs = pd.DataFrame(parse_schedule((fn, 'Расписание')))
 
     utils.lazy_tester.log(outputs)
-    utils.lazy_tester.assert_logs(reset=True)
+    utils.lazy_tester.assert_logs(reset=False)
 
 
 if __name__ == "__main__":
