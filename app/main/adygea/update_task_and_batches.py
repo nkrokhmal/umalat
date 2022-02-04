@@ -21,12 +21,21 @@ def update_task_and_batches(schedule_obj):
         metadata = json.loads(utils.read_metadata(wb))
         date = utils.cast_datetime(metadata['date'])
         boiling_plan_df = read_boiling_plan(wb, first_batch_ids=metadata['first_batch_ids'])
+
+    with code('Batch'):
+        add_batch_from_boiling_plan_df(date, 'Адыгейский цех', boiling_plan_df)
+
+    with code('Task'):
         schedule_task = init_task(date, boiling_plan_df)
         if len(boiling_plan_df) == 0:
             return schedule_task
-        boiling_plan_df = update_interval_times(wb, boiling_plan_df)
-    logger.debug('Updating adygea task', date=date)
-    with code('Update'):
-        add_batch_from_boiling_plan_df(date, 'Адыгейский цех', boiling_plan_df)
+
+        try:
+            update_interval_times(wb, boiling_plan_df)
+        except:
+            # todo later: warning
+            boiling_plan_df['start'] = ''
+            boiling_plan_df['finish'] = ''
+
         schedule_task.update_schedule_task()
     return schedule_task
