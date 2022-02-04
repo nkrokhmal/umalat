@@ -1,6 +1,6 @@
 from app.imports.runtime import *
 from utils_ak.block_tree import *
-
+from app.scheduler.parsing_new.parse_time import *
 from app.scheduler.time import *
 
 
@@ -22,7 +22,7 @@ def wrap_header(date, start_time="07:00", header="", period=566):
             if cur_time[-2:] == "00":
                 m.row(
                     size=1,
-                    text=str(int(hours)),
+                    text=cast_label_from_time(cur_time),
                     color=(218, 150, 148),
                     text_rotation=90,
                     font_size=9,

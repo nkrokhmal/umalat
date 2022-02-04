@@ -3,6 +3,7 @@ from app.imports.runtime import *
 from app.scheduler.adygea import *
 from app.scheduler.adygea.properties import *
 from app.scheduler.parsing import *
+from app.scheduler.parsing_new.parse_time import *
 
 from utils_ak.block_tree import *
 
@@ -18,11 +19,7 @@ def parse_schedule_file(wb_obj):
         start_times = []
 
         for row_num in time_index_row_nums:
-            hour = int(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])
-            if hour >= 12:
-                # yesterday
-                hour -= 24
-            start_times.append(hour * 12)
+            start_times.append(cast_t(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"])))
 
     def _split_func(row):
         try:

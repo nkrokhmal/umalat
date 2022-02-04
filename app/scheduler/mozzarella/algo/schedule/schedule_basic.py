@@ -29,7 +29,9 @@ def make_schedule_basic(
 
     if start_configuration:
         # at least two lines present
-        start_times[start_configuration[-1]] = "00:00"
+        days, _, _ = parse_time(start_times[start_configuration[0]])
+        # start latter before the former
+        start_times[start_configuration[-1]] = cast_time(cast_t((days, 0, 0)))
 
     with code("Find optimal cleanings"):
         if optimize_cleanings:

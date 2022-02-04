@@ -16,7 +16,6 @@ def parse_line(merged_cells_df, line_row, split_criteria):
 
 
 
-
 def test1():
     def expand_block(df, df_block):
         return df[(df['x1'].isin([df_block['x1'].min(), df_block['x1'].min() + 1])) &

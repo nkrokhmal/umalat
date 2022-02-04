@@ -13,11 +13,8 @@ def parse_schedule(ws_obj):
         row = time_index_rows[0]
 
         # extract time
-        hour = int(df[(df["x0"] == 5) & (df["x1"] == row)].iloc[0]["label"])
-        if hour >= 12:
-            # yesterday
-            hour -= 24
-        start_time = cast_time(hour * 12)
+        start_time = cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row)].iloc[0]["label"])
+
 
     parsed_schedule = {'boilings': []}
     with code('find line blocks'):
