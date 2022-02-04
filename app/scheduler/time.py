@@ -46,12 +46,22 @@ def cast_t(obj):
         raise Exception("Unknown format: {} {}".format(type(obj), obj))
 
 
+def is_none(obj):
+    return cast_t(obj) is None
+
+
 def cast_time(obj):
+    if is_none(obj):
+        return None
+
     days, hours, minutes = parse_time(obj)
     return f"{days}:{hours:02}:{minutes:02}"
 
 
 def cast_human_time(obj):
+    if is_none(obj):
+        return None
+
     days, hours, minutes = parse_time(obj)
     if days == 0:
         return ':'.join(cast_time(obj).split(':')[1:])
