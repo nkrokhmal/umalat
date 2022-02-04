@@ -1,4 +1,5 @@
 from app.imports.runtime import *
+from app.models import cast_model, MozzarellaBoiling, MozzarellaSKU
 from utils_ak.block_tree import *
 import flask
 
@@ -15,6 +16,21 @@ def load_schedules(path, prefix, departments=None):
         if os.path.exists(fn):
             with open(fn, "rb") as f:
                 schedules[department] = ParallelepipedBlock.from_dict(pickle.load(f))
+
+            if department == 'mozzarella':
+                # reload models for mozzarella - need for use later
+                for block in schedules[department].iter(cls='boiling'):
+                    _id = int(re.findall(r"(\d+)>", str(block.props['boiling_model']))[0]) # <MozzarellaBoiling 15> -> 15
+                    model = cast_model(MozzarellaBoiling, _id)
+                    block.props.update(boiling_model=model)
+
+                for block in schedules[department].iter(cls='packing'):
+                    bdf = block.props['boiling_group_df']
+                    bdf['sku'] = bdf['sku'].apply(lambda sku: int(re.findall(r"(\d+)>", str(sku))[0]))
+                    bdf['sku'] = bdf['sku'].apply(lambda sku: cast_model(MozzarellaSKU, sku))
+
+                    bdf['boiling'] = bdf['boiling'].apply(lambda boiling: int(re.findall(r"(\d+)>", str(boiling))[0]))
+                    bdf['boiling'] = bdf['boiling'].apply(lambda boiling: cast_model(MozzarellaBoiling, boiling))
 
     return schedules
 
