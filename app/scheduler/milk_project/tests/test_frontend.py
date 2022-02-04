@@ -20,7 +20,7 @@ def test_batch():
     )
     fns = [fn for fn in fns if "$" not in fn]
     for i, fn in enumerate(utils.tqdm(fns, desc=lambda v: v)):
-        _test(fn, open_file=True, prefix=str(i))
+        _test(fn, open_file=False, prefix=str(i))
 
 
 if __name__ == "__main__":
