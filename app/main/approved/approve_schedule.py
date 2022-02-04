@@ -83,8 +83,8 @@ def approve_upload_mozzarella():
     path = move_to_approved(date=date, file_name=file_name)
     delete_from_approved_pickle(date=date, file_name=pickle_file_name)
 
-    from app.main.workers.send_file import send_file
-    send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
+    # from app.main.workers.send_file import send_file
+    # send_file.queue(os.path.join(path, file_name), date, "Моцарелла")
 
     update_task_and_batches_mozzarella((date, 'approved', file_name))
 

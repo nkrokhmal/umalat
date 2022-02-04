@@ -141,6 +141,7 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
 
     df['batch_type'] = df['full_type']
 
+    df['batch_id'] = 0
     # set batch_id
     for batch_type in df['batch_type'].unique():
         cur_batch_id = 1
