@@ -60,7 +60,6 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
     df["group_id"] = df["group_id"].astype(int)
 
     # batch_id and group_id are the same
-    df['batch_id'] = df['group_id']
 
     df["sku"] = df["sku"].apply(
         lambda sku: cast_model([MascarponeSKU, CreamCheeseSKU], sku)
@@ -73,7 +72,7 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
 
     # convert to boilings
     values = []
-    for _, grp in df.groupby("batch_id"):
+    for _, grp in df.groupby("group_id"):
         sourdough_range = str(grp.iloc[0]["sourdough_range"])
 
         if grp.iloc[0]["type"] == "mascarpone" and not grp.iloc[0]["is_cream"]:
@@ -141,5 +140,13 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
         df['full_type'] = df['sku'].apply(lambda sku: get_type(sku.name))
 
     df['batch_type'] = df['full_type']
+
+    # set batch_id
+    for batch_type in df['batch_type'].unique():
+        cur_batch_id = 1
+        for ind, grp in df[df['batch_type'] == batch_type].groupby('group_id'):
+            df.loc[grp.index, 'batch_id'] = cur_batch_id
+            cur_batch_id += 1
+
     df = update_absolute_batch_id(df, first_batch_ids)
     return df
