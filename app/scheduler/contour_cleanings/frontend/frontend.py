@@ -12,9 +12,6 @@ def wrap_contour(contour, contour_id):
                    # props
                    font_size=9)
 
-    m.row('label', push_func=add_push,
-          size=1, x=-1, text=f'Контур {contour_id + 1}', color='yellow')
-
     for child in contour.iter():
         if not child.is_leaf():
             continue
@@ -24,8 +21,13 @@ def wrap_contour(contour, contour_id):
     return m.root
 
 
-def wrap_frontend(schedule, date=None, start_time="00:00"):
+def wrap_frontend(schedule, date=None):
     date = date or datetime.now()
+
+    with code("Calc start time"):
+        min_t = min([block.x[0] for block in schedule.iter(cls='cleaning')])
+        days, _, _ = parse_time(min_t)
+        start_time = cast_time((days, 0, 0))
 
     m = BlockMaker(
         "frontend",
@@ -36,12 +38,16 @@ def wrap_frontend(schedule, date=None, start_time="00:00"):
     )
     m.row("stub", size=0)  # start with 1
     m.block(wrap_header(date=date, start_time=start_time, header='CIP Мойка контура 1-4'))
-    for i, contour in enumerate(schedule.children[:4]):
-        m.block(wrap_contour(contour, i))
-        m.row('stub', size=0)
+    with m.block('contours 1-4', start_time=start_time, axis=1):
+        for i, contour in enumerate(schedule.children[:4]):
+            m.block(wrap_contour(contour, i))
+            m.block('label', push_func=add_push, size=(1, 1), x=(-1 + cast_t(start_time), 2 * i), text=f'Контур {i + 1}', color='yellow')
+            m.row('stub', size=0)
 
     m.block(wrap_header(date=date, start_time=start_time, header='CIP Мойка MPINOX'))
-    for i, contour in enumerate(schedule.children[4:]):
-        m.block(wrap_contour(contour, i))
-        m.row('stub', size=0)
+    with m.block('mpinox', start_time=start_time, axis=1):
+        for i, contour in enumerate(schedule.children[4:]):
+            m.block(wrap_contour(contour, i))
+            m.block('label', push_func=add_push, size=(1, 1), x=(-1 + cast_t(start_time), 2 * i), text=f'Контур {i + 1}', color='yellow')
+            m.row('stub', size=0)
     return m.root
