@@ -200,6 +200,7 @@ configs = {
     "test": TestConfig,
 }
 
+
 DEFAULT_ENVIRONMENT = "debug"
 ENVIRONMENT = os.environ.get("ENVIRONMENT", DEFAULT_ENVIRONMENT)
 config = configs[ENVIRONMENT]
