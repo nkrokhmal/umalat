@@ -37,7 +37,7 @@ class ScheduleForm(FlaskForm):
     beg_time = StringField(
         'Время начала подготовки цеха к работе',
         validators=[Optional()],
-        default='08:00',
+        default='07:00',
     )
 
 
