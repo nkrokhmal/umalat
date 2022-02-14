@@ -14,7 +14,10 @@
 
 <div class="row">
     <div class="card card-body bg-white border-light shadow-sm mb-4">
-        <h4 class="h5 mb-4">Загрузите файл плана по варкам и выберите дату</h4>
+        <h4 class="h5 mb-4">Введите дату для построения полного расписания по дню.
+
+            В расписание попадут только цеха,
+            по которым имеются подтвержденные расписания!</h4>
         <div class="row">
             <form method="post" action="/departments_schedule" enctype="multipart/form-data" class="mt-4">
                 {{ form.hidden_tag() }}

@@ -26,6 +26,7 @@ def departments_schedule():
             filename=filename,
             form=form,
         )
+    form.date.data = datetime.today() + timedelta(days=1)
     return flask.render_template(
         "departments_schedule/schedule.html",
         form=form,
