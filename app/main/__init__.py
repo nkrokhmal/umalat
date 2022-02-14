@@ -13,3 +13,4 @@ from .adygea import *
 from .contour_washers import *
 from .approved import *
 from .params import *
+from .departments_schedule import *
