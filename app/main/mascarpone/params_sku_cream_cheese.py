@@ -57,7 +57,7 @@ def mascarpone_get_sku_cream_cheese(page):
     pagination = (
         db.session.query(CreamCheeseSKU)
         .join(Group)
-        .filter(Group.name == "Кремчиз")
+        # .filter(Group.name == "Кремчиз")
         .order_by(CreamCheeseSKU.name)
         .paginate(
             page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False
