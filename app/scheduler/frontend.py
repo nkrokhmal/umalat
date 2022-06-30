@@ -27,7 +27,7 @@ def init_schedule_workbook(wb=None):
 
 
 def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
-    # wb = init_schedule_workbook(wb)
+    wb = init_schedule_workbook(wb)
     ws = cast_worksheet((wb, 'Расписание'))
     utils.set_active_sheet(wb, 'Расписание')
     O = O or [0, 0]  # initial coordinates
