@@ -19,9 +19,7 @@ STYLE = {
     "ingredient": {"color": "#C0504D", "text": "внесение ингредиентов"},  # brown
     "pumping_off": {
         "color": "#00B0F0",
-        "text": lambda b: "перекачивание в 2 бак"
-        if b.props["is_cream"]
-        else "сепарирование",
+        "text": lambda b: "перекачивание в 2 бак" if b.props["is_cream"] else "сепарирование",
     },  # blue
     "pumping_off_pause": {
         "color": "grey",
@@ -37,27 +35,21 @@ STYLE = {
     "salting": {"color": "#92D050", "text": "посолка/нормализация"},  # green
     "cream_cheese_boiling_label1": {
         "color": "white",
-        "text": lambda b: "Кремчиз/1000л/бак {}".format(
-            ",".join([str(x) for x in b.props["sourdoughs"]])
-        ),
+        "text": lambda b: "Кремчиз/1000л/бак {}".format(",".join([str(x) for x in b.props["sourdoughs"]])),
     },
     "cream_cheese_boiling_label2": {
         "color": "white",
-        "text": "Кремчиз 0,18 кг",
+        "text": lambda b: "/".join(b.props["base_names"]),
     },
     "cooling": {"color": "#F79646", "text": "охлаждение"},  # orange
     "cleaning_separator": {"color": "yellow", "text": "Мойка сепаратора"},
     "cleaning_sourdough_mascarpone": {
         "color": "yellow",
-        "text": lambda b: "Мойка заквасочников {}".format(
-            ", ".join([f"№{sn}" for sn in b.props["sourdoughs"]])
-        ),
+        "text": lambda b: "Мойка заквасочников {}".format(", ".join([f"№{sn}" for sn in b.props["sourdoughs"]])),
     },
     "cleaning_sourdough_mascarpone_cream_cheese": {
         "color": "yellow",
-        "text": lambda b: "Мойка заквасочников {}".format(
-            ", ".join([f"№{sn}" for sn in b.props["sourdoughs"]])
-        ),
+        "text": lambda b: "Мойка заквасочников {}".format(", ".join([f"№{sn}" for sn in b.props["sourdoughs"]])),
     },
     "cleaning_homogenizer": {
         "color": "yellow",

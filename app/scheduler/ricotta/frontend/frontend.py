@@ -1,7 +1,7 @@
 # fmt: off
-from app.scheduler.time import *
 from app.scheduler.frontend import *
 from app.scheduler.header import wrap_header
+from app.scheduler.time import *
 from utils_ak.block_tree import *
 
 
@@ -226,7 +226,7 @@ def wrap_frontend(schedule, date=None):
     start_t = int(utils.custom_round(schedule.x[0] - 12, 12, "floor"))  # round to last hour and add hour before for shifts
     start_time = cast_time(start_t)
 
-    m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
+    m.block(wrap_header(date=date, start_time=start_time, header="График рикоттного цеха"))
     with m.block(start_time=start_time, axis=1):
         if schedule['shifts']:
             m.block(wrap_shifts(schedule['shifts']['meltings']))

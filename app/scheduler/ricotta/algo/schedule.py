@@ -1,12 +1,11 @@
 # fmt: off
 
 from app.imports.runtime import *
-
+from app.models import *
 from app.scheduler.ricotta.algo.boilings import *
 from app.scheduler.ricotta.algo.cleanings import *
-from app.scheduler.time import *
 from app.scheduler.shifts import *
-from app.models import *
+from app.scheduler.time import *
 
 
 class Validator(ClassValidator):
@@ -23,10 +22,9 @@ class Validator(ClassValidator):
                 # skip if no common line number is used
                 continue
 
-            boiling1 = b1["boiling_sequence"]["boiling", True][b1.props["line_nums"].index(line_num)]
-            boiling2 = b2["boiling_sequence"]["boiling", True][b2.props["line_nums"].index(line_num)]
-
-            validate_disjoint_by_axis(boiling1, boiling2)
+            for boiling1 in [boiling for i, boiling in enumerate(b1["boiling_sequence"]["boiling", True]) if b1.props["line_nums"][i] == line_num]:
+                for boiling2 in [boiling for i, boiling in enumerate(b2["boiling_sequence"]["boiling", True]) if b2.props["line_nums"][i] == line_num]:
+                    validate_disjoint_by_axis(boiling1, boiling2)
 
         validate_disjoint_by_axis(b1["packing"], b2["packing"])
 
@@ -40,10 +38,7 @@ class Validator(ClassValidator):
     def validate__boiling_group__bath_cleanings(b1, b2):
         for line_num in range(3):
             bath_cleaning = b2["bath_cleaning", True][line_num]
-            if line_num in b1.props["line_nums"]:
-                boiling = utils.listify(b1["boiling_sequence"].children)[
-                    b1.props["line_nums"].index(line_num)
-                ]
+            for boiling in [boiling for i, boiling in enumerate(b1["boiling_sequence"]["boiling", True]) if b1.props["line_nums"][i] == line_num]:
                 validate_disjoint_by_axis(boiling, bath_cleaning, distance=4, ordered=True)
 
     @staticmethod
@@ -71,17 +66,16 @@ def make_schedule(boiling_plan_df,  start_time='07:00'):
     with code('make_boilings'):
         for bg_prev, bg in utils.iter_pairs(boiling_groups, method="any_prefix"):
             n_tanks = bg.props["n_tanks"]
-            first_tank = bg.props["first_tank"]
 
-            line_nums_props = [[0, 1, 2], [1, 2, 0], [2, 0, 1]]
+            first_tank = bg.props["first_tank"]
+            line_nums_props = [[0, 1, 2] * 100, [1, 2, 0] * 100, [2, 0, 1] * 100] # allow maximum up to 300 tanks per boiling. Now used 4 maximum (2022.08.29)
             if first_tank:
                 # leave only one sequence that fits first_tank
                 line_nums_props = line_nums_props[int(first_tank) - 1: int(first_tank)]
 
             # reorder so that we try to finish at last tank
-            idx = -n_tanks % 3
+            idx = -n_tanks % 3 # if bg_prev else 0 # todo next: uncomment?
             iter_line_nums_props = utils.recycle_list(line_nums_props, idx)
-
             m.block(bg,
                     push_func=AxisPusher(start_from="last_beg"),
                     push_kwargs={'validator': Validator(),
@@ -135,7 +129,5 @@ def make_schedule(boiling_plan_df,  start_time='07:00'):
                          size=(end - beg, 0),
                          shift_num=i
                      ))
-
-
     m.root.props.update(x=(cast_t(start_time), 0))
     return m.root

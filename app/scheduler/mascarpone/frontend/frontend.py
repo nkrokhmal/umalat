@@ -1,9 +1,7 @@
 # fmt: off
 from app.imports.runtime import *
-from app.scheduler.time import *
-
 from app.scheduler.header import wrap_header
-
+from app.scheduler.time import *
 from utils_ak.block_tree import *
 
 
@@ -230,6 +228,7 @@ def wrap_frontend_cream_cheese_boiling(boiling):
         x=(boiling.x[0], 0),
         size=(0, 2),
         batch_id=boiling.props["boiling_plan_df"].iloc[0]["absolute_batch_id"],
+        base_names=boiling.props['base_names']
     )
 
     bp = boiling["boiling_process"]
@@ -301,7 +300,7 @@ def wrap_frontend(schedule, date=None):
     # calc start time
     start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour and add half hour
     start_time = cast_time(start_t)
-    m.block(wrap_header(date=date, start_time=start_time, header="График наливов сыворотки"))
+    m.block(wrap_header(date=date, start_time=start_time, header="График маскарпонного цеха"))
     with m.block(axis=1,
                  start_time=cast_time(start_t)):
         if schedule['shifts']:
