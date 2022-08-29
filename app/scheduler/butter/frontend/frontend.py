@@ -1,21 +1,104 @@
 # fmt: off
-from app.scheduler.time import *
 from app.scheduler.frontend import *
 from app.scheduler.header import wrap_header
+from app.scheduler.time import *
 from utils_ak.block_tree import *
 
 
-def wrap_line(schedule):
+def wrap_boiling_lines(schedule):
     m = BlockMaker("line",
                    default_row_width=1,
                    default_col_width=1,
                    # props
-                   font_size=9)
+                   font_size=9,
+                   axis=1)
 
-    for child in schedule.iter():
+    with code('Init lines'):
+        boiling_lines = []
+        boiling_line = m.block("boiling_line_1", size=(0, 2)).block
+        boiling_lines.append(boiling_line)
+        # m.row("stub", size=0, boiling_line=boiling_line) # create  reference for upper boiling line in stub
+    cycle = itertools.cycle(boiling_lines)
+    boiling_line = next(cycle)
+
+    for child in schedule.iter(cls=lambda cls: cls in ['preparation', 'displacement', 'cleaning']):
         if not child.is_leaf():
             continue
+        block = _wrap_child(child).children[0]
+        push(
+            boiling_line,
+            block,
+            push_func=simple_push,
+            validator=disjoint_validator,
+        )
 
+
+    for child in schedule.iter(cls=lambda cls: cls == 'boiling'):
+        block = _wrap_boiling(child)
+
+        for i in range(len(boiling_lines)):
+            try:
+                res = push(
+                    boiling_line,
+                    block,
+                    push_func=simple_push,
+                    validator=disjoint_validator,
+                )
+                assert isinstance(res, Block)
+                break
+            except:
+                if i == len(boiling_lines) - 1:
+                    # create new line
+                    boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 2)).block)
+                    # m.row("stub", size=0)
+                    push(
+                        boiling_lines[-1],
+                        block,
+                        push_func=simple_push,
+                        validator=disjoint_validator,
+                    )
+                    cycle = itertools.cycle(boiling_lines)
+                    boiling_line = next(cycle)
+                else:
+                    boiling_line = next(cycle)
+                    continue
+    return m.root
+
+def _wrap_child(child):
+    m = BlockMaker(
+        "butter_block",
+        default_row_width=1,
+        default_col_width=2,
+        # props
+        axis=0,
+    )
+
+    child.update_size(size=(child.size[0], 2))
+
+    if child.props['cls'] == 'pasteurization':
+        with m.block('pasteurization', push_func=add_push,
+                     x=(child.x[0], 0),
+                     boiling_model=child.props['boiling_model']):
+            m.block('pasteurization_1', push_func=add_push,
+                    size=(child.size[0], 1), x=(0, 0))
+
+            m.block('pasteurization_2', push_func=add_push,
+                    size=(child.size[0], 1), x=(0, 1))
+    else:
+        m.row(m.copy(child, with_props=True), push_func=add_push)
+
+    return m.root
+
+def _wrap_boiling(boiling):
+    m = BlockMaker(
+        "boiling",
+        default_row_width=1,
+        default_col_width=2,
+        # props
+        axis=0,
+    )
+
+    for child in boiling.iter():
         child.update_size(size=(child.size[0], 2))
 
         if child.props['cls'] == 'pasteurization':
@@ -29,6 +112,21 @@ def wrap_line(schedule):
                         size=(child.size[0], 1), x=(0, 1))
         else:
             m.row(m.copy(child, with_props=True), push_func=add_push)
+
+    return m.root
+
+def wrap_packing(schedule):
+    m = BlockMaker("line",
+                   default_row_width=1,
+                   default_col_width=1,
+                   # props
+                   font_size=9)
+    for child, child_next in utils.iter_pairs(list(schedule.iter(cls='packing')), method='any_suffix'):
+        child.update_size(size=(child.size[0], 2))
+        m.row(m.copy(child, with_props=True), push_func=add_push)
+        if child_next:
+            m.block('cooling', size=(4, 2))
+
     return m.root
 
 
@@ -50,5 +148,8 @@ def wrap_frontend(schedule, date=None):
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы маслоцеха"))
     with m.block(start_time=start_time, axis=1):
-        m.block(wrap_line(schedule))
+        m.block(wrap_boiling_lines(schedule))
+
+    with m.block(start_time=start_time, axis=1):
+        m.block(wrap_packing(schedule))
     return m.root

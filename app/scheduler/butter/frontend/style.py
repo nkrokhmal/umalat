@@ -13,9 +13,7 @@ STYLE = {
     },  # red
     "pasteurization_2": {
         "color": "#FFFF00",
-        "text": lambda b: "{} литров".format(
-            b.props["boiling_model"].line.boiling_volume
-        ),
+        "text": lambda b: "{} литров".format(b.props["boiling_model"].line.boiling_volume),
     },  # yellow
     "increasing_temperature": {
         "color": "#00B0F0",
@@ -30,4 +28,5 @@ STYLE = {
         "color": "white",
         "text": "мойка оборудования/уборка цеха/маркировка продукции",
     },
+    "cooling": {"color": "white", "text": "охлаждение"},
 }

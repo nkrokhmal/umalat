@@ -74,7 +74,7 @@ def make_schedule(boiling_plan_df,  start_time='07:00'):
                 line_nums_props = line_nums_props[int(first_tank) - 1: int(first_tank)]
 
             # reorder so that we try to finish at last tank
-            idx = -n_tanks % 3 # if bg_prev else 0 # todo next: uncomment?
+            idx = -n_tanks % 3 if bg_prev else 0
             iter_line_nums_props = utils.recycle_list(line_nums_props, idx)
             m.block(bg,
                     push_func=AxisPusher(start_from="last_beg"),
