@@ -43,13 +43,13 @@ class SKUForm(FlaskForm):
     code = StringField("Введите код SKU", validators=[Optional()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
-    packing_speed = IntegerField("Введите скорость фасовки", validators=[Optional()])
+    packing_speed = FloatField("Введите скорость фасовки", validators=[Optional()])
     shelf_life = IntegerField("Введите время хранения, д", validators=[Optional()])
     in_box = IntegerField(
         "Введите количество упаковок в коробке, шт", validators=[Optional()]
     )
-    output_per_tank = IntegerField(
-        "Введите количество танков, шт", validators=[Optional()]
+    output_per_tank = FloatField(
+        "Выход на танк, шт", validators=[Optional()]
     )
 
     boiling = SelectField("Выберите тип варки", coerce=int, default=-1)
@@ -82,6 +82,14 @@ class LineForm(FlaskForm):
     input_ton = IntegerField(
         "Введите количество литров в одном танке", validators=[Required()]
     )
+
+
+class BoilingForm(FlaskForm):
+    name = StringField("Название варки", validators=[Optional()])
+    flavoring_agent = StringField("Добавка", validators=[Optional()])
+    percent = IntegerField("Процент", validators=[Optional()])
+    number_of_tanks = IntegerField("Число танков", validators=[Optional()])
+    submit = SubmitField(label="Сохранить")
 
 
 class BoilingTechnologyForm(FlaskForm):

@@ -114,12 +114,14 @@ def ricotta_get_sku(page):
 def ricotta_edit_sku(sku_id):
     form = SKUForm()
     sku = db.session.query(RicottaSKU).get_or_404(sku_id)
+
     if form.validate_on_submit() and sku is not None:
         sku.name = form.name.data
         sku.code = form.code.data
         sku.brand_name = form.brand_name.data
         sku.weight_netto = form.weight_netto.data
         sku.shelf_life = form.shelf_life.data
+        sku.output_per_tank = form.output_per_tank.data
         sku.packing_speed = form.packing_speed.data
         sku.in_box = form.in_box.data
         fill_ricotta_sku_from_form(sku, form)

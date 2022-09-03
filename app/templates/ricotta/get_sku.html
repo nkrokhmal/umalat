@@ -29,6 +29,7 @@
                         <th class="border-0">Группа</th>
                         <th class="border-0">Скорость фасовки</th>
                         <th class="border-0">Линия</th>
+                        <th class="border-0">Выход на танк, кг</th>
                         <th class="border-0">Действия</th>
                     </tr>
                 </thead>
@@ -41,6 +42,7 @@
                             <td class="border-0"><a class="small">{{sku.group.name}}</a></td>
                             <td class="border-0"><a class="small">{{sku.packing_speed|int}}</a></td>
                             <td class="border-0"><a class="small">{{sku.line.name}}</a></td>
+                            <td class="border-0"><a class="small">{{sku.output_per_tank|int}}</a></td>
                             <td class="border-0">
                                 <a href="{{ url_for('main.ricotta_edit_sku', sku_id = sku.id)}}" class="edit-sku">
                                     <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>

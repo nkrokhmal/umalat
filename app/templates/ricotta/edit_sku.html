@@ -3,6 +3,9 @@
 
 {% block title %}SKU - Изменить SKU{% endblock %}
 {% block page_content %}
+{% if form.errors %}
+{{ form.errors }}
+{% endif %}
 <div class="row">
     <div class="py-4">
         <div class="d-flex justify-content-between w-100 flex-wrap">
@@ -24,7 +27,7 @@
                 <div class="col-md-12 mb-3">
                     <div class="form-group">
                         <label>Введите код SKU</label>
-                        {{form.code(place_holder='Name', class='form-control')}}
+                        {{form.code(place_holder='Code', class='form-control')}}
                     </div>
                 </div>
                 <div class="col-md-12 mb-3">
@@ -71,11 +74,16 @@
                         {{form.group(place_holder='Group', class='form-select')}}
                     </div>
                 </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите выход на танк, кг</label>
+                        {{form.output_per_tank(place_holder='OutputTank', class='form-control')}}
+                    </div>
+                </div>
             </div>
             <div class="col-md-12 mb-3" style="margin-top:30px;">
                 <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
             </div>
-
         </div>
     </form>
 </div>
