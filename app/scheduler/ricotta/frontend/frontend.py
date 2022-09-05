@@ -69,7 +69,6 @@ def wrap_boiling_lines(schedule):
             boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 3)).block)
             if i <= n_lines - 2:
                 m.row("stub", size=0)
-
     with code("add boiling groups"):
         for boiling_group in schedule["boiling_group", True]:
             for i, line_num in enumerate(boiling_group.props["line_nums"]):
@@ -90,7 +89,7 @@ def wrap_boiling_lines(schedule):
     return m.root
 
 
-def wrap_analysis_line(schedule):
+def wrap_analysis_lines(schedule):
     m = BlockMaker(
         "analysis",
         default_row_width=1,
@@ -99,6 +98,7 @@ def wrap_analysis_line(schedule):
         size=(0, 2),
         axis=1,
     )
+
 
     class Validator(ClassValidator):
         def __init__(self):
@@ -117,30 +117,31 @@ def wrap_analysis_line(schedule):
             lines.append(m.row(f"analysis_line_{i}", size=0).block)
 
     for boiling_group in schedule["boiling_group", True]:
-        analysis_group = m.create_block("analysis_group")
-        for block in boiling_group["analysis_group"].children:
-            _block = m.create_block(block.props["cls"],
-                                    size=(block.size[0], 1),
-                                    x=(block.x[0], 0))
-            push(analysis_group, _block, push_func=add_push)
+        for analysis_group in boiling_group["analysis_group", True]:
+            analysis_group_wrapped = m.create_block("analysis_group")
+            for block in analysis_group.children:
+                _block = m.create_block(block.props["cls"],
+                                        size=(block.size[0], 1),
+                                        x=(block.x[0], 0))
+                push(analysis_group_wrapped, _block, push_func=add_push)
 
-        for i, line in enumerate(lines):
-            res = push(
-                line,
-                analysis_group,
-                push_func=lambda parent, block: simple_push(
-                    parent, block, validator=Validator()
-                ),
-            )
-            if not isinstance(res, dict):
-                # success
-                break
-            else:
-                if i == len(lines) - 1:
-                    # last one
-                    raise Exception(
-                        "Не получилось прорисовать баки Ришад-Ричи на двух линиях."
-                    )
+            for i, line in enumerate(lines):
+                res = push(
+                    line,
+                    analysis_group_wrapped,
+                    push_func=lambda parent, block: simple_push(
+                        parent, block, validator=Validator()
+                    ),
+                )
+                if not isinstance(res, dict):
+                    # success
+                    break
+                else:
+                    if i == len(lines) - 1:
+                        # last one
+                        raise Exception(
+                            "Не получилось прорисовать баки Ришад-Ричи на двух линиях."
+                        )
     return m.root
 
 
@@ -231,7 +232,7 @@ def wrap_frontend(schedule, date=None):
         if schedule['shifts']:
             m.block(wrap_shifts(schedule['shifts']['meltings']))
         m.block(wrap_boiling_lines(schedule))
-        m.block(wrap_analysis_line(schedule))
+        m.block(wrap_analysis_lines(schedule))
         if schedule['shifts']:
             m.block(wrap_shifts(schedule['shifts']['packings']))
         m.block(wrap_packing_line(schedule))

@@ -4,6 +4,22 @@ from app.models import *
 from utils_ak.block_tree import *
 
 
+# - Utils
+def crop_to_chunks(values, n, is_tail_appended=False):
+    """Yield successive n-sized chunks from values."""
+    tail_size = len(values) % n
+    for i in range(0, len(values), n):
+        is_penultimate = i == (len(values) - 1) - (tail_size - 1) - n  # last_index - tail_extra - chunk_size
+        if is_tail_appended and tail_size != 0 and is_penultimate:
+            yield values[i:]
+            return
+        else:
+            yield values[i : i + n]
+
+
+
+# - Makers
+
 def make_boiling(boiling_model):
     m = BlockMaker("boiling", boiling_model=boiling_model)
 
@@ -60,25 +76,26 @@ def make_boiling_group(boiling_group_df):
     m.block(boiling_sequence)
 
     with code('make_analysis'):
-        _last_boiling = boiling_sequence["boiling", True][-1]
-        analysis_start = _last_boiling["abandon"].x[0]
-        with m.row("analysis_group", push_func=add_push, x=analysis_start):
-            analysis = utils.delistify(boiling_model.analysis, single=True)
+        for boiling_pack in crop_to_chunks(boiling_sequence["boiling", True], 2, is_tail_appended=True):
+            _last_boiling = boiling_pack[-1]
+            analysis_start = _last_boiling["abandon"].x[0]
+            with m.row("analysis_group", push_func=add_push, x=analysis_start):
+                analysis = utils.delistify(boiling_model.analysis, single=True)
 
-            if boiling_model.flavoring_agent:
-                m.row("analysis", size=analysis.analysis_time // 5)
-                m.row("preparation", size=analysis.preparation_time // 5)
-                m.row("pumping", size=analysis.pumping_time // 5)
-            else:
-                m.row("preparation", size=analysis.preparation_time // 5)
-                m.row("analysis", size=analysis.analysis_time // 5)
-                m.row("pumping", size=analysis.pumping_time // 5)
+                if boiling_model.flavoring_agent:
+                    m.row("analysis", size=analysis.analysis_time // 5)
+                    m.row("preparation", size=analysis.preparation_time // 5)
+                    m.row("pumping", size=analysis.pumping_time // 5)
+                else:
+                    m.row("preparation", size=analysis.preparation_time // 5)
+                    m.row("analysis", size=analysis.analysis_time // 5)
+                    m.row("pumping", size=analysis.pumping_time // 5)
 
     with code('make_packing'):
         if first_row['sku'].weight_netto != 0.5:
-            packing_start = m.root["analysis_group"]["pumping"].x[0] + 1
+            packing_start = m.root["analysis_group", True][0]["pumping"].x[0] + 1
         else:
-            packing_start = m.root["analysis_group"]["pumping"].y[0] - 1
+            packing_start = m.root["analysis_group", True][0]["pumping"].y[0] - 1
 
         packing_time = sum(
             [

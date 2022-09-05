@@ -44,14 +44,14 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling_group__container_cleanings(b1, b2):
         # add extra 5 minutes
-        _b1 = b1["analysis_group"]["preparation"]
+        _b1 = b1["analysis_group", True][-1]["preparation"]
         _b2 = b2["container_cleaning_1"]
         validate_disjoint_by_axis(_b1, _b2, distance=1, ordered=True)
         validate_disjoint_by_axis(
-            b1["analysis_group"]["analysis"], b2["container_cleaning_2"]
+            b1["analysis_group", True][-1]["analysis"], b2["container_cleaning_2"]
         )
         validate_disjoint_by_axis(
-            b1["analysis_group"]["pumping"], b2["container_cleaning_3"]
+            b1["analysis_group", True][-1]["pumping"], b2["container_cleaning_3"]
         )
 
 
@@ -62,7 +62,6 @@ def make_schedule(boiling_plan_df,  start_time='07:00'):
     boiling_groups = []
     for batch_id, grp in boiling_plan_df.groupby("batch_id"):
         boiling_groups.append(make_boiling_group(grp))
-
     with code('make_boilings'):
         for bg_prev, bg in utils.iter_pairs(boiling_groups, method="any_prefix"):
             n_tanks = bg.props["n_tanks"]
