@@ -17,7 +17,7 @@ from app.main.milk_project.update_task_and_batches import update_task_and_batche
 from app.main.validators import *
 
 from .forms import ScheduleForm
-from collections import namedtuple
+from app.scheduler.frontend import fill_grid
 
 
 @main.route("/milk_project_schedule", methods=["GET", "POST"])
@@ -100,6 +100,8 @@ def milk_project_schedule():
             # schedule_wb, cur_row = schedule_task.schedule_task_boilings(
             #     schedule_wb, form.batch_number.data, cur_row=cur_row
             # )
+
+        _ = fill_grid(schedule_wb["Расписание"])
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
         filename_schedule_pickle = (

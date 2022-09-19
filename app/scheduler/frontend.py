@@ -2,6 +2,13 @@ from app.imports.runtime import *
 from app.scheduler.time import *
 from openpyxl.styles.borders import BORDER_THIN, Border, Side
 from utils_ak.openpyxl.openpyxl_tools import *
+from openpyxl.styles import NamedStyle, Font, Border, Side
+
+
+def fill_grid(ws):
+    utils.set_border_grid(
+        ws, 1, 1, ws.max_column, ws.max_row, Side(border_style=BORDER_THIN)
+    )
 
 
 def prepare_schedule_worksheet(ws_obj):
@@ -24,8 +31,10 @@ def init_schedule_workbook(wb=None):
     return wb
 
 
-def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
-    wb = init_schedule_workbook(wb)
+def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=True):
+    if init:
+        wb = init_schedule_workbook(wb)
+    logger.info("Finished init")
     ws = cast_worksheet((wb, "Расписание"))
     utils.set_active_sheet(wb, "Расписание")
     O = O or [0, 0]  # initial coordinates
@@ -100,8 +109,8 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False):
     return wb
 
 
-def draw_excel_frontend(frontend, style, O=None, open_file=False, fn=None, wb=None):
-    wb = draw_schedule(frontend, style, O=O, wb=wb)
+def draw_excel_frontend(frontend, style, O=None, open_file=False, fn=None, wb=None, init=True):
+    wb = draw_schedule(frontend, style, O=O, wb=wb, init=init)
 
     if fn:
         utils.makedirs(fn)

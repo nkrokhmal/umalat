@@ -1,5 +1,5 @@
 from app.main import main
-from app.scheduler import *
+# from app.scheduler import *
 from app.scheduler.ricotta import *
 
 # from app.utils.ricotta.schedule_tasks import schedule_task_boilings, update_total_schedule_task
@@ -55,6 +55,8 @@ def ricotta_schedule():
 
         schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
         # schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)
+
+        _ = fill_grid(schedule_wb["Расписание"])
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание рикотта.xlsx"
         filename_schedule_pickle = (

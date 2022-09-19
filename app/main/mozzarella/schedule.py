@@ -55,8 +55,6 @@ def mozzarella_schedule():
             LineName.WATER: form.water_beg_time.data,
             LineName.SALT: form.salt_beg_time.data,
         }
-
-
         schedule = make_schedule(
             boiling_plan_df,
             start_times=start_times,
@@ -100,6 +98,7 @@ def mozzarella_schedule():
             fn=None,
             style=STYLE,
             wb=schedule_wb,
+            init=False,
         )
         schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
         utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))

@@ -62,6 +62,8 @@ def butter_schedule():
 
         schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb)
 
+        _ = fill_grid(schedule_wb["Расписание"])
+
         utils.set_visible_sheets(schedule_wb, [sn for sn in schedule_wb.sheetnames if sn in ['Расписание', 'Печать заданий', 'Печать заданий 2', 'План варок']])
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))

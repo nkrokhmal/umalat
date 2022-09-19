@@ -54,7 +54,6 @@ def mascarpone_schedule():
         boiling_plan_df = read_boiling_plan(wb, first_batch_ids=first_batch_ids)
         boiling_plan_df['group'] = boiling_plan_df['sku'].apply(lambda x: x.group.name)
 
-
         schedule = make_schedule(boiling_plan_df, start_time=beg_time)
         frontend = wrap_frontend(schedule, date=date)
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=wb)
@@ -64,8 +63,8 @@ def mascarpone_schedule():
         filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.pickle"
 
         schedule_task = update_task_and_batches(schedule_wb)
-
         schedule_wb, _ = schedule_task.schedule_task_original(schedule_wb)
+        _ = fill_grid(schedule_wb["Расписание"])
         # schedule_wb, _ = schedule_task.schedule_task_boilings(schedule_wb, form.batch_number.data)
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
