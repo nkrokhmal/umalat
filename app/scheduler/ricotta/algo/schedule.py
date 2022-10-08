@@ -89,9 +89,14 @@ def make_schedule(boiling_plan_df,  start_time='07:00'):
     with code('make_container_cleanings'):
         # add container cleanings
         container_cleanings = make_container_cleanings()
-        m.block(container_cleanings,
-                push_func=AxisPusher(start_from=boiling_groups[-1]["analysis_group"].x[0]),
-                push_kwargs={'validator': Validator()})
+        if isinstance(boiling_groups[-1]["analysis_group"], list):
+            m.block(container_cleanings,
+                    push_func=AxisPusher(start_from=boiling_groups[-1]["analysis_group"][0].x[0]),
+                    push_kwargs={'validator': Validator()})
+        else:
+            m.block(container_cleanings,
+                    push_func=AxisPusher(start_from=boiling_groups[-1]["analysis_group"].x[0]),
+                    push_kwargs={'validator': Validator()})
 
     with code('make_shifts'):
         with m.block("shifts", x=(0, 0), push_func=add_push):
