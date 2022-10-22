@@ -1,11 +1,11 @@
 # fmt: off
-from app.imports.runtime import *
-
+from app.imports.runtime import * # isort: skip
 from app.enum import LineName
+from app.scheduler.mozzarella.algo.schedule.schedule_basic import make_schedule_basic
 from app.scheduler.mozzarella.boiling_plan.parser import parse_schedule
-from .score import calc_score
-from .schedule_basic import make_schedule_basic
+
 from .schedule_by_optimization import *
+from .score import calc_score
 
 
 def smart_shift(s, key=None, start_from=0):
@@ -53,7 +53,7 @@ def combine_groups(boiling_plan_df, groups):
 
 
 
-# todo later: del, deprecated
+# todo later: del, deprecated [@marklidenberg]
 # def swap_groups(df, group_id1, group_id2):
 #     logger.debug("Swapping groups", gid1=group_id1, gid2=group_id2)
 #     df = df.reset_index(drop=True)

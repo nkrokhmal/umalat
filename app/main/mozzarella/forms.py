@@ -1,11 +1,11 @@
-from app.imports.runtime import *
-from flask_wtf.file import FileRequired, FileField
-from flask_wtf import FlaskForm
-from wtforms import *
-from wtforms.validators import Required, Optional
-
-from app.models import *
+from app.imports.runtime import *  # isort: skip
 from app.main.validators import *
+from app.models import *
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
+from wtforms import *
+from wtforms.validators import Optional, Required
+
 
 class BoilingPlanFastForm(FlaskForm):
     validators = [FileRequired(message="Файл не выбран!")]
@@ -35,19 +35,17 @@ class UploadForm(FlaskForm):
 class ScheduleForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
     input_file = FileField("", validators=validators)
-    batch_number = IntegerField(
-        "Введите номер первой партии в текущем дне", validators=[Optional()]
-    )
+    batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
     salt_beg_time = StringField(
         'Начало первой подачи на линии "Пицца Чиз"',
         validators=[Optional()],
-        default='07:00',
+        default="07:00",
     )
     water_beg_time = StringField(
         'Начало первой подачи на линии "Моцарелла в воде"',
         validators=[Optional()],
-        default='08:00',
+        default="08:00",
     )
     add_full_boiling = BooleanField(
         "Вставить короткую мойку внутри дня по правилу 15 часов",
@@ -58,6 +56,12 @@ class ScheduleForm(FlaskForm):
         "Оптимизировать расписание",
         validators=[Optional()],
         default=True,
+    )
+    exact_melting_time_by_line = SelectField(
+        "Точное время плавления будет выставляться по линии",
+        validators=[Optional()],
+        choices=[(LineName.SALT, LineName.SALT), (LineName.WATER, LineName.WATER)],
+        default=LineName.SALT,
     )
 
 
@@ -74,9 +78,7 @@ class SKUForm(FlaskForm):
     packing_speed = IntegerField("Введите скорость фасовки", validators=[Optional()])
     shelf_life = IntegerField("Введите время хранения, д", validators=[Optional()])
     code = StringField("Введите код SKU", validators=[Optional()])
-    in_box = IntegerField(
-        "Введите количество упаковок в коробке, шт", validators=[Optional()]
-    )
+    in_box = IntegerField("Введите количество упаковок в коробке, шт", validators=[Optional()])
 
     line = SelectField("Выберите линию", coerce=int, default=-1)
     packer = SelectField("Выберите тип фасовщика", coerce=int, default=-1)
@@ -105,9 +107,7 @@ class SKUForm(FlaskForm):
         self.pack_type.choices = list(enumerate(set([x.name for x in self.pack_types])))
         self.pack_type.choices.append((-1, ""))
 
-        self.form_factor.choices = list(
-            enumerate(sorted(set([x.full_name for x in self.form_factors])))
-        )
+        self.form_factor.choices = list(enumerate(sorted(set([x.full_name for x in self.form_factors]))))
         self.form_factor.choices.append((-1, ""))
 
         self.boiling.choices = list(enumerate(set([x.to_str() for x in self.boilings])))
@@ -119,11 +119,7 @@ class SKUForm(FlaskForm):
 
     @staticmethod
     def validate_sku(self, name):
-        sku = (
-            db.session.query(MozzarellaSKU)
-            .filter_by(MozzarellaSKU.name == name.data)
-            .first()
-        )
+        sku = db.session.query(MozzarellaSKU).filter_by(MozzarellaSKU.name == name.data).first()
         if sku is not None:
             raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
@@ -131,12 +127,8 @@ class SKUForm(FlaskForm):
 class LineForm(FlaskForm):
     name = StringField("Введите название линии", validators=[Required()])
     pouring_time = IntegerField("Введите время налива", validators=[Required()])
-    serving_time = IntegerField(
-        "Введите время подачи и вымешивания", validators=[Required()]
-    )
-    chedderization_time = IntegerField(
-        "Введите время чеддеризации", validators=[Required()]
-    )
+    serving_time = IntegerField("Введите время подачи и вымешивания", validators=[Required()])
+    chedderization_time = IntegerField("Введите время чеддеризации", validators=[Required()])
     melting_speed = IntegerField("Введите скорость плавления", validators=[Required()])
     output_kg = IntegerField("Выход", validators=[Required()])
 
@@ -145,13 +137,9 @@ class BoilingTechnologyForm(FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
     pouring_time = IntegerField("Введите время налива", validators=[Optional()])
     soldification_time = IntegerField("Введите время схватки", validators=[Optional()])
-    cutting_time = IntegerField(
-        "Введите время резки и обсушки", validators=[Optional()]
-    )
+    cutting_time = IntegerField("Введите время резки и обсушки", validators=[Optional()])
     pouring_off_time = IntegerField("Введите время слива", validators=[Optional()])
-    extra_time = IntegerField(
-        "Введите время на дополнительные затраты", validators=[Optional()]
-    )
+    extra_time = IntegerField("Введите время на дополнительные затраты", validators=[Optional()])
     line = SelectField("Выберите линию", coerce=int, default=-1)
 
     submit = SubmitField(label="Сохранить")
@@ -166,12 +154,8 @@ class BoilingTechnologyForm(FlaskForm):
 class FormFactorForm(FlaskForm):
     name = StringField("Название форм фактора", validators=[Optional()])
     line = StringField("Название линии", validators=[Optional()])
-    first_cooling_time = IntegerField(
-        "Введите время первого охлаждения", validators=[Optional()]
-    )
-    second_cooling_time = IntegerField(
-        "Введите время второго охлаждения", validators=[Optional()]
-    )
+    first_cooling_time = IntegerField("Введите время первого охлаждения", validators=[Optional()])
+    second_cooling_time = IntegerField("Введите время второго охлаждения", validators=[Optional()])
     salting_time = IntegerField("Введите время посолки", validators=[Optional()])
 
 

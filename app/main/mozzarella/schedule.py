@@ -1,21 +1,18 @@
-from app.imports.runtime import *
+from app.imports.runtime import *  # isort: skip
 from app.main import main
 from app.main.errors import internal_error
+from app.main.mozzarella.update_task_and_batches import update_task_and_batches
+from app.main.validators import *
 from app.scheduler import *
 from app.scheduler.mozzarella import *
-from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 from app.utils.batches.batch import *
-from app.utils.mozzarella.parse_schedule_json import *
-from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
-from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
 from app.utils.features.openpyxl_wrapper import set_default_sheet
-from app.main.mozzarella.update_task_and_batches import update_task_and_batches
-from app.utils.files.utils import (
-    save_schedule,
-    save_schedule_dict,
-    create_if_not_exists,
-)
-from app.main.validators import *
+from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
+from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
+from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
+from app.utils.mozzarella.parse_schedule_json import *
+from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
+
 from .forms import ScheduleForm
 
 
@@ -27,6 +24,7 @@ def mozzarella_schedule():
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
         optimize = form.optimize.data
+        exact_melting_time_by_line = form.exact_melting_time_by_line.data
 
         # validate time
         time_validator(form, form.water_beg_time)
@@ -47,7 +45,7 @@ def mozzarella_schedule():
             filename=os.path.join(data_dir, file.filename),
             data_only=True,
         )
-        first_batch_ids = {'mozzarella': form.batch_number.data}
+        first_batch_ids = {"mozzarella": form.batch_number.data}
         boiling_plan_df = cast_boiling_plan(wb, first_batch_ids=first_batch_ids)
         additional_packing_df = read_additional_packing(wb)
 
@@ -59,6 +57,7 @@ def mozzarella_schedule():
             boiling_plan_df,
             start_times=start_times,
             optimize=optimize,
+            exact_melting_time_by_line=exact_melting_time_by_line,
             optimize_cleanings=add_full_boiling,
             date=date,
         )
@@ -80,16 +79,10 @@ def mozzarella_schedule():
                 },
             ]
         )
-        cleanings = [
-            x
-            for x in schedule_json["children"][0]["children"]
-            if x["cls"] == "cleaning"
-        ]
+        cleanings = [x for x in schedule_json["children"][0]["children"] if x["cls"] == "cleaning"]
         schedule_df = prepare_schedule_json(schedule_json, cleanings)
 
-        schedule_wb = openpyxl.load_workbook(
-            filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN"]
-        )
+        schedule_wb = openpyxl.load_workbook(filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN"])
 
         schedule_wb = draw_boiling_plan_merged(schedule_df, schedule_wb)
         schedule_wb = draw_excel_frontend(
@@ -101,7 +94,7 @@ def mozzarella_schedule():
             init=False,
         )
         schedule_wb = draw_additional_packing(schedule_wb, additional_packing_df)
-        utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))
+        utils.write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
 
         schedule_task = update_task_and_batches(schedule_wb, boiling_plan_df=boiling_plan_df)
 
@@ -110,17 +103,11 @@ def mozzarella_schedule():
 
         set_default_sheet(schedule_wb)
 
-        filename_schedule = "{} {}.xlsx".format(
-            date.strftime("%Y-%m-%d"), "Расписание моцарелла"
-        )
-        filename_schedule_pickle = "{} {}.pickle".format(
-            date.strftime("%Y-%m-%d"), "Расписание моцарелла"
-        )
+        filename_schedule = "{} {}.xlsx".format(date.strftime("%Y-%m-%d"), "Расписание моцарелла")
+        filename_schedule_pickle = "{} {}.pickle".format(date.strftime("%Y-%m-%d"), "Расписание моцарелла")
 
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
-        save_schedule_dict(
-            schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d")
-        )
+        save_schedule_dict(schedule.to_dict(), filename_schedule_pickle, date.strftime("%Y-%m-%d"))
 
         return flask.render_template(
             "mozzarella/schedule.html",
@@ -132,15 +119,8 @@ def mozzarella_schedule():
     form.date.data = datetime.today() + timedelta(days=1)
 
     form.batch_number.data = (
-        BatchNumber.last_batch_number(
-            datetime.today() + timedelta(days=1),
-            "Моцарельный цех",
-            group='mozzarella'
-        )
-        + 1
+        BatchNumber.last_batch_number(datetime.today() + timedelta(days=1), "Моцарельный цех", group="mozzarella") + 1
     )
     filename_schedule = None
 
-    return flask.render_template(
-        "mozzarella/schedule.html", form=form, filename=filename_schedule
-    )
+    return flask.render_template("mozzarella/schedule.html", form=form, filename=filename_schedule)

@@ -1,12 +1,12 @@
-from app.imports.runtime import *
-from .swap_optimization import optimize_schedule_by_swapping_water_gaps
+from app.imports.runtime import *  # isort: skip
 from app.enum import LineName
-from .score import calc_score
-
+from app.scheduler.mozzarella.algo.schedule.schedule_basic import make_schedule_basic
 
 from .boilings import *
-from .schedule_from_boilings import *
 from .parse_start_configuration import *
+from .schedule_from_boilings import *
+from .score import calc_score
+from .swap_optimization import optimize_schedule_by_swapping_water_gaps
 
 
 def _gen_seq(n, a=0, b=1):
@@ -36,16 +36,14 @@ def test_seq():
         pass
 
 
-def optimize_schedule_by_start_configuration(boiling_plan_df, *args, **kwargs):
+def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time_by_line=None, *args, **kwargs):
     start_times = kwargs.get("start_times")
     start_configuration = kwargs.get("start_configuration")
 
     if not start_configuration:
         with code("Make basic schedule"):
             boilings = make_boilings(boiling_plan_df)
-            schedule = make_schedule_from_boilings(
-                boilings, cleanings={}, start_times=start_times
-            )
+            schedule = make_schedule_from_boilings(boilings, cleanings={}, start_times=start_times)
 
         start_configuration = parse_start_configuration(schedule)
 
@@ -55,8 +53,10 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, *args, **kwargs):
     else:
         start_configurations = []
         n = _parse_seq(start_configuration, a=LineName.WATER, b=LineName.SALT)
-        with code('Calc neighborhood'):
-            # -1 -> -3, -2, -1, skip, 1,  2
+        with code("Calc neighborhood"):
+
+            # - 1 -> -3, -2, -1, skip, 1,  2
+
             n_neighborhood = [n + i for i in range(-2, 3) if n + i != 0]
 
             # add one if skipped
@@ -67,9 +67,7 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, *args, **kwargs):
             n_neighborhood = list(sorted(n_neighborhood))
 
         for _n in n_neighborhood:
-            start_configurations.append(
-                _gen_seq(_n, a=LineName.WATER, b=LineName.SALT)
-            )
+            start_configurations.append(_gen_seq(_n, a=LineName.WATER, b=LineName.SALT))
 
     logger.debug("Start configurations", start_configurations=start_configurations)
 
@@ -86,22 +84,78 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, *args, **kwargs):
                 return False
         return True
 
-    start_configurations = [
-        sc for sc in start_configurations if _start_start_configuration_valid(sc)
-    ]
+    start_configurations = [sc for sc in start_configurations if _start_start_configuration_valid(sc)]
 
-    logger.debug(
-        "Optimizing start configurations", start_configuration=start_configurations
-    )
+    logger.debug("Optimizing start configurations", start_configuration=start_configurations)
 
     with code("Optimization"):
         res = []
         for sc in start_configurations:
             schedule = optimize_schedule_by_swapping_water_gaps(
-                boiling_plan_df, start_configuration=sc, *args, **kwargs
+                boiling_plan_df,
+                start_configuration=sc,
+                *args,
+                **kwargs,
             )
-            res.append(schedule)
+            res.append(
+                {
+                    "schedule": schedule,
+                    "start_configuration": sc,
+                    "args": args,
+                    "kwargs": kwargs,
+                }
+            )
     logger.debug(
-        "Optimization results", results=[calc_score(schedule, start_times=start_times) for schedule in res]
+        "Optimization results", results=[calc_score(value["schedule"], start_times=start_times) for value in res]
     )
-    return min(res, key=lambda schedule: calc_score(schedule, start_times=start_times))  # return minimum score time
+
+    # - Get output value
+
+    value = min(
+        res, key=lambda value: calc_score(value["schedule"], start_times=start_times)
+    )  # return minimum score time
+
+    # - Fix start time if needed
+
+    if not exact_melting_time_by_line:
+        return value["schedule"]
+
+    time_by_line = exact_melting_time_by_line
+    time_not_by_line = LineName.WATER if time_by_line == LineName.SALT else LineName.SALT
+    boilings = {
+        line_name: [
+            boiling
+            for boiling in value["schedule"]["master"]["boiling", True]
+            if boiling.props["boiling_model"].line.name == line_name
+        ]
+        for line_name in [LineName.WATER, LineName.SALT]
+    }
+
+    if not all(boilings.values()):
+        return value["schedule"]
+
+    first_boilings = {k: v[0] for k, v in boilings.items()}
+    first_boiling = min(first_boilings.values(), key=lambda boiling: boiling.x[0])
+    second_boiling = max(first_boilings.values(), key=lambda boiling: boiling.x[0])
+    if first_boiling.props["boiling_model"].line.name == time_by_line:
+
+        # time already set by proper line
+        return value["schedule"]
+    else:
+        start_times[time_not_by_line] = cast_time(
+            cast_t(start_times[time_not_by_line])
+            + cast_t(start_times[time_by_line])
+            - second_boiling["melting_and_packing"].x[0]
+        )
+
+    value["kwargs"].pop("start_times", None)
+    value["kwargs"].pop("start_configuration", None)
+    schedule = make_schedule_basic(
+        boiling_plan_df,
+        start_times=start_times,
+        start_configuration=value["start_configuration"],
+        *value["args"],
+        **value["kwargs"],
+    )
+
+    return schedule
