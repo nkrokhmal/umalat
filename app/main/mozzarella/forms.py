@@ -58,7 +58,7 @@ class ScheduleForm(FlaskForm):
         default=True,
     )
     exact_melting_time_by_line = SelectField(
-        "Точное время плавления будет выставляться по линии",
+        "Выберите линию, по которой будет выставляться точное время начала плавления при оптимизации",
         validators=[Optional()],
         choices=[(LineName.SALT, LineName.SALT), (LineName.WATER, LineName.WATER)],
         default=LineName.SALT,
