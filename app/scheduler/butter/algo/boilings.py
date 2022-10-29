@@ -4,11 +4,11 @@ from app.models import *
 from utils_ak.block_tree import *
 
 
-def make_boiling_and_packing(boiling_group_df):
+def make_boiling_and_packing(boiling_group_df, tank_number):
     sample_row = boiling_group_df.iloc[0]
     boiling_model = sample_row['boiling']
 
-    m = BlockMaker("boiling", boiling_model=boiling_model)
+    m = BlockMaker("boiling", boiling_model=boiling_model, tank_number=tank_number)
     bt = utils.delistify(boiling_model.boiling_technologies, single=True) # there is only one boiling technology is for every boiling model in butter department
 
     m.row('separator_runaway', size=bt.separator_runaway_time // 5)
@@ -25,4 +25,4 @@ def make_boiling_and_packing(boiling_group_df):
         utils.custom_round(packing_time, 5, "ceil", pre_round_precision=1)
     )
 
-    return m.root, m.create_block('packing', size=(packing_time // 5, 1), boiling_model=boiling_model)
+    return m.root, m.create_block('packing', size=(packing_time // 5, 1), boiling_model=boiling_model, tank_number=tank_number)

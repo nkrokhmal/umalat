@@ -120,6 +120,8 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
     if not exact_melting_time_by_line:
         return value["schedule"]
 
+    start_times = dict(start_times)
+
     time_by_line = exact_melting_time_by_line
     time_not_by_line = LineName.WATER if time_by_line == LineName.SALT else LineName.SALT
     boilings = {
