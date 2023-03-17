@@ -65,21 +65,23 @@ def handle_water(df, max_weight=1000, min_weight=1000, portion=100, boiling_numb
         max_weight=max_weight, min_weight=min_weight, boiling_number=boiling_number
     )
     orders = [
-        (None, 3.3, "Альче", None),
-        (True, 3.3, "Сакко", "Фиор Ди Латте"),
+        (None, 3.2, "Альче", None),
+        (None, 3.2, "Biotec", None),
+        (None, 3.6, "Biotec", None),
+        (True, 3.2, "Сакко", "Фиор Ди Латте"),
         (True, 3.6, "Альче", "Фиор Ди Латте"),
         (True, 3.6, "Biotec", "Фиор Ди Латте"),
         (True, 3.6, "Альче", "Чильеджина"),
         (True, 3.6, "Biotec", "Чильеджина"),
-        (True, 3.3, "Альче", "Чильеджина"),
-        (True, 3.3, "Сакко", "Чильеджина"),
+        (True, 3.2, "Альче", "Чильеджина"),
+        (True, 3.2, "Сакко", "Чильеджина"),
     ]
 
     for order in orders:
         df_filter = df[
             (order[0] is None or df["is_lactose"] == order[0])
-            & (df["percent"] == order[1])
-            & (df["ferment"] == order[2])
+            & (order[1] is None or df["percent"] == order[1])
+            & (order[2] is None or df["ferment"] == order[2])
             & (order[3] is None or df["group"] == order[3])
         ]
         # df_filter = df_filter.sort_values(by='plan', ascending=True)
