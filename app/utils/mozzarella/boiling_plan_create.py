@@ -66,8 +66,8 @@ def handle_water(df, max_weight=1000, min_weight=1000, portion=100, boiling_numb
     )
     orders = [
         (None, 3.2, "Альче", None),
-        (None, 3.2, "Biotec", None),
-        (None, 3.6, "Biotec", None),
+        (False, 3.2, "Biotec", None),
+        (False, 3.6, "Biotec", None),
         (True, 3.2, "Сакко", "Фиор Ди Латте"),
         (True, 3.6, "Альче", "Фиор Ди Латте"),
         (True, 3.6, "Biotec", "Фиор Ди Латте"),
