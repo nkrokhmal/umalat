@@ -70,9 +70,9 @@ def handle_water(df, max_weight=1000, min_weight=1000, portion=100, boiling_numb
         (False, 3.6, "Biotec", None),
         (True, 3.2, "Сакко", "Фиор Ди Латте"),
         (True, 3.6, "Альче", "Фиор Ди Латте"),
-        (True, 3.6, "Biotec", "Фиор Ди Латте"),
+        (True, 3.2, "Biotec", "Фиор Ди Латте"),
         (True, 3.6, "Альче", "Чильеджина"),
-        (True, 3.6, "Biotec", "Чильеджина"),
+        (True, 3.2, "Biotec", "Чильеджина"),
         (True, 3.2, "Альче", "Чильеджина"),
         (True, 3.2, "Сакко", "Чильеджина"),
     ]
