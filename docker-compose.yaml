@@ -4,6 +4,7 @@ services:
   umalat:
     build: .
     command: python -u /app/runserver.py
+    restart: always
     volumes:
       - .:/app
       - /root/home/data/umalat:/app/app/data/dynamic
@@ -17,8 +18,10 @@ services:
     volumes:
       - .:/app
       - /root/home/data/umalat:/app/app/data/dynamic
+    restart: always
     depends_on:
       - redis
   redis:
+    restart: always
     image: redis:6-alpine
 
