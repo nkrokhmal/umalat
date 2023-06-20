@@ -1,7 +1,5 @@
-from app.enum import LineName
 from app.scheduler.mozzarella.boiling_plan.boiling_plan import cast_boiling_plan
 
-from .schedule_from_boilings import *
 from .schedule_by_optimization import *
 from .parse_start_configuration import *
 

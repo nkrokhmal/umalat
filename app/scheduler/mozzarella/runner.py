@@ -15,6 +15,7 @@ def run_mozzarella(
     first_batch_id=1,
     optimize=True,
     optimize_cleanings=True,
+    start_configuration=None,
     path="outputs/",
     prefix="",
 ):
@@ -27,6 +28,7 @@ def run_mozzarella(
             optimize=optimize,
             optimize_cleanings=optimize_cleanings,
             start_times=start_times,
+            start_configuration=start_configuration
         )
     try:
         frontend = wrap_frontend(schedule)
