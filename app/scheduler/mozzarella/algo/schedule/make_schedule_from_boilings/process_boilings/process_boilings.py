@@ -1,8 +1,14 @@
-import pandas as pd
-
-
-from app.imports.runtime import *
-from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boiling import process_boiling
+from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.create_left_df import (
+    create_left_df,
+)
+from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.create_lines_df import \
+    create_lines_df
+from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.get_last_multihead_water_boiling import (
+    get_last_multihead_water_boiling,
+)
+from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.process_boiling import (
+    process_boiling,
+)
 from app.scheduler.shifts import *
 from app.enum import LineName
 from typing import *
@@ -12,19 +18,25 @@ STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
 
 
 def process_boilings(
-    m: BlockMaker, # SIDE EFFECTED
-    left_df: pd.DataFrame,
-    last_multihead_water_boiling: ParallelepipedBlock,
-    lines_df: pd.DataFrame,
+    m: BlockMaker,  # SIDE EFFECTED
+    boilings: List[ParallelepipedBlock],
+    start_times: dict,
     cleanings: dict,
     start_configuration: Optional[list],
     shrink_drenators: bool = True,
 ) -> BlockMaker:
 
-    # - Copy input dataframes to avoid side effects
+    # - Prepare collaterel variables
 
-    left_df = left_df.copy()
-    lines_df = lines_df.copy()
+    lines_df = create_lines_df(start_times=start_times)
+
+    # - Get left df
+
+    left_df = create_left_df(boilings=boilings)
+
+    # - Get last multihead water boiling
+
+    last_multihead_water_boiling = get_last_multihead_water_boiling(left_df=left_df)
 
     # - Validate start configuration
 
@@ -38,7 +50,7 @@ def process_boilings(
 
         # - Check if finished
 
-        if left_df.empty == 0:
+        if left_df.empty:
             break
 
         # - Check if only salt left -> start working on 3 line
@@ -75,12 +87,12 @@ def process_boilings(
                 # logger.debug('Chose line by start configuration', line_name=line_name)
             else:
 
-                # choose most latest line
+                # choose latest line
                 line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
 
                 # reverse
                 line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
-                # logger.debug('Chose line by most latest line', line_name=line_name)
+                # logger.debug('Chose line by latest line', line_name=line_name)
 
             # - Select next row -> first for selected line
 
@@ -104,7 +116,7 @@ def process_boilings(
         # - Insert boiling
 
         m = process_boiling(
-            m=m, # will be modified inline
+            m=m,  # will be modified inline
             boiling=next_row["boiling"],
             last_multihead_water_boiling=last_multihead_water_boiling,
             lines_df=lines_df,
@@ -116,5 +128,7 @@ def process_boilings(
         # - Iterate cur_boiling_num
 
         cur_boiling_num += 1
+
+    # - Return
 
     return m

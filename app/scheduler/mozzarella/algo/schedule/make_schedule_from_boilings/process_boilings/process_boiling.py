@@ -16,14 +16,14 @@ STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
 
 
 def process_boiling(
-    m: BlockMaker, # SIDE EFFECTS, will be changed
+    m: BlockMaker,  # SIDE EFFECTS, will be changed
     boiling: ParallelepipedBlock,
     last_multihead_water_boiling: ParallelepipedBlock,
     lines_df: pd.DataFrame,
     cleanings: dict,
     shrink_drenators: bool = True,
     strict_order: bool = False,
-):
+) -> BlockMaker:
 
     # - Extract line name
 

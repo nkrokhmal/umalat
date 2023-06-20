@@ -5,7 +5,7 @@ from app.enum import LineName
 STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
 
 
-def create_multihead_water_boilings(left_df: pd.DataFrame):
+def get_last_multihead_water_boiling(left_df: pd.DataFrame):
 
     # - Init water boilings using multihead
 
@@ -23,4 +23,5 @@ def create_multihead_water_boilings(left_df: pd.DataFrame):
     else:
         last_multihead_water_boiling = None
 
-    return multihead_water_boilings, last_multihead_water_boiling
+    # - Return
+    return last_multihead_water_boiling
