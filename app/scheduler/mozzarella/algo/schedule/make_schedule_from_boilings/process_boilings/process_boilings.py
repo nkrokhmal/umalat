@@ -1,3 +1,4 @@
+from app.scheduler.mozzarella.algo.schedule.calc_score import calc_score
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.create_left_df import (
     create_left_df,
 )
@@ -128,12 +129,6 @@ def process_boilings(
 
                     # - Generate two lookforward schedules
 
-                    def _get_schedule_size(schedule):
-                        boilings = [b for b in schedule["master"]["boiling", True]]
-                        beg = min(boiling.x[0] for boiling in boilings)
-                        end = max(boiling.y[0] for boiling in boilings)
-                        return end - beg
-
                     water_schedule = process_boilings(
                         m=m,
                         boilings=[water_boiling, salt_boiling],
@@ -143,7 +138,7 @@ def process_boilings(
                         shrink_drenators=shrink_drenators,
                     ).root
 
-                    water_size = _get_schedule_size(water_schedule)
+                    water_score = calc_score(water_schedule)
                     salt_schedule = process_boilings(
                         m=m,
                         boilings=[salt_boiling, water_boiling],
@@ -152,11 +147,11 @@ def process_boilings(
                         start_configuration=[LineName.SALT, LineName.WATER],
                         shrink_drenators=shrink_drenators,
                     ).root
-                    salt_size = _get_schedule_size(salt_schedule)
+                    salt_score = calc_score(salt_schedule)
 
                     # - Choose the optimal one
 
-                    line_name = LineName.WATER if water_size < salt_size else LineName.SALT
+                    line_name = LineName.WATER if water_score < salt_score else LineName.SALT
 
                 elif next_boiling_optimization_type == "chess":
 
@@ -176,7 +171,7 @@ def process_boilings(
 
             # - Log
 
-            logger.debug(
+            logger.trace(
                 "Chose line", line_name=line_name, next_boiling_optimization_type=next_boiling_optimization_type
             )
 

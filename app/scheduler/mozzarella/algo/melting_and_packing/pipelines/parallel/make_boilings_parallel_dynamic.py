@@ -1,5 +1,3 @@
-# fmt: off
-
 from app.imports.runtime import *
 from app.models import *
 
@@ -12,6 +10,7 @@ from app.scheduler.mozzarella.algo.melting_and_packing.melting_process import (
 )
 
 from utils_ak.block_tree import *
+
 
 def make_mpp(boiling_df, left_boiling_volume):
     boiling_df["collecting_speed"] = boiling_df["sku"].apply(
@@ -32,18 +31,14 @@ def make_mpp(boiling_df, left_boiling_volume):
 
     left = boiling_volume
 
-    assert (
-        left < boiling_df["left"].sum() + ERROR
-    )  # have enough packers to collect |this volume
+    assert left < boiling_df["left"].sum() + ERROR  # have enough packers to collect |this volume
 
     while left > ERROR:
+
         # get next skus
         cur_skus_values = []
         for packing_team_id in packing_team_ids:
-            team_df = boiling_df[
-                (boiling_df["packing_team_id"] == packing_team_id)
-                & (boiling_df["left"] > ERROR)
-            ]
+            team_df = boiling_df[(boiling_df["packing_team_id"] == packing_team_id) & (boiling_df["left"] > ERROR)]
             if len(team_df) > 0:
                 cur_skus_values.append(team_df.iloc[0])
         cur_skus_df = pd.DataFrame(cur_skus_values).sort_values(
@@ -66,9 +61,7 @@ def make_mpp(boiling_df, left_boiling_volume):
 
         old_ts = cur_ts
         cur_ts = (
-            old_ts
-            + min((df["left"] / df["cur_speed"]).min(), left / df["cur_speed"].sum())
-            * 60
+            old_ts + min((df["left"] / df["cur_speed"]).min(), left / df["cur_speed"].sum()) * 60
         )  # either one of the skus are collected or the boiling is over
 
         # update collected kgs
@@ -78,16 +71,12 @@ def make_mpp(boiling_df, left_boiling_volume):
         boiling_df["cur_speed"] = 0
 
         boiling_df["end_ts"] = np.where(
-            (~boiling_df["beg_ts"].isnull())
-            & boiling_df["end_ts"].isnull()
-            & (boiling_df["left"] < ERROR),
+            (~boiling_df["beg_ts"].isnull()) & boiling_df["end_ts"].isnull() & (boiling_df["left"] < ERROR),
             cur_ts,
             boiling_df["end_ts"],
         )
 
-        assert (
-            boiling_df["left"].min() >= -ERROR
-        )  # check that all quantities are positive
+        assert boiling_df["left"].min() >= -ERROR  # check that all quantities are positive
 
     # set current time - collected how much we could
     boiling_df["end_ts"] = np.where(
@@ -97,13 +86,10 @@ def make_mpp(boiling_df, left_boiling_volume):
     )
 
     def round_timestamps(df, packing_team_ids):
+
         # round to five-minute intervals
-        df["beg_ts"] = df["beg_ts"].apply(
-            lambda ts: None if ts is None else custom_round(ts, 5, "nearest_half_down")
-        )
-        df["end_ts"] = df["end_ts"].apply(
-            lambda ts: None if ts is None else custom_round(ts, 5, "nearest_half_down")
-        )
+        df["beg_ts"] = df["beg_ts"].apply(lambda ts: None if ts is None else custom_round(ts, 5, "nearest_half_down"))
+        df["end_ts"] = df["end_ts"].apply(lambda ts: None if ts is None else custom_round(ts, 5, "nearest_half_down"))
 
         # fix small intervals (like beg_ts and end_ts: 5, 5 -> 5, 10)
         for packing_team_id in packing_team_ids:
@@ -122,20 +108,19 @@ def make_mpp(boiling_df, left_boiling_volume):
     m = BlockMaker("melting_and_packing_process", axis=1)
 
     # create packing blocks
-    last_collecting_process_y = 0  # todo archive: redundant?
+    last_collecting_process_y = 0  # todo later: archive: redundant? [@marklidenberg]
     for packing_team_id in packing_team_ids:
         df = boiling_df[boiling_df["packing_team_id"] == packing_team_id]
         df = df[~df["beg_ts"].isnull()]
         if len(df) > 0:
-            packing = m.row("packing", push_func=add_push,
-                            packing_team_id=packing_team_id,
-                            x=df.iloc[0]["beg_ts"] // 5).block
+            packing = m.row(
+                "packing", push_func=add_push, packing_team_id=packing_team_id, x=df.iloc[0]["beg_ts"] // 5
+            ).block
 
-            with m.row("collecting", push_func=add_push,
-                       packing_team_id=packing_team_id,
-                    x=df.iloc[0]["beg_ts"] // 5):
+            with m.row("collecting", push_func=add_push, packing_team_id=packing_team_id, x=df.iloc[0]["beg_ts"] // 5):
                 for i, (_, row) in enumerate(df.iterrows()):
                     if row["collecting_speed"] == row["packing_speed"]:
+
                         # add configuration if needed
                         if i >= 1:
                             conf_time_size = get_configuration_time(
@@ -146,33 +131,33 @@ def make_mpp(boiling_df, left_boiling_volume):
                             if conf_time_size:
                                 block = m.row("packing_configuration", size=conf_time_size // 5).block
                                 push(packing, m.copy(block), push_func=add_push)
-                        block = m.row("process",
-                                      size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5,
-                                      sku=row["sku"]).block
-                        last_collecting_process_y = max(
-                            last_collecting_process_y, block.y[0]
-                        )
+                        block = m.row(
+                            "process", size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5, sku=row["sku"]
+                        ).block
+                        last_collecting_process_y = max(last_collecting_process_y, block.y[0])
                         push(
                             packing,
-                            m.create_block("process",
-                                           size=block.props["size"],
-                                           x=list(block.props["x_rel"]),
-                                           sku=row["sku"]),
+                            m.create_block(
+                                "process", size=block.props["size"], x=list(block.props["x_rel"]), sku=row["sku"]
+                            ),
                             push_func=add_push,
                         )
                     else:
+
                         # rubber
-                        block = m.row("process",
-                                      size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5,
-                                      sku=row["sku"]).block
+                        block = m.row(
+                            "process", size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5, sku=row["sku"]
+                        ).block
                         last_collecting_process_y = max(last_collecting_process_y, block.y[0])
-                        packing_size = (custom_round(row["collected"] / row["packing_speed"] * 60, 5, "ceil") // 5)
-                        push(packing,
+                        packing_size = custom_round(row["collected"] / row["packing_speed"] * 60, 5, "ceil") // 5
+                        push(
+                            packing,
                             m.create_block(
                                 "process",
                                 size=[packing_size, 0],
                                 sku=row["sku"],
-                            ))
+                            ),
+                        )
 
     bff = boiling_df.iloc[0]["bff"]
 
@@ -188,9 +173,7 @@ def make_mpp(boiling_df, left_boiling_volume):
 
     # shift packing and collecting for cooling
     for packing in m.root["packing", True]:
-        packing.props.update(
-            x=[packing.props["x"][0] + m.root["cooling_process"]["start"].y[0], 0]
-        )
+        packing.props.update(x=[packing.props["x"][0] + m.root["cooling_process"]["start"].y[0], 0])
     for collecting in m.root["collecting", True]:
         collecting.props.update(
             x=[
@@ -204,58 +187,82 @@ def make_mpp(boiling_df, left_boiling_volume):
     return m.root
 
 
+CACHE_BOILING_GROUP_DF_TO_BOILINGS_AND_FIRST_BOILING_ID = {}
+
+
 def make_boilings_parallel_dynamic(boiling_group_df, first_boiling_id=1):
-    boilings = []
 
-    boiling_group_df = boiling_group_df.copy()
+    # - Calc hash of boiling_group_df
 
-    boiling_model = boiling_group_df.iloc[0]["boiling"]
-    boiling_volumes = boiling_group_df.iloc[0]["boiling_volumes"]
-    values = []
-    for _, grp in boiling_group_df.groupby(["packing_team_id", "sku_name"]):
-        value = grp.iloc[0]
-        value["kg"] = grp["kg"].sum()
-        values.append(value)
+    hash_df = boiling_group_df[["sku_name", "original_kg"]]
+    hash_ = hash_df.to_json()
 
-    grouped_df = pd.DataFrame(values)
+    # - Generate boilings if needed
 
-    def get_original_index(sku):
-        for i, row in boiling_group_df.iterrows():
-            if row["sku"] == sku:
-                return i
-        raise Exception(
-            "Sould not happen. Did not find sku in original boiling_group_id."
-        )
+    if hash_ not in CACHE_BOILING_GROUP_DF_TO_BOILINGS_AND_FIRST_BOILING_ID:
+        boilings = []
 
-    grouped_df["original_index"] = grouped_df["sku"].apply(get_original_index)
-    grouped_df = grouped_df.sort_values("original_index")
-    grouped_df.pop("original_index")
+        boiling_group_df = boiling_group_df.copy()
 
-    grouped_df["left"] = grouped_df["kg"]
-    form_factors = utils.remove_duplicates(grouped_df["bff"])
-    cur_form_factor = form_factors[0]
-    cur_boiling_df = grouped_df[grouped_df["bff"] == cur_form_factor]
-    for i, boiling_volume in enumerate(boiling_volumes):
-        mpps = []
+        boiling_model = boiling_group_df.iloc[0]["boiling"]
+        boiling_volumes = boiling_group_df.iloc[0]["boiling_volumes"]
+        values = []
+        for _, grp in boiling_group_df.groupby(["packing_team_id", "sku_name"]):
+            value = grp.iloc[0]
+            value["kg"] = grp["kg"].sum()
+            values.append(value)
 
-        left = boiling_volume
+        grouped_df = pd.DataFrame(values)
 
-        while left > ERROR:
-            # get next cur_boiling_df if necessary
-            if cur_boiling_df["left"].sum() < ERROR:
-                assert form_factors.index(cur_form_factor) + 1 < len(
-                    form_factors
-                )  # check there are form factors left
-                cur_form_factor = form_factors[form_factors.index(cur_form_factor) + 1]
-                cur_boiling_df = grouped_df[grouped_df["bff"] == cur_form_factor]
-            mpp = make_mpp(cur_boiling_df, left)
-            mpps.append(mpp)
-            left -= mpp.props["kg"]
+        def get_original_index(sku):
+            for i, row in boiling_group_df.iterrows():
+                if row["sku"] == sku:
+                    return i
+            raise Exception("Sould not happen. Did not find sku in original boiling_group_id.")
 
-        melting_and_packing = make_melting_and_packing_from_mpps(boiling_model, mpps)
-        boiling = make_boiling(
-            boiling_model, first_boiling_id + i, boiling_volume, melting_and_packing
-        )
-        boilings.append(boiling)
+        grouped_df["original_index"] = grouped_df["sku"].apply(get_original_index)
+        grouped_df = grouped_df.sort_values("original_index")
+        grouped_df.pop("original_index")
+
+        grouped_df["left"] = grouped_df["kg"]
+        form_factors = utils.remove_duplicates(grouped_df["bff"])
+        cur_form_factor = form_factors[0]
+        cur_boiling_df = grouped_df[grouped_df["bff"] == cur_form_factor]
+        for i, boiling_volume in enumerate(boiling_volumes):
+            mpps = []
+
+            left = boiling_volume
+
+            while left > ERROR:
+
+                # get next cur_boiling_df if necessary
+                if cur_boiling_df["left"].sum() < ERROR:
+                    assert form_factors.index(cur_form_factor) + 1 < len(
+                        form_factors
+                    )  # check there are form factors left
+                    cur_form_factor = form_factors[form_factors.index(cur_form_factor) + 1]
+                    cur_boiling_df = grouped_df[grouped_df["bff"] == cur_form_factor]
+                mpp = make_mpp(cur_boiling_df, left)
+                mpps.append(mpp)
+                left -= mpp.props["kg"]
+
+            melting_and_packing = make_melting_and_packing_from_mpps(boiling_model, mpps)
+            boiling = make_boiling(boiling_model, first_boiling_id + i, boiling_volume, melting_and_packing)
+            boilings.append(boiling)
+
+        CACHE_BOILING_GROUP_DF_TO_BOILINGS_AND_FIRST_BOILING_ID[hash_] = (boilings, first_boiling_id)
+
+    # - Get boilings
+
+    boilings, cached_first_boiling_id = CACHE_BOILING_GROUP_DF_TO_BOILINGS_AND_FIRST_BOILING_ID[hash_]
+
+    # - Copy boilings
+
+    boilings = [copy.deepcopy(boiling) for boiling in boilings]
+
+    # - Set proper boiling_id
+
+    for boiling in boilings:
+        boiling.props.update(boiling_id=boiling.props["boiling_id"] + first_boiling_id - cached_first_boiling_id)
 
     return boilings

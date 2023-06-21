@@ -72,7 +72,7 @@ class BoilingsDataframesToBoilings:
         return m.root
 
     def __call__(
-        self, boiling_volumes, boilings_dataframes, boiling_model, first_boiling_id
+        self, boiling_volumes, boilings_dataframes, boiling_model, first_boiling_id,
     ):
         res = []
         for i in range(len(boiling_volumes)):

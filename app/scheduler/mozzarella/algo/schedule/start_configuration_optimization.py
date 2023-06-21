@@ -3,8 +3,8 @@ from app.scheduler.mozzarella.algo.schedule.schedule_basic import make_schedule_
 from .make_boilings import *
 from .parse_start_configuration import *
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import *
-from .score import calc_score
-from .swap_optimization import optimize_schedule_by_swapping_water_gaps
+from .calc_score import calc_score
+from .optimize_schedule_by_swapping import optimize_schedule_by_swapping
 
 
 def _gen_seq(n, a=0, b=1):
@@ -57,7 +57,6 @@ def optimize_schedule_by_start_configuration(
             line_name_to_line_boilings,
             cleaning_type_by_group_id={},
             start_times=start_times,
-            next_boiling_optimization_type="chess",
         )
 
         # - Get start configuration
@@ -124,13 +123,16 @@ def optimize_schedule_by_start_configuration(
 
     values = []
     for start_configuration in start_configurations:
-        schedule = optimize_schedule_by_swapping_water_gaps(
+        logger.debug("Optimizing start configuration", start_configuration=start_configuration)
+
+        schedule = optimize_schedule_by_swapping(
             boiling_plan_df,
             start_configuration=start_configuration,
-            next_boiling_optimization_type="chess",
+            optimize_cleanings=False, # optimization, will run twice less time
             *args,
             **kwargs,
         )
+
         values.append(
             {
                 "schedule": schedule,
@@ -182,10 +184,11 @@ def optimize_schedule_by_start_configuration(
         first_line_boilings_by_line_name = {k: v[0] for k, v in line_name_to_line_boilings.items()}
         first_boiling = min(first_line_boilings_by_line_name.values(), key=lambda boiling: boiling.x[0])
         second_boiling = max(first_line_boilings_by_line_name.values(), key=lambda boiling: boiling.x[0])
+
         if first_boiling.props["boiling_model"].line.name == time_by_line:
             # time already set by proper line
-
-            return best_value["schedule"]
+            pass
+            # return best_value["schedule"]
         else:
             start_times[time_not_by_line] = cast_time(
                 cast_t(start_times[time_not_by_line])
@@ -193,12 +196,23 @@ def optimize_schedule_by_start_configuration(
                 - second_boiling["melting_and_packing"].x[0]
             )
 
-            return optimize_schedule_by_swapping_water_gaps(
+            return optimize_schedule_by_swapping(
                 boiling_plan_df,
-                start_configuration=[boiling.props["boiling_model"].line.name for boiling in boilings], # fix order from optimization
-                next_boiling_optimization_type="chess",
+                start_configuration=[
+                    boiling.props["boiling_model"].line.name for boiling in boilings
+                ],  # fix order from optimization
                 *args,
                 **kwargs,
             )
-    else:
-        return best_value["schedule"]
+    # else:
+    #     return best_value["schedule"]
+
+    return optimize_schedule_by_swapping(
+        boiling_plan_df,
+        start_configuration=[
+            boiling.props["boiling_model"].line.name for boiling in best_value['schedule']['master']['boiling', True]
+        ],  # fix order from optimization
+        optimize_cleanings=True,
+        *args,
+        **kwargs,
+    )

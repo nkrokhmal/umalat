@@ -11,8 +11,7 @@ from app.enum import LineName
 
 from app.scheduler.mozzarella.algo.schedule.custom_pushers import *
 from utils_ak.block_tree import *
-
-STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
+from utils_ak.builtin import remove_duplicates
 
 
 def process_boiling(
@@ -75,6 +74,8 @@ def process_boiling(
         iter_props = [props for props in iter_props if props["pouring_line"] != current_pouring_line]
 
     # - Push boiling
+
+    logger.trace("Start from", start_from)
 
     push(
         m.root["master"],
