@@ -1,9 +1,10 @@
+from app.scheduler.mozzarella.algo.schedule.calc_score import calc_score
+from app.scheduler.mozzarella.algo.schedule.make_boilings import make_boilings
+from app.scheduler.mozzarella.algo.schedule.make_schedule_by_swapping_water_gaps.make_schedule_by_swapping_water_gaps import \
+    make_schedule_by_swapping_water_gaps
+from app.scheduler.mozzarella.algo.schedule.parse_start_configuration import parse_start_configuration
 from app.scheduler.time import cast_time, cast_t
-from . import make_schedule_by_swapping_water_gaps
-from .make_boilings import *
-from .parse_start_configuration import *
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import *
-from .calc_score import calc_score
 
 
 def _gen_seq(n, a=0, b=1):
@@ -201,3 +202,5 @@ def make_schedule_by_optimizing_start_configuration(
                 start_times=start_times,
             ),
         )
+    else:
+        return best_value['schedule']

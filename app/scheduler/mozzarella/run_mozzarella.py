@@ -1,5 +1,5 @@
 from app.imports.runtime import *
-
+from app.enum import LineName
 from app.scheduler.mozzarella.algo.schedule.make_schedule import make_schedule
 from app.scheduler.mozzarella.boiling_plan import read_boiling_plan
 from app.scheduler.mozzarella.frontend.wrap_frontend import wrap_frontend
@@ -23,7 +23,9 @@ def run_mozzarella(
     boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={"mozzarella": first_batch_id})
     if not schedule:
         schedule = make_schedule(
-            boiling_plan_df, optimize=optimize, make_schedule_basic_kwargs=dict(start_times=start_times)
+            boiling_plan_df,
+            optimize=optimize,
+            make_schedule_basic_kwargs=dict(start_times=start_times),
         )
     try:
         frontend = wrap_frontend(schedule)
@@ -36,13 +38,14 @@ def run_mozzarella(
 
 
 def test():
+    utils.configure_loguru(level='DEBUG')
     run_mozzarella(
         "/Users/arsenijkadaner/Desktop/2023-06-02 План по варкам моцарелла.xlsx",
         start_times={LineName.WATER: "08:00", LineName.SALT: "05:00"},
         first_batch_id=1,
         open_file=True,
         prefix="test",
-        optimize=False,
+        optimize=True,
     )
 
 
