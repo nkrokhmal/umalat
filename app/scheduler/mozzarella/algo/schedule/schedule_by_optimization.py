@@ -1,6 +1,5 @@
-from app.imports.runtime import *
-from .boilings import *
-from .schedule_from_boilings import *
+from .make_boilings import *
+from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.schedule_from_boilings import *
 from app.scheduler.mozzarella.algo.calc_schedule_stats import *
 
 

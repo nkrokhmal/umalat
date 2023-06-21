@@ -1,11 +1,9 @@
-from app.imports.runtime import *  # isort: skip
-from app.enum import LineName
-from app.scheduler.mozzarella.algo.schedule.schedule_basic import make_schedule_basic
+from app.scheduler.mozzarella.algo.schedule.make_schedule_basic import make_schedule_basic
 
-from .boilings import *
+from .make_boilings import *
 from .parse_start_configuration import *
-from .schedule_from_boilings import *
-from .score import calc_score
+from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.schedule_from_boilings import *
+from .calc_score import calc_score
 from .swap_optimization import optimize_schedule_by_swapping_water_gaps
 
 
