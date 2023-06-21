@@ -1,6 +1,6 @@
 from app.scheduler.mozzarella.boiling_plan.boiling_plan import cast_boiling_plan
 
-from .schedule_by_optimization import *
+from app.scheduler.mozzarella.algo.schedule.find_optimal_cleanings.find_optimal_cleanings import *
 from .parse_start_configuration import *
 
 

@@ -1,10 +1,8 @@
 # fmt: off
-from app.imports.runtime import * # isort: skip
-from app.enum import LineName
 from app.scheduler.mozzarella.algo.schedule.schedule_basic import make_schedule_basic
 from app.scheduler.mozzarella.boiling_plan.parser import parse_schedule
 
-from .schedule_by_optimization import *
+from app.scheduler.mozzarella.algo.schedule.find_optimal_cleanings.find_optimal_cleanings import *
 from .score import calc_score
 
 

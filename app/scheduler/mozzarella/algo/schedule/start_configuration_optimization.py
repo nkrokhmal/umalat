@@ -39,6 +39,7 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
     start_configuration = kwargs.get("start_configuration")
 
     if not start_configuration:
+
         # - Make basic schedule
 
         boilings = make_boilings(boiling_plan_df)
