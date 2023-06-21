@@ -99,7 +99,14 @@ def parse_schedule(ws_obj):
 
 
 def test():
-    pass
+    print(
+        parse_schedule(
+            (
+                r"/Users/arsenijkadaner/FileApps/coding_projects/umalat/app/data/static/samples/outputs/by_department/mozzarella/2023-06-21 Расписание моцарелла.xlsx",
+                "Расписание",
+            )
+        )
+    )
 
 
 if __name__ == "__main__":
