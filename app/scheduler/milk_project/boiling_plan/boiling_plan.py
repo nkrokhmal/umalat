@@ -4,7 +4,7 @@ from app.models import *
 from app.enum import LineName
 
 from app.scheduler.boiling_plan import *
-from app.scheduler.milk_project import saturate_boiling_plan
+from app.scheduler.milk_project.boiling_plan import saturate_boiling_plan
 
 
 def read_boiling_plan(wb_obj, first_batch_ids=None):

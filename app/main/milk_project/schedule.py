@@ -6,7 +6,7 @@ from app.main import main
 from app.models import MilkProjectSKU, AdygeaSKU
 from app.scheduler.adygea import run_adygea
 from app.scheduler.consolidated_schedule_old import run_consolidated_old
-from app.scheduler.milk_project import run_milk_project
+from app.scheduler.milk_project.runner import run_milk_project
 
 from app.utils.batches.batch import *
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
