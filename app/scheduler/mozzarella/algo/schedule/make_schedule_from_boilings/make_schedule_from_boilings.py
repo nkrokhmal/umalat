@@ -27,6 +27,7 @@ def make_schedule_from_boilings(
     start_times: Optional[dict] = None,
     shrink_drenators: bool = True,
     start_configuration: Optional[list] = None,
+    next_boiling_optimization_type: Literal["chess", "lookahead"] = "lookahead",
 ) -> ParallelepipedBlock:
 
     # - Preprocess arguments
@@ -50,6 +51,7 @@ def make_schedule_from_boilings(
         cleaning_type_by_group_id=cleaning_type_by_group_id,
         start_configuration=start_configuration,
         shrink_drenators=shrink_drenators,
+        next_boiling_optimization_type=next_boiling_optimization_type,
     )
     m = process_extras(m=m)
     m = fix_first_boiling_on_the_later_line(m=m, start_configuration=start_configuration)

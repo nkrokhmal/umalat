@@ -16,27 +16,27 @@ def run_mozzarella(
     optimize=True,
     optimize_cleanings=True,
     start_configuration=None,
+    next_boiling_optimization_type: Literal["chess", "lookahead"] = "lookahead",
     path="outputs/",
     prefix="",
 ):
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
 
-    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={'mozzarella': first_batch_id})
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={"mozzarella": first_batch_id})
     if not schedule:
         schedule = make_schedule(
             boiling_plan_df,
             optimize=optimize,
             optimize_cleanings=optimize_cleanings,
             start_times=start_times,
-            start_configuration=start_configuration
+            start_configuration=start_configuration,
+            next_boiling_optimization_type=next_boiling_optimization_type,
         )
     try:
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
 
-    res = submit_schedule(
-        "моцарелла", schedule, frontend, prefix, STYLE, path=path, open_file=open_file
-    )
+    res = submit_schedule("моцарелла", schedule, frontend, prefix, STYLE, path=path, open_file=open_file)
     res["boiling_plan_df"] = boiling_plan_df
     return res

@@ -25,7 +25,35 @@ def process_boilings(
     cleaning_type_by_group_id: dict,
     start_configuration: Optional[list],
     shrink_drenators: bool = True,
+    next_boiling_optimization_type: Literal['chess', 'lookahead'] = 'lookahead',
 ) -> BlockMaker:
+    """ Process boilings
+
+    Parameters
+    ----------
+    m : BlockMaker
+        BlockMaker to be processed
+    boilings : List[ParallelepipedBlock]
+        List of boilings to be processed
+    start_times : dict
+        Start times for each line
+    cleaning_type_by_group_id : dict
+        Cleaning type by group id
+    start_configuration : Optional[list]
+        Start configuration
+    shrink_drenators : bool, optional
+        Shrink drenators, by default True
+    next_boiling_optimization : Literal['chess', 'lookahead'], optional
+        Next boiling optimization, by default 'lookahead'
+
+        Lookahead - takes longer, optimizes best next boiling by trying to fit [salt, water], [water, salt] and see which is better
+        Chess - takes less time, takes other line
+
+    """
+
+    # - Preprocess arguments
+
+    assert next_boiling_optimization_type in ['chess', 'lookahead'], f"Unknown next boiling optimization type: {next_boiling_optimization_type}"
 
     # - Copy BlockMaker to avoid side effects
 
@@ -90,53 +118,51 @@ def process_boilings(
                 # logger.debug('Chose line by start configuration', line_name=line_name)
             else:
 
-                # - Select next line smartly: run WATER, SALT and SALT, WATER. See which one is better - choose line that way
+                if next_boiling_optimization_type == 'lookahead':
+                    # - Select next line smartly: run WATER, SALT and SALT, WATER. See which one is better - choose line that way
 
-                water_boiling = left_df[left_df["line_name"] == LineName.WATER].iloc[0]["boiling"]
-                salt_boiling = left_df[left_df["line_name"] == LineName.SALT].iloc[0]["boiling"]
+                    water_boiling = left_df[left_df["line_name"] == LineName.WATER].iloc[0]["boiling"]
+                    salt_boiling = left_df[left_df["line_name"] == LineName.SALT].iloc[0]["boiling"]
 
-                # - Generate two lookforward schedules
+                    # - Generate two lookforward schedules
 
-                def _get_schedule_size(schedule):
-                    boilings = [b for b in schedule["master"]["boiling", True]]
-                    beg = min(boiling.x[0] for boiling in boilings)
-                    end = max(boiling.y[0] for boiling in boilings)
-                    return end - beg
+                    def _get_schedule_size(schedule):
+                        boilings = [b for b in schedule["master"]["boiling", True]]
+                        beg = min(boiling.x[0] for boiling in boilings)
+                        end = max(boiling.y[0] for boiling in boilings)
+                        return end - beg
 
-                water_schedule = process_boilings(
-                    m=m,
-                    boilings=[water_boiling, salt_boiling],
-                    start_times=start_times,
-                    cleaning_type_by_group_id=cleaning_type_by_group_id,
-                    start_configuration=[LineName.WATER, LineName.SALT],
-                    shrink_drenators=shrink_drenators,
-                ).root
+                    water_schedule = process_boilings(
+                        m=m,
+                        boilings=[water_boiling, salt_boiling],
+                        start_times=start_times,
+                        cleaning_type_by_group_id=cleaning_type_by_group_id,
+                        start_configuration=[LineName.WATER, LineName.SALT],
+                        shrink_drenators=shrink_drenators,
+                    ).root
 
-                water_size = _get_schedule_size(water_schedule)
-                salt_schedule = process_boilings(
-                    m=m,
-                    boilings=[salt_boiling, water_boiling],
-                    start_times=start_times,
-                    cleaning_type_by_group_id=cleaning_type_by_group_id,
-                    start_configuration=[LineName.SALT, LineName.WATER],
-                    shrink_drenators=shrink_drenators,
-                ).root
-                salt_size = _get_schedule_size(salt_schedule)
+                    water_size = _get_schedule_size(water_schedule)
+                    salt_schedule = process_boilings(
+                        m=m,
+                        boilings=[salt_boiling, water_boiling],
+                        start_times=start_times,
+                        cleaning_type_by_group_id=cleaning_type_by_group_id,
+                        start_configuration=[LineName.SALT, LineName.WATER],
+                        shrink_drenators=shrink_drenators,
+                    ).root
+                    salt_size = _get_schedule_size(salt_schedule)
 
-                # - Choose the optimal one
+                    # - Choose the optimal one
 
-                line_name = LineName.WATER if water_size < salt_size else LineName.SALT
+                    line_name = LineName.WATER if water_size < salt_size else LineName.SALT
+                elif next_boiling_optimization_type == 'chess':
+                    # choose latest line
+                    df = lines_df[~lines_df["latest_boiling"].isnull()]
+                    line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
 
-                # # choose latest line
-                # df = lines_df[~lines_df["latest_boiling"].isnull()]
-                # line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
-                #
-                # # reverse
-                # line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
-                # logger.debug('Chose line by latest line', line_name=line_name)
-                #
-                # next_row = left_df[left_df["line_name"] == line_name].iloc[0]
-                # logger.info("Boiling id", boiling_id=next_row["boiling"].props["boiling_id"], line_name=line_name)
+                    # reverse
+                    line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                    logger.debug('Chose line by latest line', line_name=line_name)
 
             # - Select next row -> first for selected line
 

@@ -73,7 +73,7 @@ def combine_groups(boiling_plan_df, groups):
 #     return df.iloc[indexes].reset_index(drop=True)
 
 
-def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs):
+def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs,):
     with code("Make initial schedule"):
         schedule = make_schedule_basic(boiling_plan_df, *args, **kwargs)
         boiling_plan_df = parse_schedule(schedule)

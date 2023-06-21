@@ -36,6 +36,7 @@ if __name__ == "__main__":
         open_file=True,
         prefix="new6",
         optimize=False,
+
         start_configuration=[
             "Моцарелла в воде", # 1
             "Моцарелла в воде", # 2
