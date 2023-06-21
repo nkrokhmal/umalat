@@ -53,28 +53,6 @@ def combine_groups(boiling_plan_df, groups):
     return df
 
 
-# todo later: del, deprecated [@marklidenberg]
-# def swap_groups(df, group_id1, group_id2):
-#     logger.debug("Swapping groups", gid1=group_id1, gid2=group_id2)
-#     df = df.reset_index(drop=True)
-#
-#     indexes1 = df[df["group_id"] == group_id1].index
-#     indexes2 = df[df["group_id"] == group_id2].index
-#     indexes1, indexes2 = map(list, [indexes1, indexes2])
-#     indexes1, indexes2 = list(
-#         sorted([indexes1, indexes2], key=lambda indexes: indexes[0])
-#     )
-#
-#     indexes = []
-#     indexes += [i for i in df.index if i < indexes1[0]]
-#     indexes += indexes2
-#     indexes += [i for i in df.index if indexes1[-1] < i < indexes2[0]]
-#     indexes += indexes1
-#     indexes += [i for i in df.index if i > indexes2[-1]]
-#
-#     return df.iloc[indexes].reset_index(drop=True)
-
-
 def optimize_schedule_by_swapping(
     boiling_plan_df,
     *args,

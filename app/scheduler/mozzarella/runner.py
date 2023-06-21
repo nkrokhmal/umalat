@@ -14,16 +14,14 @@ def run_mozzarella(
     start_times=None,
     first_batch_id=1,
     optimize=True,
-    optimize_cleanings=True,
     start_configuration=None,
-    next_boiling_optimization_type: Literal["chess", "lookahead"] = "chess",
-    exact_melting_time_by_line: Optional[Literal["Моцарелла в воде", "Пицца чиз"]] = None,
     path="outputs/",
     prefix="",
 ):
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
 
     boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={"mozzarella": first_batch_id})
+
     if not schedule:
 
         # - Extra kwargs
@@ -33,11 +31,10 @@ def run_mozzarella(
         schedule = make_schedule(
             boiling_plan_df,
             optimize=optimize,
-            optimize_cleanings=optimize_cleanings,
             start_times=start_times,
-            next_boiling_optimization_type=next_boiling_optimization_type,
             **kwargs,
         )
+
     try:
         frontend = wrap_frontend(schedule)
     except Exception as e:

@@ -43,8 +43,8 @@ def optimize_schedule_by_start_configuration(
 
     # - Preprocess arguments
 
-    start_times = kwargs.get("start_times")
-    start_configuration = kwargs.get("start_configuration")
+    start_times = kwargs.pop("start_times")
+    start_configuration = kwargs.pop("start_configuration", None)
 
     # - Get start configuration from schedule
 
@@ -128,7 +128,8 @@ def optimize_schedule_by_start_configuration(
         schedule = optimize_schedule_by_swapping(
             boiling_plan_df,
             start_configuration=start_configuration,
-            optimize_cleanings=False, # optimization, will run twice less time
+            start_times=start_times,
+            optimize_cleanings=False,  # optimization, will run twice less time
             *args,
             **kwargs,
         )
@@ -163,7 +164,7 @@ def optimize_schedule_by_start_configuration(
         ],
     )
 
-    # - Fix start time if needed
+    # - Fix start_times if needed
 
     if exact_melting_time_by_line:
         start_times = dict(start_times)
@@ -185,34 +186,20 @@ def optimize_schedule_by_start_configuration(
         first_boiling = min(first_line_boilings_by_line_name.values(), key=lambda boiling: boiling.x[0])
         second_boiling = max(first_line_boilings_by_line_name.values(), key=lambda boiling: boiling.x[0])
 
-        if first_boiling.props["boiling_model"].line.name == time_by_line:
-            # time already set by proper line
-            pass
-            # return best_value["schedule"]
-        else:
+        if first_boiling.props["boiling_model"].line.name != time_by_line:
             start_times[time_not_by_line] = cast_time(
                 cast_t(start_times[time_not_by_line])
                 + cast_t(start_times[time_by_line])
                 - second_boiling["melting_and_packing"].x[0]
             )
 
-            return optimize_schedule_by_swapping(
-                boiling_plan_df,
-                start_configuration=[
-                    boiling.props["boiling_model"].line.name for boiling in boilings
-                ],  # fix order from optimization
-                *args,
-                **kwargs,
-            )
-    # else:
-    #     return best_value["schedule"]
-
     return optimize_schedule_by_swapping(
         boiling_plan_df,
         start_configuration=[
-            boiling.props["boiling_model"].line.name for boiling in best_value['schedule']['master']['boiling', True]
+            boiling.props["boiling_model"].line.name for boiling in best_value["schedule"]["master"]["boiling", True]
         ],  # fix order from optimization
-        optimize_cleanings=True,
+        optimize_cleanings=True,  # THIS IS IMPORTANT, BECAUSE WE WANT CLEANINGS IN THE END
+        start_times=start_times,
         *args,
         **kwargs,
     )

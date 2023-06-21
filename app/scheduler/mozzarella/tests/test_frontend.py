@@ -1,6 +1,7 @@
 from app.imports.runtime import *  # isort: skip
 from app.enum import LineName
 from app.scheduler.mozzarella import run_mozzarella
+from utils_ak.clock import clock
 
 
 def test_batch():
@@ -23,20 +24,31 @@ def _test(fn, *args, **kwargs):
     warnings.filterwarnings("ignore")
     utils.lazy_tester.configure(local_path=os.path.basename(fn))
     outputs = run_mozzarella(fn, *args, **kwargs)
-    utils.lazy_tester.log(outputs["schedule"])
-    utils.lazy_tester.assert_logs(reset=False)
+    # utils.lazy_tester.log(outputs["schedule"])
+    # utils.lazy_tester.assert_logs(reset=False)
+
+pd.set_option("display.max_rows", 500)
+pd.set_option("display.max_columns", 500)
+pd.set_option("display.width", 1000)
 
 
 if __name__ == "__main__":
+    from pyinstrument import Profiler
+
+    profiler = Profiler()
+    profiler.start()
+
+    clock.enable()
+    clock.start('test')
     utils.configure_loguru(level="DEBUG")
+
     _test(
         "/Users/arsenijkadaner/Desktop/2023-06-02 План по варкам моцарелла.xlsx",
         start_times={LineName.WATER: "06:00", LineName.SALT: "06:00"},
         first_batch_id=1,
         open_file=True,
-        prefix="new6",
+        prefix="chess",
         optimize=True,
-        exact_melting_time_by_line=LineName.WATER,
         # start_configuration=[
         #     "Моцарелла в воде", # 1
         #     "Моцарелла в воде", # 2
@@ -70,3 +82,10 @@ if __name__ == "__main__":
         # ],
     )
     # test_batch()
+
+    clock.stop('test')
+    print(clock.stats())
+    profiler.stop()
+    profiler.print()
+    with open("profile_cached_water_boilings_both.html", "w") as f:
+        f.write(profiler.output_html())
