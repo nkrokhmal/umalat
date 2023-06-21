@@ -221,3 +221,10 @@ class Validator(ClassValidator):
 
         for p1 in boiling.iter(cls="collecting", packing_team_id=packing_configuration.props["packing_team_id"]):
             self.block_validator(b1, p1)
+
+def test():
+    sku = cast_model(SKU, 'Моцарелла для бутербродов "Aventino", 45%, 0,2 кг, т/ф')
+    print(sku)
+
+if __name__ == '__main__':
+    test()

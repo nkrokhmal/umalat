@@ -50,7 +50,6 @@ def make_schedule_basic(
         logger.debug("Using boiling plan cleanings", cleanings=cleaning_type_by_group_id)
 
     # - Make schedule with cleanings and start configuration
-    cleaning_type_by_group_id = {4: 'short'}
     cleaning_type_by_group_id = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleaning_type_by_group_id.items() if v}
     boilings = make_boilings(boiling_plan_df)
     schedule = make_schedule_from_boilings(
