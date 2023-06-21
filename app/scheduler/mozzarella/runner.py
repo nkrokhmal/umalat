@@ -17,6 +17,7 @@ def run_mozzarella(
     optimize_cleanings=True,
     start_configuration=None,
     next_boiling_optimization_type: Literal["chess", "lookahead"] = "chess",
+    exact_melting_time_by_line: Optional[Literal["Моцарелла в воде", "Пицца чиз"]] = None,
     path="outputs/",
     prefix="",
 ):
@@ -26,6 +27,7 @@ def run_mozzarella(
     if not schedule:
 
         # - Extra kwargs
+
         kwargs = {} if optimize else {"start_configuration": start_configuration}
 
         schedule = make_schedule(

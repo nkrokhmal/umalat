@@ -25,9 +25,9 @@ def process_boilings(
     cleaning_type_by_group_id: dict,
     start_configuration: Optional[list],
     shrink_drenators: bool = True,
-    next_boiling_optimization_type: Literal['chess', 'lookahead'] = 'lookahead',
+    next_boiling_optimization_type: Literal["chess", "lookahead"] = "lookahead",
 ) -> BlockMaker:
-    """ Process boilings
+    """Process boilings
 
     Parameters
     ----------
@@ -53,7 +53,10 @@ def process_boilings(
 
     # - Preprocess arguments
 
-    assert next_boiling_optimization_type in ['chess', 'lookahead'], f"Unknown next boiling optimization type: {next_boiling_optimization_type}"
+    assert next_boiling_optimization_type in [
+        "chess",
+        "lookahead",
+    ], f"Unknown next boiling optimization type: {next_boiling_optimization_type}"
 
     # - Copy BlockMaker to avoid side effects
 
@@ -106,8 +109,6 @@ def process_boilings(
             next_row = left_df.iloc[0]
         elif cur_lines == 2:
 
-            # - Filter rows with latest boiling (any boiling is already present for line)
-
             # - Select line
 
             if cur_boiling_num < len(start_configuration):
@@ -118,7 +119,8 @@ def process_boilings(
                 # logger.debug('Chose line by start configuration', line_name=line_name)
             else:
 
-                if next_boiling_optimization_type == 'lookahead':
+                if next_boiling_optimization_type == "lookahead":
+
                     # - Select next line smartly: run WATER, SALT and SALT, WATER. See which one is better - choose line that way
 
                     water_boiling = left_df[left_df["line_name"] == LineName.WATER].iloc[0]["boiling"]
@@ -155,14 +157,28 @@ def process_boilings(
                     # - Choose the optimal one
 
                     line_name = LineName.WATER if water_size < salt_size else LineName.SALT
-                elif next_boiling_optimization_type == 'chess':
-                    # choose latest line
+
+                elif next_boiling_optimization_type == "chess":
+
+                    # - Filter rows with latest boiling (any boiling is already present for line)
+
                     df = lines_df[~lines_df["latest_boiling"].isnull()]
+
+                    # - Choose latest line
+
                     line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
 
-                    # reverse
+                    # - Choose reverse line
+
                     line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
-                    logger.debug('Chose line by latest line', line_name=line_name)
+                else:
+                    raise Exception("Should not happen")
+
+            # - Log
+
+            logger.debug(
+                "Chose line", line_name=line_name, next_boiling_optimization_type=next_boiling_optimization_type
+            )
 
             # - Select next row -> first for selected line
 

@@ -36,7 +36,7 @@ if __name__ == "__main__":
         open_file=True,
         prefix="new6",
         optimize=True,
-        next_boiling_optimization_type='chess',
+        exact_melting_time_by_line=LineName.WATER,
         # start_configuration=[
         #     "Моцарелла в воде", # 1
         #     "Моцарелла в воде", # 2

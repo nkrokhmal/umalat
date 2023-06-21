@@ -74,53 +74,56 @@ def combine_groups(boiling_plan_df, groups):
 
 
 def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs,):
-    with code("Make initial schedule"):
-        schedule = make_schedule_basic(boiling_plan_df, *args, **kwargs)
-        boiling_plan_df = parse_schedule(schedule)
-        score = calc_score(schedule)
+    # - Make initial schedule
+    schedule = make_schedule_basic(boiling_plan_df, *args, **kwargs)
+    boiling_plan_df = parse_schedule(schedule)
+    score = calc_score(schedule)
 
-        water_boilings = [b for b in schedule["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.WATER]
-        water_ids = [b.props["boiling_group_df"].iloc[0]["group_id"] for b in water_boilings]
+    water_boilings = [b for b in schedule["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.WATER]
+    water_ids = [b.props["boiling_group_df"].iloc[0]["group_id"] for b in water_boilings]
+
+    # - Find the best schedule
 
     for water_id in water_ids[1:]:
         logger.debug("Optimizing", water_id=water_id)
 
-        with code('Calc cur values'):
-            cur_boilings = schedule["master"]["boiling", True]
-            cur_ids = [b.props["boiling_group_df"].iloc[0]["group_id"] for b in cur_boilings]
-            cur_water_boilings = [b for b in schedule["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.WATER]
-            cur_water_ids = [b.props["boiling_group_df"].iloc[0]["group_id"] for b in cur_water_boilings]
+        # - Calc current values
+        cur_boilings = schedule["master"]["boiling", True]
+        cur_ids = [b.props["boiling_group_df"].iloc[0]["group_id"] for b in cur_boilings]
+        cur_water_boilings = [b for b in schedule["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.WATER]
+        cur_water_ids = [b.props["boiling_group_df"].iloc[0]["group_id"] for b in cur_water_boilings]
 
-        with code("Permutate boilings a little bit if possible"):
-            bw_prev, bw_cur = (
-                cur_water_boilings[cur_water_ids.index(water_id) - 1],
-                cur_water_boilings[cur_water_ids.index(water_id)],
+        # - Permutate boilings a little bit if possible
+        bw_prev, bw_cur = (
+            cur_water_boilings[cur_water_ids.index(water_id) - 1],
+            cur_water_boilings[cur_water_ids.index(water_id)],
+        )
+        b_prev = cur_boilings[cur_ids.index(water_id) - 1]
+
+        if b_prev.props["boiling_model"].line.name == LineName.WATER:
+            # swap only with salt boilings
+            logger.debug("Previous boiling is WATER. Skipping swap optimization")
+            continue
+
+        if bw_cur["melting_and_packing"]["collecting"].x[0] - bw_prev["melting_and_packing"]["collecting"].y[0] <= 2:
+            logger.debug(
+                "Too small distance between water packings, skipping swap optimization"
             )
-            b_prev = cur_boilings[cur_ids.index(water_id) - 1]
+            continue
 
-            if b_prev.props["boiling_model"].line.name == LineName.WATER:
-                # swap only with salt boilings
-                logger.debug("Previous boiling is WATER. Skipping swap optimization")
-                continue
+        # Prepare values for shifting
+        values = [(b, b.props["boiling_group_df"].iloc[0]["group_id"], b.props["boiling_model"].line.name) for b in cur_boilings]
+        logger.debug('Current values', values=[0 if v[2] == 'Моцарелла в воде' else 1 for v in values])
+        start_from = cur_boilings.index(b_prev)
+        values = smart_shift(values, start_from=start_from, key=lambda v: 0 if v[2] == 'Моцарелла в воде' else 1)
+        logger.debug('Shifted values', values=[0 if v[2] == 'Моцарелла в воде' else 1 for v in values])
 
-            if (bw_cur["melting_and_packing"]["collecting"].x[0] - bw_prev["melting_and_packing"]["collecting"].y[0] <= 2):
-                logger.debug(
-                    "Too small distance between water packings, skipping swap optimization"
-                )
-                continue
+        swapped_df = combine_groups(
+            boiling_plan_df,
+            [v[1] for v in values]
+        )
 
-            with code('Prepare values for shifting'):
-                values = [(b, b.props["boiling_group_df"].iloc[0]["group_id"], b.props["boiling_model"].line.name) for b in cur_boilings]
-                logger.debug('Current values', values=[0 if v[2] == 'Моцарелла в воде' else 1 for v in values])
-                start_from = cur_boilings.index(b_prev)
-                values = smart_shift(values, start_from=start_from, key=lambda v: 0 if v[2] == 'Моцарелла в воде' else 1)
-                logger.debug('Shifted values', values=[0 if v[2] == 'Моцарелла в воде' else 1 for v in values])
-
-            swapped_df = combine_groups(
-                boiling_plan_df,
-                [v[1] for v in values]
-            )
-
+        # - Calc new schedule
 
         swapped_schedule = make_schedule_basic(swapped_df, *args, **kwargs)
         swapped_score = calc_score(swapped_schedule)
@@ -133,4 +136,5 @@ def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs,):
             boiling_plan_df = swapped_df
             schedule = swapped_schedule
             score = swapped_score
+
     return schedule

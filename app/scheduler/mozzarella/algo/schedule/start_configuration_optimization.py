@@ -37,58 +37,72 @@ def test_seq():
 def optimize_schedule_by_start_configuration(
     boiling_plan_df,
     exact_melting_time_by_line=None,
-    next_boiling_optimization_type: Literal["chess", "lookahead"] = "chess",
     *args,
     **kwargs,
 ):
+
+    # - Preprocess arguments
+
     start_times = kwargs.get("start_times")
     start_configuration = kwargs.get("start_configuration")
+
+    # - Get start configuration from schedule
 
     if not start_configuration:
 
         # - Make basic schedule
 
-        boilings = make_boilings(boiling_plan_df)
+        line_name_to_line_boilings = make_boilings(boiling_plan_df)
         schedule = make_schedule_from_boilings(
-            boilings,
+            line_name_to_line_boilings,
             cleaning_type_by_group_id={},
             start_times=start_times,
-            next_boiling_optimization_type=next_boiling_optimization_type,
+            next_boiling_optimization_type="chess",
         )
 
         # - Get start configuration
 
         start_configuration = parse_start_configuration(schedule)
 
+    # _- Get start configurations
     logger.debug("Initial start configuration", start_configuration=start_configuration)
 
     if not start_configuration:
         start_configurations = [None]
     else:
         start_configurations = []
+
+        # - Get n (todo: better naming, doc)
+
         n = _parse_seq(start_configuration, a=LineName.WATER, b=LineName.SALT)
-        with code("Calc neighborhood"):
 
-            # - 1 -> -3, -2, -1, skip, 1,  2
+        # - Calc neighborhood
 
-            n_neighborhood = [n + i for i in range(-2, 3) if n + i != 0]
+        # [- 1 -> -3, -2, -1, skip, 1,  2]
 
-            # add one if skipped
-            if 0 < n <= 2:
-                n_neighborhood.append(n - 2 - 1)
-            if -2 <= n < 0:
-                n_neighborhood.append(n + 2 + 1)
-            n_neighborhood = list(sorted(n_neighborhood))
+        n_neighborhood = [n + i for i in range(-2, 3) if n + i != 0]
+
+        # add one if skipped
+        if 0 < n <= 2:
+            n_neighborhood.append(n - 2 - 1)
+        if -2 <= n < 0:
+            n_neighborhood.append(n + 2 + 1)
+        n_neighborhood = list(sorted(n_neighborhood))
+
+        # - Generate start configurations
 
         for _n in n_neighborhood:
             start_configurations.append(_gen_seq(_n, a=LineName.WATER, b=LineName.SALT))
 
     logger.debug("Start configurations", start_configurations=start_configurations)
 
-    with code("Count boilings per line"):
-        counter = collections.Counter()
-        for i, grp in boiling_plan_df.groupby("group_id"):
-            counter[grp.iloc[0]["boiling"].line.name] += 1
+    # - Count boilings per line
+
+    counter = collections.Counter()
+    for i, grp in boiling_plan_df.groupby("group_id"):
+        counter[grp.iloc[0]["boiling"].line.name] += 1
+
+    # - Filter valid start configurations
 
     def _start_start_configuration_valid(sc):
         if not sc:
@@ -106,77 +120,85 @@ def optimize_schedule_by_start_configuration(
 
     logger.debug("Optimizing start configurations", start_configuration=start_configurations)
 
-    with code("Optimization"):
-        res = []
-        for start_configuration in start_configurations:
-            schedule = optimize_schedule_by_swapping_water_gaps(
-                boiling_plan_df,
-                start_configuration=start_configuration,
-                next_boiling_optimization_type=next_boiling_optimization_type,
-                *args,
-                **kwargs,
-            )
-            res.append(
-                {
-                    "schedule": schedule,
-                    "start_configuration": start_configuration,
-                    "args": args,
-                    "kwargs": kwargs,
-                }
-            )
-    logger.debug(
-        "Optimization results", results=[calc_score(value["schedule"], start_times=start_times) for value in res]
-    )
+    # - Run optimization
+
+    values = []
+    for start_configuration in start_configurations:
+        schedule = optimize_schedule_by_swapping_water_gaps(
+            boiling_plan_df,
+            start_configuration=start_configuration,
+            next_boiling_optimization_type="chess",
+            *args,
+            **kwargs,
+        )
+        values.append(
+            {
+                "schedule": schedule,
+                "start_configuration": start_configuration,
+                "args": args,
+                "kwargs": kwargs,
+            }
+        )
 
     # - Get output value
 
-    value = min(
-        res, key=lambda value: calc_score(value["schedule"], start_times=start_times)
+    best_value = min(
+        values, key=lambda value: calc_score(value["schedule"], start_times=start_times)
     )  # return minimum score time
+
+    logger.debug(
+        "Optimization results",
+        best_result={
+            "score": calc_score(best_value["schedule"], start_times=start_times),
+            "start_configuration": best_value["start_configuration"],
+        },
+        results=[
+            {
+                "score": calc_score(value["schedule"], start_times=start_times),
+                "start_configuration": value["start_configuration"],
+            }
+            for value in values
+        ],
+    )
 
     # - Fix start time if needed
 
-    if not exact_melting_time_by_line:
-        return value["schedule"]
+    if exact_melting_time_by_line:
+        start_times = dict(start_times)
 
-    start_times = dict(start_times)
+        time_by_line = exact_melting_time_by_line
+        time_not_by_line = LineName.WATER if time_by_line == LineName.SALT else LineName.SALT
 
-    time_by_line = exact_melting_time_by_line
-    time_not_by_line = LineName.WATER if time_by_line == LineName.SALT else LineName.SALT
-    boilings = {
-        line_name: [
-            boiling
-            for boiling in value["schedule"]["master"]["boiling", True]
-            if boiling.props["boiling_model"].line.name == line_name
-        ]
-        for line_name in [LineName.WATER, LineName.SALT]
-    }
+        boilings = best_value["schedule"]["master"]["boiling", True]
 
-    if not all(boilings.values()):
-        return value["schedule"]
+        line_name_to_line_boilings = {
+            line_name: [boiling for boiling in boilings if boiling.props["boiling_model"].line.name == line_name]
+            for line_name in [LineName.WATER, LineName.SALT]
+        }
 
-    first_boilings = {k: v[0] for k, v in boilings.items()}
-    first_boiling = min(first_boilings.values(), key=lambda boiling: boiling.x[0])
-    second_boiling = max(first_boilings.values(), key=lambda boiling: boiling.x[0])
-    if first_boiling.props["boiling_model"].line.name == time_by_line:
+        if not all(line_name_to_line_boilings.values()):
+            return best_value["schedule"]
 
-        # time already set by proper line
-        return value["schedule"]
+        first_line_boilings_by_line_name = {k: v[0] for k, v in line_name_to_line_boilings.items()}
+        first_boiling = min(first_line_boilings_by_line_name.values(), key=lambda boiling: boiling.x[0])
+        second_boiling = max(first_line_boilings_by_line_name.values(), key=lambda boiling: boiling.x[0])
+        if first_boiling.props["boiling_model"].line.name == time_by_line:
+            # time already set by proper line
+
+            return best_value["schedule"]
+        else:
+            start_times[time_not_by_line] = cast_time(
+                cast_t(start_times[time_not_by_line])
+                + cast_t(start_times[time_by_line])
+                - second_boiling["melting_and_packing"].x[0]
+            )
+
+            return optimize_schedule_by_swapping_water_gaps(
+                boiling_plan_df,
+                start_configuration=[boiling.props["boiling_model"].line.name for boiling in boilings], # fix order from optimization
+                next_boiling_optimization_type="chess",
+                *args,
+                **kwargs,
+            )
     else:
-        start_times[time_not_by_line] = cast_time(
-            cast_t(start_times[time_not_by_line])
-            + cast_t(start_times[time_by_line])
-            - second_boiling["melting_and_packing"].x[0]
-        )
-
-    value["kwargs"].pop("start_times", None)
-    value["kwargs"].pop("start_configuration", None)
-    schedule = make_schedule_basic(
-        boiling_plan_df,
-        start_times=start_times,
-        start_configuration=value["start_configuration"],
-        *value["args"],
-        **value["kwargs"],
-    )
-
-    return schedule
+        return best_value["schedule"]
