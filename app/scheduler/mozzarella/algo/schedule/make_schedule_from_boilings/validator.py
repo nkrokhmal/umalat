@@ -5,7 +5,6 @@ from app.scheduler.mozzarella.algo.packing import *
 from app.scheduler.shifts import *
 from app.enum import LineName
 
-from app.scheduler.mozzarella.algo.schedule.custom_pushers import *
 from utils_ak.block_tree import *
 from typing import *
 

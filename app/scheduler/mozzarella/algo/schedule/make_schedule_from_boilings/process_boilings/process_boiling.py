@@ -3,6 +3,8 @@ from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_ter
     make_termizator_cleaning_block,
 )
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.validator import Validator
+from app.scheduler.mozzarella.algo.schedule.pushers.awaiting_pusher import AwaitingPusher
+from app.scheduler.mozzarella.algo.schedule.pushers.drenator_shrinking_pusher import DrenatorShrinkingPusher
 
 from app.scheduler.time import *
 from app.scheduler.mozzarella.algo.packing import *
