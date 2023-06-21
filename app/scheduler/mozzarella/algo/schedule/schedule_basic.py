@@ -10,7 +10,7 @@ def make_schedule_basic(
     start_times=None,
     start_configuration=None,
     date=None,
-    next_boiling_optimization_type: Literal["chess", "lookahead"] = "lookahead",
+    next_boiling_optimization_type: Literal["chess", "lookahead"] = "chess",
 ):
 
     # - Cast boiling plan

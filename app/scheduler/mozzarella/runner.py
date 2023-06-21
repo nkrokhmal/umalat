@@ -16,7 +16,7 @@ def run_mozzarella(
     optimize=True,
     optimize_cleanings=True,
     start_configuration=None,
-    next_boiling_optimization_type: Literal["chess", "lookahead"] = "lookahead",
+    next_boiling_optimization_type: Literal["chess", "lookahead"] = "chess",
     path="outputs/",
     prefix="",
 ):
@@ -24,13 +24,17 @@ def run_mozzarella(
 
     boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={"mozzarella": first_batch_id})
     if not schedule:
+
+        # - Extra kwargs
+        kwargs = {} if optimize else {"start_configuration": start_configuration}
+
         schedule = make_schedule(
             boiling_plan_df,
             optimize=optimize,
             optimize_cleanings=optimize_cleanings,
             start_times=start_times,
-            start_configuration=start_configuration,
             next_boiling_optimization_type=next_boiling_optimization_type,
+            **kwargs,
         )
     try:
         frontend = wrap_frontend(schedule)

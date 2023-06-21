@@ -9,7 +9,7 @@ def make_schedule(
     boiling_plan_obj,
     optimize=True,
     exact_melting_time_by_line=None,
-    next_boiling_optimization_type: Literal["chess", "lookahead"] = "lookahead",
+    next_boiling_optimization_type: Literal["chess", "lookahead"] = "chess",
     *args,
     **kwargs,
 ):
@@ -19,14 +19,14 @@ def make_schedule(
         return optimize_schedule_by_start_configuration(
             boiling_plan_df,
             exact_melting_time_by_line=exact_melting_time_by_line,
-            next_boiling_optimization_type=next_boiling_optimization_type
+            next_boiling_optimization_type=next_boiling_optimization_type,
             *args,
             **kwargs,
         )
     else:
         return make_schedule_basic(
             boiling_plan_df,
-            next_boiling_optimization_type=next_boiling_optimization_type
+            next_boiling_optimization_type=next_boiling_optimization_type,
             *args,
             **kwargs,
         )

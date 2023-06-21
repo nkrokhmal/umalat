@@ -37,7 +37,7 @@ def test_seq():
 def optimize_schedule_by_start_configuration(
     boiling_plan_df,
     exact_melting_time_by_line=None,
-    next_boiling_optimization_type: Literal["chess", "lookahead"] = "lookahead",
+    next_boiling_optimization_type: Literal["chess", "lookahead"] = "chess",
     *args,
     **kwargs,
 ):
