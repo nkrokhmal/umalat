@@ -28,7 +28,7 @@ def mozzarella_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
-        optimize = form.optimize.data
+        optimization_type = form.optimize.data
         exact_melting_time_by_line = form.exact_melting_time_by_line.data
 
         # validate time

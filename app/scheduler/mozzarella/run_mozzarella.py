@@ -48,9 +48,9 @@ def test():
 
     run_mozzarella(
         "/Users/arsenijkadaner/Desktop/2023-06-02 План по варкам моцарелла.xlsx",
-        start_times={LineName.WATER: "08:00", LineName.SALT: "05:00"},
+        start_times={LineName.WATER: "06:00", LineName.SALT: "06:30"},
         first_batch_id=1,
-        open_file=False,
+        open_file=True,
         prefix="test",
         optimize=True,
     )

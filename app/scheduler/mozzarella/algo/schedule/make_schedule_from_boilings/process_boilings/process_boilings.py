@@ -59,10 +59,6 @@ def process_boilings(
         "lookahead",
     ], f"Unknown next boiling optimization type: {next_boiling_optimization_type}"
 
-    # - Copy BlockMaker to avoid side effects
-
-    m = copy.deepcopy(m)
-
     # - Prepare collaterel variables
 
     lines_df = create_lines_df(start_times=start_times)
@@ -130,7 +126,7 @@ def process_boilings(
                     # - Generate two lookforward schedules
 
                     water_schedule = process_boilings(
-                        m=m,
+                        m=copy.deepcopy(m),
                         boilings=[water_boiling, salt_boiling],
                         start_times=start_times,
                         cleaning_type_by_group_id=cleaning_type_by_group_id,
@@ -140,7 +136,7 @@ def process_boilings(
 
                     water_score = calc_score(water_schedule)
                     salt_schedule = process_boilings(
-                        m=m,
+                        m=copy.deepcopy(m),
                         boilings=[salt_boiling, water_boiling],
                         start_times=start_times,
                         cleaning_type_by_group_id=cleaning_type_by_group_id,
@@ -171,7 +167,7 @@ def process_boilings(
 
             # - Log
 
-            logger.trace(
+            logger.debug(
                 "Chose line", line_name=line_name, next_boiling_optimization_type=next_boiling_optimization_type
             )
 

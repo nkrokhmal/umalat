@@ -40,6 +40,7 @@ def make_schedule_by_optimizing_start_configuration(
     boiling_plan_df,
     exact_melting_time_by_line=None,
     make_schedule_basic_kwargs: Optional[dict] = None,
+    strategy: Literal["swap", "lookahead"] = "lookahead",
 ):
 
     # - Prepare
@@ -129,20 +130,23 @@ def make_schedule_by_optimizing_start_configuration(
     for start_configuration in start_configurations:
         logger.debug("Optimizing start configuration", start_configuration=start_configuration)
 
-        schedule = make_schedule_by_swapping_water_gaps(
-            boiling_plan_df,
-            make_schedule_basic_kwargs=dict(
+        if strategy == "swap":
+            schedule = make_schedule_by_swapping_water_gaps(
+                boiling_plan_df,
+                make_schedule_basic_kwargs=dict(
+                    start_configuration=start_configuration, start_times=start_times, optimize_cleanings=True
+                ),
+            )
+        elif strategy == "lookahead":
+            schedule = make_schedule_basic(
+                boiling_plan_df,
                 start_configuration=start_configuration,
                 start_times=start_times,
-            ),
-        )
-
-        schedule = make_schedule_basic(
-            boiling_plan_df,
-            start_configuration=start_configuration,
-            start_times=start_times,
-            next_boiling_optimization_type='lookahead',
-        )
+                next_boiling_optimization_type="lookahead",
+                optimize_cleanings=True,
+            )
+        else:
+            raise Exception("Unknown strategy")
 
         values.append(
             {
