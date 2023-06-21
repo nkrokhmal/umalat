@@ -1,5 +1,7 @@
 from app.imports.runtime import *
+from app.enum import LineName
 from app.scheduler import parse_time, cast_time, cast_t
+from app.scheduler.mozzarella.algo.schedule.find_optimal_cleanings.find_optimal_cleanings import find_optimal_cleanings
 from app.scheduler.mozzarella.algo.schedule.make_boilings import make_boilings
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import (
     make_schedule_from_boilings,
@@ -28,13 +30,17 @@ def make_schedule_basic(
     # - Get start configuration
 
     if not start_configuration:
-        with code("Make basic schedule"):
-            boilings = make_boilings(boiling_plan_df)
-            schedule = make_schedule_from_boilings(
-                boilings,
-                cleaning_type_by_group_id={},
-                start_times=start_times,
-            )
+
+        # - Make basic schedule
+
+        boilings = make_boilings(boiling_plan_df)
+        schedule = make_schedule_from_boilings(
+            boilings,
+            cleaning_type_by_group_id={},
+            start_times=start_times,
+        )
+
+        # - Get basic schedule start configuration
 
         start_configuration = parse_start_configuration(schedule)
 
@@ -52,12 +58,12 @@ def make_schedule_basic(
 
     if optimize_cleanings:
         cleaning_type_by_group_id = find_optimal_cleanings(
-            boiling_plan_df, start_times, start_configuration=start_configuration
+            boiling_plan_df,
+            start_times,
+            start_configuration=start_configuration,
         )
-        logger.debug("Found optimal cleanings", cleanings=cleaning_type_by_group_id)
     else:
         cleaning_type_by_group_id = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
-        logger.debug("Using boiling plan cleanings", cleanings=cleaning_type_by_group_id)
 
     # - Make schedule with cleanings and start configuration
 
