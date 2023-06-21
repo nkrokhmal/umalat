@@ -30,11 +30,11 @@ def _test(fn, *args, **kwargs):
 if __name__ == "__main__":
     utils.configure_loguru(level="DEBUG")
     _test(
-        "/Users/arsenijkadaner/Desktop/2022-10-19 План по варкам моцарелла.xlsx",
+        "/Users/arsenijkadaner/Desktop/2023-06-02 План по варкам моцарелла.xlsx",
         start_times={LineName.WATER: "08:00", LineName.SALT: "05:00"},
-        first_batch_id=100,
+        first_batch_id=1,
         open_file=True,
-        prefix="new5",
+        prefix="test",
         optimize=True,
     )
     # test_batch()

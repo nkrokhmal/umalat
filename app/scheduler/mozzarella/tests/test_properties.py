@@ -1,5 +1,5 @@
 from app.imports.runtime import *
-from app.scheduler.mozzarella.parser import parse_properties
+from app.scheduler.mozzarella.parsing.parse_properties.parser import parse_properties
 
 
 def test_batch():

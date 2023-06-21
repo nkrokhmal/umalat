@@ -2,7 +2,7 @@ from app.imports.runtime import *
 from app.scheduler.mozzarella.properties import (
     cast_properties as parse_schedule_mozzarella,
 )
-from app.scheduler.mozzarella.parser import (
+from app.scheduler.mozzarella.parsing.parse_properties.parse_properties import (
     parse_properties as parse_properties_mozzarella,
 )
 

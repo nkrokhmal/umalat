@@ -1,5 +1,4 @@
-from app.imports.runtime import *
-from app.scheduler.mozzarella.parser_new import *
+from app.scheduler.mozzarella.parsing.parse_schedule import *
 
 def test_batch():
     fns = glob.glob(
