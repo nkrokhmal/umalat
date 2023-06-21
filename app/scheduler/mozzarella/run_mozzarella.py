@@ -25,7 +25,6 @@ def run_mozzarella(
         schedule = make_schedule(
             boiling_plan_df,
             optimize=optimize,
-            optimize_cleanings=optimize_cleanings,
             start_times=start_times,
         )
     try:

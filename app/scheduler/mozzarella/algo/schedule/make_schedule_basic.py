@@ -9,6 +9,8 @@ from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_sch
 from app.scheduler.mozzarella.algo.schedule.parse_start_configuration import parse_start_configuration
 from app.scheduler.mozzarella.boiling_plan.read_boiling_plan import cast_boiling_plan
 
+from typing import Optional
+
 
 def make_schedule_basic(
     boiling_plan_obj,

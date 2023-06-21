@@ -35,9 +35,17 @@ def test_seq():
 def make_schedule_by_optimizing_start_configuration(
     boiling_plan_df,
     exact_melting_time_by_line=None,
-        start_times: Optional[dict] = None,
-        start_configuration: Optional[list] = None,
+    make_schedule_basic_kwargs: Optional[dict] = None,
 ):
+
+    # - Prepare
+
+    make_schedule_basic_kwargs = make_schedule_basic_kwargs or {}
+
+    # - Get start times and start_configuration
+
+    start_times = make_schedule_basic_kwargs.pop("start_times", None)
+    start_configuration = make_schedule_basic_kwargs.pop("start_configuration", None)
 
     # - Get start configuration from schedule
 
@@ -95,11 +103,11 @@ def make_schedule_by_optimizing_start_configuration(
 
     # - Filter valid start configurations
 
-    def _start_start_configuration_valid(sc):
-        if not sc:
+    def _start_start_configuration_valid(start_configuration):
+        if not start_configuration:
             return True
         for line_name in [LineName.WATER, LineName.SALT]:
-            if sc.count(line_name) > counter[line_name]:
+            if start_configuration.count(line_name) > counter[line_name]:
                 return False
         return True
 
@@ -119,8 +127,10 @@ def make_schedule_by_optimizing_start_configuration(
 
         schedule = make_schedule_by_swapping_water_gaps(
             boiling_plan_df,
-            start_configuration=start_configuration,
-            start_times=start_times,
+            make_schedule_basic_kwargs=dict(
+                start_configuration=start_configuration,
+                start_times=start_times,
+            ),
         )
 
         values.append(
@@ -182,8 +192,11 @@ def make_schedule_by_optimizing_start_configuration(
 
         return make_schedule_by_swapping_water_gaps(
             boiling_plan_df,
-            start_configuration=[
-                boiling.props["boiling_model"].line.name for boiling in best_value["schedule"]["master"]["boiling", True]
-            ],  # fix order from optimization
-            start_times=start_times,
+            make_schedule_basic_kwargs=dict(
+                start_configuration=[
+                    boiling.props["boiling_model"].line.name
+                    for boiling in best_value["schedule"]["master"]["boiling", True]
+                ],  # fix order from optimization
+                start_times=start_times,
+            ),
         )

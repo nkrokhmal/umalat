@@ -9,11 +9,14 @@ from app.scheduler.mozzarella.algo.schedule.schedule_by_optimization import *
 from app.scheduler.mozzarella.algo.schedule.calc_score import calc_score
 
 
-def make_schedule_by_swapping_water_gaps(boiling_plan_df, **extra_make_schedule_basic_kwargs):
+def make_schedule_by_swapping_water_gaps(
+    boiling_plan_df,
+    make_schedule_basic_kwargs,
+):
 
     # - Make basic schedule
 
-    schedule = make_schedule_basic(boiling_plan_df, **extra_make_schedule_basic_kwargs)
+    schedule = make_schedule_basic(boiling_plan_df, **make_schedule_basic_kwargs)
     boiling_plan_df = parse_schedule(schedule)
     score = calc_score(schedule)
 
