@@ -1,6 +1,6 @@
 from app.scheduler.mozzarella.algo.schedule.schedule_basic import make_schedule_basic
 
-from .boilings import *
+from .make_boilings import *
 from .parse_start_configuration import *
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import *
 from .score import calc_score
