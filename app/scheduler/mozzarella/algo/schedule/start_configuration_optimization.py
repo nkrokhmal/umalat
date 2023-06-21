@@ -43,7 +43,7 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
         # - Make basic schedule
 
         boilings = make_boilings(boiling_plan_df)
-        schedule = make_schedule_from_boilings(boilings, cleaning_type_by_boiling_id={}, start_times=start_times)
+        schedule = make_schedule_from_boilings(boilings, cleaning_type_by_group_id={}, start_times=start_times)
 
         # - Get start configuration
 

@@ -114,13 +114,11 @@ def find_optimal_cleanings_combination_by_schedule(schedule):
     df1 = df1.sort_values(by=["total_conflict_time"], ascending=True)
     df1 = df1.sort_values(by=["is_water_done"], ascending=False)
 
-    # pd.set_option("display.max_rows", 500)
-    # pd.set_option("display.max_columns", 500)
-    # pd.set_option("display.width", 1000)
-
     # take first one
     boiling_nums = df1.iloc[0]["boiling_nums"]
 
-    # - Return cleaning_type_by_boiling_id # todo later: by_group_id? [@marklidenberg]
+    # - Get output and return
 
-    return {df.loc[boiling_num]["group_id"]: "short" for boiling_num in boiling_nums}
+    cleaning_type_by_group_id = {df.loc[boiling_num]["group_id"]: "short" for boiling_num in boiling_nums}
+
+    return cleaning_type_by_group_id

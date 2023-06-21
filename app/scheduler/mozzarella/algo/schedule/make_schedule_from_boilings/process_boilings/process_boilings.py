@@ -22,7 +22,7 @@ def process_boilings(
     m: BlockMaker,  # SIDE EFFECTED
     boilings: List[ParallelepipedBlock],
     start_times: dict,
-    cleaning_type_by_boiling_id: dict,
+    cleaning_type_by_group_id: dict,
     start_configuration: Optional[list],
     shrink_drenators: bool = True,
 ) -> BlockMaker:
@@ -107,7 +107,7 @@ def process_boilings(
                     m=m,
                     boilings=[water_boiling, salt_boiling],
                     start_times=start_times,
-                    cleaning_type_by_boiling_id=cleaning_type_by_boiling_id,
+                    cleaning_type_by_group_id=cleaning_type_by_group_id,
                     start_configuration=[LineName.WATER, LineName.SALT],
                     shrink_drenators=shrink_drenators,
                 ).root
@@ -117,7 +117,7 @@ def process_boilings(
                     m=m,
                     boilings=[salt_boiling, water_boiling],
                     start_times=start_times,
-                    cleaning_type_by_boiling_id=cleaning_type_by_boiling_id,
+                    cleaning_type_by_group_id=cleaning_type_by_group_id,
                     start_configuration=[LineName.SALT, LineName.WATER],
                     shrink_drenators=shrink_drenators,
                 ).root
@@ -164,7 +164,7 @@ def process_boilings(
             boiling=next_row["boiling"],
             last_multihead_water_boiling=last_multihead_water_boiling,
             lines_df=lines_df,
-            cleaning_type_by_boiling_id=cleaning_type_by_boiling_id,
+            cleaning_type_by_group_id=cleaning_type_by_group_id,
             shrink_drenators=shrink_drenators,
             strict_order=strict_order,
         )
