@@ -7,6 +7,7 @@ from app.scheduler.mozzarella.frontend.style import STYLE
 
 from app.scheduler.submit import submit_schedule
 from utils_ak.clock import clock
+from typing import Optional, Literal
 
 
 def run_mozzarella(
@@ -15,7 +16,7 @@ def run_mozzarella(
     open_file=False,
     start_times=None,
     first_batch_id=1,
-    optimize=True,
+    optimization_strategy: Optional[Literal["swap", "lookahead"]] = 'swap',
     path="outputs/",
     prefix="",
 ):
@@ -25,7 +26,7 @@ def run_mozzarella(
     if not schedule:
         schedule = make_schedule(
             boiling_plan_df,
-            optimize=optimize,
+            optimization_strategy=optimization_strategy,
             make_schedule_basic_kwargs=dict(start_times=start_times),
         )
     try:
@@ -37,25 +38,27 @@ def run_mozzarella(
     res["boiling_plan_df"] = boiling_plan_df
     return res
 
+
 pd.set_option("display.max_rows", 500)
 pd.set_option("display.max_columns", 500)
 pd.set_option("display.width", 1000)
 
+
 def test():
     clock.enable()
-    clock('start')
-    utils.configure_loguru(level='DEBUG')
+    clock("start")
+    utils.configure_loguru(level="DEBUG")
 
     run_mozzarella(
-        "/Users/arsenijkadaner/Desktop/2023-06-02 План по варкам моцарелла.xlsx",
-        start_times={LineName.WATER: "06:00", LineName.SALT: "06:30"},
+        "/Users/arsenijkadaner/Desktop/2023-06-13 Расписание моцарелла.xlsx",
+        start_times={LineName.WATER: "06:00", LineName.SALT: "06:00"},
         first_batch_id=1,
         open_file=True,
         prefix="test",
-        optimize=True,
+        optimization_strategy='lookahead'
     )
 
-    clock('start')
+    clock("start")
     print(clock.stats())
 
 
