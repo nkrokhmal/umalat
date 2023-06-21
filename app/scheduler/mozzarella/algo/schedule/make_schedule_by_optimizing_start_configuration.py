@@ -1,4 +1,5 @@
-from app.scheduler import make_schedule_by_swapping_water_gaps, cast_time, cast_t
+from app.scheduler.time import cast_time, cast_t
+from . import make_schedule_by_swapping_water_gaps
 from .make_boilings import *
 from .parse_start_configuration import *
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import *

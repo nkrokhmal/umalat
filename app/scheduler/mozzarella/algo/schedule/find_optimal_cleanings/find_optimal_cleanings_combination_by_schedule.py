@@ -1,10 +1,10 @@
 from app.imports.runtime import *
-from app.scheduler import cast_t
 from app.scheduler.mozzarella.algo.schedule.find_optimal_cleanings.get_distance_between_boilings import (
     get_distance_between_boilings,
 )
 
 from app.scheduler.mozzarella.algo.packing import *
+from app.scheduler.time import cast_t
 
 
 def get_optimal_cleaning_type_by_group_id(schedule):

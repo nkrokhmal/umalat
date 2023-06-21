@@ -1,6 +1,5 @@
 from app.imports.runtime import *
 from app.enum import LineName
-from app.scheduler import parse_time, cast_time, cast_t
 from app.scheduler.mozzarella.algo.schedule.find_optimal_cleanings.find_optimal_cleanings import find_optimal_cleanings
 from app.scheduler.mozzarella.algo.schedule.make_boilings import make_boilings
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import (
@@ -10,6 +9,8 @@ from app.scheduler.mozzarella.algo.schedule.parse_start_configuration import par
 from app.scheduler.mozzarella.boiling_plan.read_boiling_plan import cast_boiling_plan
 
 from typing import Optional
+
+from app.scheduler.time import cast_time, cast_t, parse_time
 
 
 def make_schedule_basic(
