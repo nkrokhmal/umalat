@@ -4,7 +4,7 @@ from app.imports.runtime import *
 
 from app.main import main
 from app.models import MilkProjectSKU, AdygeaSKU
-from app.scheduler.adygea import run_adygea
+from app.scheduler.adygea.runner import run_adygea
 from app.scheduler.consolidated_schedule_old import run_consolidated_old
 from app.scheduler.milk_project.runner import run_milk_project
 
