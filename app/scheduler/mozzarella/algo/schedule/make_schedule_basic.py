@@ -67,6 +67,7 @@ def make_schedule_basic(
             start_times,
             start_configuration=start_configuration,
         )
+        logger.debug('Found optimal cleaning', cleaning_type_by_group_id=cleaning_type_by_group_id)
     else:
         cleaning_type_by_group_id = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
 

@@ -124,29 +124,44 @@ def make_schedule_by_optimizing_start_configuration(
 
     logger.debug("Optimizing start configurations", start_configuration=start_configurations)
 
-    # - Run optimization
+    # - Define make_schedule_function
 
-    values = []
-    for start_configuration in start_configurations:
-        logger.debug("Optimizing start configuration", start_configuration=start_configuration)
-
-        if strategy == "swap":
-            schedule = make_schedule_by_swapping_water_gaps(
-                boiling_plan_df,
-                make_schedule_basic_kwargs=dict(
-                    start_configuration=start_configuration, start_times=start_times, optimize_cleanings=True
-                ),
-            )
-        elif strategy == "lookahead":
-            schedule = make_schedule_basic(
+    if strategy == "swap":
+        make_schedule_function = lambda boiling_plan_df, start_configuration, start_times, optimize_cleanings: make_schedule_by_swapping_water_gaps(
+            boiling_plan_df,
+            make_schedule_basic_kwargs=dict(
+                start_configuration=start_configuration, start_times=start_times, optimize_cleanings=True
+            ),
+        )
+    elif strategy == "lookahead":
+        make_schedule_function = (
+            lambda boiling_plan_df, start_configuration, start_times, optimize_cleanings: make_schedule_basic(
                 boiling_plan_df,
                 start_configuration=start_configuration,
                 start_times=start_times,
                 next_boiling_optimization_type="lookahead",
                 optimize_cleanings=True,
             )
-        else:
-            raise Exception("Unknown strategy")
+        )
+    else:
+        raise Exception("Unknown strategy")
+
+    # - Run optimization
+
+    values = []
+    for start_configuration in start_configurations:
+        logger.debug("Optimizing start configuration", start_configuration=start_configuration)
+
+        # - Get schedule
+
+        schedule = make_schedule_function(
+            boiling_plan_df=boiling_plan_df,
+            start_configuration=start_configuration,
+            start_times=start_times,
+            optimize_cleanings=True,
+        )
+
+        # - Add value
 
         values.append(
             {
@@ -205,15 +220,14 @@ def make_schedule_by_optimizing_start_configuration(
                 - second_boiling["melting_and_packing"].x[0]
             )
 
-        return make_schedule_by_swapping_water_gaps(
-            boiling_plan_df,
-            make_schedule_basic_kwargs=dict(
-                start_configuration=[
-                    boiling.props["boiling_model"].line.name
-                    for boiling in best_value["schedule"]["master"]["boiling", True]
-                ],  # fix order from optimization
-                start_times=start_times,
-            ),
+        return make_schedule_function(
+            boiling_plan_df=boiling_plan_df,
+            start_configuration=[
+                boiling.props["boiling_model"].line.name
+                for boiling in best_value["schedule"]["master"]["boiling", True]
+            ],
+            start_times=start_times,
+            optimize_cleanings=True,
         )
     else:
         return best_value["schedule"]

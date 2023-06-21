@@ -50,12 +50,12 @@ def test():
     utils.configure_loguru(level="DEBUG")
 
     run_mozzarella(
-        "/Users/arsenijkadaner/Desktop/2023-06-13 Расписание моцарелла.xlsx",
+        "/Users/arsenijkadaner/Desktop/2023-06-02 План по варкам моцарелла.xlsx",
         start_times={LineName.WATER: "06:00", LineName.SALT: "06:00"},
         first_batch_id=1,
         open_file=True,
         prefix="test",
-        optimization_strategy='lookahead'
+        optimization_strategy='swap'
     )
 
     clock("start")
