@@ -28,7 +28,7 @@ def mozzarella_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
-        optimization_type = form.optimize.data
+        optimization_strategy = {"Нет": None, "Быстрая": "swap", "Долгая": "lookahead"}[form.optimization_strategy.data]
         exact_melting_time_by_line = form.exact_melting_time_by_line.data
 
         # validate time
@@ -60,7 +60,7 @@ def mozzarella_schedule():
         }
         schedule = make_schedule(
             boiling_plan_df,
-            optimize=optimize,
+            optimization_strategy=optimization_strategy,
             exact_melting_time_by_line=exact_melting_time_by_line,
             make_schedule_basic_kwargs=dict(
                 start_times=start_times,

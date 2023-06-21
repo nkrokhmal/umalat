@@ -76,14 +76,15 @@
                       <div class="col-md-12 mb-3">
                         <div class="form-group">
                             <label>Оптимизация</label>
-                            {{form.exact_melting_time_by_line(place_holder='OptimizationType', class='form-select')}}
-                    </div>
+                            {{form.optimization_strategy(place_holder='OptimizationType', class='form-select')}}
+                        </div>
+                      </div>
                      <div class="col-md-12 mb-3">
                         <div class="form-group">
                             <label>Выберите линию, по которой будет выставляться точное время начала плавления при оптимизации</label>
                             {{form.exact_melting_time_by_line(place_holder='Line', class='form-select')}}
                     </div>
-                </div>
+                         </div>
                     </div>
                     <div class="col-lg-6 col-sm-6">
                         <div class="col-md-12 mb-3">

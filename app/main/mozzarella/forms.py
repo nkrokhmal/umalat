@@ -52,7 +52,7 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default=True,
     )
-    optimization_type = SelectField(
+    optimization_strategy = SelectField(
         "Оптимизация",
         validators=[Optional()],
         choices=[("Нет", "Нет"), ("Быстрая", "Быстрая"), ("Долгая", "Долгая")],
