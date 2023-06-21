@@ -7,7 +7,7 @@ from app.models import ButterSKU, ButterLine, ButterFormFactor, Group
 from app.enum import *
 from app.utils.features.form_utils import *
 
-from .forms import SKUButterForm, CopySKUForm
+from app.main.butter.forms import SKUButterForm, CopySKUForm
 
 
 @main.route("/butter/add_sku", methods=["POST", "GET"])

@@ -7,7 +7,7 @@ from app.models import MozzarellaFormFactor
 from app.utils.features.form_utils import *
 from app.enum import LineName
 
-from .forms import FormFactorForm
+from app.main.mozzarella.forms import FormFactorForm
 
 
 @main.route("/mozzarella/get_form_factor", methods=["GET", "POST"])

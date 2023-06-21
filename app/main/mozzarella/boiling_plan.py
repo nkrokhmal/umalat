@@ -7,7 +7,7 @@ from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
 from app.main import main
 from app.models import *
-from .forms import BoilingPlanFastForm
+from app.main.mozzarella.forms import BoilingPlanFastForm
 
 
 @main.route("/mozzarella_boiling_plan", methods=["POST", "GET"])

@@ -1,10 +1,12 @@
 import os
 
+from app.scheduler.mozzarella.algo.melting_and_packing import BoilingGroupToSchema, SchemaToBoilingsDataframes
+from app.scheduler.mozzarella.boiling_plan import read_boiling_plan
+from utils_ak.pandas import mark_consecutive_groups
+
 os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from config import basedir
-from app.scheduler import mark_consecutive_groups
-from app.scheduler.algo import *
 
 import warnings
 

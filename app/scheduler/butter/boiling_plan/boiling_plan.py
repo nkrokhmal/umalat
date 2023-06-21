@@ -3,7 +3,6 @@ from app.imports.runtime import *
 from app.models import *
 from app.enum import LineName
 
-from .saturate import saturate_boiling_plan
 from app.scheduler.boiling_plan import *
 
 def read_boiling_plan(wb_obj, first_batch_ids=None):

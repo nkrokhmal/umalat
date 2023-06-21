@@ -1,4 +1,4 @@
-from .external import *
+from app.imports.external import *
 from config import *
 from app.utils import *
 from app.globals import *

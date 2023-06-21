@@ -8,7 +8,7 @@ from app.utils.batches.batch import *
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from app.main.ricotta.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
-from .forms import ScheduleForm
+from app.main.ricotta.forms import ScheduleForm
 
 
 @main.route("/ricotta_schedule", methods=["GET", "POST"])

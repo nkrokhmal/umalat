@@ -1,6 +1,6 @@
 from app.imports.runtime import *
 
-from .forms import BoilingPlanForm
+from app.main.ricotta.forms import BoilingPlanForm
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create
 from app.utils.ricotta.boiling_plan_draw import draw_boiling_plan
 from app.scheduler.mozzarella.boiling_plan import (

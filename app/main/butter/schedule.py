@@ -6,11 +6,10 @@ from app.main import main
 from app.scheduler.butter import *
 from app.scheduler.butter.frontend.style import STYLE
 from app.utils.batches.batch import *
-from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from app.main.butter.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
-from .forms import ScheduleForm
+from app.main.butter.forms import ScheduleForm
 
 
 @main.route("/butter_schedule", methods=["GET", "POST"])

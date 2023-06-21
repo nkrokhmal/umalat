@@ -1,5 +1,4 @@
 from app.imports.runtime import *
-from app.scheduler import draw_excel_frontend
 from app.scheduler.contour_cleanings.algo.schedule import *
 from app.scheduler.contour_cleanings.frontend import *
 from app.scheduler.contour_cleanings import run_contour_cleanings

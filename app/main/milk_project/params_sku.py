@@ -7,7 +7,7 @@ from app.models import MilkProjectSKU, MilkProjectLine, MilkProjectFormFactor, G
 from app.enum import *
 from app.utils.features.form_utils import *
 
-from .forms import SKUMilkProjectForm, CopySKUForm
+from app.main.milk_project.forms import SKUMilkProjectForm, CopySKUForm
 
 
 @main.route("/milk_project/add_sku", methods=["POST", "GET"])

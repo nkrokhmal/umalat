@@ -13,7 +13,7 @@ from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.parse_schedule_json import *
 from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 
-from .forms import ScheduleForm
+from app.main.mozzarella.forms import ScheduleForm
 
 
 @main.route("/mozzarella_schedule", methods=["GET", "POST"])

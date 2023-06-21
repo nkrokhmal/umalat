@@ -6,7 +6,7 @@ from app.main import main
 from app.models import MozzarellaBoilingTechnology
 from app.utils.features.form_utils import *
 
-from .forms import BoilingTechnologyForm
+from app.main.mozzarella.forms import BoilingTechnologyForm
 
 
 @main.route("/mozzarella/get_boiling_technology", methods=["GET", "POST"])
