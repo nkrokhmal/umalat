@@ -82,7 +82,11 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
                 return False
         return True
 
-    start_configurations = [sc for sc in start_configurations if _start_start_configuration_valid(sc)]
+    start_configurations = [
+        start_configuration
+        for start_configuration in start_configurations
+        if _start_start_configuration_valid(start_configuration)
+    ]
 
     logger.debug("Optimizing start configurations", start_configuration=start_configurations)
 

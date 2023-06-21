@@ -1,8 +1,9 @@
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.create_left_df import (
     create_left_df,
 )
-from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.create_lines_df import \
-    create_lines_df
+from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.create_lines_df import (
+    create_lines_df,
+)
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.process_boilings.get_last_multihead_water_boiling import (
     get_last_multihead_water_boiling,
 )
@@ -25,6 +26,10 @@ def process_boilings(
     start_configuration: Optional[list],
     shrink_drenators: bool = True,
 ) -> BlockMaker:
+
+    # - Copy BlockMaker to avoid side effects
+
+    m = copy.deepcopy(m)
 
     # - Prepare collaterel variables
 
@@ -75,8 +80,6 @@ def process_boilings(
 
             # - Filter rows with latest boiling (any boiling is already present for line)
 
-            df = lines_df[~lines_df["latest_boiling"].isnull()]
-
             # - Select line
 
             if cur_boiling_num < len(start_configuration):
@@ -87,12 +90,53 @@ def process_boilings(
                 # logger.debug('Chose line by start configuration', line_name=line_name)
             else:
 
-                # choose latest line
-                line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
+                # - Select next line smartly: run WATER, SALT and SALT, WATER. See which one is better - choose line that way
 
-                # reverse
-                line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                water_boiling = left_df[left_df["line_name"] == LineName.WATER].iloc[0]["boiling"]
+                salt_boiling = left_df[left_df["line_name"] == LineName.SALT].iloc[0]["boiling"]
+
+                # - Generate two lookforward schedules
+
+                def _get_schedule_size(schedule):
+                    boilings = [b for b in schedule["master"]["boiling", True]]
+                    beg = min(boiling.x[0] for boiling in boilings)
+                    end = max(boiling.y[0] for boiling in boilings)
+                    return end - beg
+
+                water_schedule = process_boilings(
+                    m=m,
+                    boilings=[water_boiling, salt_boiling],
+                    start_times=start_times,
+                    cleanings=cleanings,
+                    start_configuration=[LineName.WATER, LineName.SALT],
+                    shrink_drenators=shrink_drenators,
+                ).root
+
+                water_size = _get_schedule_size(water_schedule)
+                salt_schedule = process_boilings(
+                    m=m,
+                    boilings=[salt_boiling, water_boiling],
+                    start_times=start_times,
+                    cleanings=cleanings,
+                    start_configuration=[LineName.SALT, LineName.WATER],
+                    shrink_drenators=shrink_drenators,
+                ).root
+                salt_size = _get_schedule_size(salt_schedule)
+
+                # - Choose the optimal one
+
+                line_name = LineName.WATER if water_size < salt_size else LineName.SALT
+
+                # # choose latest line
+                # df = lines_df[~lines_df["latest_boiling"].isnull()]
+                # line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
+                #
+                # # reverse
+                # line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
                 # logger.debug('Chose line by latest line', line_name=line_name)
+
+                next_row = left_df[left_df["line_name"] == line_name].iloc[0]
+                logger.info("Boiling id", boiling_id=next_row["boiling"].props["boiling_id"], line_name=line_name)
 
             # - Select next row -> first for selected line
 
@@ -104,7 +148,7 @@ def process_boilings(
 
         left_df = left_df[left_df["index"] != next_row["index"]]
 
-        # - Disable strict order for non-start confituration blocks
+        # - Enforce strict order for start confituration blocks
 
         if cur_boiling_num < len(start_configuration):
             # all configuration blocks should start in strict order

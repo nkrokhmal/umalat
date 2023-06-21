@@ -38,10 +38,6 @@ class Validator(ClassValidator):
         # - Process boilings on the same pouring line
 
         if b1s["pouring"].props["pouring_line"] == b2s["pouring"].props["pouring_line"]:
-            logger.info(
-                "Boilings on the same pouring line", boiling_ids=[b1s.props["boiling_id"], b2s.props["boiling_id"]]
-            )
-
             # pourings should not intersect, but also five minutes should be between boilings
             validate_disjoint_by_axis(b1s["pouring"], b2s["pouring"], distance=1, ordered=True)
 

@@ -36,6 +36,7 @@ if __name__ == "__main__":
         open_file=True,
         prefix="new5",
         optimize=False,
+        # optimize_cleanings=True,
         start_configuration=['Моцарелла в воде', 'Моцарелла в воде', 'Пицца чиз']
     )
     # test_batch()

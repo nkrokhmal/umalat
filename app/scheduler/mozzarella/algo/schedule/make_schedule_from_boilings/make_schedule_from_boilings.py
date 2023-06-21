@@ -41,6 +41,8 @@ def make_schedule_from_boilings(
 
     m = create_schedule_skeleton_block_maker(date=date)
 
+    # - Process
+
     m = process_boilings(
         m=m,
         boilings=boilings,
@@ -53,4 +55,7 @@ def make_schedule_from_boilings(
     m = fix_first_boiling_on_the_later_line(m=m, start_configuration=start_configuration)
     m = process_cleanings(m=m)
     m = process_shifts(m=m)
+
+    # - Return block
+
     return m.root
