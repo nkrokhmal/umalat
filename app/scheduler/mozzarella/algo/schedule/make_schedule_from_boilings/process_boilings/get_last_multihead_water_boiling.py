@@ -2,8 +2,6 @@ from app.imports.runtime import *
 from app.scheduler.mozzarella.algo.packing import *
 from app.enum import LineName
 
-STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
-
 
 def get_last_multihead_water_boiling(left_df: pd.DataFrame):
 
