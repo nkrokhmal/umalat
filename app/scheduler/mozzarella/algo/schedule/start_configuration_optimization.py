@@ -2,7 +2,7 @@ from app.scheduler.mozzarella.algo.schedule.make_schedule_basic import make_sche
 
 from .make_boilings import *
 from .parse_start_configuration import *
-from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.schedule_from_boilings import *
+from app.scheduler.mozzarella.algo.schedule_from_boilings import *
 from .calc_score import calc_score
 from .swap_optimization import optimize_schedule_by_swapping_water_gaps
 
