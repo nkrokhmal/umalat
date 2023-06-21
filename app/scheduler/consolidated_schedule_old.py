@@ -2,17 +2,15 @@ import openpyxl
 
 from app.imports.runtime import *
 from app.scheduler import *
+from app.scheduler.consolidated_schedule import run_consolidated
+from app.scheduler.frontend import draw_excel_frontend
+from app.scheduler.load_schedules import load_schedules
+from app.scheduler.parsing import load_cells_df
 from utils_ak.block_tree import *
 
 
 def run_consolidated_old(
-    input_path,
-    prefix="",
-    output_path="outputs/",
-    open_file=False,
-    schedules=None,
-    wb=None,
-    date=None
+    input_path, prefix="", output_path="outputs/", open_file=False, schedules=None, wb=None, date=None
 ):
     utils.makedirs(output_path)
 
@@ -22,6 +20,7 @@ def run_consolidated_old(
     cur_depth = 0
 
     if "mozzarella" in schedules:
+
         # init workbook with mozzarella
         if not wb:
             wb = openpyxl.load_workbook(
@@ -38,12 +37,12 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
     else:
         if input_path:
+
             # draw mozzarella
             if not wb:
-                # init workbook with schedule file #todo maybe: better to crop mozzarella part and paste into empty workbook, so can be generalized for other departments
-                wb = openpyxl.load_workbook(
-                    os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx")
-                )
+
+                # init workbook with schedule file # todo maybe: better to crop mozzarella part and paste into empty workbook, so can be generalized for other departments [@marklidenberg]
+                wb = openpyxl.load_workbook(os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx"))
 
                 for sheet_name in wb.sheetnames:
                     if sheet_name != "Расписание":
@@ -54,9 +53,7 @@ def run_consolidated_old(
 
         if not wb:
             wb = openpyxl.load_workbook(
-                filename=os.path.join(
-                    basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT
-                ),
+                filename=os.path.join(basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT),
                 data_only=True,
             )
 
@@ -118,7 +115,7 @@ def run_consolidated_old(
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
 
-    # todo maybe: copy-paste from submit_schedule
+    # todo maybe: copy-paste from submit_schedule [@marklidenberg]
     with code("Dump frontend as excel file"):
         with code("Get filename"):
             output_fn = None
@@ -128,9 +125,7 @@ def run_consolidated_old(
                     base_fn = prefix + " " + base_fn
                 output_fn = os.path.join(output_path, base_fn)
 
-        draw_excel_frontend(
-            frontend, open_file=open_file, wb=wb, fn=output_fn, style=STYLE
-        )
+        draw_excel_frontend(frontend, open_file=open_file, wb=wb, fn=output_fn, style=STYLE)
     return wb
 
 

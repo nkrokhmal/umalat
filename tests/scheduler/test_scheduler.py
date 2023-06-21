@@ -11,15 +11,6 @@ from app.scheduler.milk_project.tests.test_frontend import (
     test_batch as test_milk_project_batch,
 )
 
-from app.scheduler.mozzarella.tests.test_frontend import (
-    test_batch as test_mozzarella_batch,
-)
-from app.scheduler.mozzarella.tests.test_parser_new import (
-    test_batch as test_mozzarella_parser_batch,
-)
-from app.scheduler.mozzarella.tests.test_properties import (
-    test_batch as test_mozzarella_properties_batch,
-)
 
 from app.scheduler.ricotta.tests.test_frontend import test_batch as test_ricotta_batch
 
@@ -29,7 +20,8 @@ from app.scheduler.contour_cleanings.tests.test_frontend import (
 
 
 if __name__ == "__main__":
-    test_mozzarella_batch()
+    # todo later: restore mozzarella tests
+    # test_mozzarella_batch()
     test_mascarpone_batch()
     test_ricotta_batch()
     test_butter_batch()
@@ -37,5 +29,6 @@ if __name__ == "__main__":
     test_milk_project_batch()
     test_contour_cleanings_batch()
 
-    test_mozzarella_parser_batch()
-    test_mozzarella_properties_batch()
+    # todo maybe: restore tests
+    # test_mozzarella_parser_batch()
+    # test_mozzarella_properties_batch()

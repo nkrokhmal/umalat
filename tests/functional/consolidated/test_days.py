@@ -1,14 +1,12 @@
 from app.imports.runtime import *
-from app.scheduler import (
-    run_contour_cleanings,
-    run_consolidated,
-    run_ricotta,
-    run_butter,
-    run_mascarpone,
-    run_mozzarella,
-    run_milk_project,
-    run_adygea,
-)
+from app.scheduler.adygea import run_adygea
+from app.scheduler.butter import run_butter
+from app.scheduler.consolidated_schedule import run_consolidated
+from app.scheduler.contour_cleanings import run_contour_cleanings
+from app.scheduler.mascarpone import run_mascarpone
+from app.scheduler.milk_project import run_milk_project
+from app.scheduler.mozzarella.run_mozzarella import run_mozzarella
+from app.scheduler.ricotta.runner import run_ricotta
 
 
 def _test_day(

@@ -4,7 +4,12 @@ from app.main.errors import internal_error
 from app.main.mozzarella.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
 from app.scheduler import *
+from app.scheduler.frontend import draw_excel_frontend
 from app.scheduler.mozzarella import *
+from app.scheduler.mozzarella.algo.schedule.make_schedule import make_schedule
+from app.scheduler.mozzarella.boiling_plan import read_additional_packing, cast_boiling_plan
+from app.scheduler.mozzarella.frontend.style import STYLE
+from app.scheduler.mozzarella.frontend.wrap_frontend import wrap_frontend
 from app.utils.batches.batch import *
 from app.utils.features.openpyxl_wrapper import set_default_sheet
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
@@ -55,11 +60,13 @@ def mozzarella_schedule():
         }
         schedule = make_schedule(
             boiling_plan_df,
-            start_times=start_times,
             optimize=optimize,
             exact_melting_time_by_line=exact_melting_time_by_line,
-            optimize_cleanings=add_full_boiling,
-            date=date,
+            make_schedule_basic_kwargs=dict(
+                start_times=start_times,
+                optimize_cleanings=add_full_boiling,
+                date=date,
+            ),
         )
 
         try:

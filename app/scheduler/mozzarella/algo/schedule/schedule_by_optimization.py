@@ -1,4 +1,5 @@
 from app.imports.runtime import *
+from app.enum import LineName
 from app.models import cast_model, Washer
 from app.scheduler.mozzarella.algo.calc_schedule_stats import *
 from app.scheduler.mozzarella.algo.schedule.make_boilings import make_boilings

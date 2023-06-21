@@ -1,5 +1,8 @@
 from app.imports.runtime import *
-from app.scheduler.ricotta import *
+from app.models import RicottaBoiling, cast_model
+from app.scheduler.ricotta.algo import make_boiling
+from app.scheduler.ricotta.frontend import wrap_boiling
+from app.scheduler.ricotta.runner import run_ricotta
 
 
 def test_make_frontend_boiling():
