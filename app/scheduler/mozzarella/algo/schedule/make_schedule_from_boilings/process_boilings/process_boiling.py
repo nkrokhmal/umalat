@@ -85,6 +85,8 @@ def process_boiling(
         max_tries=100,
     )
 
+    logger.info('Pushed', boiling_id=boiling.props['boiling_id'], interval=boiling.x)
+
     # - Fix water a little bit: try to push water before - allowing awaiting in line
 
     if line_name == LineName.WATER and lines_df.at[LineName.WATER, "latest_boiling"]:

@@ -134,9 +134,9 @@ def process_boilings(
                 # # reverse
                 # line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
                 # logger.debug('Chose line by latest line', line_name=line_name)
-
-                next_row = left_df[left_df["line_name"] == line_name].iloc[0]
-                logger.info("Boiling id", boiling_id=next_row["boiling"].props["boiling_id"], line_name=line_name)
+                #
+                # next_row = left_df[left_df["line_name"] == line_name].iloc[0]
+                # logger.info("Boiling id", boiling_id=next_row["boiling"].props["boiling_id"], line_name=line_name)
 
             # - Select next row -> first for selected line
 

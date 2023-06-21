@@ -43,19 +43,19 @@ def make_schedule_basic(
     # - Find optimal cleanings
 
     if optimize_cleanings:
-        cleanings = find_optimal_cleanings(boiling_plan_df, start_times, start_configuration=start_configuration)
-        logger.debug("Found optimal cleanings", cleanings=cleanings)
+        cleaning_type_by_group_id = find_optimal_cleanings(boiling_plan_df, start_times, start_configuration=start_configuration)
+        logger.debug("Found optimal cleanings", cleanings=cleaning_type_by_group_id)
     else:
-        cleanings = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
-        logger.debug("Using boiling plan cleanings", cleanings=cleanings)
+        cleaning_type_by_group_id = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
+        logger.debug("Using boiling plan cleanings", cleanings=cleaning_type_by_group_id)
 
     # - Make schedule with cleanings and start configuration
-
-    cleanings = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleanings.items() if v}
+    cleaning_type_by_group_id = {4: 'short'}
+    cleaning_type_by_group_id = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleaning_type_by_group_id.items() if v}
     boilings = make_boilings(boiling_plan_df)
     schedule = make_schedule_from_boilings(
         boilings,
-        cleaning_type_by_group_id=cleanings,
+        cleaning_type_by_group_id=cleaning_type_by_group_id,
         start_times=start_times,
         start_configuration=start_configuration,
         date=date,
