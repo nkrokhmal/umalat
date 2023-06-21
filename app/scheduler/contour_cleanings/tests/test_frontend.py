@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 from app.scheduler.contour_cleanings.algo.schedule import *
 from app.scheduler.contour_cleanings.frontend import *
-from app.scheduler.contour_cleanings import run_contour_cleanings
+from app.scheduler.contour_cleanings.runner import run_contour_cleanings
 
 
 def test_batch():

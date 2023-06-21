@@ -1,5 +1,5 @@
 from app.imports.runtime import *
-from app.scheduler.adygea import *
+from app.scheduler.adygea.runner import run_adygea
 
 
 def _test(fn, open_file=False,  *args, **kwargs):
