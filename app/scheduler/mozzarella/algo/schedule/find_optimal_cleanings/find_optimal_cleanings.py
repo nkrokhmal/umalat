@@ -1,6 +1,6 @@
 from app.scheduler.mozzarella.boiling_plan import read_boiling_plan
 from app.scheduler.mozzarella.algo.schedule.find_optimal_cleanings.find_optimal_cleanings_combination_by_schedule import (
-    find_optimal_cleanings_combination_by_schedule,
+    get_optimal_cleaning_type_by_group_id,
 )
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import *
 from app.scheduler.mozzarella.algo.schedule.make_boilings import make_boilings
@@ -27,7 +27,7 @@ def find_optimal_cleanings(
 
     # - Find optimal cleanings combination
 
-    return find_optimal_cleanings_combination_by_schedule(schedule)
+    return get_optimal_cleaning_type_by_group_id(schedule)
 
 
 def test():

@@ -2,25 +2,14 @@ from app.imports.runtime import *
 from app.scheduler.mozzarella.algo.schedule.find_optimal_cleanings.get_distance_between_boilings import (
     get_distance_between_boilings,
 )
-from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_termizator_cleaning_block import (
-    make_termizator_cleaning_block,
-)
-from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.validator import Validator
 
-from app.scheduler.time import *
 from app.scheduler.mozzarella.algo.packing import *
-from app.scheduler.shifts import *
-from app.enum import LineName
 
-from app.scheduler.mozzarella.algo.schedule.custom_pushers import *
-from utils_ak.block_tree import *
-
-STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
 
 from app.scheduler.mozzarella.algo.stats import *
 
 
-def find_optimal_cleanings_combination_by_schedule(schedule):
+def get_optimal_cleaning_type_by_group_id(schedule):
 
     # - Get full cleaning duration
 
@@ -117,8 +106,10 @@ def find_optimal_cleanings_combination_by_schedule(schedule):
     # take first one
     boiling_nums = df1.iloc[0]["boiling_nums"]
 
-    # - Get output and return
+    # - Get output
 
     cleaning_type_by_group_id = {df.loc[boiling_num]["group_id"]: "short" for boiling_num in boiling_nums}
+
+    # - Return
 
     return cleaning_type_by_group_id
