@@ -1,4 +1,4 @@
-from app.scheduler.mozzarella.algo.boiling import make_boiling
+from app.scheduler.mozzarella.algo.make_boiling import make_boiling
 from app.scheduler.mozzarella.algo.melting_and_packing import *
 from app.enum import LineName
 

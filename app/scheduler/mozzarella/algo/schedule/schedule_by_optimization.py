@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 from .boilings import *
 from .schedule_from_boilings import *
-from app.scheduler.mozzarella.algo.stats import *
+from app.scheduler.mozzarella.algo.calc_schedule_stats import *
 
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):

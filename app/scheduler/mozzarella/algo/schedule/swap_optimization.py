@@ -2,7 +2,7 @@
 from app.imports.runtime import * # isort: skip
 from app.enum import LineName
 from app.scheduler.mozzarella.algo.schedule.schedule_basic import make_schedule_basic
-from app.scheduler.mozzarella.boiling_plan.parser import parse_schedule
+from app.scheduler.mozzarella.boiling_plan.parse_schedule import parse_schedule
 
 from .schedule_by_optimization import *
 from .score import calc_score

@@ -1,2 +1,2 @@
 from .style import *
-from .frontend import *
+from .wrap_frontend import *

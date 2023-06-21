@@ -1,6 +1,6 @@
 from app.imports.runtime import *
 from app.scheduler.mozzarella.properties import (
-    cast_properties as parse_schedule_mozzarella,
+    cast_mozzarella_properties as parse_schedule_mozzarella,
 )
 from app.scheduler.mozzarella.parsing.parse_properties.parse_properties import (
     parse_properties as parse_properties_mozzarella,
@@ -82,31 +82,7 @@ def load_properties(schedules, path=None, prefix=None):
     return properties
 
 
-def assert_properties_presence(
-    properties, raise_if_not_present=None, warn_if_not_present=None
-):
-    raise_if_not_present = raise_if_not_present or []
-    warn_if_not_present = warn_if_not_present or []
-
-    for department in raise_if_not_present:
-        if not properties[department].is_present():
-            raise Exception(
-                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}"
-            )
-
-    for department in warn_if_not_present:
-        if not properties[department].is_present():
-            logger.warning(
-                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}"
-            )
-            if os.environ.get("APP_ENVIRONMENT") == "runtime":
-                flask.flash(
-                    f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}",
-                    "warning",
-                )
-
-
-def test_load_properties():
+def test():
     print(
         load_properties(
             schedules={},
@@ -117,4 +93,4 @@ def test_load_properties():
 
 
 if __name__ == "__main__":
-    test_load_properties()
+    test()
