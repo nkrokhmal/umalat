@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 from app.scheduler.mozzarella import *
+from app.scheduler.mozzarella.boiling_plan import read_boiling_plan
 from app.scheduler.mozzarella.parsing.parse_properties.fill_properties import fill_properties
 from app.scheduler.mozzarella.parsing.parse_properties.parse_schedule_file import parse_schedule_file
 from app.scheduler.mozzarella.parsing.parse_properties.prepare_boiling_plan import prepare_boiling_plan

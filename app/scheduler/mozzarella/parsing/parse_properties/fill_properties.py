@@ -1,6 +1,7 @@
 from app.imports.runtime import *
 from app.scheduler.mozzarella import *
 from app.scheduler.mozzarella.properties import *
+from app.enum import LineName
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.parsing import *
 from app.scheduler.parsing_new.parse_time import *
