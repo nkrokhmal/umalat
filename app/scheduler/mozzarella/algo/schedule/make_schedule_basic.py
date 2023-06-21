@@ -8,7 +8,7 @@ from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_sch
 from app.scheduler.mozzarella.algo.schedule.parse_start_configuration import parse_start_configuration
 from app.scheduler.mozzarella.boiling_plan.read_boiling_plan import cast_boiling_plan
 
-from typing import Optional
+from typing import Optional, Literal
 
 from app.scheduler.time import cast_time, cast_t, parse_time
 
@@ -19,6 +19,7 @@ def make_schedule_basic(
     start_times=None,
     start_configuration=None,
     date=None,
+    next_boiling_optimization_type: Literal["chess", "lookahead"] = "chess",
 ):
 
     # - Preprocess arguments
@@ -41,6 +42,7 @@ def make_schedule_basic(
             boilings,
             cleaning_type_by_group_id={},
             start_times=start_times,
+            next_boiling_optimization_type=next_boiling_optimization_type
         )
 
         # - Get basic schedule start configuration
@@ -80,6 +82,7 @@ def make_schedule_basic(
         start_times=start_times,
         start_configuration=start_configuration,
         date=date,
+        next_boiling_optimization_type=next_boiling_optimization_type
     )
 
     # - Return

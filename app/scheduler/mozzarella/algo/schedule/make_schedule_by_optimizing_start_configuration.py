@@ -1,7 +1,9 @@
 from app.scheduler.mozzarella.algo.schedule.calc_score import calc_score
 from app.scheduler.mozzarella.algo.schedule.make_boilings import make_boilings
-from app.scheduler.mozzarella.algo.schedule.make_schedule_by_swapping_water_gaps.make_schedule_by_swapping_water_gaps import \
-    make_schedule_by_swapping_water_gaps
+from app.scheduler.mozzarella.algo.schedule.make_schedule_basic import make_schedule_basic
+from app.scheduler.mozzarella.algo.schedule.make_schedule_by_swapping_water_gaps.make_schedule_by_swapping_water_gaps import (
+    make_schedule_by_swapping_water_gaps,
+)
 from app.scheduler.mozzarella.algo.schedule.parse_start_configuration import parse_start_configuration
 from app.scheduler.time import cast_time, cast_t
 from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import *
@@ -135,6 +137,13 @@ def make_schedule_by_optimizing_start_configuration(
             ),
         )
 
+        schedule = make_schedule_basic(
+            boiling_plan_df,
+            start_configuration=start_configuration,
+            start_times=start_times,
+            next_boiling_optimization_type='lookahead',
+        )
+
         values.append(
             {
                 "schedule": schedule,
@@ -203,4 +212,4 @@ def make_schedule_by_optimizing_start_configuration(
             ),
         )
     else:
-        return best_value['schedule']
+        return best_value["schedule"]

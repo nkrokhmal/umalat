@@ -6,6 +6,7 @@ from app.scheduler.mozzarella.frontend.wrap_frontend import wrap_frontend
 from app.scheduler.mozzarella.frontend.style import STYLE
 
 from app.scheduler.submit import submit_schedule
+from utils_ak.clock import clock
 
 
 def run_mozzarella(
@@ -36,17 +37,26 @@ def run_mozzarella(
     res["boiling_plan_df"] = boiling_plan_df
     return res
 
+pd.set_option("display.max_rows", 500)
+pd.set_option("display.max_columns", 500)
+pd.set_option("display.width", 1000)
 
 def test():
+    clock.enable()
+    clock('start')
     utils.configure_loguru(level='DEBUG')
+
     run_mozzarella(
         "/Users/arsenijkadaner/Desktop/2023-06-02 План по варкам моцарелла.xlsx",
         start_times={LineName.WATER: "08:00", LineName.SALT: "05:00"},
         first_batch_id=1,
-        open_file=True,
+        open_file=False,
         prefix="test",
         optimize=True,
     )
+
+    clock('start')
+    print(clock.stats())
 
 
 if __name__ == "__main__":
