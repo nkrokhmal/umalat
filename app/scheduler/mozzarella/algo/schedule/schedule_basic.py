@@ -26,7 +26,7 @@ def make_schedule_basic(
     if not start_configuration:
         # Make basic schedule
         boilings = make_boilings(boiling_plan_df)
-        schedule = make_schedule_from_boilings(boilings, cleanings={}, start_times=start_times)
+        schedule = make_schedule_from_boilings(boilings, cleaning_type_by_boiling_id={}, start_times=start_times)
 
         start_configuration = parse_start_configuration(schedule)
 
@@ -55,7 +55,7 @@ def make_schedule_basic(
     boilings = make_boilings(boiling_plan_df)
     schedule = make_schedule_from_boilings(
         boilings,
-        cleanings=cleanings,
+        cleaning_type_by_boiling_id=cleanings,
         start_times=start_times,
         start_configuration=start_configuration,
         date=date,

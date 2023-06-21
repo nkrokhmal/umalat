@@ -23,7 +23,7 @@ STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
 def make_schedule_from_boilings(
     boilings: List[ParallelepipedBlock],
     date: Optional[datetime] = None,
-    cleanings: Optional[dict] = None,
+    cleaning_type_by_boiling_id: Optional[dict] = None,
     start_times: Optional[dict] = None,
     shrink_drenators: bool = True,
     start_configuration: Optional[list] = None,
@@ -35,7 +35,7 @@ def make_schedule_from_boilings(
     date = date or datetime.now()
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
     start_times = {k: v if v else None for k, v in start_times.items()}
-    cleanings = cleanings or {}  # {boiling_id: cleaning}
+    cleaning_type_by_boiling_id = cleaning_type_by_boiling_id or {}  # {boiling_id: cleaning}
 
     # - Init block maker
 
@@ -47,7 +47,7 @@ def make_schedule_from_boilings(
         m=m,
         boilings=boilings,
         start_times=start_times,
-        cleanings=cleanings,
+        cleaning_type_by_boiling_id=cleaning_type_by_boiling_id,
         start_configuration=start_configuration,
         shrink_drenators=shrink_drenators,
     )

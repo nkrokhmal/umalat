@@ -20,7 +20,7 @@ def process_boiling(
     boiling: ParallelepipedBlock,
     last_multihead_water_boiling: ParallelepipedBlock,
     lines_df: pd.DataFrame,
-    cleanings: dict,
+    cleaning_type_by_boiling_id: dict,
     shrink_drenators: bool = True,
     strict_order: bool = False,
 ) -> BlockMaker:
@@ -153,7 +153,7 @@ def process_boiling(
 
     # - Add cleaning after boiling if needed
 
-    cleaning_type = cleanings.get(boiling.props["boiling_id"])
+    cleaning_type = cleaning_type_by_boiling_id.get(boiling.props["boiling_id"])
     if cleaning_type:
         start_from = boiling["pouring"]["first"]["termizator"].y[0]
         cleaning = make_termizator_cleaning_block(

@@ -39,13 +39,17 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
     start_configuration = kwargs.get("start_configuration")
 
     if not start_configuration:
-        with code("Make basic schedule"):
-            boilings = make_boilings(boiling_plan_df)
-            schedule = make_schedule_from_boilings(boilings, cleanings={}, start_times=start_times)
+        # - Make basic schedule
+
+        boilings = make_boilings(boiling_plan_df)
+        schedule = make_schedule_from_boilings(boilings, cleaning_type_by_boiling_id={}, start_times=start_times)
+
+        # - Get start configuration
 
         start_configuration = parse_start_configuration(schedule)
 
     logger.debug("Initial start configuration", start_configuration=start_configuration)
+
     if not start_configuration:
         start_configurations = [None]
     else:
