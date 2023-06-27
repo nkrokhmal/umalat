@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.7
 
 ENV PYTHONPATH "${PYTHONPATH}:/utils/python-utils-ak"
 
