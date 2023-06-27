@@ -7,7 +7,7 @@ from app.models import AdygeaSKU, AdygeaLine, AdygeaFormFactor, Group
 from app.enum import *
 from app.utils.features.form_utils import *
 
-from .forms import SKUAdygeaForm, CopySKUForm
+from app.main.adygea.forms import SKUAdygeaForm, CopySKUForm
 
 
 @main.route("/adygea/add_sku", methods=["POST", "GET"])

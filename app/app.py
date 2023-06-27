@@ -5,8 +5,8 @@ from flask_admin.contrib.sqla import ModelView
 
 import app.models as umalat_models
 
-from .main import main as main_bp
-from .main.errors import not_found
+from app.main import main as main_bp
+from app.main.errors import not_found
 
 
 def create_app(config_name="default"):

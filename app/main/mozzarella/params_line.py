@@ -4,7 +4,7 @@ from werkzeug.utils import redirect
 
 from app.main import main
 from app.models import MozzarellaLine, MozzarellaBoiling
-from .forms import LineForm
+from app.main.mozzarella.forms import LineForm
 
 
 @main.route("/mozzarella/get_line", methods=["GET", "POST"])

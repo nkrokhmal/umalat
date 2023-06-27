@@ -1,6 +1,6 @@
 from app.imports.runtime import *
 from app.main import main
-from .forms import UploadForm
+from app.main.mascarpone.forms import UploadForm
 from app.utils.files.utils import save_schedule
 
 

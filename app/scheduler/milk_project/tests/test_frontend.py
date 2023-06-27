@@ -1,6 +1,6 @@
 from app.imports.runtime import *
 from app.scheduler.milk_project import *
-from app.scheduler import draw_excel_frontend
+from app.scheduler.milk_project.runner import run_milk_project
 
 
 def _test(fn, open_file=False, *args, **kwargs):

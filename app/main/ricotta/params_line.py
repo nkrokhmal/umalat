@@ -6,7 +6,7 @@ from app.main import main
 from app.globals import db
 from app.models import RicottaLine
 
-from .forms import LineForm
+from app.main.ricotta.forms import LineForm
 
 
 @main.route("/ricotta/get_line", methods=["GET", "POST"])

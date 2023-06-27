@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 from app.main import main
 from app.models import User
-from .forms import LoginForm
+from app.main.forms import LoginForm
 
 
 @main.route('/login', methods=['GET', 'POST'])

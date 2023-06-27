@@ -1,7 +1,10 @@
 from app.imports.runtime import *
-from .boilings import *
-from .schedule_from_boilings import *
-from app.scheduler.mozzarella.algo.stats import *
+from app.enum import LineName
+from app.models import cast_model, Washer
+from app.scheduler.mozzarella.algo.calc_schedule_stats import *
+from app.scheduler.mozzarella.algo.schedule.make_boilings import make_boilings
+from app.scheduler.mozzarella.algo.schedule.make_schedule_from_boilings.make_schedule_from_boilings import \
+    make_schedule_from_boilings
 
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):

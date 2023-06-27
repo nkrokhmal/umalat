@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from werkzeug.utils import redirect
 import itertools
 from app.main import main
-from .forms import AdygeaBoilingTechnologyForm
+from app.main.adygea.forms import AdygeaBoilingTechnologyForm
 from app.models import AdygeaBoilingTechnology, AdygeaSKU
 
 

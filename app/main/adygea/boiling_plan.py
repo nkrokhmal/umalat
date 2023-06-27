@@ -1,5 +1,5 @@
 from app.imports.runtime import *
-from .forms import BoilingPlanForm
+from app.main.adygea.forms import BoilingPlanForm
 from app.utils.adygea.boiling_plan_create import boiling_plan_create
 from app.utils.adygea.boiling_plan_draw import draw_boiling_plan
 from app.utils.sku_plan import *

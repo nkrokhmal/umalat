@@ -2,8 +2,8 @@ from app.imports.runtime import *
 
 from app.models import *
 from app.scheduler.mozzarella.algo.packing import *
-from app.scheduler.mozzarella.algo.cooling import *
-from app.scheduler.mozzarella.algo.boiling import make_boiling
+from app.scheduler.mozzarella.algo.make_cooling_process import *
+from app.scheduler.mozzarella.algo.make_boiling import make_boiling
 
 
 def make_melting_and_packing_basic(boiling_plan):

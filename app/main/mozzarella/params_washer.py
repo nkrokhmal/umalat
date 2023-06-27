@@ -6,7 +6,7 @@ from app.main import main
 from app.models import Washer, Department
 from app.enum import DepartmentName
 
-from .forms import WasherForm
+from app.main.mozzarella.forms import WasherForm
 
 
 @main.route("/mozzarella/get_washer", methods=["GET", "POST"])

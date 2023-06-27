@@ -3,11 +3,12 @@ import flask
 from app.imports.runtime import *
 
 from app.main import main
-from app.scheduler import run_adygea, run_milk_project, run_consolidated_old
 from app.models import MilkProjectSKU, AdygeaSKU
+from app.scheduler.adygea.runner import run_adygea
+from app.scheduler.consolidated_schedule_old import run_consolidated_old
+from app.scheduler.milk_project.runner import run_milk_project
 
 from app.utils.batches.batch import *
-from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
@@ -16,7 +17,7 @@ from app.main.adygea.update_task_and_batches import update_task_and_batches as u
 from app.main.milk_project.update_task_and_batches import update_task_and_batches as update_task_and_batches_milk_project
 from app.main.validators import *
 
-from .forms import ScheduleForm
+from app.main.milk_project.forms import ScheduleForm
 from app.scheduler.frontend import fill_grid
 
 

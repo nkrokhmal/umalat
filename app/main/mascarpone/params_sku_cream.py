@@ -8,7 +8,7 @@ from app.models import MascarponeSKU, MascarponeLine, Group
 from app.enum import LineName
 from app.utils.features.form_utils import *
 
-from .forms import SKUMascarponeForm, CopySKUForm
+from app.main.mascarpone.forms import SKUMascarponeForm, CopySKUForm
 
 
 @main.route("/mascarpone/add_sku_cream", methods=["POST", "GET"])

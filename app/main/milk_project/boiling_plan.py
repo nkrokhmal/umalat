@@ -8,7 +8,7 @@ from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
 from app.main import main
 from app.models import *
-from .forms import BoilingPlanForm
+from app.main.milk_project.forms import BoilingPlanForm
 
 
 @main.route("/milk_project_boiling_plan", methods=["POST", "GET"])
