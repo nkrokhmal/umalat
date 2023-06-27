@@ -1,7 +1,4 @@
 import os
-
-from app.scheduler.mozzarella.algo.melting_and_packing.pipelines.archived.basic import make_melting_and_packing_basic
-
 os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from app.imports.runtime import *
@@ -11,6 +8,8 @@ from app.scheduler.mozzarella.algo import *
 
 
 def test_melting_and_packing_basic_single():
+    from app.scheduler.boiling_plan import read_boiling_plan
+
     boiling_plan_df = read_boiling_plan(
         os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
     )
@@ -20,6 +19,8 @@ def test_melting_and_packing_basic_single():
 
 
 def test_melting_and_packing_basic_many():
+    from app.scheduler.boiling_plan import read_boiling_plan
+
     boiling_plan_df = read_boiling_plan(
         os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
     )

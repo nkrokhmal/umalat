@@ -2,7 +2,7 @@ from werkzeug.utils import redirect
 from app.imports.runtime import *
 from app.main import main
 from app.models import CreamCheeseBoilingTechnology
-from app.main.mascarpone.forms import CreamCheeseBoilingTechnologyForm
+from .forms import CreamCheeseBoilingTechnologyForm
 
 
 @main.route("/mascarpone/get_boiling_technology_cream_cheese", methods=["GET", "POST"])

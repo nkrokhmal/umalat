@@ -1,5 +1,5 @@
 from app.imports.runtime import *
-from app.scheduler.butter.runner import run_butter
+from app.scheduler.butter import *
 
 
 def _test(fn, open_file=False, *args, **kwargs):

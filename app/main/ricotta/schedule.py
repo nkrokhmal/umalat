@@ -1,8 +1,6 @@
 from app.main import main
-from app.scheduler.frontend import draw_excel_frontend, fill_grid
-from app.scheduler.ricotta.algo import make_schedule
-from app.scheduler.ricotta.boiling_plan import read_boiling_plan
-from app.scheduler.ricotta.frontend import wrap_frontend, STYLE
+# from app.scheduler import *
+from app.scheduler.ricotta import *
 
 # from app.utils.ricotta.schedule_tasks import schedule_task_boilings, update_total_schedule_task
 from app.utils.ricotta.schedule_tasks import RicottaScheduleTask
@@ -10,7 +8,7 @@ from app.utils.batches.batch import *
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from app.main.ricotta.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
-from app.main.ricotta.forms import ScheduleForm
+from .forms import ScheduleForm
 
 
 @main.route("/ricotta_schedule", methods=["GET", "POST"])

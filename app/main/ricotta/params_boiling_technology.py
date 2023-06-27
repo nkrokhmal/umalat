@@ -5,7 +5,7 @@ from werkzeug.utils import redirect
 from app.main import main
 from app.models import RicottaBoilingTechnology
 
-from app.main.ricotta.forms import BoilingTechnologyForm
+from .forms import BoilingTechnologyForm
 
 
 @main.route("/ricotta/get_boiling_technology", methods=["GET", "POST"])

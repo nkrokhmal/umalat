@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from werkzeug.utils import redirect
 import itertools
 from app.main import main
-from app.main.butter.forms import ButterBoilingTechnologyForm
+from .forms import ButterBoilingTechnologyForm
 from app.models import ButterBoilingTechnology, ButterSKU
 
 

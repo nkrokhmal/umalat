@@ -6,7 +6,7 @@ from app.main import main
 from app.globals import db
 from app.models import ButterLine
 
-from app.main.butter.forms import LineForm
+from .forms import LineForm
 
 
 @main.route("/butter/get_line", methods=["GET", "POST"])

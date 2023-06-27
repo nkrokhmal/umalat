@@ -8,7 +8,7 @@ from app.main import main
 from app.models import *
 from app.globals import db
 
-from app.main.mascarpone.forms import BoilingPlanForm
+from .forms import BoilingPlanForm
 
 
 @main.route("/mascarpone_boiling_plan", methods=["POST", "GET"])

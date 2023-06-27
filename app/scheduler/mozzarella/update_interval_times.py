@@ -1,4 +1,5 @@
-from app.scheduler.mozzarella.parsing.parse_schedule import  parse_schedule
+from app.imports.runtime import *
+from app.scheduler.mozzarella.parser_new import  parse_schedule
 
 
 def update_interval_times(schedule_wb, boiling_plan_df):

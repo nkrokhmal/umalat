@@ -4,12 +4,7 @@ from app.main.errors import internal_error
 from app.main.mozzarella.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
 from app.scheduler import *
-from app.scheduler.frontend import draw_excel_frontend
 from app.scheduler.mozzarella import *
-from app.scheduler.mozzarella.algo.schedule.make_schedule import make_schedule
-from app.scheduler.mozzarella.boiling_plan import read_additional_packing, cast_boiling_plan
-from app.scheduler.mozzarella.frontend.style import STYLE
-from app.scheduler.mozzarella.frontend.wrap_frontend import wrap_frontend
 from app.utils.batches.batch import *
 from app.utils.features.openpyxl_wrapper import set_default_sheet
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
@@ -18,7 +13,7 @@ from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.parse_schedule_json import *
 from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 
-from app.main.mozzarella.forms import ScheduleForm
+from .forms import ScheduleForm
 
 
 @main.route("/mozzarella_schedule", methods=["GET", "POST"])
@@ -28,7 +23,7 @@ def mozzarella_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
-        optimization_strategy = {"Нет": None, "Быстрая": "swap", "Долгая": "lookahead"}[form.optimization_strategy.data]
+        optimize = form.optimize.data
         exact_melting_time_by_line = form.exact_melting_time_by_line.data
 
         # validate time
@@ -60,13 +55,11 @@ def mozzarella_schedule():
         }
         schedule = make_schedule(
             boiling_plan_df,
-            optimization_strategy=optimization_strategy,
+            start_times=start_times,
+            optimize=optimize,
             exact_melting_time_by_line=exact_melting_time_by_line,
-            make_schedule_basic_kwargs=dict(
-                start_times=start_times,
-                optimize_cleanings=add_full_boiling,
-                date=date,
-            ),
+            optimize_cleanings=add_full_boiling,
+            date=date,
         )
 
         try:

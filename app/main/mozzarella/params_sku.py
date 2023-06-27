@@ -5,7 +5,7 @@ from app.main import main
 from app.utils.features.form_utils import *
 from app.models import MozzarellaSKU, SKU
 
-from app.main.mozzarella.forms import SKUForm, CopySKUForm
+from .forms import SKUForm, CopySKUForm
 
 
 @main.route("/mozzarella/add_sku", methods=["POST", "GET"])

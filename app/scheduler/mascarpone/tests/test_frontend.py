@@ -1,6 +1,5 @@
 from app.imports.runtime import *
 from app.scheduler.mascarpone import *
-from app.scheduler.mascarpone.runner import run_mascarpone
 
 
 def test_batch():

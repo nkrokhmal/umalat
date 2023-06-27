@@ -1,14 +1,11 @@
 from app.main import main
-from app.models import AdygeaSKU
-from app.scheduler.adygea.algo import make_schedule
-from app.scheduler.adygea.boiling_plan import read_boiling_plan
-from app.scheduler.adygea.frontend import wrap_frontend
+from app.scheduler.adygea import *
 from app.scheduler.adygea.frontend.style import STYLE
-from app.scheduler.frontend import draw_excel_frontend
 from app.utils.batches.batch import *
+from app.scheduler import draw_excel_frontend
 from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
-from app.main.adygea.forms import ScheduleForm
+from .forms import ScheduleForm
 
 
 @main.route("/adygea_schedule", methods=["GET", "POST"])

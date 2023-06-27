@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from werkzeug.utils import redirect
 import itertools
 from app.main import main
-from app.main.milk_project.forms import MilkProjectBoilingForm
+from .forms import MilkProjectBoilingForm
 from app.models import MilkProjectBoiling, MilkProjectSKU
 
 
