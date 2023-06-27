@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 from app.enum import LineName
 
-from app.models.mozzarella import MozzarellaBoiling, MozzarellaFormFactor
+from .mozzarella import MozzarellaBoiling, MozzarellaFormFactor
 
 
 def fetch_all(cls):

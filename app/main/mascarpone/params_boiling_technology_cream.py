@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from werkzeug.utils import redirect
 import itertools
 from app.main import main
-from app.main.mascarpone.forms import MascarponeBoilingTechnologyForm
+from .forms import MascarponeBoilingTechnologyForm
 from app.models import MascarponeBoilingTechnology, MascarponeSKU
 
 

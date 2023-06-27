@@ -1,8 +1,8 @@
 # fmt: off
 from app.imports.runtime import *
 
-from app.scheduler.mozzarella.algo.make_cooling_process import make_cooling_process
-from app.scheduler.mozzarella.algo.make_boiling import make_boiling
+from app.scheduler.mozzarella.algo.cooling import make_cooling_process
+from app.scheduler.mozzarella.algo.boiling import make_boiling
 from app.scheduler.calculation import *
 
 from utils_ak.block_tree import *

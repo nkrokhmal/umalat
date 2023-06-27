@@ -2,8 +2,8 @@ import flask
 
 from app.imports.runtime import *
 from app.main import main
-from app.main.departments_schedule.forms import ScheduleForm
-from app.scheduler.consolidated_schedule import run_consolidated
+from .forms import ScheduleForm
+from app.scheduler import run_consolidated
 
 
 @main.route("/departments_schedule", methods=["GET", "POST"])

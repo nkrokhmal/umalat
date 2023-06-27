@@ -1,8 +1,6 @@
 from app.imports.runtime import *
+from app.scheduler.milk_project import *
 from app.scheduler.frontend import *
-from app.scheduler.milk_project.algo import make_schedule
-from app.scheduler.milk_project.boiling_plan import read_boiling_plan
-from app.scheduler.milk_project.frontend import wrap_frontend, STYLE
 from app.scheduler.submit import submit_schedule
 
 

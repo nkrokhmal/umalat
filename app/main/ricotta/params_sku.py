@@ -8,7 +8,7 @@ from app.models import RicottaSKU, RicottaLine
 from app.enum import LineName
 from app.utils.features.form_utils import *
 
-from app.main.ricotta.forms import SKUForm, CopySKUForm
+from .forms import SKUForm, CopySKUForm
 
 
 @main.route("/ricotta/add_sku", methods=["POST", "GET"])

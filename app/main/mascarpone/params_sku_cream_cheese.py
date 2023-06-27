@@ -9,7 +9,7 @@ from app.enum import LineName
 from app.utils.features.form_utils import *
 
 
-from app.main.mascarpone.forms import SKUCreamCheeseForm, CopySKUForm
+from .forms import SKUCreamCheeseForm, CopySKUForm
 
 
 @main.route("/mascarpone/add_sku_cream_cheese", methods=["POST", "GET"])

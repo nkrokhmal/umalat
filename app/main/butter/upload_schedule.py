@@ -2,7 +2,7 @@ import time
 
 from app.imports.runtime import *
 from app.main import main
-from app.main.butter.forms import UploadForm
+from .forms import UploadForm
 from app.utils.files.utils import save_schedule, cast_dynamic_fn
 from app.utils.batches import *
 

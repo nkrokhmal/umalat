@@ -52,11 +52,10 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default=True,
     )
-    optimization_strategy = SelectField(
-        "Оптимизация",
+    optimize = BooleanField(
+        "Оптимизировать расписание",
         validators=[Optional()],
-        choices=[("Нет", "Нет"), ("Быстрая", "Быстрая"), ("Долгая", "Долгая")],
-        default="Быстрая",
+        default=True,
     )
     exact_melting_time_by_line = SelectField(
         "Выберите линию, по которой будет выставляться точное время начала плавления при оптимизации",

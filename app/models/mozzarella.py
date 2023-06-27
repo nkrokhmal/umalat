@@ -3,7 +3,7 @@ from app.imports.runtime import *
 from sqlalchemy.orm import backref
 
 from app.enum import LineName
-from app.models.basic import SKU, Line, FormFactor, Boiling, BoilingTechnology, backref
+from .basic import SKU, Line, FormFactor, Boiling, BoilingTechnology, backref
 
 
 class MozzarellaSKU(SKU):

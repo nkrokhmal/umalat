@@ -6,7 +6,7 @@ from app.utils.parse_remainings import *
 from app.utils.files.utils import move_boiling_file, save_request
 from app.main import main
 from app.models import *
-from app.main.butter.forms import BoilingPlanForm
+from .forms import BoilingPlanForm
 
 
 @main.route("/butter_boiling_plan", methods=["POST", "GET"])

@@ -5,7 +5,7 @@ from werkzeug.utils import redirect
 from app.main import main
 from app.models import RicottaAnalysisTechnology
 
-from app.main.ricotta.forms import AnalysisForm
+from .forms import AnalysisForm
 
 
 @main.route("/ricotta/get_analysis_technology", methods=["GET", "POST"])
