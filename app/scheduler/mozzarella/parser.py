@@ -7,6 +7,23 @@ from app.scheduler.parsing_new.parse_time import *
 
 from utils_ak.block_tree import *
 
+def _is_datetime(v: Union[str, datetime]):
+    # main check 09.07.2023 format, but other formats are also possible
+
+    if isinstance(v, datetime):
+        return True
+
+    from dateutil.parser import parse
+
+    if len(v) < 8:
+        # skip 00, 05, 10, ...
+        return False
+    try:
+        parse(v)
+        return True
+    except:
+        return False
+
 
 def _filter_func(group):
     try:
@@ -28,7 +45,7 @@ def parse_schedule_file(wb_obj):
     m = BlockMaker("root")
 
     with code('Find start times'):
-        time_index_row_nums = df[df['label'].astype(str).str.contains('График')]['x1'].unique()
+        time_index_row_nums = df[df["label"].astype(str).apply(_is_datetime)]["x1"].unique()
 
         start_times = []
 
@@ -165,7 +182,6 @@ def parse_schedule_file(wb_obj):
             df_formings = df[
                 (df["label"] == "плавление/формирование") & (df["x1"] >= salt_melting_headers[0])
             ]
-
             df_formings['serving_start'] = df_formings['x0'].apply(lambda x0: df[(df['y0'] == x0) & (df['label'] == 'подача и вымешивание')].iloc[0]['x0'])
 
             with code("fix start times and column header"):
@@ -396,10 +412,9 @@ def parse_properties(fn):
     return props
 
 
+def test():
+    fn = "/Users/arsenijkadaner/Downloads/2023-07-09 Расписание моцарелла.xlsx"
+    print(dict(parse_properties(fn)))
+
 if __name__ == "__main__":
-    # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    # fn = '/Users/arsenijkadaner/Desktop/2021-11-30 Расписание моцарелла.xlsx'
-    fn = config.abs_path(
-            "app/data/static/samples/outputs/by_department/mozzarella/Расписание моцарелла 7.xlsx"
-        )
-    pprint(dict(parse_properties(fn)))
+    test()

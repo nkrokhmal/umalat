@@ -48,25 +48,6 @@ def load_cells_df(wb_obj, sheet_name):
 
     ws = wb[sheet_name]
 
-    # - Get non-empty single cells
-
-    non_empty_cells = []
-    for row in ws.iter_rows():
-        for cell in row:
-            if cell.value is not None:
-                non_empty_cells.append(cell)
-
-    df = pd.DataFrame()
-
-    df["cell"] = non_empty_cells
-    df["label"] = df["cell"].apply(lambda cell: cell.value)
-    df["x0"] = df["cell"].apply(lambda cell: cell.col_idx)
-    df["y0"] = df["x0"] + 1
-    df["x1"] = df["cell"].apply(lambda cell: cell.row)
-    df["y1"] = df["x1"] + 1
-
-    df1 = df.copy()
-
     # - Get merged cells
 
     df = pd.DataFrame()
@@ -86,6 +67,25 @@ def load_cells_df(wb_obj, sheet_name):
     df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
 
     df = df.sort_values(by=["x1", "x0", "y1", "y0"])
+
+    df1 = df.copy()
+
+    # - Get non-empty single cells
+
+    non_empty_cells = []
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value is not None:
+                non_empty_cells.append(cell)
+
+    df = pd.DataFrame()
+
+    df["cell"] = non_empty_cells
+    df["label"] = df["cell"].apply(lambda cell: cell.value)
+    df["x0"] = df["cell"].apply(lambda cell: cell.col_idx)
+    df["y0"] = df["x0"] + 1
+    df["x1"] = df["cell"].apply(lambda cell: cell.row)
+    df["y1"] = df["x1"] + 1
 
     df2 = df.copy()
 
