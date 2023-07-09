@@ -15,15 +15,15 @@ def group_intervals(intervals, max_length=None, interval_func=None, split_func=N
             cur_group.append(interval)
             continue
 
-        if interval_func(cur_group[-1])[-1] == interval_func(interval)[0] and not (
-            split_func and split_func(interval)
-        ):
+        if interval_func(cur_group[-1])[-1] == interval_func(interval)[0] and not (split_func and split_func(interval)):
+
             # subsequent
             cur_group.append(interval)
             if max_length and len(cur_group) == max_length:
                 groups.append(cur_group)
                 cur_group = []
         else:
+
             # gap between
             groups.append(cur_group)
             cur_group = [interval]
@@ -46,23 +46,65 @@ def test_group_intervals():
 def load_cells_df(wb_obj, sheet_name):
     wb = utils.cast_workbook(wb_obj)
 
-    with code("Get merged cells dataframe"):
-        ws = wb[sheet_name]
-        df = pd.DataFrame()
-        df["cell"] = ws.merged_cells.ranges
+    ws = wb[sheet_name]
 
-        bound_names = ("x0", "x1", "y0", "y1")
+    # - Get non-empty single cells
 
-        df["bounds"] = df["cell"].apply(lambda cell: cell.bounds)
-        for i in range(4):
-            df[bound_names[i]] = df["bounds"].apply(lambda bound: bound[i])
+    non_empty_cells = []
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value is not None:
+                non_empty_cells.append(cell)
 
-        df["y0"] += 1
-        df["y1"] += 1
-        df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
+    df = pd.DataFrame()
 
-        df = df.sort_values(by=["x1", "x0", "y1", "y0"])
+    df["cell"] = non_empty_cells
+    df["label"] = df["cell"].apply(lambda cell: cell.value)
+    df["x0"] = df["cell"].apply(lambda cell: cell.col_idx)
+    df["y0"] = df["x0"] + 1
+    df["x1"] = df["cell"].apply(lambda cell: cell.row)
+    df["y1"] = df["x1"] + 1
+
+    df1 = df.copy()
+
+    # - Get merged cells
+
+    df = pd.DataFrame()
+
+    df["cell"] = ws.merged_cells.ranges
+
+    bound_names = ("x0", "x1", "y0", "y1")
+
+    df["bounds"] = df["cell"].apply(lambda cell: cell.bounds)
+    for i in range(4):
+        df[bound_names[i]] = df["bounds"].apply(lambda bound: bound[i])
+
+    df.pop("bounds")
+
+    df["y0"] += 1
+    df["y1"] += 1
+    df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
+
+    df = df.sort_values(by=["x1", "x0", "y1", "y0"])
+
+    df2 = df.copy()
+
+    # - Merge
+
+    df = pd.concat([df1, df2])
+
+    # - Filter duplicates
+
+    df = df.drop_duplicates(subset=["x0", "x1"])
+
+    # - Return
+
     return df
+
+
+def test_load_cells_df():
+    df = load_cells_df("/Users/arsenijkadaner/Downloads/2023-07-09 Расписание маскарпоне.xlsx", "Расписание")
+    print(df)
 
 
 def parse_block(
@@ -108,3 +150,7 @@ def parse_block(
                     label=str(boiling_id),
                     push_func=add_push,
                 )
+
+
+if __name__ == "__main__":
+    test_load_cells_df()
