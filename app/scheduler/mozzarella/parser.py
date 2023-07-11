@@ -27,14 +27,14 @@ def _is_datetime(v: Union[str, datetime]):
 
 def _filter_func(group):
     try:
-        return is_int_like(group[0]["label"].split(" ")[0])
+        return is_int_like(str(group[0]["label"]).split(" ")[0])
     except:
         return False
 
 
 def _split_func(row):
     try:
-        return is_int_like(row["label"].split(" ")[0])
+        return is_int_like(str(row["label"]).split(" ")[0])
     except:
         return False
 
@@ -413,7 +413,7 @@ def parse_properties(fn):
 
 
 def test():
-    fn = "/Users/arsenijkadaner/Downloads/2023-07-09 Расписание моцарелла.xlsx"
+    fn = "/Users/arsenijkadaner/Downloads/2023-07-11 Расписание моцарелла.xlsx"
     print(dict(parse_properties(fn)))
 
 if __name__ == "__main__":
