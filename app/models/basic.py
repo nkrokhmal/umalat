@@ -13,7 +13,7 @@ class User(mdb.Model, UserMixin):
     id = mdb.Column(mdb.Integer, primary_key=True)
     username = mdb.Column(mdb.String, unique=True)
     email = mdb.Column(mdb.String, unique=True)
-    password = mdb.Column(mdb.Binary)
+    password = mdb.Column(mdb.String)
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():

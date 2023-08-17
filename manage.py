@@ -5,7 +5,7 @@ os.environ["APP_ENVIRONMENT"] = "runtime"
 from app.app import *
 
 app, rq = create_app()
-manager = create_manager(app)
+create_manager(app)
 
 
 @manager.command

@@ -2,62 +2,59 @@ from app.imports.runtime import *  # isort: skip
 from app.main.validators import *
 from app.models import *
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired
-from wtforms import *
-from wtforms.validators import Optional, Required
+from flask_wtf.file import FileRequired
+import wtforms
+from wtforms.validators import Optional, DataRequired
 
 
 class BoilingPlanFastForm(FlaskForm):
-    validators = [FileRequired(message="Файл не выбран!")]
-    input_file = FileField(
+    input_file = wtforms.FileField(
         label="Выберите файл",
-        validators=validators,
+        validators=[FileRequired(message="Файл не выбран!")],
     )
-    file_not_calculated = FileField(
+    file_not_calculated = wtforms.FileField(
         label="Выберите файл не посчитанного на складе",
         validators=[Optional()],
     )
-
-    date = DateTimeField(
+    date = wtforms.DateTimeField(
         "Введите дату",
         format="%Y-%m-%d",
         default=datetime.today() + timedelta(days=1),
-        validators=[Required()],
+        validators=[DataRequired()],
     )
 
 
 class UploadForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
-    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
-    input_file = FileField("", validators=validators)
+    date = wtforms.DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
+    input_file = wtforms.FileField("", validators=validators)
 
 
 class ScheduleForm(FlaskForm):
-    validators = [FileRequired(message="Отсутствует файл!")]
-    input_file = FileField("", validators=validators)
-    batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
-    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
-    salt_beg_time = StringField(
+    input_file = wtforms.FileField("", validators=[FileRequired(message="Отсутствует файл!")])
+    batch_number = wtforms.IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
+    date = wtforms.DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
+    salt_beg_time = wtforms.StringField(
         'Начало первой подачи на линии "Пицца Чиз"',
         validators=[Optional()],
         default="07:00",
     )
-    water_beg_time = StringField(
+    water_beg_time = wtforms.StringField(
         'Начало первой подачи на линии "Моцарелла в воде"',
         validators=[Optional()],
         default="08:00",
     )
-    add_full_boiling = BooleanField(
+    add_full_boiling = wtforms.BooleanField(
         "Вставить короткую мойку внутри дня по правилу 15 часов",
         validators=[Optional()],
         default=True,
     )
-    optimize = BooleanField(
+    optimize = wtforms.BooleanField(
         "Оптимизировать расписание",
         validators=[Optional()],
         default=True,
     )
-    exact_melting_time_by_line = SelectField(
+    exact_melting_time_by_line = wtforms.SelectField(
         "Выберите линию, по которой будет выставляться точное время начала плавления при оптимизации",
         validators=[Optional()],
         choices=[(LineName.SALT, LineName.SALT), (LineName.WATER, LineName.WATER)],
@@ -66,28 +63,28 @@ class ScheduleForm(FlaskForm):
 
 
 class CopySKUForm(FlaskForm):
-    name = StringField("Введите имя SKU", validators=[Required()])
-    brand_name = StringField("Введите имя бренда", validators=[Optional()])
-    code = StringField("Введите код SKU", validators=[Optional()])
+    name = wtforms.StringField("Введите имя SKU", validators=[DataRequired()])
+    brand_name = wtforms.StringField("Введите имя бренда", validators=[Optional()])
+    code = wtforms.StringField("Введите код SKU", validators=[Optional()])
 
 
 class SKUForm(FlaskForm):
-    name = StringField("Введите имя SKU", validators=[Required()])
-    brand_name = StringField("Введите имя бренда", validators=[Optional()])
-    weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
-    packing_speed = IntegerField("Введите скорость фасовки", validators=[Optional()])
-    shelf_life = IntegerField("Введите время хранения, д", validators=[Optional()])
-    code = StringField("Введите код SKU", validators=[Optional()])
-    in_box = IntegerField("Введите количество упаковок в коробке, шт", validators=[Optional()])
+    name = wtforms.StringField("Введите имя SKU", validators=[DataRequired()])
+    brand_name = wtforms.StringField("Введите имя бренда", validators=[Optional()])
+    weight_netto = wtforms.FloatField("Введите вес нетто", validators=[Optional()])
+    packing_speed = wtforms.IntegerField("Введите скорость фасовки", validators=[Optional()])
+    shelf_life = wtforms.IntegerField("Введите время хранения, д", validators=[Optional()])
+    code = wtforms.StringField("Введите код SKU", validators=[Optional()])
+    in_box = wtforms.IntegerField("Введите количество упаковок в коробке, шт", validators=[Optional()])
 
-    line = SelectField("Выберите линию", coerce=int, default=-1)
-    packer = SelectField("Выберите тип фасовщика", coerce=int, default=-1)
-    pack_type = SelectField("Выберите тип упаковки", coerce=int, default=-1)
-    form_factor = SelectField("Выберите тип форм фактора", coerce=int, default=-1)
-    boiling = SelectField("Выберите тип варки", coerce=int, default=-1)
-    group = SelectField("Выберите название форм фактора", coerce=int, default=-1)
+    line = wtforms.SelectField("Выберите линию", coerce=int, default=-1)
+    packer = wtforms.SelectField("Выберите тип фасовщика", coerce=int, default=-1)
+    pack_type = wtforms.SelectField("Выберите тип упаковки", coerce=int, default=-1)
+    form_factor = wtforms.SelectField("Выберите тип форм фактора", coerce=int, default=-1)
+    boiling = wtforms.SelectField("Выберите тип варки", coerce=int, default=-1)
+    group = wtforms.SelectField("Выберите название форм фактора", coerce=int, default=-1)
 
-    submit = SubmitField(label="Сохранить")
+    submit = wtforms.SubmitField(label="Сохранить")
 
     def __init__(self, *args, **kwargs):
         super(SKUForm, self).__init__(*args, **kwargs)
@@ -121,28 +118,30 @@ class SKUForm(FlaskForm):
     def validate_sku(self, name):
         sku = db.session.query(MozzarellaSKU).filter_by(MozzarellaSKU.name == name.data).first()
         if sku is not None:
-            raise flask_restplus.ValidationError("SKU с таким именем уже существует")
+            #todo: fix
+            ...
+            # raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 
 
 class LineForm(FlaskForm):
-    name = StringField("Введите название линии", validators=[Required()])
-    pouring_time = IntegerField("Введите время налива", validators=[Required()])
-    serving_time = IntegerField("Введите время подачи и вымешивания", validators=[Required()])
-    chedderization_time = IntegerField("Введите время чеддеризации", validators=[Required()])
-    melting_speed = IntegerField("Введите скорость плавления", validators=[Required()])
-    output_kg = IntegerField("Выход", validators=[Required()])
+    name = wtforms.StringField("Введите название линии", validators=[DataRequired()])
+    pouring_time = wtforms.IntegerField("Введите время налива", validators=[DataRequired()])
+    serving_time = wtforms.IntegerField("Введите время подачи и вымешивания", validators=[DataRequired()])
+    chedderization_time = wtforms.IntegerField("Введите время чеддеризации", validators=[DataRequired()])
+    melting_speed = wtforms.IntegerField("Введите скорость плавления", validators=[DataRequired()])
+    output_kg = wtforms.IntegerField("Выход", validators=[DataRequired()])
 
 
 class BoilingTechnologyForm(FlaskForm):
-    name = StringField("Название варки", validators=[Optional()])
-    pouring_time = IntegerField("Введите время налива", validators=[Optional()])
-    soldification_time = IntegerField("Введите время схватки", validators=[Optional()])
-    cutting_time = IntegerField("Введите время резки и обсушки", validators=[Optional()])
-    pouring_off_time = IntegerField("Введите время слива", validators=[Optional()])
-    extra_time = IntegerField("Введите время на дополнительные затраты", validators=[Optional()])
-    line = SelectField("Выберите линию", coerce=int, default=-1)
+    name = wtforms.StringField("Название варки", validators=[Optional()])
+    pouring_time = wtforms.IntegerField("Введите время налива", validators=[Optional()])
+    soldification_time = wtforms.IntegerField("Введите время схватки", validators=[Optional()])
+    cutting_time = wtforms.IntegerField("Введите время резки и обсушки", validators=[Optional()])
+    pouring_off_time = wtforms.IntegerField("Введите время слива", validators=[Optional()])
+    extra_time = wtforms.IntegerField("Введите время на дополнительные затраты", validators=[Optional()])
+    line = wtforms.SelectField("Выберите линию", coerce=int, default=-1)
 
-    submit = SubmitField(label="Сохранить")
+    submit = wtforms.SubmitField(label="Сохранить")
 
     def __init__(self, *args, **kwargs):
         super(BoilingTechnologyForm, self).__init__(*args, **kwargs)
@@ -152,19 +151,19 @@ class BoilingTechnologyForm(FlaskForm):
 
 
 class FormFactorForm(FlaskForm):
-    name = StringField("Название форм фактора", validators=[Optional()])
-    line = StringField("Название линии", validators=[Optional()])
-    first_cooling_time = IntegerField("Введите время первого охлаждения", validators=[Optional()])
-    second_cooling_time = IntegerField("Введите время второго охлаждения", validators=[Optional()])
-    salting_time = IntegerField("Введите время посолки", validators=[Optional()])
+    name = wtforms.StringField("Название форм фактора", validators=[Optional()])
+    line = wtforms.StringField("Название линии", validators=[Optional()])
+    first_cooling_time = wtforms.IntegerField("Введите время первого охлаждения", validators=[Optional()])
+    second_cooling_time = wtforms.IntegerField("Введите время второго охлаждения", validators=[Optional()])
+    salting_time = wtforms.IntegerField("Введите время посолки", validators=[Optional()])
 
 
 class WasherForm(FlaskForm):
-    name = StringField("Название", validators=[Optional()])
-    time = IntegerField("Введите время мойки", validators=[Optional()])
+    name = wtforms.StringField("Название", validators=[Optional()])
+    time = wtforms.IntegerField("Введите время мойки", validators=[Optional()])
 
 
 class ApproveForm(FlaskForm):
-    file_name = StringField("Filename", validators=[Optional()])
-    date = StringField("Date", validators=[Optional()])
-    submit = SubmitField(label="Подтвердить")
+    file_name = wtforms.StringField("Filename", validators=[Optional()])
+    date = wtforms.StringField("Date", validators=[Optional()])
+    submit = wtforms.SubmitField(label="Подтвердить")

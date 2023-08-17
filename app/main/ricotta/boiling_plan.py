@@ -69,7 +69,7 @@ def ricotta_boiling_plan():
             skus_grouped=skus_grouped,
             template_path=flask.current_app.config["TEMPLATE_RICOTTA_BOILING_PLAN"],
         )
-        sku_plan_client.fill_remainigs_list()
+        sku_plan_client.fill_remainings_list()
         sku_plan_client.fill_ricotta_sku_plan()
 
         excel_compiler, wb, wb_data_only, filename, filepath = move_boiling_file(

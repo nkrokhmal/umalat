@@ -1,7 +1,7 @@
 # fmt: off
 from flask_wtf import FlaskForm
 from wtforms import *
-from wtforms.validators import Required, Optional
+from wtforms.validators import DataRequired, Optional
 from app.models import *
 
 # todo maybe: better list form
@@ -39,7 +39,7 @@ def fill_properties(form, properties):
 
 
 class ScheduleForm(FlaskForm):
-    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
 
 
 class ScheduleDateForm(FlaskForm):

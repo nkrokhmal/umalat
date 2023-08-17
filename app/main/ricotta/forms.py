@@ -2,14 +2,14 @@ from app.imports.runtime import *
 from flask_wtf.file import FileRequired, FileField
 from flask_wtf import FlaskForm
 from wtforms import *
-from wtforms.validators import Required, Optional
+from wtforms.validators import DataRequired, Optional
 
 from app.models import *
 
 
 class UploadForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
-    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
     input_file = FileField("", validators=validators)
 
 
@@ -28,18 +28,18 @@ class BoilingPlanForm(FlaskForm):
         "Введите дату",
         format="%Y-%m-%d",
         default=datetime.today() + timedelta(days=1),
-        validators=[Required()],
+        validators=[DataRequired()],
     )
 
 
 class CopySKUForm(FlaskForm):
-    name = StringField("Введите имя SKU", validators=[Required()])
+    name = StringField("Введите имя SKU", validators=[DataRequired()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     code = StringField("Введите код SKU", validators=[Optional()])
 
 
 class SKUForm(FlaskForm):
-    name = StringField("Введите имя SKU", validators=[Required()])
+    name = StringField("Введите имя SKU", validators=[DataRequired()])
     code = StringField("Введите код SKU", validators=[Optional()])
     brand_name = StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = FloatField("Введите вес нетто", validators=[Optional()])
@@ -78,9 +78,9 @@ class SKUForm(FlaskForm):
 
 
 class LineForm(FlaskForm):
-    name = StringField("Введите название линии", validators=[Required()])
+    name = StringField("Введите название линии", validators=[DataRequired()])
     input_ton = IntegerField(
-        "Введите количество литров в одном танке", validators=[Required()]
+        "Введите количество литров в одном танке", validators=[DataRequired()]
     )
 
 
@@ -120,7 +120,7 @@ class ScheduleForm(FlaskForm):
     batch_number = IntegerField(
         "Введите номер первой партии в текущем дне", validators=[Optional()]
     )
-    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
     beg_time = StringField(
         'Начало первой подачи"',
         validators=[Optional()],

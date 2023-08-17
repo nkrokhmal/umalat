@@ -5,7 +5,7 @@ os.environ["DB_TYPE"] = "prod"
 from app.app import *
 
 app, rq = create_app()
-manager = create_manager(app)
+create_manager(app)
 
 if __name__ == "__main__":
     from app.models.fill_db.default_data import generate_all

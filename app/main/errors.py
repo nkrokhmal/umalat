@@ -23,7 +23,7 @@ def forbidden(message):
     return response
 
 
-@main.errorhandler(flask_restplus.ValidationError)
+@main.errorhandler(ValueError)
 def validation_error(e):
     return bad_request(e.args[0])
 

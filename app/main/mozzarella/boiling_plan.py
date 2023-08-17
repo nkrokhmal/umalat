@@ -49,7 +49,7 @@ def mozzarella_boiling_plan():
             template_path=flask.current_app.config["TEMPLATE_MOZZARELLA_BOILING_PLAN"],
             yesterday_boiling_plan_df=yesterday_boiling_plan_df,
         )
-        sku_plan_client.fill_remainigs_list()
+        sku_plan_client.fill_remainings_list()
         sku_plan_client.fill_mozzarella_sku_plan()
 
         excel_compiler, wb, wb_data_only, filename, filepath = move_boiling_file(

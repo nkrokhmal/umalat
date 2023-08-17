@@ -34,8 +34,6 @@ import flask_pagedown
 import flask_sqlalchemy
 import flask_bootstrap
 import flask_migrate
-import flask_script
-import flask_restplus
 import flask_rq2
 
 from loguru import logger

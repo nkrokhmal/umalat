@@ -54,17 +54,13 @@ class SkuPlanClient:
         shutil.copyfile(self.template_path, self.filepath)
         return openpyxl.load_workbook(self.filepath)
 
-    def fill_remainigs_list(self):
-        with pd.ExcelWriter(self.filepath, engine="openpyxl") as writer:
-            writer.book = self.wb
-            writer.sheets = dict((ws.title, ws) for ws in self.wb.worksheets)
-
-            print(self.remainings)
-
+    def fill_remainings_list(self):
+        with pd.ExcelWriter(self.filepath, engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
             self.remainings.to_excel(
                 writer, sheet_name=flask.current_app.config["SHEET_NAMES"]["remainings"]
             )
-            writer.save()
+        logger.info(self.filepath)
+
         wb = openpyxl.load_workbook(self.filepath)
         ws_remainings = wb[flask.current_app.config["SHEET_NAMES"]["remainings"]]
         for i in range(1, ws_remainings.max_column + 1):
