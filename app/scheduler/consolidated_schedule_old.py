@@ -3,8 +3,11 @@ import os
 import flask
 import openpyxl
 
-from utils_ak.os import makedirs
+from utils_ak.code_block import code
+from utils_ak.code_block.code import code
+from utils_ak.os.os_tools import makedirs
 
+from app.globals import basedir
 from app.scheduler.consolidated_schedule import run_consolidated
 from app.scheduler.frontend import draw_excel_frontend
 from app.scheduler.load_schedules import load_schedules
@@ -29,8 +32,6 @@ def run_consolidated_old(
                 filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN_DEPARTMENT"],
                 data_only=True,
             )
-
-        from app.scheduler.mozzarella import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["mozzarella"])
         depth = frontend.y[1]
@@ -58,8 +59,6 @@ def run_consolidated_old(
             )
 
     if "ricotta" in schedules:
-        from app.scheduler.ricotta import STYLE, wrap_frontend
-
         frontend = wrap_frontend(schedules["ricotta"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
@@ -68,7 +67,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "mascarpone" in schedules:
-        from app.scheduler.mascarpone import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["mascarpone"], date=date)
         depth = frontend.y[1]
@@ -78,7 +76,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "butter" in schedules:
-        from app.scheduler.butter import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["butter"], date=date)
         depth = frontend.y[1]
@@ -88,7 +85,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "milk_project" in schedules:
-        from app.scheduler.milk_project import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["milk_project"], date=date)
         depth = frontend.y[1]
@@ -98,7 +94,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "adygea" in schedules:
-        from app.scheduler.adygea import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["adygea"], date=date)
         depth = frontend.y[1]
@@ -108,7 +103,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "contour_cleanings" in schedules:
-        from app.scheduler.contour_cleanings import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["contour_cleanings"], date=date)
         depth = frontend.y[1]

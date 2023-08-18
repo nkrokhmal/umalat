@@ -1,3 +1,6 @@
+from app.scheduler.time import cast_time
+
+
 STYLE = {
     "cleaning": {
         "color": "white",

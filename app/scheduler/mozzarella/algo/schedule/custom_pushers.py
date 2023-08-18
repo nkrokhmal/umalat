@@ -1,4 +1,4 @@
-from utils_ak.block_tree import IterativePusher
+from utils_ak.block_tree.pushers.iterative import IterativePusher
 
 
 class AwaitingPusher(IterativePusher):

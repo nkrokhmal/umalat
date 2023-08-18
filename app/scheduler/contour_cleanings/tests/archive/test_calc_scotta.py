@@ -1,3 +1,6 @@
+from app.scheduler.load_schedules import load_schedules
+
+
 def _test(path, prefix):
     schedules = load_schedules(
         path,

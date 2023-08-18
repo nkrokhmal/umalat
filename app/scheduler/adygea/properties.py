@@ -1,3 +1,11 @@
+import pydantic
+
+from pydantic import Field
+
+from app.scheduler.adygea.properties import AdygeaProperties
+from app.scheduler.time import cast_human_time
+
+
 class AdygeaProperties(pydantic.BaseModel):
     end_time: str = Field("", description="Конец работы адыгейского цеха")
     n_boilings: str = Field(0, description="Количество варок")

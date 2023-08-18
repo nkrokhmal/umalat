@@ -1,3 +1,10 @@
+import pandas as pd
+
+from utils_ak.lazy_tester.lazy_tester_class import lazy_tester
+
+from app.models import MascarponeSKU, cast_model
+
+
 def test_make_mascarpone_boiling():
     lazy_tester.configure_function_path()
 

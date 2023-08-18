@@ -1,3 +1,9 @@
+import numpy as np
+
+from utils_ak.code_block import code
+from utils_ak.code_block.code import code
+
+
 def update_interval_times(schedule_wb, boiling_plan_df):
     schedule_info = parse_schedule((schedule_wb, "Расписание"))
     boiling_plan_df["interval_time"] = None

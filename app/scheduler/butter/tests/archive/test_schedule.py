@@ -1,5 +1,7 @@
 import os
 
+from config import config
+
 
 os.environ["APP_ENVIRONMENT"] = "interactive"
 

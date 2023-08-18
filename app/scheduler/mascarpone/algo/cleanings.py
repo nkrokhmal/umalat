@@ -1,4 +1,4 @@
-from utils_ak.block_tree import BlockMaker
+from utils_ak.block_tree.block_maker import BlockMaker
 
 from app.models import Washer, cast_model
 

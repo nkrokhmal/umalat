@@ -1,3 +1,11 @@
+import pydantic
+
+from pydantic import Field
+
+from app.scheduler.butter.properties import ButterProperties
+from app.scheduler.time import cast_human_time
+
+
 class ButterProperties(pydantic.BaseModel):
     end_time: str = Field("", description="Конец работы маслоцеха")
 

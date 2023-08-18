@@ -1,3 +1,14 @@
+import os
+
+import pandas as pd
+
+from utils_ak.openpyxl.openpyxl_tools import read_merged_cells_df
+
+from app.globals import basedir
+from app.scheduler.parsing_new.group_intervals import basic_criteria
+from app.scheduler.parsing_new.parsing import parse_line
+
+
 def parse_line(merged_cells_df, line_row, split_criteria):
     df1 = merged_cells_df[merged_cells_df["x1"] == line_row]  # filter column header
     groups = group_intervals(

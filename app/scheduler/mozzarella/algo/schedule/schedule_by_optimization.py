@@ -1,3 +1,15 @@
+import itertools
+
+import numpy as np
+import pandas as pd
+
+from utils_ak.iteration.simple_iterator import iter_pairs
+
+from app.enum import LineName
+from app.models import cast_model
+from app.scheduler.time import cast_t
+
+
 def _find_optimal_cleanings_combination_by_schedule(schedule):
     # extract full cleaning duration
     full_cleaning_length = cast_model(Washer, "Длинная мойка термизатора").time

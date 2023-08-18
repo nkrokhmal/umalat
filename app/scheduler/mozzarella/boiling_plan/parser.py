@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def parse_schedule(schedule):
     schedule_json = schedule.to_dict(
         props=[

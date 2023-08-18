@@ -1,3 +1,13 @@
+import random
+
+import numpy as np
+import pandas as pd
+
+from utils_ak.numeric.numeric import custom_round
+
+from app.models import fetch_all
+
+
 def _generate_random_boiling_group(sku_model, boiling_model, n=3):
     skus = fetch_all(sku_model)
     models = fetch_all(boiling_model)

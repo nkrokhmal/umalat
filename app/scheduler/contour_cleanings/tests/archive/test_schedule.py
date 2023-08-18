@@ -1,5 +1,10 @@
 import os
 
+from utils_ak.lazy_tester.lazy_tester_class import lazy_tester
+
+from app.scheduler.load_properties import load_properties
+from app.scheduler.load_schedules import load_schedules
+
 
 os.environ["APP_ENVIRONMENT"] = "interactive"
 

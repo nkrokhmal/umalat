@@ -1,5 +1,7 @@
 import os
 
+from utils_ak.lazy_tester.lazy_tester_class import lazy_tester
+
 
 os.environ["APP_ENVIRONMENT"] = "interactive"
 

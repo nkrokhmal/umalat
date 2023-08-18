@@ -1,3 +1,6 @@
+from app.enum import LineName
+
+
 def get_configuration_time(line_name, sku1, sku2):
     if all(
         [

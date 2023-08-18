@@ -1,8 +1,8 @@
 from loguru import logger
 from openpyxl.styles import Side
 from openpyxl.styles.borders import BORDER_THIN
-from utils_ak.color import cast_color
-from utils_ak.openpyxl import (
+from utils_ak.color.color import cast_color
+from utils_ak.openpyxl.openpyxl_tools import (
     cast_worksheet,
     draw_merged_cell,
     init_workbook,
@@ -11,8 +11,9 @@ from utils_ak.openpyxl import (
     set_dimensions,
     set_zoom,
 )
-from utils_ak.os import makedirs, open_file_in_os
+from utils_ak.os.os_tools import makedirs, open_file_in_os
 
+from app.scheduler.frontend import prepare_schedule_worksheet
 from app.scheduler.time import cast_t
 
 

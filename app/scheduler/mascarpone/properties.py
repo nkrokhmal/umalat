@@ -1,3 +1,11 @@
+import pydantic
+
+from pydantic import Field
+
+from app.scheduler.mascarpone.properties import MascarponeProperties
+from app.scheduler.time import cast_human_time
+
+
 class MascarponeProperties(pydantic.BaseModel):
     fourth_boiling_group_adding_lactic_acid_time: str = Field(
         "", description="Конец добавления кислоты во второй варке в 4-й группе варок"

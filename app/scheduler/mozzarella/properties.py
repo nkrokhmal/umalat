@@ -1,3 +1,17 @@
+from typing import List
+
+import pandas as pd
+import pydantic
+
+from pydantic import Field
+from utils_ak.code_block import code
+from utils_ak.code_block.code import code
+
+from app.enum import LineName
+from app.scheduler.mozzarella.properties import MozzarellaProperties
+from app.scheduler.time import cast_human_time
+
+
 class MozzarellaProperties(pydantic.BaseModel):
     bar12_present: bool = Field(False, description="Присутствует ли брус 1.2")
     line33_last_termizator_end_times: str = Field(

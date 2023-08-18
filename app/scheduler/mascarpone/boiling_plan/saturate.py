@@ -1,3 +1,7 @@
+from utils_ak.builtin.collection import delistify
+from utils_ak.numeric.types import cast_int
+
+
 def saturate_boiling_plan(boiling_plan_df):
     df = boiling_plan_df
     df["boiling"] = df["sku"].apply(lambda sku: delistify(sku.made_from_boilings, single=True))

@@ -1,3 +1,6 @@
+from app.scheduler.time import cast_time
+
+
 def calc_schedule_stats(schedule):
     # calc schedule stats
     stats = {}

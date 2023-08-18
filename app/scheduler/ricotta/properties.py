@@ -1,3 +1,13 @@
+import pydantic
+
+from pydantic import Field
+from utils_ak.code_block import code
+from utils_ak.code_block.code import code
+
+from app.scheduler.ricotta.properties import RicottaProperties
+from app.scheduler.time import cast_human_time
+
+
 class RicottaProperties(pydantic.BaseModel):
     n_boilings: int = Field(0, description="Число варок")
     last_pumping_out_time: str = Field("", description="Конец последнего слива")

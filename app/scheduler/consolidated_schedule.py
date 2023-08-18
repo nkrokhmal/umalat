@@ -1,9 +1,7 @@
 import os
 
-import openpyxl
-
-from utils_ak.openpyxl import cast_workbook, draw_sheet_sequence
-from utils_ak.os import makedirs, open_file_in_os
+from utils_ak.openpyxl.openpyxl_tools import cast_workbook, draw_sheet_sequence
+from utils_ak.os.os_tools import makedirs, open_file_in_os
 
 from app.scheduler.frontend import prepare_schedule_worksheet
 from config import config
