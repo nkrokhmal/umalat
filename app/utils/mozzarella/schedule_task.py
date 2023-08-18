@@ -1,5 +1,5 @@
 from app.models.mozzarella import MozzarellaSKU
-from app.utils.base.schedule_task import *
+from app.utils.base_schedule_task import *
 
 
 class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):

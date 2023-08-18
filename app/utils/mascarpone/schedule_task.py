@@ -1,6 +1,5 @@
-from app.imports.runtime import *
 from app.models import MascarponeSKU
-from app.utils.base.schedule_task import BaseScheduleTask
+from app.utils.base_schedule_task import BaseScheduleTask
 from app.utils.features.draw_utils import *
 from app.utils.files.utils import create_dir
 

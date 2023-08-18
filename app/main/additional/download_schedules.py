@@ -4,7 +4,7 @@ import flask_paginate
 
 from app.imports.runtime import *
 from app.main import main
-from app.utils.files.update import update_data_structure
+from app.utils.files.update_data_structure import update_data_structure
 
 
 def get_department(filename, default_mozzarella=True):

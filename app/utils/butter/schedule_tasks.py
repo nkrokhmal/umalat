@@ -1,5 +1,5 @@
 from app.models import ButterSKU
-from app.utils.base.schedule_task import BaseScheduleTask
+from app.utils.base_schedule_task import BaseScheduleTask
 
 
 class ButterScheduleTask(BaseScheduleTask[ButterSKU]):
