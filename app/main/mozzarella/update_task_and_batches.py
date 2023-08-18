@@ -3,8 +3,8 @@ from app.models import MozzarellaSKU
 from app.scheduler.mozzarella.boiling_plan import read_additional_packing, read_boiling_plan
 from app.scheduler.mozzarella.update_interval_times import update_interval_times
 from app.utils.batches import add_batch_from_boiling_plan_df
+from app.utils.cast_schedule import cast_schedule
 from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
-from app.utils.schedule import cast_schedule
 
 
 def init_task(date, boiling_plan_df, df_packing):

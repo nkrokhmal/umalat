@@ -8,7 +8,7 @@ def create_external_db(data_path=None):
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
-    connection_string = create_connection_string(data_path)
+    connection_string = f"sqlite:///{data_path or SQLITE_PATH}?check_same_thread=False"
     engine = create_engine(connection_string)
     Session = sessionmaker()
     Session.configure(bind=engine)
@@ -16,8 +16,3 @@ def create_external_db(data_path=None):
     db = utils.dotdict()
     db["session"] = session
     return db
-
-
-def create_connection_string(db_path):
-    db_path = db_path if db_path else SQLITE_PATH
-    return f"sqlite:///{db_path}?check_same_thread=False"

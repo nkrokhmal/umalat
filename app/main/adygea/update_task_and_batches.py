@@ -4,7 +4,7 @@ from app.scheduler.adygea.boiling_plan import read_boiling_plan
 from app.scheduler.adygea.update_interval_times import update_interval_times
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches import add_batch_from_boiling_plan_df
-from app.utils.schedule import cast_schedule
+from app.utils.cast_schedule import cast_schedule
 
 
 def init_task(date, boiling_plan_df):

@@ -4,7 +4,7 @@ from flask_wtf.file import FileField, FileRequired
 from wtforms import *
 from wtforms.validators import Optional, Required
 
-from app.main.validators import *
+from app.main.time_validator import *
 from app.models import *
 
 

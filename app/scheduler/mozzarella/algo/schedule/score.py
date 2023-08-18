@@ -1,4 +1,4 @@
-from app.enum import LineName
+from app.enum.line_name import LineName
 from app.imports.runtime import *
 from app.scheduler.time import *
 

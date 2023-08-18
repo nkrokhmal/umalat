@@ -1,18 +1,16 @@
-from app.imports.runtime import *  # isort: skip
 from app.main import main
 from app.main.errors import internal_error
 from app.main.mozzarella.update_task_and_batches import update_task_and_batches
-from app.main.validators import *
+from app.main.time_validator import *
 from app.scheduler import *
 from app.scheduler.mozzarella import *
-from app.utils.batches.batch import *
 from app.utils.features.openpyxl_wrapper import set_default_sheet
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 from app.utils.mozzarella.additional_packing_draw import draw_additional_packing
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.parse_schedule_json import *
-from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 
+from ...enum.line_name import LineName
 from .forms import ScheduleForm
 
 

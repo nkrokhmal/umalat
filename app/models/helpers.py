@@ -1,6 +1,6 @@
-from app.enum import LineName
 from app.imports.runtime import *
 
+from ..enum.line_name import LineName
 from .mozzarella import MozzarellaBoiling, MozzarellaFormFactor
 
 

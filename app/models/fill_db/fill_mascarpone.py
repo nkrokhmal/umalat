@@ -4,7 +4,7 @@ import pandas as pd
 
 from app.models import *
 
-from ...enum import LineName
+from ...enum.line_name import LineName
 
 
 def read_params():

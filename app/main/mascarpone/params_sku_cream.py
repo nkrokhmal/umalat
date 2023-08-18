@@ -1,12 +1,12 @@
 from werkzeug.utils import redirect
 
-from app.enum import LineName
 from app.globals import db
 from app.imports.runtime import *
 from app.main import main
 from app.models import Group, MascarponeLine, MascarponeSKU
 from app.utils.features.form_utils import *
 
+from ...enum.line_name import LineName
 from .forms import CopySKUForm, SKUMascarponeForm
 
 

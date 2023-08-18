@@ -1,10 +1,12 @@
 import os
 
+from app.create_manager import create_manager
+
 
 os.environ["APP_ENVIRONMENT"] = "runtime"
 os.environ["DB_TYPE"] = "test"
 
-from app.app import *
+from app.create_app import *
 
 
 app, rq = create_app("test")

@@ -24,3 +24,6 @@ class Notifier:
         tb.send_message(
             config.TELEGRAM_CHAT_ID, "\n".join([date_str, Notifier._urgency_symbol(urgency), topic, message])
         )
+
+
+notifier = Notifier()

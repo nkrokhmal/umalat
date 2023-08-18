@@ -1,4 +1,3 @@
-from app.enum import LineName
 from app.scheduler.mozzarella.boiling_plan.boiling_plan import cast_boiling_plan
 
 from .parse_start_configuration import *

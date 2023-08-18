@@ -1,9 +1,13 @@
 import os
 
+from app.create_manager import create_manager
+
+
 os.environ["ENVIRONMENT"] = "production"
 os.environ["APP_ENVIRONMENT"] = "runtime"
 
-from app.app import *
+from app.create_app import *
+
 
 app, rq = create_app()
 manager = create_manager(app)

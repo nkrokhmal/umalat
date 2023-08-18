@@ -4,7 +4,7 @@ from app.scheduler.butter.boiling_plan import read_boiling_plan
 from app.scheduler.butter.update_interval_times import update_interval_times
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.butter.schedule_tasks import ButterScheduleTask
-from app.utils.schedule import cast_schedule
+from app.utils.cast_schedule import cast_schedule
 
 
 def init_task(date, boiling_plan_df):

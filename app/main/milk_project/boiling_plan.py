@@ -1,13 +1,11 @@
-from app.imports.runtime import *
 from app.main import main
-from app.models import *
 from app.utils.adygea.boiling_plan_create import boiling_plan_create as boiling_plan_create_adygea
 from app.utils.adygea.boiling_plan_draw import draw_boiling_plan as draw_boiling_plan_adygea
 from app.utils.files.utils import move_boiling_file, save_request
 from app.utils.milk_project.boiling_plan_create import boiling_plan_create as boiling_plan_create_milk_project
 from app.utils.milk_project.boiling_plan_draw import draw_boiling_plan as draw_boiling_plan_milk_project
-from app.utils.parse_remainings import *
-from app.utils.sku_plan import *
+from app.utils.parse_remainings.parse_remainings import *
+from app.utils.sku_plan_client import *
 
 from .forms import BoilingPlanForm
 

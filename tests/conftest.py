@@ -5,7 +5,7 @@ os.environ["APP_ENVIRONMENT"] = "runtime"
 
 import pytest
 
-from app.app import create_app
+from app.create_app import create_app
 
 
 @pytest.fixture

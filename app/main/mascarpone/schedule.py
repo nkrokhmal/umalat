@@ -4,7 +4,7 @@ from app.imports.runtime import *
 from app.main import main
 from app.main.errors import internal_error
 from app.main.mascarpone.update_task_and_batches import update_task_and_batches
-from app.main.validators import *
+from app.main.time_validator import *
 from app.scheduler import draw_excel_frontend
 from app.scheduler.mascarpone import *
 from app.scheduler.mascarpone.frontend.style import STYLE

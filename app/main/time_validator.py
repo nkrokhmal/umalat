@@ -12,5 +12,9 @@ def time_validator(form, field):
         raise ValidationError(wrong_input_msg)
 
 
-if __name__ == "__main__":
+def test():
     time_validator(None, utils.dotdict({"data": "7:00+1"}))
+
+
+if __name__ == "__main__":
+    test()

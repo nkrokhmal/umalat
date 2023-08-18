@@ -1,6 +1,5 @@
 from app.enum import *
 from app.globals import *
-from app.utils import *
 
 from config import *
 

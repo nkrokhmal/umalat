@@ -1,5 +1,5 @@
 from app.imports.runtime import *  # isort: skip
-from app.enum import LineName
+from app.enum.line_name import LineName
 from app.scheduler.mozzarella import run_mozzarella
 
 

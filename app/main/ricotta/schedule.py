@@ -1,6 +1,6 @@
 from app.main import main
 from app.main.ricotta.update_task_and_batches import update_task_and_batches
-from app.main.validators import *
+from app.main.time_validator import *
 
 # from app.scheduler import *
 from app.scheduler.ricotta import *

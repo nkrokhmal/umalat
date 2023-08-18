@@ -1,7 +1,7 @@
 # fmt: off
 from utils_ak.block_tree import *
 
-from app.enum import LineName
+from app.enum.line_name import LineName
 
 
 def make_cooling_process(

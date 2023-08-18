@@ -3,7 +3,7 @@ import flask
 from app.imports.runtime import *
 from app.main import main
 from app.main.butter.update_task_and_batches import update_task_and_batches
-from app.main.validators import *
+from app.main.time_validator import *
 from app.scheduler import draw_excel_frontend
 from app.scheduler.butter import *
 from app.scheduler.butter.frontend.style import STYLE

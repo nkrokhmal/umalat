@@ -3,7 +3,7 @@ from collections import namedtuple
 from openpyxl.styles import Alignment
 from openpyxl.utils.cell import column_index_from_string, coordinate_from_string
 
-from app.enum import LineName
+from app.enum.line_name import LineName
 from app.imports.runtime import *
 from app.utils.features.openpyxl_wrapper import ExcelBlock
 

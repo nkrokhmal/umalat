@@ -1,8 +1,8 @@
 from sqlalchemy.orm import backref
 
-from app.enum import LineName
 from app.imports.runtime import *
 
+from ..enum.line_name import LineName
 from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Line, backref
 
 

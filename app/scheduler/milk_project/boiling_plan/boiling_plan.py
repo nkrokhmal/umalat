@@ -1,4 +1,4 @@
-from app.enum import LineName
+from app.enum.line_name import LineName
 from app.imports.runtime import *
 from app.models import *
 from app.scheduler.boiling_plan import *

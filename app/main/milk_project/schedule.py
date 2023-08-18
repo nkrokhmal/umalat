@@ -6,7 +6,7 @@ from app.main.adygea.update_task_and_batches import update_task_and_batches as u
 from app.main.milk_project.update_task_and_batches import (
     update_task_and_batches as update_task_and_batches_milk_project,
 )
-from app.main.validators import *
+from app.main.time_validator import *
 from app.models import AdygeaSKU, MilkProjectSKU
 from app.scheduler import draw_excel_frontend, run_adygea, run_consolidated_old, run_milk_project
 from app.scheduler.frontend import fill_grid
