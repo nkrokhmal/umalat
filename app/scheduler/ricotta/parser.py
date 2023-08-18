@@ -1,20 +1,10 @@
-# fmt: off
-from utils_ak.block_tree import *
-
-from app.imports.runtime import *
-from app.scheduler.parsing import *
-from app.scheduler.parsing_new.parse_time import *
-from app.scheduler.ricotta import *
-from app.scheduler.ricotta.properties import *
-
-
 def parse_schedule_file(wb_obj):
-    df = load_cells_df(wb_obj, 'Расписание')
+    df = load_cells_df(wb_obj, "Расписание")
 
     m = BlockMaker("root")
 
-    with code('Find start times'):
-        time_index_row_nums = df[df['label'].astype(str).str.contains('График')]['x1'].unique()
+    with code("Find start times"):
+        time_index_row_nums = df[df["label"].astype(str).str.contains("График")]["x1"].unique()
 
         start_times = []
 
@@ -35,14 +25,17 @@ def parse_schedule_file(wb_obj):
         except:
             return False
 
-    parse_block(m, df,
+    parse_block(
+        m,
+        df,
         "boilings",
         "boiling",
         [i for i in [3, 7, 11]],
         start_times[0],
         length=4,
         split_func=_split_func,
-        filter=_filter_func)
+        filter=_filter_func,
+    )
 
     return m.root
 
@@ -51,7 +44,7 @@ def fill_properties(parsed_schedule):
     props = RicottaProperties()
 
     # save boiling_model to parsed_schedule blocks
-    boilings = list(sorted(parsed_schedule.iter(cls='boiling'), key=lambda boiling: boiling.y[0]))
+    boilings = list(sorted(parsed_schedule.iter(cls="boiling"), key=lambda boiling: boiling.y[0]))
     props.n_boilings = len(boilings)
     props.last_pumping_out_time = cast_human_time(boilings[-1].y[0])
 
@@ -71,5 +64,5 @@ def parse_properties(fn):
 
 if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = '/Users/marklidenberg/Downloads/Telegram Desktop/2021-10-13 Расписание рикотта.xlsx'
+    fn = "/Users/marklidenberg/Downloads/Telegram Desktop/2021-10-13 Расписание рикотта.xlsx"
     print(dict(parse_properties(fn)))

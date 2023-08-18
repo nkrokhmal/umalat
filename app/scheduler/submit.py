@@ -1,7 +1,3 @@
-from app.imports.runtime import *
-from app.scheduler.frontend import draw_excel_frontend
-
-
 def submit_schedule(
     name,
     schedule,
@@ -13,7 +9,7 @@ def submit_schedule(
     open_file=False,
     split_file=False,
 ):
-    utils.makedirs(path)
+    makedirs(path)
 
     if path:
         with code("Dump schedule as pickle file"):
@@ -22,7 +18,7 @@ def submit_schedule(
                 base_fn = prefix + " " + base_fn
             output_pickle_fn = os.path.join(path, base_fn)
             if split_file:
-                output_pickle_fn = utils.SplitFile(output_pickle_fn).get_new()
+                output_pickle_fn = SplitFile(output_pickle_fn).get_new()
 
             with open(output_pickle_fn, "wb") as f:
                 pickle.dump(schedule.to_dict(), f)
@@ -36,7 +32,7 @@ def submit_schedule(
             output_fn = os.path.join(path, base_fn)
 
             if split_file:
-                output_fn = utils.SplitFile(output_fn).get_new()
+                output_fn = SplitFile(output_fn).get_new()
 
     workbook = draw_excel_frontend(frontend, open_file=open_file, fn=output_fn, style=style, wb=template_wb)
 

@@ -1,10 +1,3 @@
-from utils_ak.block_tree import *
-
-from app.scheduler.frontend import *
-from app.scheduler.header import wrap_header
-from app.scheduler.time import *
-
-
 def wrap_boiling_lines(schedule):
     m = BlockMaker(
         "line",
@@ -104,7 +97,7 @@ def wrap_packing(schedule):
         # props
         font_size=9,
     )
-    for child_prev, child in utils.iter_pairs(list(schedule.iter(cls="packing")), method="any_prefix"):
+    for child_prev, child in iter_pairs(list(schedule.iter(cls="packing")), method="any_prefix"):
         child.update_size(size=(child.size[0], 2))
         if child_prev:
             m.block("cooling", size=(4, 2), x=(child.x[0] - 4, 0), push_func=add_push)
@@ -126,7 +119,7 @@ def wrap_frontend(schedule, date=None):
     m.row("stub", size=0)  # start with 1
 
     # calc start time
-    start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour
+    start_t = int(custom_round(schedule.x[0], 12, "floor"))  # round to last hour
     start_time = cast_time(start_t)
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы маслоцеха"))

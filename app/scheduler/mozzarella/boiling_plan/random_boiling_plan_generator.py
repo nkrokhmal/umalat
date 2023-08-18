@@ -1,6 +1,4 @@
 # todo archive: deprecated
-# from app.imports.runtime import *
-# from app.models import *
 # from app.enum import LineName
 #
 #

@@ -1,11 +1,3 @@
-# fmt: off
-from utils_ak.block_tree import *
-
-from app.enum import LineName
-from app.imports.runtime import *
-from app.models import *
-
-
 def get_configuration_time(line_name, sku1, sku2):
     if all(
         [
@@ -19,6 +11,7 @@ def get_configuration_time(line_name, sku1, sku2):
         return 0
     else:
         return 5
+
 
 def make_configuration_blocks(b1, b2, m, line_name, between_boilings=False):
     res = []
@@ -66,11 +59,7 @@ def boiling_has_multihead_packing(boiling):
     packings = list(boiling.iter(cls="packing"))
     processes = []
     for packing in packings:
-        processes += list(
-            packing.iter(
-                cls="process", sku=lambda sku: "Мультиголова" in sku.packers[0].name
-            )
-        )
+        processes += list(packing.iter(cls="process", sku=lambda sku: "Мультиголова" in sku.packers[0].name))
         if processes:
             return True
     return False

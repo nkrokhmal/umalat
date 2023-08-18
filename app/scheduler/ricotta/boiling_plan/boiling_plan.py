@@ -1,9 +1,12 @@
-from openpyxl.utils.cell import column_index_from_string
+import copy
 
-from app.imports.runtime import *
-from app.models import *
-from app.scheduler.boiling_plan import *
-from app.scheduler.ricotta.boiling_plan.saturate import saturate_boiling_plan
+import numpy as np
+
+from openpyxl.utils import column_index_from_string
+from utils_ak.openpyxl import cast_workbook
+
+from app.models import RicottaSKU, cast_model
+from app.scheduler.boiling_plan import update_absolute_batch_id
 
 
 INDEX_COLUMN = column_index_from_string("A")
@@ -101,7 +104,7 @@ def read_boiling_plan(wb_obj, saturate=True, first_batch_ids=None):
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
     first_batch_ids = first_batch_ids or {"ricotta": 1}
-    wb = utils.cast_workbook(wb_obj)
+    wb = cast_workbook(wb_obj)
 
     ws_name = "План варок"
     ws = wb[ws_name]

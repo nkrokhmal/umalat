@@ -1,9 +1,9 @@
-from app.enum import LineName
-from app.imports.runtime import *
-from app.models import *
-from app.scheduler.boiling_plan import *
+import pandas as pd
 
-from .saturate import saturate_boiling_plan
+from utils_ak.openpyxl import cast_workbook
+
+from app.models import ButterSKU, cast_model
+from app.scheduler.boiling_plan import update_absolute_batch_id
 
 
 def read_boiling_plan(wb_obj, first_batch_ids=None):
@@ -11,7 +11,7 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    wb = utils.cast_workbook(wb_obj)
+    wb = cast_workbook(wb_obj)
     first_batch_ids = first_batch_ids or {"butter": 1}
 
     cur_id = 0

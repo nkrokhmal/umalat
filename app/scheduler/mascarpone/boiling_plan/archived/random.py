@@ -1,8 +1,3 @@
-from app.imports.runtime import *
-from app.models import *
-from app.scheduler.mascarpone.boiling_plan.saturate import saturate_boiling_plan
-
-
 def _generate_random_boiling_group(sku_model, boiling_model, n=3):
     skus = fetch_all(sku_model)
     models = fetch_all(boiling_model)
@@ -14,7 +9,7 @@ def _generate_random_boiling_group(sku_model, boiling_model, n=3):
         for j in range(2):
             sku = random.choice([sku for sku in skus if boiling_model in sku.made_from_boilings])
             kg = sku.packing_speed * np.random.uniform(0.6, 0.8) / 2
-            kg = utils.custom_round(kg, 10, "ceil")
+            kg = custom_round(kg, 10, "ceil")
             values.append([i * 2 + j, sku, kg])
 
     return pd.DataFrame(values, columns=["batch_id", "sku", "kg"])

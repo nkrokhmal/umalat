@@ -1,6 +1,3 @@
-from app.scheduler.time import *
-
-
 STYLE = {
     "cleaning": {
         "color": "white",

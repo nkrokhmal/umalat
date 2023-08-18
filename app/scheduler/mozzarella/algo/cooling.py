@@ -1,12 +1,9 @@
-# fmt: off
-from utils_ak.block_tree import *
+from utils_ak.block_tree import BlockMaker
 
 from app.enum import LineName
 
 
-def make_cooling_process(
-    line_name, cooling_technology, melting_process_size=None, size=None, *args, **kwargs
-):
+def make_cooling_process(line_name, cooling_technology, melting_process_size=None, size=None, *args, **kwargs):
     m = BlockMaker("cooling_process", *args, **kwargs)
     with m.block("start"):
         cooling_times = (

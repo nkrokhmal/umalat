@@ -1,13 +1,8 @@
-from app.imports.runtime import *
-from app.scheduler.parsing_new import *
-from app.scheduler.time import *
-
-
 COLUMN_SHIFT = 5  # header 4 + 1 for one-indexing
 
 
 def parse_schedule(ws_obj):
-    df = utils.read_merged_cells_df(ws_obj, basic_features=False)
+    df = read_merged_cells_df(ws_obj, basic_features=False)
 
     with code("Find time"):
         # find time index rows
@@ -28,7 +23,7 @@ def parse_schedule(ws_obj):
             with code("find all headers"):
                 _labels = [label.replace("налив", "") for label in row_labels]
                 _labels = [re.sub(r"\s+", "", label) for label in _labels]
-                int_labels = [int(label) for label in _labels if utils.is_int_like(label)]
+                int_labels = [int(label) for label in _labels if is_int_like(label)]
 
                 if not ("05" in row_labels and "55" in row_labels):
                     # not a time header
@@ -44,13 +39,13 @@ def parse_schedule(ws_obj):
 
             def _filter_func(group):
                 try:
-                    return utils.is_int_like(group.iloc[0]["label"].split(" ")[0])
+                    return is_int_like(group.iloc[0]["label"].split(" ")[0])
                 except:
                     return False
 
             def _split_func(prev_row, row):
                 try:
-                    return utils.is_int_like(row["label"].split(" ")[0])
+                    return is_int_like(row["label"].split(" ")[0])
                 except:
                     return False
 

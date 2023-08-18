@@ -1,16 +1,13 @@
-from app.imports.runtime import *
-
-
 def saturate_boiling_plan(boiling_plan_df):
     df = boiling_plan_df
-    df["boiling"] = df["sku"].apply(lambda sku: utils.delistify(sku.made_from_boilings, single=True))
+    df["boiling"] = df["sku"].apply(lambda sku: delistify(sku.made_from_boilings, single=True))
     df["boiling_key"] = df["boiling"].apply(lambda boiling: boiling.id)
     df["sourdough_range"] = df["sourdough_range"].astype(str)
     df["sourdoughs"] = df["sourdough_range"].apply(lambda s: s.split("-"))
 
     def format_sourdoughs(lst):
         try:
-            return [utils.cast_int(s) for s in lst]
+            return [cast_int(s) for s in lst]
         except:
             return lst
 

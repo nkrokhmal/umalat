@@ -1,15 +1,3 @@
-# fmt: off
-from utils_ak.block_tree import *
-
-from app.imports.runtime import *
-from app.models import *
-from app.scheduler.mascarpone.algo.cleanings import *
-from app.scheduler.mascarpone.algo.cream_cheese_boilings import *
-from app.scheduler.mascarpone.algo.mascarpone_boilings import *
-from app.scheduler.shifts import *
-from app.scheduler.time import *
-
-
 class Validator(ClassValidator):
     def __init__(self):
         super().__init__(window=20)
@@ -19,8 +7,8 @@ class Validator(ClassValidator):
         b1 = b1["boiling", True][-1]
         b2 = b2["boiling", True][0]
 
-        if b1.props['sourdough'] == b2.props['sourdough']:
-            validate_disjoint_by_axis(b1['boiling_process'], b2['boiling_process'], ordered=True)
+        if b1.props["sourdough"] == b2.props["sourdough"]:
+            validate_disjoint_by_axis(b1["boiling_process"], b2["boiling_process"], ordered=True)
 
         if sum([b1.props.get("is_cream", False), b2.props.get("is_cream", False)]) == 1:
             # one is cream and one is not
@@ -29,12 +17,8 @@ class Validator(ClassValidator):
         _b1 = b1["packing_process"]["packing_group"]["packing", True][-1]
         _b2 = b2["packing_process"]["packing_group"]["packing", True][0]
         validate_disjoint_by_axis(_b1, _b2, distance=2, ordered=True)
-        validate_disjoint_by_axis(
-            b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"]
-        )
-        validate_disjoint_by_axis(
-            b1["boiling_process"]["pouring"], b2["boiling_process"]["pouring"]
-        )
+        validate_disjoint_by_axis(b1["boiling_process"]["pumping_off"], b2["boiling_process"]["pumping_off"])
+        validate_disjoint_by_axis(b1["boiling_process"]["pouring"], b2["boiling_process"]["pouring"])
 
         _b1 = b1["packing_process"]["packing_group"]["P", True][-1]
         _b2 = b2["boiling_process"]["pumping_off"]
@@ -61,7 +45,7 @@ class Validator(ClassValidator):
             or b1.props["line_nums"] == b2.props["sourdoughs"]
         ):
             for b in b1["boiling", True]:
-                validate_disjoint_by_axis(b['boiling_process'], b2, distance=1, ordered=True)
+                validate_disjoint_by_axis(b["boiling_process"], b2, distance=1, ordered=True)
 
     @staticmethod
     def validate__cream_cheese_boiling__cream_cheese_boiling(b1, b2):
@@ -81,7 +65,6 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(b1, b2, distance=3, ordered=True)
         else:
             validate_disjoint_by_axis(b1, b2, distance=3, ordered=False)
-
 
     @staticmethod
     def validate__cleaning__mascarpone_boiling_group(b1, b2):
@@ -114,17 +97,13 @@ class BoilingPlanToSchedule:
 
     def _make_mascarpone(self, boiling_plan_df, is_last=False):
         is_cream = boiling_plan_df.iloc[0]["is_cream"]
-        batch_dfs = [
-            grp for batch_id, grp in boiling_plan_df.groupby("absolute_batch_id")
-        ]
+        batch_dfs = [grp for batch_id, grp in boiling_plan_df.groupby("absolute_batch_id")]
         if not is_cream:
             boiling_groups = []
 
             for batch_df in batch_dfs:
                 boiling_group_dfs = [grp for boiling_id, grp in batch_df.groupby("boiling_id")]
-                boiling_groups.append(
-                    make_mascarpone_boiling_group(boiling_group_dfs)
-                )
+                boiling_groups.append(make_mascarpone_boiling_group(boiling_group_dfs))
         else:
             # cream
             boiling_groups = []
@@ -138,19 +117,20 @@ class BoilingPlanToSchedule:
                 line_nums = [i % 4 + 1]
             else:
                 line_nums = [
-                    int(boiling_group_df.iloc[0]["sourdough"])
-                    for boiling_group_df in bg.props["boiling_group_dfs"]
+                    int(boiling_group_df.iloc[0]["sourdough"]) for boiling_group_df in bg.props["boiling_group_dfs"]
                 ]
 
             # set sourdough for each boiling
-            for i, boiling in enumerate(bg['boiling', True]):
+            for i, boiling in enumerate(bg["boiling", True]):
                 boiling.props.update(sourdough=line_nums[i])
 
-            self.m.block(bg,
-                 push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                 push_kwargs={'validator': Validator()},
-                 # props
-                 line_nums=line_nums)
+            self.m.block(
+                bg,
+                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                push_kwargs={"validator": Validator()},
+                # props
+                line_nums=line_nums,
+            )
 
         def _is_on_line_num(line_nums, compared_line_nums):
             if compared_line_nums == line_nums:
@@ -160,14 +140,13 @@ class BoilingPlanToSchedule:
                 return line_nums[0] in compared_line_nums
 
             return False
+
         left_cleaning_lines = list(all_line_nums)
         if not is_cream:
             # clean first sourdoughs asap
             last_groups = []
             for line_nums in all_line_nums:
-                cur_groups = [
-                    bg for bg in boiling_groups if _is_on_line_num(bg.props["line_nums"], line_nums)
-                ]
+                cur_groups = [bg for bg in boiling_groups if _is_on_line_num(bg.props["line_nums"], line_nums)]
                 if len(cur_groups) == 0:
                     continue
                 last_groups.append(cur_groups[-1])
@@ -179,28 +158,32 @@ class BoilingPlanToSchedule:
                 sourdoughs=first_last_group.props["line_nums"],
             )
 
-            self.m.block(block,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-30),
-                    push_kwargs={'validator': Validator()})
-            left_cleaning_lines.remove([x for x in left_cleaning_lines if _is_on_line_num(first_last_group.props["line_nums"], x)][0])
+            self.m.block(
+                block,
+                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                push_kwargs={"validator": Validator()},
+            )
+            left_cleaning_lines.remove(
+                [x for x in left_cleaning_lines if _is_on_line_num(first_last_group.props["line_nums"], x)][0]
+            )
 
             if len(boiling_plan_df.groupby("boiling_id")) > 6 or is_last:
                 for entity in ["separator", "homogenizer"]:
                     cleaning = make_cleaning(entity)
-                    self.m.block(cleaning,
-                                 push_func=AxisPusher(start_from="last_beg"),
-                                 push_kwargs={'validator': Validator()})
+                    self.m.block(
+                        cleaning, push_func=AxisPusher(start_from="last_beg"), push_kwargs={"validator": Validator()}
+                    )
 
             for line_nums in left_cleaning_lines:
                 cleaning = make_cleaning("sourdough_mascarpone", sourdoughs=line_nums)
-                self.m.block(cleaning,
-                             push_func=AxisPusher(start_from="last_beg", start_shift=-30),
-                             push_kwargs={'validator': Validator()})
+                self.m.block(
+                    cleaning,
+                    push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                    push_kwargs={"validator": Validator()},
+                )
 
     def _make_cream_cheese(self, boiling_plan_df):
-        boiling_group_dfs = [
-            grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")
-        ]
+        boiling_group_dfs = [grp for boiling_id, grp in boiling_plan_df.groupby("boiling_id")]
 
         cream_cheese_blocks = [
             make_cream_cheese_boiling(
@@ -212,43 +195,43 @@ class BoilingPlanToSchedule:
         ]
 
         for block in cream_cheese_blocks:
-            self.m.block(block,
-                         push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                         push_kwargs={'validator': Validator()})
+            self.m.block(
+                block,
+                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                push_kwargs={"validator": Validator()},
+            )
 
         # cleanings
-        sourdoughs = boiling_plan_df[boiling_plan_df["type"] == "cream_cheese"][
-            "sourdoughs"
-        ].tolist()
-        sourdoughs = utils.remove_duplicates(sourdoughs, key=lambda lst: str(lst))
+        sourdoughs = boiling_plan_df[boiling_plan_df["type"] == "cream_cheese"]["sourdoughs"].tolist()
+        sourdoughs = remove_duplicates(sourdoughs, key=lambda lst: str(lst))
         sourdoughs = sum(sourdoughs, [])
 
-        for group in utils.crop_to_chunks(sourdoughs, 2):
+        for group in crop_to_chunks(sourdoughs, 2):
             block = make_cleaning("sourdough_mascarpone_cream_cheese", sourdoughs=group)
-            self.m.block(block,
-                         push_func=AxisPusher(start_from="last_beg", start_shift=-30),
-                         push_kwargs={'validator': Validator()})
+            self.m.block(
+                block,
+                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                push_kwargs={"validator": Validator()},
+            )
 
         for entity in ["separator", "homogenizer", "heat_exchanger"]:
             block = make_cleaning(entity)
-            self.m.block(block,
-                         push_func=AxisPusher(start_from="last_beg"),
-                         push_kwargs={'validator': Validator()})
+            self.m.block(block, push_func=AxisPusher(start_from="last_beg"), push_kwargs={"validator": Validator()})
 
     def _make_shifts(self, start_time):
         with self.m.block("shifts", x=(0, 0), push_func=add_push):
-            self.m.block('meltings')
-            self.m.block('packings')
+            self.m.block("meltings")
+            self.m.block("packings")
 
-        with code('meltings'):
+        with code("meltings"):
             beg = self.m.root.x[0]
             end = self.m.root.y[0]
 
-            with code('Calc shift time properly'):
-                shift_t = cast_t('18:00')
+            with code("Calc shift time properly"):
+                shift_t = cast_t("18:00")
                 if shift_t <= beg + cast_t(start_time):
                     # add day
-                    shift_t += cast_t('00:00+1')
+                    shift_t += cast_t("00:00+1")
 
             shifts = split_shifts_by_time(beg + cast_t(start_time), end + cast_t(start_time), shift_t, min_shift=12)
 
@@ -256,48 +239,40 @@ class BoilingPlanToSchedule:
             shifts = [[beg - cast_t(start_time), end - cast_t(start_time)] for beg, end in shifts]
 
             for i, (beg, end) in enumerate(shifts, 1):
-                push(self.m.root['shifts']['meltings'], push_func=add_push,
-                     block=self.m.create_block(
-                         "shift",
-                         x=(beg, 0),
-                         size=(end - beg, 0),
-                         shift_num=i
-                     ))
+                push(
+                    self.m.root["shifts"]["meltings"],
+                    push_func=add_push,
+                    block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
+                )
 
-        with code('packings'):
-            packings = self.m.root.find(cls='packing')
+        with code("packings"):
+            packings = self.m.root.find(cls="packing")
             beg = packings[0].x[0] - 12  # 1h before
-            end = packings[-1].y[0] + 12 # 1h after
+            end = packings[-1].y[0] + 12  # 1h after
 
-            with code('Calc shift time properly'):
-                shift_t = cast_t('18:00')
+            with code("Calc shift time properly"):
+                shift_t = cast_t("18:00")
                 if shift_t <= beg + cast_t(start_time):
                     # add day
-                    shift_t += cast_t('00:00+1')
+                    shift_t += cast_t("00:00+1")
 
             shifts = split_shifts_by_time(beg + cast_t(start_time), end + cast_t(start_time), shift_t, min_shift=12)
             # fix start time
             shifts = [[beg - cast_t(start_time), end - cast_t(start_time)] for beg, end in shifts]
-            
+
             for i, (beg, end) in enumerate(shifts, 1):
-                push(self.m.root['shifts']['packings'], push_func=add_push,
-                     block=self.m.create_block(
-                         "shift",
-                         x=(beg, 0),
-                         size=(end - beg, 0),
-                         shift_num=i
-                     ))
+                push(
+                    self.m.root["shifts"]["packings"],
+                    push_func=add_push,
+                    block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
+                )
 
     def _make_boilings(self, boiling_plan_df):
         columns = boiling_plan_df.columns
 
-        boiling_plan_df["tag"] = (
-            boiling_plan_df["sku_cls_name"]
-            + "-"
-            + boiling_plan_df["is_cream"].astype(str)
-        )
+        boiling_plan_df["tag"] = boiling_plan_df["sku_cls_name"] + "-" + boiling_plan_df["is_cream"].astype(str)
         df = boiling_plan_df[["tag"] + list(columns)]
-        ordered_groups = utils.df_to_ordered_tree(df, recursive=False)
+        ordered_groups = df_to_ordered_tree(df, recursive=False)
         for i, (group_cls_name, grp) in enumerate(ordered_groups):
             if grp.iloc[0]["type"] == "mascarpone":
                 is_last = i == len(ordered_groups) - 1
@@ -305,7 +280,7 @@ class BoilingPlanToSchedule:
             elif grp.iloc[0]["type"] == "cream_cheese":
                 self._make_cream_cheese(grp)
 
-    def __call__(self, boiling_plan_df, start_time='07:00'):
+    def __call__(self, boiling_plan_df, start_time="07:00"):
         self._make_preparation()
         self._make_boilings(boiling_plan_df)
         self._make_shifts(start_time)
@@ -313,7 +288,5 @@ class BoilingPlanToSchedule:
         return self.m.root
 
 
-def make_schedule(boiling_plan_df,
-                  start_time='07:00'):
-    return BoilingPlanToSchedule()(boiling_plan_df,
-                                   start_time=start_time)
+def make_schedule(boiling_plan_df, start_time="07:00"):
+    return BoilingPlanToSchedule()(boiling_plan_df, start_time=start_time)

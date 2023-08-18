@@ -1,19 +1,13 @@
-from app.enum import LineName
-from app.imports.runtime import *
-from app.models import *
-from app.scheduler.calculation import *
-
-
 class BoilingGroupToSchema:
     def _calc_boilings_meltings(self, boiling_group_df):
         df = boiling_group_df.copy()
         df = df.reset_index()
-        utils.mark_consecutive_groups(df, "bff", "bff_group")
+        mark_consecutive_groups(df, "bff", "bff_group")
 
         bff_kgs = df.groupby("bff_group").agg({"kg": "sum", "bff": "first", "index": "first"})
         bff_kgs = bff_kgs.sort_values(by="index").reset_index(drop=True)  # keep initial order
 
-        iterator = utils.SimpleIterator([[row["bff"], row["kg"]] for bff_id, row in bff_kgs.iterrows()])
+        iterator = SimpleIterator([[row["bff"], row["kg"]] for bff_id, row in bff_kgs.iterrows()])
 
         boiling_volumes = boiling_group_df.iloc[0]["boiling_volumes"]
 
@@ -48,7 +42,7 @@ class BoilingGroupToSchema:
         df = df.reset_index()
 
         df["key"] = df["packing_team_id"].astype(str) + df["sku_id"].astype(str)
-        utils.mark_consecutive_groups(df, "key", "group")
+        mark_consecutive_groups(df, "key", "group")
 
         sku_kgs = df.groupby("group").agg(
             {

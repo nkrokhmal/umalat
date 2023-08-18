@@ -1,9 +1,4 @@
-# fmt: off
-from utils_ak.block_tree import *
-
-from app.scheduler.frontend import *
-from app.scheduler.header import wrap_header
-from app.scheduler.time import *
+from utils_ak.block_tree import BlockMaker, add_push, push
 
 
 def wrap_boiling(boiling):
@@ -17,8 +12,8 @@ def wrap_boiling(boiling):
         x=(boiling.x[0], 0),
         size=(0, 2),
         boiling_id=boiling.props["boiling_id"],
-        boiling_model=boiling.props['boiling_model'],
-        group_name=boiling.props['group_name']
+        boiling_model=boiling.props["boiling_model"],
+        group_name=boiling.props["group_name"],
     )
 
     with m.block("Upper line"):
@@ -35,7 +30,7 @@ def wrap_boiling(boiling):
 
 def wrap_lunch(block):
     m = BlockMaker(
-        block.props['cls'],
+        block.props["cls"],
         font_size=9,
         axis=1,
         x=(block.x[0], 0),
@@ -43,9 +38,10 @@ def wrap_lunch(block):
     )
     return m.root
 
+
 def wrap_preparation(block):
     m = BlockMaker(
-        block.props['cls'],
+        block.props["cls"],
         font_size=9,
         axis=1,
         x=(block.x[0], 0),
@@ -53,12 +49,13 @@ def wrap_preparation(block):
     )
     return m.root
 
+
 def wrap_cleaning(block, last_block):
     a = block.x[0]
     b = last_block.y[0]
 
     m = BlockMaker(
-        block.props['cls'],
+        block.props["cls"],
         font_size=9,
         axis=1,
         # draw from last boiling with cropped size
@@ -85,25 +82,25 @@ def wrap_boiling_lines(schedule):
             if i <= n_lines - 2:
                 m.row("stub", size=0)
 
-    push(boiling_lines[0], wrap_preparation(schedule['preparation']), push_func=add_push)
+    push(boiling_lines[0], wrap_preparation(schedule["preparation"]), push_func=add_push)
 
     with code("add boilings"):
         for boiling in schedule["boiling", True]:
-            push(boiling_lines[boiling.props['boiler_num']], wrap_boiling(boiling), push_func=add_push)
+            push(boiling_lines[boiling.props["boiler_num"]], wrap_boiling(boiling), push_func=add_push)
 
-    with code('add lunches'):
+    with code("add lunches"):
         for pair_num in range(2):
             try:
-                block = schedule.find_one(cls='lunch', pair_num=pair_num)
+                block = schedule.find_one(cls="lunch", pair_num=pair_num)
             except:
                 continue
             push(boiling_lines[pair_num * 2], wrap_lunch(block), push_func=add_push)
 
-    with code('add cleaning'):
-        block = schedule.find_one(cls='cleaning')
-        last_block = schedule['boiling', True][-1]
-        if len(schedule['lunch', True]) > 0:
-            last_block = max([last_block, schedule['lunch', True][-1]], key=lambda b: b.y[0])
+    with code("add cleaning"):
+        block = schedule.find_one(cls="cleaning")
+        last_block = schedule["boiling", True][-1]
+        if len(schedule["lunch", True]) > 0:
+            last_block = max([last_block, schedule["lunch", True][-1]], key=lambda b: b.y[0])
         push(boiling_lines[0], wrap_cleaning(block, last_block), push_func=add_push)
 
     return m.root
@@ -121,15 +118,15 @@ def wrap_frontend(schedule, date=None):
     )
     m.row("stub", size=0)  # start with 1
 
-    with code('Calc start time'):
+    with code("Calc start time"):
         # calc start time
-        if 'preferred_header_time' in schedule.props.all():
+        if "preferred_header_time" in schedule.props.all():
             # currently set in app/main/milk_project/schedule.py
-            t = cast_t(schedule.props['preferred_header_time'])
+            t = cast_t(schedule.props["preferred_header_time"])
         else:
             t = schedule.x[0]
 
-        start_t = int(utils.custom_round(t, 12, "floor"))  # round to last hour
+        start_t = int(custom_round(t, 12, "floor"))  # round to last hour
         start_time = cast_time(start_t)
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы котлов"))

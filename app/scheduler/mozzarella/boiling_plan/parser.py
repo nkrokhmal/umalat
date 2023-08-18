@@ -1,6 +1,3 @@
-from app.imports.runtime import *
-
-
 def parse_schedule(schedule):
     schedule_json = schedule.to_dict(
         props=[

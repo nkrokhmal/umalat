@@ -1,24 +1,20 @@
-from app.imports.runtime import *
-from app.scheduler.ricotta.parser_new import *
-
-
 def test_batch():
     fns = glob.glob(config.abs_path("app/data/static/samples/outputs/by_department/ricotta/*.xlsx"))
     fns = [fn for fn in fns if "$" not in fn]
-    for i, fn in enumerate(utils.tqdm(fns, desc=lambda v: v)):
+    for i, fn in enumerate(tqdm(fns, desc=lambda v: v)):
         _test(fn, open_file=False, prefix=str(i))
 
 
 def _test(fn, *args, **kwargs):
-    utils.lazy_tester.configure_function_path()
+    lazy_tester.configure_function_path()
     warnings.filterwarnings("ignore")
-    utils.lazy_tester.configure(local_path=os.path.basename(fn))
+    lazy_tester.configure(local_path=os.path.basename(fn))
 
     outputs = parse_schedule((fn, "Расписание"))
-    utils.lazy_tester.log(str(outputs))
-    utils.lazy_tester.assert_logs()
+    lazy_tester.log(str(outputs))
+    lazy_tester.assert_logs()
 
 
 if __name__ == "__main__":
-    utils.configure_loguru(level="DEBUG")
+    configure_loguru(level="DEBUG")
     test_batch()

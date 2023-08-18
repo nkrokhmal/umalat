@@ -2,16 +2,13 @@ import os
 
 
 os.environ["APP_ENVIRONMENT"] = "interactive"
-from app.models import *
-from app.scheduler.ricotta.algo.boilings import *
-from app.scheduler.ricotta.boiling_plan import *
 
 
 def test_make_boiling():
-    utils.lazy_tester.configure_function_path()
+    lazy_tester.configure_function_path()
     boiling_model = cast_model(RicottaBoiling, 17)
-    utils.lazy_tester.log(make_boiling(boiling_model))
-    utils.lazy_tester.assert_logs()
+    lazy_tester.log(make_boiling(boiling_model))
+    lazy_tester.assert_logs()
 
 
 def test_make_boiling_sequence():

@@ -1,15 +1,20 @@
-# fmt: off
-from utils_ak.block_tree import *
-
-from app.imports.runtime import *
-from app.models import *
-from app.scheduler.time import *
+from utils_ak.block_tree import BlockMaker
+from utils_ak.builtin import delistify
 
 
 def make_boiling(boiling_model, batch_id, boiler_num, group_name, pair_num):
-    m = BlockMaker("boiling", boiling_model=boiling_model, boiling_id=batch_id, boiler_num=boiler_num, group_name=group_name, pair_num=pair_num)
+    m = BlockMaker(
+        "boiling",
+        boiling_model=boiling_model,
+        boiling_id=batch_id,
+        boiler_num=boiler_num,
+        group_name=group_name,
+        pair_num=pair_num,
+    )
 
-    bt = utils.delistify(boiling_model.boiling_technologies, single=True) # there is only one boiling technology is for every boiling model in ricotta department
+    bt = delistify(
+        boiling_model.boiling_technologies, single=True
+    )  # there is only one boiling technology is for every boiling model in ricotta department
 
     m.row("collecting", size=bt.collecting_time // 5)
     m.row("coagulation", size=bt.coagulation_time // 5)

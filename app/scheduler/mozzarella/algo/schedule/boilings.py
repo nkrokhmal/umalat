@@ -1,6 +1,8 @@
+import collections
+
 from app.enum import LineName
-from app.scheduler.mozzarella.algo.boiling import make_boiling
-from app.scheduler.mozzarella.algo.melting_and_packing import *
+from app.scheduler.mozzarella.algo.melting_and_packing.pipelines.fluid_flow.water_flow import make_flow_water_boilings
+from app.scheduler.mozzarella.algo.melting_and_packing.pipelines.parallel.parallel import make_boilings_parallel_dynamic
 
 
 def make_boilings(boiling_plan_df):

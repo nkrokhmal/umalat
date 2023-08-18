@@ -1,12 +1,5 @@
-# fmt: off
-from utils_ak.block_tree import *
-
-from app.imports.runtime import *
-from app.scheduler.header import wrap_header
-from app.scheduler.time import *
-
-
 PREPARATION_HEIGHT = 11
+
 
 def wrap_frontend_mascarpone_boiling(boiling_process):
     is_cream = boiling_process.props["boiling_group_dfs"][0].iloc[0]["is_cream"]
@@ -37,28 +30,30 @@ def wrap_frontend_mascarpone_boiling(boiling_process):
         if boiling_process["waiting"].size[0]:
             m.row("waiting", size=boiling_process["waiting"].size[0])
         m.row("adding_lactic_acid", size=boiling_process["adding_lactic_acid"].size[0])
-        m.row("pumping_off", size=boiling_process["pumping_off"]['1'].size[0])
-        m.row("pumping_off_pause", size=boiling_process["pumping_off"]['pause'].size[0])
-        m.row("pumping_off", size=boiling_process["pumping_off"]['2'].size[0])
+        m.row("pumping_off", size=boiling_process["pumping_off"]["1"].size[0])
+        m.row("pumping_off_pause", size=boiling_process["pumping_off"]["pause"].size[0])
+        m.row("pumping_off", size=boiling_process["pumping_off"]["2"].size[0])
     return m.root
 
 
 def wrap_mascarpone_lines(schedule, with_cream_cheese=False):
 
-    m = BlockMaker("mascarpone_lines",
-                   default_row_width=1,
-                   default_col_width=1,
-                   # props
-                   axis=1)
+    m = BlockMaker(
+        "mascarpone_lines",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        axis=1,
+    )
 
-    with code('Init lines'):
+    with code("Init lines"):
         boiling_lines = []
         for i in range(7):
             boiling_line = m.block(f"boiling_line_{i}", size=(0, 2)).block
             boiling_lines.append(boiling_line)
-            m.row("stub", size=0, boiling_line=boiling_line) # create  reference for upper boiling line in stub
+            m.row("stub", size=0, boiling_line=boiling_line)  # create  reference for upper boiling line in stub
 
-    with code('Make mascarpone'):
+    with code("Make mascarpone"):
         for mbg in schedule.iter(
             cls="mascarpone_boiling_group",
             boiling_group_dfs=lambda dfs: not dfs[0].iloc[0]["is_cream"],
@@ -72,7 +67,7 @@ def wrap_mascarpone_lines(schedule, with_cream_cheese=False):
                     push_func=add_push,
                 )
 
-    with code('Make cream'):
+    with code("Make cream"):
         cycle = itertools.cycle(boiling_lines)
         for mbg in schedule.iter(
             cls="mascarpone_boiling_group",
@@ -107,7 +102,7 @@ def wrap_mascarpone_lines(schedule, with_cream_cheese=False):
                             continue
                     break
 
-    with code('Make cream cheese'):
+    with code("Make cream cheese"):
         if with_cream_cheese:
             cycle = itertools.cycle(boiling_lines)
             for i, ccb in enumerate(list(schedule.iter(cls="cream_cheese_boiling"))):
@@ -143,33 +138,35 @@ def wrap_mascarpone_lines(schedule, with_cream_cheese=False):
 
                     break
 
-    with code('Remove empty boiling lines and corresponding stubs'):
+    with code("Remove empty boiling lines and corresponding stubs"):
         for boiling_line in list(boiling_lines):
             if boiling_line.size[0] == 0:
                 boiling_line.detach_from_parent()
 
             # remove stub
-            for stub in m.root.iter(cls='stub', boiling_line=boiling_line):
+            for stub in m.root.iter(cls="stub", boiling_line=boiling_line):
                 stub.detach_from_parent()
 
     return m.root
 
 
 def wrap_cream_cheese_lines(schedule, boiling_lines=None):
-    m = BlockMaker("cream_cheese_lines",
-                   default_row_width=1,
-                   default_col_width=1,
-                   # props
-                   axis=1)
+    m = BlockMaker(
+        "cream_cheese_lines",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        axis=1,
+    )
 
-    with code('Init lines'):
+    with code("Init lines"):
         if not boiling_lines:
             boiling_lines = []
             for i in range(3):
                 boiling_lines.append(m.block(f"boiling_line_{i}", size=(0, 2)).block)
                 m.row("stub", size=1)
 
-    with code('Fill lines'):
+    with code("Fill lines"):
         for i, ccb in enumerate(list(schedule.iter(cls="cream_cheese_boiling"))):
             boiling_line = boiling_lines[i % 3]
             block = wrap_frontend_cream_cheese_boiling(ccb)
@@ -178,11 +175,13 @@ def wrap_cream_cheese_lines(schedule, boiling_lines=None):
 
 
 def make_packing_line(schedule):
-    m = BlockMaker("packing_line",
-                   default_row_width=1,
-                   default_col_width=1,
-                   # props
-                   axis=1)
+    m = BlockMaker(
+        "packing_line",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        axis=1,
+    )
 
     if "mascarpone_boiling_group" not in [c.props["cls"] for c in schedule.children]:
         return
@@ -229,7 +228,7 @@ def wrap_frontend_cream_cheese_boiling(boiling):
         x=(boiling.x[0], 0),
         size=(0, 2),
         batch_id=boiling.props["boiling_plan_df"].iloc[0]["absolute_batch_id"],
-        base_names=boiling.props['base_names']
+        base_names=boiling.props["base_names"],
     )
 
     bp = boiling["boiling_process"]
@@ -272,17 +271,17 @@ def wrap_cleanings_line(schedule):
 
 
 def wrap_preparation(schedule):
-    m = BlockMaker('preparation')
-    return m.create_block('preparation',
-                   x=(schedule['preparation'].x[0], 1),
-                   size=(schedule['preparation'].size[0], PREPARATION_HEIGHT))
+    m = BlockMaker("preparation")
+    return m.create_block(
+        "preparation", x=(schedule["preparation"].x[0], 1), size=(schedule["preparation"].size[0], PREPARATION_HEIGHT)
+    )
 
 
 def wrap_shifts(shifts):
     m = BlockMaker("shifts")
     shifts = m.copy(shifts, with_props=True)
-    for shift in shifts.iter(cls='shift'):
-        shift.update_size(size=(shift.size[0], 1)) # todo maybe: refactor. Should be better
+    for shift in shifts.iter(cls="shift"):
+        shift.update_size(size=(shift.size[0], 1))  # todo maybe: refactor. Should be better
     m.block(shifts, push_func=add_push)
     return m.root
 
@@ -290,34 +289,37 @@ def wrap_shifts(shifts):
 def wrap_frontend(schedule, date=None):
     date = date or datetime.now()
 
-    m = BlockMaker("frontend",
-                   default_row_width=1,
-                   default_col_width=1,
-                   # props
-                   axis=1)
+    m = BlockMaker(
+        "frontend",
+        default_row_width=1,
+        default_col_width=1,
+        # props
+        axis=1,
+    )
 
     m.row("stub", size=0)  # start with 1
 
     # calc start time
-    start_t = int(utils.custom_round(schedule.x[0], 12, "floor"))  # round to last hour and add half hour
+    start_t = int(custom_round(schedule.x[0], 12, "floor"))  # round to last hour and add half hour
     start_time = cast_time(start_t)
     m.block(wrap_header(date=date, start_time=start_time, header="График маскарпонного цеха"))
-    with m.block(axis=1,
-                 start_time=cast_time(start_t)):
-        if schedule['shifts']:
-            m.col(wrap_shifts(schedule['shifts']['meltings']))
+    with m.block(axis=1, start_time=cast_time(start_t)):
+        if schedule["shifts"]:
+            m.col(wrap_shifts(schedule["shifts"]["meltings"]))
         m.block(wrap_mascarpone_lines(schedule, with_cream_cheese=True))
 
-    m.block(wrap_header(date=date, start_time=start_time, header="График паковки"), push_func=add_push,
-            x=(0, max(PREPARATION_HEIGHT + 3, m.root.y[1])))
-    with m.block(axis=1,
-                 start_time=cast_time(start_t)):
-        if schedule['shifts']:
-            m.col(wrap_shifts(schedule['shifts']['packings']))
+    m.block(
+        wrap_header(date=date, start_time=start_time, header="График паковки"),
+        push_func=add_push,
+        x=(0, max(PREPARATION_HEIGHT + 3, m.root.y[1])),
+    )
+    with m.block(axis=1, start_time=cast_time(start_t)):
+        if schedule["shifts"]:
+            m.col(wrap_shifts(schedule["shifts"]["packings"]))
         m.block(make_packing_line(schedule))
         m.row("stub", size=0)
         m.block(wrap_cleanings_line(schedule))
 
-    if schedule['preparation']:
+    if schedule["preparation"]:
         m.block(wrap_preparation(schedule), x=(0, 3), push_func=add_push)
     return m.root

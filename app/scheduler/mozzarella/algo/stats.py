@@ -1,7 +1,3 @@
-from app.imports.runtime import *
-from app.scheduler.time import *
-
-
 def calc_schedule_stats(schedule):
     # calc schedule stats
     stats = {}

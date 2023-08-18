@@ -1,7 +1,5 @@
 import utils_ak.iteration
 
-from app.imports.runtime import *
-
 
 def group_intervals(intervals, split_criteria=None, interval_func=None):
     if not interval_func:
@@ -11,7 +9,7 @@ def group_intervals(intervals, split_criteria=None, interval_func=None):
     intervals = list(sorted(intervals, key=lambda interval: interval_func(interval)[0]))
 
     cur_group = []
-    for prev_interval, cur_interval in utils.iter_pairs(intervals, method="any_prefix"):
+    for prev_interval, cur_interval in iter_pairs(intervals, method="any_prefix"):
         if not cur_group:
             cur_group.append(cur_interval)
             continue

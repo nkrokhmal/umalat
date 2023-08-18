@@ -5,10 +5,6 @@ os.environ["APP_ENVIRONMENT"] = "interactive"
 
 import warnings
 
-from app.scheduler import mark_consecutive_groups
-from app.scheduler.algo import *
-from config import basedir
-
 
 warnings.filterwarnings("ignore")
 

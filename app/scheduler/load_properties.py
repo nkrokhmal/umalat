@@ -1,18 +1,3 @@
-from app.imports.runtime import *
-from app.scheduler.adygea.parser import parse_properties as parse_properties_adygea
-from app.scheduler.adygea.properties import cast_properties as parse_schedule_adygea
-from app.scheduler.butter.parser import parse_properties as parse_properties_butter
-from app.scheduler.butter.properties import cast_properties as parse_schedule_butter
-from app.scheduler.mascarpone.parser import parse_properties as parse_properties_mascarpone
-from app.scheduler.mascarpone.properties import cast_properties as parse_schedule_mascarpone
-from app.scheduler.milk_project.parser import parse_properties as parse_properties_milk_project
-from app.scheduler.milk_project.properties import cast_properties as parse_schedule_milk_project
-from app.scheduler.mozzarella.parser import parse_properties as parse_properties_mozzarella
-from app.scheduler.mozzarella.properties import cast_properties as parse_schedule_mozzarella
-from app.scheduler.ricotta.parser import parse_properties as parse_properties_ricotta
-from app.scheduler.ricotta.properties import cast_properties as parse_schedule_ricotta
-
-
 SCHEDULE_PARSERS = {
     "mozzarella": parse_schedule_mozzarella,
     "ricotta": parse_schedule_ricotta,

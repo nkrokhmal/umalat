@@ -1,9 +1,12 @@
-from app.enum import LineName
-from app.imports.runtime import *
-from app.models import *
-from app.scheduler.boiling_plan import *
+import numpy as np
+import pandas as pd
 
-from .saturate import saturate_boiling_plan
+from utils_ak.numeric import is_int_like
+from utils_ak.openpyxl import cast_workbook
+from utils_ak.pandas import split_into_sum_groups
+
+from app.models import CreamCheeseSKU, MascarponeSKU, cast_model
+from app.scheduler.boiling_plan import update_absolute_batch_id
 
 
 def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
@@ -11,7 +14,7 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    wb = utils.cast_workbook(wb_obj)
+    wb = cast_workbook(wb_obj)
     first_batch_ids = first_batch_ids or {}
 
     dfs = []
@@ -90,7 +93,7 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
         sourdoughs = []
 
         for s in sourdough_range.split("-"):
-            if s == "None" or utils.is_none(s) or not utils.is_int_like(s):
+            if s == "None" or is_none(s) or not is_int_like(s):
                 assert (
                     grp.iloc[0]["type"] == "mascarpone" and grp.iloc[0]["is_cream"]
                 ), "Для одной из варок не указаны заквасочники."
@@ -104,7 +107,7 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
 
         boiling_volumes = list(proportion * total_boiling_volume)
 
-        new_grp = utils.split_into_sum_groups(grp, boiling_volumes, column="kg", group_column="boiling_id")
+        new_grp = split_into_sum_groups(grp, boiling_volumes, column="kg", group_column="boiling_id")
 
         for i, (boiling_id, sub_grp) in enumerate(new_grp.groupby("boiling_id")):
             new_grp.loc[sub_grp.index, "sourdough"] = sourdoughs[i]

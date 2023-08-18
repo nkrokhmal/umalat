@@ -1,11 +1,3 @@
-from app.enum import LineName
-from app.scheduler.mozzarella.boiling_plan.boiling_plan import cast_boiling_plan
-
-from .parse_start_configuration import *
-from .schedule_by_optimization import *
-from .schedule_from_boilings import *
-
-
 def make_schedule_basic(
     boiling_plan_obj,
     optimize_cleanings=False,

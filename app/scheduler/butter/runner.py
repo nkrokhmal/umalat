@@ -1,13 +1,3 @@
-from app.imports.runtime import *
-from app.scheduler.butter import *
-from app.scheduler.butter import (  # todo archive: imports don't load up for some reason  from above
-    make_schedule,
-    read_boiling_plan,
-)
-from app.scheduler.frontend import *
-from app.scheduler.submit import submit_schedule
-
-
 def run_butter(
     boiling_plan_fn=None,
     schedule=None,
@@ -16,7 +6,7 @@ def run_butter(
     path="outputs/",
     prefix="",
 ):
-    utils.makedirs(path)
+    makedirs(path)
     boiling_plan_df = read_boiling_plan(boiling_plan_fn)
     start_time = start_time or "07:00"
 

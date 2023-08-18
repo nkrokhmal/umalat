@@ -1,5 +1,4 @@
-from utils_ak.block_tree import *
-from utils_ak.builtin import listify
+from utils_ak.block_tree import IterativePusher
 
 
 class AwaitingPusher(IterativePusher):

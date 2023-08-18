@@ -1,9 +1,3 @@
-from app.imports.runtime import *
-from app.scheduler.frontend import *
-from app.scheduler.milk_project import *
-from app.scheduler.submit import submit_schedule
-
-
 def run_milk_project(
     boiling_plan_fn=None,
     schedule=None,
@@ -14,7 +8,7 @@ def run_milk_project(
     template_wb=None,
     first_batch_ids=None,
 ):
-    utils.makedirs(path)
+    makedirs(path)
     boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids=first_batch_ids)
     start_time = start_time or "07:00"
 

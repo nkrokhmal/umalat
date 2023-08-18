@@ -1,10 +1,12 @@
+import os
+
 import openpyxl
 
-from utils_ak.block_tree import *
+from utils_ak.openpyxl import cast_workbook, draw_sheet_sequence
+from utils_ak.os import makedirs, open_file_in_os
 
-from app.imports.runtime import *
-from app.scheduler import *
 from app.scheduler.frontend import prepare_schedule_worksheet
+from config import config
 
 
 def run_consolidated(
@@ -23,7 +25,7 @@ def run_consolidated(
         "butter",
         "mascarpone",
     ]
-    utils.makedirs(output_path)
+    makedirs(output_path)
 
     fns = [
         os.path.join(
@@ -42,13 +44,13 @@ def run_consolidated(
 
     fns = [fn for fn in fns if os.path.exists(fn)]
     wb = wb or ["Расписание"]
-    wb = utils.cast_workbook(wb)
+    wb = cast_workbook(wb)
     prepare_schedule_worksheet((wb, "Расписание"))
-    utils.draw_sheet_sequence((wb, "Расписание"), [(fn, "Расписание") for fn in fns])
+    draw_sheet_sequence((wb, "Расписание"), [(fn, "Расписание") for fn in fns])
     output_fn = os.path.join(output_path, prefix + " Расписание общее.xlsx")
     wb.save(output_fn)
     if open_file:
-        utils.open_file_in_os(output_fn)
+        open_file_in_os(output_fn)
     return wb
 
 

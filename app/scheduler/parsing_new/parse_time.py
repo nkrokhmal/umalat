@@ -1,6 +1,3 @@
-from app.scheduler.time import *
-
-
 def cast_time_from_hour_label(hour_label):
     if "-" in hour_label:
         splitter = "-"

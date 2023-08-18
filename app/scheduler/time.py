@@ -1,6 +1,3 @@
-from app.imports.runtime import *
-
-
 """
 Formats
 time: [-]1:23:55 
@@ -13,12 +10,12 @@ def cast_t(obj):
     with code("Handle None"):
         if obj == 0:
             return 0
-        if utils.is_none(obj) or not obj:
+        if is_none(obj) or not obj:
             return None
 
-    if utils.is_int_like(obj):
+    if is_int_like(obj):
         return int(obj)
-    elif isinstance(obj, (tuple, list)) and all(utils.is_int_like(v) for v in obj):
+    elif isinstance(obj, (tuple, list)) and all(is_int_like(v) for v in obj):
         days, hours, minutes = obj  # unpack
         days, hours, minutes = list(map(int, (days, hours, minutes)))  # convert to int
         total_minutes = int(days) * 288 * 5 + int(hours) * 60 + int(minutes)

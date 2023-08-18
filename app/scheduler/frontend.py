@@ -1,13 +1,23 @@
-from openpyxl.styles import Border, Font, NamedStyle, Side
-from openpyxl.styles.borders import BORDER_THIN, Border, Side
-from utils_ak.openpyxl.openpyxl_tools import *
+from loguru import logger
+from openpyxl.styles import Side
+from openpyxl.styles.borders import BORDER_THIN
+from utils_ak.color import cast_color
+from utils_ak.openpyxl import (
+    cast_worksheet,
+    draw_merged_cell,
+    init_workbook,
+    set_active_sheet,
+    set_border_grid,
+    set_dimensions,
+    set_zoom,
+)
+from utils_ak.os import makedirs, open_file_in_os
 
-from app.imports.runtime import *
-from app.scheduler.time import *
+from app.scheduler.time import cast_t
 
 
 def fill_grid(ws):
-    utils.set_border_grid(ws, 1, 1, ws.max_column, ws.max_row, Side(border_style=BORDER_THIN))
+    set_border_grid(ws, 1, 1, ws.max_column, ws.max_row, Side(border_style=BORDER_THIN))
 
 
 def prepare_schedule_worksheet(ws_obj):
@@ -21,12 +31,12 @@ def prepare_schedule_worksheet(ws_obj):
 
 def init_schedule_workbook(wb=None):
     if not wb:
-        wb = utils.init_workbook(["Расписание"])
+        wb = init_workbook(["Расписание"])
 
     if "Расписание" not in wb.sheetnames:
         wb.create_sheet("Расписание")
 
-    prepare_schedule_worksheet(utils.cast_worksheet((wb, "Расписание")))
+    prepare_schedule_worksheet(cast_worksheet((wb, "Расписание")))
     return wb
 
 
@@ -35,7 +45,7 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
         wb = init_schedule_workbook(wb)
     logger.info("Finished init")
     ws = cast_worksheet((wb, "Расписание"))
-    utils.set_active_sheet(wb, "Расписание")
+    set_active_sheet(wb, "Расписание")
     O = O or [0, 0]  # initial coordinates
 
     # update styles
@@ -55,7 +65,7 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
                 continue
 
             text = b.props.get("text", "")
-            color = utils.cast_color(b.props.get("color", "white"))
+            color = cast_color(b.props.get("color", "white"))
 
             try:
                 text = text.format(**b.props.all())
@@ -76,7 +86,7 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
                 # print(b.props['cls'], x1, b.x[1], b.size[0], b.size[1])
 
                 try:
-                    utils.draw_merged_cell(
+                    draw_merged_cell(
                         ws,
                         x1 + O[0],
                         b.x[1] + O[1],
@@ -112,10 +122,10 @@ def draw_excel_frontend(frontend, style, O=None, open_file=False, fn=None, wb=No
     wb = draw_schedule(frontend, style, O=O, wb=wb, init=init)
 
     if fn:
-        utils.makedirs(fn)
+        makedirs(fn)
         wb.save(fn)
 
         if open_file:
-            utils.open_file_in_os(fn)
+            open_file_in_os(fn)
 
     return wb

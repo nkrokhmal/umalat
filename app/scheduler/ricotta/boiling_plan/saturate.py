@@ -1,6 +1,3 @@
-from utils_ak.pandas import *
-
-
 def saturate_boiling_plan(boiling_plan_df):
     df = boiling_plan_df.copy()
     df["sku_name"] = df["sku"].apply(lambda sku: sku.name)

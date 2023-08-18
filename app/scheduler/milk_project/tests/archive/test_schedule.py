@@ -3,10 +3,6 @@ import os
 
 os.environ["APP_ENVIRONMENT"] = "interactive"
 
-from app.scheduler.milk_project.algo.schedule import *
-from app.scheduler.milk_project.boiling_plan import *
-from config import DebugConfig
-
 
 def test_random():
     boiling_plan_df = generate_random_boiling_plan()

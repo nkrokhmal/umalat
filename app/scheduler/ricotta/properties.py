@@ -1,17 +1,7 @@
-# fmt: off
-from typing import *
-
-from pydantic import Field
-
-from app.enum import *
-from app.imports.runtime import *
-from app.scheduler.time import *
-
-
 class RicottaProperties(pydantic.BaseModel):
-    n_boilings: int = Field(0, description='Число варок')
-    last_pumping_out_time: str = Field('', description='Конец последнего слива')
-    start_of_ninth_from_the_end_time: str = Field('', description='Начало девятой варки с конца')
+    n_boilings: int = Field(0, description="Число варок")
+    last_pumping_out_time: str = Field("", description="Конец последнего слива")
+    start_of_ninth_from_the_end_time: str = Field("", description="Начало девятой варки с конца")
 
     def is_present(self):
         if self.last_pumping_out_time:
@@ -19,17 +9,18 @@ class RicottaProperties(pydantic.BaseModel):
         return False
 
     def department(self):
-        return 'ricotta'
+        return "ricotta"
+
 
 def cast_properties(schedule=None):
     props = RicottaProperties()
     if not schedule:
         return props
-    ricotta_boilings = list(schedule.iter(cls='boiling'))
-    with code('scotta input tanks'):
+    ricotta_boilings = list(schedule.iter(cls="boiling"))
+    with code("scotta input tanks"):
         props.n_boilings = len(ricotta_boilings)
 
-    props.last_pumping_out_time = cast_human_time(ricotta_boilings[-1]['pumping_out'].y[0])
+    props.last_pumping_out_time = cast_human_time(ricotta_boilings[-1]["pumping_out"].y[0])
     if len(ricotta_boilings) < 9:
         props.start_of_ninth_from_the_end_time = cast_human_time(ricotta_boilings[-1].x[0])
     else:

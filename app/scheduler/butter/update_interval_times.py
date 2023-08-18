@@ -1,6 +1,3 @@
-from app.scheduler.butter.parser_new import parse_schedule
-
-
 def update_interval_times(schedule_wb, boiling_plan_df):
     schedule_info = parse_schedule((schedule_wb, "Расписание"))
 

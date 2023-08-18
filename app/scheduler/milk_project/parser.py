@@ -1,24 +1,14 @@
-# fmt: off
-from utils_ak.block_tree import *
-
-from app.imports.runtime import *
-from app.scheduler.milk_project import *
-from app.scheduler.milk_project.properties import *
-from app.scheduler.parsing import *
-from app.scheduler.parsing_new.parse_time import *
-
-
 def parse_schedule_file(wb_obj):
-    df = load_cells_df(wb_obj, 'Расписание')
+    df = load_cells_df(wb_obj, "Расписание")
 
     m = BlockMaker("root")
 
-    with code('Find split rows'):
-        df1 = df[df['label'] == 'Набор смеси']
-        split_rows = df1['x1'].unique()
+    with code("Find split rows"):
+        df1 = df[df["label"] == "Набор смеси"]
+        split_rows = df1["x1"].unique()
 
-    with code('Find start times'):
-        time_index_row_nums = df[df['label'].astype(str).str.contains('График')]['x1'].unique()
+    with code("Find start times"):
+        time_index_row_nums = df[df["label"].astype(str).str.contains("График")]["x1"].unique()
 
         start_times = []
 
@@ -30,17 +20,13 @@ def parse_schedule_file(wb_obj):
 
     def _split_func(row):
         try:
-            return row["label"].split(" ")[0] == 'Набор воды в машину'
+            return row["label"].split(" ")[0] == "Набор воды в машину"
         except:
             return False
 
-    parse_block(m, df,
-        "boilings",
-        "boiling",
-        [i for i in split_rows],
-        start_times[0],
-        length=100,
-        split_func=_split_func)
+    parse_block(
+        m, df, "boilings", "boiling", [i for i in split_rows], start_times[0], length=100, split_func=_split_func
+    )
 
     return m.root
 
@@ -49,7 +35,7 @@ def fill_properties(parsed_schedule):
     props = MilkProjectProperties()
 
     # save boiling_model to parsed_schedule blocks
-    boilings = list(sorted(parsed_schedule.iter(cls='boiling'), key=lambda boiling: boiling.y[0]))
+    boilings = list(sorted(parsed_schedule.iter(cls="boiling"), key=lambda boiling: boiling.y[0]))
     if boilings:
         props.n_boilings = len(boilings)
         props.end_time = cast_human_time(boilings[-1].y[0])
@@ -64,5 +50,5 @@ def parse_properties(fn):
 
 if __name__ == "__main__":
     # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = '/Users/marklidenberg/Downloads/Telegram Desktop/2021-08-25 Расписание милкпроджект.xlsx'
+    fn = "/Users/marklidenberg/Downloads/Telegram Desktop/2021-08-25 Расписание милкпроджект.xlsx"
     print(dict(parse_properties(fn)))

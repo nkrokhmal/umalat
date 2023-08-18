@@ -1,9 +1,3 @@
-from utils_ak.block_tree import *
-
-from app.imports.runtime import *
-from app.scheduler.parsing_new.group_intervals import *
-
-
 def parse_line(merged_cells_df, line_row, split_criteria):
     df1 = merged_cells_df[merged_cells_df["x1"] == line_row]  # filter column header
     groups = group_intervals(
@@ -25,7 +19,7 @@ def test1():
         ]
 
     fn = os.path.join(basedir, "app/data/tests/parsing/2.xlsx")
-    merged_cells_df = utils.read_merged_cells_df((fn, "Sheet1"), basic_features=False)
+    merged_cells_df = read_merged_cells_df((fn, "Sheet1"), basic_features=False)
     print(merged_cells_df)
     groups = parse_line(merged_cells_df, 3, split_criteria=basic_criteria(max_length=2))
     df_block = expand_block(merged_cells_df, groups[0])

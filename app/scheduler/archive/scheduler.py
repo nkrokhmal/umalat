@@ -1,7 +1,3 @@
-from app.imports.runtime import *
-from app.scheduler.frontend import *
-
-
 class BoilingPlanner:
     def read_boiling_plan(self, fn):
         pass
@@ -39,7 +35,7 @@ class Scheduler:
         first_boiling_id=1,
         open_file=False,
     ):
-        utils.makedirs(path)
+        makedirs(path)
         boiling_plan_df = self.boiling_planner.read_boiling_plan(boiling_plan_fn)
 
         schedule = self.scheduler_maker.make_schedule(
@@ -58,7 +54,7 @@ class Scheduler:
             if prefix:
                 base_fn = prefix + " " + base_fn
             output_pickle_fn = os.path.join(path, base_fn)
-            output_pickle_fn = utils.SplitFile(output_pickle_fn).get_new()
+            output_pickle_fn = SplitFile(output_pickle_fn).get_new()
 
             with open(output_pickle_fn, "wb") as f:
                 pickle.dump(schedule.to_dict(), f)

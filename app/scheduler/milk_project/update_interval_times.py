@@ -1,7 +1,3 @@
-from app.imports.runtime import *
-from app.scheduler.milk_project.parser_new import parse_schedule
-
-
 def update_interval_times(schedule_wb, boiling_plan_df):
     schedule_info = parse_schedule((schedule_wb, "Расписание"))
 

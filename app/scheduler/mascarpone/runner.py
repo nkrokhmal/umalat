@@ -1,9 +1,3 @@
-from app.imports.runtime import *
-from app.scheduler.frontend import *
-from app.scheduler.mascarpone import *
-from app.scheduler.submit import submit_schedule
-
-
 def run_mascarpone(
     boiling_plan_fn=None,
     schedule=None,
@@ -17,7 +11,7 @@ def run_mascarpone(
     path="outputs/",
     prefix="",
 ):
-    utils.makedirs(path)
+    makedirs(path)
     boiling_plan_df = read_boiling_plan(
         boiling_plan_fn,
         first_batch_ids={

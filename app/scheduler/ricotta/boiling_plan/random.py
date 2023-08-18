@@ -1,7 +1,3 @@
-from app.imports.runtime import *
-from app.models import *
-
-
 def generate_random_boiling_plan(n=24, seed=12):
     random.seed(seed)
     np.random.seed(seed)
@@ -22,7 +18,7 @@ def generate_random_boiling_plan(n=24, seed=12):
         boiling_skus = list(sorted(boiling_skus, key=lambda sku: sku.name))
         for sku in boiling_skus:
             kg = sku.packing_speed * np.random.uniform(0.6, 0.8) / 3
-            kg = utils.custom_round(kg, 10, "ceil")
+            kg = custom_round(kg, 10, "ceil")
             values.append([i, sku, kg])
 
     df = pd.DataFrame(values, columns=["boiling_id", "sku", "kg"])

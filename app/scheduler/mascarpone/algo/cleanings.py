@@ -1,7 +1,6 @@
-from utils_ak.block_tree import *
+from utils_ak.block_tree import BlockMaker
 
-from app.imports.runtime import *
-from app.models import *
+from app.models import Washer, cast_model
 
 
 def make_cleaning(entity, **kwargs):

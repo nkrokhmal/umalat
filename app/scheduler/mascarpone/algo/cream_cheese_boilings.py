@@ -1,9 +1,3 @@
-# from app.imports.runtime import *
-from utils_ak.block_tree import *
-
-from app.models import *
-
-
 def _remove_duplicates_in_order(values, key=None):
     # preserves order of sequence
     seen = set()
@@ -32,7 +26,7 @@ def make_cream_cheese_boiling(boiling_group_df, **props):
         **props
     )
 
-    bt = utils.delistify(boiling_model.boiling_technologies, single=True)
+    bt = delistify(boiling_model.boiling_technologies, single=True)
 
     with m.row("boiling_process"):
         m.row("cooling", size=bt.cooling_time // 5)
@@ -48,7 +42,7 @@ def make_cream_cheese_boiling(boiling_group_df, **props):
     ):
         m.row("P", size=bt.p_time // 5)
         packing_time = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in boiling_group_df.iterrows()])
-        packing_time = int(utils.custom_round(packing_time, 5, "ceil", pre_round_precision=1))
+        packing_time = int(custom_round(packing_time, 5, "ceil", pre_round_precision=1))
         m.row(
             "packing",
             size=packing_time // 5,

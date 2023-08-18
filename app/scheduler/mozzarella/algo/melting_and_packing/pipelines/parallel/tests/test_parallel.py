@@ -5,16 +5,8 @@ os.environ["APP_ENVIRONMENT"] = "interactive"
 
 import warnings
 
-from utils_ak.interactive_imports import *
-
-from app.scheduler.algo import *
-from app.scheduler.boiling_plan import read_boiling_plan
-from app.scheduler.models import *
-from config import basedir
-
 
 warnings.filterwarnings("ignore")
-from utils_ak.loguru import configure_loguru_stdout
 
 
 def test1():
