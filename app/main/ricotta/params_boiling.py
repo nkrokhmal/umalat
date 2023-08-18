@@ -1,7 +1,6 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
+from app.imports.runtime import *
 from app.main import main
 from app.models import RicottaBoiling
 
@@ -19,16 +18,11 @@ def ricotta_get_boiling():
     )
 
 
-@main.route(
-    "/ricotta/edit_boiling/<int:boiling_id>",
-    methods=["GET", "POST"]
-)
+@main.route("/ricotta/edit_boiling/<int:boiling_id>", methods=["GET", "POST"])
 @flask_login.login_required
 def ricotta_edit_boiling(boiling_id):
     form = BoilingForm()
-    boiling = db.session.query(RicottaBoiling).get_or_404(
-        boiling_id
-    )
+    boiling = db.session.query(RicottaBoiling).get_or_404(boiling_id)
     if form.validate_on_submit() and boiling is not None:
         boiling.flavoring_agent = form.flavoring_agent.data
         boiling.percent = form.percent.data

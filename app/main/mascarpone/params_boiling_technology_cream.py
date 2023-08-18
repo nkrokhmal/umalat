@@ -1,10 +1,12 @@
-from app.imports.runtime import *
+import itertools
 
 from werkzeug.utils import redirect
-import itertools
+
+from app.imports.runtime import *
 from app.main import main
-from .forms import MascarponeBoilingTechnologyForm
 from app.models import MascarponeBoilingTechnology, MascarponeSKU
+
+from .forms import MascarponeBoilingTechnologyForm
 
 
 @main.route("/mascarpone/get_boiling_technology_cream", methods=["GET", "POST"])
@@ -28,9 +30,7 @@ def mascarpone_get_boiling_technology_cream():
 @flask_login.login_required
 def mascarpone_edit_boiling_technology_cream(boiling_technology_id):
     form = MascarponeBoilingTechnologyForm()
-    boiling_technology = db.session.query(MascarponeBoilingTechnology).get_or_404(
-        boiling_technology_id
-    )
+    boiling_technology = db.session.query(MascarponeBoilingTechnology).get_or_404(boiling_technology_id)
     if form.validate_on_submit() and boiling_technology is not None:
         boiling_technology.name = form.name.data
         boiling_technology.pouring_time = form.pouring_time.data

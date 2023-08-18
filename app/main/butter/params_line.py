@@ -1,9 +1,8 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
 from app.globals import db
+from app.imports.runtime import *
+from app.main import main
 from app.models import ButterLine
 
 from .forms import LineForm
@@ -13,9 +12,7 @@ from .forms import LineForm
 @flask_login.login_required
 def butter_get_line():
     lines = db.session.query(ButterLine).all()
-    return flask.render_template(
-        "butter/get_line.html", lines=lines, endpoints=".butter_get_line"
-    )
+    return flask.render_template("butter/get_line.html", lines=lines, endpoints=".butter_get_line")
 
 
 @main.route("/butter/edit_line/<int:line_id>", methods=["GET", "POST"])

@@ -1,8 +1,10 @@
 # fmt: off
 from flask_wtf import FlaskForm
 from wtforms import *
-from wtforms.validators import Required, Optional
+from wtforms.validators import Optional, Required
+
 from app.models import *
+
 
 # todo maybe: better list form
 

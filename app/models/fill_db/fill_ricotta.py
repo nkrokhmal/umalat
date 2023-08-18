@@ -1,7 +1,10 @@
-from ...enum import LineName
-import pandas as pd
 import json
+
+import pandas as pd
+
 from app.models import *
+
+from ...enum import LineName
 
 
 def read_params():
@@ -184,7 +187,7 @@ def fill_sku():
             in_box=sku["Коробки"],
             output_per_tank=sku["Выход"] / sku["Количество баков"],
             code=sku["Kод"],
-            at_first=sku["Вначале"] == "Да"
+            at_first=sku["Вначале"] == "Да",
         )
 
         line_name = LineName.RICOTTA

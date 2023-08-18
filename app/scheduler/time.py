@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 
+
 """
 Formats
 time: [-]1:23:55 
@@ -18,8 +19,8 @@ def cast_t(obj):
     if utils.is_int_like(obj):
         return int(obj)
     elif isinstance(obj, (tuple, list)) and all(utils.is_int_like(v) for v in obj):
-        days, hours, minutes = obj # unpack
-        days, hours, minutes = list(map(int, (days, hours, minutes))) # convert to int
+        days, hours, minutes = obj  # unpack
+        days, hours, minutes = list(map(int, (days, hours, minutes)))  # convert to int
         total_minutes = int(days) * 288 * 5 + int(hours) * 60 + int(minutes)
         assert total_minutes % 5 == 0
         return total_minutes // 5
@@ -64,7 +65,7 @@ def cast_human_time(obj):
 
     days, hours, minutes = parse_time(obj)
     if days == 0:
-        return ':'.join(cast_time(obj).split(':')[1:])
+        return ":".join(cast_time(obj).split(":")[1:])
     else:
         sign = "+" if days > 0 else "-"
         return f"{hours:02}:{minutes:02}{sign}{abs(days)}"
@@ -79,7 +80,7 @@ def parse_time(time_obj):
 
 
 def test():
-    for value in ['1:23:55', '0:23:55', '-1:23:55', 1, 0, -1, '08:00', '0:08:00', '21:35-1', '10:08:00']:
+    for value in ["1:23:55", "0:23:55", "-1:23:55", 1, 0, -1, "08:00", "0:08:00", "21:35-1", "10:08:00"]:
         assert cast_t(value) == cast_t(cast_time(cast_t(value)))
         assert cast_t(value) == cast_t(cast_human_time(cast_t(value)))
         assert cast_time(value) == cast_time(cast_t(cast_time(value)))
@@ -89,13 +90,13 @@ def test():
         print(cast_time(value))
         print(cast_human_time(value))
 
-    for wrong_value in ['a:08:00', '08:0a']:
+    for wrong_value in ["a:08:00", "08:0a"]:
         try:
             cast_time(wrong_value)
         except Exception:
             pass
         else:
-            raise Exception('Should not happen')
+            raise Exception("Should not happen")
 
 
 if __name__ == "__main__":

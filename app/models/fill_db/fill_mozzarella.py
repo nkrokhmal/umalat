@@ -1,7 +1,10 @@
-from ...enum import LineName
-import pandas as pd
 import json
+
+import pandas as pd
+
 from app.models import *
+
+from ...enum import LineName
 
 
 def read_params():
@@ -38,9 +41,7 @@ def fill_boiling_technologies():
         "Тип закваски",
     ]
     bt_data = df[boiling_technologies_columns]
-    bt_data["Наличие лактозы"] = bt_data["Наличие лактозы"].apply(
-        lambda x: True if x == "Да" else False
-    )
+    bt_data["Наличие лактозы"] = bt_data["Наличие лактозы"].apply(lambda x: True if x == "Да" else False)
     bt_data = bt_data.drop_duplicates()
     bt_data = bt_data.to_dict("records")
     for bt in bt_data:
@@ -106,9 +107,7 @@ def fill_boilings():
         "Дополнительное время",
     ]
     b_data = df[columns]
-    b_data["Наличие лактозы"] = b_data["Наличие лактозы"].apply(
-        lambda x: True if x == "Да" else False
-    )
+    b_data["Наличие лактозы"] = b_data["Наличие лактозы"].apply(lambda x: True if x == "Да" else False)
     b_data = b_data.drop_duplicates()
     b_data = b_data.to_dict("records")
     for b in b_data:
@@ -173,17 +172,13 @@ def fill_form_factors():
         if value["Вес форм фактора"] == 1:
             name = "Терка {}".format(value["Название форм фактора"])
         elif (
-            (value["Вес форм фактора"] == 7.5)
-            or (value["Вес форм фактора"] == 15)
-            or (value["Вес форм фактора"] == 30)
+            (value["Вес форм фактора"] == 7.5) or (value["Вес форм фактора"] == 15) or (value["Вес форм фактора"] == 30)
         ):
             name = "Палочки {}г".format(value["Вес форм фактора"])
         else:
             name = str(value["Вес форм фактора"] / 1000)
 
-        form_factor = MozzarellaFormFactor(
-            name=name, relative_weight=value["Вес форм фактора"]
-        )
+        form_factor = MozzarellaFormFactor(name=name, relative_weight=value["Вес форм фактора"])
         form_factor.line = [x for x in lines if x.name == line_name][0]
         # cooling_technologies = db.session.query(MozzarellaCoolingTechnology).all()
         if "Терка" not in name:
@@ -248,7 +243,6 @@ def fill_sku():
     sku_data = sku_data.drop_duplicates()
     sku_data = sku_data.to_dict("records")
     for sku in sku_data:
-
         is_lactose = sku["Наличие лактозы"] == "Да"
         add_sku = MozzarellaSKU(
             name=sku["Название SKU"],
@@ -288,16 +282,11 @@ def fill_sku():
             add_sku.packing_by_request = False
         if sku["Вес форм фактора"] != 1:
             add_sku.form_factor = [
-                x
-                for x in form_factors
-                if x.relative_weight == sku["Вес форм фактора"]
-                and x.line.name == line_name
+                x for x in form_factors if x.relative_weight == sku["Вес форм фактора"] and x.line.name == line_name
             ][0]
         else:
             add_sku.form_factor = [
-                x
-                for x in form_factors
-                if x.name == "Терка {}".format(sku["Название форм фактора"])
+                x for x in form_factors if x.name == "Терка {}".format(sku["Название форм фактора"])
             ][0]
 
         db.session.add(add_sku)
@@ -309,20 +298,8 @@ def fill_form_factors_made_from():
     form_factors = db.session.query(MozzarellaFormFactor).all()
     sul_ff = [x for x in form_factors if x.name == "Терка Сулугуни"][0]
     moz_ff = [x for x in form_factors if x.name == "Терка Моцарелла"][0]
-    sul_ffs = set(
-        [
-            x.form_factor
-            for x in skus
-            if "сулугуни" in x.name.lower() and x.line.name == LineName.SALT
-        ]
-    )
-    moz_ffs = set(
-        [
-            x.form_factor
-            for x in skus
-            if "моцарелла" in x.name.lower() and x.line.name == LineName.SALT
-        ]
-    )
+    sul_ffs = set([x.form_factor for x in skus if "сулугуни" in x.name.lower() and x.line.name == LineName.SALT])
+    moz_ffs = set([x.form_factor for x in skus if "моцарелла" in x.name.lower() and x.line.name == LineName.SALT])
     for sul in sul_ffs:
         sul_ff.add_made_from(sul)
     for moz in moz_ffs:

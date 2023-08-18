@@ -1,12 +1,13 @@
 from flask import render_template, request
+
+from app.globals import db
+from app.main import main
+from app.models import *
 from app.utils.files.utils import move_boiling_file, save_request
 from app.utils.mascarpone.boiling_plan_create import mascarpone_boiling_plan_create
 from app.utils.mascarpone.boiling_plan_draw import draw_boiling_plan
-from app.utils.sku_plan import *
 from app.utils.parse_remainings import *
-from app.main import main
-from app.models import *
-from app.globals import db
+from app.utils.sku_plan import *
 
 from .forms import BoilingPlanForm
 
@@ -18,20 +19,12 @@ def mascarpone_boiling_plan():
     if request.method == "POST" and "submit" in request.form:
         date = form.date.data
 
-        skus = (
-            db.session.query(MascarponeSKU).all()
-            + db.session.query(CreamCheeseSKU).all()
-        )
+        skus = db.session.query(MascarponeSKU).all() + db.session.query(CreamCheeseSKU).all()
         total_skus = db.session.query(SKU).all()
-        boilings = (
-            db.session.query(MascarponeBoiling).all()
-            + db.session.query(CreamCheeseBoiling).all()
-        )
+        boilings = db.session.query(MascarponeBoiling).all() + db.session.query(CreamCheeseBoiling).all()
 
         file = request.files["input_file"]
-        tmp_file_path = os.path.join(
-            flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
-        )
+        tmp_file_path = os.path.join(flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
 
         if file:
             file.save(tmp_file_path)
@@ -60,8 +53,6 @@ def mascarpone_boiling_plan():
         wb = draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb)
         save_request(data=wb, filename=filename, date=sku_plan_client.date)
         os.remove(tmp_file_path)
-        return render_template(
-            "mascarpone/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date
-        )
+        return render_template("mascarpone/boiling_plan.html", form=form, filename=filename, date=sku_plan_client.date)
     form.date.data = datetime.today() + timedelta(days=1)
     return render_template("mascarpone/boiling_plan.html", form=form, filename=None)

@@ -1,7 +1,10 @@
-from ...enum import LineName
-import pandas as pd
 import json
+
+import pandas as pd
+
 from app.models import *
+
+from ...enum import LineName
 
 
 def read_params():
@@ -25,11 +28,19 @@ def fill_fermentators():
     line_name = LineName.MASCARPONE
     lines = db.session.query(MascarponeLine).all()
     mascarpone_line = [x for x in lines if x.name == line_name][0]
-    for i, name in enumerate([
-        "Big", "Small", "Small", "Small", "Small", "Small", "Small",
-    ]):
+    for i, name in enumerate(
+        [
+            "Big",
+            "Small",
+            "Small",
+            "Small",
+            "Small",
+            "Small",
+            "Small",
+        ]
+    ):
         fermentator = MascarponeSourdough(
-            number=i+1,
+            number=i + 1,
             name=name,
         )
         fermentator.line = mascarpone_line
@@ -73,7 +84,7 @@ def fill_boiling_technologies():
         "Вес",
         "pumping_off_pause_time",
         "pumping_off_2_time",
-        "Выход"
+        "Выход",
     ]:
         bt_data[column_name] = bt_data[column_name].apply(lambda x: json.loads(x))
     bt_data = bt_data.to_dict("records")
@@ -130,15 +141,15 @@ def fill_boilings():
             line_id = [x for x in lines if x.name == LineName.MASCARPONE][0].id
             bts_name += [
                 x
-                for x in bts if
-                (
+                for x in bts
+                if (
                     x.name
                     == MascarponeBoilingTechnology.create_name(
                         line=line_name,
                         weight=b["Вес"][i],
                         percent=b["Процент"],
                         flavoring_agent=b["Вкусовая добавка"],
-                        is_lactose=b["Наличие лактозы"]
+                        is_lactose=b["Наличие лактозы"],
                     )
                 )
             ]

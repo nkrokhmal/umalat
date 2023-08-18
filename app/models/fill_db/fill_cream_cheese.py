@@ -1,7 +1,10 @@
-from ...enum import LineName
-import pandas as pd
 import json
+
+import pandas as pd
+
 from app.models import *
+
+from ...enum import LineName
 
 
 def read_params(fn="app/data/static/params/creamcheese.xlsx"):
@@ -42,7 +45,8 @@ def fill_boiling_technologies():
         line_name = LineName.MASCARPONE
         technology = CreamCheeseBoilingTechnology(
             name=CreamCheeseBoilingTechnology.create_name(
-                line=line_name, percent=bt["Процент"],
+                line=line_name,
+                percent=bt["Процент"],
                 weight=bt["Вес нетто"],
                 form_factor=bt["Название форм фактора"],
                 flavoring_agent=bt["Вкусовая добавка"],
@@ -94,7 +98,8 @@ def fill_boilings():
             & (
                 x.name
                 == CreamCheeseBoilingTechnology.create_name(
-                    line=line_name, percent=b["Процент"],
+                    line=line_name,
+                    percent=b["Процент"],
                     form_factor=b["Название форм фактора"],
                     weight=b["Вес нетто"],
                     flavoring_agent=b["Вкусовая добавка"],
@@ -177,8 +182,12 @@ def fill_sku():
         add_sku.made_from_boilings = [
             x
             for x in boilings
-            if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id) & (x.output_coeff == sku["Коэффициент"]) &
-               (x.weight_netto == sku["Вес нетто"]) & (x.is_lactose == sku["Наличие лактозы"]) & (x.flavoring_agent == sku["Вкусовая добавка"])
+            if (x.percent == sku["Процент"])
+            & (x.line_id == add_sku.line.id)
+            & (x.output_coeff == sku["Коэффициент"])
+            & (x.weight_netto == sku["Вес нетто"])
+            & (x.is_lactose == sku["Наличие лактозы"])
+            & (x.flavoring_agent == sku["Вкусовая добавка"])
         ]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]

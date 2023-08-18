@@ -1,13 +1,13 @@
 from app.imports.runtime import *
 from app.scheduler import (
-    run_contour_cleanings,
-    run_consolidated,
-    run_ricotta,
-    run_butter,
-    run_mascarpone,
-    run_mozzarella,
-    run_milk_project,
     run_adygea,
+    run_butter,
+    run_consolidated,
+    run_contour_cleanings,
+    run_mascarpone,
+    run_milk_project,
+    run_mozzarella,
+    run_ricotta,
 )
 
 
@@ -62,10 +62,7 @@ def _test_day(
         for fn in utils.list_files(input_path):
             utils.copy_path(fn, os.path.join(output_path, os.path.basename(fn)))
     run_contour_cleanings(
-        output_path,
-        output_path=output_path,
-        prefix=prefix,
-        **input_params.get("contour_cleanings", {})
+        output_path, output_path=output_path, prefix=prefix, **input_params.get("contour_cleanings", {})
     )
     run_consolidated(
         output_path,

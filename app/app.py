@@ -1,9 +1,9 @@
-from app.imports.runtime import *
-
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
 import app.models as umalat_models
+
+from app.imports.runtime import *
 
 from .main import main as main_bp
 from .main.errors import not_found
@@ -43,10 +43,9 @@ def create_app(config_name="default"):
     return app, rq
 
 
-
 def create_manager(app):
-    DB_FOLDER = 'test' if app.config["TESTING"] else 'prod'
-    MIGRATION_DIR = os.path.join('db', DB_FOLDER, 'migrations')
+    DB_FOLDER = "test" if app.config["TESTING"] else "prod"
+    MIGRATION_DIR = os.path.join("db", DB_FOLDER, "migrations")
 
     manager = flask_script.Manager(app)
     flask_migrate.Migrate(app, db, render_as_batch=True, directory=MIGRATION_DIR)

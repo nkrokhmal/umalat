@@ -1,7 +1,9 @@
 from werkzeug.utils import redirect
+
 from app.imports.runtime import *
 from app.main import main
 from app.models import CreamCheeseBoilingTechnology
+
 from .forms import CreamCheeseBoilingTechnologyForm
 
 
@@ -23,9 +25,7 @@ def mascarpone_get_boiling_technology_cream_cheese():
 @flask_login.login_required
 def mascarpone_edit_boiling_technology_cream_cheese(boiling_technology_id):
     form = CreamCheeseBoilingTechnologyForm()
-    boiling_technology = db.session.query(CreamCheeseBoilingTechnology).get_or_404(
-        boiling_technology_id
-    )
+    boiling_technology = db.session.query(CreamCheeseBoilingTechnology).get_or_404(boiling_technology_id)
     if form.validate_on_submit() and boiling_technology is not None:
         boiling_technology.name = form.name.data
         boiling_technology.cooling_time = form.cooling_time.data

@@ -1,7 +1,8 @@
 from app.imports.runtime import *
 from app.scheduler.adygea import *
-from app.scheduler.submit import submit_schedule
 from app.scheduler.boiling_plan import *
+from app.scheduler.submit import submit_schedule
+
 
 def run_adygea(
     boiling_plan_fn=None,
@@ -17,12 +18,10 @@ def run_adygea(
     start_time = start_time or "07:00"
     prepare_start_time = prepare_start_time or start_time
     utils.makedirs(path)
-    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={'adygea': first_batch_id})
+    boiling_plan_df = read_boiling_plan(boiling_plan_fn, first_batch_ids={"adygea": first_batch_id})
 
     if not schedule:
-        schedule = make_schedule(
-            boiling_plan_df, start_time=start_time, prepare_start_time=prepare_start_time
-        )
+        schedule = make_schedule(boiling_plan_df, start_time=start_time, prepare_start_time=prepare_start_time)
     if not template_wb:
         template_wb = openpyxl.load_workbook(
             filename=os.path.join(basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT),

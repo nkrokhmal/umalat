@@ -1,8 +1,10 @@
 import os
 
+
 os.environ["APP_ENVIRONMENT"] = "runtime"
 
 import pytest
+
 from app.app import create_app
 
 

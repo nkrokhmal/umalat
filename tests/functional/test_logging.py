@@ -1,5 +1,3 @@
-
-
 from app.imports.runtime import *
 
 
@@ -21,5 +19,6 @@ def test_logging():
     except:
         logger.exception("Exception")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_logging()

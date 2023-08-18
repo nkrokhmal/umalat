@@ -26,9 +26,7 @@ def download_contour_washers():
         date,
         flask.current_app.config["APPROVED_FOLDER"],
     )
-    response = flask.send_from_directory(
-        directory=uploads, filename=file_name, as_attachment=True
-    )
+    response = flask.send_from_directory(directory=uploads, filename=file_name, as_attachment=True)
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
 
@@ -44,9 +42,7 @@ def download_request_plan():
         date,
         flask.current_app.config["REQUEST_FOLDER"],
     )
-    response = flask.send_from_directory(
-        directory=uploads, filename=file_name, as_attachment=True
-    )
+    response = flask.send_from_directory(directory=uploads, filename=file_name, as_attachment=True)
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
 
@@ -62,9 +58,7 @@ def download_boiling_plan():
         date,
         flask.current_app.config["BOILING_PLAN_FOLDER"],
     )
-    response = flask.send_from_directory(
-        directory=uploads, filename=file_name, as_attachment=True
-    )
+    response = flask.send_from_directory(directory=uploads, filename=file_name, as_attachment=True)
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
 
@@ -80,9 +74,7 @@ def download_schedule_plan():
         date,
         flask.current_app.config["SCHEDULE_FOLDER"],
     )
-    response = flask.send_from_directory(
-        directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True
-    )
+    response = flask.send_from_directory(directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True)
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
 
@@ -98,31 +90,29 @@ def download_schedule_task():
         date,
         flask.current_app.config["TASK_FOLDER"],
     )
-    response = flask.send_from_directory(
-        directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True
-    )
+    response = flask.send_from_directory(directory=uploads, filename=file_name, cache_timeout=0, as_attachment=True)
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
 
 
-@main.route("/download_last_schedule_task", defaults={'check_date': False}, methods=["GET", "POST"])
+@main.route("/download_last_schedule_task", defaults={"check_date": False}, methods=["GET", "POST"])
 def download_last_schedule_task(check_date):
-    dates = [folder for folder in os.listdir(flask.current_app.config["DYNAMIC_DIR"]) if folder.startswith('20')]
-    task_dirs = [os.path.join(
+    dates = [folder for folder in os.listdir(flask.current_app.config["DYNAMIC_DIR"]) if folder.startswith("20")]
+    task_dirs = [
+        os.path.join(
             os.path.dirname(flask.current_app.root_path),
             flask.current_app.config["DYNAMIC_DIR"],
             x,
             flask.current_app.config["TASK_FOLDER"],
-            f"{x}.csv"
+            f"{x}.csv",
         )
-        for x in dates]
+        for x in dates
+    ]
     task_dirs = [x for x in task_dirs if os.path.exists(x)]
     task_dirs = sorted(task_dirs, reverse=True)
     if len(task_dirs) > 0:
         last_dir, filename = os.path.split(task_dirs[0])
-        response = flask.send_from_directory(
-            directory=last_dir, filename=filename, cache_timeout=0, as_attachment=True
-        )
+        response = flask.send_from_directory(directory=last_dir, filename=filename, cache_timeout=0, as_attachment=True)
         response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
         return response
     else:
@@ -134,30 +124,23 @@ def download_last_boiling_schedule_task(department):
     if department not in DEPARTMENTS:
         raise Exception("Wrong department name")
 
-    dates = [folder for folder in os.listdir(flask.current_app.config["DYNAMIC_DIR"]) if folder.startswith('20')]
-    task_dirs = [os.path.join(
-        os.path.dirname(flask.current_app.root_path),
-        flask.current_app.config["DYNAMIC_DIR"],
-        x,
-        flask.current_app.config["TASK_FOLDER"],
-        f"{x} {DEPARTMENT_DICT[department]}.csv"
-    )
-        for x in dates]
+    dates = [folder for folder in os.listdir(flask.current_app.config["DYNAMIC_DIR"]) if folder.startswith("20")]
+    task_dirs = [
+        os.path.join(
+            os.path.dirname(flask.current_app.root_path),
+            flask.current_app.config["DYNAMIC_DIR"],
+            x,
+            flask.current_app.config["TASK_FOLDER"],
+            f"{x} {DEPARTMENT_DICT[department]}.csv",
+        )
+        for x in dates
+    ]
     task_dirs = [x for x in task_dirs if os.path.exists(x)]
     task_dirs = sorted(task_dirs, reverse=True)
     if len(task_dirs) > 0:
         last_dir, filename = os.path.split(task_dirs[0])
-        response = flask.send_from_directory(
-            directory=last_dir, filename=filename, cache_timeout=0, as_attachment=True
-        )
+        response = flask.send_from_directory(directory=last_dir, filename=filename, cache_timeout=0, as_attachment=True)
         response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
         return response
     else:
         raise Exception("There is no csv files in schedule task directory!")
-
-
-
-
-
-
-

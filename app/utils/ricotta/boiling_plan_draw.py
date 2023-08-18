@@ -1,9 +1,8 @@
-from app.imports.runtime import *
-
 from openpyxl.utils.cell import column_index_from_string
 
-from app.utils.features.openpyxl_wrapper import ExcelBlock
+from app.imports.runtime import *
 from app.models import RicottaBoiling, RicottaSKU
+from app.utils.features.openpyxl_wrapper import ExcelBlock
 
 
 Cell = collections.namedtuple("Cell", "col, col_name")
@@ -30,9 +29,7 @@ ROWS = {
 
 def draw_boiling_names(wb):
     excel_client = ExcelBlock(wb["Типы варок"])
-    boiling_names = list(
-        set([x.to_str() for x in db.session.query(RicottaBoiling).all()])
-    )
+    boiling_names = list(set([x.to_str() for x in db.session.query(RicottaBoiling).all()]))
     excel_client.draw_row(1, ["-"])
     cur_i = 2
     for boiling_name in boiling_names:
@@ -53,10 +50,7 @@ def draw_skus(wb, data_sku):
             [
                 group_sku.name,
                 group_sku.made_from_boilings[0].to_str(),
-                int(
-                    group_sku.output_per_tank
-                    * group_sku.made_from_boilings[0].number_of_tanks
-                ),
+                int(group_sku.output_per_tank * group_sku.made_from_boilings[0].number_of_tanks),
                 group_sku.made_from_boilings[0].number_of_tanks,
             ],
             set_border=False,

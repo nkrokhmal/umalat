@@ -1,14 +1,13 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
-from app.globals import db
-from app.models import MascarponeSKU, MascarponeLine, Group
 from app.enum import LineName
+from app.globals import db
+from app.imports.runtime import *
+from app.main import main
+from app.models import Group, MascarponeLine, MascarponeSKU
 from app.utils.features.form_utils import *
 
-from .forms import SKUMascarponeForm, CopySKUForm
+from .forms import CopySKUForm, SKUMascarponeForm
 
 
 @main.route("/mascarpone/add_sku_cream", methods=["POST", "GET"])
@@ -28,11 +27,7 @@ def mascarpone_add_sku_cream():
             in_box=form.in_box.data,
         )
         sku = fill_mascarpone_sku_from_form(sku, form)
-        mascarpone_line = (
-            db.session.query(MascarponeLine)
-            .filter(MascarponeLine.name == LineName.MASCARPONE)
-            .first()
-        )
+        mascarpone_line = db.session.query(MascarponeLine).filter(MascarponeLine.name == LineName.MASCARPONE).first()
         sku.line = mascarpone_line
 
         db.session.add(sku)
@@ -49,6 +44,7 @@ def mascarpone_add_sku_cream():
 def mascarpone_get_sku_cream(page):
     db.session.remove()
     import time
+
     time.sleep(0.1)
     form = SKUMascarponeForm()
     skus_count = db.session.query(MascarponeSKU).count()

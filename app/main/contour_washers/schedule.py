@@ -2,16 +2,17 @@ import flask
 
 from app.imports.runtime import *
 from app.main import main
-from .forms import ScheduleForm, ScheduleDateForm, create_form, fill_properties
+from app.main.errors import internal_error
+from app.scheduler import run_consolidated, run_contour_cleanings
+from app.scheduler.adygea.properties import AdygeaProperties
+from app.scheduler.butter.properties import ButterProperties
+from app.scheduler.contour_cleanings import *
+from app.scheduler.mascarpone.properties import MascarponeProperties
+from app.scheduler.milk_project.properties import MilkProjectProperties
 from app.scheduler.mozzarella.properties import MozzarellaProperties
 from app.scheduler.ricotta.properties import RicottaProperties
-from app.scheduler.mascarpone.properties import MascarponeProperties
-from app.scheduler.butter.properties import ButterProperties
-from app.scheduler.milk_project.properties import MilkProjectProperties
-from app.scheduler.adygea.properties import AdygeaProperties
-from app.scheduler import run_consolidated, run_contour_cleanings
-from app.main.errors import internal_error
-from app.scheduler.contour_cleanings import *
+
+from .forms import ScheduleDateForm, ScheduleForm, create_form, fill_properties
 
 
 @main.route("/contour_washers_schedule", methods=["GET", "POST"])
@@ -21,9 +22,7 @@ def contour_washers_schedule():
     if date is None:
         form = ScheduleForm()
         form.date.data = datetime.today() + timedelta(days=1)
-        return flask.render_template(
-            "contour_washers/schedule.html", form=form, params=False
-        )
+        return flask.render_template("contour_washers/schedule.html", form=form, params=False)
     else:
         main_form = ScheduleDateForm()
         mozzarella_form = create_form(flask.request.form, MozzarellaProperties())
@@ -63,24 +62,18 @@ def contour_washers_schedule():
                 yesterday_str = yesterday.strftime("%Y-%m-%d")
 
                 yesterday_schedules = load_schedules(
-                    config.abs_path(
-                        "app/data/dynamic/{}/approved/".format(yesterday_str)
-                    ),
+                    config.abs_path("app/data/dynamic/{}/approved/".format(yesterday_str)),
                     prefix=yesterday_str,
                     departments=["ricotta", "mozzarella", "adygea", "milk_project"],
                 )
                 yesterday_properties = load_properties(
                     yesterday_schedules,
-                    path=config.abs_path(
-                        "app/data/dynamic/{}/approved/".format(yesterday_str)
-                    ),
+                    path=config.abs_path("app/data/dynamic/{}/approved/".format(yesterday_str)),
                     prefix=yesterday_str,
                 )
 
                 if yesterday_properties["mozzarella"].is_present():
-                    main_form.molder.data = yesterday_properties[
-                        "mozzarella"
-                    ].bar12_present
+                    main_form.molder.data = yesterday_properties["mozzarella"].bar12_present
                 else:
                     flask.flash(
                         "Отсутствует утвержденное расписание по моцарелльному цеху за вчера (определяет, нужен ли формовщик)",
@@ -88,9 +81,7 @@ def contour_washers_schedule():
                     )
 
                 if yesterday_properties["ricotta"].is_present():
-                    main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
-                        "ricotta"
-                    ].n_boilings
+                    main_form.ricotta_n_boilings_yesterday.data = yesterday_properties["ricotta"].n_boilings
                 else:
                     flask.flash(
                         "Отсутствует утвержденное расписание по рикоттному цеху за вчера (определяет число варок для скотты)",
@@ -98,9 +89,7 @@ def contour_washers_schedule():
                     )
 
                 if yesterday_properties["milk_project"].is_present():
-                    main_form.ricotta_n_boilings_yesterday.data = yesterday_properties[
-                        "milk_project"
-                    ].n_boilings
+                    main_form.ricotta_n_boilings_yesterday.data = yesterday_properties["milk_project"].n_boilings
                 else:
                     flask.flash(
                         "Отсутствует утвержденное расписание по милк-проджекты за вчера (определяет число варок для скотты)",
@@ -108,9 +97,7 @@ def contour_washers_schedule():
                     )
 
                 if yesterday_properties["adygea"].is_present():
-                    main_form.adygea_n_boilings_yesterday.data = yesterday_properties[
-                        "adygea"
-                    ].n_boilings
+                    main_form.adygea_n_boilings_yesterday.data = yesterday_properties["adygea"].n_boilings
                 else:
                     flask.flash(
                         "Отсутствует утвержденное расписание по адыгейскому цеху за вчера (определяет число варок для скотты)",
@@ -167,36 +154,24 @@ def contour_washers_schedule():
             path = config.abs_path("app/data/dynamic/{}/approved/".format(date_str))
 
             if not os.path.exists(path):
-                raise Exception(
-                    "Не найдены утвержденные расписания для данной даты: {}".format(
-                        date
-                    )
-                )
+                raise Exception("Не найдены утвержденные расписания для данной даты: {}".format(date))
 
             with code("Calc input tanks"):
                 try:
-                    ricotta_n_boilings = int(
-                        main_form.ricotta_n_boilings_yesterday.data
-                    )
+                    ricotta_n_boilings = int(main_form.ricotta_n_boilings_yesterday.data)
                     adygea_n_boilings = int(main_form.adygea_n_boilings_yesterday.data)
-                    milk_project_n_boilings = int(
-                        main_form.milk_project_n_boilings_yesterday.data
-                    )
+                    milk_project_n_boilings = int(main_form.milk_project_n_boilings_yesterday.data)
                 except Exception as e:
                     return internal_error(e)
 
-                input_tanks = calc_scotta_input_tanks(
-                    ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings
-                )
+                input_tanks = calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings)
             run_contour_cleanings(
                 path,
                 properties=properties,
                 output_path=path,
                 prefix=date_str,
                 input_tanks=input_tanks,
-                is_tomorrow_day_off=utils.cast_bool(
-                    main_form.is_tomorrow_not_working_day.data
-                ),
+                is_tomorrow_day_off=utils.cast_bool(main_form.is_tomorrow_not_working_day.data),
                 shipping_line=utils.cast_bool(main_form.shipping_line.data),
                 molder=utils.cast_bool(main_form.molder.data),
             )

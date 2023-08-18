@@ -1,14 +1,13 @@
-from app.imports.runtime import *
-from app.scheduler.time import *
+from openpyxl.styles import Border, Font, NamedStyle, Side
 from openpyxl.styles.borders import BORDER_THIN, Border, Side
 from utils_ak.openpyxl.openpyxl_tools import *
-from openpyxl.styles import NamedStyle, Font, Border, Side
+
+from app.imports.runtime import *
+from app.scheduler.time import *
 
 
 def fill_grid(ws):
-    utils.set_border_grid(
-        ws, 1, 1, ws.max_column, ws.max_row, Side(border_style=BORDER_THIN)
-    )
+    utils.set_border_grid(ws, 1, 1, ws.max_column, ws.max_row, Side(border_style=BORDER_THIN))
 
 
 def prepare_schedule_worksheet(ws_obj):

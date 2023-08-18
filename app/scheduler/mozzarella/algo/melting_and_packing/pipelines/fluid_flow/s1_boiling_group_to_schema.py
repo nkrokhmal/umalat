@@ -1,8 +1,7 @@
+from app.enum import LineName
 from app.imports.runtime import *
-
 from app.models import *
 from app.scheduler.calculation import *
-from app.enum import LineName
 
 
 class BoilingGroupToSchema:
@@ -11,16 +10,10 @@ class BoilingGroupToSchema:
         df = df.reset_index()
         utils.mark_consecutive_groups(df, "bff", "bff_group")
 
-        bff_kgs = df.groupby("bff_group").agg(
-            {"kg": "sum", "bff": "first", "index": "first"}
-        )
-        bff_kgs = bff_kgs.sort_values(by="index").reset_index(
-            drop=True
-        )  # keep initial order
+        bff_kgs = df.groupby("bff_group").agg({"kg": "sum", "bff": "first", "index": "first"})
+        bff_kgs = bff_kgs.sort_values(by="index").reset_index(drop=True)  # keep initial order
 
-        iterator = utils.SimpleIterator(
-            [[row["bff"], row["kg"]] for bff_id, row in bff_kgs.iterrows()]
-        )
+        iterator = utils.SimpleIterator([[row["bff"], row["kg"]] for bff_id, row in bff_kgs.iterrows()])
 
         boiling_volumes = boiling_group_df.iloc[0]["boiling_volumes"]
 

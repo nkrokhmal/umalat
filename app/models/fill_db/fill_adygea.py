@@ -1,9 +1,11 @@
+import json
 import os
 
-from ...enum import LineName
 import pandas as pd
-import json
+
 from app.models import *
+
+from ...enum import LineName
 
 
 def read_params():
@@ -83,10 +85,10 @@ def fill_boilings():
             & (
                 x.name
                 == AdygeaBoilingTechnology.create_name(
-                   line=line_name,
-                   percent=b["Процент"],
-                   weight=b["Вес нетто"],
-                   form_factor=b["Название форм фактора"],
+                    line=line_name,
+                    percent=b["Процент"],
+                    weight=b["Вес нетто"],
+                    form_factor=b["Название форм фактора"],
                 )
             )
         ]
@@ -96,7 +98,7 @@ def fill_boilings():
             line_id=line_id,
             weight_netto=b["Вес нетто"],
             output_kg=b["Выход"],
-            input_kg=b["Вход"]
+            input_kg=b["Вход"],
         )
         db.session.add(boiling)
         db.session.commit()
@@ -153,9 +155,7 @@ def fill_sku():
         add_sku.made_from_boilings = [
             x
             for x in boilings
-            if (x.percent == sku["Процент"]) &
-               (x.line_id == add_sku.line.id) &
-               (x.weight_netto == sku["Вес нетто"])
+            if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id) & (x.weight_netto == sku["Вес нетто"])
         ]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]

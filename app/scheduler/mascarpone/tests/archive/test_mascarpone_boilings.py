@@ -1,6 +1,5 @@
 from app.imports.runtime import *
 from app.models import *
-
 from app.scheduler.mascarpone.algo.mascarpone_boilings import *
 
 
@@ -45,11 +44,7 @@ def test_make_mascarpone_boiling_group():
             ],
         )
 
-    utils.lazy_tester.log(
-        make_mascarpone_boiling_group(
-            [_create_boiling_group_df(1), _create_boiling_group_df(2)]
-        )
-    )
+    utils.lazy_tester.log(make_mascarpone_boiling_group([_create_boiling_group_df(1), _create_boiling_group_df(2)]))
     utils.lazy_tester.assert_logs()
 
 

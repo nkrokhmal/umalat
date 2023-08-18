@@ -1,5 +1,6 @@
 import os
 import shutil
+
 from app.imports.runtime import *
 
 
@@ -30,15 +31,11 @@ def save_file_dir(data, filename, date, folder, data_type="xlsx"):
 
 
 def save_boiling_plan(*args, **kwargs):
-    save_file_dir(
-        *args, **kwargs, folder=flask.current_app.config["BOILING_PLAN_FOLDER"]
-    )
+    save_file_dir(*args, **kwargs, folder=flask.current_app.config["BOILING_PLAN_FOLDER"])
 
 
 def save_request(*args, **kwargs):
-    save_file_dir(
-        *args, **kwargs, folder=flask.current_app.config["REQUEST_FOLDER"]
-    )
+    save_file_dir(*args, **kwargs, folder=flask.current_app.config["REQUEST_FOLDER"])
 
 
 def save_schedule(*args, **kwargs):
@@ -46,24 +43,15 @@ def save_schedule(*args, **kwargs):
 
 
 def save_schedule_task(*args, **kwargs):
-    save_file_dir(
-        *args, **kwargs, folder=flask.current_app.config["TASK_FOLDER"], data_type="csv"
-    )
+    save_file_dir(*args, **kwargs, folder=flask.current_app.config["TASK_FOLDER"], data_type="csv")
 
 
 def save_schedule_dict(*args, **kwargs):
-    save_file_dir(
-        *args,
-        **kwargs,
-        folder=flask.current_app.config["SCHEDULE_DICT_FOLDER"],
-        data_type="pickle"
-    )
+    save_file_dir(*args, **kwargs, folder=flask.current_app.config["SCHEDULE_DICT_FOLDER"], data_type="pickle")
 
 
 def move_boiling_file(date, old_filepath, old_filename, department=""):
-    new_filename = "{} План по варкам {}.xlsx".format(
-        old_filename.split(" ")[0], department
-    )
+    new_filename = "{} План по варкам {}.xlsx".format(old_filename.split(" ")[0], department)
     data_dir = os.path.join(
         flask.current_app.config["DYNAMIC_DIR"],
         date,
@@ -123,10 +111,7 @@ def move_to_approved_pickle(date, file_name):
 
 def delete_from_approved_pickle(date, file_name):
     pickle_dir = os.path.join(
-        flask.current_app.config["DYNAMIC_DIR"],
-        date,
-        flask.current_app.config["APPROVED_FOLDER"],
-        file_name
+        flask.current_app.config["DYNAMIC_DIR"], date, flask.current_app.config["APPROVED_FOLDER"], file_name
     )
     if os.path.exists(pickle_dir):
         os.remove(pickle_dir)

@@ -54,7 +54,6 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
         start_configurations = []
         n = _parse_seq(start_configuration, a=LineName.WATER, b=LineName.SALT)
         with code("Calc neighborhood"):
-
             # - 1 -> -3, -2, -1, skip, 1,  2
 
             n_neighborhood = [n + i for i in range(-2, 3) if n + i != 0]
@@ -140,7 +139,6 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
     first_boiling = min(first_boilings.values(), key=lambda boiling: boiling.x[0])
     second_boiling = max(first_boilings.values(), key=lambda boiling: boiling.x[0])
     if first_boiling.props["boiling_model"].line.name == time_by_line:
-
         # time already set by proper line
         return value["schedule"]
     else:

@@ -1,16 +1,14 @@
 from app.imports.runtime import *
-
-from .forms import BoilingPlanForm
+from app.main import main
+from app.models import *
+from app.scheduler.mozzarella.boiling_plan import read_boiling_plan as mozzarella_read_boiling_plan
+from app.utils.files.utils import move_boiling_file, save_request
+from app.utils.parse_remainings import *
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create
 from app.utils.ricotta.boiling_plan_draw import draw_boiling_plan
-from app.scheduler.mozzarella.boiling_plan import (
-    read_boiling_plan as mozzarella_read_boiling_plan,
-)
 from app.utils.sku_plan import *
-from app.utils.parse_remainings import *
-from app.main import main
-from app.utils.files.utils import move_boiling_file, save_request
-from app.models import *
+
+from .forms import BoilingPlanForm
 
 
 @main.route("/ricotta_boiling_plan", methods=["POST", "GET"])
@@ -27,35 +25,26 @@ def ricotta_boiling_plan():
         total_volume = 0
 
         file = flask.request.files["input_file"]
-        filename_ext = file.filename.split('.')[-1]
+        filename_ext = file.filename.split(".")[-1]
 
-        tmp_file_path = os.path.join(
-            flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
-        )
+        tmp_file_path = os.path.join(flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
 
         if file:
             file.save(tmp_file_path)
 
-        if filename_ext == 'csv':
+        if filename_ext == "csv":
             wb = openpyxl.Workbook()
             request_ton = 0
         else:
             wb = openpyxl.load_workbook(
-                filename=os.path.join(
-                    flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
-                ),
+                filename=os.path.join(flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename),
                 data_only=True,
             )
             request_ton = 0
             if ("Вода" in wb.sheetnames) and ("Соль" in wb.sheetnames):
                 boiling_plan_df = mozzarella_read_boiling_plan(wb, validate=False)
-                boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(
-                    lambda x: int(x)
-                )
-                total_volume = int(
-                    boiling_plan_df.groupby("group_id").first()["configuration"].sum()
-                    * 0.81
-                )
+                boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(lambda x: int(x))
+                total_volume = int(boiling_plan_df.groupby("group_id").first()["configuration"].sum() * 0.81)
                 if add_auto_boilings:
                     request_ton = total_volume
 

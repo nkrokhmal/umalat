@@ -1,5 +1,5 @@
-from app.imports.runtime import *
 from app.enum import LineName
+from app.imports.runtime import *
 
 from .mozzarella import MozzarellaBoiling, MozzarellaFormFactor
 
@@ -15,9 +15,7 @@ def query_exactly_one(cls, key, value):
     if len(res) == 0:
         raise Exception("Failed to fetch element {} {} {}".format(cls, key, value))
     elif len(res) > 1:
-        raise Exception(
-            "Fetched too many elements {} {} {}: {}".format(cls, key, value, res)
-        )
+        raise Exception("Fetched too many elements {} {} {}: {}".format(cls, key, value, res))
     else:
         return res[0]
 
@@ -55,8 +53,7 @@ def cast_mozzarella_form_factor(obj):
         form_factors = [
             ff
             for ff in form_factors
-            if str(ff.relative_weight) == relative_weight
-            and ff.line.name == short_line_names_map[short_line_name]
+            if str(ff.relative_weight) == relative_weight and ff.line.name == short_line_names_map[short_line_name]
         ]
         assert (
             len(form_factors) <= 1

@@ -1,8 +1,12 @@
 import io
-from tests.conftest import client
-from flask import url_for
-from app.imports.runtime import *
+
 from io import StringIO
+
+from flask import url_for
+
+from app.imports.runtime import *
+
+from tests.conftest import client
 
 
 def test_mozzarella_params(client):
@@ -20,7 +24,7 @@ def test_mozzarella_add_sku(client):
 
 
 def test_mozzarella_download_params(client):
-    params_df = pd.read_excel(r'app/data/static/params/mozzarella_test.xlsx')
+    params_df = pd.read_excel(r"app/data/static/params/mozzarella_test.xlsx")
     with client.test_client() as client:
         url = url_for("main.download_mozzarella", _external=False)
         response = client.post(url, follow_redirects=True)
@@ -32,9 +36,3 @@ def test_mozzarella_download_params(client):
         assert sorted(df.columns) == sorted(params_df.columns)
         assert df.equals(params_df)
         assert response.status_code == 200
-
-
-
-
-
-

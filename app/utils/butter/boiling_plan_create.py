@@ -8,9 +8,7 @@ def butter_boiling_plan_create(df):
     df["percent"] = df["sku"].apply(lambda x: x.made_from_boilings[0].percent)
     df["weight"] = df["sku"].apply(lambda x: round(x.weight_netto))
     df["flavoring_agent"] = df["sku"].apply(
-        lambda x: x.made_from_boilings[0].flavoring_agent
-        if isinstance(x, ButterSKU)
-        else ""
+        lambda x: x.made_from_boilings[0].flavoring_agent if isinstance(x, ButterSKU) else ""
     )
     df["is_lactose"] = df["sku"].apply(lambda x: x.made_from_boilings[0].is_lactose)
     df["group"] = df["sku"].apply(lambda x: x.group.name)
@@ -22,10 +20,7 @@ def butter_boiling_plan_create(df):
 def butter_proceed_order(order, df, boilings):
     df_filter = df[
         (df["is_lactose"] == order.is_lactose)
-        & (
-            order.flavoring_agent is None
-            or df["flavoring_agent"] == order.flavoring_agent
-        )
+        & (order.flavoring_agent is None or df["flavoring_agent"] == order.flavoring_agent)
     ]
     if not df_filter.empty:
         df_filter_groups = [group for _, group in df_filter.groupby("percent")]
@@ -54,7 +49,9 @@ def handle_butter(df):
     ]
     for order in orders:
         boilings_butter = butter_proceed_order(
-            order, df, boilings_butter,
+            order,
+            df,
+            boilings_butter,
         )
     boilings_butter.finish()
     return pd.DataFrame(boilings_butter.boilings)

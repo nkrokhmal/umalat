@@ -1,9 +1,9 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
+from app.imports.runtime import *
 from app.main import main
-from app.models import MozzarellaLine, MozzarellaBoiling
+from app.models import MozzarellaBoiling, MozzarellaLine
+
 from .forms import LineForm
 
 
@@ -11,9 +11,7 @@ from .forms import LineForm
 @flask_login.login_required
 def get_line():
     lines = db.session.query(MozzarellaLine).all()
-    return flask.render_template(
-        "mozzarella/get_line.html", lines=lines, endpoints=".get_line"
-    )
+    return flask.render_template("mozzarella/get_line.html", lines=lines, endpoints=".get_line")
 
 
 @main.route("/mozzarella/edit_line/<int:line_id>", methods=["GET", "POST"])

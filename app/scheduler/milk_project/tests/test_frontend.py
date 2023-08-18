@@ -1,6 +1,6 @@
 from app.imports.runtime import *
-from app.scheduler.milk_project import *
 from app.scheduler import draw_excel_frontend
+from app.scheduler.milk_project import *
 
 
 def _test(fn, open_file=False, *args, **kwargs):
@@ -13,11 +13,7 @@ def _test(fn, open_file=False, *args, **kwargs):
 
 
 def test_batch():
-    fns = glob.glob(
-        config.abs_path(
-            "app/data/static/samples/inputs/by_department/milk_project/*.xlsx"
-        )
-    )
+    fns = glob.glob(config.abs_path("app/data/static/samples/inputs/by_department/milk_project/*.xlsx"))
     fns = [fn for fn in fns if "$" not in fn]
     for i, fn in enumerate(utils.tqdm(fns, desc=lambda v: v)):
         _test(fn, open_file=False, prefix=str(i))

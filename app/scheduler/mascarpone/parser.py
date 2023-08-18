@@ -1,10 +1,10 @@
+from utils_ak.block_tree import *
+
 from app.imports.runtime import *
 from app.scheduler.mascarpone import *
 from app.scheduler.mascarpone.properties import *
 from app.scheduler.parsing import *
 from app.scheduler.parsing_new import cast_time_from_hour_label
-
-from utils_ak.block_tree import *
 
 
 def _is_datetime(v: Union[str, datetime]):
@@ -26,7 +26,6 @@ def _is_datetime(v: Union[str, datetime]):
 
 
 def parse_schedule_file(wb_obj):
-
     # - Load cells
 
     df = load_cells_df(wb_obj, "Расписание")
@@ -43,7 +42,6 @@ def parse_schedule_file(wb_obj):
 
     # todo maybe: refactor, start_times -> start_ts [@marklidenberg]
     start_times = [cast_t(v) for v in start_times]
-
 
     # Precaution for minimum start time
     minimum_start_time = "21:00"
@@ -106,7 +104,6 @@ def parse_schedule_file(wb_obj):
                 fourth_boiling_group_adding_lactic_acid_time=cast_time(blocks_df.iloc[0]["y0"] + start_times[0] - 5)
             )  # don't forget the column header
         except:
-
             # todo maybe: cream-only case, where there are no 4 labels [@marklidenberg]
             m.root.props.update(fourth_boiling_group_adding_lactic_acid_time=None)
 

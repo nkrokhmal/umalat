@@ -1,14 +1,13 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
-from app.globals import db
-from app.models import RicottaSKU, RicottaLine
 from app.enum import LineName
+from app.globals import db
+from app.imports.runtime import *
+from app.main import main
+from app.models import RicottaLine, RicottaSKU
 from app.utils.features.form_utils import *
 
-from .forms import SKUForm, CopySKUForm
+from .forms import CopySKUForm, SKUForm
 
 
 @main.route("/ricotta/add_sku", methods=["POST", "GET"])
@@ -29,11 +28,7 @@ def ricotta_add_sku():
             output_per_tank=form.output_per_tank.data,
         )
         sku = fill_ricotta_sku_from_form(sku, form)
-        ricotta_line = (
-            db.session.query(RicottaLine)
-            .filter(RicottaLine.name == LineName.RICOTTA)
-            .first()
-        )
+        ricotta_line = db.session.query(RicottaLine).filter(RicottaLine.name == LineName.RICOTTA).first()
         sku.line = ricotta_line
 
         db.session.add(sku)
@@ -94,9 +89,7 @@ def ricotta_get_sku(page):
     pagination = (
         db.session.query(RicottaSKU)
         .order_by(RicottaSKU.name)
-        .paginate(
-            page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False
-        )
+        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return flask.render_template(
         "ricotta/get_sku.html",

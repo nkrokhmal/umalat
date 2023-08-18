@@ -1,15 +1,13 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
-from app.globals import db
-from app.models import CreamCheeseSKU, CreamCheeseLine, Group
 from app.enum import LineName
+from app.globals import db
+from app.imports.runtime import *
+from app.main import main
+from app.models import CreamCheeseLine, CreamCheeseSKU, Group
 from app.utils.features.form_utils import *
 
-
-from .forms import SKUCreamCheeseForm, CopySKUForm
+from .forms import CopySKUForm, SKUCreamCheeseForm
 
 
 @main.route("/mascarpone/add_sku_cream_cheese", methods=["POST", "GET"])
@@ -29,11 +27,7 @@ def mascarpone_add_sku_cream_cheese():
             in_box=form.in_box.data,
         )
         sku = fill_mascarpone_sku_from_form(sku, form)
-        mascarpone_line = (
-            db.session.query(CreamCheeseLine)
-            .filter(CreamCheeseLine.name == LineName.MASCARPONE)
-            .first()
-        )
+        mascarpone_line = db.session.query(CreamCheeseLine).filter(CreamCheeseLine.name == LineName.MASCARPONE).first()
         sku.line = mascarpone_line
 
         db.session.add(sku)
@@ -50,6 +44,7 @@ def mascarpone_add_sku_cream_cheese():
 def mascarpone_get_sku_cream_cheese(page):
     db.session.remove()
     import time
+
     time.sleep(0.1)
     form = SKUCreamCheeseForm()
     skus_count = db.session.query(CreamCheeseSKU).count()
@@ -59,9 +54,7 @@ def mascarpone_get_sku_cream_cheese(page):
         .join(Group)
         # .filter(Group.name == "Кремчиз")
         .order_by(CreamCheeseSKU.name)
-        .paginate(
-            page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False
-        )
+        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return flask.render_template(
         "mascarpone/get_sku_cream_cheese.html",
@@ -148,9 +141,7 @@ def mascarpone_edit_sku_cream_cheese(sku_id):
     form.packing_speed.data = sku.packing_speed
     form.in_box.data = sku.in_box
 
-    return flask.render_template(
-        "mascarpone/edit_sku_cream_cheese.html", form=form, sku_id=sku_id
-    )
+    return flask.render_template("mascarpone/edit_sku_cream_cheese.html", form=form, sku_id=sku_id)
 
 
 @main.route("/mascarpone/delete_sku_cream_cheese/<int:sku_id>", methods=["DELETE"])

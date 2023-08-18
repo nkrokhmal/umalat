@@ -1,9 +1,11 @@
 import os
 
+
 os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from app.scheduler.butter.algo.schedule import *
 from app.scheduler.butter.boiling_plan import *
+
 from config import DebugConfig
 
 
@@ -16,9 +18,7 @@ def test_sample():
     from utils_ak.loguru import configure_loguru_stdout
 
     configure_loguru_stdout("INFO")
-    boiling_plan_df = read_boiling_plan(
-        config.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx")
-    )
+    boiling_plan_df = read_boiling_plan(config.abs_path("app/data/inputs/ricotta/sample_boiling_plan.xlsx"))
     print(make_schedule(boiling_plan_df))
 
 

@@ -1,17 +1,17 @@
 import os
 
+
 os.environ["APP_ENVIRONMENT"] = "interactive"
 
 
 from app.scheduler.mozzarella import *
 
+
 warnings.filterwarnings("ignore")
 
 
 def test():
-    fn = config.abs_path(
-        "app/data/inputs/samples/mozzarella/2021-05-07 План по варкам.xlsx"
-    )
+    fn = config.abs_path("app/data/inputs/samples/mozzarella/2021-05-07 План по варкам.xlsx")
     df = read_boiling_plan(fn)
     mark_consecutive_groups(df, "boiling", "boiling_group")
     boiling_group_df = df[df["boiling_group"] == 1]

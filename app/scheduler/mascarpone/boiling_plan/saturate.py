@@ -3,9 +3,7 @@ from app.imports.runtime import *
 
 def saturate_boiling_plan(boiling_plan_df):
     df = boiling_plan_df
-    df["boiling"] = df["sku"].apply(
-        lambda sku: utils.delistify(sku.made_from_boilings, single=True)
-    )
+    df["boiling"] = df["sku"].apply(lambda sku: utils.delistify(sku.made_from_boilings, single=True))
     df["boiling_key"] = df["boiling"].apply(lambda boiling: boiling.id)
     df["sourdough_range"] = df["sourdough_range"].astype(str)
     df["sourdoughs"] = df["sourdough_range"].apply(lambda s: s.split("-"))
@@ -19,7 +17,7 @@ def saturate_boiling_plan(boiling_plan_df):
     df["sourdoughs"] = df["sourdoughs"].apply(format_sourdoughs)
 
     df["sku_cls_name"] = df["sku"].apply(lambda sku: str(sku.__class__))
-    df['sku_name'] = df['sku'].apply(lambda sku: sku.name)
+    df["sku_name"] = df["sku"].apply(lambda sku: sku.name)
 
     def get_type(cls_name):
         if "Mascarpone" in cls_name:

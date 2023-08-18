@@ -1,10 +1,10 @@
-from app.imports.runtime import *
-
-from app.models import *
 from app.enum import LineName
+from app.imports.runtime import *
+from app.models import *
+from app.scheduler.boiling_plan import *
 
 from .saturate import saturate_boiling_plan
-from app.scheduler.boiling_plan import *
+
 
 def read_boiling_plan(wb_obj, first_batch_ids=None):
     """
@@ -12,7 +12,7 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
     wb = utils.cast_workbook(wb_obj)
-    first_batch_ids = first_batch_ids or {'butter': 1}
+    first_batch_ids = first_batch_ids or {"butter": 1}
 
     cur_id = 0
     ws = wb["План варок"]
@@ -43,13 +43,12 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
     ]
     df = df[df["sku"] != "-"]
 
-
     df["group_id"] = df["group_id"].astype(int)
 
     # batch_id and boiling_id are the same with group_id
     df["batch_id"] = df["group_id"]
     df["boiling_id"] = df["group_id"]
-    df['batch_type'] = 'butter'
+    df["batch_type"] = "butter"
     df["sku"] = df["sku"].apply(lambda sku: cast_model(ButterSKU, sku))
 
     df = saturate_boiling_plan(df)

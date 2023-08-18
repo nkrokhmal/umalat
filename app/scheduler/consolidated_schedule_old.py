@@ -1,18 +1,13 @@
 import openpyxl
 
+from utils_ak.block_tree import *
+
 from app.imports.runtime import *
 from app.scheduler import *
-from utils_ak.block_tree import *
 
 
 def run_consolidated_old(
-    input_path,
-    prefix="",
-    output_path="outputs/",
-    open_file=False,
-    schedules=None,
-    wb=None,
-    date=None
+    input_path, prefix="", output_path="outputs/", open_file=False, schedules=None, wb=None, date=None
 ):
     utils.makedirs(output_path)
 
@@ -29,7 +24,7 @@ def run_consolidated_old(
                 data_only=True,
             )
 
-        from app.scheduler.mozzarella import wrap_frontend, STYLE
+        from app.scheduler.mozzarella import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["mozzarella"])
         depth = frontend.y[1]
@@ -41,9 +36,7 @@ def run_consolidated_old(
             # draw mozzarella
             if not wb:
                 # init workbook with schedule file #todo maybe: better to crop mozzarella part and paste into empty workbook, so can be generalized for other departments
-                wb = openpyxl.load_workbook(
-                    os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx")
-                )
+                wb = openpyxl.load_workbook(os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx"))
 
                 for sheet_name in wb.sheetnames:
                     if sheet_name != "Расписание":
@@ -54,14 +47,12 @@ def run_consolidated_old(
 
         if not wb:
             wb = openpyxl.load_workbook(
-                filename=os.path.join(
-                    basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT
-                ),
+                filename=os.path.join(basedir, config.TEMPLATE_SCHEDULE_PLAN_DEPARTMENT),
                 data_only=True,
             )
 
     if "ricotta" in schedules:
-        from app.scheduler.ricotta import wrap_frontend, STYLE
+        from app.scheduler.ricotta import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["ricotta"], date=date)
         depth = frontend.y[1]
@@ -71,7 +62,7 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "mascarpone" in schedules:
-        from app.scheduler.mascarpone import wrap_frontend, STYLE
+        from app.scheduler.mascarpone import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["mascarpone"], date=date)
         depth = frontend.y[1]
@@ -81,7 +72,7 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "butter" in schedules:
-        from app.scheduler.butter import wrap_frontend, STYLE
+        from app.scheduler.butter import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["butter"], date=date)
         depth = frontend.y[1]
@@ -91,7 +82,7 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "milk_project" in schedules:
-        from app.scheduler.milk_project import wrap_frontend, STYLE
+        from app.scheduler.milk_project import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["milk_project"], date=date)
         depth = frontend.y[1]
@@ -101,7 +92,7 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "adygea" in schedules:
-        from app.scheduler.adygea import wrap_frontend, STYLE
+        from app.scheduler.adygea import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["adygea"], date=date)
         depth = frontend.y[1]
@@ -111,7 +102,7 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "contour_cleanings" in schedules:
-        from app.scheduler.contour_cleanings import wrap_frontend, STYLE
+        from app.scheduler.contour_cleanings import STYLE, wrap_frontend
 
         frontend = wrap_frontend(schedules["contour_cleanings"], date=date)
         depth = frontend.y[1]
@@ -128,9 +119,7 @@ def run_consolidated_old(
                     base_fn = prefix + " " + base_fn
                 output_fn = os.path.join(output_path, base_fn)
 
-        draw_excel_frontend(
-            frontend, open_file=open_file, wb=wb, fn=output_fn, style=STYLE
-        )
+        draw_excel_frontend(frontend, open_file=open_file, wb=wb, fn=output_fn, style=STYLE)
     return wb
 
 

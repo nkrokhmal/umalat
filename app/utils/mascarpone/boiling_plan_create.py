@@ -1,5 +1,4 @@
 from app.imports.runtime import *
-
 from app.models import *
 from app.utils.features.merge_boiling_utils import Boilings
 
@@ -8,22 +7,16 @@ def add_fields(result, type):
     if not result.empty:
         result["kg"] = result["plan"]
         result["name"] = result["sku"].apply(lambda sku: sku.name)
-        result["boiling_type"] = result["sku"].apply(
-            lambda sku: sku.made_from_boilings[0].to_str()
-        )
+        result["boiling_type"] = result["sku"].apply(lambda sku: sku.made_from_boilings[0].to_str())
         result["output"] = result["max_boiling_weight"]
 
         max_output = int(result["output"].max())
         if type == "mascarpone":
-            result["fermentators"] = result["output"].apply(
-                lambda x: "1-2" if x == max_output else "3-4"
-            )
+            result["fermentators"] = result["output"].apply(lambda x: "1-2" if x == max_output else "3-4")
         else:
             result["fermentators"] = "-"
 
-        result["coeff"] = result["sku"].apply(
-            lambda sku: sku.made_from_boilings[0].output_coeff
-        )
+        result["coeff"] = result["sku"].apply(lambda sku: sku.made_from_boilings[0].output_coeff)
         result["kg"] = result["kg"] / result["coeff"]
         result["kg"] = result["kg"].apply(lambda x: math.ceil(x))
 
@@ -70,13 +63,8 @@ def mascarpone_proceed_order(order, df, boilings, output_tons):
     print(order)
     df_filter = df[
         (df["group"] == order.group)
-        & (
-            order.flavoring_agent is None
-            or df["flavoring_agent"] == order.flavoring_agent
-        )
-        & (
-            df["is_lactose"] == order.is_lactose
-        )
+        & (order.flavoring_agent is None or df["flavoring_agent"] == order.flavoring_agent)
+        & (df["is_lactose"] == order.is_lactose)
     ]
     print(df_filter)
     if not df_filter.empty:
@@ -97,20 +85,13 @@ def mascarpone_proceed_order(order, df, boilings, output_tons):
 def cream_cheese_proceed_order(order, df, boilings):
     print(order)
     df_filter = df[
-        (df["group"].isin(order.groups)) &
-        (df["is_lactose"] == order.is_lactose) &
-        (
-            order.flavoring_agent is None
-            or df["flavoring_agent"] == order.flavoring_agent
-        )
-    ].sort_values(
-        by=["group", "percent"]
-    )
+        (df["group"].isin(order.groups))
+        & (df["is_lactose"] == order.is_lactose)
+        & (order.flavoring_agent is None or df["flavoring_agent"] == order.flavoring_agent)
+    ].sort_values(by=["group", "percent"])
 
     if not df_filter.empty:
-        output_ton = (
-            df_filter["sku"].apply(lambda x: x.made_from_boilings[0].output_ton).iloc[0]
-        )
+        output_ton = df_filter["sku"].apply(lambda x: x.made_from_boilings[0].output_ton).iloc[0]
         boilings.init_iterator(output_ton)
 
         df_filter_groups = [group for _, group in df_filter.groupby("boiling_id")]
@@ -123,14 +104,7 @@ def cream_cheese_proceed_order(order, df, boilings):
 
 def handle_mascarpone(df):
     output_tons = sorted(
-        list(
-            set(
-                [
-                    x.output_ton
-                    for x in db.session.query(MascarponeBoilingTechnology).all()
-                ]
-            )
-        ),
+        list(set([x.output_ton for x in db.session.query(MascarponeBoilingTechnology).all()])),
         reverse=True,
     )
     output_tons = [max(output_tons) + min(output_tons), 2 * min(output_tons)]
@@ -143,9 +117,7 @@ def handle_mascarpone(df):
         Order("Шоколад", True, "Маскарпоне"),
     ]
     for order in orders:
-        boilings_mascarpone = mascarpone_proceed_order(
-            order, df, boilings_mascarpone, output_tons
-        )
+        boilings_mascarpone = mascarpone_proceed_order(order, df, boilings_mascarpone, output_tons)
     boilings_mascarpone.finish()
     return pd.DataFrame(boilings_mascarpone.boilings)
 
@@ -159,9 +131,7 @@ def handle_cream(df):
         Order("", True, "Сливки"),
     ]
     for order in orders:
-        boilings_mascarpone = mascarpone_proceed_order(
-            order, df, boilings_mascarpone, output_tons
-        )
+        boilings_mascarpone = mascarpone_proceed_order(order, df, boilings_mascarpone, output_tons)
     boilings_mascarpone.finish()
     return pd.DataFrame(boilings_mascarpone.boilings)
 
@@ -179,8 +149,6 @@ def handle_cream_cheese(df):
         Order("", True, ["Робиола", "Творожный"]),
     ]
     for order in orders:
-        boilings_cream_cheese = cream_cheese_proceed_order(
-            order, df, boilings_cream_cheese
-        )
+        boilings_cream_cheese = cream_cheese_proceed_order(order, df, boilings_cream_cheese)
     boilings_cream_cheese.finish()
     return pd.DataFrame(boilings_cream_cheese.boilings)

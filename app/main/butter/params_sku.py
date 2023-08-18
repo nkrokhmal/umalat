@@ -1,13 +1,12 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
-from app.models import ButterSKU, ButterLine, ButterFormFactor, Group
 from app.enum import *
+from app.imports.runtime import *
+from app.main import main
+from app.models import ButterFormFactor, ButterLine, ButterSKU, Group
 from app.utils.features.form_utils import *
 
-from .forms import SKUButterForm, CopySKUForm
+from .forms import CopySKUForm, SKUButterForm
 
 
 @main.route("/butter/add_sku", methods=["POST", "GET"])
@@ -29,11 +28,7 @@ def butter_add_sku():
             form_factor=form_factor,
         )
         sku = fill_butter_sku_from_form(sku, form)
-        butter_line = (
-            db.session.query(ButterLine)
-            .filter(ButterLine.name == LineName.BUTTER)
-            .first()
-        )
+        butter_line = db.session.query(ButterLine).filter(ButterLine.name == LineName.BUTTER).first()
         sku.line = butter_line
 
         db.session.add(sku)
@@ -88,6 +83,7 @@ def butter_copy_sku(sku_id):
 def butter_get_sku(page):
     db.session.remove()
     import time
+
     time.sleep(0.1)
     form = SKUButterForm()
     skus_count = db.session.query(ButterSKU).count()
@@ -146,9 +142,7 @@ def butter_edit_sku(sku_id):
     form.packing_speed.data = sku.packing_speed
     form.in_box.data = sku.in_box
 
-    return flask.render_template(
-        "butter/edit_sku.html", form=form, sku_id=sku_id
-    )
+    return flask.render_template("butter/edit_sku.html", form=form, sku_id=sku_id)
 
 
 @main.route("/butter/delete_sku/<int:sku_id>", methods=["DELETE"])

@@ -1,7 +1,8 @@
 from app.imports.runtime import *
+from app.scheduler.mozzarella.algo.stats import *
+
 from .boilings import *
 from .schedule_from_boilings import *
-from app.scheduler.mozzarella.algo.stats import *
 
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):
@@ -32,9 +33,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
 
     # is_water_done - has water been finished at this point
     df["is_water_done"] = df["line_name"]
-    df["is_water_done"] = np.where(
-        df["is_water_done"] == "Моцарелла в воде", True, np.nan
-    )
+    df["is_water_done"] = np.where(df["is_water_done"] == "Моцарелла в воде", True, np.nan)
     df["is_water_done"] = df["is_water_done"].fillna(method="bfill")
     df["is_water_done"] = df["is_water_done"].shift(-1).fillna(0)
     df["is_water_done"] = df["is_water_done"].astype(bool)
@@ -75,9 +74,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
             for combo in available_combinations
         ]
 
-        df1 = pd.DataFrame(
-            values1, columns=["combo", "total_conflict_time", "is_water_done"]
-        )
+        df1 = pd.DataFrame(values1, columns=["combo", "total_conflict_time", "is_water_done"])
         # set priorities
         df1 = df1.sort_values(by=["total_conflict_time"], ascending=True)
         df1 = df1.sort_values(by=["is_water_done"], ascending=False)
@@ -92,7 +89,5 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
 def find_optimal_cleanings(boiling_plan_df, start_times=None, **make_schedule_kwargs):
     start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
     boilings = make_boilings(boiling_plan_df)
-    schedule = make_schedule_from_boilings(
-        boilings, start_times=start_times, **make_schedule_kwargs
-    )
+    schedule = make_schedule_from_boilings(boilings, start_times=start_times, **make_schedule_kwargs)
     return _find_optimal_cleanings_combination_by_schedule(schedule)

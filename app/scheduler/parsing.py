@@ -1,5 +1,6 @@
-from app.imports.runtime import *
 from utils_ak.block_tree import *
+
+from app.imports.runtime import *
 
 
 def group_intervals(intervals, max_length=None, interval_func=None, split_func=None):
@@ -16,14 +17,12 @@ def group_intervals(intervals, max_length=None, interval_func=None, split_func=N
             continue
 
         if interval_func(cur_group[-1])[-1] == interval_func(interval)[0] and not (split_func and split_func(interval)):
-
             # subsequent
             cur_group.append(interval)
             if max_length and len(cur_group) == max_length:
                 groups.append(cur_group)
                 cur_group = []
         else:
-
             # gap between
             groups.append(cur_group)
             cur_group = [interval]

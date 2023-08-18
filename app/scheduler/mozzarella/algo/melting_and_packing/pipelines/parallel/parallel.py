@@ -1,17 +1,15 @@
 # fmt: off
 
+from utils_ak.block_tree import *
+
 from app.imports.runtime import *
 from app.models import *
-
-from app.scheduler.mozzarella.algo import make_boiling
-from app.scheduler.mozzarella.algo.packing import *
-from app.scheduler.mozzarella.algo.cooling import *
 from app.scheduler.calculation import *
-from app.scheduler.mozzarella.algo.melting_and_packing.melting_process import (
-    make_melting_and_packing_from_mpps,
-)
+from app.scheduler.mozzarella.algo import make_boiling
+from app.scheduler.mozzarella.algo.cooling import *
+from app.scheduler.mozzarella.algo.melting_and_packing.melting_process import make_melting_and_packing_from_mpps
+from app.scheduler.mozzarella.algo.packing import *
 
-from utils_ak.block_tree import *
 
 def make_mpp(boiling_df, left_boiling_volume):
     boiling_df["collecting_speed"] = boiling_df["sku"].apply(

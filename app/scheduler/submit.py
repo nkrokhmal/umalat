@@ -38,8 +38,6 @@ def submit_schedule(
             if split_file:
                 output_fn = utils.SplitFile(output_fn).get_new()
 
-    workbook = draw_excel_frontend(
-        frontend, open_file=open_file, fn=output_fn, style=style, wb=template_wb
-    )
+    workbook = draw_excel_frontend(frontend, open_file=open_file, fn=output_fn, style=style, wb=template_wb)
 
     return {"schedule": schedule, "frontend": frontend, "workbook": workbook}

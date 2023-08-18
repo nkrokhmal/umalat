@@ -1,8 +1,8 @@
-from app.imports.runtime import *
-
 from sqlalchemy.orm import backref
 
-from .basic import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from app.imports.runtime import *
+
+from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
 
 
 class AdygeaSKU(SKU):
@@ -49,19 +49,24 @@ class AdygeaBoilingTechnology(BoilingTechnology):
     __tablename__ = "adygea_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "adygea_boiling_technology"}
 
-    id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
-    )
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
 
     collecting_time = mdb.Column(mdb.Integer)
     coagulation_time = mdb.Column(mdb.Integer)
     pouring_off_time = mdb.Column(mdb.Integer)
 
     @staticmethod
-    def create_name(form_factor, line, percent, weight,):
+    def create_name(
+        form_factor,
+        line,
+        percent,
+        weight,
+    ):
         boiling_name = [percent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
         return "Линия {}, Форм фактор {}, Вес {}, {}".format(
-            line, form_factor, weight, boiling_name,
+            line,
+            form_factor,
+            weight,
+            boiling_name,
         )
-

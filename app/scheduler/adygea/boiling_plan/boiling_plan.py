@@ -1,11 +1,10 @@
-from app.imports.runtime import *
-
-from app.models import *
 from app.enum import LineName
+from app.imports.runtime import *
+from app.models import *
+from app.scheduler.boiling_plan import *
+from app.utils.features.merge_boiling_utils import Boilings
 
 from .saturate import saturate_boiling_plan
-from app.utils.features.merge_boiling_utils import Boilings
-from app.scheduler.boiling_plan import *
 
 
 def read_boiling_plan(wb_obj, first_batch_ids=None):
@@ -13,7 +12,7 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    first_batch_ids = first_batch_ids or {'adygea': 1}
+    first_batch_ids = first_batch_ids or {"adygea": 1}
     wb = utils.cast_workbook(wb_obj)
 
     cur_id = 0
@@ -46,7 +45,7 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
     ]
     df = df[df["sku"] != "-"]
 
-    df_plan, boiling_number = handle_adygea(df) # convert to boiligns
+    df_plan, boiling_number = handle_adygea(df)  # convert to boiligns
 
     if df_plan.empty:
         logger.info("Empty data frame")
@@ -54,7 +53,7 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
     else:
         df_plan["boiling_id"] = df_plan["id"]
         df_plan["kg"] = df_plan["plan"]
-        df_plan["n_baths"] = 1 # todo maybe: redundant
+        df_plan["n_baths"] = 1  # todo maybe: redundant
         df_plan["boiling_id"] = df_plan["boiling_id"].astype(int) + 1
         df_plan["sku"] = df_plan["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku.name))
         df_plan["boiling"] = df_plan["sku"].apply(lambda x: x.made_from_boilings[0])
@@ -62,8 +61,8 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
         df_plan = df_plan[["boiling_id", "sku", "n_baths", "kg", "boiling"]]
 
     # batch_id and boiling_id are the same
-    df_plan['batch_id'] = df_plan['boiling_id']
-    df_plan['batch_type'] = 'adygea'
+    df_plan["batch_id"] = df_plan["boiling_id"]
+    df_plan["batch_type"] = "adygea"
     df_plan = update_absolute_batch_id(df_plan, first_batch_ids)
     return df_plan
 

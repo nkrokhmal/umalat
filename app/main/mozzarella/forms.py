@@ -1,10 +1,11 @@
 from app.imports.runtime import *  # isort: skip
-from app.main.validators import *
-from app.models import *
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import *
 from wtforms.validators import Optional, Required
+
+from app.main.validators import *
+from app.models import *
 
 
 class BoilingPlanFastForm(FlaskForm):

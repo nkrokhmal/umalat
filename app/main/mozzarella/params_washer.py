@@ -1,10 +1,9 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
-from app.models import Washer, Department
 from app.enum import DepartmentName
+from app.imports.runtime import *
+from app.main import main
+from app.models import Department, Washer
 
 from .forms import WasherForm
 
@@ -12,15 +11,8 @@ from .forms import WasherForm
 @main.route("/mozzarella/get_washer", methods=["GET", "POST"])
 @flask_login.login_required
 def get_washer():
-    washers = (
-        db.session.query(Washer)
-        .join(Department)
-        .filter(Department.name == DepartmentName.MOZZARELLA)
-        .all()
-    )
-    return flask.render_template(
-        "mozzarella/get_washer.html", washers=washers, endpoints=".get_washer"
-    )
+    washers = db.session.query(Washer).join(Department).filter(Department.name == DepartmentName.MOZZARELLA).all()
+    return flask.render_template("mozzarella/get_washer.html", washers=washers, endpoints=".get_washer")
 
 
 @main.route("/mozzarella/edit_washer/<int:washer_id>", methods=["GET", "POST"])
@@ -38,6 +30,4 @@ def edit_washer(washer_id):
     form.name.data = washer.name
     form.time.data = washer.time
 
-    return flask.render_template(
-        "mozzarella/edit_washer.html", form=form, washer_id=washer.id
-    )
+    return flask.render_template("mozzarella/edit_washer.html", form=form, washer_id=washer.id)

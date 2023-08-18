@@ -1,14 +1,18 @@
 import os
 
+
 os.environ["APP_ENVIRONMENT"] = "interactive"
 
-from config import basedir
-from app.scheduler.models import *
-from app.scheduler.algo import *
-from app.scheduler.boiling_plan import read_boiling_plan
+import warnings
 
 from utils_ak.interactive_imports import *
-import warnings
+
+from app.scheduler.algo import *
+from app.scheduler.boiling_plan import read_boiling_plan
+from app.scheduler.models import *
+
+from config import basedir
+
 
 warnings.filterwarnings("ignore")
 from utils_ak.loguru import configure_loguru_stdout
@@ -20,9 +24,7 @@ def test1():
     boiling_plan_df = read_boiling_plan(
         r"C:\Users\Mi\Desktop\master\code\git\2020.10-umalat\umalat\app\data\inputs\2021-02-19 План по варкам.xlsx"
     )
-    boiling_plan_df = boiling_plan_df[
-        boiling_plan_df["boiling"].apply(lambda b: b.line.name == LineName.SALT)
-    ]
+    boiling_plan_df = boiling_plan_df[boiling_plan_df["boiling"].apply(lambda b: b.line.name == LineName.SALT)]
 
     for _, grp in boiling_plan_df.groupby("group_id"):
         grp["packing_speed"] = grp["sku"].apply(lambda sku: sku.packing_speed)
@@ -35,9 +37,7 @@ def test1():
 
 
 def test2():
-    boiling_plan_df = read_boiling_plan(
-        os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
-    )
+    boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
 
     mark_consecutive_groups(boiling_plan_df, "boiling", "boiling_group")
 
@@ -54,9 +54,7 @@ def test2():
 
 
 def test3():
-    boiling_plan_df = read_boiling_plan(
-        os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx")
-    )
+    boiling_plan_df = read_boiling_plan(os.path.join(basedir, "app/schedule_maker/data/sample_boiling_plan.xlsx"))
 
     boiling_df = boiling_plan_df[boiling_plan_df["bff"] == cast_form_factor(14)]
     boiling_df["sku_name"] = boiling_df["sku"].apply(lambda sku: sku.name)
@@ -72,9 +70,7 @@ def test3():
         boiling_df.pop("sku_name")
 
         boiling_df["left"] = boiling_df["kg"]
-        boiling_df["packing_speed"] = boiling_df["sku"].apply(
-            lambda sku: sku.packing_speed
-        )
+        boiling_df["packing_speed"] = boiling_df["sku"].apply(lambda sku: sku.packing_speed)
 
         make_mpp(boiling_df, 850)
         print(boiling_df)
