@@ -13,7 +13,6 @@ from utils_ak.openpyxl.openpyxl_tools import (
 )
 from utils_ak.os.os_tools import makedirs, open_file_in_os
 
-from app.scheduler.frontend import prepare_schedule_worksheet
 from app.scheduler.time import cast_t
 
 

@@ -8,7 +8,6 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 
 from app.enum import LineName
-from app.scheduler.mozzarella.properties import MozzarellaProperties
 from app.scheduler.time import cast_human_time
 
 

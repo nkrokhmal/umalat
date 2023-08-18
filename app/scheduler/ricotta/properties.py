@@ -4,7 +4,6 @@ from pydantic import Field
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 
-from app.scheduler.ricotta.properties import RicottaProperties
 from app.scheduler.time import cast_human_time
 
 

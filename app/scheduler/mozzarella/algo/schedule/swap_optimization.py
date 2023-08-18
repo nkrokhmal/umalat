@@ -5,6 +5,9 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 
 from app.enum import LineName
+from app.scheduler.mozzarella.algo.schedule.schedule_basic import make_schedule_basic
+from app.scheduler.mozzarella.algo.schedule.score import calc_score
+from app.scheduler.mozzarella.parser_new import parse_schedule
 
 
 def smart_shift(s, key=None, start_from=0):

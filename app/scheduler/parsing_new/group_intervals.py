@@ -1,7 +1,5 @@
 from utils_ak.iteration.simple_iterator import iter_pairs
 
-from app.scheduler.parsing_new.group_intervals import basic_criteria
-
 
 def group_intervals(intervals, split_criteria=None, interval_func=None):
     if not interval_func:

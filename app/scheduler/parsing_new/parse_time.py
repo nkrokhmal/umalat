@@ -1,4 +1,3 @@
-from app.scheduler.parsing_new.parse_time import cast_time_from_hour_label
 from app.scheduler.time import cast_time, parse_time
 
 

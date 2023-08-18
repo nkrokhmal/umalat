@@ -10,8 +10,8 @@ from utils_ak.code_block.code import code
 from utils_ak.iteration.simple_iterator import iter_sequences
 from utils_ak.portion.portion_tools import cast_interval
 
-from app.models import AdygeaLine, cast_model
-from app.scheduler.adygea.algo.boilings import make_lunch, make_preparation
+from app.models import AdygeaLine, Washer, cast_model
+from app.scheduler.adygea.algo.boilings import make_boiling, make_cleaning, make_lunch, make_preparation
 from app.scheduler.time import cast_t, cast_time
 
 

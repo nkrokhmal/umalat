@@ -10,6 +10,7 @@ from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.numeric.numeric import custom_round
+from utils_ak.optimizer.optimizer import optimize
 
 from app.scheduler.time import cast_t
 

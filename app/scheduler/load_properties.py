@@ -4,7 +4,6 @@ import flask
 
 from loguru import logger
 
-from app.scheduler.load_properties import load_properties
 from config import config
 
 

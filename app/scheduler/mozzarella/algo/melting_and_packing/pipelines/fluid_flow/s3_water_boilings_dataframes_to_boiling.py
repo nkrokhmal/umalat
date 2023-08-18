@@ -1,6 +1,9 @@
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.pushers import add_push, push
 
+from app.scheduler.mozzarella.algo.boiling import make_boiling
+from app.scheduler.mozzarella.algo.cooling import make_cooling_process
+
 
 class BoilingsDataframesToBoilings:
     def _make_line(self, df, line_name, item_name):

@@ -2,7 +2,6 @@ import pydantic
 
 from pydantic import Field
 
-from app.scheduler.milk_project.properties import MilkProjectProperties
 from app.scheduler.time import cast_human_time
 
 

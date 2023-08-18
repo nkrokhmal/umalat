@@ -2,7 +2,6 @@ import pydantic
 
 from pydantic import Field
 
-from app.scheduler.mascarpone.properties import MascarponeProperties
 from app.scheduler.time import cast_human_time
 
 

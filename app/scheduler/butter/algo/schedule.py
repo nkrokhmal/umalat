@@ -2,6 +2,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
 
+from app.scheduler.butter.algo.boilings import make_boiling_and_packing
 from app.scheduler.time import cast_t
 
 

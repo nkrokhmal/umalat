@@ -78,6 +78,7 @@ from utils_ak.os.os_tools import makedirs, open_file_in_os
 from utils_ak.pandas.pandas_tools import df_to_ordered_tree, mark_consecutive_groups, split_into_sum_groups
 from utils_ak.portion.portion_tools import calc_interval_length, cast_interval
 from utils_ak.split_file.split_file import SplitFile
+from utils_ak.time.dt import cast_str
 
 from app.enum import DepartmentName, LineName
 from app.globals import ERROR, basedir
@@ -142,7 +143,7 @@ from app.scheduler.milk_project.properties import MilkProjectProperties
 from app.scheduler.mozzarella.properties import MozzarellaProperties
 from app.scheduler.parsing import load_cells_df, parse_block
 from app.scheduler.parsing_new.group_intervals import basic_criteria
-from app.scheduler.parsing_new.parse_time import cast_time_from_hour_label
+from app.scheduler.parsing_new.parse_time import cast_label_from_time, cast_time_from_hour_label
 from app.scheduler.parsing_new.parsing import parse_line
 from app.scheduler.ricotta.properties import RicottaProperties
 from app.scheduler.submit import submit_schedule

@@ -2,6 +2,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import crop_to_chunks, remove_duplicates
 from utils_ak.iteration.simple_iterator import iter_pairs
 
+from app.scheduler.milk_project.algo.boilings import make_boiling, make_boiling_sequence
 from app.scheduler.time import cast_t
 
 
