@@ -1,10 +1,12 @@
-from app.imports.runtime import *
-
-from app.models import *
-from app.enum import LineName
-from .saturate import saturate_boiling_plan
 import openpyxl as opx
+
+from app.enum import LineName
+from app.imports.runtime import *
+from app.models import *
 from app.scheduler.boiling_plan import *
+
+from .saturate import saturate_boiling_plan
+
 
 def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     ws = wb[sheet_name]
@@ -66,9 +68,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     df["total_volume"] = df["total_volume"].fillna(method="bfill")
 
     # fill cleaning
-    df["cleaning"] = np.where(
-        (df["sku"] == "-") & (df["cleaning"].isnull()), "", df["cleaning"]
-    )
+    df["cleaning"] = np.where((df["sku"] == "-") & (df["cleaning"].isnull()), "", df["cleaning"])
     df["cleaning"] = df["cleaning"].fillna(method="bfill")
     df["cleaning"] = df["cleaning"].apply(
         lambda cleaning_type: {
@@ -86,9 +86,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
         elif np.isnan(value):
             return None
         elif isinstance(value, str):
-            assert (
-                "," not in value
-            ), "Группы варок не поддерживаются в моцаррельном цеху."
+            assert "," not in value, "Группы варок не поддерживаются в моцаррельном цеху."
             return value
         else:
             raise AssertionError("Unknown format")
@@ -108,9 +106,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     df["sku_obj"] = df["sku_obj"].apply(lambda x: x.line.name)
 
     # add line name to boiling_params
-    df["boiling_params"] = df.apply(
-        lambda row: row["sku_obj"] + "," + row["boiling_params"], axis=1
-    )
+    df["boiling_params"] = df.apply(lambda row: row["sku_obj"] + "," + row["boiling_params"], axis=1)
     df["sheet"] = sheet_number
 
     return df
@@ -121,11 +117,11 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     if len(df) == 0:
         return pd.DataFrame()
 
-    with code('Fix group ids: first water -> then salt'):
+    with code("Fix group ids: first water -> then salt"):
         cur_group_id = 1
         for line_name in [LineName.WATER, LineName.SALT]:
-            for ind, grp in df[df['sku_obj'] == line_name].groupby('group_id'):
-                df.loc[grp.index, 'group_id'] = cur_group_id
+            for ind, grp in df[df["sku_obj"] == line_name].groupby("group_id"):
+                df.loc[grp.index, "group_id"] = cur_group_id
                 cur_group_id += 1
 
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
@@ -142,9 +138,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     for idx, grp in df.copy().groupby("group_id"):
         if grp["_bff"].isnull().all():
             # take from bff input if not specified
-            df.loc[grp.index, "_bff"] = cast_mozzarella_form_factor(
-                config.DEFAULT_RUBBER_FORM_FACTOR
-            )
+            df.loc[grp.index, "_bff"] = cast_mozzarella_form_factor(config.DEFAULT_RUBBER_FORM_FACTOR)
         else:
             filled_grp = grp.copy()
             filled_grp = filled_grp.fillna(method="ffill")
@@ -154,25 +148,19 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
 
     # validate single boiling
     for idx, grp in df.groupby("group_id"):
-        assert (
-            len(grp["boiling"].unique()) == 1
-        ), "В одной группе варок должен быть только один тип варки."
+        assert len(grp["boiling"].unique()) == 1, "В одной группе варок должен быть только один тип варки."
 
     df["original_kg"] = df["kg"]
 
-    assert not df['total_volume'].isnull().any(), "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
+    assert (
+        not df["total_volume"].isnull().any()
+    ), "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
 
     # validate kilograms
     if validate:
         for idx, grp in df.groupby("group_id"):
-            if (
-                abs(grp["kg"].sum() - grp.iloc[0]["total_volume"])
-                / grp.iloc[0]["total_volume"]
-                > 0.05
-            ):
-                raise AssertionError(
-                    "Одна из групп варок имеет неверное количество килограмм."
-                )
+            if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) / grp.iloc[0]["total_volume"] > 0.05:
+                raise AssertionError("Одна из групп варок имеет неверное количество килограмм.")
             else:
                 if normalization:
                     if abs(grp["kg"].sum() - grp.iloc[0]["total_volume"]) > 1e-5:
@@ -195,7 +183,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
             "configuration",
             "cleaning",
             "sheet",
-            "total_volume"
+            "total_volume",
         ]
     ]
 
@@ -211,39 +199,31 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True, 
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    first_batch_ids = first_batch_ids or {'mozzarella': 1}
+    first_batch_ids = first_batch_ids or {"mozzarella": 1}
     wb = utils.cast_workbook(wb_obj)
 
     dfs = []
 
     sheet_names = ["Вода", "Соль", "План варок"]
-    sheet_names = [
-        sheet_name for sheet_name in sheet_names if sheet_name in wb.sheetnames
-    ]
+    sheet_names = [sheet_name for sheet_name in sheet_names if sheet_name in wb.sheetnames]
 
     for i, ws_name in enumerate(sheet_names):
         if ws_name in ["Вода", "Соль"]:
-            line = (
-                cast_model(Line, LineName.WATER)
-                if ws_name == "Вода"
-                else cast_model(Line, LineName.SALT)
-            )
+            line = cast_model(Line, LineName.WATER) if ws_name == "Вода" else cast_model(Line, LineName.SALT)
             default_boiling_volume = line.output_ton
         else:
             default_boiling_volume = None
 
-        df = read_sheet(
-            wb, ws_name, default_boiling_volume=default_boiling_volume, sheet_number=i
-        )
+        df = read_sheet(wb, ws_name, default_boiling_volume=default_boiling_volume, sheet_number=i)
         dfs.append(df)
 
     df = update_boiling_plan(dfs, normalization, saturate, validate)
     df["packing_team_id"] = df["packing_team_id"].apply(lambda x: int(x))
 
     # batch_id and boiling_id are the same as group_id
-    df['batch_id'] = df['group_id']
-    df['boiling_id'] = df['group_id']
-    df['batch_type'] = 'mozzarella'
+    df["batch_id"] = df["group_id"]
+    df["boiling_id"] = df["group_id"]
+    df["batch_type"] = "mozzarella"
     df = update_absolute_batch_id(df, first_batch_ids)
     return df
 

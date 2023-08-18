@@ -1,5 +1,6 @@
 from app.imports.runtime import *
 
+
 LineName = utils.dotdict(
     {
         "WATER": "Моцарелла в воде",

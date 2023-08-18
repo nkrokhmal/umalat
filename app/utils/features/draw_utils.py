@@ -1,11 +1,11 @@
-from app.imports.runtime import *
+from collections import namedtuple
 
 from openpyxl.styles import Alignment
-from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
+from openpyxl.utils.cell import column_index_from_string, coordinate_from_string
 
 from app.enum import LineName
+from app.imports.runtime import *
 from app.utils.features.openpyxl_wrapper import ExcelBlock
-from collections import namedtuple
 
 
 Cell = namedtuple("Cell", "col, col_name")
@@ -82,9 +82,7 @@ def draw_header(excel_client, date, cur_row, task_name, is_boiling=None):
         value="Вложение коробок",
         alignment=alignment,
     )
-    excel_client.draw_cell(
-        col=COLUMNS["kg"].col, row=cur_row, value="Вес, кг", alignment=alignment
-    )
+    excel_client.draw_cell(col=COLUMNS["kg"].col, row=cur_row, value="Вес, кг", alignment=alignment)
     excel_client.draw_cell(
         col=COLUMNS["boxes_count"].col,
         row=cur_row,
@@ -129,12 +127,9 @@ def draw_schedule_raw(excel_client, cur_row, values, color=None):
         end_row=cur_row,
         value=values[1],
     )
-    excel_client.draw_cell(
-        col=COLUMNS["boxes"].col, row=cur_row, value=values[2]
-    )
+    excel_client.draw_cell(col=COLUMNS["boxes"].col, row=cur_row, value=values[2])
     excel_client.draw_cell(col=COLUMNS["kg"].col, row=cur_row, value=values[3])
-    excel_client.draw_cell(
-        col=COLUMNS["boxes_count"].col, row=cur_row, value=values[4])
+    excel_client.draw_cell(col=COLUMNS["boxes_count"].col, row=cur_row, value=values[4])
     excel_client.draw_cell(col=COLUMNS["priority"].col, row=cur_row, value="")
     excel_client.merge_cells(
         beg_col=COLUMNS["code"].col,

@@ -1,8 +1,10 @@
 import io
-from tests.conftest import client
+
+from flask import url_for
+
 from app.imports.runtime import *
 from app.models import *
-from flask import url_for
+from tests.conftest import client
 
 
 def test_mascarpone_get_schedule(client):
@@ -27,13 +29,11 @@ def test_mascarpone_post_schedule(client):
             "cottage_cheese_batch_number": 1,
             "cream_batch_number": 1,
             "beg_time": "07:00",
-            "submit": "submit"
+            "submit": "submit",
         }
-        with open(filepath, 'rb') as f:
-            data['input_file'] = (io.BytesIO(f.read()), "mascarpone.xlsx")
-        response = client.post(
-            url, data=data, follow_redirects=True, content_type='multipart/form-data'
-        )
+        with open(filepath, "rb") as f:
+            data["input_file"] = (io.BytesIO(f.read()), "mascarpone.xlsx")
+        response = client.post(url, data=data, follow_redirects=True, content_type="multipart/form-data")
         new_last_batch = BatchNumber.last_batch_department(department_name)
         try:
             assert response.status_code == 200

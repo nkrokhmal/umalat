@@ -1,6 +1,5 @@
-from app.imports.runtime import *
-
 from app.enum import LineName
+from app.imports.runtime import *
 
 
 class SchemaToBoilingsDataframes:
@@ -10,9 +9,7 @@ class SchemaToBoilingsDataframes:
         for boiling_meltings in boilings_meltings:
             boiling_volume = sum(kg for bff, kg in boiling_meltings)
 
-            drenator = utils.Container(
-                "Drenator", value=boiling_volume, max_pressures=[None, None]
-            )
+            drenator = utils.Container("Drenator", value=boiling_volume, max_pressures=[None, None])
 
             melting_processors = []
             cooling_processors = []
@@ -68,9 +65,7 @@ class SchemaToBoilingsDataframes:
                     max_pressures=[sku.packing_speed, None],
                     processing_time=0,
                 )
-                seq = utils.Sequence(
-                    f"Sequence{packing_team_id}-{j}", [container, processor]
-                )
+                seq = utils.Sequence(f"Sequence{packing_team_id}-{j}", [container, processor])
                 sequences.append(seq)
             packing_queue = utils.Queue(
                 f"PackingQueue{packing_team_id}",
@@ -80,9 +75,7 @@ class SchemaToBoilingsDataframes:
             packing_queues[packing_team_id] = packing_queue
         return packing_queues
 
-    def _calc_boilings_dataframes(
-        self, melting_actors_by_boiling, packing_queues, rounding="nearest_half_down"
-    ):
+    def _calc_boilings_dataframes(self, melting_actors_by_boiling, packing_queues, rounding="nearest_half_down"):
         res = []
 
         for drenator, melting_queue, cooling_queue in melting_actors_by_boiling:
@@ -95,16 +88,12 @@ class SchemaToBoilingsDataframes:
             utils.pipe_connect(cooling_queue, packing_hub, "cooling-hub")
 
             for packing_team_id, packing_queue in packing_queues.items():
-                utils.pipe_connect(
-                    packing_hub, packing_queue, f"hub-packing_queue{packing_team_id}"
-                )
+                utils.pipe_connect(packing_hub, packing_queue, f"hub-packing_queue{packing_team_id}")
 
             flow = utils.FluidFlow(drenator, verbose=False)
             utils.run_flow(flow)
 
-            df = pd.DataFrame(
-                melting_queue.active_periods("out"), columns=["item", "beg", "end"]
-            )
+            df = pd.DataFrame(melting_queue.active_periods("out"), columns=["item", "beg", "end"])
             df["name"] = "melting_process"
             boiling_dataframes["meltings"] = df
 
@@ -112,22 +101,17 @@ class SchemaToBoilingsDataframes:
                 abs(drenator.value) < utils.ERROR
             ), f"Дренатор не был опустошен полностью во время плавления на линии {LineName.WATER} из-за невалидного плана варок. Поправьте план варок и повторите попытку. "
             assert all(
-                abs(container.io_containers["out"].value) < utils.ERROR
-                for container in cooling_queue.lines
+                abs(container.io_containers["out"].value) < utils.ERROR for container in cooling_queue.lines
             ), f"Некоторые SKU не были собраны полностью во время паковки на линии {LineName.WATER} из-за невалидного плана варок. Поправьте план варок и повторите попытку. "
 
-            df = pd.DataFrame(
-                cooling_queue.active_periods(), columns=["item", "beg", "end"]
-            )
+            df = pd.DataFrame(cooling_queue.active_periods(), columns=["item", "beg", "end"])
             df["name"] = "cooling_process"
             boiling_dataframes["coolings"] = df
 
             boiling_dataframes["collectings"] = {}
             boiling_dataframes["packings"] = {}
             for packing_team_id, queue in packing_queues.items():
-                df1 = pd.DataFrame(
-                    queue.active_periods("out"), columns=["item", "beg", "end"]
-                )
+                df1 = pd.DataFrame(queue.active_periods("out"), columns=["item", "beg", "end"])
                 df1["name"] = "process"
 
                 df2 = pd.DataFrame(queue.breaks, columns=["beg", "end"])
@@ -171,20 +155,14 @@ class SchemaToBoilingsDataframes:
                 utils.pipe_disconnect(packing_hub, packing_queue)
         return res
 
-    def _post_process_dataframe(
-        self, df, fix_small_intervals=True, rounding="nearest_half_down"
-    ):
+    def _post_process_dataframe(self, df, fix_small_intervals=True, rounding="nearest_half_down"):
         # move to minutes
         df["beg"] = df["beg"] * 60
         df["end"] = df["end"] * 60
         if rounding:
             # round to five-minute intervals
-            df["beg"] = df["beg"].apply(
-                lambda ts: None if ts is None else utils.custom_round(ts, 5, rounding)
-            )
-            df["end"] = df["end"].apply(
-                lambda ts: None if ts is None else utils.custom_round(ts, 5, rounding)
-            )
+            df["beg"] = df["beg"].apply(lambda ts: None if ts is None else utils.custom_round(ts, 5, rounding))
+            df["end"] = df["end"].apply(lambda ts: None if ts is None else utils.custom_round(ts, 5, rounding))
 
             # fix small intervals (like beg and end: 5, 5 -> 5, 10)
             if fix_small_intervals:
@@ -199,12 +177,8 @@ class SchemaToBoilingsDataframes:
             df["end"] = df["end"].astype(int)
         return df
 
-    def __call__(
-        self, boilings_meltings, packings, melting_speed, rounding="nearest_half_down"
-    ):
-        melting_actors_by_boiling = self._calc_melting_actors_by_boiling(
-            boilings_meltings, melting_speed
-        )
+    def __call__(self, boilings_meltings, packings, melting_speed, rounding="nearest_half_down"):
+        melting_actors_by_boiling = self._calc_melting_actors_by_boiling(boilings_meltings, melting_speed)
         packing_queues = self._calc_packing_queues(packings)
         boilings_dataframes = self._calc_boilings_dataframes(
             melting_actors_by_boiling, packing_queues, rounding=rounding

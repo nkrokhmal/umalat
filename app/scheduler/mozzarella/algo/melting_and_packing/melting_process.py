@@ -1,12 +1,8 @@
 # fmt: off
-from app.imports.runtime import *
-
-from app.scheduler.mozzarella.algo.packing import (
-    get_configuration_time,
-    make_configuration_blocks,
-)
-
 from utils_ak.block_tree import *
+
+from app.imports.runtime import *
+from app.scheduler.mozzarella.algo.packing import get_configuration_time, make_configuration_blocks
 
 
 N_PACKING_TEAMS = 2

@@ -1,8 +1,8 @@
-from app.imports.runtime import *
-
 from sqlalchemy.orm import backref
 
-from .basic import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from app.imports.runtime import *
+
+from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
 
 
 class RicottaSKU(SKU):
@@ -71,9 +71,7 @@ class RicottaBoilingTechnology(BoilingTechnology):
     __tablename__ = "ricotta_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "ricotta_boiling_technology"}
 
-    id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
-    )
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
     heating_time = mdb.Column(mdb.Integer)
     delay_time = mdb.Column(mdb.Integer)
     protein_harvest_time = mdb.Column(mdb.Integer)
@@ -94,6 +92,4 @@ class RicottaAnalysisTechnology(mdb.Model):
     analysis_time = mdb.Column(mdb.Integer)
     pumping_time = mdb.Column(mdb.Integer)
 
-    boiling_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("ricotta_boilings.id"), nullable=True
-    )
+    boiling_id = mdb.Column(mdb.Integer, mdb.ForeignKey("ricotta_boilings.id"), nullable=True)

@@ -1,8 +1,8 @@
-from app.imports.runtime import *
-
 from sqlalchemy.orm import backref
 
-from .basic import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from app.imports.runtime import *
+
+from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
 
 
 class ButterSKU(SKU):
@@ -51,9 +51,7 @@ class ButterBoilingTechnology(BoilingTechnology):
     __tablename__ = "butter_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "butter_boiling_technology"}
 
-    id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
-    )
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
 
     separator_runaway_time = mdb.Column(mdb.Integer)
     pasteurization_time = mdb.Column(mdb.Integer)
@@ -64,6 +62,10 @@ class ButterBoilingTechnology(BoilingTechnology):
         boiling_name = [percent]
         boiling_name = ", ".join([str(v) for v in boiling_name if v])
         return "Линия {}, Форм фактор {}, Вес {}, Вкусовая добавка {}, {}, {}".format(
-            line, form_factor, weight, flavoring_agent, 'без лактозы' if not is_lactose else '', boiling_name,
+            line,
+            form_factor,
+            weight,
+            flavoring_agent,
+            "без лактозы" if not is_lactose else "",
+            boiling_name,
         )
-

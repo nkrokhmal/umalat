@@ -1,5 +1,6 @@
-from app.imports.runtime import *
 from utils_ak.block_tree import *
+
+from app.imports.runtime import *
 
 
 def group_intervals(intervals, max_length=None, interval_func=None, split_func=None):

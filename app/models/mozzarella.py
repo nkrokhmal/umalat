@@ -1,9 +1,9 @@
-from app.imports.runtime import *
-
 from sqlalchemy.orm import backref
 
 from app.enum import LineName
-from .basic import SKU, Line, FormFactor, Boiling, BoilingTechnology, backref
+from app.imports.runtime import *
+
+from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Line, backref
 
 
 class MozzarellaSKU(SKU):
@@ -70,9 +70,7 @@ class MozzarellaBoilingTechnology(BoilingTechnology):
     __tablename__ = "mozzarella_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "mozzarella_boiling_technology"}
 
-    id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
-    )
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
     pouring_time = mdb.Column(mdb.Integer)
     soldification_time = mdb.Column(mdb.Integer)
     cutting_time = mdb.Column(mdb.Integer)

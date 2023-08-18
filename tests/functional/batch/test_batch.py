@@ -1,6 +1,8 @@
 import io
-from tests.conftest import client
+
 from flask import url_for
+
+from tests.conftest import client
 
 
 def test_save_batches(client):

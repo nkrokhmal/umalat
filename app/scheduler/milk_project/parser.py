@@ -1,10 +1,11 @@
 # fmt: off
+from utils_ak.block_tree import *
+
 from app.imports.runtime import *
 from app.scheduler.milk_project import *
 from app.scheduler.milk_project.properties import *
 from app.scheduler.parsing import *
 from app.scheduler.parsing_new.parse_time import *
-from utils_ak.block_tree import *
 
 
 def parse_schedule_file(wb_obj):

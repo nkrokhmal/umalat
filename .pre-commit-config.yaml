@@ -1,0 +1,31 @@
+# originally taken from https://github.com/python-poetry/poetry/blob/master/.pre-commit-config.yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=200"]
+      - id: check-merge-conflict
+
+#  - repo: https://github.com/jlebar/pre-commit-hooks
+#    rev: 62ca83ba4958da48ea44d9f24cd0aa58633376c7 # pragma: allowlist secret
+#    hooks:
+#      - id: do-not-submit # Forbids the string "do not submit".upper()
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: "isort (python)"
+        types: [python]
+        args: [ "--settings-path", "pyproject.toml" ]
+      - id: isort
+        name: "isort (pyi)"
+        types: [pyi]
+        args: [ "--settings-path", "pyproject.toml" ]
+
+  - repo: https://github.com/psf/black
+    rev: 22.10.0
+    hooks:
+      - id: black
+        args: [ "--line-length", "120" ]

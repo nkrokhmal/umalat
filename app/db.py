@@ -1,5 +1,4 @@
 from app.imports.external import *
-
 from config import SQLITE_PATH
 
 

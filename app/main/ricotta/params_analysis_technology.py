@@ -1,7 +1,6 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
+from app.imports.runtime import *
 from app.main import main
 from app.models import RicottaAnalysisTechnology
 
@@ -26,9 +25,7 @@ def ricotta_get_analysis_technology():
 @flask_login.login_required
 def ricotta_edit_analysis_technology(analysis_technology_id):
     form = AnalysisForm()
-    analysis_technology = db.session.query(RicottaAnalysisTechnology).get_or_404(
-        analysis_technology_id
-    )
+    analysis_technology = db.session.query(RicottaAnalysisTechnology).get_or_404(analysis_technology_id)
     if form.validate_on_submit() and analysis_technology is not None:
         analysis_technology.preparation_time = form.preparation_time.data
         analysis_technology.analysis_time = form.analysis_time.data

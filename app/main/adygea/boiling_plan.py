@@ -1,12 +1,13 @@
 from app.imports.runtime import *
-from .forms import BoilingPlanForm
+from app.main import main
+from app.models import *
 from app.utils.adygea.boiling_plan_create import boiling_plan_create
 from app.utils.adygea.boiling_plan_draw import draw_boiling_plan
-from app.utils.sku_plan import *
-from app.utils.parse_remainings import *
-from app.main import main
 from app.utils.files.utils import move_boiling_file, save_boiling_plan
-from app.models import *
+from app.utils.parse_remainings import *
+from app.utils.sku_plan import *
+
+from .forms import BoilingPlanForm
 
 
 @main.route("/adygea_boiling_plan", methods=["POST", "GET"])
@@ -21,9 +22,7 @@ def adygea_boiling_plan():
         boilings = db.session.query(AdygeaBoiling).all()
 
         file = flask.request.files["input_file"]
-        tmp_file_path = os.path.join(
-            flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename
-        )
+        tmp_file_path = os.path.join(flask.current_app.config["UPLOAD_TMP_FOLDER"], file.filename)
 
         if file:
             file.save(tmp_file_path)

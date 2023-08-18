@@ -2,7 +2,9 @@
 from flask_wtf import FlaskForm
 from wtforms import *
 from wtforms.validators import DataRequired, Optional
+
 from app.models import *
+
 
 # todo maybe: better list form
 

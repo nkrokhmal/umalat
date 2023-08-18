@@ -1,5 +1,4 @@
 from app.models import *
-
 from app.scheduler.mascarpone.algo.cream_cheese_boilings import *
 
 

@@ -1,7 +1,8 @@
 from app.imports.runtime import *
 from app.main import main
-from .forms import UploadForm
 from app.utils.files.utils import save_schedule
+
+from .forms import UploadForm
 
 
 @main.route("/ricotta_upload_schedule", methods=["GET", "POST"])
@@ -20,6 +21,4 @@ def ricotta_upload_schedule():
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
-    return flask.render_template(
-        "ricotta/upload_schedule.html", form=form, filename=None, date=None
-    )
+    return flask.render_template("ricotta/upload_schedule.html", form=form, filename=None, date=None)

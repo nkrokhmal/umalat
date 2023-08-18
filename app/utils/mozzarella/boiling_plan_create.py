@@ -1,19 +1,14 @@
 from app.imports.runtime import *
-
-from app.utils.features.merge_boiling_utils import Boilings
 from app.models import cast_mozzarella_boiling
 from app.models.mozzarella import MozzarellaLine
+from app.utils.features.merge_boiling_utils import Boilings
 
 
 def boiling_plan_create(df):
     df["plan"] = df["plan"].apply(lambda x: round(x))
-    df["boiling_type"] = df["boiling_id"].apply(
-        lambda boiling_id: cast_mozzarella_boiling(boiling_id).boiling_type
-    )
+    df["boiling_type"] = df["boiling_id"].apply(lambda boiling_id: cast_mozzarella_boiling(boiling_id).boiling_type)
     df["weight"] = df["sku"].apply(
-        lambda x: x.form_factor.relative_weight + 30
-        if "Терка" in x.form_factor.name
-        else x.form_factor.relative_weight
+        lambda x: x.form_factor.relative_weight + 30 if "Терка" in x.form_factor.name else x.form_factor.relative_weight
     )
     df["percent"] = df["sku"].apply(lambda x: x.made_from_boilings[0].percent)
     df["is_lactose"] = df["sku"].apply(lambda x: x.made_from_boilings[0].is_lactose)
@@ -22,9 +17,7 @@ def boiling_plan_create(df):
     df["group"] = df["sku"].apply(lambda x: x.group.name)
 
     water, boiling_number = handle_water(df[df["boiling_type"] == "water"])
-    salt, boiling_number = handle_salt(
-        df[df["boiling_type"] == "salt"], boiling_number=boiling_number + 1
-    )
+    salt, boiling_number = handle_salt(df[df["boiling_type"] == "salt"], boiling_number=boiling_number + 1)
 
     result = pd.concat([water, salt])
     result["kg"] = result["plan"]
@@ -37,12 +30,8 @@ def boiling_plan_create(df):
 
     result["boiling_volume"] = np.where(result["boiling_type"] == "salt", salt_kg, water_kg)
     result["packer"] = result["sku"].apply(lambda sku: sku.packers_str)
-    result["form_factor"] = result["sku"].apply(
-        lambda sku: sku.form_factor.weight_with_line
-    )
-    result["boiling_form_factor"] = result["sku"].apply(
-        lambda sku: get_boiling_form_factor(sku)
-    )
+    result["form_factor"] = result["sku"].apply(lambda sku: sku.form_factor.weight_with_line)
+    result["boiling_form_factor"] = result["sku"].apply(lambda sku: get_boiling_form_factor(sku))
     result = result[
         [
             "id",
@@ -61,9 +50,7 @@ def boiling_plan_create(df):
 
 
 def handle_water(df, max_weight=1000, min_weight=1000, portion=100, boiling_number=1):
-    boilings_water = Boilings(
-        max_weight=max_weight, min_weight=min_weight, boiling_number=boiling_number
-    )
+    boilings_water = Boilings(max_weight=max_weight, min_weight=min_weight, boiling_number=boiling_number)
     orders = [
         (None, 3.2, "Альче", None),
         (False, 3.2, "Biotec", None),
@@ -87,35 +74,27 @@ def handle_water(df, max_weight=1000, min_weight=1000, portion=100, boiling_numb
         # df_filter = df_filter.sort_values(by='plan', ascending=True)
 
         if not order[0]:
-            df_filter_chl = df_filter[
-                (df_filter["group"] == "Чильеджина") & (~df_filter["is_lactose"])
-            ].sort_values(by=["weight", "plan"], ascending=[False, True])
+            df_filter_chl = df_filter[(df_filter["group"] == "Чильеджина") & (~df_filter["is_lactose"])].sort_values(
+                by=["weight", "plan"], ascending=[False, True]
+            )
 
-            df_filter_fdl = df_filter[
-                (df_filter["group"] == "Фиор Ди Латте") & (~df_filter["is_lactose"])
-            ].sort_values(by=["weight", "plan"], ascending=[False, True])
+            df_filter_fdl = df_filter[(df_filter["group"] == "Фиор Ди Латте") & (~df_filter["is_lactose"])].sort_values(
+                by=["weight", "plan"], ascending=[False, True]
+            )
 
             df_filter_oth = df_filter[df_filter["is_lactose"]].sort_values(
                 by=["weight", "plan"], ascending=[False, True]
             )
 
-            total_sum_without_lactose = df_filter[(~df_filter["is_lactose"])][
-                "plan"
-            ].sum()
+            total_sum_without_lactose = df_filter[(~df_filter["is_lactose"])]["plan"].sum()
             total_sum = df_filter["plan"].sum()
 
             if total_sum // max_weight == total_sum_without_lactose // max_weight:
-                if (df_filter_chl["plan"].sum() < portion) and (
-                    df_filter_oth["plan"].sum() < portion
-                ):
+                if (df_filter_chl["plan"].sum() < portion) and (df_filter_oth["plan"].sum() < portion):
                     order = [df_filter_chl, df_filter_oth, df_filter_fdl]
-                elif (df_filter_chl["plan"].sum() < portion) and (
-                    df_filter_oth["plan"].sum() > portion
-                ):
+                elif (df_filter_chl["plan"].sum() < portion) and (df_filter_oth["plan"].sum() > portion):
                     order = [df_filter_chl, df_filter_fdl, df_filter_oth]
-                elif (df_filter_chl["plan"].sum() > portion) and (
-                    df_filter_oth["plan"].sum() < portion
-                ):
+                elif (df_filter_chl["plan"].sum() > portion) and (df_filter_oth["plan"].sum() < portion):
                     order = [df_filter_oth, df_filter_fdl, df_filter_chl]
                 else:
                     order = [df_filter_fdl, df_filter_chl, df_filter_oth]
@@ -145,28 +124,18 @@ def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
     boilings = Boilings(max_weight=850, min_weight=850, boiling_number=boiling_number)
 
     for weight, df_grouped_weight in df.groupby("weight"):
-        for boiling_id, df_grouped_boiling_id in df_grouped_weight.groupby(
-            "boiling_id"
-        ):
+        for boiling_id, df_grouped_boiling_id in df_grouped_weight.groupby("boiling_id"):
             new = True
             for group, df_grouped in df_grouped_boiling_id.groupby("group"):
                 rubber_sku_exist = any(
-                    [
-                        x
-                        for x in df_grouped.to_dict("records")
-                        if "Терка" in x["sku"].form_factor.name
-                    ]
+                    [x for x in df_grouped.to_dict("records") if "Терка" in x["sku"].form_factor.name]
                 )
                 if rubber_sku_exist:
                     df_grouped_sul = [
-                        x
-                        for x in df_grouped.to_dict("records")
-                        if x["sku"].form_factor.name == "Терка Сулугуни"
+                        x for x in df_grouped.to_dict("records") if x["sku"].form_factor.name == "Терка Сулугуни"
                     ]
                     df_grouped_moz = [
-                        x
-                        for x in df_grouped.to_dict("records")
-                        if x["sku"].form_factor.name == "Терка Моцарелла"
+                        x for x in df_grouped.to_dict("records") if x["sku"].form_factor.name == "Терка Моцарелла"
                     ]
 
                     boilings.add_group(df_grouped_sul, True)
@@ -191,4 +160,3 @@ def get_boiling_form_factor(sku):
         return "{}: {}".format(sku.line.name_short, 370)
     else:
         return "{}: {}".format(sku.line.name_short, 460)
-

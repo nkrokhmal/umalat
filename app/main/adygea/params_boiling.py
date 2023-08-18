@@ -1,10 +1,12 @@
-from app.imports.runtime import *
+import itertools
 
 from werkzeug.utils import redirect
-import itertools
+
+from app.imports.runtime import *
 from app.main import main
-from .forms import AdygeaBoilingForm
 from app.models import AdygeaBoiling
+
+from .forms import AdygeaBoilingForm
 
 
 @main.route("/adygea/get_boiling", methods=["GET", "POST"])
@@ -25,9 +27,7 @@ def adygea_get_boiling():
 @flask_login.login_required
 def adygea_edit_boiling(boiling_id):
     form = AdygeaBoilingForm()
-    boiling = db.session.query(AdygeaBoiling).get_or_404(
-        boiling_id
-    )
+    boiling = db.session.query(AdygeaBoiling).get_or_404(boiling_id)
     if form.validate_on_submit() and boiling is not None:
         boiling.output_coeff = form.output_coeff.data
         boiling.output_kg = form.output_kg.data

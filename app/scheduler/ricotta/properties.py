@@ -1,10 +1,11 @@
 # fmt: off
-from app.imports.runtime import *
-from app.scheduler.time import *
 from typing import *
-from app.enum import *
 
 from pydantic import Field
+
+from app.enum import *
+from app.imports.runtime import *
+from app.scheduler.time import *
 
 
 class RicottaProperties(pydantic.BaseModel):

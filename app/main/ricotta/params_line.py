@@ -1,9 +1,8 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
 from app.globals import db
+from app.imports.runtime import *
+from app.main import main
 from app.models import RicottaLine
 
 from .forms import LineForm
@@ -13,9 +12,7 @@ from .forms import LineForm
 @flask_login.login_required
 def ricotta_get_line():
     lines = db.session.query(RicottaLine).all()
-    return flask.render_template(
-        "ricotta/get_line.html", lines=lines, endpoints=".ricotta_get_line"
-    )
+    return flask.render_template("ricotta/get_line.html", lines=lines, endpoints=".ricotta_get_line")
 
 
 @main.route("/ricotta/edit_line/<int:line_id>", methods=["GET", "POST"])

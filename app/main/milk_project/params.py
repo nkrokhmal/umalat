@@ -6,4 +6,3 @@ from app.main import main
 @flask_login.login_required
 def milk_project_params():
     return flask.render_template("milk_project/params.html")
-

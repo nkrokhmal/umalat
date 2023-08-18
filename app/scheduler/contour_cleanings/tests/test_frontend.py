@@ -1,8 +1,8 @@
 from app.imports.runtime import *
 from app.scheduler import draw_excel_frontend
+from app.scheduler.contour_cleanings import run_contour_cleanings
 from app.scheduler.contour_cleanings.algo.schedule import *
 from app.scheduler.contour_cleanings.frontend import *
-from app.scheduler.contour_cleanings import run_contour_cleanings
 
 
 def test_batch():
@@ -21,9 +21,7 @@ def _test(path, open_file=False, prefix=None, *args, **kwargs):
     utils.lazy_tester.configure_function_path()
     utils.lazy_tester.configure(local_path=os.path.basename(path))
     prefix = prefix or os.path.basename(path)
-    outputs = run_contour_cleanings(
-        path, prefix=prefix, open_file=open_file, *args, **kwargs
-    )
+    outputs = run_contour_cleanings(path, prefix=prefix, open_file=open_file, *args, **kwargs)
     utils.lazy_tester.log(outputs["schedule"])
     utils.lazy_tester.assert_logs()
 

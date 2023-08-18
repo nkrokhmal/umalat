@@ -1,12 +1,9 @@
-from app.imports.runtime import *
-
-from app.models import *
-from app.scheduler.ricotta.boiling_plan.saturate import (
-    saturate_boiling_plan,
-)
-from app.scheduler.boiling_plan import *
-
 from openpyxl.utils.cell import column_index_from_string
+
+from app.imports.runtime import *
+from app.models import *
+from app.scheduler.boiling_plan import *
+from app.scheduler.ricotta.boiling_plan.saturate import saturate_boiling_plan
 
 
 INDEX_COLUMN = column_index_from_string("A")
@@ -47,16 +44,10 @@ class BoilingParser:
             if self.index == len(self.boilings) - 1:
                 if cur_boiling[KG_COLUMN] == 0:
                     break
-            if cur_boiling[KG_COLUMN] >= self.kg_per_tank - sum(
-                [x[KG_COLUMN] for x in add_boiling]
-            ):
+            if cur_boiling[KG_COLUMN] >= self.kg_per_tank - sum([x[KG_COLUMN] for x in add_boiling]):
                 boiling = copy.deepcopy(cur_boiling)
-                boiling[KG_COLUMN] = self.kg_per_tank - sum(
-                    [x[KG_COLUMN] for x in add_boiling]
-                )
-                self.boilings[self.index][KG_COLUMN] -= self.kg_per_tank - sum(
-                    [x[KG_COLUMN] for x in add_boiling]
-                )
+                boiling[KG_COLUMN] = self.kg_per_tank - sum([x[KG_COLUMN] for x in add_boiling])
+                self.boilings[self.index][KG_COLUMN] -= self.kg_per_tank - sum([x[KG_COLUMN] for x in add_boiling])
                 add_boiling.append(boiling)
                 break
             else:
@@ -84,15 +75,10 @@ class BoilingParser:
                 boiling_result = pd.DataFrame(boiling_result)
                 groupby_columns = list(range(KG_COLUMN))
                 groupby_columns.append(FIRST_TANK_COLUMN - 1)
-                boiling_result[FIRST_TANK_COLUMN - 1] = (
-                    self.first_tank_number if is_first else ""
-                )
+                boiling_result[FIRST_TANK_COLUMN - 1] = self.first_tank_number if is_first else ""
 
                 boiling_result = (
-                    pd.DataFrame(boiling_result)
-                    .groupby(groupby_columns)
-                    .agg({KG_COLUMN: "sum"})
-                    .reset_index()
+                    pd.DataFrame(boiling_result).groupby(groupby_columns).agg({KG_COLUMN: "sum"}).reset_index()
                 )
 
                 boiling_result[INDEX_COLUMN - 1] = self.number_of_boiling
@@ -114,7 +100,7 @@ def read_boiling_plan(wb_obj, saturate=True, first_batch_ids=None):
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    first_batch_ids = first_batch_ids or {'ricotta': 1}
+    first_batch_ids = first_batch_ids or {"ricotta": 1}
     wb = utils.cast_workbook(wb_obj)
 
     ws_name = "План варок"
@@ -146,9 +132,7 @@ def read_boiling_plan(wb_obj, saturate=True, first_batch_ids=None):
         else:
             current_boiling.append([ws.cell(i, j).value for j in range(1, length)])
             number_of_tanks_in_boiling = ws.cell(i, TANKS_COLUMN).value
-            kg_per_tank = float(
-                ws.cell(i, OUTPUT_COLUMN).value / number_of_tanks_in_boiling
-            )
+            kg_per_tank = float(ws.cell(i, OUTPUT_COLUMN).value / number_of_tanks_in_boiling)
 
     df = pd.DataFrame(
         values,
@@ -165,60 +149,40 @@ def read_boiling_plan(wb_obj, saturate=True, first_batch_ids=None):
 
     # group_id is the same with batch_id
     df["batch_id"] = df["batch_id"].astype(int)
-    df['group_id'] = df['batch_id']
-    df['boiling_id'] = None # do not calculate boiling id
+    df["group_id"] = df["batch_id"]
+    df["boiling_id"] = None  # do not calculate boiling id
 
     df["sku"] = df["sku"].apply(lambda sku: cast_model(RicottaSKU, sku))
     df["boiling"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0])
-    df["full_tank_number"] = df["sku"].apply(
-        lambda sku: sku.made_from_boilings[0].number_of_tanks
-    )
+    df["full_tank_number"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0].number_of_tanks)
     df["kg"] = df["kg"].apply(lambda x: int(x))
     df["first_tank"] = np.where(df["first_tank"] == "", 0, df["first_tank"])
     df["first_tank"] = df["first_tank"].astype(int)
 
     for idx, grp in df.groupby("batch_id"):
-        assert (
-            len(grp["boiling"].unique()) == 1
-        ), "В одной варке должен быть только один тип варки"
+        assert len(grp["boiling"].unique()) == 1, "В одной варке должен быть только один тип варки"
 
-        assert (
-            len(grp["output"].unique()) == 1
-        ), "В одной варке должны совпадать выходы с варки"
+        assert len(grp["output"].unique()) == 1, "В одной варке должны совпадать выходы с варки"
 
         # fix number of kilograms
         if (
-            abs(
-                grp["kg"].sum()
-                - grp.iloc[0]["output"]
-                * grp.iloc[0]["tanks"]
-                / grp.iloc[0]["full_tank_number"]
-            )
+            abs(grp["kg"].sum() - grp.iloc[0]["output"] * grp.iloc[0]["tanks"] / grp.iloc[0]["full_tank_number"])
             / grp.iloc[0]["output"]
             > 0.05
         ):
-            raise AssertionError(
-                "Одна из групп варок имеет неверное количество килограмм."
-            )
+            raise AssertionError("Одна из групп варок имеет неверное количество килограмм.")
         else:
             if (
-                abs(
-                    grp["kg"].sum()
-                    - grp.iloc[0]["output"]
-                    * grp.iloc[0]["tanks"]
-                    / grp.iloc[0]["full_tank_number"]
-                )
+                abs(grp["kg"].sum() - grp.iloc[0]["output"] * grp.iloc[0]["tanks"] / grp.iloc[0]["full_tank_number"])
                 > 1e-5
             ):
-                df.loc[grp.index, "kg"] *= (
-                    grp.iloc[0]["output"] / grp["kg"].sum()
-                )  # scale to total_volume
+                df.loc[grp.index, "kg"] *= grp.iloc[0]["output"] / grp["kg"].sum()  # scale to total_volume
             else:
                 # all fine
                 pass
 
     if saturate:
         df = saturate_boiling_plan(df)
-    df['batch_type'] = 'ricotta'
+    df["batch_type"] = "ricotta"
     df = update_absolute_batch_id(df, first_batch_ids=first_batch_ids)
     return df

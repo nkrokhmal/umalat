@@ -1,10 +1,10 @@
 # fmt: off
 
 from app.imports.runtime import *
-
+from app.models import *
 from app.scheduler.adygea.algo.boilings import *
 from app.scheduler.time import *
-from app.models import *
+
 
 BOILING_NUMS = [0, 2, 1, 3]
 

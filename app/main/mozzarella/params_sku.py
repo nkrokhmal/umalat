@@ -1,11 +1,11 @@
-from app.imports.runtime import *
 from werkzeug.utils import redirect
 
+from app.imports.runtime import *
 from app.main import main
+from app.models import SKU, MozzarellaSKU
 from app.utils.features.form_utils import *
-from app.models import MozzarellaSKU, SKU
 
-from .forms import SKUForm, CopySKUForm
+from .forms import CopySKUForm, SKUForm
 
 
 @main.route("/mozzarella/add_sku", methods=["POST", "GET"])
@@ -85,7 +85,7 @@ def mozzarella_copy_sku(sku_id):
             made_from_boilings=sku.made_from_boilings,
             packers=sku.packers,
             production_by_request=sku.production_by_request,
-            packing_by_request=sku.packing_by_request
+            packing_by_request=sku.packing_by_request,
         )
         db.session.add(copy_sku)
         db.session.commit()

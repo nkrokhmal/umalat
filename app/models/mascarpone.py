@@ -1,9 +1,8 @@
-from app.imports.runtime import *
-
 from sqlalchemy.orm import backref
 
+from app.imports.runtime import *
 
-from .basic import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
 
 
 class MascarponeSKU(SKU):
@@ -19,9 +18,7 @@ class MascarponeLine(Line):
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
     params = mdb.Column(mdb.String)
-    sourdoughs = mdb.relationship(
-        "MascarponeSourdough", backref=backref("line", uselist=False, lazy="subquery")
-    )
+    sourdoughs = mdb.relationship("MascarponeSourdough", backref=backref("line", uselist=False, lazy="subquery"))
 
 
 class MascarponeFormFactor(FormFactor):
@@ -50,9 +47,7 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     __tablename__ = "mascarpone_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "mascarpone_boiling_technology"}
 
-    id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
-    )
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
     weight = mdb.Column(mdb.Integer)
     pouring_time = mdb.Column(mdb.Integer)
     heating_time = mdb.Column(mdb.Integer)
@@ -62,9 +57,7 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     pumping_off_2_time = mdb.Column(mdb.Integer)
     pumping_off_pause_time = mdb.Column(mdb.Integer)
     ingredient_time = mdb.Column(mdb.Integer)
-    line_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("mascarpone_lines.id"), nullable=True
-    )
+    line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("mascarpone_lines.id"), nullable=True)
 
     @staticmethod
     def create_name(line, weight, percent, flavoring_agent, is_lactose):
@@ -96,9 +89,7 @@ class MascarponeSourdough(mdb.Model):
     id = mdb.Column(mdb.Integer, primary_key=True)
     number = mdb.Column(mdb.Integer)
     name = mdb.Column(mdb.String)
-    line_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("mascarpone_lines.id"), nullable=True
-    )
+    line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("mascarpone_lines.id"), nullable=True)
     boiling_technologies = mdb.relationship(
         "MascarponeBoilingTechnology",
         secondary=boiling_technology_sourdough,

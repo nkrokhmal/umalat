@@ -1,5 +1,6 @@
-from app.imports.runtime import *
 import utils_ak.iteration
+
+from app.imports.runtime import *
 
 
 def group_intervals(intervals, split_criteria=None, interval_func=None):
@@ -10,7 +11,7 @@ def group_intervals(intervals, split_criteria=None, interval_func=None):
     intervals = list(sorted(intervals, key=lambda interval: interval_func(interval)[0]))
 
     cur_group = []
-    for prev_interval, cur_interval in utils.iter_pairs(intervals, method='any_prefix'):
+    for prev_interval, cur_interval in utils.iter_pairs(intervals, method="any_prefix"):
         if not cur_group:
             cur_group.append(cur_interval)
             continue
@@ -54,5 +55,6 @@ def test_group_intervals():
         [[10, 11]],
     ]
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_group_intervals()

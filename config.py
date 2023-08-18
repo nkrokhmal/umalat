@@ -1,5 +1,6 @@
 from app.imports.external import *
 
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 SQLITE_PATH = os.path.join(basedir, "db/prod/data.sqlite")
@@ -27,22 +28,14 @@ class BaseClass:
     UPLOAD_TMP_FOLDER = "app/data/dynamic/tmp"
     SKU_PLAN_FOLDER = "app/data/dynamic/sku_plan"
 
-    TEMPLATE_MOZZARELLA_BOILING_PLAN = (
-        "app/data/static/templates/constructor_mozzarella.xlsx"
-    )
+    TEMPLATE_MOZZARELLA_BOILING_PLAN = "app/data/static/templates/constructor_mozzarella.xlsx"
     TEMPLATE_RICOTTA_BOILING_PLAN = "app/data/static/templates/constructor_ricotta.xlsx"
-    TEMPLATE_MASCARPONE_BOILING_PLAN = (
-        "app/data/static/templates/constructor_mascarpone.xlsx"
-    )
+    TEMPLATE_MASCARPONE_BOILING_PLAN = "app/data/static/templates/constructor_mascarpone.xlsx"
     TEMPLATE_BUTTER_BOILING_PLAN = "app/data/static/templates/constructor_butter.xlsx"
-    TEMPLATE_MILKPROJECT_BOILING_PLAN = (
-        "app/data/static/templates/constructor_milk_project.xlsx"
-    )
+    TEMPLATE_MILKPROJECT_BOILING_PLAN = "app/data/static/templates/constructor_milk_project.xlsx"
     TEMPLATE_SCHEDULE_PLAN = "app/data/static/templates/constructor_schedule.xlsx"
     TEMPLATE_ADYGEA_BOILING_PLAN = "app/data/static/templates/constructor_adygea.xlsx"
-    TEMPLATE_SCHEDULE_PLAN_DEPARTMENT = (
-        "app/data/static/templates/constructor_schedule_department.xlsx"
-    )
+    TEMPLATE_SCHEDULE_PLAN_DEPARTMENT = "app/data/static/templates/constructor_schedule_department.xlsx"
 
     IGNORE_SKU_FILE = "app/data/static/ignore/ignore_sku.json"
     with open(os.path.join(basedir, IGNORE_SKU_FILE), encoding="utf-8") as json_file:
@@ -192,6 +185,7 @@ class TestConfig(BaseClass):
     # TELEGRAM_CHAT_MASCARPONE_ID = -633089546
     # TELEGRAM_CHAT_BUTTER_ID = -633089546
     # TELEGRAM_CHAT_MILKPROJECT_ID = -633089546
+
 
 configs = {
     "default": DebugConfig,

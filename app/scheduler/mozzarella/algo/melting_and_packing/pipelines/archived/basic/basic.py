@@ -1,9 +1,8 @@
 from app.imports.runtime import *
-
 from app.models import *
-from app.scheduler.mozzarella.algo.packing import *
-from app.scheduler.mozzarella.algo.cooling import *
 from app.scheduler.mozzarella.algo.boiling import make_boiling
+from app.scheduler.mozzarella.algo.cooling import *
+from app.scheduler.mozzarella.algo.packing import *
 
 
 def make_melting_and_packing_basic(boiling_plan):
@@ -11,16 +10,10 @@ def make_melting_and_packing_basic(boiling_plan):
     boiling_model = boiling_plan.iloc[0]["boiling"]
 
     # todo archive: test and refactor
-    assert boiling_plan[
-        "bff"
-    ].any(), "At least one sku should be non-Терка for now"
+    assert boiling_plan["bff"].any(), "At least one sku should be non-Терка for now"
 
-    boiling_plan["ct"] = boiling_plan["bff"].apply(
-        lambda ff: ff.default_cooling_technology
-    )
-    boiling_plan["group_key"] = boiling_plan["bff"].astype(str) + boiling_plan[
-        "ct"
-    ].astype(str)
+    boiling_plan["ct"] = boiling_plan["bff"].apply(lambda ff: ff.default_cooling_technology)
+    boiling_plan["group_key"] = boiling_plan["bff"].astype(str) + boiling_plan["ct"].astype(str)
     utils.mark_consecutive_groups(boiling_plan, "group_key", "melting_group")
 
     maker, make = init_block_maker("melting_and_packing")
@@ -70,9 +63,7 @@ def make_melting_and_packing_basic(boiling_plan):
     with make(
         "packing",
         x=(
-            maker.root["melting"]["coolings"]["cooling_process", True][0][
-                "start"
-            ].y[0],
+            maker.root["melting"]["coolings"]["cooling_process", True][0]["start"].y[0],
             0,
         ),
         packing_team_id=1,
@@ -92,9 +83,7 @@ def make_melting_and_packing_basic(boiling_plan):
 
             if i != len(boiling_plan) - 1:
                 # add configuration
-                conf_time_size = get_configuration_time(
-                    boiling_model.line.name, sku, boiling_plan.iloc[i + 1]["sku"]
-                )
+                conf_time_size = get_configuration_time(boiling_model.line.name, sku, boiling_plan.iloc[i + 1]["sku"])
 
                 if conf_time_size:
                     make("packing_configuration", size=[conf_time_size // 5, 0])

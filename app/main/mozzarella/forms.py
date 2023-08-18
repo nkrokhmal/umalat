@@ -1,10 +1,12 @@
 from app.imports.runtime import *  # isort: skip
-from app.main.validators import *
-from app.models import *
+import wtforms
+
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired
-import wtforms
-from wtforms.validators import Optional, DataRequired
+from wtforms.validators import DataRequired, Optional
+
+from app.main.validators import *
+from app.models import *
 
 
 class BoilingPlanFastForm(FlaskForm):
@@ -118,7 +120,7 @@ class SKUForm(FlaskForm):
     def validate_sku(self, name):
         sku = db.session.query(MozzarellaSKU).filter_by(MozzarellaSKU.name == name.data).first()
         if sku is not None:
-            #todo: fix
+            # todo: fix
             ...
             # raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 

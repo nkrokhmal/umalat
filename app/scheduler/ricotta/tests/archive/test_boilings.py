@@ -1,8 +1,8 @@
 import os
 
+
 os.environ["APP_ENVIRONMENT"] = "interactive"
 from app.models import *
-
 from app.scheduler.ricotta.algo.boilings import *
 from app.scheduler.ricotta.boiling_plan import *
 

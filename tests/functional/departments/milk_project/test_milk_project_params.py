@@ -1,12 +1,15 @@
 import io
-from tests.conftest import client
-from flask import url_for
-from app.imports.runtime import *
+
 from io import StringIO
+
+from flask import url_for
+
+from app.imports.runtime import *
+from tests.conftest import client
 
 
 def test_milk_project_download_params(client):
-    params_df = pd.read_excel(r'app/data/static/params/milk_project_test.xlsx')
+    params_df = pd.read_excel(r"app/data/static/params/milk_project_test.xlsx")
     with client.test_client() as client:
         url = url_for("main.download_milk_project", _external=False)
         response = client.post(url, follow_redirects=True)

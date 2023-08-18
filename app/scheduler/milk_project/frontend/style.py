@@ -11,10 +11,7 @@ def f(b):
 
 
 STYLE = {
-    'equipment_check': {
-        'color': '#4BACC6',
-        'text': 'Проверка'
-    },
+    "equipment_check": {"color": "#4BACC6", "text": "Проверка"},
     "water_collecting": {
         "color": "#FFFF00",  # yellow
         "text": "Набор воды в машину",
@@ -27,7 +24,7 @@ STYLE = {
         "color": "#00B0F0",  # blue
         "text": f,
     },
-    "red": {"color": "red", 'text': 'Мойка обородувания'},  # yellow
+    "red": {"color": "red", "text": "Мойка обородувания"},  # yellow
     "pouring_off": {
         "text": "Слив",
         "color": "#70AD47",  # green

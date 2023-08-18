@@ -1,10 +1,10 @@
-from app.imports.runtime import *
-
-from app.models import *
 from app.enum import LineName
+from app.imports.runtime import *
+from app.models import *
+from app.scheduler.boiling_plan import *
 
 from .saturate import saturate_boiling_plan
-from app.scheduler.boiling_plan import *
+
 
 def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
     """
@@ -61,9 +61,7 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
 
     # batch_id and group_id are the same
 
-    df["sku"] = df["sku"].apply(
-        lambda sku: cast_model([MascarponeSKU, CreamCheeseSKU], sku)
-    )
+    df["sku"] = df["sku"].apply(lambda sku: cast_model([MascarponeSKU, CreamCheeseSKU], sku))
 
     df = saturate_boiling_plan(df)
 
@@ -102,15 +100,11 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
 
         total_boiling_volume = grp.iloc[0]["output"]
 
-        assert (
-            abs(total_boiling_volume - grp["kg"].sum()) < 1e-5
-        ), "Указано неверное число килограмм в варке"
+        assert abs(total_boiling_volume - grp["kg"].sum()) < 1e-5, "Указано неверное число килограмм в варке"
 
         boiling_volumes = list(proportion * total_boiling_volume)
 
-        new_grp = utils.split_into_sum_groups(
-            grp, boiling_volumes, column="kg", group_column="boiling_id"
-        )
+        new_grp = utils.split_into_sum_groups(grp, boiling_volumes, column="kg", group_column="boiling_id")
 
         for i, (boiling_id, sub_grp) in enumerate(new_grp.groupby("boiling_id")):
             new_grp.loc[sub_grp.index, "sourdough"] = sourdoughs[i]
@@ -122,31 +116,33 @@ def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
     df = pd.DataFrame(values)
 
     with code("Get type"):
+
         def get_type(name):
-            if 'сливки' in name.lower():
-                return 'cream'
-            elif 'кремчиз' in name.lower():
-                return 'cream_cheese'
-            elif 'робиола' in name.lower():
-                return 'robiola'
-            elif 'творожный' in name.lower():
-                return 'cottage_cheese'
-            elif 'маскарпоне' in name.lower():
-                return 'mascarpone'
+            if "сливки" in name.lower():
+                return "cream"
+            elif "кремчиз" in name.lower():
+                return "cream_cheese"
+            elif "робиола" in name.lower():
+                return "robiola"
+            elif "творожный" in name.lower():
+                return "cottage_cheese"
+            elif "маскарпоне" in name.lower():
+                return "mascarpone"
             else:
                 raise Exception(
-                    'Неизвестный тип максарпоне. В названии должен присутствовать один из типов: Сливки, Кремчиз, Робиола, Творожный, Маскарпоне')
+                    "Неизвестный тип максарпоне. В названии должен присутствовать один из типов: Сливки, Кремчиз, Робиола, Творожный, Маскарпоне"
+                )
 
-        df['full_type'] = df['sku'].apply(lambda sku: get_type(sku.name))
+        df["full_type"] = df["sku"].apply(lambda sku: get_type(sku.name))
 
-    df['batch_type'] = df['full_type']
+    df["batch_type"] = df["full_type"]
 
-    df['batch_id'] = 0
+    df["batch_id"] = 0
     # set batch_id
-    for batch_type in df['batch_type'].unique():
+    for batch_type in df["batch_type"].unique():
         cur_batch_id = 1
-        for ind, grp in df[df['batch_type'] == batch_type].groupby('group_id'):
-            df.loc[grp.index, 'batch_id'] = cur_batch_id
+        for ind, grp in df[df["batch_type"] == batch_type].groupby("group_id"):
+            df.loc[grp.index, "batch_id"] = cur_batch_id
             cur_batch_id += 1
 
     df = update_absolute_batch_id(df, first_batch_ids)

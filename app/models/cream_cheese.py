@@ -1,8 +1,8 @@
-from app.imports.runtime import *
-
 from sqlalchemy.orm import backref
 
-from .basic import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from app.imports.runtime import *
+
+from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
 
 
 class CreamCheeseSKU(SKU):
@@ -48,9 +48,7 @@ class CreamCheeseBoilingTechnology(BoilingTechnology):
     __tablename__ = "cream_cheese_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "cream_cheese_boiling_technology"}
 
-    id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
-    )
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
     cooling_time = mdb.Column(mdb.Integer)
     separation_time = mdb.Column(mdb.Integer)
     salting_time = mdb.Column(mdb.Integer)
@@ -70,6 +68,4 @@ class CreamCheeseFermentator(mdb.Model):
 
     id = mdb.Column(mdb.Integer, primary_key=True)
     name = mdb.Column(mdb.String)
-    line_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("mascarpone_lines.id"), nullable=True
-    )
+    line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("mascarpone_lines.id"), nullable=True)

@@ -17,11 +17,7 @@ def generate_random_boiling_plan(n=24, seed=12):
         boiling_model = random.choice(models)
 
         for _ in range(boiling_model.number_of_tanks):
-            boiling_skus.append(
-                random.choice(
-                    [sku for sku in skus if boiling_model in sku.made_from_boilings]
-                )
-            )
+            boiling_skus.append(random.choice([sku for sku in skus if boiling_model in sku.made_from_boilings]))
 
         boiling_skus = list(sorted(boiling_skus, key=lambda sku: sku.name))
         for sku in boiling_skus:

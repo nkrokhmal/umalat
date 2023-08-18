@@ -1,9 +1,9 @@
 from app.imports.runtime import *
 from app.scheduler.contour_cleanings import *
 from app.scheduler.frontend import *
-from app.scheduler.submit import submit_schedule
-from app.scheduler.load_schedules import *
 from app.scheduler.load_properties import *
+from app.scheduler.load_schedules import *
+from app.scheduler.submit import submit_schedule
 
 
 def run_contour_cleanings(

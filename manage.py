@@ -1,8 +1,10 @@
 import os
 
+
 os.environ["APP_ENVIRONMENT"] = "runtime"
 
 from app.app import *
+
 
 app, rq = create_app()
 create_manager(app)

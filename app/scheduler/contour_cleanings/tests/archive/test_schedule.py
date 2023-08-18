@@ -1,10 +1,11 @@
 import os
 
+
 os.environ["APP_ENVIRONMENT"] = "interactive"
 
 from app.imports.runtime import *
+from app.scheduler import load_properties, load_schedules
 from app.scheduler.contour_cleanings.algo.schedule import *
-from app.scheduler import load_schedules, load_properties
 
 
 def test():

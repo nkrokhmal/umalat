@@ -1,9 +1,9 @@
 from app.imports.runtime import *
 from app.scheduler.butter import *
-from app.scheduler.butter import (
-    read_boiling_plan,
+from app.scheduler.butter import (  # todo archive: imports don't load up for some reason  from above
     make_schedule,
-)  # todo archive: imports don't load up for some reason  from above
+    read_boiling_plan,
+)
 from app.scheduler.frontend import *
 from app.scheduler.submit import submit_schedule
 
@@ -27,9 +27,6 @@ def run_butter(
         frontend = wrap_frontend(schedule)
     except Exception as e:
         raise Exception("Ошибка при построении расписания")
-    res = submit_schedule(
-        "масло", schedule, frontend, prefix, STYLE, path=path, open_file=open_file
-    )
+    res = submit_schedule("масло", schedule, frontend, prefix, STYLE, path=path, open_file=open_file)
     res["boiling_plan_df"] = boiling_plan_df
     return res
-

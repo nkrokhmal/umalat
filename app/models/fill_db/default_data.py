@@ -3,9 +3,9 @@ from app.models import *
 
 def generate_user():
     user = User(
-        username='umalat',
-        email='umalat@mail.ru',
-        password='1',
+        username="umalat",
+        email="umalat@mail.ru",
+        password="1",
     )
     db.session.add(user)
     db.session.commit()
@@ -18,7 +18,7 @@ def generate_departments():
         "Маскарпоновый цех",
         "Масло цех",
         "Милкпроджект",
-        "Адыгейский цех"
+        "Адыгейский цех",
     ]:
         department = Department(name=name)
         db.session.add(department)

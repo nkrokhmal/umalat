@@ -17,9 +17,7 @@ def _test(fn, open_file=False, *args, **kwargs):
 
 
 def test_batch():
-    fns = glob.glob(
-        config.abs_path("app/data/static/samples/inputs/by_department/ricotta/*.xlsx")
-    )
+    fns = glob.glob(config.abs_path("app/data/static/samples/inputs/by_department/ricotta/*.xlsx"))
     fns = [fn for fn in fns if "$" not in fn]
     for i, fn in enumerate(utils.tqdm(fns, desc=lambda v: v)):
         _test(fn, open_file=False, prefix=str(i))

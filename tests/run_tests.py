@@ -1,10 +1,12 @@
+import os
 import subprocess
 import sys
-import os
 
 
 def get_last_commit_name():
-    process = subprocess.Popen(['git', 'log', 'master', '--format=%B', '-1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        ["git", "log", "master", "--format=%B", "-1"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     last_commit_name = str(process.stdout.read()).lower()
 
     if "--no-tests" in last_commit_name or "--no-test" in last_commit_name:

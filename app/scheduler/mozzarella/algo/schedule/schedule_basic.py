@@ -1,9 +1,9 @@
 from app.enum import LineName
 from app.scheduler.mozzarella.boiling_plan.boiling_plan import cast_boiling_plan
 
-from .schedule_from_boilings import *
-from .schedule_by_optimization import *
 from .parse_start_configuration import *
+from .schedule_by_optimization import *
+from .schedule_from_boilings import *
 
 
 def make_schedule_basic(
@@ -21,9 +21,7 @@ def make_schedule_basic(
         if not start_configuration:
             with code("Make basic schedule"):
                 boilings = make_boilings(boiling_plan_df)
-                schedule = make_schedule_from_boilings(
-                    boilings, cleanings={}, start_times=start_times
-                )
+                schedule = make_schedule_from_boilings(boilings, cleanings={}, start_times=start_times)
 
             start_configuration = parse_start_configuration(schedule)
 
@@ -35,20 +33,14 @@ def make_schedule_basic(
 
     with code("Find optimal cleanings"):
         if optimize_cleanings:
-            cleanings = find_optimal_cleanings(
-                boiling_plan_df, start_times, start_configuration=start_configuration
-            )
+            cleanings = find_optimal_cleanings(boiling_plan_df, start_times, start_configuration=start_configuration)
             logger.debug("Found optimal cleanings", cleanings=cleanings)
         else:
-            cleanings = (
-                boiling_plan_df.groupby("group_id")
-                .agg({"cleaning": "first"})
-                .to_dict()["cleaning"]
-            )
+            cleanings = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
             logger.debug("Using boiling plan cleanings", cleanings=cleanings)
 
     with code("Make schedule with cleanings and start configuration "):
-        cleanings = {k + boiling_plan_df['absolute_batch_id'].min() - 1: v for k, v in cleanings.items() if v}
+        cleanings = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleanings.items() if v}
         boilings = make_boilings(boiling_plan_df)
         schedule = make_schedule_from_boilings(
             boilings,

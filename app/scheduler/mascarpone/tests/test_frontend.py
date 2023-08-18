@@ -3,11 +3,7 @@ from app.scheduler.mascarpone import *
 
 
 def test_batch():
-    fns = glob.glob(
-        config.abs_path(
-            "app/data/static/samples/inputs/by_department/mascarpone/*.xlsx"
-        )
-    )
+    fns = glob.glob(config.abs_path("app/data/static/samples/inputs/by_department/mascarpone/*.xlsx"))
     fns = [fn for fn in fns if "$" not in fn]
 
     for i, fn in enumerate(utils.tqdm(fns, desc=lambda fn: fn)):

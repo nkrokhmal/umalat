@@ -29,7 +29,8 @@ def boiling_plan_create(df):
         ]
         return result
     else:
-        return pd.DataFrame(columns=[
+        return pd.DataFrame(
+            columns=[
                 "id",
                 "sku",
                 "group",
@@ -37,13 +38,12 @@ def boiling_plan_create(df):
                 "name",
                 "boiling_type",
                 "kg",
-            ])
+            ]
+        )
 
 
 def proceed_order(order, df, boilings_milk_project, boilings_count=1):
-    df_filter = df[
-        (df["group"] == order.group)
-    ]
+    df_filter = df[(df["group"] == order.group)]
     if not df_filter.empty:
         boilings_milk_project.init_iterator(df_filter["output"].iloc[0])
         boilings_milk_project.add_group(
@@ -65,4 +65,3 @@ def handle_milk_project(df):
         boilings_milk_project = proceed_order(order, df, boilings_milk_project)
     boilings_milk_project.finish()
     return pd.DataFrame(boilings_milk_project.boilings), boilings_milk_project.boiling_number
-

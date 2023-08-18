@@ -13,12 +13,8 @@ def parse_schedule(schedule):
             },
         ]
     )
-    boilings_json = [
-        x for x in schedule_json["children"][0]["children"] if x["cls"] == "boiling"
-    ]
-    boilings_json = list(
-        sorted(boilings_json, key=lambda b_json: b_json["props"]["x"][0])
-    )
+    boilings_json = [x for x in schedule_json["children"][0]["children"] if x["cls"] == "boiling"]
+    boilings_json = list(sorted(boilings_json, key=lambda b_json: b_json["props"]["x"][0]))
 
     dfs = []
     for b_json in boilings_json:

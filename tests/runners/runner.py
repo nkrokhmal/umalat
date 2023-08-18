@@ -1,8 +1,11 @@
-import py
 import os
-from config import basedir, configs
-from pytest import ExitCode
+
 import notifiers
+import py
+
+from pytest import ExitCode
+
+from config import basedir, configs
 
 
 def run_test(local_path, config_name="test", notify_if_failed=True):

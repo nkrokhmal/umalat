@@ -1,9 +1,9 @@
- # fmt: off
+# fmt: off
+
+from utils_ak.block_tree import *
 
 from app.imports.runtime import *
 from app.scheduler.mozzarella.boiling_plan import *
-
-from utils_ak.block_tree import *
 
 
 def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing):

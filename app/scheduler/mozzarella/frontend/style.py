@@ -28,9 +28,7 @@ STYLE = {
     "salting": {"color": (0, 176, 240), "text": "посолка"},  # light-blue color
     "cleaning": {
         "color": "yellow",
-        "text": lambda b: "Полная мойка"
-        if b.props["cleaning_type"] == "full"
-        else "Короткая мойка",
+        "text": lambda b: "Полная мойка" if b.props["cleaning_type"] == "full" else "Короткая мойка",
     },
     "multihead_cleaning": {"color": "yellow", "text": "Мойка мультиголовы"},
     "template": {"visible": True},

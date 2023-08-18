@@ -1,7 +1,8 @@
 import flask
+
 from app.imports.runtime import *
 from app.main import main
-from app.models import Department, BatchNumber
+from app.models import BatchNumber, Department
 
 
 @main.route("/save_batches", methods=["GET"])
@@ -10,7 +11,7 @@ def save_batches():
     if len(batches) > 0:
         batch_path = os.path.join(flask.current_app.config["BATCH_NUMBERS_DIR"], "batches.json")
         batches = [batch.serialize() for batch in batches]
-        mode = 'a' if os.path.exists(batch_path) else 'w'
+        mode = "a" if os.path.exists(batch_path) else "w"
         with open(batch_path, mode) as file:
             file.truncate(0)
             json.dump(batches, file)
@@ -35,7 +36,7 @@ def upload_batches():
                     beg_number=batch["beg_number"],
                     end_number=batch["end_number"],
                     department_id=batch["department_id"],
-                    group=batch['group']
+                    group=batch["group"],
                 )
                 db.session.add(batch)
             db.session.commit()
@@ -49,14 +50,16 @@ def save_last_batches():
     departments = db.session.query(Department).all()
     last_batches = []
     for department in departments:
-        last_batch = db.session.query(BatchNumber)\
-            .filter(BatchNumber.department_id == department.id)\
-            .order_by(BatchNumber.datetime.desc())\
+        last_batch = (
+            db.session.query(BatchNumber)
+            .filter(BatchNumber.department_id == department.id)
+            .order_by(BatchNumber.datetime.desc())
             .first()
+        )
         if last_batch:
             last_batches.append(last_batch.serialize())
     batch_number_path = os.path.join(flask.current_app.config["BATCH_NUMBERS_DIR"], "data.json")
-    mode = 'a' if os.path.exists(batch_number_path) else 'w'
+    mode = "a" if os.path.exists(batch_number_path) else "w"
     with open(batch_number_path, mode) as file:
         file.truncate(0)
         json.dump(last_batches, file)
@@ -77,7 +80,7 @@ def upload_last_batches():
                     beg_number=department["beg_number"],
                     end_number=department["end_number"],
                     department_id=department["department_id"],
-                    group=department['group']
+                    group=department["group"],
                 )
                 db.session.add(batch)
             db.session.commit()

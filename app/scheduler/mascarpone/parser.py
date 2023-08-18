@@ -1,10 +1,10 @@
+from utils_ak.block_tree import *
+
 from app.imports.runtime import *
 from app.scheduler.mascarpone import *
 from app.scheduler.mascarpone.properties import *
 from app.scheduler.parsing import *
 from app.scheduler.parsing_new import cast_time_from_hour_label
-
-from utils_ak.block_tree import *
 
 
 def _is_datetime(v: Union[str, datetime]):
@@ -43,7 +43,6 @@ def parse_schedule_file(wb_obj):
 
     # todo maybe: refactor, start_times -> start_ts [@marklidenberg]
     start_times = [cast_t(v) for v in start_times]
-
 
     # Precaution for minimum start time
     minimum_start_time = "21:00"

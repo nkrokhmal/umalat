@@ -1,10 +1,10 @@
-from app.imports.runtime import *
-
 from openpyxl.utils.cell import column_index_from_string
 
+from app.imports.runtime import *
+from app.models import *
 from app.utils.features.merge_boiling_utils import CircularList
 from app.utils.features.openpyxl_wrapper import ExcelBlock
-from app.models import *
+
 
 Cell = collections.namedtuple("Cell", "col, col_name")
 
@@ -123,9 +123,7 @@ def get_colour_by_name(sku_name, skus):
         return flask.current_app.config["COLORS"]["Default"]
 
 
-def draw_boiling_sheet(
-    wb, df, skus, sheet_name, type=None, cur_row=None, normalize=True
-):
+def draw_boiling_sheet(wb, df, skus, sheet_name, type=None, cur_row=None, normalize=True):
     if not cur_row:
         cur_row = 3
 
@@ -177,9 +175,7 @@ def draw_boiling_sheet(
                 value=formula,
                 set_border=False,
             )
-            excel_client.draw_row(
-                row=cur_row, values=value, cols=column, set_border=False
-            )
+            excel_client.draw_row(row=cur_row, values=value, cols=column, set_border=False)
 
             excel_client.color_cell(row=cur_row, col=COLUMNS["boiling_type"].col)
             excel_client.color_cell(row=cur_row, col=COLUMNS["output"].col)
@@ -200,16 +196,9 @@ def draw_boiling_sheet(
 
 
 def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
-    mascarpone_skus = (
-        db.session.query(MascarponeSKU)
-        .join(Group)
-        .filter(Group.name == "Маскарпоне")
-        .all()
-    )
+    mascarpone_skus = db.session.query(MascarponeSKU).join(Group).filter(Group.name == "Маскарпоне").all()
     cream_cheese_skus = db.session.query(CreamCheeseSKU).all()
-    cream_skus = (
-        db.session.query(MascarponeSKU).join(Group).filter(Group.name == "Сливки").all()
-    )
+    cream_skus = db.session.query(MascarponeSKU).join(Group).filter(Group.name == "Сливки").all()
 
     cur_i = None
     cur_i = draw_skus(wb, mascarpone_skus, SKU_SHEET_NAME, cur_i)

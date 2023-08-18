@@ -1,9 +1,9 @@
 # fmt: off
+from utils_ak.block_tree import *
+
+from app.enum import LineName
 from app.imports.runtime import *
 from app.models import *
-from app.enum import LineName
-
-from utils_ak.block_tree import *
 
 
 def get_configuration_time(line_name, sku1, sku2):
