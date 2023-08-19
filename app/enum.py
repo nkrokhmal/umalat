@@ -1,7 +1,7 @@
-from app.imports.runtime import *
+from utils_ak.dict import dotdict
 
 
-LineName = utils.dotdict(
+LineName = dotdict(
     {
         "WATER": "Моцарелла в воде",
         "SALT": "Пицца чиз",
@@ -12,7 +12,7 @@ LineName = utils.dotdict(
         "ADYGEA": "Адыгейский",
     }
 )
-DepartmentName = utils.dotdict(
+DepartmentName = dotdict(
     {
         "MOZZARELLA": "Моцарельный цех",
         "RICOTTA": "Рикоттный цех",
@@ -25,5 +25,4 @@ DepartmentName = utils.dotdict(
 
 
 if __name__ == "__main__":
-    print(DepartmentName.MOZZARELLA)
-    print(LineName.WATER)
+    ...

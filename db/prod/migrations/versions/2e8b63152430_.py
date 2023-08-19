@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 54db3865156b
+Revision ID: 2e8b63152430
 Revises: 
-Create Date: 2022-03-15 01:16:00.352839
+Create Date: 2023-08-19 21:56:00.694753
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ from alembic import op
 
 
 # revision identifiers, used by Alembic.
-revision = "54db3865156b"
+revision = "2e8b63152430"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -57,7 +57,7 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("username", sa.String(), nullable=True),
         sa.Column("email", sa.String(), nullable=True),
-        sa.Column("password", sa.Binary(), nullable=True),
+        sa.Column("password", sa.String(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
         sa.UniqueConstraint("username"),
@@ -138,16 +138,6 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "cream_cheese_lines",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("params", sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["id"],
-            ["lines.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
         "form_factors",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(), nullable=True),
@@ -164,6 +154,9 @@ def upgrade():
         "mascarpone_lines",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("params", sa.String(), nullable=True),
+        sa.Column("cream_reconfiguration_short", sa.Integer(), nullable=True),
+        sa.Column("cream_reconfiguration_long", sa.Integer(), nullable=True),
+        sa.Column("creamcheese_reconfiguration", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["id"],
             ["lines.id"],
@@ -290,48 +283,16 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "cream_cheese_boilings",
+        "mascarpone_boilings",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("weight_netto", sa.Float(), nullable=True),
-        sa.Column("percent", sa.Integer(), nullable=True),
         sa.Column("is_lactose", sa.Boolean(), nullable=True),
         sa.Column("flavoring_agent", sa.String(), nullable=True),
+        sa.Column("percent", sa.Integer(), nullable=True),
         sa.Column("output_ton", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["id"],
             ["boilings.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "cream_cheese_form_factors",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["id"],
-            ["form_factors.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "mascarpone_boilings",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("is_lactose", sa.Boolean(), nullable=True),
-        sa.Column("flavoring_agent", sa.String(), nullable=True),
-        sa.Column("percent", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["id"],
-            ["boilings.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "mascarpone_fermentator",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=True),
-        sa.Column("line_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["line_id"],
-            ["mascarpone_lines.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -341,18 +302,6 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["id"],
             ["form_factors.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "mascarpone_sourdoughs",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("number", sa.Integer(), nullable=True),
-        sa.Column("name", sa.String(), nullable=True),
-        sa.Column("line_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["line_id"],
-            ["mascarpone_lines.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -503,38 +452,16 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "cream_cheese_boiling_technologies",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("cooling_time", sa.Integer(), nullable=True),
-        sa.Column("separation_time", sa.Integer(), nullable=True),
-        sa.Column("salting_time", sa.Integer(), nullable=True),
-        sa.Column("p_time", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["id"],
-            ["boiling_technologies.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "cream_cheese_skus",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["id"],
-            ["skus.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
         "mascarpone_boiling_technologies",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("weight", sa.Integer(), nullable=True),
+        sa.Column("output_ton", sa.Integer(), nullable=True),
+        sa.Column("separation_time", sa.Integer(), nullable=True),
+        sa.Column("analysis_time", sa.Integer(), nullable=True),
         sa.Column("pouring_time", sa.Integer(), nullable=True),
         sa.Column("heating_time", sa.Integer(), nullable=True),
-        sa.Column("adding_lactic_acid_time", sa.Integer(), nullable=True),
-        sa.Column("output_ton", sa.Integer(), nullable=True),
-        sa.Column("pumping_off_time", sa.Integer(), nullable=True),
-        sa.Column("pumping_off_2_time", sa.Integer(), nullable=True),
-        sa.Column("pumping_off_pause_time", sa.Integer(), nullable=True),
+        sa.Column("pumping_time", sa.Integer(), nullable=True),
+        sa.Column("salting_time", sa.Integer(), nullable=True),
         sa.Column("ingredient_time", sa.Integer(), nullable=True),
         sa.Column("line_id", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
@@ -669,26 +596,11 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("packer_id", "sku_id"),
     )
-    op.create_table(
-        "boiling_technology_sourdough",
-        sa.Column("sourdough_id", sa.Integer(), nullable=False),
-        sa.Column("boiling_technology_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["boiling_technology_id"],
-            ["mascarpone_boiling_technologies.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["sourdough_id"],
-            ["mascarpone_sourdoughs.id"],
-        ),
-        sa.PrimaryKeyConstraint("sourdough_id", "boiling_technology_id"),
-    )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table("boiling_technology_sourdough")
     op.drop_table("sku_packer")
     op.drop_table("sku_boiling")
     op.drop_table("ricotta_skus")
@@ -700,8 +612,6 @@ def downgrade():
     op.drop_table("milk_project_boiling_technologies")
     op.drop_table("mascarpone_skus")
     op.drop_table("mascarpone_boiling_technologies")
-    op.drop_table("cream_cheese_skus")
-    op.drop_table("cream_cheese_boiling_technologies")
     op.drop_table("butter_skus")
     op.drop_table("butter_boiling_technologies")
     op.drop_table("adygea_skus")
@@ -713,12 +623,8 @@ def downgrade():
     op.drop_table("mozzarella_boilings")
     op.drop_table("milk_project_form_factors")
     op.drop_table("milk_project_boilings")
-    op.drop_table("mascarpone_sourdoughs")
     op.drop_table("mascarpone_form_factors")
-    op.drop_table("mascarpone_fermentator")
     op.drop_table("mascarpone_boilings")
-    op.drop_table("cream_cheese_form_factors")
-    op.drop_table("cream_cheese_boilings")
     op.drop_table("butter_form_factors")
     op.drop_table("butter_boilings")
     op.drop_table("boiling_technologies")
@@ -731,7 +637,6 @@ def downgrade():
     op.drop_table("milk_project_lines")
     op.drop_table("mascarpone_lines")
     op.drop_table("form_factors")
-    op.drop_table("cream_cheese_lines")
     op.drop_table("butter_lines")
     op.drop_table("boilings")
     op.drop_table("adygea_lines")

@@ -7,158 +7,99 @@ from app.models import *
 from ...enum import LineName
 
 
-def read_params():
-    if os.environ["DB_TYPE"] == "test":
-        fn = "app/data/static/params/mascarpone_test.xlsx"
-    else:
-        fn = "app/data/static/params/mascarpone.xlsx"
-    df = pd.read_excel(fn, index_col=0)
-    return df
+def read_params_df() -> pd.DataFrame:
+    suffix: str = "_test" if os.environ["DB_TYPE"] == "test" else ""
+    return pd.read_excel(f"app/data/static/params/mascarpone{suffix}.xlsx", index_col=0)
 
 
-def fill_db():
-    fill_fermentators()
+def fill_db() -> None:
     fill_boiling_technologies()
     fill_boilings()
     fill_form_factors()
     fill_sku()
 
 
-def fill_fermentators():
-    line_name = LineName.MASCARPONE
-    lines = db.session.query(MascarponeLine).all()
-    mascarpone_line = [x for x in lines if x.name == line_name][0]
-    for i, name in enumerate(
-        [
-            "Big",
-            "Small",
-            "Small",
-            "Small",
-            "Small",
-            "Small",
-            "Small",
-        ]
-    ):
-        fermentator = MascarponeSourdough(
-            number=i + 1,
-            name=name,
-        )
-        fermentator.line = mascarpone_line
-        db.session.add(fermentator)
-    db.session.commit()
-
-
-def fill_boiling_technologies():
-    df = read_params()
+def fill_boiling_technologies() -> None:
+    """
+    Adds boiling technologies into db from the excel params
+    """
+    df = read_params_df()
     boiling_technologies_columns = [
         "Название форм фактора",
-        "Прием",
+        "Сепарация",
+        "Анализ",
+        "Налив",
+        "Перекачка",
         "Нагрев",
-        "Молочная кислота",
-        "Сепарирование",
-        "Внесение ингредиентов",
+        "Посолка",
+        "Ингридиенты",
         "Процент",
         "Наличие лактозы",
         "Вкусовая добавка",
         "Вес",
         "Выход",
-        "pumping_off_pause_time",
-        "pumping_off_2_time",
     ]
-    bt_data = df[boiling_technologies_columns]
-    bt_data["Наличие лактозы"] = bt_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
-    bt_data = bt_data.drop_duplicates().fillna("")
-    fermentators = db.session.query(MascarponeSourdough).all()
-    big_fermentators = [x for x in fermentators if x.name == "Big"]
-    small_fermentators = [x for x in fermentators if x.name == "Small"]
-    fermentators_dict = {
-        0: big_fermentators,
-        1: small_fermentators,
-    }
+    df = df[boiling_technologies_columns]
+    df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
+    df.drop_duplicates().fillna("", inplace=True)
 
-    for column_name in [
-        "Прием",
-        "Нагрев",
-        "Молочная кислота",
-        "Сепарирование",
-        "Вес",
-        "pumping_off_pause_time",
-        "pumping_off_2_time",
-        "Выход",
-    ]:
-        bt_data[column_name] = bt_data[column_name].apply(lambda x: json.loads(x))
-    bt_data = bt_data.to_dict("records")
-    for bt in bt_data:
-        n = 1 if bt["Название форм фактора"] == "Сливки" else 2
-        for i in range(n):
-            line_name = LineName.MASCARPONE
-            technology = MascarponeBoilingTechnology(
-                name=MascarponeBoilingTechnology.create_name(
-                    line=line_name,
-                    weight=bt["Вес"][i],
-                    percent=bt["Процент"],
-                    flavoring_agent=bt["Вкусовая добавка"],
-                    is_lactose=bt["Наличие лактозы"],
-                ),
-                pouring_time=bt["Прием"][i],
-                heating_time=bt["Нагрев"][i],
-                adding_lactic_acid_time=bt["Молочная кислота"][i],
-                pumping_off_time=bt["Сепарирование"][i],
-                pumping_off_2_time=bt["pumping_off_2_time"][i],
-                pumping_off_pause_time=bt["pumping_off_pause_time"][i],
-                ingredient_time=bt["Внесение ингредиентов"],
-                weight=bt["Вес"][i],
-                output_ton=bt["Выход"][i],
-            )
-            if "Сливки" not in bt["Название форм фактора"]:
-                technology.sourdoughs = fermentators_dict[i]
-            db.session.add(technology)
+    for item in df.to_dict("records"):
+        technology = MascarponeBoilingTechnology(
+            name=MascarponeBoilingTechnology.create_name(
+                line=LineName.MASCARPONE,
+                weight=item["Вес"],
+                percent=item["Процент"],
+                cheese_type=item["Название форм фактора"],
+                flavoring_agent=item["Вкусовая добавка"],
+                is_lactose=item["Наличие лактозы"],
+            ),
+            separation_time=item["Сепарация"],
+            analysis_time=item["Анализ"],
+            pouring_time=item["Налив"],
+            heating_time=item["Нагрев"],
+            pumping_time=item["Перекачка"],
+            salting_time=item["Посолка"],
+            ingredient_time=item["Ингридиенты"],
+            weight=item["Вес"],
+            output_ton=item["Выход"],
+        )
+        db.session.add(technology)
     db.session.commit()
 
 
-def fill_boilings():
-    df = read_params()
-    lines = db.session.query(Line).all()
-    bts = db.session.query(MascarponeBoilingTechnology).all()
-    columns = [
+def fill_boilings() -> None:
+    df: pd.DataFrame = read_params_df()
+    lines: list[Line] = db.session.query(Line).all()
+    bts: list[MascarponeBoilingTechnology] = db.session.query(MascarponeBoilingTechnology).all()
+    columns: list[str] = [
         "Вкусовая добавка",
         "Процент",
         "Наличие лактозы",
+        "Название форм фактора",
         "Линия",
         "Вес",
         "Коэффициент",
     ]
-    b_data = df[columns]
-    b_data["Наличие лактозы"] = b_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
-    b_data = b_data.drop_duplicates().fillna("")
-    for column_name in ["Вес"]:
-        b_data[column_name] = b_data[column_name].apply(lambda x: json.loads(x))
-    b_data = b_data.to_dict("records")
-    for b in b_data:
-        bts_name = []
-        for i in range(2):
-            line_name = LineName.MASCARPONE
-            line_id = [x for x in lines if x.name == LineName.MASCARPONE][0].id
-            bts_name += [
-                x
-                for x in bts
-                if (
-                    x.name
-                    == MascarponeBoilingTechnology.create_name(
-                        line=line_name,
-                        weight=b["Вес"][i],
-                        percent=b["Процент"],
-                        flavoring_agent=b["Вкусовая добавка"],
-                        is_lactose=b["Наличие лактозы"],
-                    )
-                )
-            ]
+    df = df[columns]
+    df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
+    df.drop_duplicates().fillna("", inplace=True)
+    line_id: int = next((x.id for x in lines if x.name == LineName.MASCARPONE))
+
+    for item in df.to_dict("records"):
+        bts_name = MascarponeBoilingTechnology.create_name(
+            line=LineName.MASCARPONE,
+            weight=item["Вес"],
+            percent=item["Процент"],
+            cheese_type=item["Название форм фактора"],
+            flavoring_agent=item["Вкусовая добавка"],
+            is_lactose=item["Наличие лактозы"],
+        )
         boiling = MascarponeBoiling(
-            percent=b["Процент"],
-            flavoring_agent=b["Вкусовая добавка"],
-            is_lactose=b["Наличие лактозы"],
-            boiling_technologies=bts_name,
-            output_coeff=b["Коэффициент"],
+            percent=item["Процент"],
+            flavoring_agent=item["Вкусовая добавка"],
+            is_lactose=item["Наличие лактозы"],
+            boiling_technologies=[next((x for x in bts if x.name == bts_name), None)],
+            output_coeff=item["Коэффициент"],
             line_id=line_id,
         )
         db.session.add(boiling)
@@ -180,14 +121,12 @@ def _cast_non_nan(obj):
         return obj
 
 
-def fill_sku():
-    df = read_params()
+def fill_sku() -> None:
+    df = read_params_df()
     lines = db.session.query(MascarponeLine).all()
     boilings = db.session.query(MascarponeBoiling).all()
     form_factors = db.session.query(MascarponeFormFactor).all()
     groups = db.session.query(Group).all()
-    fermentators = db.session.query(MascarponeSourdough).all()
-    fermentator_small = [x for x in fermentators if x.name == "Small"][0]
 
     columns = [
         "Название SKU",
@@ -195,35 +134,32 @@ def fill_sku():
         "Вкусовая добавка",
         "Наличие лактозы",
         "Имя бренда",
-        "Вес нетто",
-        "Срок хранения",
+        "Вес",
         "Коробки",
-        "Скорость упаковки",
+        "Скорость фасовки",
         "Линия",
         "Название форм фактора",
         "Выход",
         "Kод",
     ]
 
-    sku_data = df[columns]
-    sku_data["Наличие лактозы"] = sku_data["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
-    sku_data = sku_data.drop_duplicates().fillna("")
-    for column_name in ["Выход"]:
-        sku_data[column_name] = sku_data[column_name].apply(lambda x: json.loads(x))
-    sku_data = sku_data.to_dict("records")
-    for sku in sku_data:
+    df = df[columns]
+    df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
+    df.drop_duplicates().fillna("", inplace=True)
+
+    for sku in df.to_dict("records"):
         add_sku = MascarponeSKU(
             name=sku["Название SKU"],
             brand_name=sku["Имя бренда"],
-            weight_netto=sku["Вес нетто"],
-            shelf_life=sku["Срок хранения"],
-            packing_speed=sku["Скорость упаковки"],
+            weight_netto=sku["Вес"],
+            shelf_life=0,
+            packing_speed=sku["Скорость фасовки"],
             in_box=sku["Коробки"],
             code=sku["Kод"],
         )
 
         line_name = LineName.MASCARPONE
-        add_sku.line = [x for x in lines if x.name == line_name][0]
+        add_sku.line = next((x for x in lines if x.name == line_name), None)
         add_sku.made_from_boilings = [
             x
             for x in boilings
@@ -232,7 +168,7 @@ def fill_sku():
             & (x.is_lactose == sku["Наличие лактозы"])
             & (x.line_id == add_sku.line.id)
         ]
-        add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
-        add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]
+        add_sku.group = next((x for x in groups if x.name == sku["Название форм фактора"]), None)
+        add_sku.form_factor = next((x for x in form_factors if x.name == "Масса"), None)
         db.session.add(add_sku)
     db.session.commit()

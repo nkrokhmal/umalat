@@ -1,8 +1,5 @@
-from sqlalchemy.orm import backref
-
 from app.imports.runtime import *
-
-from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
+from app.models.basic import SKU, Boiling, BoilingTechnology, FormFactor, Line
 
 
 class AdygeaSKU(SKU):
