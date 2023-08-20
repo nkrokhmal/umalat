@@ -45,18 +45,19 @@ def fill_boiling_technologies() -> None:
         "Процент",
         "Наличие лактозы",
         "Вкусовая добавка",
-        "Вес",
+        "Вес технология",
         "Выход",
     ]
     df = df[boiling_technologies_columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
-    df.drop_duplicates().fillna("", inplace=True)
+    df.drop_duplicates(inplace=True)
+    df.fillna("", inplace=True)
 
     for item in df.to_dict("records"):
         technology = MascarponeBoilingTechnology(
             name=MascarponeBoilingTechnology.create_name(
                 line=LineName.MASCARPONE,
-                weight=item["Вес"],
+                weight=item["Вес технология"],
                 percent=item["Процент"],
                 cheese_type=item["Название форм фактора"],
                 flavoring_agent=item["Вкусовая добавка"],
@@ -69,7 +70,7 @@ def fill_boiling_technologies() -> None:
             pumping_time=item["Перекачка"],
             salting_time=item["Посолка"],
             ingredient_time=item["Ингридиенты"],
-            weight=item["Вес"],
+            weight=item["Вес технология"],
             output_ton=item["Выход"],
         )
         db.session.add(technology)
@@ -85,19 +86,19 @@ def fill_boilings() -> None:
         "Процент",
         "Наличие лактозы",
         "Название форм фактора",
-        "Линия",
-        "Вес",
+        "Вес технология",
         "Коэффициент",
     ]
     df = df[columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
-    df.drop_duplicates().fillna("", inplace=True)
+    df.drop_duplicates(inplace=True)
+    df.fillna("", inplace=True)
     line_id: int = next((x.id for x in lines if x.name == LineName.MASCARPONE))
 
     for item in df.to_dict("records"):
         bts_name = MascarponeBoilingTechnology.create_name(
             line=LineName.MASCARPONE,
-            weight=item["Вес"],
+            weight=item["Вес технология"],
             percent=item["Процент"],
             cheese_type=item["Название форм фактора"],
             flavoring_agent=item["Вкусовая добавка"],
@@ -105,12 +106,15 @@ def fill_boilings() -> None:
         )
         boiling = MascarponeBoiling(
             percent=item["Процент"],
+            weight_netto=item["Вес технология"],
             flavoring_agent=item["Вкусовая добавка"],
+            boiling_type=item["Название форм фактора"],
             is_lactose=item["Наличие лактозы"],
             boiling_technologies=[next((x for x in bts if x.name == bts_name), None)],
             output_coeff=item["Коэффициент"],
             line_id=line_id,
         )
+
         db.session.add(boiling)
     db.session.commit()
 
@@ -139,14 +143,15 @@ def fill_sku() -> None:
 
     columns = [
         "Название SKU",
+        "Название форм фактора",
         "Процент",
         "Вкусовая добавка",
         "Наличие лактозы",
         "Имя бренда",
         "Вес",
+        "Вес технология",
         "Коробки",
         "Скорость фасовки",
-        "Линия",
         "Название форм фактора",
         "Выход",
         "Kод",
@@ -154,7 +159,8 @@ def fill_sku() -> None:
 
     df = df[columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
-    df.drop_duplicates().fillna("", inplace=True)
+    df.drop_duplicates(inplace=True)
+    df.fillna("", inplace=True)
 
     for sku in df.to_dict("records"):
         add_sku = MascarponeSKU(
@@ -175,8 +181,11 @@ def fill_sku() -> None:
             if (x.percent == sku["Процент"])
             & (x.flavoring_agent == sku["Вкусовая добавка"])
             & (x.is_lactose == sku["Наличие лактозы"])
+            & (x.weight_netto == sku["Вес технология"])
             & (x.line_id == add_sku.line.id)
+            & (x.boiling_type == sku["Название форм фактора"])
         ]
+
         add_sku.group = next((x for x in groups if x.name == sku["Название форм фактора"]), None)
         add_sku.form_factor = next((x for x in form_factors if x.name == "Масса"), None)
         db.session.add(add_sku)

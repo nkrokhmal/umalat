@@ -33,6 +33,7 @@ class MascarponeBoiling(Boiling):
     __mapper_args__ = {"polymorphic_identity": "mascarpone_boiling"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True)
+    boiling_type = mdb.Column(mdb.String)
     weight_netto = mdb.Column(mdb.Float)
     is_lactose = mdb.Column(mdb.Boolean, default=False)
     flavoring_agent = mdb.Column(mdb.String)
