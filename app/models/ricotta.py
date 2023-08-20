@@ -1,8 +1,7 @@
 from sqlalchemy.orm import backref
 
-from app.imports.runtime import *
-
-from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
+from app.globals import mdb
+from app.models.basic import SKU, Boiling, BoilingTechnology, FormFactor, Line
 
 
 class RicottaSKU(SKU):
@@ -44,27 +43,19 @@ class RicottaBoiling(Boiling):
     )
 
     @property
-    def with_flavor(self):
+    def with_flavor(self) -> bool:
         return self.flavoring_agent != ""
 
     @property
-    def short_display_name(self):
-        if self.flavoring_agent:
-            return self.flavoring_agent
-        else:
-            return "Рикотта"
+    def short_display_name(self) -> str:
+        return self.flavoring_agent if self.flavoring_agent else "Рикотта"
 
     @property
-    def is_cream(self):
-        if self.percent == 30 and not self.with_flavor:
-            return True
-        else:
-            return False
+    def is_cream(self) -> bool:
+        return self.percent == 30 and not self.with_flavor
 
-    def to_str(self):
-        values = [self.percent, self.flavoring_agent]
-        values = [str(v) for v in values if v]
-        return ", ".join(values)
+    def to_str(self) -> str:
+        return f"{self.percent}, {self.flavoring_agent}"
 
 
 class RicottaBoilingTechnology(BoilingTechnology):
@@ -79,10 +70,8 @@ class RicottaBoilingTechnology(BoilingTechnology):
     pumping_out_time = mdb.Column(mdb.Integer)
 
     @staticmethod
-    def create_name(line, percent, flavoring_agent):
-        boiling_name = [percent, flavoring_agent]
-        boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, {}".format(line, boiling_name)
+    def create_name(line: str, percent: float | int, flavoring_agent: str) -> str:
+        return f"Линия {line}, {percent}, {flavoring_agent}"
 
 
 class RicottaAnalysisTechnology(mdb.Model):
@@ -93,3 +82,13 @@ class RicottaAnalysisTechnology(mdb.Model):
     pumping_time = mdb.Column(mdb.Integer)
 
     boiling_id = mdb.Column(mdb.Integer, mdb.ForeignKey("ricotta_boilings.id"), nullable=True)
+
+
+__all__ = [
+    "RicottaBoilingTechnology",
+    "RicottaBoiling",
+    "RicottaAnalysisTechnology",
+    "RicottaLine",
+    "RicottaSKU",
+    "RicottaFormFactor",
+]

@@ -1,4 +1,4 @@
-from app.imports.runtime import *
+from app.globals import mdb
 from app.models.basic import SKU, Boiling, BoilingTechnology, FormFactor, Line
 
 
@@ -36,10 +36,8 @@ class AdygeaBoiling(Boiling):
     output_kg = mdb.Column(mdb.Integer)
     percent = mdb.Column(mdb.Integer)
 
-    def to_str(self):
-        values = [self.percent]
-        values = [str(v) for v in values if v]
-        return ", ".join(values)
+    def to_str(self) -> str:
+        return str(self.percent)
 
 
 class AdygeaBoilingTechnology(BoilingTechnology):
@@ -54,16 +52,18 @@ class AdygeaBoilingTechnology(BoilingTechnology):
 
     @staticmethod
     def create_name(
-        form_factor,
-        line,
-        percent,
-        weight,
-    ):
-        boiling_name = [percent]
-        boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, Форм фактор {}, Вес {}, {}".format(
-            line,
-            form_factor,
-            weight,
-            boiling_name,
-        )
+        form_factor: str,
+        line: str,
+        percent: float | int,
+        weight: float | int,
+    ) -> str:
+        return f"Линия {line}, Форм фактор {form_factor}, Вес {weight}, {percent}"
+
+
+__all__ = [
+    "AdygeaBoiling",
+    "AdygeaBoilingTechnology",
+    "AdygeaLine",
+    "AdygeaSKU",
+    "AdygeaFormFactor",
+]

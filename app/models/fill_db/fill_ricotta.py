@@ -1,10 +1,18 @@
-import json
+import os
 
 import pandas as pd
 
-from app.models import *
-
-from ...enum import LineName
+from app.enum import LineName
+from app.globals import db
+from app.models.basic import Group, Line
+from app.models.ricotta import (
+    RicottaAnalysisTechnology,
+    RicottaBoiling,
+    RicottaBoilingTechnology,
+    RicottaFormFactor,
+    RicottaLine,
+    RicottaSKU,
+)
 
 
 def read_params():
@@ -117,22 +125,6 @@ def fill_boilings():
         db.session.add(technology)
         db.session.add(boiling)
         db.session.commit()
-
-
-# def fill_analysis_technology():
-#     df = read_params()
-#     data = df[['Подготовка полуфабриката', 'Анализ', 'Перекачка']]
-#     data = data.drop_duplicates()
-#     data = data.to_dict('records')
-#     for value in data:
-#         if any([not np.isnan(x) for x in value.values()]):
-#             technology = RicottaAnalysisTechnology(
-#                 preparation_time=value['Подготовка полуфабриката'],
-#                 analysis_time=value['Анализ'],
-#                 pumping_time=value['Перекачка']
-#             )
-#             db.session.add(technology)
-#     db.session.commit()
 
 
 def fill_form_factors():

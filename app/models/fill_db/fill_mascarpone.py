@@ -1,10 +1,19 @@
-import json
+import os
+import typing as tp
 
+import numpy as np
 import pandas as pd
 
-from app.models import *
-
-from ...enum import LineName
+from app.enum import LineName
+from app.globals import db
+from app.models.basic import Group, Line
+from app.models.mascarpone import (
+    MascarponeBoiling,
+    MascarponeBoilingTechnology,
+    MascarponeFormFactor,
+    MascarponeLine,
+    MascarponeSKU,
+)
 
 
 def read_params_df() -> pd.DataFrame:
@@ -106,13 +115,13 @@ def fill_boilings() -> None:
     db.session.commit()
 
 
-def fill_form_factors():
+def fill_form_factors() -> None:
     mass_ff = MascarponeFormFactor(name="Масса")
     db.session.add(mass_ff)
     db.session.commit()
 
 
-def _cast_non_nan(obj):
+def _cast_non_nan(obj: tp.Any) -> tp.Any:
     if obj is None:
         return
     elif np.isnan(obj):

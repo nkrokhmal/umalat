@@ -1,21 +1,12 @@
+import os
+
+import flask
+import flask_login
+import pandas as pd
+
+from app.globals import db
 from app.main import main
-from app.models import *
-
-
-def duplicate(l):
-    if isinstance(l, list):
-        if len(l) == 1:
-            return l * 3
-        else:
-            return l
-    else:
-        raise Exception("Wrong format")
-
-
-def add(l, x):
-    if len(l) == 3:
-        return l
-    return l + [x]
+from app.models import MascarponeSKU
 
 
 @main.route("/download_mascarpone", methods=["POST", "GET"])
@@ -37,28 +28,14 @@ def download_mascarpone():
             "Срок хранения": "",
             "Упаковщик": "",
             "Скорость упаковки": sku.packing_speed,
-            "Прием": json.dumps(
-                add(duplicate([x.pouring_time for x in sku.made_from_boilings[0].boiling_technologies]), 10)
+            "Прием": next((x.pouring_time for x in sku.made_from_boilings[0].boiling_technologies)),
+            "Нагрев": next((x.heating_time for x in sku.made_from_boilings[0].boiling_technologies)),
+            "Молочная кислота": next(
+                (x.adding_lactic_acid_time for x in sku.made_from_boilings[0].boiling_technologies)
             ),
-            "Нагрев": json.dumps(
-                add(duplicate([x.heating_time for x in sku.made_from_boilings[0].boiling_technologies]), 15)
-            ),
-            "Молочная кислота": json.dumps(
-                add(duplicate([x.adding_lactic_acid_time for x in sku.made_from_boilings[0].boiling_technologies]), 10)
-            ),
-            "Сепарирование": json.dumps(
-                add(duplicate([x.pumping_off_time for x in sku.made_from_boilings[0].boiling_technologies]), 25)
-            ),
+            "Сепарирование": next((x.pumping_off_time for x in sku.made_from_boilings[0].boiling_technologies)),
             "Вес": "[500,300,1000]",
-            "Выход": json.dumps(
-                add(duplicate([x.output_ton for x in sku.made_from_boilings[0].boiling_technologies]), 600)
-            ),
-            "pumping_off_pause_time": json.dumps(
-                add(duplicate([x.pumping_off_pause_time for x in sku.made_from_boilings[0].boiling_technologies]), 10)
-            ),
-            "pumping_off_2_time": json.dumps(
-                add(duplicate([x.pumping_off_2_time for x in sku.made_from_boilings[0].boiling_technologies]), 25)
-            ),
+            "Выход": next((x.output_ton for x in sku.made_from_boilings[0].boiling_technologies)),
             "Коэффициент": sku.made_from_boilings[0].output_coeff,
             "Внесение ингредиентов": sku.made_from_boilings[0].boiling_technologies[0].ingredient_time,
             "Kод": sku.code,

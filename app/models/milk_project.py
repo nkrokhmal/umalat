@@ -1,8 +1,5 @@
-from sqlalchemy.orm import backref
-
-from app.imports.runtime import *
-
-from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
+from app.globals import mdb
+from app.models.basic import SKU, Boiling, BoilingTechnology, FormFactor, Line
 
 
 class MilkProjectSKU(SKU):
@@ -40,10 +37,8 @@ class MilkProjectBoiling(Boiling):
     # todo: delete
     equipment_check_time = mdb.Column(mdb.Integer)
 
-    def to_str(self):
-        values = [self.percent]
-        values = [str(v) for v in values if v]
-        return ", ".join(values)
+    def to_str(self) -> str:
+        return str(self.percent)
 
 
 class MilkProjectBoilingTechnology(BoilingTechnology):
@@ -59,16 +54,24 @@ class MilkProjectBoilingTechnology(BoilingTechnology):
 
     @staticmethod
     def create_name(
-        form_factor,
-        line,
-        percent,
-        weight,
-    ):
-        boiling_name = [percent]
-        boiling_name = ", ".join([str(v) for v in boiling_name if v])
+        form_factor: str,
+        line: str,
+        percent: float | int,
+        weight: float | int,
+    ) -> str:
+        boiling_name = ", ".join([str(percent)])
         return "Линия {}, Форм фактор {}, Вес {}, {}".format(
             line,
             form_factor,
             weight,
             boiling_name,
         )
+
+
+__all__ = [
+    "MilkProjectBoiling",
+    "MilkProjectBoilingTechnology",
+    "MilkProjectLine",
+    "MilkProjectFormFactor",
+    "MilkProjectSKU",
+]

@@ -1,4 +1,4 @@
-from app.imports.runtime import *
+from app.globals import mdb
 from app.models.basic import SKU, Boiling, BoilingTechnology, FormFactor, Line
 
 
@@ -39,10 +39,8 @@ class MascarponeBoiling(Boiling):
     percent = mdb.Column(mdb.Integer)
     output_ton = mdb.Column(mdb.Integer)
 
-    def to_str(self):
-        values = [self.percent, self.flavoring_agent]
-        values = [str(v) for v in values if v]
-        return ", ".join(values)
+    def to_str(self) -> str:
+        return f"{self.percent}, {self.flavoring_agent}"
 
 
 class MascarponeBoilingTechnology(BoilingTechnology):
@@ -67,6 +65,14 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     def create_name(
         line: str, weight: float | int, percent: float | type, cheese_type: str, flavoring_agent: str, is_lactose: bool
     ) -> str:
-        boiling_name = ["{} кг".format(weight), percent, flavoring_agent]
-        boiling_name = ", ".join([str(v) for v in boiling_name if v])
+        boiling_name = f"{weight} кг, {percent}, {flavoring_agent}"
         return "Линия {}, {}, {}, {}".format(line, cheese_type, boiling_name, "" if is_lactose else "без лактозы")
+
+
+__all__ = [
+    "MascarponeBoilingTechnology",
+    "MascarponeBoiling",
+    "MascarponeLine",
+    "MascarponeSKU",
+    "MascarponeFormFactor",
+]

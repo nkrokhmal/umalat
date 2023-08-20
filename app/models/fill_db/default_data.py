@@ -1,4 +1,14 @@
-from app.models import *
+import collections
+
+from app.enum import LineName
+from app.globals import db
+from app.models.adygea import AdygeaLine
+from app.models.basic import Department, Group, Packer, PackType, User, Washer
+from app.models.butter import ButterLine
+from app.models.mascarpone import MascarponeLine
+from app.models.milk_project import MilkProjectLine
+from app.models.mozzarella import MozzarellaLine
+from app.models.ricotta import RicottaLine
 
 
 def generate_user():

@@ -1,10 +1,16 @@
-import json
+import os
 
 import pandas as pd
 
-from app.models import *
-
-from ...enum import LineName
+from app.enum import LineName
+from app.globals import db
+from app.models.basic import Group, Line
+from app.models.milk_project import (
+    MilkProjectBoiling,
+    MilkProjectBoilingTechnology,
+    MilkProjectFormFactor,
+    MilkProjectSKU,
+)
 
 
 def read_params():
