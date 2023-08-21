@@ -25,7 +25,7 @@ def edit_line(line_id):
         line.serving_time = form.serving_time.data
         line.chedderization_time = form.chedderization_time.data
         line.melting_speed = form.melting_speed.data
-        line.output_ton = form.output_kg.data
+        line.output_kg = form.output_kg.data
 
         db.session.commit()
 

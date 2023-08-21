@@ -25,8 +25,8 @@ def boiling_plan_create(df):
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result["boiling_name"] = result["boiling"].apply(lambda b: b.to_str())
 
-    salt_kg = db.session.query(MozzarellaLine).filter(MozzarellaLine.name == "Пицца чиз").first().output_ton
-    water_kg = db.session.query(MozzarellaLine).filter(MozzarellaLine.name == "Моцарелла в воде").first().output_ton
+    salt_kg = db.session.query(MozzarellaLine).filter(MozzarellaLine.name == "Пицца чиз").first().output_kg
+    water_kg = db.session.query(MozzarellaLine).filter(MozzarellaLine.name == "Моцарелла в воде").first().output_kg
 
     result["boiling_volume"] = np.where(result["boiling_type"] == "salt", salt_kg, water_kg)
     result["packer"] = result["sku"].apply(lambda sku: sku.packers_str)

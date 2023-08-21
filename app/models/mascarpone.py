@@ -38,7 +38,7 @@ class MascarponeBoiling(Boiling):
     is_lactose = mdb.Column(mdb.Boolean, default=False)
     flavoring_agent = mdb.Column(mdb.String)
     percent = mdb.Column(mdb.Integer)
-    output_ton = mdb.Column(mdb.Integer)
+    output_kg = mdb.Column(mdb.Integer)
 
     def to_str(self) -> str:
         return f"{self.percent}, {self.flavoring_agent}"
@@ -50,7 +50,6 @@ class MascarponeBoilingTechnology(BoilingTechnology):
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
     weight = mdb.Column(mdb.Integer)
-    output_ton = mdb.Column(mdb.Integer)
 
     separation_time = mdb.Column(mdb.Integer)  # blue block сепарирование
     analysis_time = mdb.Column(mdb.Integer)  # white block analysis

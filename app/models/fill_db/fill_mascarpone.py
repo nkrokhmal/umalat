@@ -46,7 +46,6 @@ def fill_boiling_technologies() -> None:
         "Наличие лактозы",
         "Вкусовая добавка",
         "Вес технология",
-        "Выход",
     ]
     df = df[boiling_technologies_columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
@@ -71,7 +70,6 @@ def fill_boiling_technologies() -> None:
             salting_time=item["Посолка"],
             ingredient_time=item["Ингридиенты"],
             weight=item["Вес технология"],
-            output_ton=item["Выход"],
         )
         db.session.add(technology)
     db.session.commit()
@@ -88,6 +86,7 @@ def fill_boilings() -> None:
         "Название форм фактора",
         "Вес технология",
         "Коэффициент",
+        "Выход",
     ]
     df = df[columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
@@ -113,6 +112,7 @@ def fill_boilings() -> None:
             boiling_technologies=[next((x for x in bts if x.name == bts_name), None)],
             output_coeff=item["Коэффициент"],
             line_id=line_id,
+            output_kg=item["Выход"],
         )
 
         db.session.add(boiling)
@@ -153,7 +153,6 @@ def fill_sku() -> None:
         "Коробки",
         "Скорость фасовки",
         "Название форм фактора",
-        "Выход",
         "Kод",
     ]
 

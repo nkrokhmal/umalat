@@ -80,9 +80,9 @@ def wrap_cheese_makers(master, rng):
                     round(
                         boiling_model.line.input_ton
                         * boiling.props.relative_props.get(
-                            "boiling_volume", boiling_model.line.output_ton
+                            "boiling_volume", boiling_model.line.output_kg
                         )
-                        / boiling_model.line.output_ton
+                        / boiling_model.line.output_kg
                     )
                 )
                 boiling_label = "{} {} {} {}кг".format(

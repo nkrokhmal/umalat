@@ -1,6 +1,7 @@
 FROM python:3.10
 
 ENV PYTHONPATH "${PYTHONPATH}:/utils/python-utils-ak"
+RUN export PIP_DEFAULT_TIMEOUT=100
 
 SHELL ["/bin/bash", "-c"]
 

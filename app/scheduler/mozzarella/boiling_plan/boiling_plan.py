@@ -210,7 +210,7 @@ def read_boiling_plan(wb_obj, saturate=True, normalization=True, validate=True, 
     for i, ws_name in enumerate(sheet_names):
         if ws_name in ["Вода", "Соль"]:
             line = cast_model(Line, LineName.WATER) if ws_name == "Вода" else cast_model(Line, LineName.SALT)
-            default_boiling_volume = line.output_ton
+            default_boiling_volume = line.output_kg
         else:
             default_boiling_volume = None
 

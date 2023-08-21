@@ -1,14 +1,13 @@
-def get_sku_by_name(skus, name):
-    sku = [x for x in skus if x.name == name]
-    if any(sku):
-        return sku[0]
-    else:
-        return None
+from app.models.basic import SKU
 
 
-def sku_is_rubber(skus, name):
-    sku = [x for x in skus if x.name == name]
-    if any(sku):
-        return "Терка" in sku[0].form_factor.name
-    else:
+def get_sku_by_name(skus: list[SKU], name: str) -> SKU | None:
+    return next((x for x in skus if x.name == name), None)
+
+
+def sku_is_rubber(skus: list[SKU], name: str) -> bool:
+    sku = get_sku_by_name(skus, name)
+    if sku is None:
         return False
+
+    return "Терка" in sku.form_factor.name
