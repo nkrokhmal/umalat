@@ -13,8 +13,6 @@ def add_fields(df: pd.DataFrame) -> pd.DataFrame:
         df["boiling_type"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0].to_str())
         df["output"] = df["max_boiling_weight"]
         df["coeff"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0].output_coeff)
-        df["kg"] = df["kg"] / df["coeff"]
-        df["kg"] = df["kg"].apply(lambda x: math.ceil(x))
 
         return df[
             [
@@ -32,19 +30,17 @@ def add_fields(df: pd.DataFrame) -> pd.DataFrame:
 
 def mascarpone_boiling_plan_create(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     df["plan"] = df["plan"].apply(lambda x: round(x))
-    df[["weight", "group", "form_factor"]] = df["sku"].apply(
-        lambda x: pd.Series([round(x.weight_netto), x.group.name, x.form_factor.name])
-    )
+    df[["group", "form_factor"]] = df["sku"].apply(lambda x: pd.Series([x.group.name, x.form_factor.name]))
 
-    boiling_lambda = lambda x: pd.Series([x.percent, x.is_lactose, x.flavoring_agent, x.output_kg])
-    df[["percent", "is_lactose", "flavoring_agent", "output_kg"]] = df["sku"].apply(
+    boiling_lambda = lambda x: pd.Series([x.weight_netto, x.percent, x.is_lactose, x.flavoring_agent, x.output_kg])
+    df[["weight", "percent", "is_lactose", "flavoring_agent", "output_kg"]] = df["sku"].apply(
         lambda x: boiling_lambda(x.made_from_boilings[0])
     )
 
     return (
         handle_group(df, "Маскарпоне", MASCARPONE_ORDER),
-        handle_group(df, "Сливки", CREAM_ORDER),
         handle_group(df, "Кремчиз", CREAM_CHEESE_ORDER),
+        handle_group(df, "Сливки", CREAM_ORDER),
     )
 
 
@@ -52,13 +48,10 @@ def proceed_order(order: Order, df: pd.DataFrame, boilings: Boilings) -> Boiling
     df_filter = df[df.apply(lambda row: order.order_filter(row), axis=1)]
 
     if not df_filter.empty:
-        df_filter_groups = [group for _, group in df_filter.groupby("percent")]
+        df_filter_groups = [group for _, group in df_filter.groupby("boiling_id")]
 
-        for df_filter_group in df_filter_groups:
-            df_group_dict = df_filter_group.sort_values(
-                by="weight",
-                ascending=True,
-            ).to_dict("records")
+        for df_filter_group in sorted(df_filter_groups, key=lambda x: x["weight"].iloc[0], reverse=True):
+            df_group_dict = df_filter_group.to_dict("records")
 
             boilings.add_group(
                 df_group_dict,
@@ -68,7 +61,6 @@ def proceed_order(order: Order, df: pd.DataFrame, boilings: Boilings) -> Boiling
 
 def handle_group(df: pd.DataFrame, group: str, orders: list[Order]) -> pd.DataFrame:
     output_tons: list[float | int] = [df[df["group"] == group]["output_kg"].iloc[0]]
-
     boilings_iterator = Boilings(max_iter_weight=output_tons)
 
     for order in orders:

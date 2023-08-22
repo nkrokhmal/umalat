@@ -7,16 +7,20 @@ import pandas as pd
 class Order:
     groups: list[str]
     flavoring_agent: str | None
-    is_lactose: bool | None
+    is_lactose: bool
+
+    @property
+    def flavoring_agent_str(self):
+        return self.flavoring_agent if self.flavoring_agent is not None else ""
 
     def order_filter(self, row: pd.Series) -> bool:
         if not row["group"] in self.groups:
             return False
 
-        if self.flavoring_agent is not None and row["flavoring_agent"] != self.flavoring_agent:
+        if row["flavoring_agent"] != self.flavoring_agent_str:
             return False
 
-        if self.is_lactose is not None and row["is_lactose"] != self.is_lactose:
+        if row["is_lactose"] != self.is_lactose:
             return False
 
         return True
@@ -25,13 +29,11 @@ class Order:
 CREAM_ORDER: list[Order] = [
     Order(["Сливки"], None, False),
     Order(["Сливки"], None, True),
-    Order(["Сливки"], None, None),
 ]
 MASCARPONE_ORDER: list[Order] = [
     Order(["Маскарпоне"], None, False),
     Order(["Маскарпоне"], None, True),
     Order(["Маскарпоне"], "Шоколад", True),
-    Order(["Маскарпоне"], None, None),
 ]
 CREAM_CHEESE_ORDER: list[Order] = [
     Order(["Кремчиз"], None, False),
@@ -42,7 +44,6 @@ CREAM_CHEESE_ORDER: list[Order] = [
     Order(["Кремчиз"], "Огурец", True),
     Order(["Творожный"], None, True),
     Order(["Робиола"], None, True),
-    Order(["Кремчиз", "Робиола", "Творожный"], None, None),
 ]
 
 
