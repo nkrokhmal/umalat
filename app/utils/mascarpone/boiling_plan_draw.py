@@ -41,13 +41,10 @@ def draw_skus(wb: openpyxl.Workbook, skus: list[SKU], sheet_name: str, row_numbe
         row_number = 2
 
     for group_sku in sorted(skus, key=lambda x: x.name, reverse=False):
+        boiling = group_sku.made_from_boilings[0]
         excel_client.draw_row(
             row_number,
-            [
-                group_sku.name,
-                group_sku.made_from_boilings[0].to_str(),
-                group_sku.made_from_boilings[0].output_coeff,
-            ],
+            [group_sku.name, boiling.to_str(), boiling.output_coeff, int(boiling.output_coeff * boiling.output_kg)],
             set_border=False,
         )
         row_number += 1
@@ -90,7 +87,7 @@ def draw_boiling_sheet(
     for v in values:
         if v[COLUMNS["name"]] != "-":
             del v[COLUMNS["boiling_type"]]
-            # del v[COLUMNS["output"]]
+            del v[COLUMNS["output"]]
         value = v.values()
 
         column = [x.col for x in v.keys()]

@@ -1,9 +1,8 @@
-import math
-
 import pandas as pd
 
 from app.utils.features.merge_boiling_utils import Boilings
 from app.utils.mascarpone.order import CREAM_CHEESE_ORDER, CREAM_ORDER, MASCARPONE_ORDER, Order
+from app.utils.mascarpone.utils import BoilingsHandler
 
 
 def add_fields(df: pd.DataFrame) -> pd.DataFrame:
@@ -11,7 +10,7 @@ def add_fields(df: pd.DataFrame) -> pd.DataFrame:
         df.rename({"plan": "kg"}, axis="columns", inplace=True)
         df["name"] = df["sku"].apply(lambda sku: sku.name)
         df["boiling_type"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0].to_str())
-        df["output"] = df["max_boiling_weight"]
+        df["output"] = df["output_kg"]
         df["coeff"] = df["sku"].apply(lambda sku: sku.made_from_boilings[0].output_coeff)
 
         return df[
@@ -38,32 +37,25 @@ def mascarpone_boiling_plan_create(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.D
     )
 
     return (
-        handle_group(df, "Маскарпоне", MASCARPONE_ORDER),
-        handle_group(df, "Кремчиз", CREAM_CHEESE_ORDER),
-        handle_group(df, "Сливки", CREAM_ORDER),
+        handle_group(df, MASCARPONE_ORDER),
+        handle_group(df, CREAM_CHEESE_ORDER),
+        handle_group(df, CREAM_ORDER),
     )
 
 
-def proceed_order(order: Order, df: pd.DataFrame, boilings: Boilings) -> Boilings:
-    df_filter = df[df.apply(lambda row: order.order_filter(row), axis=1)]
-
-    if not df_filter.empty:
-        df_filter_groups = [group for _, group in df_filter.groupby("boiling_id")]
-
-        for df_filter_group in sorted(df_filter_groups, key=lambda x: x["weight"].iloc[0], reverse=True):
-            df_group_dict = df_filter_group.to_dict("records")
-
-            boilings.add_group(
-                df_group_dict,
-            )
-    return boilings
-
-
-def handle_group(df: pd.DataFrame, group: str, orders: list[Order]) -> pd.DataFrame:
-    output_tons: list[float | int] = [df[df["group"] == group]["output_kg"].iloc[0]]
-    boilings_iterator = Boilings(max_iter_weight=output_tons)
+def handle_group(df: pd.DataFrame, orders: list[Order]) -> pd.DataFrame:
+    handler = BoilingsHandler()
 
     for order in orders:
-        boilings_iterator = proceed_order(order, df, boilings_iterator)
-    boilings_iterator.finish()
-    return add_fields(pd.DataFrame(boilings_iterator.boilings))
+        df_order = df[df.apply(lambda row: order.order_filter(row), axis=1)]
+
+        if not df_order.empty:
+            groups = [group for _, group in df_order.groupby("boiling_id")]
+
+            for group in sorted(groups, key=lambda x: x["weight"].iloc[0], reverse=True):
+                group_dict = group.to_dict("records")
+                max_weight = group_dict[0]["output_kg"]
+
+                handler.handle_group(group_dict, max_weight=max_weight)
+
+    return add_fields(pd.DataFrame(handler.boiling_groups))
