@@ -7,7 +7,7 @@ from app.main import main
 from app.main.mascarpone.forms import CopySKUForm, SKUMascarponeForm
 from app.models.mascarpone import MascarponeLine, MascarponeSKU
 from app.utils.features.form_utils import default_form_value, fill_mascarpone_sku_from_form
-from app.utils.flash_msgs import sku_exception_msg, sku_successful_msg
+from app.utils.flash_msgs import Action, sku_msg
 
 
 @main.route("/mascarpone/add_sku", methods=["POST", "GET"])
@@ -31,7 +31,7 @@ def mascarpone_add_sku() -> flask.Response | str:
 
         db.session.add(sku)
         db.session.commit()
-        flask.flash(sku_successful_msg(), "success")
+        flask.flash(sku_msg(Action.ADD), "success")
         return flask.redirect(flask.url_for(".mascarpone_get_sku", page=1))
     if name:
         form.name.data = name
@@ -46,7 +46,7 @@ def mascarpone_copy_sku(sku_id: int) -> flask.Response | str:
     if form.validate_on_submit():
         for attr in ("name", "code"):
             if getattr(form, attr).data == getattr(sku, attr):
-                raise Exception(sku_exception_msg())
+                raise Exception(sku_msg(Action.ERROR))
 
         copy_sku = MascarponeSKU(
             name=form.name.data,
@@ -67,7 +67,7 @@ def mascarpone_copy_sku(sku_id: int) -> flask.Response | str:
         )
         db.session.add(copy_sku)
         db.session.commit()
-        flask.flash(sku_successful_msg(), "success")
+        flask.flash(sku_msg(Action.ADD), "success")
         return flask.redirect(flask.url_for(".mascarpone_get_sku", page=1))
 
     form.name.data = sku.name
@@ -116,7 +116,7 @@ def mascarpone_edit_sku(sku_id: int) -> flask.Response | str:
 
         db.session.commit()
 
-        flask.flash(sku_successful_msg(action="change"), "success")
+        flask.flash(sku_msg(action=Action.EDIT), "success")
         return flask.redirect(flask.url_for(".mascarpone_get_sku", page=1))
 
     if sku.made_from_boilings:
@@ -141,11 +141,10 @@ def mascarpone_edit_sku(sku_id: int) -> flask.Response | str:
 @flask_login.login_required
 def mascarpone_delete_sku(sku_id: int) -> flask.Response:
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
-
     db.session.delete(sku)
     db.session.commit()
-    flask.flash(sku_successful_msg(action="delete"), "success")
 
+    flask.flash(sku_msg(action=Action.DELETE), "success")
     return flask.redirect(flask.url_for(".mascarpone_get_sku", page=1))
 
 

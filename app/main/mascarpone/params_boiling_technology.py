@@ -5,6 +5,7 @@ from app.globals import db
 from app.main import main
 from app.main.mascarpone.forms import MascarponeBoilingTechnologyForm
 from app.models import MascarponeBoilingTechnology
+from app.utils.flash_msgs import Action, boiling_technology_msg
 
 
 @main.route("/mascarpone/get_boiling_technology", methods=["GET", "POST"])
@@ -29,7 +30,7 @@ def mascarpone_edit_boiling_technology(boiling_technology_id: int) -> str | flas
             setattr(bt, attr, getattr(form, attr).data)
 
         db.session.commit()
-        flask.flash("Параметры технологии успешно изменены", "success")
+        flask.flash(boiling_technology_msg(Action.ADD), "success")
         return flask.redirect(flask.url_for(".mascarpone_get_boiling_technology"))
 
     for attr in bt.dynamic_attributes + bt.readonly_attributes:

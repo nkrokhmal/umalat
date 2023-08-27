@@ -5,6 +5,7 @@ from app.globals import db
 from app.main import main
 from app.main.mascarpone.forms import WasherForm
 from app.models.basic import Department, Washer
+from app.utils.flash_msgs import Action, washer_msg
 
 
 @main.route("/mascarpone/get_washer", methods=["GET", "POST"])
@@ -33,7 +34,7 @@ def mascarpone_edit_washer(washer_id: int):
         washer.time = form.time.data
         db.session.commit()
 
-        flask.flash("Время варки было успешно изменено", "success")
+        flask.flash(washer_msg(action=Action.EDIT), "success")
         return flask.redirect(flask.url_for(".mascarpone_get_washer"))
 
     form.name.data = washer.original_name

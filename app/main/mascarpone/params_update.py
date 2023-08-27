@@ -11,6 +11,7 @@ from app.main import main
 from app.main.mascarpone.forms import UpdateParamsForm
 from app.models.fill_db.fill_mascarpone import fill_boiling_technologies, fill_boilings, fill_sku, validate_params
 from app.models.mascarpone import MascarponeBoiling, MascarponeBoilingTechnology, MascarponeSKU
+from app.utils.flash_msgs import Action, department_msg
 
 
 @main.route("/mascarpone/update_params", methods=["POST", "GET"])
@@ -27,7 +28,7 @@ def mascarpone_update_params():
         df = pd.read_excel(path, index_col=0)
         is_valid, msg = validate_params(df)
         if not is_valid:
-            flask.flash(f"Параметры не были изменены. {msg}", "warning")
+            flask.flash(f"{department_msg(action=Action.ERROR)} {msg}", "warning")
             return flask.redirect(flask.url_for(".mascarpone_update_params"))
 
         for obj in (MascarponeSKU, MascarponeBoiling, MascarponeBoilingTechnology):
@@ -39,7 +40,7 @@ def mascarpone_update_params():
             db.session.add(obj)
         db.session.commit()
 
-        flask.flash("Параметры цеха Маскарпоне были успешно изменены", "success")
+        flask.flash(department_msg(action=Action.EDIT), "success")
         return flask.redirect(flask.url_for(".mascarpone_params"))
 
     return flask.render_template("mascarpone/update_params.html", form=form)

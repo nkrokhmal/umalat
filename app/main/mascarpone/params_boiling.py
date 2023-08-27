@@ -5,7 +5,7 @@ from app.globals import db
 from app.main import main
 from app.main.mascarpone.forms import MascarponeBoilingForm
 from app.models import MascarponeBoiling
-from app.utils.flash_msgs import boiling_successful_msg
+from app.utils.flash_msgs import Action, boiling_msg
 
 
 @main.route("/mascarpone/get_boiling", methods=["GET", "POST"])
@@ -30,7 +30,7 @@ def mascarpone_edit_boiling(boiling_id: int) -> str | flask.Response:
             setattr(boiling, attr, getattr(form, attr).data)
 
         db.session.commit()
-        flask.flash(boiling_successful_msg(), "success")
+        flask.flash(boiling_msg(Action.EDIT), "success")
         return flask.redirect(flask.url_for(".mascarpone_get_boiling"))
 
     for attr in boiling.dynamic_attributes + boiling.readonly_attributes:
