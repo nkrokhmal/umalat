@@ -44,3 +44,9 @@ def mascarpone_edit_washer(washer_id: int):
         form=form,
         washer_id=washer.id,
     )
+
+
+__all__ = [
+    "mascarpone_get_washer",
+    "mascarpone_edit_washer",
+]

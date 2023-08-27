@@ -83,3 +83,6 @@ def mascarpone_schedule():
         )
 
     return flask.render_template("mascarpone/schedule.html", form=form, filename=None)
+
+
+__all__ = ["mascarpone_schedule"]

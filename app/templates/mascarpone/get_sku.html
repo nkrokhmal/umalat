@@ -12,7 +12,7 @@
     </div>
 </div>
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
-    <a href="{{ url_for('main.mascarpone_add_sku_mascarpone') }}" class="btn btn-primary btn-sm mr-2 dropdown-toggle">
+    <a href="{{ url_for('main.mascarpone_add_sku') }}" class="btn btn-primary btn-sm mr-2 dropdown-toggle">
         <span class="fas fa-plus mr-2"></span>
         Добавить новое SKU
     </a>
@@ -45,7 +45,7 @@
                                 <a href="{{ url_for('main.mascarpone_edit_sku', sku_id = sku.id)}}" class="edit-sku">
                                     <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>
                                 </a>
-                                <a href="{{ url_for('main.mascarpone_copy_sku_mascarpone', sku_id = sku.id)}}" class="edit-sku">
+                                <a href="{{ url_for('main.mascarpone_copy_sku', sku_id = sku.id)}}" class="edit-sku">
                                     <i class="material-icons" style="color:blue" title="Копировать"> <span class="fas fa-copy"> </i>
                                 </a>
                                 <a href="#delete_sku" class="delete-current-sku" data-id={{sku.id}} data-toggle="modal">

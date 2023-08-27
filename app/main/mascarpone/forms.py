@@ -131,3 +131,16 @@ class UpdateParamsForm(FlaskForm):
 class WasherForm(FlaskForm):
     name = StringField("Название мойки")
     time = IntegerField("Время мойки")
+
+
+__all__ = [
+    "UploadForm",
+    "BoilingPlanForm",
+    "CopySKUForm",
+    "SKUMascarponeForm",
+    "MascarponeBoilingForm",
+    "MascarponeBoilingTechnologyForm",
+    "ScheduleForm",
+    "UpdateParamsForm",
+    "WasherForm",
+]

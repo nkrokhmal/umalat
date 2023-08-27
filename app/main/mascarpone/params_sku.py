@@ -10,9 +10,9 @@ from app.utils.features.form_utils import default_form_value, fill_mascarpone_sk
 from app.utils.flash_msgs import sku_exception_msg, sku_successful_msg
 
 
-@main.route("/mascarpone/add_sku_mascarpone", methods=["POST", "GET"])
+@main.route("/mascarpone/add_sku", methods=["POST", "GET"])
 @flask_login.login_required
-def mascarpone_add_sku_mascarpone() -> flask.Response | str:
+def mascarpone_add_sku() -> flask.Response | str:
     form = SKUMascarponeForm()
     name = flask.request.args.get("name")
     if form.validate_on_submit():
@@ -40,7 +40,7 @@ def mascarpone_add_sku_mascarpone() -> flask.Response | str:
 
 @main.route("/mascarpone/copy_sku/<int:sku_id>", methods=["GET", "POST"])
 @flask_login.login_required
-def mascarpone_copy_sku_mascarpone(sku_id: int) -> flask.Response | str:
+def mascarpone_copy_sku(sku_id: int) -> flask.Response | str:
     form = CopySKUForm()
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
     if form.validate_on_submit():
@@ -147,3 +147,11 @@ def mascarpone_delete_sku(sku_id: int) -> flask.Response:
     flask.flash(sku_successful_msg(action="delete"), "success")
 
     return flask.redirect(flask.url_for(".mascarpone_get_sku", page=1))
+
+
+__all__ = [
+    "mascarpone_add_sku",
+    "mascarpone_copy_sku",
+    "mascarpone_get_sku",
+    "mascarpone_delete_sku",
+]

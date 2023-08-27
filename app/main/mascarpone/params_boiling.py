@@ -42,3 +42,9 @@ def mascarpone_edit_boiling(boiling_id: int) -> str | flask.Response:
         form=form,
         boiling_id=boiling.id,
     )
+
+
+__all__ = [
+    "mascarpone_get_boiling",
+    "mascarpone_edit_boiling",
+]

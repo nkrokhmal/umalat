@@ -41,3 +41,9 @@ def mascarpone_edit_boiling_technology(boiling_technology_id: int) -> str | flas
         form=form,
         boiling_technology_id=bt.id,
     )
+
+
+__all__ = [
+    "mascarpone_get_boiling_technology",
+    "mascarpone_edit_boiling_technology",
+]

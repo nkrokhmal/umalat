@@ -45,4 +45,6 @@ def mascarpone_update_params():
     return flask.render_template("mascarpone/update_params.html", form=form)
 
 
-__all__ = ["mascarpone_update_params"]
+__all__ = [
+    "mascarpone_update_params",
+]
