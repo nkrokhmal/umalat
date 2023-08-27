@@ -161,6 +161,7 @@ class Line(mdb.Model):
 class Washer(mdb.Model):
     __tablename__ = "washer"
     id = mdb.Column(mdb.Integer, primary_key=True)
+    original_name = mdb.Column(mdb.String)
     name = mdb.Column(mdb.String)
     time = mdb.Column(mdb.Integer)
     department_id = mdb.Column(mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True)

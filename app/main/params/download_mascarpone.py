@@ -11,15 +11,14 @@ from app.main import main
 from app.models.mascarpone import MascarponeBoiling, MascarponeBoilingTechnology, MascarponeSKU
 
 
-@main.route("/download_mascarpone", methods=["POST", "GET"])
-@flask_login.login_required
-def download_mascarpone() -> flask.Response:
+def get_mascarpone_parameters() -> pd.DataFrame:
     skus: list[MascarponeSKU] = db.session.query(MascarponeSKU).all()
     data: list[dict[str, str | float | int]] = []
 
     for sku in skus:
         boiling: MascarponeBoiling = sku.made_from_boilings[0]
         boiling_technology: MascarponeBoilingTechnology = boiling.boiling_technologies[0]
+
         data.append(
             {
                 "Название SKU": sku.name,
@@ -30,6 +29,7 @@ def download_mascarpone() -> flask.Response:
                 "Линия": "Маскарпоне",
                 "Имя бренда": sku.brand_name,
                 "Вес": sku.weight_netto,
+                "Вес технология": boiling_technology.weight,
                 "Коробки": sku.in_box,
                 "Сепарация": boiling_technology.separation_time,
                 "Анализ": boiling_technology.analysis_time,
@@ -39,23 +39,33 @@ def download_mascarpone() -> flask.Response:
                 "Посолка": boiling_technology.salting_time,
                 "Ингридиенты": boiling_technology.ingredient_time,
                 "Скорость фасовки": sku.packing_speed,
-                "Выход": boiling_technology.output_ton,
+                "Выход": boiling.output_kg,
                 "Коэффициент": boiling.output_coeff,
                 "Константа": 0 if sku.group.name != "Сливки" else -100,
                 "Kод": sku.code,
             }
         )
+    return pd.DataFrame(data)
 
+
+@main.route("/download_mascarpone", methods=["POST", "GET"])
+@flask_login.login_required
+def download_mascarpone() -> flask.Response:
     filename: str = "mascarpone.xlsx"
     root_path = Path(os.path.dirname(flask.current_app.root_path))
     excel_path = root_path / flask.current_app.config["UPLOAD_TMP_FOLDER"] / filename
 
-    pd.DataFrame(data).to_excel(excel_path)
+    get_mascarpone_parameters().to_excel(excel_path)
     response = flask.send_from_directory(
         directory=root_path / flask.current_app.config["UPLOAD_TMP_FOLDER"],
-        filename=filename,
-        cache_timeout=0,
+        path=filename,
         as_attachment=True,
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
+
+
+__all__ = [
+    "download_mascarpone",
+    "get_mascarpone_parameters",
+]

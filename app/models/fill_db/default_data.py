@@ -159,7 +159,6 @@ def generate_mozzarella_lines():
 def generate_washer():
     WasherData = collections.namedtuple("WasherData", "name, time")
     mozzarella_department = Department.query.filter_by(name="Моцарельный цех").first()
-    mascarpone_department = Department.query.filter_by(name="Маскарпоновый цех").first()
     ricotta_department = Department.query.filter_by(name="Рикоттный цех").first()
     adygea_department = Department.query.filter_by(name="Адыгейский цех").first()
 
@@ -171,20 +170,6 @@ def generate_washer():
             name=data.name,
             time=data.time,
             department_id=mozzarella_department.id,
-        )
-        db.session.add(washer)
-
-    for data in [
-        WasherData("sourdough_mascarpone", 5 * 13),
-        WasherData("sourdough_mascarpone_cream_cheese", 5 * 12),
-        WasherData("separator", 5 * 15),
-        WasherData("heat_exchanger", 5 * 12),
-        WasherData("homogenizer", 5 * 12),
-    ]:
-        washer = Washer(
-            name=data.name,
-            time=data.time,
-            department_id=mascarpone_department.id,
         )
         db.session.add(washer)
 

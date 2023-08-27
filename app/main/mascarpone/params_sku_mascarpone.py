@@ -1,12 +1,12 @@
-from werkzeug.utils import redirect
+import flask
+import flask_login
 
-from app.enum import *
-from app.imports.runtime import *
+from app.enum import LineName
+from app.globals import db
 from app.main import main
-from app.models import Group, MascarponeLine, MascarponeSKU
-from app.utils.features.form_utils import *
-
-from .forms import CopySKUForm, SKUMascarponeForm
+from app.main.mascarpone.forms import CopySKUForm, SKUMascarponeForm
+from app.models.mascarpone import MascarponeLine, MascarponeSKU
+from app.utils.features.form_utils import default_form_value, fill_mascarpone_sku_from_form
 
 
 @main.route("/mascarpone/add_sku_mascarpone", methods=["POST", "GET"])
@@ -22,7 +22,6 @@ def mascarpone_add_sku_mascarpone():
             weight_netto=form.weight_netto.data,
             shelf_life=form.shelf_life.data,
             packing_speed=form.packing_speed.data,
-            collecting_speed=form.packing_speed.data,
             in_box=form.in_box.data,
         )
         sku = fill_mascarpone_sku_from_form(sku, form)
@@ -32,7 +31,7 @@ def mascarpone_add_sku_mascarpone():
         db.session.add(sku)
         db.session.commit()
         flask.flash("SKU успешно добавлено", "success")
-        return redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
+        return flask.redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
     if name:
         form.name.data = name
     return flask.render_template("mascarpone/add_sku_mascarpone.html", form=form)
@@ -43,7 +42,7 @@ def mascarpone_add_sku_mascarpone():
 def mascarpone_copy_sku_mascarpone(sku_id):
     form = CopySKUForm()
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
-    if form.validate_on_submit() and sku is not None:
+    if form.validate_on_submit():
         if form.name.data == sku.name:
             raise Exception("SKU с таким именем уже сущесвует в базе данных!")
         if form.code.data == sku.code:
@@ -69,7 +68,8 @@ def mascarpone_copy_sku_mascarpone(sku_id):
         db.session.add(copy_sku)
         db.session.commit()
         flask.flash("SKU успешно добавлено", "success")
-        return redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
+        return flask.redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
+
     form.name.data = sku.name
     form.brand_name.data = sku.brand_name
     form.code.data = sku.code
@@ -80,18 +80,13 @@ def mascarpone_copy_sku_mascarpone(sku_id):
 @flask_login.login_required
 def mascarpone_get_sku_mascarpone(page):
     db.session.remove()
-    import time
-
-    time.sleep(0.1)
     form = SKUMascarponeForm()
     skus_count = db.session.query(MascarponeSKU).count()
 
     pagination = (
         db.session.query(MascarponeSKU)
-        .join(Group)
-        .filter(Group.name == "Маскарпоне")
         .order_by(MascarponeSKU.name)
-        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page=page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return flask.render_template(
         "mascarpone/get_sku_mascarpone.html",
@@ -106,10 +101,10 @@ def mascarpone_get_sku_mascarpone(page):
 
 @main.route("/mascarpone/edit_sku_mascarpone/<int:sku_id>", methods=["GET", "POST"])
 @flask_login.login_required
-def mascarpone_edit_sku_mascarpone(sku_id):
+def mascarpone_edit_sku_mascarpone(sku_id: int):
     form = SKUMascarponeForm()
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
-    if form.validate_on_submit() and sku is not None:
+    if form.validate_on_submit():
         sku.name = form.name.data
         sku.code = form.code.data
         sku.brand_name = form.brand_name.data
@@ -122,9 +117,9 @@ def mascarpone_edit_sku_mascarpone(sku_id):
         db.session.commit()
 
         flask.flash("SKU успешно изменено", "success")
-        return redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
+        return flask.redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
 
-    if len(sku.made_from_boilings) > 0:
+    if sku.made_from_boilings:
         default_form_value(form.boiling, sku.made_from_boilings[0].to_str())
 
     if sku.group is not None:
@@ -145,10 +140,11 @@ def mascarpone_edit_sku_mascarpone(sku_id):
 
 @main.route("/mascarpone/delete_sku_mascarpone/<int:sku_id>", methods=["DELETE"])
 @flask_login.login_required
-def mascarpone_delete_sku_mascarpone(sku_id):
+def mascarpone_delete_sku_mascarpone(sku_id: int):
     sku = db.session.query(MascarponeSKU).get_or_404(sku_id)
-    if sku:
-        db.session.delete(sku)
-        db.session.commit()
-        # flask.flash("SKU успешно удалено", "success")
-    return redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))
+
+    db.session.delete(sku)
+    db.session.commit()
+    flask.flash("SKU успешно удалено", "success")
+
+    return flask.redirect(flask.url_for(".mascarpone_get_sku_mascarpone", page=1))

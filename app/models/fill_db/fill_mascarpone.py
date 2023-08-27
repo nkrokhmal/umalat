@@ -1,12 +1,15 @@
+import itertools
 import os
 import typing as tp
+
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 
 from app.enum import LineName
 from app.globals import db
-from app.models.basic import Group, Line
+from app.models.basic import Department, Group, Line, Washer
 from app.models.mascarpone import (
     MascarponeBoiling,
     MascarponeBoilingTechnology,
@@ -16,23 +19,57 @@ from app.models.mascarpone import (
 )
 
 
-def read_params_df() -> pd.DataFrame:
-    suffix: str = "_test" if os.environ["DB_TYPE"] == "test" else ""
-    return pd.read_excel(f"app/data/static/params/mascarpone{suffix}.xlsx", index_col=0)
+@dataclass
+class WasherData:
+    original_name: str
+    name: str
+    time: int
+
+
+class MascarponeFillingDBException(Exception):
+    ...
 
 
 def fill_db() -> None:
-    fill_boiling_technologies()
-    fill_boilings()
-    fill_form_factors()
-    fill_sku()
+    suffix: str = "_test" if os.environ["DB_TYPE"] == "test" else ""
+    df = pd.read_excel(f"app/data/static/params/mascarpone{suffix}.xlsx", index_col=0)
+
+    is_valid, msg = validate_params(df)
+    if not is_valid:
+        raise MascarponeFillingDBException(msg)
+
+    for obj in itertools.chain(
+        fill_washer(),
+        fill_boiling_technologies(df),
+        fill_boilings(df),
+        fill_form_factors(),
+        fill_sku(df),
+    ):
+        db.session.add(obj)
+    db.session.commit()
 
 
-def fill_boiling_technologies() -> None:
-    """
-    Adds boiling technologies into db from the excel params
-    """
-    df = read_params_df()
+def fill_washer() -> tp.Generator[Washer, None, None]:
+    mascarpone_department = db.session.query(Department).filter_by(name="Маскарпоновый цех").first()
+
+    for data in [
+        WasherData("Мойка пастеризатора", "pasteurizer", 19 * 5),
+        WasherData("Мойка сепаратора", "separator", 13 * 5),
+        WasherData("Мойка 1-го и 2-го бака лишатричи+гомогенизатора", "homogenizer", 13 * 5),
+        WasherData("Мойка буферного танка и фасовочника", "packer", 13 * 5),
+        WasherData("Мойка бака №1", "tank_1", 13 * 5),
+        WasherData("Мойка бака №2", "tank_2", 13 * 5),
+        WasherData("Мойка теплообменника", "heat_exchanger", 13 * 5),
+    ]:
+        yield Washer(
+            name=data.name,
+            original_name=data.original_name,
+            time=data.time,
+            department_id=mascarpone_department.id,
+        )
+
+
+def validate_params(df: pd.DataFrame) -> tuple[bool, str | None]:
     boiling_technologies_columns = [
         "Название форм фактора",
         "Сепарация",
@@ -52,31 +89,72 @@ def fill_boiling_technologies() -> None:
     df.drop_duplicates(inplace=True)
     df.fillna("", inplace=True)
 
-    for item in df.to_dict("records"):
-        technology = MascarponeBoilingTechnology(
-            name=MascarponeBoilingTechnology.create_name(
-                line=LineName.MASCARPONE,
-                weight=item["Вес технология"],
-                percent=item["Процент"],
-                cheese_type=item["Название форм фактора"],
-                flavoring_agent=item["Вкусовая добавка"],
-                is_lactose=item["Наличие лактозы"],
-            ),
-            separation_time=item["Сепарация"],
-            analysis_time=item["Анализ"],
-            pouring_time=item["Налив"],
-            heating_time=item["Нагрев"],
-            pumping_time=item["Перекачка"],
-            salting_time=item["Посолка"],
-            ingredient_time=item["Ингридиенты"],
-            weight=item["Вес технология"],
+    bt_names: list[tuple[str, int]] = []
+
+    for index, row in df.iterrows():
+        bt_name = MascarponeBoilingTechnology.create_name(
+            line=LineName.MASCARPONE,
+            weight=row["Вес технология"],
+            percent=row["Процент"],
+            cheese_type=row["Название форм фактора"],
+            flavoring_agent=row["Вкусовая добавка"],
+            is_lactose=row["Наличие лактозы"],
         )
-        db.session.add(technology)
-    db.session.commit()
+
+        same_technologies = [x for x in bt_names if x[0] == bt_name]
+        if same_technologies:
+            return (
+                False,
+                f"Технология {bt_name} имеет разные параметры. Проверьте строки {index} и {same_technologies[0][1]}",
+            )
+
+        bt_names.append((bt_name, index))
+    return True, None
 
 
-def fill_boilings() -> None:
-    df: pd.DataFrame = read_params_df()
+def fill_boiling_technologies(df: pd.DataFrame) -> tp.Generator[MascarponeBoilingTechnology, None, None]:
+    boiling_technologies_columns = [
+        "Название форм фактора",
+        "Сепарация",
+        "Анализ",
+        "Налив",
+        "Перекачка",
+        "Нагрев",
+        "Посолка",
+        "Ингридиенты",
+        "Процент",
+        "Наличие лактозы",
+        "Вкусовая добавка",
+        "Вес технология",
+    ]
+    df = df[boiling_technologies_columns]
+    df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
+    df.drop_duplicates(inplace=True)
+    df.fillna("", inplace=True)
+
+    for index, row in df.iterrows():
+        bt_name = MascarponeBoilingTechnology.create_name(
+            line=LineName.MASCARPONE,
+            weight=row["Вес технология"],
+            percent=row["Процент"],
+            cheese_type=row["Название форм фактора"],
+            flavoring_agent=row["Вкусовая добавка"],
+            is_lactose=row["Наличие лактозы"],
+        )
+        yield MascarponeBoilingTechnology(
+            name=bt_name,
+            separation_time=row["Сепарация"],
+            analysis_time=row["Анализ"],
+            pouring_time=row["Налив"],
+            heating_time=row["Нагрев"],
+            pumping_time=row["Перекачка"],
+            salting_time=row["Посолка"],
+            ingredient_time=row["Ингридиенты"],
+            weight=row["Вес технология"],
+        )
+
+
+def fill_boilings(df: pd.DataFrame) -> tp.Generator[MascarponeBoiling, None, None]:
     lines: list[Line] = db.session.query(Line).all()
     bts: list[MascarponeBoilingTechnology] = db.session.query(MascarponeBoilingTechnology).all()
     columns: list[str] = [
@@ -103,7 +181,7 @@ def fill_boilings() -> None:
             flavoring_agent=item["Вкусовая добавка"],
             is_lactose=item["Наличие лактозы"],
         )
-        boiling = MascarponeBoiling(
+        yield MascarponeBoiling(
             percent=item["Процент"],
             weight_netto=item["Вес технология"],
             flavoring_agent=item["Вкусовая добавка"],
@@ -115,14 +193,9 @@ def fill_boilings() -> None:
             output_kg=item["Выход"],
         )
 
-        db.session.add(boiling)
-    db.session.commit()
 
-
-def fill_form_factors() -> None:
-    mass_ff = MascarponeFormFactor(name="Масса")
-    db.session.add(mass_ff)
-    db.session.commit()
+def fill_form_factors() -> tp.Generator[MascarponeFormFactor, None, None]:
+    yield MascarponeFormFactor(name="Масса")
 
 
 def _cast_non_nan(obj: tp.Any) -> tp.Any:
@@ -134,8 +207,7 @@ def _cast_non_nan(obj: tp.Any) -> tp.Any:
         return obj
 
 
-def fill_sku() -> None:
-    df = read_params_df()
+def fill_sku(df: pd.DataFrame) -> tp.Generator[MascarponeSKU, None, None]:
     lines = db.session.query(MascarponeLine).all()
     boilings = db.session.query(MascarponeBoiling).all()
     form_factors = db.session.query(MascarponeFormFactor).all()
@@ -187,5 +259,4 @@ def fill_sku() -> None:
 
         add_sku.group = next((x for x in groups if x.name == sku["Название форм фактора"]), None)
         add_sku.form_factor = next((x for x in form_factors if x.name == "Масса"), None)
-        db.session.add(add_sku)
-    db.session.commit()
+        yield add_sku

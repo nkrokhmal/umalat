@@ -3,7 +3,7 @@ import os
 import click
 
 
-# os.environ["ENVIRONMENT"] = "production"
+os.environ["ENVIRONMENT"] = "production"
 os.environ["APP_ENVIRONMENT"] = "runtime"
 
 from app.app import create_app, create_manager
