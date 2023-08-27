@@ -11,3 +11,6 @@ def sku_is_rubber(skus: list[SKU], name: str) -> bool:
         return False
 
     return "Терка" in sku.form_factor.name
+
+
+__all__ = ["get_sku_by_name", "sku_is_rubber"]

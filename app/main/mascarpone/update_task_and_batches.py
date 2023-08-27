@@ -1,4 +1,10 @@
-from app.imports.runtime import *
+import json
+
+from loguru import logger
+from utils_ak.code_block.code_block import code
+from utils_ak.openpyxl.openpyxl_tools import read_metadata
+from utils_ak.time.dt import cast_datetime
+
 from app.models import MascarponeSKU
 from app.scheduler.mascarpone.boiling_plan import read_boiling_plan
 from app.scheduler.mascarpone.update_interval_times import update_interval_times
@@ -14,9 +20,9 @@ def init_task(date, boiling_plan_df):
 def update_task_and_batches(schedule_obj):
     with code("Prepare"):
         wb = cast_schedule(schedule_obj)
-        metadata = json.loads(utils.read_metadata(wb))
+        metadata = json.loads(read_metadata(wb))
         boiling_plan_df = read_boiling_plan(wb, first_batch_ids=metadata["first_batch_ids"])
-        date = utils.cast_datetime(metadata["date"])
+        date = cast_datetime(metadata["date"])
 
     with code("Batch"):
         add_batch_from_boiling_plan_df(date, "Маскарпоновый цех", boiling_plan_df)

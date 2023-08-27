@@ -1,4 +1,6 @@
-from app.imports.runtime import *
+import flask
+import flask_login
+
 from app.main import main
 
 
