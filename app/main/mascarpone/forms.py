@@ -2,7 +2,16 @@ from datetime import datetime, timedelta
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired
-from wtforms import DateTimeField, FileField, FloatField, IntegerField, SelectField, StringField, SubmitField
+from wtforms import (
+    BooleanField,
+    DateTimeField,
+    FileField,
+    FloatField,
+    IntegerField,
+    SelectField,
+    StringField,
+    SubmitField,
+)
 from wtforms.validators import DataRequired, Optional
 
 from app.globals import db
@@ -68,13 +77,31 @@ class SKUMascarponeForm(FlaskForm):
             raise ValueError("SKU с таким именем уже существует")
 
 
+class MascarponeBoilingForm(FlaskForm):
+    # readonly fields
+    boiling_type = StringField("Тип варки", validators=[Optional()])
+    weight_netto = FloatField("Вес варки", validators=[Optional()])
+    is_lactose = BooleanField("Наличие лактозы", validators=[Optional()])
+    flavoring_agent = StringField("Вкусовая добавка", validators=[Optional()])
+    percent = FloatField("Процент", validators=[Optional()], default=False)
+
+    # mutable fields
+    output_coeff = FloatField("Коэффициент", validators=[Optional()])
+    output_kg = FloatField("Выход", validators=[Optional()])
+
+    submit = SubmitField(label="Сохранить")
+
+
 class MascarponeBoilingTechnologyForm(FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
+    weight = IntegerField("Введите вес, кг", validators=[Optional()])
     pouring_time = IntegerField("Введите время налива", validators=[Optional()])
     heating_time = IntegerField("Введите время нагрева", validators=[Optional()])
-    adding_lactic_acid_time = IntegerField("Введите время добавления лактозы", validators=[Optional()])
-    pumping_off_time = IntegerField("Введите время слива", validators=[Optional()])
+    analysis_time = IntegerField("Введите время анализа", validators=[Optional()])
+    pumping_time = IntegerField("Введите время П", validators=[Optional()])
     ingredient_time = IntegerField("Введите время внесения ингредиентов", validators=[Optional()])
+    salting_time = IntegerField("Введите время посолки", validators=[Optional()])
+    separation_time = IntegerField("Введите время сепарации", validators=[Optional()])
     submit = SubmitField(label="Сохранить")
 
 

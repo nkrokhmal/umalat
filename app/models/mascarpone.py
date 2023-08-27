@@ -37,8 +37,16 @@ class MascarponeBoiling(Boiling):
     weight_netto = mdb.Column(mdb.Float)
     is_lactose = mdb.Column(mdb.Boolean, default=False)
     flavoring_agent = mdb.Column(mdb.String)
-    percent = mdb.Column(mdb.Integer)
-    output_kg = mdb.Column(mdb.Integer)
+    percent = mdb.Column(mdb.Float)
+    output_kg = mdb.Column(mdb.Float)
+
+    @property
+    def dynamic_attributes(self) -> tuple[str, ...]:
+        return "output_coeff", "output_kg"
+
+    @property
+    def readonly_attributes(self) -> tuple[str, ...]:
+        return "boiling_type", "weight_netto", "is_lactose", "flavoring_agent", "percent"
 
     def to_str(self) -> str:
         return f"{self.percent}, {self.flavoring_agent}"
@@ -60,6 +68,22 @@ class MascarponeBoilingTechnology(BoilingTechnology):
     ingredient_time = mdb.Column(mdb.Integer)  # greeen block добавление/нагрев/перемешивание
 
     line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("mascarpone_lines.id"), nullable=True)
+
+    @property
+    def dynamic_attributes(self) -> tuple[str, ...]:
+        return (
+            "separation_time",
+            "analysis_time",
+            "pouring_time",
+            "heating_time",
+            "pumping_time",
+            "salting_time",
+            "ingredient_time",
+        )
+
+    @property
+    def readonly_attributes(self) -> tuple[str, str]:
+        return "name", "weight"
 
     @staticmethod
     def create_name(

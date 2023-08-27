@@ -11,7 +11,7 @@
             </div>
         </div>
     </div>
-    <form method="post" action="/mascarpone/edit_boiling_technology_mascarpone/{{boiling_technology_id}}" class="mt-4">
+    <form method="post" action="/mascarpone/edit_boiling_technology/{{boiling_technology_id}}" class="mt-4">
         {{ form.hidden_tag() }}
         <div class="row mb-4">
             <div class="col-md-12 mb-3">
@@ -23,34 +23,46 @@
             <div class="col-lg-6 col-sm-6">
                 <div class="col-md-12 mb-3">
                     <div class="form-group">
-                        <label>Введите время налива, мин</label>
-                        {{form.pouring_time(place_holder='Pouring', class='form-control')}}
+                        <label>Введите время сепарации, мин</label>
+                        {{form.separation_time(place_holder='separation_time', class='form-control')}}
                     </div>
                 </div>
                 <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите время анализа (только для сливок), мин</label>
+                        {{form.analysis_time(place_holder='analysis_time', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите время приема, мин</label>
+                        {{form.pouring_time(place_holder='pouring_time',  class='form-control')}}
+                    </div>
+                </div>
+                 <div class="col-md-12 mb-3">
                     <div class="form-group">
                         <label>Введите время нагрева, мин</label>
-                        {{form.heating_time(place_holder='Heating', class='form-control')}}
-                    </div>
-                </div>
-                <div class="col-md-12 mb-3">
-                    <div class="form-group">
-                        <label>Введите время добавления лактозы, мин</label>
-                        {{form.adding_lactic_acid_time(place_holder='Acid',  class='form-control')}}
+                        {{form.heating_time(place_holder='heating_time', class='form-control')}}
                     </div>
                 </div>
             </div>
             <div class="col-lg-6 col-sm-6">
                 <div class="col-md-12 mb-3">
                     <div class="form-group">
-                        <label>Введите время слива, мин</label>
-                        {{form.pumping_off_time(place_holder='Pumping off', class='form-control')}}
+                        <label>Введите время перекачки, мин</label>
+                        {{form.pumping_time(place_holder='pumping_time', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите время посолки, мин</label>
+                        {{form.salting_time(place_holder='salting_time', class='form-control')}}
                     </div>
                 </div>
                 <div class="col-md-12 mb-3">
                     <div class="form-group">
                         <label>Введите время внесения ингредиентов, мин</label>
-                        {{form.ingredient_time(place_holder='Ingredient', class='form-control')}}
+                        {{form.ingredient_time(place_holder='ingredient_time', class='form-control')}}
                     </div>
                 </div>
             </div>

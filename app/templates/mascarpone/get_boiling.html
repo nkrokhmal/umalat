@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Варки - Список варок{% endblock %}
+{% block page_content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Варки</h1>
+        </div>
+    </div>
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Тип варки</th>
+                        <th class="border-0">Вес, кг</th>
+                        <th class="border-0">Наличие лактозы</th>
+                        <th class="border-0">Вкусовая добавка</th>
+                        <th class="border-0">Процент</th>
+                        <th class="border-0">Коэффициент на выходе</th>
+                        <th class="border-0">Выход, кг</th>
+                        <th class="border-0">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bt in boilings %}
+                        <tr>
+                            <td class="border-0">{{loop.index}}</td>
+                            <td class="border-0"><a class="small">{{bt.boiling_type}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.weight_netto}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.is_lactose}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.flavoring_agent}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.percent}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.output_coeff}}</a></td>
+                            <td class="border-0"><a class="small">{{bt.output_kg}}</a></td>
+                            <td class="border-0">
+                                <a href="{{ url_for('main.mascarpone_edit_boiling', boiling_id = bt.id)}}" class="edit-bt">
+                                    <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

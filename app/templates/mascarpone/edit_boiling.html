@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Технолония варки - Изменить технологию варки{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="py-4">
+        <div class="d-flex justify-content-between w-100 flex-wrap">
+            <div class="mb-3 mb-lg-0">
+                <h1 class="h4">Изменение параметров технологии варки <br></h1>
+            </div>
+        </div>
+    </div>
+    <form method="post" action="/mascarpone/edit_boiling/{{boiling_id}}" class="mt-4">
+        {{ form.csrf_token }}
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="form-group">
+                    <label>Введите тип варки</label>
+                    {{form.boiling_type(place_holder='boiling_type', class='form-control', readonly=true)}}
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Введите вес нетто, кг</label>
+                        {{form.weight_netto(place_holder='weight_netto', class='form-control', readonly=true)}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Наличие лактозы</label>
+                        {{form.is_lactose(place_holder='is_lactose', checked=True, readonly=true)}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Вкусовая добавка</label>
+                        {{form.flavoring_agent(place_holder='flavoring_agent',  class='form-control', readonly=true )}}
+                    </div>
+                </div>
+                 <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Процент</label>
+                        {{form.percent(place_holder='percent', class='form-control', readonly=true)}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6">
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Коэффициент</label>
+                        {{form.output_coeff(place_holder='output_coeff', class='form-control')}}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label>Выход, кг</label>
+                        {{form.output_kg(place_holder='output_kg', class='form-control')}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-3" style="margin-top:30px;">
+                <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

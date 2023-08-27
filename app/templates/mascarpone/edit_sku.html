@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}SKU - Добавить SKU{% endblock %}
+{% block title %}SKU - Изменить SKU{% endblock %}
 {% block page_content %}
 <div class="row">
     <div class="py-4">
         <div class="d-flex justify-content-between w-100 flex-wrap">
             <div class="mb-3 mb-lg-0">
-                <h1 class="h4">Добавление нового sku в базу данных <br></h1>
-                <h7>Постарайтесь заполнить максимальное количество параметров, чтобы избежать ошибок при построении расписания</h7>
+                <h1 class="h4">Изменение параметров sku <br></h1>
             </div>
         </div>
     </div>
-    <form method="post" action="/mascarpone/add_sku_mascarpone" class="mt-4">
+    <form method="post" action="/mascarpone/edit_sku/{{sku_id}}" class="mt-4">
         {{ form.hidden_tag() }}
         <div class="row mb-4">
             <div class="col-lg-6 col-sm-6">
@@ -76,6 +75,7 @@
             <div class="col-md-12 mb-3" style="margin-top:30px;">
                 <button type="submit" name="submit" class="btn btn-block btn-primary">Сохранить</button>
             </div>
+
         </div>
     </form>
 </div>

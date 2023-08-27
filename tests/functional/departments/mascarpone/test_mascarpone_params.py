@@ -7,7 +7,7 @@ from pytest import fixture
 
 from app.globals import db
 from app.main.params.download_mascarpone import get_mascarpone_parameters
-from app.models import Department, Washer
+from app.models import Department, MascarponeBoiling, MascarponeBoilingTechnology, MascarponeSKU, Washer
 from app.models.fill_db.fill_mascarpone import validate_params
 from tests.conftest import client
 
@@ -38,19 +38,41 @@ def test_validate_mascarpone_parameters(df_parameters_corrupted: pd.DataFrame) -
     )
 
 
-def test_mascarpone_get_washer(client: flask.Flask) -> None:
+def test_mascarpone_get_params(client: flask.Flask) -> None:
+    urls: list[str] = [
+        flask.url_for("main.mascarpone_get_washer", _external=False),
+        flask.url_for("main.mascarpone_get_boiling", _external=False),
+        flask.url_for("main.mascarpone_get_sku", _external=False, page=1),
+        flask.url_for("main.mascarpone_get_boiling_technology", _external=False),
+    ]
+
     with client.test_client() as client:
-        url = flask.url_for("main.mascarpone_get_washer", _external=False)
-        response = client.get(url)
-        assert response.status_code == 200
+        for url in urls:
+            response = client.get(url)
+            assert response.status_code == 200
 
 
-def test_mascarpone_edit_washer(client: flask.Flask) -> None:
+def test_mascarpone_edit_params(
+    client: flask.Flask,
+) -> None:
     with client.test_client() as client:
         washer = db.session.query(Washer).join(Washer.department).filter(Department.name == "Маскарпоновый цех").first()
-        url = flask.url_for("main.mascarpone_edit_washer", washer_id=washer.id, _external=False)
-        response = client.get(url)
-        assert response.status_code == 200
+        sku = db.session.query(MascarponeSKU).first()
+        boiling = db.session.query(MascarponeBoiling).first()
+        boiling_technology = db.session.query(MascarponeBoilingTechnology).first()
+        urls: list[str] = [
+            flask.url_for(endpoint="main.mascarpone_edit_washer", washer_id=washer.id, _external=False),
+            flask.url_for(endpoint="main.mascarpone_edit_boiling", boiling_id=boiling.id, _external=False),
+            flask.url_for(endpoint="main.mascarpone_edit_sku", sku_id=sku.id, _external=False),
+            flask.url_for(
+                endpoint="main.mascarpone_edit_boiling_technology",
+                boiling_technology_id=boiling_technology.id,
+                _external=False,
+            ),
+        ]
+        for url in urls:
+            response = client.get(url)
+            assert response.status_code == 200
 
 
 def test_mascarpone_download_params(client: flask.Flask, df_parameters: pd.DataFrame) -> None:
