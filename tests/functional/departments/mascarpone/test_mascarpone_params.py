@@ -5,6 +5,7 @@ import pandas as pd
 
 from pytest import fixture
 
+from app.enum import DepartmentName
 from app.globals import db
 from app.main.params.download_mascarpone import get_mascarpone_parameters
 from app.models import Department, MascarponeBoiling, MascarponeBoilingTechnology, MascarponeSKU, Washer
@@ -56,7 +57,12 @@ def test_mascarpone_edit_params(
     client: flask.Flask,
 ) -> None:
     with client.test_client() as client:
-        washer = db.session.query(Washer).join(Washer.department).filter(Department.name == "Маскарпоновый цех").first()
+        washer = (
+            db.session.query(Washer)
+            .join(Washer.department)
+            .filter(Department.name == DepartmentName.MASCARPONE)
+            .first()
+        )
         sku = db.session.query(MascarponeSKU).first()
         boiling = db.session.query(MascarponeBoiling).first()
         boiling_technology = db.session.query(MascarponeBoilingTechnology).first()

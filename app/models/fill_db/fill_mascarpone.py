@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from app.enum import LineName
+from app.enum import DepartmentName, LineName
 from app.globals import db
 from app.models.basic import Department, Group, Line, Washer
 from app.models.mascarpone import (
@@ -50,7 +50,7 @@ def fill_db() -> None:
 
 
 def fill_washer() -> tp.Generator[Washer, None, None]:
-    mascarpone_department = db.session.query(Department).filter_by(name="Маскарпоновый цех").first()
+    mascarpone_department = db.session.query(Department).filter_by(name=DepartmentName.MASCARPONE).first()
 
     for data in [
         WasherData("Мойка пастеризатора", "pasteurizer", 19 * 5),
@@ -196,15 +196,6 @@ def fill_boilings(df: pd.DataFrame) -> tp.Generator[MascarponeBoiling, None, Non
 
 def fill_form_factors() -> tp.Generator[MascarponeFormFactor, None, None]:
     yield MascarponeFormFactor(name="Масса")
-
-
-def _cast_non_nan(obj: tp.Any) -> tp.Any:
-    if obj is None:
-        return
-    elif np.isnan(obj):
-        return
-    else:
-        return obj
 
 
 def fill_sku(df: pd.DataFrame) -> tp.Generator[MascarponeSKU, None, None]:

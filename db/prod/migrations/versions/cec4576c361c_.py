@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 682ccfe5f21d
+Revision ID: cec4576c361c
 Revises: 
-Create Date: 2023-08-27 22:58:18.602370
+Create Date: 2023-08-29 23:59:04.181947
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ from alembic import op
 
 
 # revision identifiers, used by Alembic.
-revision = "682ccfe5f21d"
+revision = "cec4576c361c"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -193,7 +193,7 @@ def upgrade():
     op.create_table(
         "ricotta_lines",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("input_ton", sa.Integer(), nullable=True),
+        sa.Column("input_kg", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["id"],
             ["lines.id"],
@@ -361,7 +361,8 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("flavoring_agent", sa.String(), nullable=True),
         sa.Column("percent", sa.Integer(), nullable=True),
-        sa.Column("number_of_tanks", sa.Integer(), nullable=True),
+        sa.Column("input_kg", sa.Integer(), nullable=True),
+        sa.Column("output_kg", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["id"],
             ["boilings.id"],
@@ -532,26 +533,15 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "ricotta_analyses_technology",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("preparation_time", sa.Integer(), nullable=True),
-        sa.Column("analysis_time", sa.Integer(), nullable=True),
-        sa.Column("pumping_time", sa.Integer(), nullable=True),
-        sa.Column("boiling_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["boiling_id"],
-            ["ricotta_boilings.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
         "ricotta_boiling_technologies",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("pouring_time", sa.Integer(), nullable=True),
         sa.Column("heating_time", sa.Integer(), nullable=True),
-        sa.Column("delay_time", sa.Integer(), nullable=True),
-        sa.Column("protein_harvest_time", sa.Integer(), nullable=True),
-        sa.Column("abandon_time", sa.Integer(), nullable=True),
-        sa.Column("pumping_out_time", sa.Integer(), nullable=True),
+        sa.Column("lactic_acid_time", sa.Integer(), nullable=True),
+        sa.Column("drain_whey_time", sa.Integer(), nullable=True),
+        sa.Column("dray_ricotta_time", sa.Integer(), nullable=True),
+        sa.Column("salting_time", sa.Integer(), nullable=True),
+        sa.Column("pumping_time", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["id"],
             ["boiling_technologies.id"],
@@ -561,8 +551,6 @@ def upgrade():
     op.create_table(
         "ricotta_skus",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("output_per_tank", sa.Float(), nullable=True),
-        sa.Column("at_first", sa.Boolean(), nullable=True),
         sa.ForeignKeyConstraint(
             ["id"],
             ["skus.id"],
@@ -606,7 +594,6 @@ def downgrade():
     op.drop_table("sku_boiling")
     op.drop_table("ricotta_skus")
     op.drop_table("ricotta_boiling_technologies")
-    op.drop_table("ricotta_analyses_technology")
     op.drop_table("mozzarella_skus")
     op.drop_table("mozzarella_boiling_technologies")
     op.drop_table("milk_project_skus")

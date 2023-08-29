@@ -1,6 +1,7 @@
 import flask
 import flask_login
 
+from app.enum import DepartmentName
 from app.globals import db
 from app.main import main
 from app.main.mascarpone.forms import WasherForm
@@ -12,7 +13,7 @@ from app.utils.flash_msgs import Action, washer_msg
 @flask_login.login_required
 def mascarpone_get_washer() -> str:
     washers: list[Washer] = (
-        db.session.query(Washer).join(Washer.department).filter(Department.name == "Маскарпоновый цех").all()
+        db.session.query(Washer).join(Washer.department).filter(Department.name == DepartmentName.MASCARPONE).all()
     )
 
     return flask.render_template(

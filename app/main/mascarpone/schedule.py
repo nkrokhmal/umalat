@@ -1,3 +1,4 @@
+from app.enum import DepartmentName
 from app.main import main
 from app.main.mascarpone.forms import ScheduleForm
 from app.main.mascarpone.update_task_and_batches import update_task_and_batches
@@ -76,7 +77,7 @@ def mascarpone_schedule():
         getattr(form, f"{batch_type}_batch_number").data = (
             BatchNumber.last_batch_number(
                 date=datetime.today() + timedelta(days=1),
-                department_name="Маскарпоновый цех",
+                department_name=DepartmentName.MASCARPONE,
                 group=batch_type,
             )
             + 1
