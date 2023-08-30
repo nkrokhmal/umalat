@@ -5,7 +5,7 @@ import pandas as pd
 from app.enum import DepartmentName, LineName
 from app.globals import db
 from app.models.basic import Department, Group, Line, Washer
-from app.models.fill_db.base import BaseFiller, WasherData
+from app.models.fill_db.base import BaseFiller, ValidateData, WasherData
 from app.models.ricotta import RicottaBoiling, RicottaBoilingTechnology, RicottaFormFactor, RicottaLine, RicottaSKU
 
 
@@ -29,20 +29,24 @@ class RicottaFiller(BaseFiller):
         super().__init__(department="ricotta")
 
     def validate_params(self, df: pd.DataFrame) -> str | None:
-        _df = self._filter_df(df, TECHNOLOGIES_COLUMNS + ["Процент", "Вкусовая добавка"])
-
-        s: pd.Series = _df[["Процент", "Вкусовая добавка"]].apply(
-            lambda row: RicottaBoilingTechnology.create_name(
-                line=LineName.RICOTTA,
-                percent=row["Процент"],
-                flavoring_agent=row["Вкусовая добавка"],
+        for data in [
+            ValidateData(
+                columns=TECHNOLOGIES_COLUMNS + ["Процент", "Вкусовая добавка"],
+                group_columns=["Процент", "Вкусовая добавка"],
+                msg="Технологии варки с одинаковым именем имеют разные параметры. Проверьте строки {} и {}",
             ),
-            axis=1,
-        )
+            ValidateData(
+                columns=["Процент", "Вкусовая добавка", "Вес нетто", "Вход", "Выход"],
+                group_columns=["Процент", "Вкусовая добавка", "Вес нетто"],
+                msg="Некоторые SKU с одинаковыми параметрами имеют разный вход/выход. Проверьте строки {} и {}",
+            ),
+        ]:
+            _df = self._filter_df(df, data.columns)
+            s: pd.Series = _df[data.group_columns].apply(tuple, axis=1)
+            idx = self._not_unique_index(s)
+            if idx is not None:
+                return data.msg.format(idx[0], idx[1])
 
-        idx = self._not_unique_index(s)
-        if idx is not None:
-            return f"Технологии варки с одинаковы именем имеют разные параметры. Проверьте строки {idx[0]} и {idx[1]}"
         return
 
     def fill_form_factors(self, _: pd.DataFrame) -> tp.Generator[RicottaFormFactor, None, None]:
@@ -76,10 +80,11 @@ class RicottaFiller(BaseFiller):
             line=LineName.RICOTTA,
             percent=row["Процент"],
             flavoring_agent=row["Вкусовая добавка"],
+            weight=row["Вес нетто"],
         )
 
     def fill_boiling_technologies(self, df: pd.DataFrame) -> tp.Generator[RicottaBoilingTechnology, None, None]:
-        _df = self._filter_df(df, TECHNOLOGIES_COLUMNS + ["Процент", "Вкусовая добавка"])
+        _df = self._filter_df(df, TECHNOLOGIES_COLUMNS + ["Процент", "Вкусовая добавка", "Вес нетто"])
 
         for _, row in _df.iterrows():
             yield RicottaBoilingTechnology(
@@ -97,15 +102,15 @@ class RicottaFiller(BaseFiller):
         technologies = db.session.query(RicottaBoilingTechnology).all()
         line = db.session.query(Line).filter_by(name=LineName.RICOTTA).first()
 
-        _df = self._filter_df(df, ["Вкусовая добавка", "Процент", "Вход", "Выход"])
+        _df = self._filter_df(df, ["Вкусовая добавка", "Процент", "Вес нетто", "Вход", "Выход"])
 
         for _, row in _df.iterrows():
-            technology = next(t for t in technologies if t.name == self._boiling_technology_name(row))
-
+            name = self._boiling_technology_name(row)
             yield RicottaBoiling(
                 percent=row["Процент"],
+                weight=row["Вес нетто"],
                 flavoring_agent=row["Вкусовая добавка"],
-                boiling_technologies=[technology],
+                boiling_technologies=[t for t in technologies if t.name == name],
                 input_kg=row["Вход"],
                 output_kg=row["Выход"],
                 line=line,
@@ -135,7 +140,7 @@ class RicottaFiller(BaseFiller):
         _df = self._filter_df(df, columns)
 
         for _, row in _df.iterrows():
-            sku = RicottaSKU(
+            yield RicottaSKU(
                 name=row["Название SKU"],
                 brand_name=row["Имя бренда"],
                 weight_netto=row["Вес нетто"],
@@ -143,14 +148,16 @@ class RicottaFiller(BaseFiller):
                 in_box=row["Коробки"],
                 code=row["Kод"],
                 line=line,
+                made_from_boilings=[
+                    b
+                    for b in boilings
+                    if b.percent == row["Процент"]
+                    and b.flavoring_agent == row["Вкусовая добавка"]
+                    and b.weight == row["Вес нетто"]
+                ],
+                group=next(x for x in groups if x.name == row["Название форм фактора"]),
+                form_factor=next(x for x in form_factors if x.name == "Масса"),
             )
-
-            sku.made_from_boilings = [
-                x for x in boilings if x.percent == row["Процент"] and x.flavoring_agent == row["Вкусовая добавка"]
-            ]
-            sku.group = next(x for x in groups if x.name == row["Название форм фактора"])
-            sku.form_factor = next(x for x in form_factors if x.name == "Масса")
-            yield sku
 
 
 __all__ = [

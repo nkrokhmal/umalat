@@ -8,7 +8,6 @@ from app.models.butter import ButterLine
 from app.models.mascarpone import MascarponeLine
 from app.models.milk_project import MilkProjectLine
 from app.models.mozzarella import MozzarellaLine
-from app.models.ricotta import RicottaLine
 
 
 def generate_user():

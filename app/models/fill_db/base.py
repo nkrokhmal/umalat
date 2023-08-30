@@ -18,6 +18,13 @@ class WasherData:
     time: int
 
 
+@dataclass
+class ValidateData:
+    columns: list[str]
+    group_columns: list[str]
+    msg: str
+
+
 class ParametersException(Exception):
     ...
 
@@ -44,7 +51,7 @@ class BaseFiller(ABC):
         if not pairs:
             return None
 
-        return values[values == pairs[0]].index.tolist()
+        return values[values == pairs[0][0]].index.tolist()
 
     @abstractmethod
     def validate_params(self, df: pd.DataFrame) -> str | None:
@@ -80,15 +87,16 @@ class BaseFiller(ABC):
         if msg is not None:
             raise ParametersException(msg)
 
-        for item in itertools.chain(
+        for generator in [
             self.fill_lines(df),
             self.fill_washers(df),
             self.fill_form_factors(df),
             self.fill_boiling_technologies(df),
             self.fill_boiling(df),
             self.fill_sku(df),
-        ):
-            db.session.add(item)
+        ]:
+            for item in generator:
+                db.session.add(item)
 
         db.session.commit()
 

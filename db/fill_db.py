@@ -27,5 +27,4 @@ if __name__ == "__main__":
         milk_project_fill_db()
         butter_fill_db()
         mozzarella_fill_db()
-
         mascarpone_fill_db()

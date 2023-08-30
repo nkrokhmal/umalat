@@ -29,6 +29,7 @@ class RicottaBoiling(Boiling):
     __mapper_args__ = {"polymorphic_identity": "ricotta_boiling"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True)
+    weight = mdb.Column(mdb.Float)
     flavoring_agent = mdb.Column(mdb.String)
     percent = mdb.Column(mdb.Integer)
     input_kg = mdb.Column(mdb.Integer)
@@ -60,8 +61,8 @@ class RicottaBoilingTechnology(BoilingTechnology):
     pumping_time = mdb.Column(mdb.Integer)  # Перекачивание
 
     @staticmethod
-    def create_name(line: str, percent: float | int, flavoring_agent: str) -> str:
-        return f"Линия {line}, {percent}, {flavoring_agent}"
+    def create_name(line: str, percent: float | int, flavoring_agent: str, weight: float) -> str:
+        return f"Линия {line}, {percent}, {flavoring_agent}, {weight}"
 
 
 __all__ = [
