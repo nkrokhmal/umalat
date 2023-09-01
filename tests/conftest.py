@@ -1,5 +1,7 @@
 import os
 
+import flask
+
 
 os.environ["APP_ENVIRONMENT"] = "runtime"
 
@@ -9,7 +11,7 @@ from app.app import create_app
 
 
 @pytest.fixture
-def client():
+def client() -> flask.Flask:
     app, rq = create_app("test")
     app.config["LOGIN_DISABLED"] = True
     return app

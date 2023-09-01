@@ -1,8 +1,8 @@
-from flask_wtf import FlaskForm
-from wtforms import *
-from wtforms.validators import DataRequired
+from datetime import datetime, timedelta
 
-from app.models import *
+from flask_wtf import FlaskForm
+from wtforms import DateTimeField
+from wtforms.validators import DataRequired
 
 
 class ScheduleForm(FlaskForm):

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} Мойки - маскарпоне {% endblock %}
+{% block page_content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" xmlns="http://www.w3.org/1999/html"></script>
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Список всех моек на линии Маскарпоне</h1>
+        </div>
+    </div>
+</div>
+<div class="card border-light shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0">#</th>
+                        <th class="border-0">Название мойки</th>
+                        <th class="border-0">Время, мин</th>
+                        <th class="border-0">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for washer in washers %}
+                        <tr>
+                            <td class="border-0">{{loop.index}}</td>
+                            <td class="border-0"><a class="small">{{washer.original_name}}</a></td>
+                            <td class="border-0"><a class="small">{{washer.time}}</a></td>
+                            <td class="border-0">
+                                <a href="{{ url_for('main.mascarpone_edit_washer', washer_id = washer.id)}}" class="edit-washer">
+                                    <i class="material-icons" style="color:green" title="Изменить"> <span class="fas fa-edit"> </i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

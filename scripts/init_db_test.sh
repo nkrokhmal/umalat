@@ -1,7 +1,2 @@
-cd .. &&
-rm -f db/test/data.sqlite &&
-rm -r -f db/test/migrations &&
-python3 manage_test.py db init --directory db/test/migrations &&
-python3 manage_test.py db migrate &&
-python3 manage_test.py db upgrade &&
-python3 db/fill_db_test.py
+FLASK_APP=runserver_test.py; echo $FLASK_APP
+cd .. && rm -f db/test/data.sqlite && rm -r -f db/test/migrations && flask db init --directory db/test/migrations && flask db migrate && flask db upgrade && python db/fill_db_test.py

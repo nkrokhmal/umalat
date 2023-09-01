@@ -165,9 +165,7 @@ class ProductionConfig(BaseClass):
 
 class TestConfig(BaseClass):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("SQLALCHEMY_DATABASE_URI") or "sqlite:///" + TEST_SQLITE_PATH
-    ) + "?check_same_thread=False"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///" + TEST_SQLITE_PATH + "?check_same_thread=False"
     TEST_MOZZARELLA = "app/data/tests/mozzarella_plan.xlsx"
     TEST_RICOTTA = "app/data/tests/ricotta_plan.xlsx"
     TEST_MASCARPONE = "app/data/tests/mascarpone_plan.xlsx"

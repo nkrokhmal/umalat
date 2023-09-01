@@ -13,6 +13,25 @@ from app.scheduler.mascarpone.boiling_plan.saturate import saturate_boiling_plan
 from app.scheduler.time import is_none
 
 
+def saturate_boiling_plan(boiling_plan_df: pd.DataFrame) -> pd.DataFrame:
+    df = boiling_plan_df
+    df["boiling"] = df["sku"].apply(lambda sku: utils.delistify(sku.made_from_boilings, single=True))
+    df["boiling_key"] = df["boiling"].apply(lambda boiling: boiling.id)
+    df["sku_cls_name"] = df["sku"].apply(lambda sku: str(sku.__class__))
+    df["sku_name"] = df["sku"].apply(lambda sku: sku.name)
+
+    def get_type(cls_name):
+        if "Mascarpone" in cls_name:
+            return "mascarpone"
+        elif "CreamCheese" in cls_name:
+            return "cream_cheese"
+
+    df["group"] = df["sku_cls_name"].apply(get_type)
+    df["is_cream"] = df["sku"].apply(lambda sku: "сливки" in sku.name.lower())
+
+    return boiling_plan_df
+
+
 def read_boiling_plan(wb_obj, as_boilings=True, first_batch_ids=None):
     """
     :param wb_obj: str or openpyxl.Workbook

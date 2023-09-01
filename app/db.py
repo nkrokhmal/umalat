@@ -3,11 +3,12 @@ from config import SQLITE_PATH
 
 
 def create_external_db(data_path=None):
-    logger.info("Creating database session outside of the app.")
+
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
     connection_string = create_connection_string(data_path)
+    logger.info(f"Creating database session outside of the app {connection_string}.")
     engine = create_engine(connection_string)
     Session = sessionmaker()
     Session.configure(bind=engine)

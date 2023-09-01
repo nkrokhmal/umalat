@@ -1,8 +1,12 @@
+import os
+import shutil
+
+import flask
+import openpyxl
 import pandas as pd
 
 from openpyxl.styles import Alignment
 
-from app.imports.runtime import *
 from app.models import MozzarellaSKU
 from app.utils.features.openpyxl_wrapper import ExcelBlock
 
@@ -54,7 +58,6 @@ class SkuPlanClient:
     def fill_remainings_list(self):
         with pd.ExcelWriter(self.filepath, engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
             self.remainings.to_excel(writer, sheet_name=flask.current_app.config["SHEET_NAMES"]["remainings"])
-        logger.info(self.filepath)
 
         wb = openpyxl.load_workbook(self.filepath)
         ws_remainings = wb[flask.current_app.config["SHEET_NAMES"]["remainings"]]

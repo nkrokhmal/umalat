@@ -1,39 +1,49 @@
-from app.enum import LineName
-from app.imports.runtime import *
+import re
+import typing as tp
 
-from .mozzarella import MozzarellaBoiling, MozzarellaFormFactor
+from utils_ak.numeric.types import is_int_like
+from utils_ak.re.patterns import spaces_on_edge
+
+from app.globals import db
+from app.models.mozzarella import MozzarellaBoiling, MozzarellaFormFactor
 
 
-def fetch_all(cls):
+def fetch_all(cls: tp.Any) -> tp.Any:
     return db.session.query(cls).all()
 
 
-def query_exactly_one(cls, key, value):
+def query_exactly_one(cls: tp.Any, key: str, value: str | int | float) -> tp.Any:
     query = db.session.query(cls).filter(getattr(cls, key) == value)
     res = query.all()
 
-    if len(res) == 0:
-        raise Exception("Failed to fetch element {} {} {}".format(cls, key, value))
-    elif len(res) > 1:
-        raise Exception("Fetched too many elements {} {} {}: {}".format(cls, key, value, res))
-    else:
-        return res[0]
+    match len(res):
+        case 0:
+            raise Exception("Failed to fetch element {} {} {}".format(cls, key, value))
+        case 1:
+            return res[0]
+        case _:
+            return Exception("Fetched too many elements {} {} {}: {}".format(cls, key, value, res))
 
 
-def cast_model(cls, obj, int_attribute="id", str_attribute="name"):
+def cast_model(
+    cls: tp.Any,
+    obj: tp.Any,
+    int_attribute: str = "id",
+    str_attribute: str = "name",
+) -> tp.Any:
     if isinstance(cls, list):
-        results = []
+        results: list[tp.Any] = []
         for _cls in cls:
             try:
                 results.append(cast_model(_cls, obj, int_attribute, str_attribute))
             except:
-                pass
+                ...
         assert len(results) == 1
         return results[0]
 
     elif isinstance(obj, cls):
         return obj
-    elif utils.is_int_like(obj):
+    elif is_int_like(obj):
         return query_exactly_one(cls, int_attribute, int(float(obj)))
     elif isinstance(obj, str):
         return query_exactly_one(cls, str_attribute, obj)
@@ -73,8 +83,8 @@ def cast_mozzarella_boiling(obj):
             values = obj.split(",")
             line_name, percent, ferment = values[:3]
             percent = percent.replace(" ", "")
-            ferment = re.sub(utils.spaces_on_edge("beg"), "", ferment)
-            ferment = re.sub(utils.spaces_on_edge("end"), "", ferment)
+            ferment = re.sub(spaces_on_edge("beg"), "", ferment)
+            ferment = re.sub(spaces_on_edge("end"), "", ferment)
             is_lactose = len(values) < 4
             query = db.session.query(MozzarellaBoiling).filter(
                 (MozzarellaBoiling.percent == percent)

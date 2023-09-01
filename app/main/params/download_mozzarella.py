@@ -1,5 +1,12 @@
+import os
+
+import flask
+import flask_login
+import pandas as pd
+
+from app.globals import db
 from app.main import main
-from app.models import *
+from app.models.mozzarella import MozzarellaSKU
 
 
 @main.route("/download_mozzarella", methods=["POST", "GET"])
@@ -18,7 +25,7 @@ def download_mozzarella():
             "Вес нетто": sku.weight_netto,
             "Коробки": sku.in_box,
             "Вес форм фактора": sku.form_factor.relative_weight,
-            "Выход": sku.line.output_ton,
+            "Выход": sku.line.output_kg,
             "Срок хранения": sku.shelf_life,
             "Является ли SKU теркой": "Да" if "Терка" in sku.form_factor.name else "Нет",
             "Упаковщик": "/".join([packer.name for packer in sku.packers]),

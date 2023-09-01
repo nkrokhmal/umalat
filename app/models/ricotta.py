@@ -1,8 +1,5 @@
-from sqlalchemy.orm import backref
-
-from app.imports.runtime import *
-
-from .basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
+from app.globals import mdb
+from app.models.basic import SKU, Boiling, BoilingTechnology, FormFactor, Line
 
 
 class RicottaSKU(SKU):
@@ -10,8 +7,6 @@ class RicottaSKU(SKU):
     __mapper_args__ = {"polymorphic_identity": "ricotta_skus"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("skus.id"), primary_key=True)
-    output_per_tank = mdb.Column(mdb.Float)
-    at_first = mdb.Column(mdb.Boolean)
 
 
 class RicottaLine(Line):
@@ -19,7 +14,7 @@ class RicottaLine(Line):
     __mapper_args__ = {"polymorphic_identity": "ricotta_lines"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
-    input_ton = mdb.Column(mdb.Integer)
+    input_kg = mdb.Column(mdb.Integer)
 
 
 class RicottaFormFactor(FormFactor):
@@ -34,37 +29,22 @@ class RicottaBoiling(Boiling):
     __mapper_args__ = {"polymorphic_identity": "ricotta_boiling"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True)
+    weight = mdb.Column(mdb.Float)
     flavoring_agent = mdb.Column(mdb.String)
     percent = mdb.Column(mdb.Integer)
-    number_of_tanks = mdb.Column(mdb.Integer)
-
-    analysis = mdb.relationship(
-        "RicottaAnalysisTechnology",
-        backref=backref("boiling", uselist=False, lazy="subquery"),
-    )
+    input_kg = mdb.Column(mdb.Integer)
+    output_kg = mdb.Column(mdb.Integer)
 
     @property
-    def with_flavor(self):
+    def with_flavor(self) -> bool:
         return self.flavoring_agent != ""
 
     @property
-    def short_display_name(self):
-        if self.flavoring_agent:
-            return self.flavoring_agent
-        else:
-            return "Рикотта"
+    def short_display_name(self) -> str:
+        return self.flavoring_agent if self.flavoring_agent else "Рикотта"
 
-    @property
-    def is_cream(self):
-        if self.percent == 30 and not self.with_flavor:
-            return True
-        else:
-            return False
-
-    def to_str(self):
-        values = [self.percent, self.flavoring_agent]
-        values = [str(v) for v in values if v]
-        return ", ".join(values)
+    def to_str(self) -> str:
+        return f"{self.percent}, {self.flavoring_agent}"
 
 
 class RicottaBoilingTechnology(BoilingTechnology):
@@ -72,24 +52,23 @@ class RicottaBoilingTechnology(BoilingTechnology):
     __mapper_args__ = {"polymorphic_identity": "ricotta_boiling_technology"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
-    heating_time = mdb.Column(mdb.Integer)
-    delay_time = mdb.Column(mdb.Integer)
-    protein_harvest_time = mdb.Column(mdb.Integer)
-    abandon_time = mdb.Column(mdb.Integer)
-    pumping_out_time = mdb.Column(mdb.Integer)
+    pouring_time = mdb.Column(mdb.Integer)  # Набор сыворотки 6500 кг
+    heating_time = mdb.Column(mdb.Integer)  # Нагрев до 90 градусов
+    lactic_acid_time = mdb.Column(mdb.Integer)  # молочная кислота/выдерживание
+    drain_whey_time = mdb.Column(mdb.Integer)  # слив сыворотки
+    dray_ricotta_time = mdb.Column(mdb.Integer)  # слив рикотты
+    salting_time = mdb.Column(mdb.Integer)  # посолка/анализ
+    pumping_time = mdb.Column(mdb.Integer)  # Перекачивание
 
     @staticmethod
-    def create_name(line, percent, flavoring_agent):
-        boiling_name = [percent, flavoring_agent]
-        boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, {}".format(line, boiling_name)
+    def create_name(line: str, percent: float | int, flavoring_agent: str, weight: float) -> str:
+        return f"Линия {line}, {percent}, {flavoring_agent}, {weight}"
 
 
-class RicottaAnalysisTechnology(mdb.Model):
-    __tablename__ = "ricotta_analyses_technology"
-    id = mdb.Column(mdb.Integer, primary_key=True)
-    preparation_time = mdb.Column(mdb.Integer)
-    analysis_time = mdb.Column(mdb.Integer)
-    pumping_time = mdb.Column(mdb.Integer)
-
-    boiling_id = mdb.Column(mdb.Integer, mdb.ForeignKey("ricotta_boilings.id"), nullable=True)
+__all__ = [
+    "RicottaBoilingTechnology",
+    "RicottaBoiling",
+    "RicottaLine",
+    "RicottaSKU",
+    "RicottaFormFactor",
+]

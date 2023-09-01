@@ -1,10 +1,20 @@
 import json
+import os
 
+import numpy as np
 import pandas as pd
 
-from app.models import *
-
-from ...enum import LineName
+from app.enum import LineName
+from app.globals import db
+from app.models.basic import Group, Line, Packer, SteamConsumption
+from app.models.mozzarella import (
+    MozzarellaBoiling,
+    MozzarellaBoilingTechnology,
+    MozzarellaCoolingTechnology,
+    MozzarellaFormFactor,
+    MozzarellaLine,
+    MozzarellaSKU,
+)
 
 
 def read_params():
@@ -270,7 +280,6 @@ def fill_sku():
             & (x.ferment == sku["Тип закваски"])
             & (x.line_id == add_sku.line.id)
         ]
-        print(len(add_sku.made_from_boilings))
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         if add_sku.group.name != "Качокавалло":
             add_sku.production_by_request = True

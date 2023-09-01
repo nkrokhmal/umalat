@@ -1,18 +1,13 @@
-import flask
-
-from app.imports.runtime import *
+from app.enum import DepartmentName
 from app.main import main
-from app.main.errors import internal_error
+from app.main.mascarpone.forms import ScheduleForm
 from app.main.mascarpone.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
-from app.scheduler import draw_excel_frontend
 from app.scheduler.mascarpone import *
 from app.scheduler.mascarpone.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
-from app.utils.mascarpone.schedule_task import MascarponeScheduleTask
-
-from .forms import ScheduleForm
+from app.utils.mascarpone.boiling_plan_read import BoilingPlanReader
 
 
 BATCH_TYPES = ["mascarpone", "cream_cheese", "robiola", "cottage_cheese", "cream"]
@@ -31,7 +26,6 @@ def mascarpone_schedule():
         time_validator(form, form.beg_time)
         file = flask.request.files["input_file"]
 
-        # Маскарпоне, кремчиз, робиолла, творожный, сливки
         data_dir = os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
             date.strftime("%Y-%m-%d"),
@@ -42,6 +36,7 @@ def mascarpone_schedule():
         file_path = os.path.join(data_dir, file.filename)
         if file:
             file.save(file_path)
+
         wb = openpyxl.load_workbook(
             filename=os.path.join(data_dir, file.filename),
             data_only=True,
@@ -53,7 +48,8 @@ def mascarpone_schedule():
             "cream_cheese": form.cream_cheese_batch_number.data,
             "cottage_cheese": form.cottage_cheese_batch_number.data,
         }
-        boiling_plan_df = read_boiling_plan(wb, first_batch_ids=first_batch_ids)
+        boiling_plan_df = BoilingPlanReader(wb=wb, first_batches=first_batch_ids).parse()
+
         boiling_plan_df["group"] = boiling_plan_df["sku"].apply(lambda x: x.group.name)
 
         schedule = make_schedule(boiling_plan_df, start_time=beg_time)
@@ -81,10 +77,13 @@ def mascarpone_schedule():
         getattr(form, f"{batch_type}_batch_number").data = (
             BatchNumber.last_batch_number(
                 date=datetime.today() + timedelta(days=1),
-                department_name="Маскарпоновый цех",
+                department_name=DepartmentName.MASCARPONE,
                 group=batch_type,
             )
             + 1
         )
 
     return flask.render_template("mascarpone/schedule.html", form=form, filename=None)
+
+
+__all__ = ["mascarpone_schedule"]
