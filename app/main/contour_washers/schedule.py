@@ -6,7 +6,7 @@ from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
 from app.scheduler.butter.properties.butter_properties import ButterProperties
 from app.scheduler.mascarpone.properties import MascarponeProperties
 from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
-from app.scheduler.mozzarella.properties import MozzarellaProperties
+from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.ricotta.properties import RicottaProperties
 
 from .forms import ScheduleDateForm, ScheduleForm, create_form, fill_properties

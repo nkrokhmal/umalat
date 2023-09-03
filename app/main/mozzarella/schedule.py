@@ -13,6 +13,8 @@ from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.parse_schedule_json import *
 from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 
+from ...scheduler.mozzarella.to_boiling_plan.read_additional_packing import read_additional_packing
+from ...scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from .forms import ScheduleForm
 
 
@@ -46,7 +48,7 @@ def mozzarella_schedule():
             data_only=True,
         )
         first_batch_ids = {"mozzarella": form.batch_number.data}
-        boiling_plan_df = cast_boiling_plan(wb, first_batch_ids=first_batch_ids)
+        boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=first_batch_ids)
         additional_packing_df = read_additional_packing(wb)
 
         start_times = {
