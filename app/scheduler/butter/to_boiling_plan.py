@@ -12,10 +12,7 @@ from app.models import ButterSKU, cast_model
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 
-BoilingPlanLike = Union[str, Workbook, pd.DataFrame]
-
-
-def to_butter_boiling_plan(
+def to_boiling_plan(
     boiling_plan_source: BoilingPlanLike,
     first_batch_ids_by_type: dict = {"butter": 1},
 ) -> pd.DataFrame:
@@ -75,7 +72,7 @@ def to_butter_boiling_plan(
 
 
 def test():
-    df = to_butter_boiling_plan(
+    df = to_boiling_plan(
         str(get_repo_path() / "app/data/static/samples/inputs/by_department/butter/План по варкам масло 1.xlsx")
     )
     print(df.iloc[0])

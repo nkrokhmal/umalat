@@ -7,7 +7,7 @@ from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_
 from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.butter.make_schedule._make_boiling_and_packing import _make_boiling_and_packing
-from app.scheduler.butter.to_butter_boiling_plan import BoilingPlanLike, to_butter_boiling_plan
+from app.scheduler.butter.to_boiling_plan import BoilingPlanLike, to_boiling_plan
 from app.scheduler.time import cast_t
 
 
@@ -66,10 +66,10 @@ def make_schedule(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"butter": 1},
-):
+) -> dict:
     # - Get boiling plan
 
-    boiling_plan_df = to_butter_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type).copy()
+    boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type).copy()
 
     # - Init block maker
 
@@ -125,7 +125,7 @@ def make_schedule(
 
     # - Return result
 
-    return m.root
+    return {"schedule": m.root, "boiling_plan": boiling_plan_df}
 
 
 def test():

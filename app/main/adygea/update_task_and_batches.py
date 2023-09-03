@@ -1,6 +1,5 @@
 from app.imports.runtime import *
 from app.models import AdygeaSKU
-from app.scheduler.adygea.boiling_plan import read_boiling_plan
 from app.scheduler.adygea.update_interval_times import update_interval_times
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches import add_batch_from_boiling_plan_df
@@ -9,6 +8,23 @@ from app.utils.schedule import cast_schedule
 
 def init_task(date, boiling_plan_df):
     return AdygeaScheduleTask(df=boiling_plan_df, date=date, model=AdygeaSKU, department="Адыгейский цех")
+
+
+def update_interval_times(schedule_wb, boiling_plan_df):
+    schedule_info = parse_schedule((schedule_wb, "Расписание"))
+
+    interval_times = {}
+
+    for boiling in schedule_info.get("adygea_boilings", []):
+        interval_times[boiling["boiling_id"]] = boiling["interval_time"]
+
+    boiling_plan_df["start"] = boiling_plan_df["batch_id"].apply(
+        lambda batch_id: interval_times.get(batch_id, ["", ""])[0]
+    )
+    boiling_plan_df["finish"] = boiling_plan_df["batch_id"].apply(
+        lambda batch_id: interval_times.get(batch_id, ["", ""])[1]
+    )
+    return boiling_plan_df
 
 
 def update_task_and_batches(schedule_obj):

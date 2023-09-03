@@ -6,16 +6,16 @@ from utils_ak.os import open_file_in_os
 
 from lessmore.utils.get_repo_path import get_repo_path
 
-from app.scheduler.butter.draw_frontend.style import STYLE
-from app.scheduler.butter.to_boiling_plan import BoilingPlanLike
-from app.scheduler.butter.wrap_frontend import wrap_frontend
+from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.frontend import draw_excel_frontend
+from app.scheduler.milk_project.draw_frontend.style import STYLE
+from app.scheduler.milk_project.wrap_frontend import wrap_frontend
 
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
-    first_batch_ids_by_type: dict = {"butter": 1},
+    first_batch_ids_by_type: dict = {"milk_project": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:
@@ -45,7 +45,10 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(get_repo_path() / "app/data/static/samples/inputs/by_department/butter/План по варкам масло 1.xlsx")
+        str(
+            get_repo_path()
+            / "app/data/static/samples/inputs/by_department/milk_project/План по варкам милкпроджект 3.xlsx"
+        )
     )
 
     output["workbook"].save("test.xlsx")

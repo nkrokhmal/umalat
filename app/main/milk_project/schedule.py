@@ -8,7 +8,6 @@ from app.main.milk_project.update_task_and_batches import (
 )
 from app.main.validators import *
 from app.models import AdygeaSKU, MilkProjectSKU
-from app.scheduler import draw_excel_frontend, run_adygea, run_consolidated_old, run_milk_project
 from app.scheduler.frontend import fill_grid
 from app.scheduler.time import *
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
@@ -16,6 +15,7 @@ from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 
+from ...scheduler.milk_project.draw_frontend.draw_frontend import draw_frontend as draw_milk_project_frontend
 from .forms import ScheduleForm
 
 
@@ -47,7 +47,7 @@ def milk_project_schedule():
             data_only=True,
         )
         first_batch_ids = {"milk_project": form.batch_number.data}
-        milk_project_output = run_milk_project(wb, path=None, start_time=beg_time)
+        milk_project_output = draw_milk_project_frontend(boiling_plan=wb, start_time=beg_time)
         prepare_start_time = beg_time
         if len(milk_project_output["boiling_plan_df"]) > 0:
             beg_time = cast_time(
@@ -57,7 +57,7 @@ def milk_project_schedule():
             # when no milk project - prepare start time is before beg_time
             prepare_start_time = cast_time(cast_t(prepare_start_time) - 12)
             # run milk project output again to match the new timing (will be empty, but with a timeline)
-            milk_project_output = run_milk_project(wb, path=None, start_time=prepare_start_time)
+            milk_project_output = draw_milk_project_frontend(boiling_plan=wb, start_time=prepare_start_time)
 
         adygea_output = run_adygea(wb, path=None, start_time=beg_time, prepare_start_time=prepare_start_time)
 

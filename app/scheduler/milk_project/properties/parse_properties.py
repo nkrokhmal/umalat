@@ -2,7 +2,9 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 
-from app.scheduler.milk_project.properties import MilkProjectProperties
+from lessmore.utils.get_repo_path import get_repo_path
+
+from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
 from app.scheduler.parsing import load_cells_df, parse_block
 from app.scheduler.parsing_new.parse_time import cast_time_from_hour_label
 from app.scheduler.time import cast_human_time, cast_t
@@ -25,7 +27,7 @@ def parse_schedule_file(wb_obj):
         for row_num in time_index_row_nums:
             start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
 
-        # todo maybe: refactor start_times -> start_ts
+        # todo maybe: refactor start_times -> start_ts [@marklidenberg]
         start_times = [cast_t(v) for v in start_times]
 
     def _split_func(row):
@@ -58,7 +60,18 @@ def parse_properties(fn):
     return props
 
 
+def test():
+    print(
+        dict(
+            parse_properties(
+                str(
+                    get_repo_path()
+                    / "app/data/static/samples/outputs/by_department/milk_project/Расписание милк проджект 1 без милки.xlsx"
+                )
+            )
+        )
+    )
+
+
 if __name__ == "__main__":
-    # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = "/Users/marklidenberg/Downloads/Telegram Desktop/2021-08-25 Расписание милкпроджект.xlsx"
-    print(dict(parse_properties(fn)))
+    test()

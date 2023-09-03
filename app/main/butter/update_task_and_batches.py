@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 from app.models import ButterSKU
 from app.scheduler.butter.parse_schedule import parse_schedule
-from app.scheduler.butter.to_butter_boiling_plan import to_butter_boiling_plan
+from app.scheduler.butter.to_boiling_plan import to_boiling_plan
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.butter.schedule_tasks import ButterScheduleTask
 from app.utils.schedule import cast_schedule
@@ -34,7 +34,7 @@ def update_task_and_batches(schedule_obj):
 
     wb = cast_schedule(schedule_obj)
     metadata = json.loads(utils.read_metadata(wb))
-    boiling_plan_df = to_butter_boiling_plan(wb, first_batch_ids=metadata["first_batch_ids"])
+    boiling_plan_df = to_boiling_plan(wb, first_batch_ids=metadata["first_batch_ids"])
     date = utils.cast_datetime(metadata["date"])
 
     # - Batch

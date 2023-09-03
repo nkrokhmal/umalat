@@ -12,7 +12,7 @@ from utils_ak.numeric.numeric import custom_round
 from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.butter.make_schedule.make_schedule import make_schedule
-from app.scheduler.butter.to_butter_boiling_plan import BoilingPlanLike
+from app.scheduler.butter.to_boiling_plan import BoilingPlanLike
 from app.scheduler.header import wrap_header
 from app.scheduler.time import cast_time
 
@@ -133,11 +133,12 @@ def wrap_frontend(
 ):
     # - Get schedule
 
-    schedule = make_schedule(
+    output = make_schedule(
         boiling_plan,
         start_time=start_time,
         first_batch_ids_by_type=first_batch_ids_by_type,
     )
+    schedule = output["schedule"]
 
     # - Wrap schedule
 
@@ -165,7 +166,9 @@ def wrap_frontend(
 
     # - Return
 
-    return {"frontend": m.root, "boiling_plan": boiling_plan, "schedule": schedule}
+    output["frontend"] = m.root
+
+    return output
 
 
 def test():

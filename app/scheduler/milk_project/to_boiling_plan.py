@@ -1,21 +1,31 @@
+from typing import Union
+
 import pandas as pd
 
+from openpyxl import Workbook
+from utils_ak.builtin import delistify
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
+from lessmore.utils.get_repo_path import get_repo_path
+
 from app.models import MilkProjectSKU, cast_model
-from app.scheduler.milk_project.boiling_plan.saturate import saturate_boiling_plan
+from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 
-def read_boiling_plan(wb_obj, first_batch_ids=None):
+def to_boiling_plan(boiling_plan: BoilingPlanLike, first_batch_ids_by_type={"milk_project": 1}):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    first_batch_ids = first_batch_ids or {"milk_project": 1}
-    wb = cast_workbook(wb_obj)
+
+    if isinstance(boiling_plan, pd.DataFrame):
+        # already boiling plan
+        return boiling_plan
+
+    wb = cast_workbook(boiling_plan)
 
     cur_id = 0
 
@@ -60,7 +70,22 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
 
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MilkProjectSKU, sku))
 
-    df = saturate_boiling_plan(df)
+    df["boiling"] = df["sku"].apply(lambda sku: delistify(sku.made_from_boilings, single=True))
+
     df["batch_type"] = "milk_project"
-    df = update_absolute_batch_id(df, first_batch_ids)
+    df = update_absolute_batch_id(boiling_plan_df=df, first_batch_ids_by_type=first_batch_ids_by_type)
     return df
+
+
+def test():
+    df = to_boiling_plan(
+        str(
+            get_repo_path()
+            / "app/data/static/samples/inputs/by_department/milk_project/План по варкам милкпроджект 3.xlsx"
+        )
+    )
+    print(df.iloc[0])
+
+
+if __name__ == "__main__":
+    test()

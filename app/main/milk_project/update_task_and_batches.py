@@ -1,7 +1,7 @@
 from app.imports.runtime import *
 from app.models import MilkProjectSKU
-from app.scheduler.milk_project.boiling_plan import read_boiling_plan
-from app.scheduler.milk_project.update_interval_times import update_interval_times
+from app.scheduler.milk_project.parse_schedule import parse_schedule
+from app.scheduler.milk_project.to_boiling_plan import read_boiling_plan
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 from app.utils.schedule import cast_schedule
@@ -9,6 +9,22 @@ from app.utils.schedule import cast_schedule
 
 def init_task(date, boiling_plan_df):
     return MilkProjectScheduleTask(df=boiling_plan_df, date=date, model=MilkProjectSKU, department="Милкпроджект")
+
+
+def update_interval_times(schedule_wb, boiling_plan_df):
+    schedule_info = parse_schedule((schedule_wb, "Расписание"))
+
+    if len(boiling_plan_df) == 0:
+        return boiling_plan_df
+
+    boilings = schedule_info.get("milk_project_boilings", [])
+    boilings = list(sorted(boilings, key=lambda b: b["interval"][0]))
+    boiling_plan_df["start"] = ""
+    boiling_plan_df["finish"] = ""
+    for i, (batch_id, grp) in enumerate(boiling_plan_df.groupby("absolute_batch_id")):
+        boiling_plan_df.loc[grp.index, "start"] = boilings[i]["interval_time"][0]
+        boiling_plan_df.loc[grp.index, "finish"] = boilings[i]["interval_time"][1]
+    return boiling_plan_df
 
 
 def update_task_and_batches(schedule_obj):
