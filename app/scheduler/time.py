@@ -17,7 +17,7 @@ def cast_t(obj):
     with code("Handle None"):
         if obj == 0:
             return 0
-        if is_none(obj) or not obj:
+        if not obj:
             return None
 
     if is_int_like(obj):

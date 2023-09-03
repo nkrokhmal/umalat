@@ -1,4 +1,6 @@
-from app.imports.external import *
+from loguru import logger
+from utils_ak.dict.dotdict import dotdict
+
 from config import SQLITE_PATH
 
 
@@ -13,7 +15,7 @@ def create_external_db(data_path=None):
     Session = sessionmaker()
     Session.configure(bind=engine)
     session = Session()
-    db = utils.dotdict()
+    db = dotdict()
     db["session"] = session
     return db
 
