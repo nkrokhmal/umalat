@@ -7,7 +7,7 @@ from utils_ak.code_block.code import code
 from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.butter.properties.butter_properties import ButterProperties
-from app.scheduler.parsing_new.parse_time import cast_time_from_hour_label
+from app.scheduler.parsing_new_utils.parse_time import cast_time_from_hour_label
 from app.scheduler.parsing_utils import load_cells_df, parse_block
 from app.scheduler.time_utils import cast_human_time, cast_t
 
