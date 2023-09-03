@@ -11,9 +11,9 @@ from lessmore.utils.get_repo_path import get_repo_path
 
 from app.enum import LineName
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.header import wrap_header
 from app.scheduler.mozzarella.make_schedule.make_schedule import make_schedule
-from app.scheduler.time import cast_time
+from app.scheduler.time_utils import cast_time
+from app.scheduler.wrap_header import wrap_header
 
 
 def calc_form_factor_label(form_factors):

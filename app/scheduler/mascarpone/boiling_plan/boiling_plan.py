@@ -9,7 +9,7 @@ from utils_ak.pandas.pandas_tools import split_into_sum_groups
 
 from app.models import CreamCheeseSKU, MascarponeSKU, cast_model
 from app.scheduler.mascarpone.boiling_plan.saturate import saturate_boiling_plan
-from app.scheduler.time import is_none
+from app.scheduler.time_utils import is_none
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 

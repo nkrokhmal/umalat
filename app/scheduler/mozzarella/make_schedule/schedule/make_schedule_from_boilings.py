@@ -19,8 +19,8 @@ from app.scheduler.mozzarella.make_schedule.packing import boiling_has_multihead
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.awaiting_pusher import AwaitingPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.backwards_pusher import BackwardsPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.drenator_shrinking_pusher import DrenatorShrinkingPusher
-from app.scheduler.shifts import split_shifts
-from app.scheduler.time import cast_t, cast_time
+from app.scheduler.split_shifts_utils import split_shifts
+from app.scheduler.time_utils import cast_t, cast_time
 
 
 STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]

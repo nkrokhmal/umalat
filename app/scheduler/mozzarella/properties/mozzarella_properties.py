@@ -8,7 +8,7 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 
 from app.enum import LineName
-from app.scheduler.time import cast_human_time
+from app.scheduler.time_utils import cast_human_time
 
 
 class MozzarellaProperties(pydantic.BaseModel):

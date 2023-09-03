@@ -10,8 +10,8 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.numeric.numeric import custom_round
 
-from app.scheduler.header import wrap_header
-from app.scheduler.time import cast_time
+from app.scheduler.time_utils import cast_time
+from app.scheduler.wrap_header import wrap_header
 
 
 PREPARATION_HEIGHT = 11

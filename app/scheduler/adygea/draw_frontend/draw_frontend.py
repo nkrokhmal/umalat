@@ -9,7 +9,7 @@ from lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.adygea.draw_frontend.style import STYLE
 from app.scheduler.adygea.wrap_frontend import wrap_frontend
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.frontend import draw_excel_frontend
+from app.scheduler.frontend_utils import draw_excel_frontend
 
 
 def draw_frontend(

@@ -1,4 +1,4 @@
-from app.scheduler.time import cast_time
+from app.scheduler.time_utils import cast_time
 
 
 STYLE = {

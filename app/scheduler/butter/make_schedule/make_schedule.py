@@ -8,7 +8,7 @@ from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.butter.make_schedule._make_boiling_and_packing import _make_boiling_and_packing
 from app.scheduler.butter.to_boiling_plan import BoilingPlanLike, to_boiling_plan
-from app.scheduler.time import cast_t
+from app.scheduler.time_utils import cast_t
 
 
 class Validator(ClassValidator):

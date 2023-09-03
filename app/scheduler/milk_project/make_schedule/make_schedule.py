@@ -6,7 +6,7 @@ from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.milk_project.make_schedule._boilings import make_boiling, make_boiling_sequence
 from app.scheduler.milk_project.to_boiling_plan import BoilingPlanLike, to_boiling_plan
-from app.scheduler.time import cast_t
+from app.scheduler.time_utils import cast_t
 
 
 def make_schedule(

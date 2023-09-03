@@ -1,6 +1,6 @@
 from wtforms.validators import ValidationError
 
-from app.scheduler.time import *
+from app.scheduler.time_utils import *
 
 
 def time_validator(form, field):

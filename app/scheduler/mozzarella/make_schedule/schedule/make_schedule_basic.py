@@ -8,7 +8,7 @@ from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_b
 from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_from_boilings import make_schedule_from_boilings
 from app.scheduler.mozzarella.make_schedule.schedule.parse_start_configuration import parse_start_configuration
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
-from app.scheduler.time import cast_t, cast_time, parse_time
+from app.scheduler.time_utils import cast_t, cast_time, parse_time
 
 
 def make_schedule_basic(

@@ -13,7 +13,7 @@ from app.scheduler.mozzarella.make_schedule.schedule.optimize_schedule_by_swappi
     optimize_schedule_by_swapping_water_gaps,
 )
 from app.scheduler.mozzarella.make_schedule.schedule.parse_start_configuration import parse_start_configuration
-from app.scheduler.time import cast_t, cast_time
+from app.scheduler.time_utils import cast_t, cast_time
 
 
 def _gen_seq(n, a=0, b=1):

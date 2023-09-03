@@ -6,10 +6,10 @@ from utils_ak.numeric.numeric import custom_round
 
 from lessmore.utils.get_repo_path import get_repo_path
 
-from app.scheduler.header import wrap_header
 from app.scheduler.milk_project.make_schedule.make_schedule import make_schedule
 from app.scheduler.milk_project.to_boiling_plan import BoilingPlanLike
-from app.scheduler.time import cast_time
+from app.scheduler.time_utils import cast_time
+from app.scheduler.wrap_header import wrap_header
 
 
 def wrap_line(schedule):

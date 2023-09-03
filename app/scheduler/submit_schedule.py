@@ -6,7 +6,7 @@ from utils_ak.code_block.code import code
 from utils_ak.os.os_tools import makedirs
 from utils_ak.split_file.split_file import SplitFile
 
-from app.scheduler.frontend import draw_excel_frontend
+from app.scheduler.frontend_utils import draw_excel_frontend
 
 
 def submit_schedule(

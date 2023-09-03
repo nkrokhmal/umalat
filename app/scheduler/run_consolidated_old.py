@@ -8,15 +8,21 @@ from utils_ak.code_block.code import code
 from utils_ak.os.os_tools import makedirs
 
 from app.globals import basedir
-from app.scheduler.consolidated_schedule import run_consolidated
-from app.scheduler.frontend import draw_excel_frontend
+from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.load_schedules import load_schedules
-from app.scheduler.parsing import load_cells_df
+from app.scheduler.parsing_utils import load_cells_df
+from app.scheduler.run_consolidated import run_consolidated
 from config import config
 
 
 def run_consolidated_old(
-    input_path, prefix="", output_path="outputs/", open_file=False, schedules=None, wb=None, date=None
+    input_path,
+    prefix="",
+    output_path="outputs/",
+    open_file=False,
+    schedules=None,
+    wb=None,
+    date=None,
 ):
     makedirs(output_path)
 
@@ -42,7 +48,7 @@ def run_consolidated_old(
         if input_path:
             # draw mozzarella
             if not wb:
-                # init workbook with schedule file #todo maybe: better to crop mozzarella part and paste into empty workbook, so can be generalized for other departments
+                # init workbook with schedule file # todo maybe: better to crop mozzarella part and paste into empty workbook, so can be generalized for other departments [@marklidenberg]
                 wb = openpyxl.load_workbook(os.path.join(input_path, f"{prefix} Расписание моцарелла.xlsx"))
 
                 for sheet_name in wb.sheetnames:
@@ -67,7 +73,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "mascarpone" in schedules:
-
         frontend = wrap_frontend(schedules["mascarpone"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
@@ -76,7 +81,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "butter" in schedules:
-
         frontend = wrap_frontend(schedules["butter"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
@@ -85,7 +89,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "milk_project" in schedules:
-
         frontend = wrap_frontend(schedules["milk_project"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
@@ -94,7 +97,6 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "adygea" in schedules:
-
         frontend = wrap_frontend(schedules["adygea"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
@@ -103,13 +105,12 @@ def run_consolidated_old(
         draw_excel_frontend(frontend, STYLE, wb=wb)
 
     if "contour_cleanings" in schedules:
-
         frontend = wrap_frontend(schedules["contour_cleanings"], date=date)
         depth = frontend.y[1]
         frontend.props.update(x=(frontend.x[0], frontend.x[1] + cur_depth))
         cur_depth += depth
 
-    # todo maybe: copy-paste from submit_schedule
+    # todo maybe: copy-paste from submit_schedule [@marklidenberg]
     with code("Dump frontend as excel file"):
         with code("Get filename"):
             output_fn = None

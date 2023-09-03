@@ -2,7 +2,7 @@ import pydantic
 
 from pydantic import Field
 
-from app.scheduler.time import cast_human_time
+from app.scheduler.time_utils import cast_human_time
 
 
 class AdygeaProperties(pydantic.BaseModel):

@@ -19,9 +19,9 @@ from lessmore.utils.get_repo_path import get_repo_path
 from app.enum import LineName
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
-from app.scheduler.parsing import load_cells_df, parse_block
 from app.scheduler.parsing_new.parse_time import cast_time_from_hour_label
-from app.scheduler.time import cast_human_time, cast_t
+from app.scheduler.parsing_utils import load_cells_df, parse_block
+from app.scheduler.time_utils import cast_human_time, cast_t
 
 
 def _is_datetime(v: Union[str, datetime]):

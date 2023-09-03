@@ -16,7 +16,7 @@ from app.models import AdygeaLine, Washer, cast_model
 from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_cleaning, make_lunch, make_preparation
 from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.time import cast_t, cast_time
+from app.scheduler.time_utils import cast_t, cast_time
 
 
 BOILING_NUMS = [0, 2, 1, 3]

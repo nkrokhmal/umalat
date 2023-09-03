@@ -9,8 +9,8 @@ from utils_ak.iteration.simple_iterator import iter_pairs
 
 from app.scheduler.ricotta.algo.boilings import make_boiling_group
 from app.scheduler.ricotta.algo.cleanings import make_bath_cleanings, make_container_cleanings
-from app.scheduler.shifts import split_shifts
-from app.scheduler.time import cast_t
+from app.scheduler.split_shifts_utils import split_shifts
+from app.scheduler.time_utils import cast_t
 
 
 class Validator(ClassValidator):
