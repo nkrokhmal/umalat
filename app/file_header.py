@@ -83,57 +83,8 @@ from utils_ak.time.dt import cast_str
 from app.enum import DepartmentName, LineName
 from app.globals import ERROR, basedir
 from app.imports import utils
-from app.models import (
-    SKU,
-    AdygeaBoiling,
-    AdygeaBoilingTechnology,
-    AdygeaFormFactor,
-    AdygeaLine,
-    AdygeaSKU,
-    Boiling,
-    ButterBoiling,
-    ButterBoilingTechnology,
-    ButterFormFactor,
-    ButterLine,
-    ButterSKU,
-    CreamCheeseBoiling,
-    CreamCheeseBoilingTechnology,
-    CreamCheeseFermentator,
-    CreamCheeseFormFactor,
-    CreamCheeseLine,
-    CreamCheeseSKU,
-    FormFactor,
-    Group,
-    Line,
-    MascarponeBoiling,
-    MascarponeBoilingTechnology,
-    MascarponeFormFactor,
-    MascarponeLine,
-    MascarponeSKU,
-    MascarponeSourdough,
-    MilkProjectBoiling,
-    MilkProjectBoilingTechnology,
-    MilkProjectFormFactor,
-    MilkProjectLine,
-    MilkProjectSKU,
-    MozzarellaBoiling,
-    MozzarellaBoilingTechnology,
-    MozzarellaCoolingTechnology,
-    MozzarellaFormFactor,
-    MozzarellaLine,
-    MozzarellaSKU,
-    RicottaAnalysisTechnology,
-    RicottaBoiling,
-    RicottaBoilingTechnology,
-    RicottaFormFactor,
-    RicottaLine,
-    RicottaSKU,
-    User,
-    cast_model,
-    fetch_all,
-)
 from app.scheduler.adygea.properties import AdygeaProperties
-from app.scheduler.butter.properties import ButterProperties
+from app.scheduler.butter.properties.butter_properties import ButterProperties
 from app.scheduler.frontend import draw_excel_frontend, prepare_schedule_worksheet
 from app.scheduler.header import wrap_header
 from app.scheduler.load_properties import load_properties
@@ -146,6 +97,6 @@ from app.scheduler.parsing_new.group_intervals import basic_criteria
 from app.scheduler.parsing_new.parse_time import cast_label_from_time, cast_time_from_hour_label
 from app.scheduler.parsing_new.parsing import parse_line
 from app.scheduler.ricotta.properties import RicottaProperties
-from app.scheduler.submit import submit_schedule
+from app.scheduler.submit_schedule import submit_schedule
 from app.scheduler.time import cast_human_time, cast_t, cast_time, parse_time
 from config import config

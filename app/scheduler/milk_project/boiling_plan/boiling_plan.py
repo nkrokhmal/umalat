@@ -5,8 +5,8 @@ from utils_ak.code_block.code import code
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
 from app.models import MilkProjectSKU, cast_model
-from app.scheduler.boiling_plan import update_absolute_batch_id
 from app.scheduler.milk_project.boiling_plan.saturate import saturate_boiling_plan
+from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 
 def read_boiling_plan(wb_obj, first_batch_ids=None):

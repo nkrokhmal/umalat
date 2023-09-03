@@ -9,7 +9,7 @@ from app.scheduler.milk_project.algo.schedule import make_schedule
 from app.scheduler.milk_project.boiling_plan.boiling_plan import read_boiling_plan
 from app.scheduler.milk_project.frontend.frontend import wrap_frontend
 from app.scheduler.milk_project.frontend.style import STYLE
-from app.scheduler.submit import submit_schedule
+from app.scheduler.submit_schedule import submit_schedule
 from config import config
 
 

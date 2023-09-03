@@ -3,7 +3,7 @@ from utils_ak.os.os_tools import makedirs
 from app.scheduler.adygea.algo.schedule import make_schedule
 from app.scheduler.mascarpone.boiling_plan.boiling_plan import read_boiling_plan
 from app.scheduler.mascarpone.frontend.frontend import wrap_frontend
-from app.scheduler.submit import submit_schedule
+from app.scheduler.submit_schedule import submit_schedule
 
 
 def run_mascarpone(

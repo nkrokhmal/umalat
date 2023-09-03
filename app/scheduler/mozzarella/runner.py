@@ -3,7 +3,7 @@ from app.scheduler.mozzarella.algo.schedule.schedule import make_schedule
 from app.scheduler.mozzarella.boiling_plan.boiling_plan import read_boiling_plan
 from app.scheduler.mozzarella.frontend.frontend import wrap_frontend
 from app.scheduler.mozzarella.frontend.style import STYLE
-from app.scheduler.submit import submit_schedule
+from app.scheduler.submit_schedule import submit_schedule
 
 
 def run_mozzarella(

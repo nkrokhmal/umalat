@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.pushers import add_push, push, simple_push
@@ -8,11 +9,15 @@ from utils_ak.code_block.code import code
 from utils_ak.iteration.simple_iterator import iter_pairs
 from utils_ak.numeric.numeric import custom_round
 
+from lessmore.utils.get_repo_path import get_repo_path
+
+from app.scheduler.butter.make_schedule.make_schedule import make_schedule
+from app.scheduler.butter.to_butter_boiling_plan import BoilingPlanLike
 from app.scheduler.header import wrap_header
 from app.scheduler.time import cast_time
 
 
-def wrap_boiling_lines(schedule):
+def _wrap_boiling_lines(schedule):
     m = BlockMaker(
         "line",
         default_row_width=1,
@@ -103,7 +108,7 @@ def _wrap_boiling(boiling):
     return m.root
 
 
-def wrap_packing(schedule):
+def _wrap_packing(schedule):
     m = BlockMaker(
         "line",
         default_row_width=1,
@@ -120,7 +125,22 @@ def wrap_packing(schedule):
     return m.root
 
 
-def wrap_frontend(schedule, date=None):
+def wrap_frontend(
+    boiling_plan: BoilingPlanLike,
+    start_time: str = "07:00",
+    first_batch_ids_by_type: dict = {"butter": 1},
+    date: Optional[datetime] = None,
+):
+    # - Get schedule
+
+    schedule = make_schedule(
+        boiling_plan,
+        start_time=start_time,
+        first_batch_ids_by_type=first_batch_ids_by_type,
+    )
+
+    # - Wrap schedule
+
     date = date or datetime.now()
 
     m = BlockMaker(
@@ -138,8 +158,23 @@ def wrap_frontend(schedule, date=None):
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы маслоцеха"))
     with m.block(start_time=start_time, axis=1):
-        m.block(wrap_boiling_lines(schedule))
+        m.block(_wrap_boiling_lines(schedule))
 
     with m.block(start_time=start_time, axis=1):
-        m.block(wrap_packing(schedule))
-    return m.root
+        m.block(_wrap_packing(schedule))
+
+    # - Return
+
+    return {"frontend": m.root, "boiling_plan": boiling_plan, "schedule": schedule}
+
+
+def test():
+    print(
+        wrap_frontend(
+            str(get_repo_path() / "app/data/static/samples/inputs/by_department/butter/План по варкам масло 1.xlsx")
+        )
+    )
+
+
+if __name__ == "__main__":
+    test()

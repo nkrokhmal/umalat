@@ -9,7 +9,7 @@ from app.scheduler.adygea.algo.schedule import make_schedule
 from app.scheduler.adygea.boiling_plan.boiling_plan import read_boiling_plan
 from app.scheduler.adygea.frontend.frontend import wrap_frontend
 from app.scheduler.adygea.frontend.style import STYLE
-from app.scheduler.submit import submit_schedule
+from app.scheduler.submit_schedule import submit_schedule
 from config import config
 
 

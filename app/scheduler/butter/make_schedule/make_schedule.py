@@ -1,8 +1,13 @@
+import pandas as pd
+
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
 
-from app.scheduler.butter.algo.boilings import make_boiling_and_packing
+from lessmore.utils.get_repo_path import get_repo_path
+
+from app.scheduler.butter.make_schedule._make_boiling_and_packing import _make_boiling_and_packing
+from app.scheduler.butter.to_butter_boiling_plan import BoilingPlanLike, to_butter_boiling_plan
 from app.scheduler.time import cast_t
 
 
@@ -57,18 +62,35 @@ class Validator(ClassValidator):
         validate_disjoint_by_axis(b1, b2, ordered=True)
 
 
-def make_schedule(boiling_plan_df, start_time="07:00"):
+def make_schedule(
+    boiling_plan: BoilingPlanLike,
+    start_time: str = "07:00",
+    first_batch_ids_by_type: dict = {"butter": 1},
+):
+    # - Get boiling plan
+
+    boiling_plan_df = to_butter_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type).copy()
+
+    # - Init block maker
+
     m = BlockMaker("schedule")
-    boiling_plan_df = boiling_plan_df.copy()
+
+    # - Make schedule
 
     sample_row = boiling_plan_df.iloc[0]
     line = sample_row["boiling"].line
 
+    # -- Make preparation block
+
     m.row("preparation", size=line.preparing_time // 5)
+
+    # -- Make boiling and packing blocks
 
     for i, (boiling_id, grp) in enumerate(boiling_plan_df.groupby("boiling_id")):
         tank_number = i % 2
-        boiling, packing = make_boiling_and_packing(grp, tank_number=tank_number)
+
+        boiling, packing = _make_boiling_and_packing(grp, tank_number=tank_number)
+
         m.block(
             boiling,
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -81,11 +103,15 @@ def make_schedule(boiling_plan_df, start_time="07:00"):
             push_kwargs={"validator": Validator()},
         )
 
+    # -- Make displacement and cleaning blocks
+
     m.block(
         m.create_block("displacement", size=(line.displacement_time // 5, 1)),
         push_func=AxisPusher(start_from="last_beg", start_shift=-50),
         push_kwargs={"validator": Validator()},
     )
+
+    # -- Make cleaning block
 
     m.block(
         m.create_block("cleaning", size=(line.cleaning_time // 5, 1)),
@@ -93,5 +119,22 @@ def make_schedule(boiling_plan_df, start_time="07:00"):
         push_kwargs={"validator": Validator()},
     )
 
+    # - Update start time
+
     m.root.props.update(x=(cast_t(start_time), 0))
+
+    # - Return result
+
     return m.root
+
+
+def test():
+    print(
+        make_schedule(
+            str(get_repo_path() / "app/data/static/samples/inputs/by_department/butter/План по варкам масло 1.xlsx")
+        )
+    )
+
+
+if __name__ == "__main__":
+    test()

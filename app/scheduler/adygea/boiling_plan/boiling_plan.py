@@ -6,7 +6,7 @@ from utils_ak.code_block.code import code
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
 from app.models import AdygeaSKU, cast_model
-from app.scheduler.boiling_plan import update_absolute_batch_id
+from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 from app.utils.features.merge_boiling_utils import Boilings
 
 

@@ -7,8 +7,8 @@ from openpyxl.utils import column_index_from_string
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
 from app.models import RicottaSKU, cast_model
-from app.scheduler.boiling_plan import update_absolute_batch_id
 from app.scheduler.ricotta.boiling_plan.saturate import saturate_boiling_plan
+from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 
 INDEX_COLUMN = column_index_from_string("A")
@@ -189,5 +189,5 @@ def read_boiling_plan(wb_obj, saturate=True, first_batch_ids=None):
     if saturate:
         df = saturate_boiling_plan(df)
     df["batch_type"] = "ricotta"
-    df = update_absolute_batch_id(df, first_batch_ids=first_batch_ids)
+    df = update_absolute_batch_id(df, first_batch_ids_by_type=first_batch_ids)
     return df
