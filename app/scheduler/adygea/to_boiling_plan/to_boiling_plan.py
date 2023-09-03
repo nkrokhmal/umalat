@@ -5,17 +5,24 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
+from lessmore.utils.get_repo_path import get_repo_path
+
 from app.models import AdygeaSKU, cast_model
+from app.scheduler.adygea.to_boiling_plan._handle_adygea import _handle_adygea
+from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
-from app.utils.features.merge_boiling_utils import Boilings
 
 
-def read_boiling_plan(wb_obj, first_batch_ids=None):
+def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"adygea": 1}):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
     """
-    first_batch_ids = first_batch_ids or {"adygea": 1}
+
+    if isinstance(wb_obj, pd.DataFrame):
+        # already a dataframe
+        return wb_obj
+
     wb = cast_workbook(wb_obj)
 
     cur_id = 0
@@ -48,7 +55,7 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
     ]
     df = df[df["sku"] != "-"]
 
-    df_plan, boiling_number = handle_adygea(df)  # convert to boiligns
+    df_plan, boiling_number = _handle_adygea(df)  # convert to boiligns
 
     if df_plan.empty:
         logger.info("Empty data frame")
@@ -66,27 +73,16 @@ def read_boiling_plan(wb_obj, first_batch_ids=None):
     # batch_id and boiling_id are the same
     df_plan["batch_id"] = df_plan["boiling_id"]
     df_plan["batch_type"] = "adygea"
-    df_plan = update_absolute_batch_id(df_plan, first_batch_ids)
+    df_plan = update_absolute_batch_id(df_plan, first_batch_ids_by_type)
     return df_plan
 
 
-def proceed_order(df_filter, boilings_adygea, boilings_count=1):
-    if not df_filter.empty:
-        boilings_adygea.init_iterator(df_filter["output"].iloc[0])
-        boilings_adygea.add_group(
-            df_filter.to_dict("records"),
-            boilings_count=boilings_count,
-        )
-    return boilings_adygea
+def test():
+    df = to_boiling_plan(
+        str(get_repo_path() / "app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 1.xlsx")
+    )
+    print(df.iloc[0])
 
 
-def handle_adygea(df):
-    df["sku"] = df["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku))
-    df["plan"] = df["kg"]
-    df["output"] = df["sku"].apply(lambda x: x.made_from_boilings[0].output_kg)
-
-    boilings_adygea = Boilings()
-    for i, df_filter in df.groupby("group_id"):
-        boilings_adygea = proceed_order(df_filter, boilings_adygea)
-    boilings_adygea.finish()
-    return pd.DataFrame(boilings_adygea.boilings), boilings_adygea.boiling_number
+if __name__ == "__main__":
+    test()

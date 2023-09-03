@@ -10,8 +10,12 @@ from utils_ak.code_block.code import code
 from utils_ak.iteration.simple_iterator import iter_sequences
 from utils_ak.portion.portion_tools import cast_interval
 
+from lessmore.utils.get_repo_path import get_repo_path
+
 from app.models import AdygeaLine, Washer, cast_model
-from app.scheduler.adygea.algo.boilings import make_boiling, make_cleaning, make_lunch, make_preparation
+from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_cleaning, make_lunch, make_preparation
+from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
+from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.time import cast_t, cast_time
 
 
@@ -92,7 +96,8 @@ def _make_schedule(boiling_plan_df, start_time="07:00", prepare_start_time="07:0
     adygea_cleaning = cast_model(Washer, "adygea_cleaning")
 
     boiling_num_generator = itertools.cycle(BOILING_NUMS)
-    # todo maybe: a little bit messy with batch_id, cur_batch_id and n_baths
+
+    # todo maybe: a little bit messy with batch_id, cur_batch_id and n_baths [@marklidenberg]
     for batch_id, grp in boiling_plan_df.groupby("batch_id"):
         row = grp.iloc[0]
         cur_boiler_num = next(boiling_num_generator)
@@ -146,13 +151,25 @@ def _make_schedule(boiling_plan_df, start_time="07:00", prepare_start_time="07:0
     return m.root
 
 
-def make_schedule(boiling_plan_df, start_time="07:00", prepare_start_time="07:00"):
+def make_schedule(
+    boiling_plan: BoilingPlanLike,
+    start_time: str = "07:00",
+    prepare_start_time: str = "07:00",
+    first_batch_ids_by_type: dict = {"adygea": 1},
+) -> dict:
+    # - Get boiling plan
+
+    boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type)
+
+    # - Make scedule
+
     no_lunch_schedule = _make_schedule(boiling_plan_df, start_time=start_time, prepare_start_time=prepare_start_time)
 
     need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12  # work more than 8 hours
     if not need_a_break:
         # no lunch in these cases
         lunch_times = []
+
         # print('No lunch needed')
     else:
         lunch_times = []
@@ -186,6 +203,7 @@ def make_schedule(boiling_plan_df, start_time="07:00", prepare_start_time="07:00
                 # lunch is closer to the start
                 if lunch_interval.upper - working_interval.lower >= 2 * 12:
                     lunch_times.append(find_first_after("00:13:30"))
+
                     # print(1, lunch_times)
                     continue
 
@@ -193,6 +211,7 @@ def make_schedule(boiling_plan_df, start_time="07:00", prepare_start_time="07:00
                 # lunch is close to the end
                 if working_interval.upper - lunch_interval.lower >= 2 * 12:
                     lunch_times.append(find_first_after("00:12:00"))
+
                     # print(2, lunch_times)
                     continue
                 elif working_interval.upper - lunch_interval.lower >= 0:
@@ -201,13 +220,31 @@ def make_schedule(boiling_plan_df, start_time="07:00", prepare_start_time="07:00
                         if lunch_interval.lower - working_interval.lower <= 7 * 12:
                             # work around 7 hours
                             lunch_times.append(find_first_after("00:12:00"))
+
                             # print(3, lunch_times)
                             continue
 
             if need_a_break:
                 lunch_times.append(find_first_after(cast_time(no_lunch_schedule.x[0] + 6 * 12)))
+
                 # print(4, lunch_times)
                 continue
-    return _make_schedule(
+    schedule = _make_schedule(
         boiling_plan_df, start_time=start_time, prepare_start_time=prepare_start_time, lunch_times=lunch_times
     )
+
+    return {"schedule": schedule, "boiling_plan": boiling_plan_df}
+
+
+def test():
+    print(
+        make_schedule(
+            str(
+                get_repo_path() / "app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 1.xlsx"
+            )
+        )
+    )
+
+
+if __name__ == "__main__":
+    test()

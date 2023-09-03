@@ -1,7 +1,7 @@
 from app.main import main
 from app.scheduler import draw_excel_frontend
 from app.scheduler.adygea import *
-from app.scheduler.adygea.frontend.style import STYLE
+from app.scheduler.adygea.draw_frontend.style import STYLE
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict

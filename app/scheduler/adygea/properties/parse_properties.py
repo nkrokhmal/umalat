@@ -3,7 +3,7 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.numeric.types import is_int_like
 
-from app.scheduler.adygea.properties import AdygeaProperties
+from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
 from app.scheduler.parsing import load_cells_df, parse_block
 from app.scheduler.parsing_new.parse_time import cast_time_from_hour_label
 from app.scheduler.time import cast_human_time, cast_t

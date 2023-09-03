@@ -6,6 +6,10 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.numeric.numeric import custom_round
 
+from lessmore.utils.get_repo_path import get_repo_path
+
+from app.scheduler.adygea.make_schedule.make_schedule import make_schedule
+from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.header import wrap_header
 from app.scheduler.time import cast_t, cast_time
 
@@ -115,7 +119,23 @@ def wrap_boiling_lines(schedule):
     return m.root
 
 
-def wrap_frontend(schedule, date=None):
+def wrap_frontend(
+    boiling_plan: BoilingPlanLike,
+    date=None,
+    start_time: str = "07:00",
+    first_batch_ids_by_type: dict = {"adygea": 1},
+):
+    # - Get schedule
+
+    output = make_schedule(
+        boiling_plan=boiling_plan,
+        start_time=start_time,
+        first_batch_ids_by_type=first_batch_ids_by_type,
+    )
+    schedule = output["schedule"]
+
+    # - Wrap frontend
+
     date = date or datetime.now()
 
     m = BlockMaker(
@@ -142,4 +162,23 @@ def wrap_frontend(schedule, date=None):
 
     with m.block(start_time=start_time, axis=1):
         m.block(wrap_boiling_lines(schedule))
-    return m.root
+
+    # - Add frontend to output and return
+
+    output["frontend"] = m.root
+
+    return output
+
+
+def test():
+    print(
+        wrap_frontend(
+            str(
+                get_repo_path() / "app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 1.xlsx"
+            )
+        )
+    )
+
+
+if __name__ == "__main__":
+    test()
