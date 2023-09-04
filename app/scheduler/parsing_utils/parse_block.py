@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional
 
 import pandas as pd
 
@@ -10,7 +10,7 @@ from app.scheduler.parsing_utils.group_neighbor_intervals import group_neighbor_
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
 
 
-def parse_block(
+def parse_elements(
     m: BlockMaker,
     cells_df: pd.DataFrame,
     label: str,
@@ -18,8 +18,8 @@ def parse_block(
     rows: list,
     start_time,
     length: int = 2,
-    split_func: Callable = None,
-    filter_: Callable = None,
+    split_func: Optional[Callable] = None,
+    filter_: Optional[Callable] = None,
 ):
     with m.row(label, x=start_time, push_func=add_push):
         for i, row_num in enumerate(rows):
@@ -36,7 +36,7 @@ def parse_block(
                     continue
 
                 try:
-                    boiling_id = int(group[0]["label"].split(" ")[0])
+                    boiling_id = int(str(group[0]["label"]).split(" ")[0])
                 except Exception as e:
                     boiling_id = None
 
@@ -55,22 +55,22 @@ def parse_block(
 
 def test():
     cells_df = load_cells_df(
-        str(
-            get_repo_path()
-            / "app/data/static/samples/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
-        ),
+        str(get_repo_path() / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"),
         "Расписание",
     )
 
-    parse_block(
-        m=BlockMaker(),
+    m = BlockMaker()
+    parse_elements(
+        m=m,
         cells_df=cells_df,
         label="boiling",
         element_label="element",
-        rows=[5, 6],
+        rows=[35],
         start_time=0,
         length=2,
     )
+
+    print(m.root)
 
 
 if __name__ == "__main__":

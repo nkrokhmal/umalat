@@ -19,9 +19,9 @@ from lessmore.utils.get_repo_path import get_repo_path
 from app.enum import LineName
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
-from app.scheduler.parsing_new_utils.parse_time import cast_time_from_hour_label
+from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
-from app.scheduler.parsing_utils.parse_block import parse_block
+from app.scheduler.parsing_utils.parse_block import parse_elements
 from app.scheduler.time_utils import cast_human_time, cast_t
 
 
@@ -45,14 +45,14 @@ def _is_datetime(v: Union[str, datetime]):
 
 def _filter_func(group):
     try:
-        return is_int_like(str(group[0]["label"]).split(" ")[0])
+        return is_int_like(group[0]["label"].split(" ")[0])
     except:
         return False
 
 
 def _split_func(row):
     try:
-        return is_int_like(str(row["label"]).split(" ")[0])
+        return is_int_like(row["label"].split(" ")[0])
     except:
         return False
 
@@ -128,7 +128,7 @@ def parse_schedule_file(wb_obj):
 
     # - Parse blocks
 
-    parse_block(
+    parse_elements(
         m=m,
         cells_df=cells_df,
         label="boilings",
@@ -139,12 +139,12 @@ def parse_schedule_file(wb_obj):
         split_func=_split_func,
     )
 
-    parse_block(m, cells_df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 8], start_times[0])
+    parse_elements(m, cells_df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 8], start_times[0])
 
     # -- Parse water melting
 
     if water_melting_headers:
-        parse_block(
+        parse_elements(
             m=m,
             cells_df=cells_df,
             label="water_meltings",
@@ -197,7 +197,7 @@ def parse_schedule_file(wb_obj):
             cooling_length = row["y0"] - melting.x[0]
             melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
 
-        parse_block(
+        parse_elements(
             m=m,
             cells_df=cells_df,
             label="water_packings",
@@ -211,7 +211,7 @@ def parse_schedule_file(wb_obj):
     # -- Parse salt melting
 
     if salt_melting_headers:
-        parse_block(
+        parse_elements(
             m=m,
             cells_df=cells_df,
             label="salt_meltings",
@@ -249,7 +249,7 @@ def parse_schedule_file(wb_obj):
 
         # - Add salt packing info to meltings
 
-        parse_block(
+        parse_elements(
             m=m,
             cells_df=cells_df,
             label="salt_packings",
@@ -260,7 +260,6 @@ def parse_schedule_file(wb_obj):
             filter_=_filter_func,
         )
 
-    print(m.root)
     return m.root
 
 

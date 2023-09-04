@@ -7,9 +7,9 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.numeric.types import is_int_like
 
 from app.scheduler.mascarpone.properties import MascarponeProperties
-from app.scheduler.parsing_new_utils.parse_time import cast_time_from_hour_label
+from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
-from app.scheduler.parsing_utils.parse_block import parse_block
+from app.scheduler.parsing_utils.parse_block import parse_elements
 from app.scheduler.time_utils import cast_human_time, cast_t, cast_time
 
 
@@ -69,7 +69,7 @@ def parse_schedule_file(wb_obj):
         except:
             return False
 
-    parse_block(
+    parse_elements(
         m,
         df,
         "boilings",

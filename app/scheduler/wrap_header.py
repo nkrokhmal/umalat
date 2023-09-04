@@ -1,7 +1,7 @@
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.time.dt import cast_str
 
-from app.scheduler.parsing_new_utils.parse_time import cast_label_from_time
+from app.scheduler.parsing_new_utils.parse_time_utils import cast_label_from_time
 from app.scheduler.time_utils import cast_t, cast_time
 
 

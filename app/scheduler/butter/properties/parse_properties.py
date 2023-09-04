@@ -7,9 +7,9 @@ from utils_ak.code_block.code import code
 from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.butter.properties.butter_properties import ButterProperties
-from app.scheduler.parsing_new_utils.parse_time import cast_time_from_hour_label
+from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
-from app.scheduler.parsing_utils.parse_block import parse_block
+from app.scheduler.parsing_utils.parse_block import parse_elements
 from app.scheduler.time_utils import cast_human_time, cast_t
 
 
@@ -29,7 +29,7 @@ def parse_schedule_file(wb_obj):
         # todo maybe: refactor start_times -> start_ts [@marklidenberg]
         start_times = [cast_t(v) for v in start_times]
 
-    parse_block(m, df, "boilings", "boiling", [i + 1 for i in time_index_row_nums], start_times[0], length=100)
+    parse_elements(m, df, "boilings", "boiling", [i + 1 for i in time_index_row_nums], start_times[0], length=100)
 
     return m.root
 

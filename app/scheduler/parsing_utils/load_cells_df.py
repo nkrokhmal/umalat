@@ -26,7 +26,7 @@ def load_cells_df(wb_obj, sheet_name):
 
     df["y0"] += 1
     df["y1"] += 1
-    df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
+    df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value).astype(str)
 
     df = df.sort_values(by=["x1", "x0", "y1", "y0"])
 
@@ -43,7 +43,7 @@ def load_cells_df(wb_obj, sheet_name):
     df = pd.DataFrame()
 
     df["cell"] = non_empty_cells
-    df["label"] = df["cell"].apply(lambda cell: cell.value)
+    df["label"] = df["cell"].apply(lambda cell: cell.value).astype(str)
     df["x0"] = df["cell"].apply(lambda cell: cell.col_idx)
     df["y0"] = df["x0"] + 1
     df["x1"] = df["cell"].apply(lambda cell: cell.row)
