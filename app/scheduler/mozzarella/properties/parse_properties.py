@@ -58,18 +58,20 @@ def _split_func(row):
 
 
 def parse_schedule_file(wb_obj):
-    df = load_cells_df(wb_obj, "Расписание")
+    cells_df = load_cells_df(wb_obj, "Расписание")
 
     m = BlockMaker("root")
 
     # - Find start times
 
-    time_index_row_nums = df[df["label"].astype(str).apply(_is_datetime)]["x1"].unique()
+    time_index_row_nums = cells_df[cells_df["label"].astype(str).apply(_is_datetime)]["x1"].unique()
 
     start_times = []
 
     for row_num in time_index_row_nums:
-        start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
+        start_times.append(
+            cast_time_from_hour_label(cells_df[(cells_df["x0"] == 5) & (cells_df["x1"] == row_num)].iloc[0]["label"])
+        )
 
     start_times = [cast_t(v) for v in start_times]
 
@@ -80,15 +82,15 @@ def parse_schedule_file(wb_obj):
 
     # - Calc split rows
 
-    df1 = df[df["x0"] >= 5]  # column header out
+    cells_df1 = cells_df[cells_df["x0"] >= 5]  # column header out
 
     cheese_maker_headers = []
     water_melting_headers = []
     salt_melting_headers = []
     headers = []
 
-    for row_num in df1["x1"].unique():
-        row_labels = [str(row["label"]) for i, row in df1[df1["x1"] == row_num].iterrows()]
+    for row_num in cells_df1["x1"].unique():
+        row_labels = [str(row["label"]) for i, row in cells_df1[cells_df1["x1"] == row_num].iterrows()]
         row_labels = [re.sub(r"\s+", " ", label) for label in row_labels if label]
 
         if {"налив/внесение закваски", "схватка"}.issubset(set(row_labels)):
@@ -101,6 +103,7 @@ def parse_schedule_file(wb_obj):
             salt_melting_headers.append(row_num - 1)
 
         # -- Find all headers
+
         _labels = [label.replace("налив", "") for label in row_labels]
         _labels = [re.sub(r"\s+", "", label) for label in _labels]
         int_labels = [int(label) for label in _labels if is_int_like(label)]
@@ -126,28 +129,28 @@ def parse_schedule_file(wb_obj):
     # - Parse blocks
 
     parse_block(
-        m,
-        df,
-        "boilings",
-        "boiling",
-        cheese_maker_headers,
-        start_times[0],
+        m=m,
+        cells_df=cells_df,
+        label="boilings",
+        element_label="boiling",
+        rows=cheese_maker_headers,
+        start_time=start_times[0],
         filter_=_filter_func,
         split_func=_split_func,
     )
 
-    parse_block(m, df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 8], start_times[0])
+    parse_block(m, cells_df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 8], start_times[0])
 
     # -- Parse water melting
 
     if water_melting_headers:
         parse_block(
-            m,
-            df,
-            "water_meltings",
-            "melting",
-            water_melting_headers,
-            start_times[1],
+            m=m,
+            cells_df=cells_df,
+            label="water_meltings",
+            element_label="melting",
+            rows=water_melting_headers,
+            start_time=start_times[1],
             filter_=_filter_func,
             split_func=_split_func,
         )
@@ -163,7 +166,7 @@ def parse_schedule_file(wb_obj):
 
         # -- Melting end with cooling
 
-        df_formings = df[df["label"] == "охлаждение"]
+        df_formings = cells_df[cells_df["label"] == "охлаждение"]
 
         # fix start times and column header
         df_formings["x0"] += start_times[1] - 5
@@ -195,12 +198,12 @@ def parse_schedule_file(wb_obj):
             melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
 
         parse_block(
-            m,
-            df,
-            "water_packings",
-            "packing",
-            packing_headers[:1],
-            start_times[1],
+            m=m,
+            cells_df=cells_df,
+            label="water_packings",
+            element_label="packing",
+            rows=packing_headers[:1],
+            start_time=start_times[1],
             split_func=_split_func,
             filter_=_filter_func,
         )
@@ -209,12 +212,12 @@ def parse_schedule_file(wb_obj):
 
     if salt_melting_headers:
         parse_block(
-            m,
-            df,
-            "salt_meltings",
-            "melting",
-            salt_melting_headers,
-            start_times[1],
+            m=m,
+            cells_df=cells_df,
+            label="salt_meltings",
+            element_label="melting",
+            rows=salt_melting_headers,
+            start_time=start_times[1],
             split_func=_split_func,
             filter_=_filter_func,
         )
@@ -223,9 +226,11 @@ def parse_schedule_file(wb_obj):
 
         # - Add salt forming info to meltings
 
-        df_formings = df[(df["label"] == "плавление/формирование") & (df["x1"] >= salt_melting_headers[0])]
+        df_formings = cells_df[
+            (cells_df["label"] == "плавление/формирование") & (cells_df["x1"] >= salt_melting_headers[0])
+        ]
         df_formings["serving_start"] = df_formings["x0"].apply(
-            lambda x0: df[(df["y0"] == x0) & (df["label"] == "подача и вымешивание")].iloc[0]["x0"]
+            lambda x0: cells_df[(cells_df["y0"] == x0) & (cells_df["label"] == "подача и вымешивание")].iloc[0]["x0"]
         )
 
         # fix start times and column header
@@ -245,12 +250,12 @@ def parse_schedule_file(wb_obj):
         # - Add salt packing info to meltings
 
         parse_block(
-            m,
-            df,
-            "salt_packings",
-            "packing",
-            [packing_headers[-1], packing_headers[-1] + 6],
-            start_times[1],
+            m=m,
+            cells_df=cells_df,
+            label="salt_packings",
+            element_label="packing",
+            rows=[packing_headers[-1], packing_headers[-1] + 6],
+            start_time=start_times[1],
             split_func=_split_func,
             filter_=_filter_func,
         )
@@ -280,19 +285,19 @@ def prepare_boiling_plan(parsed_schedule, boiling_plan_df):
     return boiling_plan_df
 
 
-def fill_properties(parsed_schedule, df_bp):
+def fill_properties(parsed_schedule, boiling_plan_df):
     props = MozzarellaProperties()
 
     # save boiling_model to parsed_schedule blocks
     for block in list(parsed_schedule.iter(cls=lambda cls: cls in ["boiling", "melting", "packing"])):
-        with code("remove little blocks"):
-            if "boiling_id" not in block.props.all() or not is_int(block.props["boiling_id"]):
-                # NOTE: SHOULD NOT HAPPEN IN NEWER FILES SINCE update 2021.10.21 (# update 2021.10.21)
-                logger.error("Removing small block", block=block)
-                block.detach_from_parent()
-                continue
+        # remove little blocks
+        if "boiling_id" not in block.props.all() or not is_int(block.props["boiling_id"]):
+            # NOTE: SHOULD NOT HAPPEN IN NEWER FILES SINCE update 2021.10.21 (# update 2021.10.21)
+            logger.error("Removing small block", block=block)
+            block.detach_from_parent()
+            continue
 
-        boiling_group_df = df_bp[df_bp["boiling_id"] == int(block.props["boiling_id"])]
+        boiling_group_df = boiling_plan_df[boiling_plan_df["boiling_id"] == int(block.props["boiling_id"])]
         block.props.update(
             boiling_group_df=boiling_group_df,
             line_name=boiling_group_df.iloc[0]["boiling"].line.name,
@@ -309,152 +314,155 @@ def fill_properties(parsed_schedule, df_bp):
 
     # filling code is mirroring the pickle parser from app/scheduler/mozzarella/properties.py
 
-    props.bar12_present = "1.2" in [sku.form_factor.name for sku in df_bp["sku"]]
+    props.bar12_present = "1.2" in [sku.form_factor.name for sku in boiling_plan_df["sku"]]
 
-    with code("2.7, 3.3, 3.6 tanks"):
-        _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.3"]
-        if _boilings:
-            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-            props.line33_last_termizator_end_times = [
-                cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"]))
-                for b in _tank_boilings
-            ]
+    # - 2.7, 3.3, 3.6 tanks
 
-        _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.6"]
-        if _boilings:
-            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-            props.line36_last_termizator_end_times = [
-                cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"]))
-                for b in _tank_boilings
-            ]
-
-        _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "2.7"]
-        if _boilings:
-            _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-            props.line27_last_termizator_end_times = [
-                cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"]))
-                for b in _tank_boilings
-            ]
-
-    with code("multihead"):
-        multihead_packings = list(
-            parsed_schedule.iter(
-                cls="packing",
-                boiling_group_df=lambda df: df["sku"].iloc[0].packers[0].name == "Мультиголова",
-            )
-        )
-        if multihead_packings:
-            props.multihead_end_time = cast_human_time(max(packing.y[0] for packing in multihead_packings))
-
-        water_multihead_packings = list(
-            parsed_schedule.iter(
-                cls="packing",
-                boiling_group_df=lambda df: df["sku"].iloc[0].packers[0].name == "Мультиголова"
-                and df.iloc[0]["boiling"].line.name == LineName.WATER,
-            )
-        )
-        if water_multihead_packings:
-            props.water_multihead_present = True
-
-    with code("cleanings"):
-        props.short_cleaning_times = [
-            cast_human_time(cleaning.x[0])
-            for cleaning in parsed_schedule.iter(cls="cleaning")
-            if "Короткая мойка" in cleaning.props["group"][0]["label"]
-        ]
-        props.full_cleaning_times = [
-            cast_human_time(cleaning.x[0])
-            for cleaning in parsed_schedule.iter(cls="cleaning")
-            if "Полная мойка" in cleaning.props["group"][0]["label"]
+    _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.3"]
+    if _boilings:
+        _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+        props.line33_last_termizator_end_times = [
+            cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings
         ]
 
-    with code("meltings"):
-        if salt_boilings:
-            props.salt_melting_start_time = cast_human_time(
-                parsed_schedule["salt_meltings"]["melting", True][0].props["melting_start"]
-            )
+    _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.6"]
+    if _boilings:
+        _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+        props.line36_last_termizator_end_times = [
+            cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings
+        ]
 
-    with code("cheesemakers"):
-        values = []
-        for b in parsed_schedule["boilings"]["boiling", True]:
-            values.append([b.props["line_num"], b.y[0]])
+    _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "2.7"]
+    if _boilings:
+        _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
+        props.line27_last_termizator_end_times = [
+            cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings
+        ]
 
-        df1 = pd.DataFrame(values, columns=["pouring_line", "finish"])
-        values = df1.groupby("pouring_line").agg(max).to_dict()["finish"]
-        values = list(sorted(values.items(), key=lambda kv: kv[0]))  # [('0', 116), ('1', 97), ('2', 149), ('3', 160)]
-        values_dict = dict(values)
-        props.cheesemaker1_end_time = cast_human_time(values_dict.get("0"))
-        props.cheesemaker2_end_time = cast_human_time(values_dict.get("1"))
-        props.cheesemaker3_end_time = cast_human_time(values_dict.get("2"))
-        props.cheesemaker4_end_time = cast_human_time(values_dict.get("3"))
+    # - Multihead
 
-    with code("melting end"):
+    multihead_packings = list(
+        parsed_schedule.iter(
+            cls="packing",
+            boiling_group_df=lambda df: df["sku"].iloc[0].packers[0].name == "Мультиголова",
+        )
+    )
+    if multihead_packings:
+        props.multihead_end_time = cast_human_time(max(packing.y[0] for packing in multihead_packings))
 
-        def _get_melting_end(line_boilings):
-            if not line_boilings:
-                return None
-            line_boilings = list(sorted(line_boilings, key=lambda b: b.x[0]))
-            last_boiling_id = line_boilings[-1].props["boiling_id"]
-            last_melting = parsed_schedule.find_one(cls="melting", boiling_id=last_boiling_id)
-            return last_melting.props["melting_end_with_cooling"]
+    water_multihead_packings = list(
+        parsed_schedule.iter(
+            cls="packing",
+            boiling_group_df=lambda df: df["sku"].iloc[0].packers[0].name == "Мультиголова"
+            and df.iloc[0]["boiling"].line.name == LineName.WATER,
+        )
+    )
+    if water_multihead_packings:
+        props.water_multihead_present = True
 
-        props.water_melting_end_time = cast_human_time(_get_melting_end(water_boilings))
-        props.salt_melting_end_time = cast_human_time(_get_melting_end(salt_boilings))
+    # - Cleanings
 
-    with code("drenators"):
-        with code("fill drenators info"):
-            for line_num in range(4):
-                line_boilings = [b for b in boilings if b.props["line_num"] == str(line_num)]
-                line_boilings = list(sorted(line_boilings, key=lambda b: b.x[0]))
+    props.short_cleaning_times = [
+        cast_human_time(cleaning.x[0])
+        for cleaning in parsed_schedule.iter(cls="cleaning")
+        if "Короткая мойка" in cleaning.props["group"][0]["label"]
+    ]
+    props.full_cleaning_times = [
+        cast_human_time(cleaning.x[0])
+        for cleaning in parsed_schedule.iter(cls="cleaning")
+        if "Полная мойка" in cleaning.props["group"][0]["label"]
+    ]
 
-                cur_drenator_num = -1
-                for b1, b2 in iter_pairs(line_boilings, method="any_prefix"):
-                    if not b1:
-                        cur_drenator_num += 1
-                    else:
-                        melting = parsed_schedule.find_one(cls="melting", boiling_id=b1.props["boiling_id"])
-                        if (
-                            b2.y[0] - 5 < melting.props["melting_end"]
-                        ):  # todo later: make pouring off properly [@marklidenberg]
-                            cur_drenator_num += 1
-                        else:
-                            # use same drenator for the next boiling
-                            pass
-                    b2.props.update(
-                        drenator_num=cur_drenator_num % 2,
-                        drenator_end=b2.y[0] + b2.props["boiling_model"].line.chedderization_time // 5 - 5,
-                    )  # todo later: make pouring off properly [@marklidenberg]
+    # - Meltings
 
-        with code("fill drenator properties"):
-            # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
-            values = []
-            for boiling in boilings:
-                values.append(
-                    [
-                        boiling.props["drenator_end"],
-                        boiling.props["line_num"],
-                        boiling.props["drenator_num"],
-                    ]
-                )
-            df = pd.DataFrame(values, columns=["drenator_end", "pouring_line", "drenator_num"])
-            df["id"] = df["pouring_line"].astype(int) * 2 + df["drenator_num"].astype(int)
-            df = df[["id", "drenator_end"]]
-            df = df.drop_duplicates(subset="id", keep="last")
-            df = df.reset_index(drop=True)
-            df["id"] = df["id"].astype(int) + 1
+    if salt_boilings:
+        props.salt_melting_start_time = cast_human_time(
+            parsed_schedule["salt_meltings"]["melting", True][0].props["melting_start"]
+        )
 
-            df = df.sort_values(by="id")
+    # - Cheesemakers
 
-            values = df.values.tolist()
-            values_dict = dict(values)
-            props.drenator1_end_time = cast_human_time(values_dict.get(1))
-            props.drenator2_end_time = cast_human_time(values_dict.get(2))
-            props.drenator3_end_time = cast_human_time(values_dict.get(3))
-            props.drenator4_end_time = cast_human_time(values_dict.get(4))
-            props.drenator5_end_time = cast_human_time(values_dict.get(5))
-            props.drenator6_end_time = cast_human_time(values_dict.get(6))
-            props.drenator7_end_time = cast_human_time(values_dict.get(7))
-            props.drenator8_end_time = cast_human_time(values_dict.get(8))
+    values = []
+    for b in parsed_schedule["boilings"]["boiling", True]:
+        values.append([b.props["line_num"], b.y[0]])
+
+    df1 = pd.DataFrame(values, columns=["pouring_line", "finish"])
+    values = df1.groupby("pouring_line").agg(max).to_dict()["finish"]
+    values = list(sorted(values.items(), key=lambda kv: kv[0]))  # [('0', 116), ('1', 97), ('2', 149), ('3', 160)]
+    values_dict = dict(values)
+    props.cheesemaker1_end_time = cast_human_time(values_dict.get("0"))
+    props.cheesemaker2_end_time = cast_human_time(values_dict.get("1"))
+    props.cheesemaker3_end_time = cast_human_time(values_dict.get("2"))
+    props.cheesemaker4_end_time = cast_human_time(values_dict.get("3"))
+
+    # - Melting end
+
+    def _get_melting_end(line_boilings):
+        if not line_boilings:
+            return None
+        line_boilings = list(sorted(line_boilings, key=lambda b: b.x[0]))
+        last_boiling_id = line_boilings[-1].props["boiling_id"]
+        last_melting = parsed_schedule.find_one(cls="melting", boiling_id=last_boiling_id)
+        return last_melting.props["melting_end_with_cooling"]
+
+    props.water_melting_end_time = cast_human_time(_get_melting_end(water_boilings))
+    props.salt_melting_end_time = cast_human_time(_get_melting_end(salt_boilings))
+
+    # - Drenators
+
+    # -- Fill drenators info
+
+    for line_num in range(4):
+        line_boilings = [b for b in boilings if b.props["line_num"] == str(line_num)]
+        line_boilings = list(sorted(line_boilings, key=lambda b: b.x[0]))
+
+        cur_drenator_num = -1
+        for b1, b2 in iter_pairs(line_boilings, method="any_prefix"):
+            if not b1:
+                cur_drenator_num += 1
+            else:
+                melting = parsed_schedule.find_one(cls="melting", boiling_id=b1.props["boiling_id"])
+                if b2.y[0] - 5 < melting.props["melting_end"]:  # todo later: make pouring off properly [@marklidenberg]
+                    cur_drenator_num += 1
+                else:
+                    # use same drenator for the next boiling
+                    pass
+            b2.props.update(
+                drenator_num=cur_drenator_num % 2,
+                drenator_end=b2.y[0] + b2.props["boiling_model"].line.chedderization_time // 5 - 5,
+            )  # todo later: make pouring off properly [@marklidenberg]
+
+    # -- Fill drenator properties
+
+    # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
+    values = []
+    for boiling in boilings:
+        values.append(
+            [
+                boiling.props["drenator_end"],
+                boiling.props["line_num"],
+                boiling.props["drenator_num"],
+            ]
+        )
+    df = pd.DataFrame(values, columns=["drenator_end", "pouring_line", "drenator_num"])
+    df["id"] = df["pouring_line"].astype(int) * 2 + df["drenator_num"].astype(int)
+    df = df[["id", "drenator_end"]]
+    df = df.drop_duplicates(subset="id", keep="last")
+    df = df.reset_index(drop=True)
+    df["id"] = df["id"].astype(int) + 1
+
+    df = df.sort_values(by="id")
+
+    values = df.values.tolist()
+    values_dict = dict(values)
+    props.drenator1_end_time = cast_human_time(values_dict.get(1))
+    props.drenator2_end_time = cast_human_time(values_dict.get(2))
+    props.drenator3_end_time = cast_human_time(values_dict.get(3))
+    props.drenator4_end_time = cast_human_time(values_dict.get(4))
+    props.drenator5_end_time = cast_human_time(values_dict.get(5))
+    props.drenator6_end_time = cast_human_time(values_dict.get(6))
+    props.drenator7_end_time = cast_human_time(values_dict.get(7))
+    props.drenator8_end_time = cast_human_time(values_dict.get(8))
 
     return props
 

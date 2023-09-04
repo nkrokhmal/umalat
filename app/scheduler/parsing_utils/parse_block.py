@@ -4,12 +4,15 @@ import pandas as pd
 
 from utils_ak.block_tree import BlockMaker, add_push
 
+from lessmore.utils.get_repo_path import get_repo_path
+
 from app.scheduler.parsing_utils.group_neighbor_intervals import group_neighbor_intervals
+from app.scheduler.parsing_utils.load_cells_df import load_cells_df
 
 
 def parse_block(
     m: BlockMaker,
-    merged_cells_df: pd.DataFrame,
+    cells_df: pd.DataFrame,
     label: str,
     element_label: str,
     rows: list,
@@ -20,9 +23,7 @@ def parse_block(
 ):
     with m.row(label, x=start_time, push_func=add_push):
         for i, row_num in enumerate(rows):
-            df1 = merged_cells_df[
-                (merged_cells_df["x1"] == row_num) & (merged_cells_df["x0"] >= 4)
-            ]  # filter column header
+            df1 = cells_df[(cells_df["x1"] == row_num) & (cells_df["x0"] >= 4)]  # filter column header
             groups = group_neighbor_intervals(
                 [row for i, row in df1.iterrows()],
                 max_group_size=length,
@@ -50,3 +51,27 @@ def parse_block(
                     label=str(boiling_id),
                     push_func=add_push,
                 )
+
+
+def test():
+    cells_df = load_cells_df(
+        str(
+            get_repo_path()
+            / "app/data/static/samples/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
+        ),
+        "Расписание",
+    )
+
+    parse_block(
+        m=BlockMaker(),
+        cells_df=cells_df,
+        label="boiling",
+        element_label="element",
+        rows=[5, 6],
+        start_time=0,
+        length=2,
+    )
+
+
+if __name__ == "__main__":
+    test()
