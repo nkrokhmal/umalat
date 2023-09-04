@@ -3,6 +3,8 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.numeric.types import is_int_like
 
+from lessmore.utils.get_repo_path import get_repo_path
+
 from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
 from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
@@ -22,7 +24,8 @@ def parse_schedule_file(wb_obj):
 
         for row_num in time_index_row_nums:
             start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
-        # todo maybe: refactor, start_times -> start_ts
+
+        # todo maybe: refactor, start_times -> start_ts [@marklidenberg]
         start_times = [cast_t(v) for v in start_times]
 
     def _split_func(row):
@@ -73,13 +76,21 @@ def fill_properties(parsed_schedule):
     return props
 
 
-def parse_properties(fn):
-    parsed_schedule = parse_schedule_file(fn)
+def parse_properties(filename):
+    parsed_schedule = parse_schedule_file(filename)
     props = fill_properties(parsed_schedule)
     return props
 
 
+def test():
+    print(
+        parse_properties(
+            filename=str(
+                get_repo_path() / "app/data/static/samples/by_department/adygea/2023-09-03 Расписание милкпроджект.xlsx"
+            )
+        )
+    )
+
+
 if __name__ == "__main__":
-    # fn = "/Users/marklidenberg/Desktop/2021-09-04 Расписание моцарелла.xlsx"
-    fn = "/Users/arsenijkadaner/Desktop/2021-01-02 Расписание милкпроджект-2.xlsx"
-    print(dict(parse_properties(fn)))
+    test()

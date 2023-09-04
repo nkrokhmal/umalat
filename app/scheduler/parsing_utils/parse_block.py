@@ -36,7 +36,7 @@ def parse_elements(
                     continue
 
                 try:
-                    boiling_id = int(str(group[0]["label"]).split(" ")[0])
+                    boiling_id = int(group[0]["label"].split(" ")[0])
                 except Exception as e:
                     boiling_id = None
 

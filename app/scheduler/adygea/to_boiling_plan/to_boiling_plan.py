@@ -79,7 +79,9 @@ def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"adygea": 
 
 def test():
     df = to_boiling_plan(
-        str(get_repo_path() / "app/data/static/samples/by_department/adygea/План по варкам адыгейский 1.xlsx")
+        str(
+            get_repo_path() / "app/data/static/samples/by_department/adygea/2023-09-03 План по варкам милкпроджект.xlsx"
+        )
     )
     print(df.iloc[0])
 

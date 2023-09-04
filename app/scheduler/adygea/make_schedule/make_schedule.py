@@ -54,12 +54,17 @@ class Validator(ClassValidator):
         pass
 
 
-def _make_schedule(boiling_plan_df, start_time="07:00", prepare_start_time="07:00", lunch_times=None):
+def _make_schedule(
+    boiling_plan_df,
+    start_time="07:00",
+    prepare_start_time="07:00",
+    lunch_times=None,
+):
     lunch_times = lunch_times or []
     lunch_times = list(lunch_times)
     assert len(lunch_times) in [0, 2]  # no lunches or two lunches for two teams
 
-    adygea_line = cast_model(AdygeaLine, 7)
+    adygea_line = cast_model(cls=AdygeaLine, obj="Адыгейский")
 
     local_start_t = cast_t(start_time) - cast_t(prepare_start_time)
     normed_lunch_times = [cast_time(cast_t(lt) - cast_t(prepare_start_time)) for lt in lunch_times]
@@ -239,7 +244,10 @@ def make_schedule(
 def test():
     print(
         make_schedule(
-            str(get_repo_path() / "app/data/static/samples/by_department/adygea/План по варкам адыгейский 1.xlsx")
+            str(
+                get_repo_path()
+                / "app/data/static/samples/by_department/adygea/2023-09-03 План по варкам милкпроджект.xlsx"
+            )
         )
     )
 
