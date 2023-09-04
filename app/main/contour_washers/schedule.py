@@ -1,7 +1,6 @@
 from app.imports.runtime import *
 from app.main import main
 from app.main.errors import internal_error
-from app.scheduler import run_consolidated, run_contour_cleanings
 from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
 from app.scheduler.butter.properties.butter_properties import ButterProperties
 from app.scheduler.mascarpone.properties import MascarponeProperties
@@ -9,6 +8,8 @@ from app.scheduler.milk_project.properties.milk_project_properties import MilkPr
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.ricotta.properties import RicottaProperties
 
+from ...scheduler.contour_cleanings.make_schedule import calc_scotta_input_tanks
+from ...scheduler.run_consolidated import run_consolidated
 from .forms import ScheduleDateForm, ScheduleForm, create_form, fill_properties
 
 

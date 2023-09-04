@@ -1,20 +1,23 @@
 import os
 
+from openpyxl import Workbook
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook, draw_sheet_sequence
 from utils_ak.os.os_tools import makedirs, open_file_in_os
+
+from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.frontend_utils import prepare_schedule_worksheet
 from config import config
 
 
 def run_consolidated(
-    input_path,
-    prefix="",
-    departments=None,
-    add_contour_cleanings=True,
-    output_path="outputs/",
-    wb=None,
-    open_file=False,
+    input_path: str,
+    prefix: str = "",
+    departments: list[str] = None,
+    add_contour_cleanings: bool = True,
+    output_path: str = "outputs/",
+    wb: Workbook = None,
+    open_file: bool = False,
 ):
     departments = departments or [
         "mozzarella",
@@ -28,7 +31,7 @@ def run_consolidated(
     fns = [
         os.path.join(
             input_path,
-            f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES[department]}.xlsx",
+            f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES_BY_DEPARTMENT[department]}.xlsx",
         )
         for department in departments
     ]
@@ -54,10 +57,9 @@ def run_consolidated(
 
 def test():
     run_consolidated(
-        # "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
-        "/Users/arsenijkadaner/Desktop/2022-01-21/approved",
-        add_contour_cleanings=True,
-        prefix="2022-01-21",
+        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2023-09-03"),
+        add_contour_cleanings=False,
+        prefix="2023-09-03",
         open_file=True,
     )
 

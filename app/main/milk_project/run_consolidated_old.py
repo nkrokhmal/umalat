@@ -11,7 +11,6 @@ from app.globals import basedir
 from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.load_schedules import load_schedules_by_department
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
-from app.scheduler.run_consolidated import run_consolidated
 from config import config
 
 
@@ -125,7 +124,7 @@ def run_consolidated_old(
 
 
 def test():
-    run_consolidated(
+    run_consolidated_old(
         # "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/schedule_dict/",
         "/Users/marklidenberg/Yandex.Disk.localized/Загрузки/umalat/2021-07-16/approved",
         # prefix="2021-01-01",

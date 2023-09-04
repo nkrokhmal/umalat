@@ -60,7 +60,7 @@ def load_properties_by_department(
             if path and prefix:
                 filename = os.path.join(
                     path,
-                    f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES[department]}.xlsx",
+                    f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES_BY_DEPARTMENT[department]}.xlsx",
                 )
                 if os.path.exists(filename):
                     try:
@@ -85,14 +85,18 @@ def assert_properties_presence(properties, raise_if_not_present=None, warn_if_no
 
     for department in raise_if_not_present:
         if not properties[department].is_present():
-            raise Exception(f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}")
+            raise Exception(
+                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES_BY_DEPARTMENT[department]}"
+            )
 
     for department in warn_if_not_present:
         if not properties[department].is_present():
-            logger.warning(f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}")
+            logger.warning(
+                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES_BY_DEPARTMENT[department]}"
+            )
             if os.environ.get("APP_ENVIRONMENT") == "runtime":
                 flask.flash(
-                    f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}",
+                    f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES_BY_DEPARTMENT[department]}",
                     "warning",
                 )
 

@@ -1,6 +1,0 @@
-boiling (0, 8] x (0, 0]
-  heating (0, 3] x (0, 0]
-  delay (3, 4] x (0, 0]
-  protein_harvest (4, 6] x (0, 0]
-  abandon (6, 7] x (0, 0]
-  pumping_out (7, 8] x (0, 0]
