@@ -7,6 +7,7 @@ from . import (
     params_download,
     params_line,
     params_sku,
+    params_update,
     schedule,
     upload_schedule,
 )

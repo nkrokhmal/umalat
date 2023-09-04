@@ -1,3 +1,5 @@
+import io
+
 from pathlib import Path
 
 import flask
@@ -61,18 +63,22 @@ def test_ricotta_download_params(client: flask.Flask, df_parameters: pd.DataFram
         assert df.equals(df_parameters)
 
 
-#
-#
-# def test_ricotta_download_params(client):
-#     params_df = pd.read_excel(r"app/data/static/params/ricotta_test.xlsx")
-#     with client.test_client() as client:
-#         url = url_for("main.download_ricotta", _external=False)
-#         response = client.post(url, follow_redirects=True)
-#         df = pd.read_excel(response.data)
-#
-#         df = df.reindex(sorted(df.columns), axis=1)
-#         params_df = params_df.reindex(sorted(df.columns), axis=1)
-#
-#         assert sorted(df.columns) == sorted(params_df.columns)
-#         assert df.equals(params_df)
-#         assert response.status_code == 200
+def test_ricotta_upload_params(client: flask.Flask, df_parameters: pd.DataFrame) -> None:
+    body: dict = {}
+    with open(RICOTTA_TEST_DIR / "parameters.xlsx", "rb") as f:
+        body["input_file"] = (io.BytesIO(f.read()), "ricotta.xlsx")
+
+    update_url = flask.url_for("main.ricotta_update_params", _external=False)
+    download_url = flask.url_for("main.download_ricotta", _external=False)
+
+    with client.test_client() as client:
+        response = client.post(update_url, data=body, follow_redirects=True, content_type="multipart/form-data")
+        assert response.status_code == 200
+
+        response = client.post(download_url, follow_redirects=True)
+        assert response.status_code == 200
+
+        df = pd.read_excel(response.data)
+        df.set_index(df.columns[0], inplace=True)
+        df.fillna("", inplace=True)
+        assert df.equals(df_parameters)

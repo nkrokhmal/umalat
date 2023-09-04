@@ -1,6 +1,8 @@
-from app.imports.runtime import *
-from app.models import *
+import pandas as pd
+
+from app.models.ricotta import RicottaBoiling
 from app.utils.features.merge_boiling_utils import Boilings
+from app.utils.ricotta.order import RICOTTA_ORDERS, Order
 
 
 POPULAR_NAMES = {
@@ -9,18 +11,15 @@ POPULAR_NAMES = {
 }
 
 
-def boiling_plan_create(df, request_ton=0):
+def boiling_plan_create(df: pd.DataFrame, request_kg: int = 0) -> pd.DataFrame:
     df["plan"] = df["plan"].apply(lambda x: round(x))
     df["percent"] = df["sku"].apply(lambda x: x.made_from_boilings[0].percent)
     df["flavoring_agent"] = df["sku"].apply(lambda x: x.made_from_boilings[0].flavoring_agent)
-    df["number_of_tanks"] = df["sku"].apply(lambda x: x.made_from_boilings[0].number_of_tanks)
     df["short_display_name"] = df["sku"].apply(lambda x: x.made_from_boilings[0].short_display_name)
-    df["group"] = df["sku"].apply(lambda x: x.group.name)
-    df["is_cream"] = df["sku"].apply(lambda x: x.made_from_boilings[0].is_cream)
-    df["output_per_tank"] = df["sku"].apply(lambda x: x.output_per_tank)
-    df["at_first"] = df["sku"].apply(lambda x: x.at_first)
+    df["output"] = df["sku"].apply(lambda x: x.made_from_boilings[0].output_kg)
 
-    result, boiling_number = handle_ricotta(df, request_ton=request_ton)
+    result, boiling_number = handle_ricotta(df, request_kg=request_kg)
+
     result["kg"] = result["plan"]
     result["name"] = result["sku"].apply(lambda sku: sku.name)
     result["output"] = result["output_per_tank"] * result["number_of_tanks"]
@@ -60,18 +59,28 @@ def group_result(df):
     return df.groupby("name", as_index=False).agg(agg).sort_values(by="id")
 
 
-def proceed_order(order, df, boilings_ricotta, boilings_count=1):
+def handle_ricotta(df: pd.DataFrame) -> pd.DataFrame:
+    handler = BoilingsHandler()
 
-    if order.at_first:
-        df_filter = df[(df["at_first"] == True)]
-    else:
-        df_filter = df[
-            (df["at_first"] == False)
-            & (df["is_cream"] == order.is_cream)
-            & (order.flavoring_agent is None or df["flavoring_agent"] == order.flavoring_agent)
-        ]
+    for order in RICOTTA_ORDERS:
+        df_order = df[df.apply(lambda row: order.order_filter(row), axis=1)]
 
-    if not df_filter.empty:
+        if not df_order.empty:
+            groups = [group for _, group in df_order.groupby("boiling_id")]
+
+            for group in sorted(groups, key=lambda x: x["weight"].iloc[0], reverse=True):
+                group_dict = group.to_dict("records")
+                max_weight = group_dict[0]["output_kg"]
+
+                handler.handle_group(group_dict, max_weight=max_weight)
+
+    return add_fields(pd.DataFrame(handler.boiling_groups))
+
+
+def handle_order(order: Order, df: pd.DataFrame, boilings_ricotta, boilings_count=1):
+    df_order = df[df.apply(lambda row: order.order_filter(row), axis=1)]
+
+    if not df_order.empty:
         df_filter["output"] = df_filter["number_of_tanks"] * df_filter["output_per_tank"]
         df_filter["output"] = df_filter["output"].apply(lambda x: int(x))
 
@@ -89,19 +98,10 @@ def proceed_order(order, df, boilings_ricotta, boilings_count=1):
 def handle_ricotta(df, request_ton=0):
     boilings_ricotta = Boilings()
     input_ton = db.session.query(RicottaLine).first().input_ton
-    Order = collections.namedtuple("Collection", "at_first, is_cream, flavoring_agent")
-    orders = [
-        Order(True, None, None),
-        Order(False, True, None),
-        Order(False, False, ""),
-        Order(False, False, "Ваниль"),
-        Order(False, False, "Мед"),
-        Order(False, False, "Вишня"),
-        Order(False, False, "Шоколад"),
-        Order(False, False, "Шоколад-орех"),
-    ]
-    for order in orders:
+
+    for order in RICOTTA_ORDER:
         boilings_ricotta = proceed_order(order, df, boilings_ricotta)
+
     boilings_ricotta.finish()
     sum_ton = pd.DataFrame(boilings_ricotta.boilings).groupby("id").first()["number_of_tanks"].sum() * input_ton
     if request_ton > sum_ton:
