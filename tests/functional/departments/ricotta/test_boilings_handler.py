@@ -13,22 +13,22 @@ class HandlerCase:
 
 
 CASES: list[HandlerCase] = [
-    # HandlerCase(
-    #     groups=[{"max_weight": 100, "skus": [{"name": 0, "plan": 300}]}],
-    #     ground_truth=[
-    #         [{"name": 0, "plan": 100, "id": 0}],
-    #     ],
-    #     counts=[3]
-    # ),
-    # HandlerCase(
-    #     groups=[{"max_weight": 100, "skus": [{"name": 0, "plan": 220}, {"name": 1, "plan": 100}]}],
-    #     ground_truth=[
-    #         [{"name": 0, "plan": 100, "id": 0}],
-    #         [{"name": 0, "plan": 20, "id": 2}, {"name": 1, "plan": 80, "id": 2}],
-    #         [{"name": 1, "plan": 20, "id": 3}],
-    #     ],
-    #     counts=[2, 1, 1]
-    # ),
+    HandlerCase(
+        groups=[{"max_weight": 100, "skus": [{"name": 0, "plan": 300}]}],
+        ground_truth=[
+            [{"name": 0, "plan": 100, "id": 0}],
+        ],
+        counts=[3],
+    ),
+    HandlerCase(
+        groups=[{"max_weight": 100, "skus": [{"name": 0, "plan": 220}, {"name": 1, "plan": 100}]}],
+        ground_truth=[
+            [{"name": 0, "plan": 100, "id": 0}],
+            [{"name": 0, "plan": 20, "id": 2}, {"name": 1, "plan": 80, "id": 2}],
+            [{"name": 1, "plan": 20, "id": 3}],
+        ],
+        counts=[2, 1, 1],
+    ),
     HandlerCase(
         groups=[
             {"max_weight": 100, "skus": [{"name": 0, "plan": 120}, {"name": 1, "plan": 110}, {"name": 2, "plan": 70}]},

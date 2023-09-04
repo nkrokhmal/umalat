@@ -1,3 +1,4 @@
+import itertools
 import typing as tp
 
 from copy import deepcopy
@@ -18,6 +19,14 @@ class RicottaBoilingGroup(BoilingGroup):
 class RicottaBoilingsHandler(BoilingsHandler):
     def __init__(self):
         super().__init__()
+
+    @property
+    def boiling_groups(self) -> list[dict]:
+        result: list[dict] = []
+        for group in self.boilings:
+            for sku in group.skus:
+                result.append((lambda d: d.update({"boiling_count": group.count}) or d)(sku.copy()))
+        return result
 
     def handle_group(self, skus: list[dict], max_weight: float, weight_key: str = "plan") -> None:
         boiling = RicottaBoilingGroup(max_weight, id=self.boiling_id)

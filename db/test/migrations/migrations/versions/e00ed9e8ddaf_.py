@@ -179,7 +179,7 @@ def upgrade():
         "mozzarella_lines",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("input_ton", sa.Integer(), nullable=True),
-        sa.Column("output_ton", sa.Integer(), nullable=True),
+        sa.Column("output_kg", sa.Integer(), nullable=True),
         sa.Column("pouring_time", sa.Integer(), nullable=True),
         sa.Column("serving_time", sa.Integer(), nullable=True),
         sa.Column("melting_speed", sa.Integer(), nullable=True),

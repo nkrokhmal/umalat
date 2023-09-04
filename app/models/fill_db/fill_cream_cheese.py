@@ -109,7 +109,7 @@ def fill_boilings():
         ]
         boiling = CreamCheeseBoiling(
             percent=b["Процент"],
-            output_ton=b["Выход"],
+            output_kg=b["Выход"],
             output_coeff=b["Коэффициент"],
             boiling_technologies=bts_name,
             line_id=line_id,

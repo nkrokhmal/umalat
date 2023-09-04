@@ -13,7 +13,7 @@ class Order:
         return self.flavoring_agent if self.flavoring_agent is not None else ""
 
     def order_filter(self, row: pd.Series) -> bool:
-        if self.percent is not None and not row["percent"] != self.percent:
+        if self.percent is not None and row["percent"] != self.percent:
             return False
 
         if row["flavoring_agent"] != self.flavoring_agent_str:

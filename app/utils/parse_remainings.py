@@ -94,7 +94,7 @@ def parse_file(file):
 
 
 def parse_file_path(path: os.PathLike | str) -> tuple[dict, pd.DataFrame]:
-    mode = path.split(".")[-1]
+    mode = str(path).split(".")[-1]
     if mode == "csv":
         return parse_df(pd.read_csv(path, sep=";"), "csv")
     else:
@@ -153,7 +153,7 @@ def cast_volume(obj):
     if isinstance(obj, MozzarellaSKU):
         return obj.line.output_kg
     elif isinstance(obj, RicottaSKU):
-        return obj.made_from_boilings[0].number_of_tanks * obj.output_per_tank
+        return obj.made_from_boilings[0].output_kg
     elif isinstance(obj, MascarponeSKU):
         return obj.made_from_boilings[0].output_kg
     elif isinstance(obj, ButterSKU):

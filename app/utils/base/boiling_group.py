@@ -8,6 +8,7 @@ from dataclasses import dataclass
 class BoilingGroup:
     weight: float
     id: int = 0
+    skus: list[dict] | None = None
 
     def __post_init__(self) -> None:
         self.skus: list[dict] = []

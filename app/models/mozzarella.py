@@ -22,7 +22,7 @@ class MozzarellaLine(Line):
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), primary_key=True)
     input_ton = mdb.Column(mdb.Integer)
-    output_ton = mdb.Column(mdb.Integer)
+    output_kg = mdb.Column(mdb.Integer)
     pouring_time = mdb.Column(mdb.Integer)
     serving_time = mdb.Column(mdb.Integer)
     melting_speed = mdb.Column(mdb.Integer)
