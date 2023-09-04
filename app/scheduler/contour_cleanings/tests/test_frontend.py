@@ -12,7 +12,7 @@ from config import config
 def test_batch():
     paths = glob.glob(
         config.abs_path(
-            "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/*"
+            "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/by_day/*"
         )
     )
     for i, path in enumerate(tqdm(paths, desc=lambda v: v)):
@@ -32,7 +32,7 @@ def _test(path, open_file=False, prefix=None, *args, **kwargs):
 
 if __name__ == "__main__":
     # _test(
-    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_day/2021-07-10-manual",
+    #     "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/by_day/2021-07-10-manual",
     #     prefix="2021-07-10-manual",
     #     open_file=True,
     #     is_tomorrow_day_off=True,

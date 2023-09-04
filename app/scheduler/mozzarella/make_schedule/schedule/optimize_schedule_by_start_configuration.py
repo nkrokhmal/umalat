@@ -44,13 +44,17 @@ def test_seq():
 
 
 def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time_by_line=None, *args, **kwargs):
-    start_times = kwargs.get("start_times")
+    start_times = kwargs.get("start_times", {LineName.WATER: "08:00", LineName.SALT: "07:00"})
     start_configuration = kwargs.get("start_configuration")
 
     if not start_configuration:
         with code("Make basic schedule"):
             boilings = make_boilings(boiling_plan_df)
-            schedule = make_schedule_from_boilings(boilings, cleanings={}, start_times=start_times)
+            schedule = make_schedule_from_boilings(
+                boilings,
+                cleanings={},
+                start_times=start_times,
+            )
 
         start_configuration = parse_start_configuration(schedule)
 
@@ -61,7 +65,6 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
         start_configurations = []
         n = _parse_seq(start_configuration, a=LineName.WATER, b=LineName.SALT)
         with code("Calc neighborhood"):
-
             # - 1 -> -3, -2, -1, skip, 1,  2
 
             n_neighborhood = [n + i for i in range(-2, 3) if n + i != 0]
@@ -91,23 +94,25 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
                 return False
         return True
 
-    start_configurations = [sc for sc in start_configurations if _start_start_configuration_valid(sc)]
+    start_configurations = [
+        configuration for configuration in start_configurations if _start_start_configuration_valid(configuration)
+    ]
 
     logger.debug("Optimizing start configurations", start_configuration=start_configurations)
 
     with code("Optimization"):
         res = []
-        for sc in start_configurations:
+        for configuration in start_configurations:
             schedule = optimize_schedule_by_swapping_water_gaps(
                 boiling_plan_df,
-                start_configuration=sc,
+                start_configuration=configuration,
                 *args,
                 **kwargs,
             )
             res.append(
                 {
                     "schedule": schedule,
-                    "start_configuration": sc,
+                    "start_configuration": configuration,
                     "args": args,
                     "kwargs": kwargs,
                 }
@@ -147,7 +152,6 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
     first_boiling = min(first_boilings.values(), key=lambda boiling: boiling.x[0])
     second_boiling = max(first_boilings.values(), key=lambda boiling: boiling.x[0])
     if first_boiling.props["boiling_model"].line.name == time_by_line:
-
         # time already set by proper line
         return value["schedule"]
     else:

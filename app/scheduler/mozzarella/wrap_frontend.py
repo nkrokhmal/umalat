@@ -92,8 +92,8 @@ def wrap_cheese_makers(master, rng):
                 boiling_size = int(
                     round(
                         boiling_model.line.input_ton
-                        * boiling.props.relative_props.get("boiling_volume", boiling_model.line.output_kg)
-                        / boiling_model.line.output_kg
+                        * boiling.props.relative_props.get("boiling_volume", boiling_model.line.output_ton)
+                        / boiling_model.line.output_ton
                     )
                 )
                 boiling_label = "{} {} {} {}кг".format(
@@ -572,7 +572,7 @@ def test():
         wrap_frontend(
             str(
                 get_repo_path()
-                / "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
+                / "app/data/static/samples/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
             )
         )
     )

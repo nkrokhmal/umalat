@@ -72,7 +72,7 @@ class Validator(ClassValidator):
 
             # if water and different boilings - cannot intersect serving with meltings
             if boiling_model1.line.name == LineName.WATER and boiling_model1 != boiling_model2:
-                # todo later: deprecated, delete
+                # todo later: deprecated, delete [@marklidenberg]
                 # validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
                 if not boiling_model1.is_lactose:
                     _df = b1s.props["boiling_group_df"]
@@ -124,6 +124,7 @@ class Validator(ClassValidator):
                 if bff1_name not in sticks and bff2_name in sticks:
                     _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
                     _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
+
                     # at least one hour should pass between meltings
                     validate_disjoint_by_axis(_b1s, _b2s, distance=12, ordered=True)
 
@@ -137,6 +138,7 @@ class Validator(ClassValidator):
                 if bff1_name in sticks and bff2_name not in sticks:
                     _b1s = b1s["melting_and_packing"]["melting"]["coolings"]
                     _b2s = b2s["melting_and_packing"]["melting"]["coolings"]
+
                     # at least one hour should pass between meltings
                     validate_disjoint_by_axis(_b1s, _b2s, distance=24, ordered=True)
 
@@ -263,7 +265,6 @@ class ScheduleMaker:
         self.lines_df = lines_df
 
     def _init_left_df(self):
-
         # make left_df
         values = [
             [
@@ -352,6 +353,7 @@ class ScheduleMaker:
             validator=Validator(strict_order=strict_order),
             max_tries=100,
         )
+
         # fix water a little bit: try to push water before - allowing awaiting in line
         if line_name == LineName.WATER and self.lines_df.at[LineName.WATER, "latest_boiling"]:
             boiling.detach_from_parent()
@@ -434,6 +436,7 @@ class ScheduleMaker:
 
     def _process_boilings(self, start_configuration, shrink_drenators=True):
         assert len(start_configuration) != 0, "Start configuration not specified"
+
         # logger.debug('Start configuration', start_configuration=start_configuration)
         cur_boiling_num = 0
 
@@ -468,10 +471,12 @@ class ScheduleMaker:
                     if cur_boiling_num < len(start_configuration):
                         # start from specified configuration
                         line_name = start_configuration[cur_boiling_num]
+
                         # logger.debug('Chose line by start configuration', line_name=line_name)
                     else:
                         # choose most latest line
                         line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
+
                         # reverse
                         line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
                         # logger.debug('Chose line by most latest line', line_name=line_name)
@@ -526,7 +531,6 @@ class ScheduleMaker:
             )
 
     def _process_cleanings(self):
-
         with code("Add cleanings if necessary"):
             # extract boilings
             boilings = self.m.root["master"]["boiling", True]
@@ -584,7 +588,7 @@ class ScheduleMaker:
                     block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
                 )
 
-        # todo maybe: refactor, code duplication
+        # todo maybe: refactor, code duplication [@marklidenberg]
         with code("Water"):
             water_boilings = [
                 b
@@ -660,6 +664,7 @@ class ScheduleMaker:
 
         boilings = list(sorted(self.m.root["master"]["boiling", True], key=lambda b: b.x[0]))
         boiling_line_names = [b.props["boiling_model"].line.name for b in boilings]
+
         # first_boiling_of_later_line_index
         index = boiling_line_names.index(start_configuration[-1])
 
@@ -685,7 +690,7 @@ class ScheduleMaker:
                         if pc.x[0]
                         > b1["melting_and_packing"]["collecting", True][0].x[
                             0
-                        ]  # todo maybe: we take first collecting here, but this is not very straightforward
+                        ]  # todo maybe: we take first collecting here, but this is not very straightforward [@marklidenberg]
                         and pc.x[0] <= b3["melting_and_packing"]["collecting", True][0].x[0]
                         and pc.props["line_name"] == b1.props["boiling_model"].line.name
                     ]
@@ -722,11 +727,16 @@ class ScheduleMaker:
         self.m.root["master"].reorder_children(lambda b: b.x[0])
 
     def make(
-        self, boilings, date=None, cleanings=None, start_times=None, start_configuration=None, shrink_drenators=True
+        self,
+        boilings,
+        date=None,
+        cleanings=None,
+        start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+        start_configuration=None,
+        shrink_drenators=True,
     ):
         start_configuration = start_configuration or [LineName.SALT]
         self.date = date or datetime.now()
-        self.start_times = start_times or {LineName.WATER: "08:00", LineName.SALT: "07:00"}
         self.start_times = {k: v if v else None for k, v in start_times.items()}
         self.cleanings = cleanings or {}  # {boiling_id: cleaning}
         self.boilings = boilings
@@ -744,13 +754,18 @@ class ScheduleMaker:
 
 
 def make_schedule_from_boilings(
-    boilings, date=None, cleanings=None, start_times=None, shrink_drenators=True, start_configuration=None
+    boilings,
+    date=None,
+    cleanings=None,
+    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+    shrink_drenators=True,
+    start_configuration=None,
 ):
     return ScheduleMaker().make(
-        boilings,
-        date,
-        cleanings,
-        start_times,
+        boilings=boilings,
+        date=date,
+        cleanings=cleanings,
+        start_times=start_times,
         shrink_drenators=shrink_drenators,
         start_configuration=start_configuration,
     )

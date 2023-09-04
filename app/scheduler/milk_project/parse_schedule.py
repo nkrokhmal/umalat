@@ -175,7 +175,7 @@ def test():
         (
             str(
                 get_repo_path()
-                / "app/data/static/samples/inputs/by_department/milk_project/План по варкам милкпроджект 3.xlsx"
+                / "app/data/static/samples/by_department/milk_project/План по варкам милкпроджект 3.xlsx"
             ),
             "Расписание",
         )

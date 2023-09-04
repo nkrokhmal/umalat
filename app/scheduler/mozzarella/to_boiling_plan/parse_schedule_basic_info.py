@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def parse_schedule(schedule):
+def parse_schedule_basic_info(schedule):
     schedule_json = schedule.to_dict(
         props=[
             {"key": "x", "value": lambda b: list(b.props["x"])},

@@ -7,7 +7,7 @@ from utils_ak.code_block.code import code
 from app.enum import LineName
 from app.scheduler.mozzarella.make_schedule.schedule.calc_score import calc_score
 from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_basic import make_schedule_basic
-from app.scheduler.mozzarella.parse_schedule import parse_schedule
+from app.scheduler.mozzarella.to_boiling_plan.parse_schedule_basic_info import parse_schedule_basic_info
 
 
 def smart_shift(s, key=None, start_from=0):
@@ -80,7 +80,7 @@ def combine_groups(boiling_plan_df, groups):
 def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, *args, **kwargs):
     with code("Make initial schedule"):
         schedule = make_schedule_basic(boiling_plan_df, *args, **kwargs)
-        boiling_plan_df = parse_schedule(schedule)
+        boiling_plan_df = parse_schedule_basic_info(schedule)
         score = calc_score(schedule)
 
         water_boilings = [

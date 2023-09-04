@@ -9,6 +9,7 @@ from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 from lessmore.utils.get_repo_path import get_repo_path
 
 from app.models import ButterSKU, cast_model
+from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 
@@ -73,7 +74,7 @@ def to_boiling_plan(
 
 def test():
     df = to_boiling_plan(
-        str(get_repo_path() / "app/data/static/samples/inputs/by_department/butter/План по варкам масло 1.xlsx")
+        str(get_repo_path() / "app/data/static/samples/by_department/butter/2023-09-03 План по варкам масло.xlsx")
     )
     print(df.iloc[0])
 

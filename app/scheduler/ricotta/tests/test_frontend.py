@@ -25,7 +25,7 @@ def _test(fn, open_file=False, *args, **kwargs):
 
 
 def test_batch():
-    fns = glob.glob(config.abs_path("app/data/static/samples/inputs/by_department/ricotta/*.xlsx"))
+    fns = glob.glob(config.abs_path("app/data/static/samples/by_department/ricotta/*.xlsx"))
     fns = [fn for fn in fns if "$" not in fn]
     for i, fn in enumerate(tqdm(fns, desc=lambda v: v)):
         _test(fn, open_file=False, prefix=str(i))
@@ -33,7 +33,7 @@ def test_batch():
 
 if __name__ == "__main__":
     _test(
-        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/inputs/by_department/ricotta/План по варкам рикотта.xlsx",
+        "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/static/samples/by_department/ricotta/План по варкам рикотта.xlsx",
         open_file=True,
     )
     # test_batch()

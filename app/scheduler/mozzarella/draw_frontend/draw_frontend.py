@@ -14,7 +14,6 @@ from app.scheduler.mozzarella.wrap_frontend import wrap_frontend
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
-    start_time: str = "07:00",
     date: Optional[datetime] = None,
     workbook: Workbook = None,
     optimize=True,
@@ -30,7 +29,6 @@ def draw_frontend(
 
     output = wrap_frontend(
         boiling_plan=boiling_plan,
-        start_time=start_time,
         first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,
         optimize=optimize,
@@ -61,7 +59,7 @@ def test():
     output = draw_frontend(
         str(
             get_repo_path()
-            / "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
+            / "app/data/static/samples/by_department/mozzarella/2023-09-04 План по варкам моцарелла.xlsx"
         )
     )
 

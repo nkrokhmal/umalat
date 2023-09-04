@@ -239,9 +239,7 @@ def make_schedule(
 def test():
     print(
         make_schedule(
-            str(
-                get_repo_path() / "app/data/static/samples/inputs/by_department/adygea/План по варкам адыгейский 1.xlsx"
-            )
+            str(get_repo_path() / "app/data/static/samples/by_department/adygea/План по варкам адыгейский 1.xlsx")
         )
     )
 

@@ -1,10 +1,15 @@
+from typing import Optional
+
 from utils_ak.numeric.numeric import custom_round
 
 from app.enum import LineName
 from app.scheduler.time_utils import cast_t
 
 
-def calc_score(schedule, start_times=None):
+def calc_score(
+    schedule,
+    start_times: Optional[dict] = None,
+):
     score = 0
     line_lengths = {}
     for line_name in [LineName.WATER, LineName.SALT]:

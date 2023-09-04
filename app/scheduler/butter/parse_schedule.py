@@ -80,7 +80,8 @@ def test():
             parse_schedule(
                 (
                     str(
-                        get_repo_path() / "app/data/static/samples/outputs/by_department/butter/Расписание масло 1.xlsx"
+                        get_repo_path()
+                        / "app/data/static/samples/by_department/butter/2023-09-03 План по варкам масло.xlsx"
                     ),
                     "Расписание",
                 )

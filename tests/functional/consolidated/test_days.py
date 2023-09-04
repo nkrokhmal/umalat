@@ -74,7 +74,7 @@ def _test_day(
 
 # todo: make proper test
 def _test_batch(same_output_path=False):
-    paths = glob.glob(config.abs_path("app/data/static/samples/inputs/by_day/*"))
+    paths = glob.glob(config.abs_path("app/data/static/samples/by_day/*"))
 
     for path in tqdm.tqdm(paths):
         prefix = os.path.basename(path)

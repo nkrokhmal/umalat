@@ -58,15 +58,14 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     # fill group id
     df["group_id"] = (df["boiling_params"] == "-").astype(int).cumsum() + 1
 
-    with code("Convert total_volume to float safely"):
+    # Convert boiling_volume to float safely
+    def _cast_float(obj):
+        try:
+            return float(obj)
+        except:
+            return np.nan
 
-        def _cast_float(obj):
-            try:
-                return float(obj)
-            except:
-                return np.nan
-
-        df["total_volume"] = df["total_volume"].apply(_cast_float)
+    df["total_volume"] = df["total_volume"].apply(_cast_float)
 
     # fill total_volume
     df["total_volume"] = np.where(
@@ -115,7 +114,8 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     df["sku_obj"] = df["sku_obj"].apply(lambda x: x.line.name)
 
     # add line name to boiling_params
-    df["boiling_params"] = df.apply(lambda row: row["sku_obj"] + "," + row["boiling_params"], axis=1)
+    if not df.empty:
+        df["boiling_params"] = df.apply(lambda row: row["sku_obj"] + "," + row["boiling_params"], axis=1)
     df["sheet"] = sheet_number
 
     return df
@@ -251,7 +251,7 @@ def test():
     df = to_boiling_plan(
         str(
             get_repo_path()
-            / "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
+            / "app/data/static/samples/by_department/mozzarella/2023-09-04 План по варкам моцарелла.xlsx"
         )
     )
     print(df.iloc[0])

@@ -47,7 +47,7 @@ def test():
     make_schedule(
         str(
             get_repo_path()
-            / "app/data/static/samples/inputs/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
+            / "app/data/static/samples/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
         )
     )
 

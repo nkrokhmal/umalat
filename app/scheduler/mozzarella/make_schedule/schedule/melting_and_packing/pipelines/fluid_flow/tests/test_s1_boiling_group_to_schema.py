@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 
 
 def test(use_interactive_environment):
-    df = read_boiling_plan(config.abs_path("app/data/static/samples/inputs/mozzarella/2021-02-09 План по варкам.xlsx"))
+    df = read_boiling_plan(config.abs_path("app/data/static/samples/mozzarella/2021-02-09 План по варкам.xlsx"))
     mark_consecutive_groups(df, "boiling", "boiling_group")
     boiling_group_df = df[df["boiling_group"] == 2]
     boiling_volumes, boilings_meltings, packings = BoilingGroupToSchema()(boiling_group_df)

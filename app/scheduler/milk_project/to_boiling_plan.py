@@ -79,10 +79,7 @@ def to_boiling_plan(boiling_plan: BoilingPlanLike, first_batch_ids_by_type={"mil
 
 def test():
     df = to_boiling_plan(
-        str(
-            get_repo_path()
-            / "app/data/static/samples/inputs/by_department/milk_project/План по варкам милкпроджект 3.xlsx"
-        )
+        str(get_repo_path() / "app/data/static/samples/by_department/milk_project/План по варкам милкпроджект 3.xlsx")
     )
     print(df.iloc[0])
 

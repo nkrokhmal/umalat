@@ -9,7 +9,7 @@ from config import config
 
 
 def test_batch():
-    fns = glob.glob(config.abs_path("app/data/static/samples/inputs/by_department/mascarpone/*.xlsx"))
+    fns = glob.glob(config.abs_path("app/data/static/samples/by_department/mascarpone/*.xlsx"))
     fns = [fn for fn in fns if "$" not in fn]
 
     for i, fn in enumerate(tqdm(fns, desc=lambda fn: fn)):
@@ -28,7 +28,7 @@ def _test(fn, *args, **kwargs):
 if __name__ == "__main__":
     # _test(
     #     config.abs_path(
-    #         "app/data/static/samples/inputs/by_department/mascarpone/План по варкам маскарпоне 1 новый.xlsx"
+    #         "app/data/static/samples/by_department/mascarpone/План по варкам маскарпоне 1 новый.xlsx"
     #     ),
     #     open_file=True,
     # )

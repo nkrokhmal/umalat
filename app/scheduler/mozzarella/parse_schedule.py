@@ -16,9 +16,11 @@ COLUMN_SHIFT = 5  # header 4 + 1 for one-indexing
 
 def parse_schedule(ws_obj):
     # - Read merged cells
+
     df = read_merged_cells_df(ws_obj, basic_features=False)
 
     # - Find time
+
     # find time index rows
     time_index_rows = df[df["label"].astype(str).str.contains("График")]["x1"].unique()
     row = time_index_rows[0]
@@ -33,6 +35,7 @@ def parse_schedule(ws_obj):
         )
 
     # - FInd cheese makers rows
+
     df1 = df[df["x0"] >= 5]  # column header out
 
     # find cheese_maker_rows
@@ -76,6 +79,7 @@ def parse_schedule(ws_obj):
         boiling_dfs = [expand_block(df, line_block) for line_block in line_blocks]
 
         # - Convert boilings to dictionaries
+
         for boiling_df in boiling_dfs:
             boiling = boiling_df.set_index("label").to_dict(orient="index")
             boiling = {
