@@ -1,5 +1,7 @@
 import pandas as pd
 
+from lessmore.utils.get_repo_path import get_repo_path
+
 
 def parse_schedule_basic_info(schedule):
     schedule_json = schedule.to_dict(
@@ -23,3 +25,17 @@ def parse_schedule_basic_info(schedule):
     res = pd.concat(dfs)
     res["sheet"] = 0
     return res
+
+
+def test():
+    from app.scheduler.mozzarella.make_schedule.make_schedule import make_schedule
+
+    output = make_schedule(
+        str(get_repo_path() / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx")
+    )
+
+    print(parse_schedule_basic_info(output["schedule"]))
+
+
+if __name__ == "__main__":
+    test()

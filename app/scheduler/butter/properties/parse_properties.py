@@ -8,7 +8,8 @@ from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.butter.properties.butter_properties import ButterProperties
 from app.scheduler.parsing_new_utils.parse_time import cast_time_from_hour_label
-from app.scheduler.parsing_utils import load_cells_df, parse_block
+from app.scheduler.parsing_utils.load_cells_df import load_cells_df
+from app.scheduler.parsing_utils.parse_block import parse_block
 from app.scheduler.time_utils import cast_human_time, cast_t
 
 
@@ -51,7 +52,7 @@ def test():
     print(
         pd.DataFrame(
             parse_properties(
-                str(get_repo_path() / "app/data/static/samples/outputs/by_department/butter/Расписание масло 1.xlsx")
+                str(get_repo_path() / "app/data/static/samples/by_department/butter/Расписание масло 1.xlsx")
             )
         )
     )

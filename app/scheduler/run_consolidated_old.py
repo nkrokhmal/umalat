@@ -10,7 +10,7 @@ from utils_ak.os.os_tools import makedirs
 from app.globals import basedir
 from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.load_schedules import load_schedules
-from app.scheduler.parsing_utils import load_cells_df
+from app.scheduler.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.run_consolidated import run_consolidated
 from config import config
 

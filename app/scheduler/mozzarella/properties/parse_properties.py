@@ -20,7 +20,8 @@ from app.enum import LineName
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.parsing_new_utils.parse_time import cast_time_from_hour_label
-from app.scheduler.parsing_utils import load_cells_df, parse_block
+from app.scheduler.parsing_utils.load_cells_df import load_cells_df
+from app.scheduler.parsing_utils.parse_block import parse_block
 from app.scheduler.time_utils import cast_human_time, cast_t
 
 
@@ -61,66 +62,68 @@ def parse_schedule_file(wb_obj):
 
     m = BlockMaker("root")
 
-    with code("Find start times"):
-        time_index_row_nums = df[df["label"].astype(str).apply(_is_datetime)]["x1"].unique()
+    # - Find start times
 
-        start_times = []
+    time_index_row_nums = df[df["label"].astype(str).apply(_is_datetime)]["x1"].unique()
 
-        for row_num in time_index_row_nums:
-            start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
+    start_times = []
 
-        start_times = [cast_t(v) for v in start_times]
+    for row_num in time_index_row_nums:
+        start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
 
-        with code("Precaution for minimum start time"):
-            minimum_start_time = "21:00"
-            start_times = [t if t <= cast_t(minimum_start_time) else t - 24 * 12 for t in start_times]
+    start_times = [cast_t(v) for v in start_times]
 
-    with code("calc split rows"):
-        with code("find headers"):
-            df1 = df[df["x0"] >= 5]  # column header out
+    # - Precaution for minimum start time
 
-            cheese_maker_headers = []
-            water_melting_headers = []
-            salt_melting_headers = []
-            headers = []
+    minimum_start_time = "21:00"
+    start_times = [t if t <= cast_t(minimum_start_time) else t - 24 * 12 for t in start_times]
 
-            for row_num in df1["x1"].unique():
-                row_labels = [str(row["label"]) for i, row in df1[df1["x1"] == row_num].iterrows()]
-                row_labels = [re.sub(r"\s+", " ", label) for label in row_labels if label]
+    # - Calc split rows
 
-                if {"налив/внесение закваски", "схватка"}.issubset(set(row_labels)):
-                    cheese_maker_headers.append(row_num - 1)
+    df1 = df[df["x0"] >= 5]  # column header out
 
-                if "подача и вымешивание" in row_labels and "посолка" not in row_labels:
-                    water_melting_headers.append(row_num + 1)
+    cheese_maker_headers = []
+    water_melting_headers = []
+    salt_melting_headers = []
+    headers = []
 
-                if {"подача и вымешивание", "посолка", "плавление/формирование"}.issubset(set(row_labels)):
-                    salt_melting_headers.append(row_num - 1)
+    for row_num in df1["x1"].unique():
+        row_labels = [str(row["label"]) for i, row in df1[df1["x1"] == row_num].iterrows()]
+        row_labels = [re.sub(r"\s+", " ", label) for label in row_labels if label]
 
-                with code("find all headers"):
-                    _labels = [label.replace("налив", "") for label in row_labels]
-                    _labels = [re.sub(r"\s+", "", label) for label in _labels]
-                    int_labels = [int(label) for label in _labels if is_int_like(label)]
+        if {"налив/внесение закваски", "схватка"}.issubset(set(row_labels)):
+            cheese_maker_headers.append(row_num - 1)
 
-                    if not ("05" in row_labels and "55" in row_labels):
-                        # not a time header
-                        if int_labels:
-                            headers.append(row_num)
+        if "подача и вымешивание" in row_labels and "посолка" not in row_labels:
+            water_melting_headers.append(row_num + 1)
 
-            packing_headers = (
-                set(headers) - set(cheese_maker_headers) - set(water_melting_headers) - set(salt_melting_headers)
-            )
-            packing_headers = list(sorted(packing_headers))
-            if water_melting_headers and salt_melting_headers:
-                packing_headers = packing_headers[:2]
-            else:
-                # no water or no salt
-                packing_headers = packing_headers[:1]
+        if {"подача и вымешивание", "посолка", "плавление/формирование"}.issubset(set(row_labels)):
+            salt_melting_headers.append(row_num - 1)
 
-            cheese_maker_headers = list(sorted(cheese_maker_headers))
-            water_melting_headers = list(sorted(water_melting_headers))
-            salt_melting_headers = list(sorted(salt_melting_headers))
-            packing_headers = list(sorted(packing_headers))
+        # -- Find all headers
+        _labels = [label.replace("налив", "") for label in row_labels]
+        _labels = [re.sub(r"\s+", "", label) for label in _labels]
+        int_labels = [int(label) for label in _labels if is_int_like(label)]
+
+        if not ("05" in row_labels and "55" in row_labels):
+            # not a time header
+            if int_labels:
+                headers.append(row_num)
+
+    packing_headers = set(headers) - set(cheese_maker_headers) - set(water_melting_headers) - set(salt_melting_headers)
+    packing_headers = list(sorted(packing_headers))
+    if water_melting_headers and salt_melting_headers:
+        packing_headers = packing_headers[:2]
+    else:
+        # no water or no salt
+        packing_headers = packing_headers[:1]
+
+    cheese_maker_headers = list(sorted(cheese_maker_headers))
+    water_melting_headers = list(sorted(water_melting_headers))
+    salt_melting_headers = list(sorted(salt_melting_headers))
+    packing_headers = list(sorted(packing_headers))
+
+    # - Parse blocks
 
     parse_block(
         m,
@@ -129,11 +132,13 @@ def parse_schedule_file(wb_obj):
         "boiling",
         cheese_maker_headers,
         start_times[0],
-        filter=_filter_func,
+        filter_=_filter_func,
         split_func=_split_func,
     )
 
     parse_block(m, df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 8], start_times[0])
+
+    # -- Parse water melting
 
     if water_melting_headers:
         parse_block(
@@ -143,49 +148,52 @@ def parse_schedule_file(wb_obj):
             "melting",
             water_melting_headers,
             start_times[1],
-            filter=_filter_func,
+            filter_=_filter_func,
             split_func=_split_func,
         )
 
         # todo maybe: make properly [@marklidenberg]
-        with code("meta info to water meltings"):
-            with code("melting_end"):
-                for melting in m.root["water_meltings"].children:
-                    melting.props.update(melting_end=melting.y[0])
 
-            with code("melting_end_with_cooling"):
-                df_formings = df[df["label"] == "охлаждение"]
+        # - Meta info to water meltings
 
-                with code("fix start times and column header"):
-                    df_formings["x0"] += start_times[1] - 5
-                    df_formings["y0"] += start_times[1] - 5
-                    df_formings["x1"] += start_times[1] - 5
-                    df_formings["y1"] += start_times[1] - 5
+        # -- Melting end
 
-                df_formings = df_formings.sort_values(by="x0")
-                for i, row in df_formings.iterrows():
-                    overlapping = [
-                        m
-                        for m in m.root["water_meltings"].children
-                        if calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row["x0"], row["y0"])) > 0
-                    ]
-                    if not overlapping:
-                        # first cooling in each boiling does not qualify the filter
-                        continue
+        for melting in m.root["water_meltings"].children:
+            melting.props.update(melting_end=melting.y[0])
 
-                    # todo later: on the way, make properly [@marklidenberg]
-                    # choose melting with maxixum coverage
-                    melting = max(
-                        overlapping,
-                        key=lambda m: calc_interval_length(
-                            cast_interval(m.x[0], m.y[0]) & cast_interval(row["x0"], row["y0"])
-                        )
-                        / calc_interval_length(cast_interval(m.x[0], m.y[0])),
-                    )
+        # -- Melting end with cooling
 
-                    # melting = delistify(overlapping, single=True)
-                    cooling_length = row["y0"] - melting.x[0]
-                    melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
+        df_formings = df[df["label"] == "охлаждение"]
+
+        # fix start times and column header
+        df_formings["x0"] += start_times[1] - 5
+        df_formings["y0"] += start_times[1] - 5
+        df_formings["x1"] += start_times[1] - 5
+        df_formings["y1"] += start_times[1] - 5
+
+        df_formings = df_formings.sort_values(by="x0")
+        for i, row in df_formings.iterrows():
+            overlapping = [
+                m
+                for m in m.root["water_meltings"].children
+                if calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row["x0"], row["y0"])) > 0
+            ]
+            if not overlapping:
+                # first cooling in each boiling does not qualify the filter
+                continue
+
+            # todo later: on the way, make properly [@marklidenberg]
+            # choose melting with maxixum coverage
+            melting = max(
+                overlapping,
+                key=lambda m: calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row["x0"], row["y0"]))
+                / calc_interval_length(cast_interval(m.x[0], m.y[0])),
+            )
+
+            # melting = delistify(overlapping, single=True)
+            cooling_length = row["y0"] - melting.x[0]
+            melting.props.update(melting_end_with_cooling=melting.y[0] + cooling_length)
+
         parse_block(
             m,
             df,
@@ -194,8 +202,10 @@ def parse_schedule_file(wb_obj):
             packing_headers[:1],
             start_times[1],
             split_func=_split_func,
-            filter=_filter_func,
+            filter_=_filter_func,
         )
+
+    # -- Parse salt melting
 
     if salt_melting_headers:
         parse_block(
@@ -206,31 +216,33 @@ def parse_schedule_file(wb_obj):
             salt_melting_headers,
             start_times[1],
             split_func=_split_func,
-            filter=_filter_func,
+            filter_=_filter_func,
         )
 
         # todo maybe: make properly [@marklidenberg]
-        with code("add salt forming info to meltings"):
-            df_formings = df[(df["label"] == "плавление/формирование") & (df["x1"] >= salt_melting_headers[0])]
-            df_formings["serving_start"] = df_formings["x0"].apply(
-                lambda x0: df[(df["y0"] == x0) & (df["label"] == "подача и вымешивание")].iloc[0]["x0"]
+
+        # - Add salt forming info to meltings
+
+        df_formings = df[(df["label"] == "плавление/формирование") & (df["x1"] >= salt_melting_headers[0])]
+        df_formings["serving_start"] = df_formings["x0"].apply(
+            lambda x0: df[(df["y0"] == x0) & (df["label"] == "подача и вымешивание")].iloc[0]["x0"]
+        )
+
+        # fix start times and column header
+        df_formings["x0"] += start_times[1] - 5
+        df_formings["y0"] += start_times[1] - 5
+        df_formings["x1"] += start_times[1] - 5
+        df_formings["y1"] += start_times[1] - 5
+        df_formings["serving_start"] += start_times[1] - 5
+
+        df_formings = df_formings.sort_values(by="x0")
+        for i, row in df_formings.iterrows():
+            melting = delistify(
+                [m for m in m.root["salt_meltings"].children if m.x[0] == row["serving_start"]], single=True
             )
+            melting.props.update(melting_start=row["x0"], melting_end=row["y0"], melting_end_with_cooling=melting.y[0])
 
-            with code("fix start times and column header"):
-                df_formings["x0"] += start_times[1] - 5
-                df_formings["y0"] += start_times[1] - 5
-                df_formings["x1"] += start_times[1] - 5
-                df_formings["y1"] += start_times[1] - 5
-                df_formings["serving_start"] += start_times[1] - 5
-
-            df_formings = df_formings.sort_values(by="x0")
-            for i, row in df_formings.iterrows():
-                melting = delistify(
-                    [m for m in m.root["salt_meltings"].children if m.x[0] == row["serving_start"]], single=True
-                )
-                melting.props.update(
-                    melting_start=row["x0"], melting_end=row["y0"], melting_end_with_cooling=melting.y[0]
-                )
+        # - Add salt packing info to meltings
 
         parse_block(
             m,
@@ -240,14 +252,16 @@ def parse_schedule_file(wb_obj):
             [packing_headers[-1], packing_headers[-1] + 6],
             start_times[1],
             split_func=_split_func,
-            filter=_filter_func,
+            filter_=_filter_func,
         )
+
+    print(m.root)
     return m.root
 
 
-def prepare_boiling_plan(parsed_schedule, df_bp):
-    df_bp["line_name"] = df_bp["line"].apply(lambda line: line.name)
-    for line_name, grp_line in df_bp.groupby("line_name"):
+def prepare_boiling_plan(parsed_schedule, boiling_plan_df):
+    boiling_plan_df["line_name"] = boiling_plan_df["line"].apply(lambda line: line.name)
+    for line_name, grp_line in boiling_plan_df.groupby("line_name"):
         if line_name == LineName.WATER:
             boiling_ids = [b.props["label"] for b in parsed_schedule["water_packings"].children]
         else:
@@ -261,9 +275,9 @@ def prepare_boiling_plan(parsed_schedule, df_bp):
             )
 
         for i, (_, grp) in enumerate(grp_line.groupby("group_id")):
-            df_bp.loc[grp.index, "boiling_id"] = boiling_ids[i]
-    df_bp["boiling_id"] = df_bp["boiling_id"].astype(int)
-    return df_bp
+            boiling_plan_df.loc[grp.index, "boiling_id"] = boiling_ids[i]
+    boiling_plan_df["boiling_id"] = boiling_plan_df["boiling_id"].astype(int)
+    return boiling_plan_df
 
 
 def fill_properties(parsed_schedule, df_bp):
@@ -445,11 +459,11 @@ def fill_properties(parsed_schedule, df_bp):
     return props
 
 
-def parse_properties(fn):
-    parsed_schedule = parse_schedule_file(fn)
-    df_bp = to_boiling_plan(fn)
-    df_bp = prepare_boiling_plan(parsed_schedule, df_bp)
-    props = fill_properties(parsed_schedule, df_bp)
+def parse_properties(filename):
+    parsed_schedule = parse_schedule_file(filename)
+    boiling_plan_df = to_boiling_plan(filename)
+    boiling_plan_df = prepare_boiling_plan(parsed_schedule, boiling_plan_df=boiling_plan_df)
+    props = fill_properties(parsed_schedule, boiling_plan_df=boiling_plan_df)
     return props
 
 
@@ -459,7 +473,7 @@ def test():
             parse_properties(
                 str(
                     get_repo_path()
-                    / "app/data/static/samples/outputs/by_department/mozzarella/Расписание моцарелла 3.xlsx"
+                    / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
                 )
             )
         )

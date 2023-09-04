@@ -5,6 +5,8 @@ from utils_ak.code_block.code import code
 from utils_ak.numeric.types import is_int_like
 from utils_ak.openpyxl.openpyxl_tools import read_merged_cells_df
 
+from lessmore.utils.get_repo_path import get_repo_path
+
 from app.scheduler.parsing_new_utils.group_intervals import basic_criteria
 from app.scheduler.parsing_new_utils.parse_time import cast_time_from_hour_label
 from app.scheduler.parsing_new_utils.parsing import parse_line
@@ -105,7 +107,19 @@ def parse_schedule(ws_obj):
 
 
 def test():
-    pass
+    print(
+        dict(
+            parse_schedule(
+                (
+                    str(
+                        get_repo_path()
+                        / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
+                    ),
+                    "Расписание",
+                )
+            )
+        )
+    )
 
 
 if __name__ == "__main__":

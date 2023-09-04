@@ -8,7 +8,8 @@ from utils_ak.numeric.types import is_int_like
 
 from app.scheduler.mascarpone.properties import MascarponeProperties
 from app.scheduler.parsing_new_utils.parse_time import cast_time_from_hour_label
-from app.scheduler.parsing_utils import load_cells_df, parse_block
+from app.scheduler.parsing_utils.load_cells_df import load_cells_df
+from app.scheduler.parsing_utils.parse_block import parse_block
 from app.scheduler.time_utils import cast_human_time, cast_t, cast_time
 
 
@@ -76,7 +77,7 @@ def parse_schedule_file(wb_obj):
         [time_index_row_nums[0] + 2 + 3 * i for i in range(n_boiling_lines)],
         start_times[0],
         split_func=_split_func,
-        filter=_filter_func,
+        filter_=_filter_func,
         length=100,
     )
 

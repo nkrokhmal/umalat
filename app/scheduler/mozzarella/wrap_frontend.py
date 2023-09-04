@@ -572,7 +572,7 @@ def test():
         wrap_frontend(
             str(
                 get_repo_path()
-                / "app/data/static/samples/by_department/mozzarella/План по варкам моцарелла 4 расписание.xlsx"
+                / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
             )
         )
     )
