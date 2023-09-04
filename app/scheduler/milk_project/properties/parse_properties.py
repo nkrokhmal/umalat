@@ -67,7 +67,7 @@ def test():
             parse_properties(
                 str(
                     get_repo_path()
-                    / "app/data/static/samples/outputs/by_department/milk_project/Расписание милк проджект 1 без милки.xlsx"
+                    / "app/data/static/samples/by_department/milk_project/Расписание милкпроджект 3 несколько милок.xlsx"
                 )
             )
         )
