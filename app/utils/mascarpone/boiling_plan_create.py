@@ -1,7 +1,7 @@
 import pandas as pd
 
 from app.utils.mascarpone.order import CREAM_CHEESE_ORDER, CREAM_ORDER, MASCARPONE_ORDER, Order
-from app.utils.mascarpone.utils import BoilingsHandler
+from app.utils.mascarpone.utils import MascarponeBoilingsHandler
 
 
 def add_fields(df: pd.DataFrame) -> pd.DataFrame:
@@ -43,7 +43,7 @@ def mascarpone_boiling_plan_create(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.D
 
 
 def handle_group(df: pd.DataFrame, orders: list[Order]) -> pd.DataFrame:
-    handler = BoilingsHandler()
+    handler = MascarponeBoilingsHandler()
 
     for order in orders:
         df_order = df[df.apply(lambda row: order.order_filter(row), axis=1)]

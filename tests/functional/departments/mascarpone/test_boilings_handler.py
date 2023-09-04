@@ -2,7 +2,8 @@ from dataclasses import dataclass
 
 import pytest
 
-from app.utils.mascarpone.utils import BoilingGroup, BoilingsHandler
+from app.utils.base.boiling_group import BoilingGroup
+from app.utils.mascarpone.utils import MascarponeBoilingsHandler
 
 
 def test_boiling_group_no_exception() -> None:
@@ -80,7 +81,7 @@ CASES: list[HandlerCase] = [
 
 @pytest.mark.parametrize("case", CASES)
 def test_boiling_handler(case: HandlerCase) -> None:
-    handler = BoilingsHandler()
+    handler = MascarponeBoilingsHandler()
     for group in case.groups:
         handler.handle_group(skus=group["skus"], max_weight=group["max_weight"])
 

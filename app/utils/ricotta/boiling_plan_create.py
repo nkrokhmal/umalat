@@ -60,7 +60,7 @@ def group_result(df):
 
 
 def handle_ricotta(df: pd.DataFrame) -> pd.DataFrame:
-    handler = BoilingsHandler()
+    handler = RicottaBoilingsHandler()
 
     for order in RICOTTA_ORDERS:
         df_order = df[df.apply(lambda row: order.order_filter(row), axis=1)]
