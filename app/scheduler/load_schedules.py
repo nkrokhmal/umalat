@@ -11,7 +11,7 @@ from app.models import MozzarellaBoiling, MozzarellaSKU, cast_model
 from config import config
 
 
-def load_schedules(path, prefix, departments=None):
+def load_schedules_by_department(path, prefix, departments=None):
     # NOTE: DOES NOT RETURN DEPARTMENT IF NOT PRESENT
     schedules = {}
     departments = departments or []
@@ -63,7 +63,7 @@ def assert_schedules_presence(schedules, raise_if_not_present=None, warn_if_not_
 
 
 if __name__ == "__main__":
-    load_schedules(
+    load_schedules_by_department(
         "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/approved",
         "2021-01-01",
     )

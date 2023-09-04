@@ -234,11 +234,11 @@ def parse_schedule_file(wb_obj):
         )
 
         # fix start times and column header
-        df_formings["x0"] += start_times[1] - 5
-        df_formings["y0"] += start_times[1] - 5
-        df_formings["x1"] += start_times[1] - 5
-        df_formings["y1"] += start_times[1] - 5
-        df_formings["serving_start"] += start_times[1] - 5
+        df_formings["x0"] = df_formings["x0"] + start_times[1] - 5
+        df_formings["y0"] = df_formings["y0"] + start_times[1] - 5
+        df_formings["x1"] = df_formings["x1"] + start_times[1] - 5
+        df_formings["y1"] = df_formings["y1"] + start_times[1] - 5
+        df_formings["serving_start"] = df_formings["serving_start"] + start_times[1] - 5
 
         df_formings = df_formings.sort_values(by="x0")
         for i, row in df_formings.iterrows():
@@ -295,7 +295,6 @@ def fill_properties(parsed_schedule, boiling_plan_df):
             logger.error("Removing small block", block=block)
             block.detach_from_parent()
             continue
-
         boiling_group_df = boiling_plan_df[boiling_plan_df["boiling_id"] == int(block.props["boiling_id"])]
         block.props.update(
             boiling_group_df=boiling_group_df,
@@ -480,7 +479,8 @@ def test():
             parse_properties(
                 str(
                     get_repo_path()
-                    / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
+                    # / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
+                    / "app/data/static/samples/by_day/2023-09-03/2023-09-03 Расписание моцарелла.xlsx"
                 )
             )
         )

@@ -629,7 +629,7 @@ def make_contour_6(properties):
                 label="Маскарпоне",
             )
 
-    ricotta_end = cast_t(properties["ricotta"].last_pumping_out_time) + 12
+    ricotta_end = cast_t(properties["ricotta"].last_pumping_out_time) or 0 + 12
     m.row(
         "cleaning",
         push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
@@ -648,7 +648,8 @@ def make_contour_6(properties):
         m.row(
             "cleaning",
             push_func=AxisPusher(
-                start_from=cast_t(properties["ricotta"].start_of_ninth_from_the_end_time),
+                start_from=cast_t(properties["ricotta"].start_of_ninth_from_the_end_time)
+                or 0,  # todo next: remove or 0, make properly
                 validator=CleaningValidator(ordered=False),
             ),
             size=cast_t("01:20"),
@@ -676,18 +677,20 @@ def make_contour_6(properties):
     return m.root
 
 
-def make_schedule(properties, **kwargs):
+def make_schedule(properties_by_department, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(properties, shipping_line=kwargs.get("shipping_line", True)),
-        make_contour_2(properties),
+        make_contour_1(properties_by_department, shipping_line=kwargs.get("shipping_line", True)),
+        make_contour_2(properties_by_department),
         make_contour_3(
-            properties, molder=kwargs.get("molder", False), is_tomorrow_day_off=kwargs.get("is_tomorrow_day_off", False)
+            properties_by_department,
+            molder=kwargs.get("molder", False),
+            is_tomorrow_day_off=kwargs.get("is_tomorrow_day_off", False),
         ),
-        make_contour_4(properties, is_tomorrow_day_off=kwargs.get("is_tomorrow_day_off", False)),
-        make_contour_5(properties, input_tanks=kwargs.get("input_tanks")),
-        make_contour_6(properties),
+        make_contour_4(properties_by_department, is_tomorrow_day_off=kwargs.get("is_tomorrow_day_off", False)),
+        make_contour_5(properties_by_department, input_tanks=kwargs.get("input_tanks")),
+        make_contour_6(properties_by_department),
     ]
 
     for contour in contours:

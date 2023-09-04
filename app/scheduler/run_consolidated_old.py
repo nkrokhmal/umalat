@@ -9,7 +9,7 @@ from utils_ak.os.os_tools import makedirs
 
 from app.globals import basedir
 from app.scheduler.frontend_utils import draw_excel_frontend
-from app.scheduler.load_schedules import load_schedules
+from app.scheduler.load_schedules import load_schedules_by_department
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.run_consolidated import run_consolidated
 from config import config
@@ -27,7 +27,7 @@ def run_consolidated_old(
     makedirs(output_path)
 
     if not schedules:
-        schedules = load_schedules(input_path, prefix)
+        schedules = load_schedules_by_department(input_path, prefix)
 
     cur_depth = 0
 

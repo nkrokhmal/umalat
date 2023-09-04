@@ -15,7 +15,7 @@ class ButterProperties(pydantic.BaseModel):
         return "butter"
 
 
-def cast_butter_properties(schedule=None):
+def cast_properties(schedule=None):
     props = ButterProperties()
     if not schedule:
         return props
