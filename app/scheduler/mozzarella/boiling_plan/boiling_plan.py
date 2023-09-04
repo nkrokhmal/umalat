@@ -96,7 +96,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     df["configuration"] = df["configuration"].apply(format_configuration)
     df["configuration"] = np.where(
         (df["sku"] == "-") & (df["configuration"].isnull()),
-        "8000",
+        "8300",
         df["configuration"],
     )
     df["configuration"] = df["configuration"].fillna(method="bfill")
