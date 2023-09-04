@@ -1,7 +1,6 @@
 from app.imports.runtime import *
 from app.models import MozzarellaSKU
 from app.scheduler.mozzarella.parse_schedule import parse_schedule
-from app.scheduler.mozzarella.to_boiling_plan import read_additional_packing, read_boiling_plan
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.mozzarella.schedule_task import MozzarellaScheduleTask
 from app.utils.schedule import cast_schedule

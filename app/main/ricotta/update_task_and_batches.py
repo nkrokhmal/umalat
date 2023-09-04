@@ -1,6 +1,5 @@
 from app.imports.runtime import *
 from app.models import RicottaSKU
-from app.scheduler.ricotta.boiling_plan import read_boiling_plan
 from app.scheduler.ricotta.update_interval_times import update_interval_times
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.ricotta.schedule_tasks import RicottaScheduleTask

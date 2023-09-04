@@ -40,7 +40,7 @@ def make_schedule(
 
     # - Return
 
-    return {"schedule": schedule, "boiling_plan": boiling_plan_df}
+    return {"schedule": schedule, "boiling_plan_df": boiling_plan_df}
 
 
 def test():

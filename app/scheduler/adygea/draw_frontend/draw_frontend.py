@@ -15,7 +15,7 @@ from app.scheduler.frontend_utils import draw_excel_frontend
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
-    first_batch_ids_by_type: dict = {"butter": 1},
+    first_batch_ids_by_type: dict = {"adygea": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:

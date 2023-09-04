@@ -238,7 +238,7 @@ def make_schedule(
         boiling_plan_df, start_time=start_time, prepare_start_time=prepare_start_time, lunch_times=lunch_times
     )
 
-    return {"schedule": schedule, "boiling_plan": boiling_plan_df}
+    return {"schedule": schedule, "boiling_plan_df": boiling_plan_df}
 
 
 def test():

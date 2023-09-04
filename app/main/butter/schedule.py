@@ -60,7 +60,7 @@ def butter_schedule():
         _output = draw_frontend(
             boiling_plan=wb, first_batch_ids_by_type=first_batch_ids_by_type, date=date, start_time=beg_time
         )
-        schedule, boiling_plan_df, schedule_wb = _output["schedule"], _output["boiling_plan"], _output["workbook"]
+        schedule, boiling_plan_df, schedule_wb = _output["schedule"], _output["boiling_plan_df"], _output["workbook"]
 
         # - Post-process schedule workbook
 

@@ -7,7 +7,6 @@ from utils_ak.time.dt import cast_datetime
 
 from app.enum import DepartmentName
 from app.models import MascarponeSKU
-from app.scheduler.mascarpone.boiling_plan import read_boiling_plan
 from app.scheduler.mascarpone.update_interval_times import update_interval_times
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.mascarpone.schedule_task import MascarponeScheduleTask

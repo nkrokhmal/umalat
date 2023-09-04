@@ -34,7 +34,7 @@ def make_schedule(
             m.row("pouring_off", size=1)
     m.root.props.update(x=(cast_t(start_time), 0))
 
-    return {"schedule": m.root, "boiling_plan": boiling_plan_df}
+    return {"schedule": m.root, "boiling_plan_df": boiling_plan_df}
 
 
 def test():

@@ -1,7 +1,6 @@
 from app.imports.runtime import *
 from app.models import MilkProjectSKU
 from app.scheduler.milk_project.parse_schedule import parse_schedule
-from app.scheduler.milk_project.to_boiling_plan import read_boiling_plan
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 from app.utils.schedule import cast_schedule

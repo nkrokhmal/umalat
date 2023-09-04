@@ -1,19 +1,13 @@
-import flask
-
-from app.imports.runtime import *
 from app.main import main
-from app.main.adygea.update_task_and_batches import update_task_and_batches as update_task_and_batches_adygea
+from app.main.archive.adygea import update_task_and_batches as update_task_and_batches_adygea
 from app.main.milk_project.update_task_and_batches import (
     update_task_and_batches as update_task_and_batches_milk_project,
 )
 from app.main.validators import *
-from app.models import AdygeaSKU, MilkProjectSKU
 from app.scheduler.frontend_utils import fill_grid
 from app.scheduler.time_utils import *
-from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
-from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
 
 from ...scheduler.milk_project.draw_frontend.draw_frontend import draw_frontend as draw_milk_project_frontend
 from .forms import ScheduleForm

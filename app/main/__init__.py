@@ -3,9 +3,10 @@ from flask import Blueprint
 
 main = Blueprint("main", __name__)
 
+from app.main.archive.adygea import *
+
 from . import batch, download, index, login
 from .additional import *
-from .adygea import *
 from .approved import *
 from .butter import *
 from .contour_washers import *

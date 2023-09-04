@@ -125,7 +125,7 @@ def make_schedule(
 
     # - Return result
 
-    return {"schedule": m.root, "boiling_plan": boiling_plan_df}
+    return {"schedule": m.root, "boiling_plan_df": boiling_plan_df}
 
 
 def test():

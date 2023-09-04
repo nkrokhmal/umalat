@@ -1,6 +1,5 @@
 from app.imports.runtime import *
 from app.models import AdygeaSKU
-from app.scheduler.adygea.update_interval_times import update_interval_times
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.schedule import cast_schedule
