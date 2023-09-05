@@ -109,16 +109,24 @@ def make_mpp(boiling_df, left_boiling_volume):
     m = BlockMaker("melting_and_packing_process", axis=1)
 
     # create packing blocks
-    last_collecting_process_y = 0  # todo archive: redundant?
+    last_collecting_process_y = 0  # todo later: archive: redundant? [@marklidenberg]
     for packing_team_id in packing_team_ids:
         df = boiling_df[boiling_df["packing_team_id"] == packing_team_id]
         df = df[~df["beg_ts"].isnull()]
         if len(df) > 0:
             packing = m.row(
-                "packing", push_func=add_push, packing_team_id=packing_team_id, x=df.iloc[0]["beg_ts"] // 5
+                "packing",
+                push_func=add_push,
+                packing_team_id=packing_team_id,
+                x=df.iloc[0]["beg_ts"] // 5,
             ).block
 
-            with m.row("collecting", push_func=add_push, packing_team_id=packing_team_id, x=df.iloc[0]["beg_ts"] // 5):
+            with m.row(
+                "collecting",
+                push_func=add_push,
+                packing_team_id=packing_team_id,
+                x=df.iloc[0]["beg_ts"] // 5,
+            ):
                 for i, (_, row) in enumerate(df.iterrows()):
                     if row["collecting_speed"] == row["packing_speed"]:
                         # add configuration if needed
@@ -132,20 +140,27 @@ def make_mpp(boiling_df, left_boiling_volume):
                                 block = m.row("packing_configuration", size=conf_time_size // 5).block
                                 push(packing, m.copy(block), push_func=add_push)
                         block = m.row(
-                            "process", size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5, sku=row["sku"]
+                            "process",
+                            size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5,
+                            sku=row["sku"],
                         ).block
                         last_collecting_process_y = max(last_collecting_process_y, block.y[0])
                         push(
                             packing,
                             m.create_block(
-                                "process", size=block.props["size"], x=list(block.props["x_rel"]), sku=row["sku"]
+                                "process",
+                                size=block.props["size"],
+                                x=list(block.props["x_rel"]),
+                                sku=row["sku"],
                             ),
                             push_func=add_push,
                         )
                     else:
                         # rubber
                         block = m.row(
-                            "process", size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5, sku=row["sku"]
+                            "process",
+                            size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5,
+                            sku=row["sku"],
                         ).block
                         last_collecting_process_y = max(last_collecting_process_y, block.y[0])
                         packing_size = custom_round(row["collected"] / row["packing_speed"] * 60, 5, "ceil") // 5

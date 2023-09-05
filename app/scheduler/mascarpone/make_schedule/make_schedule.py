@@ -23,14 +23,14 @@ class Validator(ClassValidator):
         # todo maybe: refactor [@marklidenberg]
         validate_disjoint_by_axis(b1["pouring"], b2["pouring"])
         if "analysis" in b1.children_by_cls:
-            validate_disjoint_by_axis(b1["analysis"], b2["packing"])
+            validate_disjoint_by_axis(b1["analysis"], b2["packing_group"])
         if "analysis" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1["packing"], b2["analysis"])
+            validate_disjoint_by_axis(b1["packing_group"], b2["analysis"])
         if "salting" in b1.children_by_cls and "salting" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["salting"], b2["salting"])
-        validate_disjoint_by_axis(b1["packing"], b2["packing"])
+        validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
         if "ingredient" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1["packing"], b2["ingredient"])
+            validate_disjoint_by_axis(b1["packing_group"], b2["ingredient"])
         if "heating" in b1.children_by_cls and "heating" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["heating"], b2["heating"])
 

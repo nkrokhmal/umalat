@@ -5,6 +5,7 @@ import pandas as pd
 from openpyxl import Workbook
 from utils_ak.builtin import delistify
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
+from utils_ak.pandas import mark_consecutive_groups
 
 from lessmore.utils.get_repo_path import get_repo_path
 
@@ -39,7 +40,6 @@ def to_boiling_plan(
 
 def test():
     df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx"))
-    print(df.iloc[0])
 
 
 if __name__ == "__main__":
