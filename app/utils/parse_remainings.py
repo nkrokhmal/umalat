@@ -221,20 +221,10 @@ def parse_sheet(ws, sheet_name, excel_compiler, sku_type=ButterSKU):
                                 "extra_packing": 0,
                             },
                         ]
-                    )
+                    ),
                 ],
                 ignore_index=True,
             )
-            # df = df.append(
-            #     {
-            #         "sku": sku,
-            #         "remainings - request": 0,
-            #         "normative remainings": 0,
-            #         "plan": sku.line.output_kg,
-            #         "extra_packing": 0,
-            #     },
-            #     ignore_index=True,
-            # )
     else:
         if df.empty:
             sku = db.session.query(sku_type).all()[0]
@@ -251,7 +241,7 @@ def parse_sheet(ws, sheet_name, excel_compiler, sku_type=ButterSKU):
                                 "extra_packing": 0,
                             }
                         ]
-                    )
+                    ),
                 ],
                 ignore_index=True,
             )
