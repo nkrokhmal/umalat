@@ -16,7 +16,7 @@ def run_app(test: bool, debug: bool):
     config_name: str = "test" if test else "default"
     app, rq = create_app(config_name=config_name)
     create_manager(app)
-    app.run(port=5000, threaded=False, host="0.0.0.0", debug=debug)
+    app.run(port=7001, threaded=False, host="0.0.0.0", debug=debug)
 
 
 if __name__ == "__main__":

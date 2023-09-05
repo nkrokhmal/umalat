@@ -1,12 +1,8 @@
 from app.main import main
-from app.scheduler import draw_excel_frontend
-from app.scheduler.adygea import *
-from app.scheduler.adygea.frontend.style import STYLE
+from app.main.adygea.forms import ScheduleForm
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
-
-from .forms import ScheduleForm
 
 
 @main.route("/adygea_schedule", methods=["GET", "POST"])
@@ -34,7 +30,9 @@ def adygea_schedule():
             data_only=True,
         )
 
-        boiling_plan_df = read_boiling_plan(wb, first_batch_id=form.batch_number.data)
+        # - Generate schedule
+
+        boiling_plan_df = to_boiling_plan(wb, first_batch_id=form.batch_number.data)
         add_batch(
             date,
             "Адыгейский цех",

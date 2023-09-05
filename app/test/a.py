@@ -1,0 +1,3 @@
+samplefoo
+
+print(123)

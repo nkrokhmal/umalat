@@ -1,9 +1,10 @@
+from utils_ak.openpyxl import write_metadata
+
 from app.main import main
 from app.main.ricotta.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
 
 # from app.scheduler import *
-from app.scheduler.ricotta import *
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 
@@ -48,7 +49,7 @@ def ricotta_schedule():
         frontend = wrap_frontend(schedule, date=date)
 
         schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=wb)
-        utils.write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
+        write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
 
         schedule_task = update_task_and_batches(schedule_wb)
 

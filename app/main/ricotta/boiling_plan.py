@@ -8,7 +8,6 @@ from app.main import main
 from app.main.ricotta.forms import BoilingPlanForm
 from app.models.basic import SKU
 from app.models.ricotta import RicottaBoiling, RicottaSKU
-from app.scheduler.mozzarella.boiling_plan import read_boiling_plan as mozzarella_read_boiling_plan
 from app.utils.files.utils import move_boiling_file, save_request
 from app.utils.parse_remainings import *
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create

@@ -1,4 +1,4 @@
-from utils_ak.dict import dotdict
+from utils_ak.dict.dotdict import dotdict
 
 
 LineName = dotdict(

@@ -1,17 +1,22 @@
+import os
+import pickle
+import re
+
 import flask
 
-from utils_ak.block_tree import *
+from loguru import logger
+from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 
-from app.imports.runtime import *
 from app.models import MozzarellaBoiling, MozzarellaSKU, cast_model
+from config import config
 
 
-def load_schedules(path, prefix, departments=None):
+def load_schedules_by_department(path, prefix, departments=None):
     # NOTE: DOES NOT RETURN DEPARTMENT IF NOT PRESENT
     schedules = {}
     departments = departments or []
 
-    for department, name in config.DEPARTMENT_NAMES.items():
+    for department, name in config.DEPARTMENT_NAMES_BY_DEPARTMENT.items():
         if departments and department not in departments:
             continue
         fn = os.path.join(path, f"{prefix} Расписание {name}.pickle")
@@ -45,20 +50,24 @@ def assert_schedules_presence(schedules, raise_if_not_present=None, warn_if_not_
 
     for department in raise_if_not_present:
         if department not in schedules:
-            raise Exception(f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}")
+            raise Exception(
+                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES_BY_DEPARTMENT[department]}"
+            )
 
     for department in warn_if_not_present:
         if department not in schedules:
-            logger.warning(f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}")
+            logger.warning(
+                f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES_BY_DEPARTMENT[department]}"
+            )
             if os.environ.get("APP_ENVIRONMENT") == "runtime":
                 flask.flash(
-                    f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES[department]}",
+                    f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES_BY_DEPARTMENT[department]}",
                     "warning",
                 )
 
 
 if __name__ == "__main__":
-    load_schedules(
+    load_schedules_by_department(
         "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/approved",
         "2021-01-01",
     )

@@ -1,5 +1,6 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from utils_ak.os import makedirs
 
 import app.models as umalat_models
 
@@ -18,7 +19,7 @@ def create_app(config_name="default"):
         config.UPLOAD_TMP_FOLDER,
         config.SKU_PLAN_FOLDER,
     ]:
-        utils.makedirs(config.abs_path(local_path) + "/")
+        makedirs(config.abs_path(local_path) + "/")
 
     # init directories for files
     for local_path in [
@@ -27,7 +28,7 @@ def create_app(config_name="default"):
         config.TEMPLATE_MASCARPONE_BOILING_PLAN,
         config.IGNORE_SKU_FILE,
     ]:
-        utils.makedirs(config.abs_path(local_path))
+        makedirs(config.abs_path(local_path))
 
     app = flask.Flask(__name__)
     app.config.from_object(config)

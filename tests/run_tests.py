@@ -13,7 +13,7 @@ def get_last_commit_name():
         # todo: fast tests
         pass
     else:
-        from tests.runners.runner import run_test
+        from tests.run_test import run_test
 
         run_test("tests")
 

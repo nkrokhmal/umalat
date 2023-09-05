@@ -113,7 +113,7 @@ class BaseClass:
     def abs_path(local_path):
         return os.path.join(basedir, local_path)
 
-    DEPARTMENT_NAMES = {
+    DEPARTMENT_NAMES_BY_DEPARTMENT = {
         "mozzarella": "моцарелла",
         "mascarpone": "маскарпоне",
         "milk_project": "милкпроджект",
@@ -122,7 +122,7 @@ class BaseClass:
         "contour_cleanings": "контурные мойки",
         "ricotta": "рикотта",
     }
-    DEPARTMENT_ROOT_NAMES = {
+    DEPARTMENT_ROOT_NAMES_BY_DEPARTMENT = {
         "mozzarella": "моцарелла",
         "mascarpone": "маскарпоне",
         "milk_project": "милкпроджект",
