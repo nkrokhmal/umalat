@@ -32,6 +32,9 @@ def wrap_line(schedule, line: int, date: datetime, start_time="07:00"):
 
     schedule = filter_block(block=schedule, cond=lambda b: b.props["line"] == line)
 
+    if not schedule:
+        return
+
     # - Init block maker
 
     m = BlockMaker(

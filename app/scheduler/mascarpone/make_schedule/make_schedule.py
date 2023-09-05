@@ -76,8 +76,8 @@ class Validator(ClassValidator):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        if b1.props["cleaning_object"] == "buffer_tank_and_packer" and "separation" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1, b2["separation"], ordered=True)
+        if b1.props["cleaning_object"] == "buffer_tank_and_packer" and "pumping" in b2.children_by_cls:
+            validate_disjoint_by_axis(b1, b2["pumping"], ordered=True)
 
     @staticmethod
     def validate__separator_acceleration__boiling(b1, b2):
@@ -136,6 +136,9 @@ def make_schedule(
         # -- Filter boiling_plan_df
 
         boiling_plan_df1 = boiling_plan_df[boiling_plan_df["line"] == line].copy()
+
+        if boiling_plan_df1.empty:
+            continue
 
         # -- Make preparation block
 
@@ -335,6 +338,11 @@ def make_schedule(
 
     for line in [1, 2]:
 
+        # - Skip if no boilings
+
+        if len(list(m.root.iter(cls="boiling", line=line))) == 0:
+            continue
+
         # - Add last cleanings
 
         m.block(
@@ -453,7 +461,7 @@ def make_schedule(
         push_kwargs={"validator": Validator()},
         cleaning_object="heat_exchanger",
         contour="2",
-        line=line,
+        line=1,
     )
 
     # - Return result
