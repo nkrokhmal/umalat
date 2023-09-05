@@ -65,9 +65,9 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(b1["separation"], b2, ordered=True)
 
         if (
-            b2.props["cleaning_object"] == "cream_cheese_tub_1"
+            b2.props["cleaning_object"] in ["cream_cheese_tub_1", "cream_cheese_tub_2"]
             and "separation" in b1.children_by_cls
-            and b1.props["group"] == "cream_cheese"
+            and b1.props["group"] in ["cream_cheese", "robiola", "cottage_cheese"]
         ):
             validate_disjoint_by_axis(b1["separation"], b2, ordered=True)
 
