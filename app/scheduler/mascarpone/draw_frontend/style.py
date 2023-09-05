@@ -64,7 +64,10 @@ STYLE = {
         "text": boiling_header_text,
         "color": "white",
     },
-    "pouring_cream": {"text": lambda b: f"Прием сливок", "color": "#B8CCE4"},
+    "pouring_cream": {
+        "text": lambda b: f"Прием сливок {1000 * len(b.props['boilings'])} кг/заквашивание/подача на сепаратор с аппаратного танка сливок",
+        "color": "#B8CCE4",
+    },
     "shift": {
         "text": lambda b: f"Смена {b.props['shift_num'] + 1} {b.props['team']}",
         "color": lambda b: ["yellow", "#95B3D7"][b.props["shift_num"]],

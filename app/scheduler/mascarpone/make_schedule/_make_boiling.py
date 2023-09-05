@@ -34,7 +34,7 @@ def _make_boiling(boiling_group_df, **kwargs):
     if technology.separation_time:
         m.row("separation", size=technology.separation_time // 5)
 
-    pouring = m.row("pouring", size=technology.pouring_time // 5, push_func=add_push).block
+    m.row("pouring", size=technology.pouring_time // 5, push_func=add_push)
 
     # - Salt if needed
 
@@ -50,6 +50,8 @@ def _make_boiling(boiling_group_df, **kwargs):
     with packing_m.block("packing_group"):
         # - Add ingredient if needed
 
+        if technology.analysis_time:
+            packing_m.row("analysis", size=technology.analysis_time // 5)
         if technology.ingredient_time:
             packing_m.row("ingredient", size=technology.ingredient_time // 5)
 
@@ -73,24 +75,12 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     # - Make other
 
-    if sample_row["group"] == "cream":
-        m.row("pumping", size=technology.pumping_time // 5, x=pouring.x[0] + 10 // 5, push_func=add_push)
-        analysis = m.row(
-            "analysis", size=technology.analysis_time // 5, x=pouring.x[0] + 15 // 5, push_func=add_push
-        ).block
+    if technology.heating_time:
+        m.row("heating", size=technology.heating_time // 5)
 
-        packing_group.props.update(x=(analysis.y[0], 0))
-        add_push(m.root, packing_group)
+    current_block = m.row("pumping", size=technology.pumping_time // 5).block
 
-        # m.row("packing", size=packing_size, x=analysis.y[0], push_func=add_push)
-
-    else:
-        if technology.heating_time:
-            m.row("heating", size=technology.heating_time // 5)
-
-        current_block = m.row("pumping", size=technology.pumping_time // 5).block
-
-        packing_group.props.update(x=(current_block.x[0] + 5 // 5, 0))
-        add_push(m.root, packing_group)
+    packing_group.props.update(x=(current_block.x[0] + 5 // 5, 0))
+    add_push(m.root, packing_group)
 
     return m.root

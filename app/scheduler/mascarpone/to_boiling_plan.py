@@ -35,8 +35,8 @@ def to_boiling_plan(
 
     # - Set line number
 
-    df["line"] = [1] * 10 + [2] * (len(df) - 10)  # План по варкам
-    # df["line"] = [1] * 3 + [2] * 16 + [1] * 12 # 2023-09-06
+    # df["line"] = [1] * 10 + [2] * (len(df) - 10)  # План по варкам
+    df["line"] = [1] * 3 + [2] * 16 + [1] * 12  # 2023-09-06
     df = df[df["group"] != "cream"]
     # - Return
 

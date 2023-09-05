@@ -1,3 +1,5 @@
+import json
+
 from typing import Callable
 
 import pandas as pd
@@ -30,17 +32,13 @@ class Validator(ClassValidator):
         if "separation" in b1.children_by_cls and "separation" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["separation"], b2["separation"])
 
-        # todo maybe: refactor [@marklidenberg]
         validate_disjoint_by_axis(b1["pouring"], b2["pouring"])
-        if "analysis" in b1.children_by_cls:
-            validate_disjoint_by_axis(b1["analysis"], b2["packing_group"])
-        if "analysis" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1["packing_group"], b2["analysis"])
         if "salting" in b1.children_by_cls and "salting" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["salting"], b2["salting"])
-        validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
-        if "ingredient" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1["packing_group"], b2["ingredient"])
+
+        if b1.props["group"] == "cream" and b2.props["group"] == "cream":
+            validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
+
         if "heating" in b1.children_by_cls and "heating" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["heating"], b2["heating"])
 
@@ -99,13 +97,16 @@ class Validator(ClassValidator):
     def validate__boiling__packing_switch(b1, b2):
         if b1.props["line"] != b2.props["line"]:
             return
+
         validate_disjoint_by_axis(b1["packing_group"], b2, ordered=True)
 
     @staticmethod
     def validate__packing_switch__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
             return
-        validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
+
+        if b2.props["group"] == "cream":
+            validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -206,7 +207,7 @@ def make_schedule(
 
             # - Full cleaning
 
-            if is_mascarpone_filled or (prev_group == "mascarpone" and is_new_group) or is_last:
+            if (is_mascarpone_filled and not is_last) or (prev_group == "mascarpone" and is_new_group):
                 m.block(
                     "cleaning",
                     size=(13, 0),
@@ -260,17 +261,6 @@ def make_schedule(
                 )
 
             if is_last:
-                m.block(
-                    "cleaning",
-                    size=(13, 0),
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                    push_kwargs={"validator": Validator()},
-                    cleaning_object="heat_exchanger",
-                    contour="2",
-                    line=line,
-                )
-
-            if is_last:
                 # last element
                 continue
 
@@ -310,6 +300,30 @@ def make_schedule(
                 push_kwargs={"validator": Validator()},
             )
 
+            # - Fix packing group if there is a overlap
+
+            if len(m.root.children) > 1:
+                b1, b2 = m.root.children[-2:]
+
+                if b1.props["cls"] == "boiling" and b2.props["cls"] == "boiling":
+                    try:
+                        validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
+                    except AssertionError as e:
+                        disposition = json.loads(str(e))["disposition"]
+
+                        b2["packing_group"].props.update(
+                            x=[b2["packing_group"].props["x_rel"][0] + disposition, b2["packing_group"].x[1]]
+                        )
+
+                elif b1.props["cls"] == "packing_switch" and b2.props["cls"] == "boiling":
+                    try:
+                        validate_disjoint_by_axis(b1, b2["packing_group"])
+                    except AssertionError as e:
+                        disposition = json.loads(str(e))["disposition"]
+                        b2["packing_group"].props.update(
+                            x=[b2["packing_group"].props["x_rel"][0] + disposition, b2["packing_group"].x[1]]
+                        )
+
             # - Increment current group count
 
             current_group_count += 1
@@ -318,6 +332,40 @@ def make_schedule(
 
             if group != "cream":
                 current_tub_num = 1 if current_tub_num == 2 else 2
+
+    for line in [1, 2]:
+
+        # - Add last cleanings
+
+        m.block(
+            "cleaning",
+            size=(13, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="separator",
+            contour="2",
+            line=line,
+        )
+
+        m.block(
+            "cleaning",
+            size=(13, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="tubs",
+            contour="2",
+            line=line,
+        )
+
+        m.block(
+            "cleaning",
+            size=(13, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="buffer_tank_and_packer",
+            contour="2",
+            line=line,
+        )
 
         # - Make boiling_headers
 
@@ -378,6 +426,7 @@ def make_schedule(
                     "pouring_cream",
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start - 2, 0),
+                    boilings=grp["boiling"].tolist(),
                     push_func=add_push,
                     line=line,
                 )
@@ -395,6 +444,18 @@ def make_schedule(
             m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line)
             m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", line=line)
 
+    # - Add last cleaning
+
+    m.block(
+        "cleaning",
+        size=(13, 0),
+        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+        push_kwargs={"validator": Validator()},
+        cleaning_object="heat_exchanger",
+        contour="2",
+        line=line,
+    )
+
     # - Return result
 
     return {"schedule": m.root, "boiling_plan_df": boiling_plan_df}
@@ -404,7 +465,8 @@ def test():
     from copy import deepcopy
 
     schedule = make_schedule(
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")
+        # str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/2023-09-05 Расписание маскарпоне.xlsx"),
     )["schedule"]
 
     print(schedule)
