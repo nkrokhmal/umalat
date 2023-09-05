@@ -1,14 +1,15 @@
 import openpyxl
 import pandas as pd
 
+from collections import namedtuple
 from openpyxl.utils.cell import column_index_from_string
 
-from app.imports.runtime import *
+from app.globals import db
 from app.models import RicottaBoiling, RicottaSKU
 from app.utils.features.openpyxl_wrapper import ExcelBlock
 
 
-Cell = collections.namedtuple("Cell", "col, col_name")
+Cell = namedtuple("Cell", "col, col_name")
 
 COLUMNS = {
     "boiling_number": Cell(column_index_from_string("A"), "A"),
@@ -39,7 +40,7 @@ def draw_boiling_names(wb: openpyxl.Workbook) -> None:
         row += 1
 
 
-def draw_skus(wb: openpyxl.Workbook, skus):
+def draw_skus(wb: openpyxl.Workbook, skus: list[RicottaSKU]) -> None:
     excel_client = ExcelBlock(wb["SKU"])
     excel_client.draw_row(1, ["-", "-", "-"], set_border=False)
     row: int = 2
@@ -51,14 +52,6 @@ def draw_skus(wb: openpyxl.Workbook, skus):
             set_border=False,
         )
         row += 1
-
-
-def get_colour_by_name(sku_name: str, skus: list[RicottaSKU]) -> str:
-    sku = next((x for x in skus if x.name == sku_name), None)
-    if sku is not None:
-        return sku[0]
-    else:
-        return flask.current_app.config["COLORS"]["Default"]
 
 
 def draw_boiling_plan(df: pd.DataFrame, wb: openpyxl.Workbook, total_volume: int = 0) -> openpyxl.Workbook:
@@ -80,6 +73,18 @@ def draw_boiling_plan(df: pd.DataFrame, wb: openpyxl.Workbook, total_volume: int
 
             excel_client.color_cell(row=row, col=COLUMNS["boiling_type"].col)
             excel_client.color_cell(row=row, col=COLUMNS["output_kg"].col)
+
+            formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
+                row,
+                COLUMNS["delimiter"].col_name,
+                COLUMNS["delimiter_int"].col_name,
+            )
+            excel_client.draw_cell(
+                row=row,
+                col=COLUMNS["boiling_number"].col,
+                value=formula,
+                set_border=False,
+            )
             excel_client.draw_row(
                 row=row,
                 values=[sku[key] for key in sku_columns],

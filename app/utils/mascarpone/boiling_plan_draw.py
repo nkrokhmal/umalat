@@ -61,7 +61,7 @@ def draw_boiling_sheet(
     wb: openpyxl.Workbook, df: pd.DataFrame, skus: list[SKU], sheet_name: str, row_number: int | None = None
 ):
     if df.empty:
-        return row_number
+        return wb, row_number
 
     if row_number is None:
         row_number = 3

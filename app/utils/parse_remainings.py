@@ -208,27 +208,51 @@ def parse_sheet(ws, sheet_name, excel_compiler, sku_type=ButterSKU):
         df = df.iloc[0:0]
         skus = db.session.query(sku_type).all()
         for sku in skus:
-            df = df.append(
-                {
-                    "sku": sku,
-                    "remainings - request": 0,
-                    "normative remainings": 0,
-                    "plan": sku.line.output_kg,
-                    "extra_packing": 0,
-                },
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        [
+                            {
+                                "sku": sku,
+                                "remainings - request": 0,
+                                "normative remainings": 0,
+                                "plan": sku.line.output_kg,
+                                "extra_packing": 0,
+                            },
+                        ]
+                    )
+                ],
                 ignore_index=True,
             )
+            # df = df.append(
+            #     {
+            #         "sku": sku,
+            #         "remainings - request": 0,
+            #         "normative remainings": 0,
+            #         "plan": sku.line.output_kg,
+            #         "extra_packing": 0,
+            #     },
+            #     ignore_index=True,
+            # )
     else:
         if df.empty:
             sku = db.session.query(sku_type).all()[0]
-            df = df.append(
-                {
-                    "sku": sku,
-                    "remainings - request": 0,
-                    "normative remainings": 0,
-                    "plan": 1,
-                    "extra_packing": 0,
-                },
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        [
+                            {
+                                "sku": sku,
+                                "remainings - request": 0,
+                                "normative remainings": 0,
+                                "plan": 1,
+                                "extra_packing": 0,
+                            }
+                        ]
+                    )
+                ],
                 ignore_index=True,
             )
             flask.flash("Заявка на текущий день нулевая!")
