@@ -16,6 +16,25 @@ class Validator(ClassValidator):
         super().__init__(window=20)
 
     @staticmethod
+    def validate__boiling__boiling(b1, b2):
+        if "separation" in b1.children_by_cls and "separation" in b2.children_by_cls:
+            validate_disjoint_by_axis(b1["separation"], b2["separation"])
+
+        # todo maybe: refactor [@marklidenberg]
+        validate_disjoint_by_axis(b1["pouring"], b2["pouring"])
+        if "analysis" in b1.children_by_cls:
+            validate_disjoint_by_axis(b1["analysis"], b2["packing"])
+        if "analysis" in b2.children_by_cls:
+            validate_disjoint_by_axis(b1["packing"], b2["analysis"])
+        if "salting" in b1.children_by_cls and "salting" in b2.children_by_cls:
+            validate_disjoint_by_axis(b1["salting"], b2["salting"])
+        validate_disjoint_by_axis(b1["packing"], b2["packing"])
+        if "ingredient" in b2.children_by_cls:
+            validate_disjoint_by_axis(b1["packing"], b2["ingredient"])
+        if "heating" in b1.children_by_cls and "heating" in b2.children_by_cls:
+            validate_disjoint_by_axis(b1["heating"], b2["heating"])
+
+    @staticmethod
     def validate__preparation__boiling(b1, b2):
         validate_disjoint_by_axis(b1, b2, ordered=True)
 
@@ -42,14 +61,11 @@ def make_schedule(
 
     # -- Make preparation block
 
-    m.row("preparation", size=6)  # todo next: put to parameters
+    m.row("preparation", size=6)  # todo next: put to parameters [@marklidenberg]
 
     # -- Make boiling and packing blocks
+
     for i, (boiling_id, grp) in enumerate(boiling_plan_df.groupby("group_id")):
-
-        if i == 1:
-            break
-
         boiling = _make_boiling(grp)
 
         m.block(
@@ -60,7 +76,7 @@ def make_schedule(
 
     # - Update start time
 
-    # m.root.props.update(x=(cast_t(start_time), 0))
+    m.root.props.update(x=(cast_t(start_time), 0))
 
     # - Return result
 

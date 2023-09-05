@@ -163,30 +163,34 @@ def wrap_frontend(
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы маскарпоне"))
 
+    # - Add separator
+
+    with m.block("separator_line", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls="separation"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
     # - Add бак 1
 
-    with m.block("tub_1_line", size=(0, 1)):
+    with m.block("tub_1_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="pouring"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add бак 2
-    with m.block("tub_2_line", size=(0, 1)):
+
+    with m.block("tub_2_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="salting"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add pumping
 
-    with m.block("pumping_line", size=(0, 1)):
+    with m.block("pumping_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="pumping"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add бак 3
-    with m.block("tub_3_line", size=(0, 1)):
 
-        for block in schedule.iter(cls="analysis"):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
-
-        for block in schedule.iter(cls="packing"):
+    with m.block("tub_3_line", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls=lambda cls: cls in ["analysis", "ingredient", "packing"]):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Return

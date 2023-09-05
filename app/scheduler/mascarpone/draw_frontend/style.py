@@ -6,6 +6,7 @@ STYLE = {
     "packing": {"text": "фасовка", "color": "#C0504D"},
     "separation": {"text": "сепарирование", "color": "#00B0F0"},
     "heating": {"text": "нагрев", "color": "#F79646"},
+    "ingredient": {"text": "ингредиенты", "color": "#92D050"},
     # "boiling_num": {"text": "{boiling_id}"},
     # "boiling_name": {"text": "{boiling_label}"},
     # "heating": {"color": "yellow"},
