@@ -8,14 +8,15 @@ from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
 from lessmore.utils.get_repo_path import get_repo_path
 
-from app.models import cast_model, mascarponeSKU
+from app.models import MascarponeSKU, cast_model
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
+from app.utils.mascarpone.boiling_plan_read import BoilingPlanReader
 
 
 def to_boiling_plan(
     boiling_plan_source: BoilingPlanLike,
-    first_batch_ids_by_type: dict = {"mascarpone": 1},
+    first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
 ) -> pd.DataFrame:
     """
     :param boiling_plan_source: str or openpyxl.Workbook
@@ -28,44 +29,8 @@ def to_boiling_plan(
 
     # - Read boiling plan
 
-    wb = cast_workbook(boiling_plan_source)
-
-    cur_id = 0
-    ws = wb["План варок"]
-
-    values = []
-
-    # collect header
-    header = [ws.cell(1, i).value for i in range(1, 100) if ws.cell(1, i).value]
-
-    for i in range(2, 200):
-        if not ws.cell(i, 2).value:
-            continue
-
-        values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
-
-    df = pd.DataFrame(values, columns=header)
-    df = df[["Номер группы варок", "SKU", "КГ"]]
-    df.columns = ["group_id", "sku", "kg"]
-    df = df[df["sku"] != "-"]
-
-    df["group_id"] = df["group_id"].astype(int)
-
-    # batch_id and boiling_id are the same with group_id
-    df["batch_id"] = df["group_id"]
-    df["boiling_id"] = df["group_id"]
-    df["batch_type"] = "mascarpone"
-    df["sku"] = df["sku"].apply(lambda sku: cast_model(mascarponeSKU, sku))
-
-    # - Saturate boiling plan
-
-    df["boiling"] = df["sku"].apply(lambda sku: delistify(sku.made_from_boilings, single=True))
-    df["start"] = None
-    df["finish"] = None
-
-    # - Update absolute batch id
-
-    df = update_absolute_batch_id(boiling_plan_df=df, first_batch_ids_by_type=first_batch_ids_by_type)
+    reader = BoilingPlanReader(wb=boiling_plan_source, first_batches=first_batch_ids_by_type)
+    df = reader.parse()
 
     # - Return
 
@@ -73,9 +38,7 @@ def to_boiling_plan(
 
 
 def test():
-    df = to_boiling_plan(
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/2023-09-03 План по варкам масло.xlsx")
-    )
+    df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx"))
     print(df.iloc[0])
 
 

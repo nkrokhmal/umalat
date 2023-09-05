@@ -254,6 +254,7 @@ def test():
             / "app/data/static/samples/by_department/mozzarella/2023-09-04 План по варкам моцарелла.xlsx"
         )
     )
+    print(df["batch_id"])
     print(df.iloc[0])
 
 

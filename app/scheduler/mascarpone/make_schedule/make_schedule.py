@@ -6,7 +6,7 @@ from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_
 
 from lessmore.utils.get_repo_path import get_repo_path
 
-from app.scheduler.mascarpone.make_schedule._make_boiling_and_packing import _make_boiling_and_packing
+from app.scheduler.mascarpone.make_schedule._make_boiling import _make_boiling
 from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike, to_boiling_plan
 from app.scheduler.time_utils import cast_t
 
@@ -19,53 +19,11 @@ class Validator(ClassValidator):
     def validate__preparation__boiling(b1, b2):
         validate_disjoint_by_axis(b1, b2, ordered=True)
 
-    @staticmethod
-    def validate__boiling__displacement(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
-
-    @staticmethod
-    def validate__boiling__cleaning(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
-
-    @staticmethod
-    def validate__boiling__boiling(b1, b2):
-        validate_disjoint_by_axis(b1["pasteurization"], b2["pasteurization"], ordered=True)
-
-    @staticmethod
-    def validate__displacement__cleaning(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
-
-    @staticmethod
-    def validate__boiling__packing(b1, b2):
-        if b1.props["is_first"]:
-            distance_needed = 0
-        else:
-            distance_needed = 4  # for cooling
-
-        validate_disjoint_by_axis(b1, b2, ordered=True, distance=distance_needed)
-
-    @staticmethod
-    def validate__packing__boiling(b1, b2):
-        if b1.props["tank_number"] == b2.props["tank_number"]:
-            validate_disjoint_by_axis(b1, b2["pasteurization"], ordered=True, distance=4)
-
-    @staticmethod
-    def validate__packing__packing(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True, distance=4)
-
-    @staticmethod
-    def validate__packing__displacement(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
-
-    @staticmethod
-    def validate__packing__cleaning(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
-
 
 def make_schedule(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
-    first_batch_ids_by_type: dict = {"mascarpone": 1},
+    first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
 ) -> dict:
     # - Get boiling plan
 
@@ -77,51 +35,32 @@ def make_schedule(
 
     # - Make schedule
 
+    # -- Get line
+
     sample_row = boiling_plan_df.iloc[0]
     line = sample_row["boiling"].line
 
     # -- Make preparation block
 
-    m.row("preparation", size=line.preparing_time // 5)
+    m.row("preparation", size=6)  # todo next: put to parameters
 
     # -- Make boiling and packing blocks
+    for i, (boiling_id, grp) in enumerate(boiling_plan_df.groupby("group_id")):
 
-    for i, (boiling_id, grp) in enumerate(boiling_plan_df.groupby("boiling_id")):
-        tank_number = i % 2
+        if i == 1:
+            break
 
-        boiling, packing = _make_boiling_and_packing(grp, tank_number=tank_number)
+        boiling = _make_boiling(grp)
 
         m.block(
             boiling,
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
             push_kwargs={"validator": Validator()},
-            is_first=i == 0,
         )
-        m.block(
-            packing,
-            push_func=AxisPusher(start_from="last_beg", start_shift=0),
-            push_kwargs={"validator": Validator()},
-        )
-
-    # -- Make displacement and cleaning blocks
-
-    m.block(
-        m.create_block("displacement", size=(line.displacement_time // 5, 1)),
-        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-        push_kwargs={"validator": Validator()},
-    )
-
-    # -- Make cleaning block
-
-    m.block(
-        m.create_block("cleaning", size=(line.cleaning_time // 5, 1)),
-        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-        push_kwargs={"validator": Validator()},
-    )
 
     # - Update start time
 
-    m.root.props.update(x=(cast_t(start_time), 0))
+    # m.root.props.update(x=(cast_t(start_time), 0))
 
     # - Return result
 
@@ -130,12 +69,9 @@ def make_schedule(
 
 def test():
     print(
-        make_schedule(
-            str(
-                get_repo_path()
-                / "app/data/static/samples/by_department/mascarpone/2023-09-03 План по варкам масло.xlsx"
-            )
-        )
+        make_schedule(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx"))[
+            "schedule"
+        ]
     )
 
 
