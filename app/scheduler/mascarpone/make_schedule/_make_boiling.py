@@ -54,7 +54,7 @@ def _make_boiling(boiling_group_df, **kwargs):
 
             if previous_weight and current_weight != previous_weight:
                 packing_m.row(
-                    "packing_switching", size=10 // 5, push_func=stack_push
+                    "packing_switch", size=10 // 5, push_func=stack_push
                 )  # todo next: make proper change of packing [@marklidenberg]
 
             packing_size = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in grp.iterrows()])

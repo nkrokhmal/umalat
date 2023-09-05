@@ -96,6 +96,18 @@ class Validator(ClassValidator):
         validate_disjoint_by_axis(b1["pumping"], b2, ordered=True)  # todo next: check logic [@marklidenberg]
 
     @staticmethod
+    def validate__boiling__packing_switch(b1, b2):
+        if b1.props["line"] != b2.props["line"]:
+            return
+        validate_disjoint_by_axis(b1["packing_group"], b2, ordered=True)
+
+    @staticmethod
+    def validate__packing_switch__boiling(b1, b2):
+        if b1.props["line"] != b2.props["line"]:
+            return
+        validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
+
+    @staticmethod
     def validate__cleaning__cleaning(b1, b2):
         if b1.props["contour"] == b2.props["contour"]:
             validate_disjoint_by_axis(b1, b2, distance=1, ordered=b1.props["line"] == b2.props["line"])
@@ -106,7 +118,7 @@ class Validator(ClassValidator):
 
 def make_schedule(
     boiling_plan: BoilingPlanLike,
-    start_times_by_line: dict[int, str] = {1: "07:00", 2: "07:00"},
+    start_times_by_line: dict[int, str] = {1: "07:00", 2: "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
 ) -> dict:
     # - Get boiling plan
@@ -126,7 +138,7 @@ def make_schedule(
 
         # -- Make preparation block
 
-        m.row("preparation", size=6, line=line, x=cast_t(start_times_by_line[1]), push_func=add_push)
+        m.row("preparation", size=6, line=line, x=cast_t(start_times_by_line[line]), push_func=add_push)
 
         # -- Make boiling and packing blocks
 
@@ -273,6 +285,22 @@ def make_schedule(
                 percent=grp.iloc[0]["boiling"].percent,
                 weight_netto=grp.iloc[0]["sku"].weight_netto,
             )
+
+            # - Insert packing_switch if needed
+
+            if (
+                not is_first
+                and not is_new_group
+                and grp.iloc[0]["sku"].weight_netto != prev_grp.iloc[-1]["sku"].weight_netto
+            ):
+                # packing switching
+                m.block(
+                    "packing_switch",
+                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                    push_kwargs={"validator": Validator()},
+                    size=(6, 0),
+                    line=line,
+                )
 
             # - Insert new boiling
 

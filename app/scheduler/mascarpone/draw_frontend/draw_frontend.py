@@ -14,7 +14,7 @@ from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
-    start_time: str = "07:00",
+    start_times_by_line: dict = {1: "07:00", 2: "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
@@ -23,7 +23,7 @@ def draw_frontend(
 
     output = wrap_frontend(
         boiling_plan=boiling_plan,
-        start_time=start_time,
+        start_times_by_line=start_times_by_line,
         first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,
     )

@@ -23,7 +23,7 @@ from app.scheduler.wrap_header import wrap_header
 LINE_HEIGHT = 14
 
 
-def wrap_line(schedule, line: int, date: datetime):
+def wrap_line(schedule, line: int, date: datetime, start_time="07:00"):
     # - Copy schedule
 
     schedule = copy.deepcopy(schedule)
@@ -45,9 +45,7 @@ def wrap_line(schedule, line: int, date: datetime):
     m.row("stub", size=0)  # start with 1
 
     # calc start time
-    preparation = next(schedule.iter(cls="preparation", line=line))
-    start_t = int(custom_round(preparation.x[0], 12, "floor"))  # round to last hour
-    start_time = cast_time(start_t)
+    start_time = cast_time(start_time)
 
     # - Add header
 
@@ -112,7 +110,7 @@ def wrap_line(schedule, line: int, date: datetime):
     # - Add бак 3
 
     with m.block("tub_3_line", start_time=start_time, size=(0, 1)):
-        for block in schedule.iter(cls=lambda cls: cls in ["analysis", "ingredient", "packing"]):
+        for block in schedule.iter(cls=lambda cls: cls in ["analysis", "ingredient", "packing", "packing_switch"]):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add packing lines
@@ -130,8 +128,13 @@ def wrap_line(schedule, line: int, date: datetime):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add preparation
-
-    m.block("preparation", x=(0, 4), size=(6, 10), push_func=add_push)
+    m.block(
+        "preparation",
+        x=(next(schedule.iter(cls="preparation")).x[0], 4),
+        start_time=start_time,
+        size=(6, 10),
+        push_func=add_push,
+    )
 
     # - Add template
 
@@ -198,7 +201,7 @@ def wrap_line(schedule, line: int, date: datetime):
 
 def wrap_frontend(
     boiling_plan: BoilingPlanLike,
-    start_time: str = "07:00",
+    start_times_by_line: dict = {1: "07:00", 2: "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     date: Optional[datetime] = None,
 ):
@@ -206,7 +209,7 @@ def wrap_frontend(
 
     output = make_schedule(
         boiling_plan,
-        start_times_by_line={1: start_time, 2: start_time},
+        start_times_by_line=start_times_by_line,
         first_batch_ids_by_type=first_batch_ids_by_type,
     )
     schedule = output["schedule"]
@@ -226,8 +229,8 @@ def wrap_frontend(
     )
     m.row("stub", size=0)  # start with 1
 
-    m.block(wrap_line(schedule, line=1, date=date))
-    m.block(wrap_line(schedule, line=2, date=date))
+    m.block(wrap_line(schedule, line=1, date=date, start_time=min(start_times_by_line.values())))
+    m.block(wrap_line(schedule, line=2, date=date, start_time=min(start_times_by_line.values())))
 
     # - Return
 
