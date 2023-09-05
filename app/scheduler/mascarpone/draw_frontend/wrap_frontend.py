@@ -163,10 +163,28 @@ def wrap_frontend(
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы маскарпоне"))
 
+    # - Add shifts
+
+    with m.block("shift_line", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls="shift", team="brigadir"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    # - Add shifts
+
+    with m.block("shift_line", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls="shift", team="packer"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
     # - Add boiling header
 
     with m.block("boiling_header_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="boiling_header"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    # - Add pouring cream line
+
+    with m.block("pouring_cream_line", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls="pouring_cream"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add separator
@@ -212,6 +230,70 @@ def wrap_frontend(
     with m.block("contour_2", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: "cleaning", contour="2"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    # - Add preparation
+
+    m.block("preparation", x=(0, 4), size=(6, 10), push_func=add_push)
+
+    # - Add template
+
+    with m.block("template_block", index_width=1, push_func=add_push):
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 6),
+            size=(2, 1),
+            text="Сепаратор",
+        )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 7),
+            size=(2, 1),
+            text="Бак 1",
+        )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 8),
+            size=(2, 1),
+            text="Бак 2",
+        )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 9),
+            size=(2, 1),
+            text="Перекачивание в фасовочный танк",
+        )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 10),
+            size=(2, 1),
+            text="Бак 3",
+        )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 11),
+            size=(2, 1),
+            text="Грюнвальд",
+        )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 12),
+            size=(2, 1),
+            text="Контур 1",
+        )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 13),
+            size=(2, 1),
+            text="Контур 2",
+        )
 
     # - Return
 

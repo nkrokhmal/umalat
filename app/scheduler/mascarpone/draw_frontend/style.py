@@ -10,6 +10,13 @@ STYLE = {
     "cleaning": {"text": lambda b: f'Мойка {b.props["cleaning_object"]}', "color": "yellow"},
     "separator_acceleration": {"text": "разгон сепаратора", "color": "#C4D79B"},
     "boiling_header": {"text": lambda b: f"Варки {b.props['group']}", "color": "white"},
+    "pouring_cream": {"text": lambda b: f"Прием сливок", "color": "#B8CCE4"},
+    "shift": {"text": lambda b: f"Смена {b.props['team']}", "color": "yellow"},
+    "preparation": {
+        "text": "подготовка цеха к работе, проверка оборудования стерилизация оборудования  , вызов микробиолога, отбор анализов, разгон сепаратора",
+        "color": "white",
+    },
+    "template": {"color": "white"},
     # "boiling_num": {"text": "{boiling_id}"},
     # "boiling_name": {"text": "{boiling_label}"},
     # "heating": {"color": "yellow"},

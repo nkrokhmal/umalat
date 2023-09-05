@@ -1,6 +1,6 @@
 import pandas as pd
 
-from more_itertools import mark_ends
+from more_itertools import last, mark_ends
 from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
@@ -12,6 +12,7 @@ from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.mascarpone.make_schedule._make_boiling import _make_boiling
 from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike, to_boiling_plan
+from app.scheduler.split_shifts_utils import split_shifts_by_time
 from app.scheduler.time_utils import cast_t
 
 
@@ -261,13 +262,58 @@ def make_schedule(
         pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
         pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
 
+        if grp.iloc[0]["group"] != "mascarpone":
+            m.block(
+                "boiling_header",
+                size=(pouring_finish - pouring_start, 0),
+                x=(pouring_start, 0),
+                push_func=add_push,
+                group=grp.iloc[0]["group"],
+                boilings=grp["boiling"].tolist(),
+            )
+        else:
+            # shifted 10 minutes to the left. Also add pouring_cream block
+
+            m.block(
+                "boiling_header",
+                size=(pouring_finish - pouring_start, 0),
+                x=(pouring_start - 2, 0),
+                push_func=add_push,
+                group=grp.iloc[0]["group"],
+                boilings=grp["boiling"].tolist(),
+            )
+
+            m.block(
+                "pouring_cream",
+                size=(pouring_finish - pouring_start, 0),
+                x=(pouring_start - 2, 0),
+                push_func=add_push,
+            )
+
+    # - Make shifts
+
+    # -- Brigadir and packer
+
+    shifts = split_shifts_by_time(
+        a=m.root["preparation"].x[0],
+        b=last(m.root.iter(cls="cleaning", cleaning_object="buffer_tank_and_packer")).y[0],
+        split=cast_t("18:00") - cast_t(start_time),
+    )
+    for a, b in shifts:
         m.block(
-            "boiling_header",
-            size=(pouring_finish - pouring_start, 0),
-            x=(pouring_start, 0),
+            "shift",
+            size=(b - a, 0),
+            x=(a, 0),
             push_func=add_push,
-            group=grp.iloc[0]["group"],
-            boilings=grp["boiling"].tolist(),
+            team="brigadir",
+        )
+
+        m.block(
+            "shift",
+            size=(b - a, 0),
+            x=(a, 0),
+            push_func=add_push,
+            team="packer",
         )
 
     # - Update start time
