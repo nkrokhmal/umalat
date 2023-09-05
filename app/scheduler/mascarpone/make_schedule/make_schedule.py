@@ -98,7 +98,7 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
         if b1.props["contour"] == b2.props["contour"]:
-            validate_disjoint_by_axis(b1, b2, distance=1, ordered=True)
+            validate_disjoint_by_axis(b1, b2, distance=1, ordered=b1.props["line"] == b2.props["line"])
 
         if b2.props["cleaning_object"] == "heat_exchanger":
             validate_disjoint_by_axis(b1, b2, distance=1, ordered=True)
@@ -350,23 +350,7 @@ def test():
         str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")
     )["schedule"]
 
-    def _filter(b):
-        return b.props["cls"] == "preparation"
-
-    def _filter_block(block, cond: Callable):
-        if not block.children:
-            if cond(block):
-                return block
-            else:
-                return None
-        else:
-            block.children = [_filter_block(b) for b in block.children]
-            block.children = [b for b in block.children if b is not None]
-            if not block.children:
-                return None
-            return block
-
-    print(_filter_block(schedule))
+    print(schedule)
 
 
 if __name__ == "__main__":

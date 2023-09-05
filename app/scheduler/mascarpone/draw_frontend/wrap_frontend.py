@@ -45,7 +45,8 @@ def wrap_line(schedule, line: int, date: datetime):
     m.row("stub", size=0)  # start with 1
 
     # calc start time
-    start_t = int(custom_round(schedule.x[0], 12, "floor"))  # round to last hour
+    preparation = next(schedule.iter(cls="preparation", line=line))
+    start_t = int(custom_round(preparation.x[0], 12, "floor"))  # round to last hour
     start_time = cast_time(start_t)
 
     # - Add header
