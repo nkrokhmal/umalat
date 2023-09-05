@@ -128,7 +128,7 @@ def _wrap_packing(schedule):
 def wrap_frontend(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
-    first_batch_ids_by_type: dict = {"mascarpone": 1},
+    first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     date: Optional[datetime] = None,
 ):
     # - Get schedule
@@ -144,6 +144,8 @@ def wrap_frontend(
 
     date = date or datetime.now()
 
+    # - Init block maker
+
     m = BlockMaker(
         "frontend",
         default_row_width=1,
@@ -157,12 +159,35 @@ def wrap_frontend(
     start_t = int(custom_round(schedule.x[0], 12, "floor"))  # round to last hour
     start_time = cast_time(start_t)
 
-    m.block(wrap_header(date=date, start_time=start_time, header="График работы маслоцеха"))
-    with m.block(start_time=start_time, axis=1):
-        m.block(_wrap_boiling_lines(schedule))
+    # - Add header
 
-    with m.block(start_time=start_time, axis=1):
-        m.block(_wrap_packing(schedule))
+    m.block(wrap_header(date=date, start_time=start_time, header="График работы маскарпоне"))
+
+    # - Add бак 1
+
+    with m.block("tub_1_line", size=(0, 1)):
+        for block in schedule.iter(cls="pouring"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    # - Add бак 2
+    with m.block("tub_2_line", size=(0, 1)):
+        for block in schedule.iter(cls="salting"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    # - Add pumping
+
+    with m.block("pumping_line", size=(0, 1)):
+        for block in schedule.iter(cls="pumping"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    # - Add бак 3
+    with m.block("tub_3_line", size=(0, 1)):
+
+        for block in schedule.iter(cls="analysis"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+        for block in schedule.iter(cls="packing"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Return
 
@@ -172,14 +197,7 @@ def wrap_frontend(
 
 
 def test():
-    print(
-        wrap_frontend(
-            str(
-                get_repo_path()
-                / "app/data/static/samples/by_department/mascarpone/2023-09-03 План по варкам масло.xlsx"
-            )
-        )
-    )
+    print(wrap_frontend(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")))
 
 
 if __name__ == "__main__":

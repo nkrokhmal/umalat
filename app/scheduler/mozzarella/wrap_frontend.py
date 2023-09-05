@@ -508,7 +508,7 @@ def wrap_frontend(
     )
     schedule = output["schedule"]
 
-    # - Wrap forntend
+    # - Wrap frontend
 
     master = schedule["master"]
     extra_packings = schedule["extra_packings"]

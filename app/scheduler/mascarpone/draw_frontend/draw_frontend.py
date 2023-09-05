@@ -8,14 +8,14 @@ from lessmore.utils.get_repo_path import get_repo_path
 
 from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.mascarpone.draw_frontend.style import STYLE
+from app.scheduler.mascarpone.draw_frontend.wrap_frontend import wrap_frontend
 from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike
-from app.scheduler.mascarpone.wrap_frontend import wrap_frontend
 
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
-    first_batch_ids_by_type: dict = {"mascarpone": 1},
+    first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:
@@ -37,7 +37,7 @@ def draw_frontend(
         fn=None,
         wb=workbook,
     )
-    #
+
     # - Return
 
     return output
@@ -45,7 +45,7 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/2023-09-03 План по варкам масло.xlsx")
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")
     )
 
     output["workbook"].save("test.xlsx")
