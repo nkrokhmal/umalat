@@ -58,7 +58,6 @@ class SKUForm(FlaskForm):
     packing_speed = FloatField("Введите скорость фасовки", validators=[Optional()])
     shelf_life = IntegerField("Введите время хранения, д", validators=[Optional()])
     in_box = IntegerField("Введите количество упаковок в коробке, шт", validators=[Optional()])
-    output_per_tank = FloatField("Выход на танк, шт", validators=[Optional()])
 
     boiling = SelectField("Выберите тип варки", coerce=int, default=-1)
     group = SelectField("Выберите название форм фактора", coerce=int, default=-1)
@@ -85,7 +84,7 @@ class SKUForm(FlaskForm):
 
 class LineForm(FlaskForm):
     name = StringField("Введите название линии", validators=[DataRequired()])
-    input_ton = IntegerField("Введите количество литров в одном танке", validators=[DataRequired()])
+    input_kg = IntegerField("Введите количество литров в одном танке", validators=[DataRequired()])
 
 
 class BoilingForm(FlaskForm):
