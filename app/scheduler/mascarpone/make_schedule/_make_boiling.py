@@ -48,6 +48,13 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     packing_m = BlockMaker()
     with packing_m.block("packing_group"):
+        # - Add ingredient if needed
+
+        if technology.ingredient_time:
+            packing_m.row("ingredient", size=technology.ingredient_time // 5)
+
+        # - Add packings
+
         previous_weight = None
         for i, grp in boiling_group_df.groupby("weight_group_id"):
             current_weight = grp.iloc[0]["weight_netto"]
@@ -83,20 +90,7 @@ def _make_boiling(boiling_group_df, **kwargs):
 
         current_block = m.row("pumping", size=technology.pumping_time // 5).block
 
-        if technology.ingredient_time:
-            current_block = m.row(
-                "ingredient",
-                size=technology.ingredient_time // 5,
-                x=current_block.x[0] + 10 // 5,
-                push_func=add_push,
-            ).block
-            packing_group.props.update(x=(current_block.y[0], 0))
-            add_push(m.root, packing_group)
-
-            # m.row("packing", size=packing_size, x=current_block.y[0], push_func=add_push)
-        else:
-            packing_group.props.update(x=(current_block.x[0] + 5 // 5, 0))
-            add_push(m.root, packing_group)
-            # m.row("packing", size=packing_size, x=current_block.x[0] + 5 // 5, push_func=add_push)
+        packing_group.props.update(x=(current_block.x[0] + 5 // 5, 0))
+        add_push(m.root, packing_group)
 
     return m.root

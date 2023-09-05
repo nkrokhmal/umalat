@@ -165,7 +165,7 @@ def make_schedule(
             group = None if is_last else grp.iloc[0]["group"]
 
             is_mascarpone_filled = (
-                current_group_count >= 3 + 1 and current_group_count % 3 == 1
+                current_group_count >= 8 + 1 and current_group_count % 8 == 1
             ) and prev_group == "mascarpone"
 
             # - Reset current group count if new group
