@@ -91,7 +91,7 @@ def make_schedule(boiling_plan_df, start_time="07:00"):
             iter_line_nums_props = recycle_list(line_nums_props, idx)
             m.block(
                 bg,
-                push_func=AxisPusher(start_from="last_beg"),
+                push_func=AxisPusher(start_from="max_beg"),
                 push_kwargs={
                     "validator": Validator(),
                     "iter_props": [{"line_nums": line_nums[:n_tanks]} for line_nums in iter_line_nums_props],
@@ -100,7 +100,7 @@ def make_schedule(boiling_plan_df, start_time="07:00"):
 
     with code("make_bath_cleanings"):
         bath_cleanings = make_bath_cleanings()
-        m.block(bath_cleanings, push_func=AxisPusher(start_from="last_beg"), push_kwargs={"validator": Validator()})
+        m.block(bath_cleanings, push_func=AxisPusher(start_from="max_beg"), push_kwargs={"validator": Validator()})
 
     with code("make_container_cleanings"):
         # add container cleanings

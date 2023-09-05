@@ -144,7 +144,7 @@ def make_mascarpone_boiling_group(boiling_group_dfs):
     ]
 
     for mascarpone_boiling in mascarpone_boilings:
-        m.row(mascarpone_boiling, push_func=AxisPusher(start_from="last_beg"), push_kwargs={"validator": Validator()})
+        m.row(mascarpone_boiling, push_func=AxisPusher(start_from="max_beg"), push_kwargs={"validator": Validator()})
 
     with code("Fix waiting time"):
         if len(boiling_group_dfs) == 2:

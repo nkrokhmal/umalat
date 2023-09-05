@@ -187,7 +187,7 @@ def make_contour_2(properties):
             multihead_end = cast_t(properties["mozzarella"].multihead_end_time) + 12
             m.row(
                 "cleaning",
-                push_func=AxisPusher(start_from=["last_end", multihead_end], validator=CleaningValidator()),
+                push_func=AxisPusher(start_from=["max_end", multihead_end], validator=CleaningValidator()),
                 size=cast_t("01:20"),
                 label="Комет",
             )
@@ -366,11 +366,11 @@ def _make_contour_3(
                         m.block(
                             c,
                             push_func=AxisPusher(
-                                start_from=["last_end", row["melting_end"] + 12], validator=CleaningValidator()
+                                start_from=["max_end", row["melting_end"] + 12], validator=CleaningValidator()
                             ),
                         )  # add hour
                     else:
-                        m.block(c, push_func=AxisPusher(start_from="last_end", validator=CleaningValidator()))
+                        m.block(c, push_func=AxisPusher(start_from="max_end", validator=CleaningValidator()))
                     yield
 
             # make iterator longer
@@ -416,7 +416,7 @@ def _make_contour_3(
     if molder:
         m.row(
             "cleaning",
-            push_func=AxisPusher(start_from="last_end", validator=CleaningValidator()),
+            push_func=AxisPusher(start_from="max_end", validator=CleaningValidator()),
             size=cast_t("01:20"),
             label="Формовщик",
         )

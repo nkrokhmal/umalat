@@ -141,7 +141,7 @@ class BoilingPlanToSchedule:
 
             self.m.block(
                 bg,
-                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                push_func=AxisPusher(start_from="max_beg", start_shift=-50),
                 push_kwargs={"validator": Validator()},
                 # props
                 line_nums=line_nums,
@@ -175,7 +175,7 @@ class BoilingPlanToSchedule:
 
             self.m.block(
                 block,
-                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                push_func=AxisPusher(start_from="max_beg", start_shift=-30),
                 push_kwargs={"validator": Validator()},
             )
             left_cleaning_lines.remove(
@@ -186,14 +186,14 @@ class BoilingPlanToSchedule:
                 for entity in ["separator", "homogenizer"]:
                     cleaning = make_cleaning(entity)
                     self.m.block(
-                        cleaning, push_func=AxisPusher(start_from="last_beg"), push_kwargs={"validator": Validator()}
+                        cleaning, push_func=AxisPusher(start_from="max_beg"), push_kwargs={"validator": Validator()}
                     )
 
             for line_nums in left_cleaning_lines:
                 cleaning = make_cleaning("sourdough_mascarpone", sourdoughs=line_nums)
                 self.m.block(
                     cleaning,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                    push_func=AxisPusher(start_from="max_beg", start_shift=-30),
                     push_kwargs={"validator": Validator()},
                 )
 
@@ -212,7 +212,7 @@ class BoilingPlanToSchedule:
         for block in cream_cheese_blocks:
             self.m.block(
                 block,
-                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                push_func=AxisPusher(start_from="max_beg", start_shift=-50),
                 push_kwargs={"validator": Validator()},
             )
 
@@ -225,13 +225,13 @@ class BoilingPlanToSchedule:
             block = make_cleaning("sourdough_mascarpone_cream_cheese", sourdoughs=group)
             self.m.block(
                 block,
-                push_func=AxisPusher(start_from="last_beg", start_shift=-30),
+                push_func=AxisPusher(start_from="max_beg", start_shift=-30),
                 push_kwargs={"validator": Validator()},
             )
 
         for entity in ["separator", "homogenizer", "heat_exchanger"]:
             block = make_cleaning(entity)
-            self.m.block(block, push_func=AxisPusher(start_from="last_beg"), push_kwargs={"validator": Validator()})
+            self.m.block(block, push_func=AxisPusher(start_from="max_beg"), push_kwargs={"validator": Validator()})
 
     def _make_shifts(self, start_time):
         with self.m.block("shifts", x=(0, 0), push_func=add_push):

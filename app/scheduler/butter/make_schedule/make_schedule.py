@@ -93,13 +93,13 @@ def make_schedule(
 
         m.block(
             boiling,
-            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_func=AxisPusher(start_from="max_beg", start_shift=-50),
             push_kwargs={"validator": Validator()},
             is_first=i == 0,
         )
         m.block(
             packing,
-            push_func=AxisPusher(start_from="last_beg", start_shift=0),
+            push_func=AxisPusher(start_from="max_beg", start_shift=0),
             push_kwargs={"validator": Validator()},
         )
 
@@ -107,7 +107,7 @@ def make_schedule(
 
     m.block(
         m.create_block("displacement", size=(line.displacement_time // 5, 1)),
-        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+        push_func=AxisPusher(start_from="max_beg", start_shift=-50),
         push_kwargs={"validator": Validator()},
     )
 
@@ -115,7 +115,7 @@ def make_schedule(
 
     m.block(
         m.create_block("cleaning", size=(line.cleaning_time // 5, 1)),
-        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+        push_func=AxisPusher(start_from="max_beg", start_shift=-50),
         push_kwargs={"validator": Validator()},
     )
 

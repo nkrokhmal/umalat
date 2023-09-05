@@ -44,6 +44,6 @@ def make_boiling_sequence(boilings):
             validate_disjoint_by_axis(b1, b2)
 
     for b in boilings:
-        push(m.root, b, push_func=AxisPusher(start_from="last_beg"), validator=Validator())
+        push(m.root, b, push_func=AxisPusher(start_from="max_beg"), validator=Validator())
 
     return m.root

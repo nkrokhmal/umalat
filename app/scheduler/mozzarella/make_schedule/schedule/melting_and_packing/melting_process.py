@@ -72,7 +72,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
     start_from = 0
     for c in blocks:
         if c.props["cls"] == "packing_configuration":
-            m.block(c, push_func=AxisPusher(start_from="last_end"), push_kwargs={"validator": Validator()})
+            m.block(c, push_func=AxisPusher(start_from="max_end"), push_kwargs={"validator": Validator()})
         else:
             m.block(c, push_func=AxisPusher(start_from=start_from), push_kwargs={"validator": Validator()})
         if c.props["cls"] == "melting_and_packing_process":

@@ -117,7 +117,7 @@ def _make_schedule(
         push(
             m.root,
             boiling,
-            push_func=AxisPusher(start_from="last_beg", start_shift=-30, min_start=local_start_t),
+            push_func=AxisPusher(start_from="max_beg", start_shift=-30, min_start=local_start_t),
             validator=Validator(),
         )
         with code("Push lunch if needed"):

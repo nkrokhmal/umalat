@@ -33,6 +33,10 @@ def to_boiling_plan(
     reader = BoilingPlanReader(wb=boiling_plan_source, first_batches=first_batch_ids_by_type)
     df = reader.parse()
 
+    # - Set line number
+
+    df["line"] = [1] * 10 + [2] * (len(df) - 10)
+
     # - Return
 
     return df
@@ -40,7 +44,7 @@ def to_boiling_plan(
 
 def test():
     df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx"))
-    print(df["group"])
+    print(df["line_number"])
 
 
 if __name__ == "__main__":
