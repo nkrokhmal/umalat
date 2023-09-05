@@ -1,5 +1,11 @@
+from loguru import logger
+from utils_ak.openpyxl import read_metadata
+from utils_ak.time import cast_datetime
+
 from app.imports.runtime import *
 from app.models import AdygeaSKU
+from app.scheduler.milk_project.parse_schedule import parse_schedule
+from app.scheduler.milk_project.to_boiling_plan import to_boiling_plan
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.schedule import cast_schedule
@@ -29,9 +35,9 @@ def update_interval_times(schedule_wb, boiling_plan_df):
 def update_task_and_batches(schedule_obj):
     with code("Prepare"):
         wb = cast_schedule(schedule_obj)
-        metadata = json.loads(utils.read_metadata(wb))
-        date = utils.cast_datetime(metadata["date"])
-        boiling_plan_df = read_boiling_plan(wb, first_batch_ids=metadata["first_batch_ids"])
+        metadata = json.loads(read_metadata(wb))
+        date = cast_datetime(metadata["date"])
+        boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=metadata["first_batch_ids"])
 
     with code("Batch"):
         add_batch_from_boiling_plan_df(date, "Адыгейский цех", boiling_plan_df)

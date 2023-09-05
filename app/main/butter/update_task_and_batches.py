@@ -1,3 +1,7 @@
+from loguru import logger
+from utils_ak.openpyxl import read_metadata
+from utils_ak.time import cast_datetime
+
 from app.imports.runtime import *
 from app.models import ButterSKU
 from app.scheduler.butter.parse_schedule import parse_schedule
@@ -33,9 +37,9 @@ def update_task_and_batches(schedule_obj):
     # - Prepare
 
     wb = cast_schedule(schedule_obj)
-    metadata = json.loads(utils.read_metadata(wb))
-    boiling_plan_df = to_boiling_plan(wb, first_batch_ids=metadata["first_batch_ids"])
-    date = utils.cast_datetime(metadata["date"])
+    metadata = json.loads(read_metadata(wb))
+    boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=metadata["first_batch_ids"])
+    date = cast_datetime(metadata["date"])
 
     # - Batch
 

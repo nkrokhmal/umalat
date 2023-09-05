@@ -3,7 +3,6 @@ from app.main.ricotta.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
 
 # from app.scheduler import *
-from app.scheduler.ricotta import *
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 

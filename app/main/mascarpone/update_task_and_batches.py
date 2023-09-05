@@ -8,6 +8,7 @@ from utils_ak.time.dt import cast_datetime
 from app.enum import DepartmentName
 from app.models import MascarponeSKU
 from app.scheduler.archive.mascarpone.update_interval_times import update_interval_times
+from app.scheduler.mascarpone.to_boiling_plan import to_boiling_plan
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.mascarpone.schedule_task import MascarponeScheduleTask
 from app.utils.schedule import cast_schedule
@@ -21,7 +22,7 @@ def update_task_and_batches(schedule_obj):
     with code("Prepare"):
         wb = cast_schedule(schedule_obj)
         metadata = json.loads(read_metadata(wb))
-        boiling_plan_df = read_boiling_plan(wb, first_batch_ids=metadata["first_batch_ids"])
+        boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=metadata["first_batch_ids"])
         date = cast_datetime(metadata["date"])
 
     with code("Batch"):

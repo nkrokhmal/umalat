@@ -1,9 +1,16 @@
+import flask
+import flask_login
+import openpyxl
+
+from utils_ak.openpyxl import write_metadata
+
 from app.main import main
 from app.main.mascarpone.forms import ScheduleForm
 from app.main.mascarpone.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
 from app.scheduler.archive.mascarpone.frontend.style import STYLE
-from app.scheduler.mascarpone import *
+from app.scheduler.frontend_utils import fill_grid
+from app.scheduler.mascarpone.draw_frontend.draw_frontend import draw_frontend
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 from app.utils.mascarpone.boiling_plan_read import BoilingPlanReader
@@ -15,7 +22,6 @@ BATCH_TYPES = ["mascarpone", "cream_cheese", "robiola", "cottage_cheese", "cream
 @main.route("/mascarpone_schedule", methods=["GET", "POST"])
 @flask_login.login_required
 def mascarpone_schedule():
-
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
@@ -40,21 +46,25 @@ def mascarpone_schedule():
             filename=os.path.join(data_dir, file.filename),
             data_only=True,
         )
-        first_batch_ids = {
+
+        first_batch_ids_by_type = {
             "mascarpone": form.mascarpone_batch_number.data,
             "cream": form.cream_batch_number.data,
             "robiola": form.robiola_batch_number.data,
             "cream_cheese": form.cream_cheese_batch_number.data,
             "cottage_cheese": form.cottage_cheese_batch_number.data,
         }
-        boiling_plan_df = BoilingPlanReader(wb=wb, first_batches=first_batch_ids).parse()
 
-        boiling_plan_df["group"] = boiling_plan_df["sku"].apply(lambda x: x.group.name)
+        output = draw_frontend(
+            boiling_plan=wb,
+            first_batch_ids_by_type=first_batch_ids_by_type,
+            start_times_by_line={1: beg_time, 2: beg_time},
+            date=date,
+        )  # todo next: make different times [@marklidenberg]
 
-        schedule = make_schedule(boiling_plan_df, start_time=beg_time)
-        frontend = wrap_frontend(schedule, date=date)
-        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=wb)
-        utils.write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
+        schedule, schedule_wb = output["schedule"], output["workbook"]
+
+        write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids_by_type, "date": str(date)}))
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.xlsx"
         filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание маскарпоне.pickle"

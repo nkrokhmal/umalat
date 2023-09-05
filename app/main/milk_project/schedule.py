@@ -1,16 +1,23 @@
+import flask
+import flask_login
+import openpyxl
+
+from utils_ak.openpyxl import write_metadata
+
 from app.main import main
 from app.main.archive.adygea import update_task_and_batches as update_task_and_batches_adygea
+from app.main.milk_project.forms import ScheduleForm
+from app.main.milk_project.run_consolidated_old import run_consolidated_old
 from app.main.milk_project.update_task_and_batches import (
     update_task_and_batches as update_task_and_batches_milk_project,
 )
 from app.main.validators import *
+from app.scheduler.adygea.draw_frontend.draw_frontend import draw_frontend as draw_frontend_adygea
 from app.scheduler.frontend_utils import fill_grid
+from app.scheduler.milk_project.draw_frontend.draw_frontend import draw_frontend as draw_frontend_milk_project
 from app.scheduler.time_utils import *
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
-
-from ...scheduler.milk_project.draw_frontend.draw_frontend import draw_frontend as draw_milk_project_frontend
-from .forms import ScheduleForm
 
 
 @main.route("/milk_project_schedule", methods=["GET", "POST"])
@@ -41,19 +48,23 @@ def milk_project_schedule():
             data_only=True,
         )
         first_batch_ids = {"milk_project": form.batch_number.data}
-        milk_project_output = draw_milk_project_frontend(boiling_plan=wb, start_time=beg_time)
+        milk_project_output = draw_frontend_milk_project(boiling_plan=wb, start_time=beg_time)
         prepare_start_time = beg_time
         if len(milk_project_output["boiling_plan_df"]) > 0:
             beg_time = cast_time(
                 milk_project_output["schedule"].y[0] - 3
-            )  # 15 minutes before milk project ends # todo maybe: take from parameters
+            )  # 15 minutes before milk project ends # todo maybe: take from parameters [@marklidenberg]
         else:
             # when no milk project - prepare start time is before beg_time
             prepare_start_time = cast_time(cast_t(prepare_start_time) - 12)
-            # run milk project output again to match the new timing (will be empty, but with a timeline)
-            milk_project_output = draw_milk_project_frontend(boiling_plan=wb, start_time=prepare_start_time)
 
-        adygea_output = run_adygea(wb, path=None, start_time=beg_time, prepare_start_time=prepare_start_time)
+            # run milk project output again to match the new timing (will be empty, but with a timeline)
+            milk_project_output = draw_frontend_milk_project(boiling_plan=wb, start_time=prepare_start_time)
+
+        adygea_output = draw_frontend_adygea(
+            wb,
+            start_time=beg_time,
+        )
 
         if len(adygea_output["boiling_plan_df"]) > 0 and len(milk_project_output["boiling_plan_df"]) > 0:
             with code("Set preferred header time"):
@@ -72,7 +83,7 @@ def milk_project_schedule():
             date=date,
             wb=wb,
         )
-        utils.write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
+        write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
 
         schedule_tasks = [
             update_task_and_batches_milk_project(schedule_wb),
