@@ -6,7 +6,7 @@ import pandas as pd
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.numeric.types import is_int_like
 
-from app.scheduler.mascarpone.properties import MascarponeProperties
+from app.scheduler.archive.mascarpone.properties import MascarponeProperties
 from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.parsing_utils.parse_block import parse_elements

@@ -1,10 +1,9 @@
-from app.enum import DepartmentName
 from app.main import main
 from app.main.mascarpone.forms import ScheduleForm
 from app.main.mascarpone.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
+from app.scheduler.archive.mascarpone.frontend.style import STYLE
 from app.scheduler.mascarpone import *
-from app.scheduler.mascarpone.frontend.style import STYLE
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 from app.utils.mascarpone.boiling_plan_read import BoilingPlanReader

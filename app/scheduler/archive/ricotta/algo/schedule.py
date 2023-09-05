@@ -7,8 +7,8 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.iteration.simple_iterator import iter_pairs
 
-from app.scheduler.ricotta.algo.boilings import make_boiling_group
-from app.scheduler.ricotta.algo.cleanings import make_bath_cleanings, make_container_cleanings
+from app.scheduler.archive.ricotta.algo.boilings import make_boiling_group
+from app.scheduler.archive.ricotta.algo.cleanings import make_bath_cleanings, make_container_cleanings
 from app.scheduler.split_shifts_utils import split_shifts
 from app.scheduler.time_utils import cast_t
 

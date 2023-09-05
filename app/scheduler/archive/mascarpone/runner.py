@@ -1,8 +1,8 @@
 from utils_ak.os.os_tools import makedirs
 
 from app.scheduler.adygea.make_schedule.make_schedule import make_schedule
-from app.scheduler.mascarpone.boiling_plan.boiling_plan import read_boiling_plan
-from app.scheduler.mascarpone.frontend.frontend import wrap_frontend
+from app.scheduler.archive.mascarpone.boiling_plan.boiling_plan import read_boiling_plan
+from app.scheduler.archive.mascarpone.frontend.frontend import wrap_frontend
 from app.scheduler.submit_schedule import submit_schedule
 
 

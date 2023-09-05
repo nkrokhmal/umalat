@@ -7,8 +7,8 @@ from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 from utils_ak.pandas.pandas_tools import df_to_ordered_tree
 
-from app.scheduler.mascarpone.algo.cleanings import make_cleaning
-from app.scheduler.mascarpone.algo.mascarpone_boilings import make_mascarpone_boiling_group
+from app.scheduler.archive.mascarpone.algo.cleanings import make_cleaning
+from app.scheduler.archive.mascarpone.algo.mascarpone_boilings import make_mascarpone_boiling_group
 from app.scheduler.split_shifts_utils import split_shifts_by_time
 from app.scheduler.time_utils import cast_t
 
