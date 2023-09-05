@@ -5,7 +5,7 @@ import openpyxl
 from utils_ak.openpyxl import write_metadata
 
 from app.main import main
-from app.main.adygea import update_task_and_batches as update_task_and_batches_adygea
+from app.main.adygea.update_task_and_batches import update_task_and_batches as update_task_and_batches_adygea
 from app.main.milk_project.forms import ScheduleForm
 from app.main.milk_project.run_consolidated_old import run_consolidated_old
 from app.main.milk_project.update_task_and_batches import (
