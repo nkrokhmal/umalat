@@ -1,48 +1,6 @@
-from dataclasses import dataclass
-
-import pytest
-
-from app.utils.base.boiling_group import BoilingGroup
-from app.utils.mascarpone.utils import MascarponeBoilingsHandler
+dataclass
 
 
-def test_boiling_group_no_exception() -> None:
-    """
-    No exception boiling group tests:
-    - Correct leftovers
-    - Correct is full check
-    """
-    group = BoilingGroup(weight=100)
-    assert group.leftovers == 100
-    assert not group.is_full
-
-    group.add_sku(dict(plan=30))
-    assert group.leftovers == 70
-    assert not group.is_full
-
-    group.add_sku(dict(weight=70), weight_key="weight")
-    assert group.leftovers == 0
-    assert group.is_full
-
-
-def test_boiling_group_exception() -> None:
-    """
-    Boiling group exceptions test:
-    - Can't add heavy sku
-    """
-    group = BoilingGroup(weight=100)
-
-    with pytest.raises(ValueError):
-        group.add_sku(dict(plan=110))
-
-    group.add_sku(dict(plan=30))
-    assert group.leftovers == 70
-
-    with pytest.raises(ValueError):
-        group.add_sku(dict(weight=71), weight_key="weight")
-
-
-@dataclass
 class HandlerCase:
     groups: list[dict]
     ground_truth: list[list[dict]]
@@ -81,7 +39,7 @@ CASES: list[HandlerCase] = [
 
 @pytest.mark.parametrize("case", CASES)
 def test_boiling_handler(case: HandlerCase) -> None:
-    handler = MascarponeBoilingsHandler()
+    handler = BoilingsHandler()
     for group in case.groups:
         handler.handle_group(skus=group["skus"], max_weight=group["max_weight"])
 

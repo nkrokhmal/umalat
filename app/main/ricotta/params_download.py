@@ -18,8 +18,6 @@ def download_ricotta() -> flask.Response:
     data: list[dict] = []
     for sku in skus:
         boiling: RicottaBoiling = sku.made_from_boilings[0]
-        if not boiling.boiling_technologies:
-            continue
         technology: RicottaBoilingTechnology = boiling.boiling_technologies[0]
 
         data.append(
@@ -54,7 +52,6 @@ def download_ricotta() -> flask.Response:
     response = flask.send_from_directory(
         directory=path,
         path=filename,
-        cache_timeout=0,
         as_attachment=True,
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]

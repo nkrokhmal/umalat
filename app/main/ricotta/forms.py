@@ -1,10 +1,22 @@
+from datetime import datetime, timedelta
+
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired
-from wtforms import *
+from flask_wtf.file import FileRequired
+from wtforms import (
+    BooleanField,
+    DateTimeField,
+    FileField,
+    FloatField,
+    IntegerField,
+    SelectField,
+    StringField,
+    SubmitField,
+)
 from wtforms.validators import DataRequired, Optional
 
-from app.imports.runtime import *
-from app.models import *
+from app.globals import db
+from app.models.basic import Group
+from app.models.ricotta import RicottaBoiling, RicottaSKU
 
 
 class UploadForm(FlaskForm):
@@ -57,18 +69,18 @@ class SKUForm(FlaskForm):
         super(SKUForm, self).__init__(*args, **kwargs)
 
         self.boilings = db.session.query(RicottaBoiling).all()
-        self.boiling.choices = list(enumerate(set([x.to_str() for x in self.boilings])))
+        self.boiling.choices = list(enumerate(set(x.to_str() for x in self.boilings)))
         self.boiling.choices.append((-1, ""))
 
         self.groups = db.session.query(Group).all()
-        self.group.choices = list(enumerate(set([x.name for x in self.groups])))
+        self.group.choices = list(enumerate(set(x.name for x in self.groups)))
         self.group.choices.append((-1, ""))
 
     @staticmethod
     def validate_sku(self, name):
         sku = db.session.query(RicottaSKU).filter_by(RicottaSKU.name == name.data).first()
         if sku is not None:
-            raise flask_restplus.ValidationError("SKU с таким именем уже существует")
+            raise Exception("SKU с таким именем уже существует")
 
 
 class LineForm(FlaskForm):
@@ -112,3 +124,8 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default="07:00",
     )
+
+
+class UpdateParamsForm(FlaskForm):
+    validators = [FileRequired(message="Отсутствует файл!")]
+    input_file = FileField("", validators=validators)

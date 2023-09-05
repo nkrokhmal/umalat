@@ -1,39 +1,11 @@
-import itertools
-
 from copy import deepcopy
-from dataclasses import dataclass
+
+from app.utils.base.boiling_group import BoilingGroup, BoilingsHandler
 
 
-@dataclass
-class BoilingGroup:
-    weight: float
-    id: int = 0
-
-    def __post_init__(self) -> None:
-        self.skus: list[dict] = []
-        self.leftovers: float = self.weight
-
-    def add_sku(self, sku: dict, weight_key="plan") -> None:
-        if sku[weight_key] > self.leftovers:
-            raise ValueError("Can't add new SKU, the boiling weight has been exceeded")
-
-        sku.update(dict(id=self.id))
-        self.skus.append(sku)
-        self.leftovers -= sku[weight_key]
-
-    @property
-    def is_full(self) -> bool:
-        return -1e-10 <= self.leftovers <= 1e-10
-
-
-class BoilingsHandler:
+class MascarponeBoilingsHandler(BoilingsHandler):
     def __init__(self):
-        self.boilings: list[BoilingGroup] = []
-        self.boiling_id: int = 0
-
-    @property
-    def boiling_groups(self) -> list[dict]:
-        return list(itertools.chain.from_iterable(boiling.skus for boiling in self.boilings))
+        super().__init__()
 
     def handle_group(self, skus: list[dict], max_weight: float, weight_key: str = "plan") -> None:
         boiling = BoilingGroup(max_weight, id=self.boiling_id)
@@ -56,4 +28,4 @@ class BoilingsHandler:
             self.boiling_id += 1
 
 
-__all__ = ["BoilingGroup", "BoilingsHandler"]
+__all__ = ["MascarponeBoilingsHandler"]
