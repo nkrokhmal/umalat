@@ -56,14 +56,22 @@ def wrap_line(schedule, line: int, date: datetime):
     # - Add shifts
 
     with m.block("shift_line", start_time=start_time, size=(0, 1)):
-        for block in schedule.iter(cls="shift", team="brigadir"):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+        for i, block in enumerate(schedule.iter(cls="shift", team="Бригадир")):
+            m.row(
+                m.copy(block, with_props=True, size=(None, 1)),
+                push_func=add_push,
+                push_kwargs={"new_props": {"shift_num": i}},
+            )
 
     # - Add shifts
 
     with m.block("shift_line", start_time=start_time, size=(0, 1)):
-        for block in schedule.iter(cls="shift", team="packer"):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+        for i, block in enumerate(schedule.iter(cls="shift", team="Упаковка")):
+            m.row(
+                m.copy(block, with_props=True, size=(None, 1)),
+                push_func=add_push,
+                push_kwargs={"new_props": {"shift_num": i}},
+            )
 
     # - Add boiling header
 

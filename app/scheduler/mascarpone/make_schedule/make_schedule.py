@@ -264,7 +264,15 @@ def make_schedule(
 
             # - Prepare boiling
 
-            boiling = _make_boiling(grp, tub_num=current_tub_num, group_number=current_group_number, line=line)
+            boiling = _make_boiling(
+                grp,
+                tub_num=current_tub_num,
+                group_number=current_group_number,
+                line=line,
+                output_kg=grp["kg"].sum(),
+                percent=grp.iloc[0]["boiling"].percent,
+                weight_netto=grp.iloc[0]["sku"].weight_netto,
+            )
 
             # - Insert new boiling
 
@@ -289,17 +297,39 @@ def make_schedule(
         df = pd.DataFrame(boilings, columns=["boiling"])
         df["group"] = df["boiling"].apply(lambda boiling: boiling.props["group"])
         df["group_number"] = df["boiling"].apply(lambda boiling: boiling.props["group_number"])
+        df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
+
+        cream_cheese_tub_num = 1
+
         for i, grp in df.groupby("group_number"):
             pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
             pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
 
-            if grp.iloc[0]["group"] != "mascarpone":
+            if grp.iloc[0]["group"] in ["cream_cheese", "robiola", "cottage_cheese"]:
+                # add cream_cheese_tub_num
+
                 m.block(
                     "boiling_header",
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start, 0),
                     push_func=add_push,
                     group=grp.iloc[0]["group"],
+                    total_output_kg=grp["output_kg"].sum(),
+                    boilings=grp["boiling"].tolist(),
+                    cream_cheese_tub_num=cream_cheese_tub_num,
+                    line=line,
+                )
+
+                cream_cheese_tub_num += 1
+
+            elif grp.iloc[0]["group"] != "mascarpone":
+                m.block(
+                    "boiling_header",
+                    size=(pouring_finish - pouring_start, 0),
+                    x=(pouring_start, 0),
+                    push_func=add_push,
+                    group=grp.iloc[0]["group"],
+                    total_output_kg=grp["output_kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,
                 )
@@ -334,9 +364,8 @@ def make_schedule(
             split=cast_t("18:00"),
         )
         for a, b in shifts:
-            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="brigadir", line=line)
-
-            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="packer", line=line)
+            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line)
+            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", line=line)
 
     # - Return result
 
