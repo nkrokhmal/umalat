@@ -163,6 +163,12 @@ def wrap_frontend(
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы маскарпоне"))
 
+    # - Add boiling header
+
+    with m.block("boiling_header_line", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls="boiling_header"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
     # - Add separator
 
     with m.block("separator_line", start_time=start_time, size=(0, 1)):
@@ -172,13 +178,13 @@ def wrap_frontend(
     # - Add бак 1
 
     with m.block("tub_1_line", start_time=start_time, size=(0, 1)):
-        for block in schedule.iter(cls="pouring"):
+        for block in schedule.iter(cls=lambda cls: cls in ["pouring", "salting", "heating"], tub_num=1):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add бак 2
 
     with m.block("tub_2_line", start_time=start_time, size=(0, 1)):
-        for block in schedule.iter(cls="salting"):
+        for block in schedule.iter(cls=lambda cls: cls in ["pouring", "salting", "heating"], tub_num=2):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add pumping

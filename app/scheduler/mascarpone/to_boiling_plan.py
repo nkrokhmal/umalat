@@ -40,6 +40,7 @@ def to_boiling_plan(
 
 def test():
     df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx"))
+    print(df["group"])
 
 
 if __name__ == "__main__":

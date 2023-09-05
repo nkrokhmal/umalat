@@ -1,9 +1,11 @@
 import pandas as pd
 
 from more_itertools import mark_ends
+from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
+from utils_ak.pandas import mark_consecutive_groups
 
 from lessmore.utils.fp import pairwise
 from lessmore.utils.get_repo_path import get_repo_path
@@ -101,6 +103,8 @@ def make_schedule(
     # -- Make boiling and packing blocks
 
     current_group_count = 1
+    current_group_number = 1
+    current_tub_num = 1  # 1 or 2
 
     for is_first, is_last, (prev_indexed_grp, indexed_grp) in mark_ends(
         pairwise(
@@ -128,6 +132,9 @@ def make_schedule(
 
         if is_new_group:
             current_group_count = 1
+
+        if is_new_group or is_mascarpone_filled:
+            current_group_number += 1
 
         # - Process edge cases
 
@@ -195,6 +202,16 @@ def make_schedule(
                 contour="1",
             )
 
+        if prev_group == "robiola" and (is_last or is_new_group):
+            m.block(
+                "cleaning",
+                size=(13, 0),
+                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                push_kwargs={"validator": Validator()},
+                cleaning_object="cream_cheese_tub_2",
+                contour="1",
+            )
+
         if is_last:
             m.block(
                 "cleaning",
@@ -211,7 +228,11 @@ def make_schedule(
 
         # - Prepare boiling
 
-        boiling = _make_boiling(grp)
+        boiling = _make_boiling(
+            grp,
+            tub_num=current_tub_num,
+            group_number=current_group_number,
+        )
 
         # - Insert new boiling
 
@@ -224,6 +245,30 @@ def make_schedule(
         # - Increment current group count
 
         current_group_count += 1
+
+        # - Switch tub_num
+
+        if group != "cream":
+            current_tub_num = 1 if current_tub_num == 2 else 2
+
+    # - Make boiling_headers
+
+    boilings = m.root["boiling", True]
+    df = pd.DataFrame(boilings, columns=["boiling"])
+    df["group"] = df["boiling"].apply(lambda boiling: boiling.props["group"])
+    df["group_number"] = df["boiling"].apply(lambda boiling: boiling.props["group_number"])
+    for i, grp in df.groupby("group_number"):
+        pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
+        pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
+
+        m.block(
+            "boiling_header",
+            size=(pouring_finish - pouring_start, 0),
+            x=(pouring_start, 0),
+            push_func=add_push,
+            group=grp.iloc[0]["group"],
+            boilings=grp["boiling"].tolist(),
+        )
 
     # - Update start time
 

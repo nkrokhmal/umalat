@@ -9,6 +9,7 @@ STYLE = {
     "ingredient": {"text": "ингредиенты", "color": "#92D050"},
     "cleaning": {"text": lambda b: f'Мойка {b.props["cleaning_object"]}', "color": "yellow"},
     "separator_acceleration": {"text": "разгон сепаратора", "color": "#C4D79B"},
+    "boiling_header": {"text": lambda b: f"Варки {b.props['group']}", "color": "white"},
     # "boiling_num": {"text": "{boiling_id}"},
     # "boiling_name": {"text": "{boiling_label}"},
     # "heating": {"color": "yellow"},

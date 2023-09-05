@@ -11,7 +11,7 @@ from utils_ak.pandas import mark_consecutive_groups
 warnings.filterwarnings("ignore")
 
 
-def _make_boiling(boiling_group_df):
+def _make_boiling(boiling_group_df, **kwargs):
     # - Unfold boiling group params
 
     sample_row = boiling_group_df.iloc[0]
@@ -27,7 +27,7 @@ def _make_boiling(boiling_group_df):
 
     # - Init block maker
 
-    m = BlockMaker("boiling", boiling_model=boiling_model, group=sample_row["group"])
+    m = BlockMaker("boiling", boiling_model=boiling_model, group=sample_row["group"], **kwargs)
 
     # - Make pouring
 
@@ -55,7 +55,7 @@ def _make_boiling(boiling_group_df):
             if previous_weight and current_weight != previous_weight:
                 packing_m.row(
                     "packing_switching", size=10 // 5, push_func=stack_push
-                )  # todo next: make proper change of packing
+                )  # todo next: make proper change of packing [@marklidenberg]
 
             packing_size = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in grp.iterrows()])
             packing_size = int(custom_round(packing_size, 5, "ceil", pre_round_precision=1))
@@ -92,6 +92,7 @@ def _make_boiling(boiling_group_df):
             ).block
             packing_group.props.update(x=(current_block.y[0], 0))
             add_push(m.root, packing_group)
+
             # m.row("packing", size=packing_size, x=current_block.y[0], push_func=add_push)
         else:
             packing_group.props.update(x=(current_block.x[0] + 5 // 5, 0))
