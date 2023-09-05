@@ -166,7 +166,7 @@ def wrap_frontend(
     # - Add separator
 
     with m.block("separator_line", start_time=start_time, size=(0, 1)):
-        for block in schedule.iter(cls="separation"):
+        for block in schedule.iter(cls=lambda cls: cls in ["separation", "separator_acceleration"]):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add бак 1
@@ -191,6 +191,20 @@ def wrap_frontend(
 
     with m.block("tub_3_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: cls in ["analysis", "ingredient", "packing"]):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    # - Add packing lines
+
+    with m.block("contour_0", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls=lambda cls: "cleaning", contour="0"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    with m.block("contour_1", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls=lambda cls: "cleaning", contour="1"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
+    with m.block("contour_2", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls=lambda cls: "cleaning", contour="2"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Return

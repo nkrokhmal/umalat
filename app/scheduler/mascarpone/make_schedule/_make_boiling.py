@@ -27,7 +27,7 @@ def _make_boiling(boiling_group_df):
 
     # - Init block maker
 
-    m = BlockMaker("boiling", boiling_model=boiling_model)
+    m = BlockMaker("boiling", boiling_model=boiling_model, group=sample_row["group"])
 
     # - Make pouring
 
@@ -59,8 +59,7 @@ def _make_boiling(boiling_group_df):
 
             packing_size = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in grp.iterrows()])
             packing_size = int(custom_round(packing_size, 5, "ceil", pre_round_precision=1))
-
-            packing_m.row("packing", size=packing_size, push_func=stack_push)
+            packing_m.row("packing", size=packing_size // 5, push_func=stack_push)
 
             previous_weight = current_weight
     packing_group = packing_m.root["packing_group"]
