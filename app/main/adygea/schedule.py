@@ -1,5 +1,5 @@
 from app.main import main
-from app.main.archive.adygea.forms import ScheduleForm
+from app.main.adygea.forms import ScheduleForm
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict

@@ -3,7 +3,7 @@ from flask import Blueprint
 
 main = Blueprint("main", __name__)
 
-from app.main.archive.adygea import *
+from app.main.adygea import *
 
 from . import batch, download, index, login
 from .additional import *
