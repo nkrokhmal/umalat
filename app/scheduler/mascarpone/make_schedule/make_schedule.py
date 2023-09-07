@@ -66,7 +66,7 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(b1["separation"], b2, ordered=True)
 
         if (
-            b2.props["cleaning_object"] in ["cream_cheese_tub_1", "cream_cheese_tub_2"]
+            b2.props["cleaning_object"] == "cream_cheese_tub"
             and "separation" in b1.children_by_cls
             and b1.props["semifinished_group"] in ["cream_cheese", "robiola"]
         ):
@@ -112,7 +112,7 @@ class Validator(ClassValidator):
         if b2.props["semifinished_group"] == "cream":
             validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
         else:
-            validate_disjoint_by_axis(b1, b2["pumping"], ordered=True, distance=-4)  # 20 minutes buffer
+            validate_disjoint_by_axis(b1, b2["pumping"], distance=-4)  # 20 minutes buffer
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -179,8 +179,10 @@ def make_schedule(
             group = None if is_last else grp.iloc[0]["semifinished_group"]
 
             is_mascarpone_filled = (
-                current_group_count >= 8 + 1 and current_group_count % 8 == 1
-            ) and prev_group == "mascarpone"
+                (current_group_count >= 8 + 1 and current_group_count % 8 == 1)
+                and prev_group == "mascarpone"
+                and group == "mascarpone"
+            )
 
             # - Reset current group count if new group
 
@@ -220,7 +222,7 @@ def make_schedule(
 
             # - Full cleaning
 
-            if (is_mascarpone_filled and not is_last) or (prev_group == "mascarpone" and is_new_group):
+            if is_mascarpone_filled and not is_last:
                 m.block(
                     "cleaning",
                     size=(13, 0),
@@ -257,7 +259,7 @@ def make_schedule(
                     size=(13, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                     push_kwargs={"validator": Validator()},
-                    cleaning_object="cream_cheese_tub_1",
+                    cleaning_object="cream_cheese_tub",
                     contour="1",
                     line=line,
                 )
@@ -268,7 +270,7 @@ def make_schedule(
                     size=(13, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                     push_kwargs={"validator": Validator()},
-                    cleaning_object="cream_cheese_tub_2",
+                    cleaning_object="cream_cheese_tub",
                     contour="1",
                     line=line,
                 )
@@ -394,14 +396,11 @@ def make_schedule(
         df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
         df["semifinished_group"] = df["boiling"].apply(lambda boiling: boiling.props["semifinished_group"])
 
-        cream_cheese_tub_num = 1
-
         for i, grp in df.groupby("group_number"):
             pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
             pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
 
             if grp.iloc[0]["semifinished_group"] in ["cream_cheese", "robiola"]:
-                # add cream_cheese_tub_num
 
                 m.block(
                     "boiling_header",
@@ -411,11 +410,8 @@ def make_schedule(
                     semifinished_group=grp.iloc[0]["semifinished_group"],
                     total_output_kg=grp["output_kg"].sum(),
                     boilings=grp["boiling"].tolist(),
-                    cream_cheese_tub_num=cream_cheese_tub_num,
                     line=line,
                 )
-
-                cream_cheese_tub_num += 1
 
             elif grp.iloc[0]["semifinished_group"] != "mascarpone":
                 m.block(
@@ -458,6 +454,7 @@ def make_schedule(
             a=next(m.root.iter(cls="preparation", line=line)).x[0],
             b=last(m.root.iter(cls="cleaning", line=line, cleaning_object="buffer_tank_and_packer")).y[0],
             split=cast_t("18:00"),
+            min_shift=6,
         )
         for a, b in shifts:
             m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line)

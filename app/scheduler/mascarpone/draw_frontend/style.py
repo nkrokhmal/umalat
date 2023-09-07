@@ -3,13 +3,13 @@ def boiling_header_text(b):
         return f"Производство сливок {int(b.props['total_output_kg'])}кг"
     elif b.props["semifinished_group"] == "cream_cheese":
         litres = 1000 * len(b.props["boilings"])
-        return f"Кремчиз/{litres}л/бак {b.props['cream_cheese_tub_num']}"
+        return f"Кремчиз/{litres}л"
     elif b.props["semifinished_group"] == "robiola":
         litres = 1000 * len(b.props["boilings"])
-        return f"Робиола/{litres}л/бак {b.props['cream_cheese_tub_num']}"
+        return f"Робиола/{litres}л"
     elif b.props["semifinished_group"] == "cottage_cheese":
         litres = 1000 * len(b.props["boilings"])
-        return f"Творожный/{litres}л/бак {b.props['cream_cheese_tub_num']}"
+        return f"Творожный/{litres}л"
     elif b.props["semifinished_group"] == "mascarpone":
         kgs = 1000 * len(b.props["boilings"])
         return f"Производство маскарпоне {kgs}кг"
@@ -36,10 +36,8 @@ def cleaning_text(b):
         return "Мойка 1-го и 2-го бака лишатричи+гомогенизатора"
     elif b.props["cleaning_object"] == "heat_exchanger":
         return "Мойка теплообменника"
-    elif b.props["cleaning_object"] == "cream_cheese_tub_1":
-        return "Мойка бака №1"
-    elif b.props["cleaning_object"] == "cream_cheese_tub_2":
-        return "Мойка бака №2"
+    elif b.props["cleaning_object"] == "cream_cheese_tub":
+        return "Мойка бака"
     elif b.props["cleaning_object"] == "buffer_tank_and_packer":
         return "Мойка буферного танка и фасовочника"
     else:
