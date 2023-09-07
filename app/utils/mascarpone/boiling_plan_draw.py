@@ -15,15 +15,15 @@ Cell = collections.namedtuple("Cell", "col, col_name")
 
 COLUMNS = {
     "boiling_number": Cell(column_index_from_string("A"), "A"),
-    "boiling_type": Cell(column_index_from_string("B"), "B"),
-    "output": Cell(column_index_from_string("C"), "C"),
+    "line": Cell(column_index_from_string("B"), "B"),
+    "boiling_type": Cell(column_index_from_string("C"), "C"),
     "name": Cell(column_index_from_string("D"), "D"),
-    "kg_output": Cell(column_index_from_string("E"), "E"),
-    "kg": Cell(column_index_from_string("F"), "F"),
+    "kg": Cell(column_index_from_string("E"), "E"),
     "remainings": Cell(column_index_from_string("G"), "G"),
-    "total_output": Cell(column_index_from_string("H"), "H"),
-    "delimiter": Cell(column_index_from_string("J"), "J"),
-    "delimiter_int": Cell(column_index_from_string("M"), "M"),
+    "total_output_kg": Cell(column_index_from_string("G"), "G"),
+    "total_input_kg": Cell(column_index_from_string("H"), "H"),
+    "delimiter": Cell(column_index_from_string("I"), "I"),
+    "delimiter_int": Cell(column_index_from_string("L"), "L"),
 }
 
 ROWS = {
@@ -37,14 +37,25 @@ PLAN_SHEET_NAME: str = "План варок"
 def draw_skus(wb: openpyxl.Workbook, skus: list[SKU], sheet_name: str, row_number: int | None = None) -> int:
     excel_client = ExcelBlock(wb[sheet_name])
     if row_number is None:
-        excel_client.draw_row(1, ["-", "-", "-"], set_border=False)
+        excel_client.draw_row(
+            1,
+            [
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+            ],
+            set_border=False,
+        )
         row_number = 2
 
-    for group_sku in sorted(skus, key=lambda x: x.name, reverse=False):
-        boiling = group_sku.made_from_boilings[0]
+    for sku in sorted(skus, key=lambda x: x.name, reverse=False):
+        b: MascarponeBoiling = sku.made_from_boilings[0]
         excel_client.draw_row(
             row_number,
-            [group_sku.name, boiling.to_str(), boiling.output_coeff, int(boiling.output_coeff * boiling.output_kg)],
+            [sku.name, b.to_str(), b.output_coeff, b.output_constant, b.input_kg, sku.line.name],
             set_border=False,
         )
         row_number += 1
@@ -58,61 +69,61 @@ def get_sku_color(sku_name: str, skus: list[SKU]) -> str:
 
 
 def draw_boiling_sheet(
-    wb: openpyxl.Workbook, df: pd.DataFrame, skus: list[SKU], sheet_name: str, row_number: int | None = None
+    wb: openpyxl.Workbook, df: pd.DataFrame, skus: list[SKU], sheet_name: str, row: int | None = None
 ):
     if df.empty:
-        return wb, row_number
+        return wb, row
 
-    if row_number is None:
-        row_number = 3
+    if row is None:
+        row = 3
 
     excel_client = ExcelBlock(wb[sheet_name])
-    values = []
+    sku_columns = ["name", "kg", "boiling_type", "line"]
+    empty_columns = ["name", "delimiter", "kg"]
+    total_input_kg = 0
 
-    sku_names = [x.name for x in skus]
+    for group_id, group in df.groupby("id", sort=False):
+        for i, sku in group.iterrows():
+            excel_client.colour = sku["sku"].colour[1:]
+            total_input_kg = sku["total_input_kg"]
 
-    for id, grp in df[df["name"].isin(sku_names)].groupby("id", sort=False):
-        for i, row in grp.iterrows():
-            columns = [x for x in row.index if x in COLUMNS.keys()]
-            v = [row[column] for column in columns]
-            c = [COLUMNS[column] for column in columns]
-            values.append(dict(zip(c, v)))
-        empty_columns = [
-            COLUMNS["name"],
-            COLUMNS["output"],
-            COLUMNS["delimiter"],
-        ]
-        values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
+            excel_client.color_cell(row=row, col=COLUMNS["boiling_type"].col)
 
-    for v in values:
-        if v[COLUMNS["name"]] != "-":
-            del v[COLUMNS["boiling_type"]]
-            del v[COLUMNS["output"]]
-        value = v.values()
+            formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
+                row,
+                COLUMNS["delimiter"].col_name,
+                COLUMNS["delimiter_int"].col_name,
+            )
+            excel_client.draw_cell(
+                row=row,
+                col=COLUMNS["boiling_number"].col,
+                value=formula,
+                set_border=False,
+            )
+            excel_client.draw_row(
+                row=row,
+                values=[sku[key] for key in sku_columns],
+                cols=[COLUMNS[key].col for key in sku_columns],
+                set_border=False,
+            )
+            row += 1
 
-        column = [x.col for x in v.keys()]
-        formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
-            row_number,
-            COLUMNS["delimiter"].col_name,
-            COLUMNS["delimiter_int"].col_name,
-        )
-
-        colour = get_sku_color(v[COLUMNS["name"]], skus)
-        excel_client.colour = colour[1:]
-
-        excel_client.draw_cell(
-            row=row_number,
-            col=COLUMNS["boiling_number"].col,
-            value=formula,
+        excel_client.colour = "FFFFFF"
+        excel_client.draw_row(
+            row=row,
+            values=["-"] * len(empty_columns),
+            cols=[COLUMNS[key].col for key in empty_columns],
             set_border=False,
         )
-        excel_client.draw_row(row=row_number, values=value, cols=column, set_border=False)
-        excel_client.color_cell(row=row_number, col=COLUMNS["boiling_type"].col)
-        excel_client.color_cell(row=row_number, col=COLUMNS["output"].col)
-        excel_client.color_cell(row=row_number, col=COLUMNS["kg_output"].col)
+        excel_client.draw_cell(
+            row=row,
+            col=COLUMNS["total_input_kg"].col,
+            value=total_input_kg,
+            set_border=False,
+        )
+        row += 1
 
-        row_number += 1
-    return wb, row_number
+    return wb, row
 
 
 def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
@@ -129,7 +140,7 @@ def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
     ]:
 
         wb, row_number = draw_boiling_sheet(
-            wb=wb, df=item.df, sheet_name=item.sheet_name, skus=item.skus, row_number=row_number
+            wb=wb, df=item.df, sheet_name=item.sheet_name, skus=item.skus, row=row_number
         )
 
     # for sheet in wb.sheetnames:

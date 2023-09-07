@@ -109,9 +109,6 @@ def generate_mozzarella_lines():
         db.session.add(line)
 
     mascarpone_department = Department.query.filter_by(name=DepartmentName.MASCARPONE).first()
-    mascarpone_line = MascarponeLine(name="Маскарпоне")
-    mascarpone_line.department_id = mascarpone_department.id
-    db.session.add(mascarpone_line)
 
     butter_department = Department.query.filter_by(name="Масло цех").first()
     butter_line = ButterLine(

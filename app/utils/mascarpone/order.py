@@ -8,6 +8,7 @@ class Order:
     groups: list[str]
     flavoring_agent: str | None
     is_lactose: bool
+    max_weight: int
 
     @property
     def flavoring_agent_str(self):
@@ -27,23 +28,23 @@ class Order:
 
 
 CREAM_ORDER: list[Order] = [
-    Order(["Сливки"], None, False),
-    Order(["Сливки"], None, True),
+    Order(["Сливки"], None, False, 800),
+    Order(["Сливки"], None, True, 800),
 ]
 MASCARPONE_ORDER: list[Order] = [
-    Order(["Маскарпоне"], None, False),
-    Order(["Маскарпоне"], None, True),
-    Order(["Маскарпоне"], "Шоколад", True),
+    Order(["Маскарпоне"], None, False, 8000),
+    Order(["Маскарпоне"], None, True, 8000),
+    Order(["Маскарпоне"], "Шоколад", True, 8000),
 ]
 CREAM_CHEESE_ORDER: list[Order] = [
-    Order(["Кремчиз"], None, False),
-    Order(["Кремчиз"], None, True),
-    Order(["Кремчиз"], "Паприка", True),
-    Order(["Кремчиз"], "Томаты", True),
-    Order(["Кремчиз"], "Травы", True),
-    Order(["Кремчиз"], "Огурец", True),
-    Order(["Творожный"], None, True),
-    Order(["Робиола"], None, True),
+    Order(["Кремчиз"], None, False, 8000),
+    Order(["Кремчиз"], None, True, 8000),
+    Order(["Кремчиз"], "Паприка", True, 8000),
+    Order(["Кремчиз"], "Томаты", True, 8000),
+    Order(["Кремчиз"], "Травы", True, 8000),
+    Order(["Кремчиз"], "Огурец", True, 8000),
+    Order(["Творожный"], None, True, 8000),
+    Order(["Робиола"], None, True, 8000),
 ]
 
 

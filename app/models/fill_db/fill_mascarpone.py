@@ -4,7 +4,6 @@ import typing as tp
 
 from dataclasses import dataclass
 
-import numpy as np
 import pandas as pd
 
 from app.enum import DepartmentName, LineName
@@ -39,6 +38,7 @@ def fill_db() -> None:
         raise MascarponeFillingDBException(msg)
 
     for obj in itertools.chain(
+        fill_lines(),
         fill_washer(),
         fill_boiling_technologies(df),
         fill_boilings(df),
@@ -83,6 +83,8 @@ def validate_params(df: pd.DataFrame) -> tuple[bool, str | None]:
         "Наличие лактозы",
         "Вкусовая добавка",
         "Вес технология",
+        "Константа",
+        "Коэффициент",
     ]
     df = df[boiling_technologies_columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
@@ -164,15 +166,18 @@ def fill_boilings(df: pd.DataFrame) -> tp.Generator[MascarponeBoiling, None, Non
         "Название форм фактора",
         "Вес технология",
         "Коэффициент",
-        "Выход",
+        "Константа",
+        "Вход",
     ]
     df = df[columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
     df.drop_duplicates(inplace=True)
     df.fillna("", inplace=True)
-    line_id: int = next((x.id for x in lines if x.name == LineName.MASCARPONE))
 
     for item in df.to_dict("records"):
+        line_name = "Маскарпоне" if item["Название форм фактора"] != "Кремчиз" else "Кремчиз"
+        line: int = next((x for x in lines if x.name == line_name))
+
         bts_name = MascarponeBoilingTechnology.create_name(
             line=LineName.MASCARPONE,
             weight=item["Вес технология"],
@@ -189,8 +194,9 @@ def fill_boilings(df: pd.DataFrame) -> tp.Generator[MascarponeBoiling, None, Non
             is_lactose=item["Наличие лактозы"],
             boiling_technologies=[next((x for x in bts if x.name == bts_name), None)],
             output_coeff=item["Коэффициент"],
-            line_id=line_id,
-            output_kg=item["Выход"],
+            output_constant=item["Константа"],
+            line=line,
+            input_kg=item["Вход"],
         )
 
 
@@ -235,7 +241,7 @@ def fill_sku(df: pd.DataFrame) -> tp.Generator[MascarponeSKU, None, None]:
             code=sku["Kод"],
         )
 
-        line_name = LineName.MASCARPONE
+        line_name = "Маскарпоне" if sku["Название форм фактора"] != "Кремчиз" else "Кремчиз"
         add_sku.line = next((x for x in lines if x.name == line_name), None)
         add_sku.made_from_boilings = [
             x
@@ -251,3 +257,8 @@ def fill_sku(df: pd.DataFrame) -> tp.Generator[MascarponeSKU, None, None]:
         add_sku.group = next((x for x in groups if x.name == sku["Название форм фактора"]), None)
         add_sku.form_factor = next((x for x in form_factors if x.name == "Масса"), None)
         yield add_sku
+
+
+def fill_lines() -> tp.Generator[MascarponeLine, None, None]:
+    for name, input_kg in (("Маскарпоне", 8000), ("Кремчиз", 8000)):
+        yield MascarponeLine(name=name, department=Department.query.filter_by(name=DepartmentName.MASCARPONE).first())
