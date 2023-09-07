@@ -27,7 +27,9 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     # - Init block maker
 
-    m = BlockMaker("boiling", boiling_model=boiling_model, group=sample_row["group"], **kwargs)
+    m = BlockMaker(
+        "boiling", boiling_model=boiling_model, semifinished_group=sample_row["semifinished_group"], **kwargs
+    )
 
     # - Make pouring
 

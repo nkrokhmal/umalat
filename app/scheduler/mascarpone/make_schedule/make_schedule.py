@@ -35,7 +35,7 @@ class Validator(ClassValidator):
         if "salting" in b1.children_by_cls and "salting" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["salting"], b2["salting"])
 
-        if b1.props["group"] == "cream" and b2.props["group"] == "cream":
+        if b1.props["semifinished_group"] == "cream" and b2.props["semifinished_group"] == "cream":
             validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
 
         if "heating" in b1.children_by_cls and "heating" in b2.children_by_cls:
@@ -66,7 +66,7 @@ class Validator(ClassValidator):
         if (
             b2.props["cleaning_object"] in ["cream_cheese_tub_1", "cream_cheese_tub_2"]
             and "separation" in b1.children_by_cls
-            and b1.props["group"] in ["cream_cheese", "robiola", "cottage_cheese"]
+            and b1.props["semifinished_group"] in ["cream_cheese", "robiola"]
         ):
             validate_disjoint_by_axis(b1["separation"], b2, ordered=True)
 
@@ -104,7 +104,7 @@ class Validator(ClassValidator):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        if b2.props["group"] == "cream":
+        if b2.props["semifinished_group"] == "cream":
             validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
 
     @staticmethod
@@ -163,9 +163,13 @@ def make_schedule(
 
             # - Calc helpers
 
-            is_new_group = False if (is_first or is_last) else (prev_grp.iloc[0]["group"] != grp.iloc[0]["group"])
-            prev_group = None if is_first else prev_grp.iloc[0]["group"]
-            group = None if is_last else grp.iloc[0]["group"]
+            is_new_group = (
+                False
+                if (is_first or is_last)
+                else (prev_grp.iloc[0]["semifinished_group"] != grp.iloc[0]["semifinished_group"])
+            )
+            prev_group = None if is_first else prev_grp.iloc[0]["semifinished_group"]
+            group = None if is_last else grp.iloc[0]["semifinished_group"]
 
             is_mascarpone_filled = (
                 current_group_count >= 8 + 1 and current_group_count % 8 == 1
@@ -378,9 +382,10 @@ def make_schedule(
 
         boilings = list(m.root.iter(cls="boiling", line=line))
         df = pd.DataFrame(boilings, columns=["boiling"])
-        df["group"] = df["boiling"].apply(lambda boiling: boiling.props["group"])
+
         df["group_number"] = df["boiling"].apply(lambda boiling: boiling.props["group_number"])
         df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
+        df["semifinished_group"] = df["boiling"].apply(lambda boiling: boiling.props["semifinished_group"])
 
         cream_cheese_tub_num = 1
 
@@ -388,7 +393,7 @@ def make_schedule(
             pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
             pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
 
-            if grp.iloc[0]["group"] in ["cream_cheese", "robiola", "cottage_cheese"]:
+            if grp.iloc[0]["semifinished_group"] in ["cream_cheese", "robiola"]:
                 # add cream_cheese_tub_num
 
                 m.block(
@@ -396,7 +401,7 @@ def make_schedule(
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start, 0),
                     push_func=add_push,
-                    group=grp.iloc[0]["group"],
+                    semifinished_group=grp.iloc[0]["semifinished_group"],
                     total_output_kg=grp["output_kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     cream_cheese_tub_num=cream_cheese_tub_num,
@@ -405,13 +410,13 @@ def make_schedule(
 
                 cream_cheese_tub_num += 1
 
-            elif grp.iloc[0]["group"] != "mascarpone":
+            elif grp.iloc[0]["semifinished_group"] != "mascarpone":
                 m.block(
                     "boiling_header",
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start, 0),
                     push_func=add_push,
-                    group=grp.iloc[0]["group"],
+                    semifinished_group=grp.iloc[0]["semifinished_group"],
                     total_output_kg=grp["output_kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,
@@ -424,7 +429,7 @@ def make_schedule(
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start - 2, 0),
                     push_func=add_push,
-                    group=grp.iloc[0]["group"],
+                    semifinished_group=grp.iloc[0]["semifinished_group"],
                     boilings=grp["boiling"].tolist(),
                     line=line,
                 )

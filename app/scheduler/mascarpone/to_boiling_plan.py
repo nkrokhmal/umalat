@@ -44,10 +44,8 @@ def to_boiling_plan(
 
 
 def test():
-    df = to_boiling_plan(
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/2023-09-05 Расписание маскарпоне.xlsx")
-    )
-    print(df["group"].reset_index())
+    df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/workflow plan.xlsx"))
+    print(df["semifinished_group"].value_counts())
 
 
 if __name__ == "__main__":

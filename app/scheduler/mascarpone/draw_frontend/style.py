@@ -1,17 +1,16 @@
 def boiling_header_text(b):
-
-    if b.props["group"] == "cream":
+    if b.props["semifinished_group"] == "cream":
         return f"Производство сливок {int(b.props['total_output_kg'])}кг"
-    elif b.props["group"] == "cream_cheese":
+    elif b.props["semifinished_group"] == "cream_cheese":
         litres = 1000 * len(b.props["boilings"])
         return f"Кремчиз/{litres}л/бак {b.props['cream_cheese_tub_num']}"
-    elif b.props["group"] == "robiola":
+    elif b.props["semifinished_group"] == "robiola":
         litres = 1000 * len(b.props["boilings"])
         return f"Робиола/{litres}л/бак {b.props['cream_cheese_tub_num']}"
-    elif b.props["group"] == "cottage_cheese":
+    elif b.props["semifinished_group"] == "cottage_cheese":
         litres = 1000 * len(b.props["boilings"])
         return f"Творожный/{litres}л/бак {b.props['cream_cheese_tub_num']}"
-    elif b.props["group"] == "mascarpone":
+    elif b.props["semifinished_group"] == "mascarpone":
         kgs = 1000 * len(b.props["boilings"])
         return f"Производство маскарпоне {kgs}кг"
 
