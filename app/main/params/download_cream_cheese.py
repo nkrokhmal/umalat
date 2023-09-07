@@ -16,7 +16,7 @@
 #             "Вес нетто": sku.weight_netto,
 #             "Коробки": sku.in_box,
 #             "Вес форм фактора": sku.form_factor.relative_weight,
-#             "Выход": sku.made_from_boilings[0].output_ton,
+#             "Выход": sku.made_from_boilings[0].output_kg,
 #             "Срок хранения": sku.shelf_life,
 #             "Коэффициент": sku.made_from_boilings[0].output_coeff,
 #             "Скорость упаковки": sku.packing_speed,

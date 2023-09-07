@@ -1,8 +1,8 @@
-from pathlib import Path
-
+import io
 import flask
 import pandas as pd
 
+from pathlib import Path
 from pytest import fixture
 
 from app.enum import DepartmentName
@@ -28,7 +28,7 @@ def df_parameters_corrupted() -> pd.DataFrame:
 
 def test_get_mascarpone_parameters(df_parameters: pd.DataFrame) -> None:
     df = get_mascarpone_parameters()
-    assert df.equals(df_parameters)
+    assert (df == df_parameters).all().all()
 
 
 def test_validate_mascarpone_parameters(df_parameters_corrupted: pd.DataFrame) -> None:
@@ -37,6 +37,40 @@ def test_validate_mascarpone_parameters(df_parameters_corrupted: pd.DataFrame) -
     assert (
         msg == "Технология Линия Маскарпоне, Маскарпоне, 0.2 кг, 80, ,  имеет разные параметры. Проверьте строки 13 и 0"
     )
+
+
+def test_mascarpone_download_params(client: flask.Flask, df_parameters: pd.DataFrame) -> None:
+    with client.test_client() as client:
+        url = flask.url_for("main.download_mascarpone", _external=False)
+
+        response = client.post(url, follow_redirects=True)
+        assert response.status_code == 200
+
+        df = pd.read_excel(response.data)
+        df.set_index(df.columns[0], inplace=True)
+        df.fillna("", inplace=True)
+        assert df.equals(df_parameters)
+
+
+def test_mascarpone_upload_params(client: flask.Flask, df_parameters: pd.DataFrame) -> None:
+    body: dict = {}
+    with open(MASCARPONE_TEST_DIR / "parameters.xlsx", "rb") as f:
+        body["input_file"] = (io.BytesIO(f.read()), "mascarpone.xlsx")
+
+    update_url = flask.url_for("main.mascarpone_update_params", _external=False)
+    download_url = flask.url_for("main.download_mascarpone", _external=False)
+
+    with client.test_client() as client:
+        response = client.post(update_url, data=body, follow_redirects=True, content_type="multipart/form-data")
+        assert response.status_code == 200
+
+        response = client.post(download_url, follow_redirects=True)
+        assert response.status_code == 200
+
+        df = pd.read_excel(response.data)
+        df.set_index(df.columns[0], inplace=True)
+        df.fillna("", inplace=True)
+        assert df.equals(df_parameters)
 
 
 def test_mascarpone_get_params(client: flask.Flask) -> None:
@@ -79,16 +113,3 @@ def test_mascarpone_edit_params(
         for url in urls:
             response = client.get(url)
             assert response.status_code == 200
-
-
-def test_mascarpone_download_params(client: flask.Flask, df_parameters: pd.DataFrame) -> None:
-    with client.test_client() as client:
-        url = flask.url_for("main.download_mascarpone", _external=False)
-
-        response = client.post(url, follow_redirects=True)
-        assert response.status_code == 200
-
-        df = pd.read_excel(response.data)
-        df.set_index(df.columns[0], inplace=True)
-        df.fillna("", inplace=True)
-        assert df.equals(df_parameters)

@@ -38,7 +38,8 @@ class MascarponeBoiling(Boiling):
     is_lactose = mdb.Column(mdb.Boolean, default=False)
     flavoring_agent = mdb.Column(mdb.String)
     percent = mdb.Column(mdb.Float)
-    output_kg = mdb.Column(mdb.Float)
+    input_kg = mdb.Column(mdb.Float)
+    output_constant = mdb.Column(mdb.Float)
 
     @property
     def dynamic_attributes(self) -> tuple[str, ...]:

@@ -37,6 +37,6 @@ def edit_line(line_id):
     form.serving_time.data = line.serving_time
     form.chedderization_time.data = line.chedderization_time
     form.melting_speed.data = line.melting_speed
-    form.output_kg.data = line.output_ton
+    form.output_kg.data = line.output_kg
 
     return flask.render_template("mozzarella/edit_line.html", form=form, line_id=line.id)

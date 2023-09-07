@@ -98,7 +98,7 @@ def generate_mozzarella_lines():
         line = MozzarellaLine(
             name=params[0],
             chedderization_time=params[1],
-            output_ton=params[2],
+            output_kg=params[2],
             input_ton=params[3],
             melting_speed=params[4],
             serving_time=params[5],
@@ -109,9 +109,6 @@ def generate_mozzarella_lines():
         db.session.add(line)
 
     mascarpone_department = Department.query.filter_by(name=DepartmentName.MASCARPONE).first()
-    mascarpone_line = MascarponeLine(name="Маскарпоне")
-    mascarpone_line.department_id = mascarpone_department.id
-    db.session.add(mascarpone_line)
 
     butter_department = Department.query.filter_by(name="Масло цех").first()
     butter_line = ButterLine(

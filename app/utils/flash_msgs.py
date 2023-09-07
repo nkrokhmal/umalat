@@ -50,6 +50,16 @@ def department_msg(action: str) -> str | None:
             return None
 
 
+def line_msg(action: str) -> str | None:
+    match action:
+        case Action.EDIT:
+            return "Параметры линии успешно изменены!"
+        case Action.ERROR:
+            return "Параметры линии не были изменены!"
+        case _:
+            return None
+
+
 def washer_msg(action: str) -> str | None:
     match action:
         case Action.EDIT:

@@ -94,7 +94,7 @@ def parse_file(file):
 
 
 def parse_file_path(path: os.PathLike | str) -> tuple[dict, pd.DataFrame]:
-    mode = path.split(".")[-1]
+    mode = str(path).split(".")[-1]
     if mode == "csv":
         return parse_df(pd.read_csv(path, sep=";"), "csv")
     else:
@@ -153,9 +153,10 @@ def cast_volume(obj):
     if isinstance(obj, MozzarellaSKU):
         return obj.line.output_kg
     elif isinstance(obj, RicottaSKU):
-        return obj.made_from_boilings[0].number_of_tanks * obj.output_per_tank
-    elif isinstance(obj, MascarponeSKU):
         return obj.made_from_boilings[0].output_kg
+    elif isinstance(obj, MascarponeSKU):
+        b = obj.made_from_boilings[0]
+        return b.input_kg * b.output_coeff + b.output_constant
     elif isinstance(obj, ButterSKU):
         return obj.line.output_kg
     elif isinstance(obj, MilkProjectSKU):
@@ -208,27 +209,41 @@ def parse_sheet(ws, sheet_name, excel_compiler, sku_type=ButterSKU):
         df = df.iloc[0:0]
         skus = db.session.query(sku_type).all()
         for sku in skus:
-            df = df.append(
-                {
-                    "sku": sku,
-                    "remainings - request": 0,
-                    "normative remainings": 0,
-                    "plan": sku.line.output_kg,
-                    "extra_packing": 0,
-                },
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        [
+                            {
+                                "sku": sku,
+                                "remainings - request": 0,
+                                "normative remainings": 0,
+                                "plan": sku.line.output_kg,
+                                "extra_packing": 0,
+                            },
+                        ]
+                    ),
+                ],
                 ignore_index=True,
             )
     else:
         if df.empty:
             sku = db.session.query(sku_type).all()[0]
-            df = df.append(
-                {
-                    "sku": sku,
-                    "remainings - request": 0,
-                    "normative remainings": 0,
-                    "plan": 1,
-                    "extra_packing": 0,
-                },
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        [
+                            {
+                                "sku": sku,
+                                "remainings - request": 0,
+                                "normative remainings": 0,
+                                "plan": 1,
+                                "extra_packing": 0,
+                            }
+                        ]
+                    ),
+                ],
                 ignore_index=True,
             )
             flask.flash("Заявка на текущий день нулевая!")
