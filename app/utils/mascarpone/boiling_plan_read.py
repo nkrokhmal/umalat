@@ -56,6 +56,9 @@ class BoilingPlanReader:
         df[["boiling_id", "output_coeff"]] = df["boiling"].apply(
             lambda boiling: pd.Series([boiling.id, boiling.output_coeff])
         )
+
+        df["semifinished_group"] = df["group"].apply(lambda group: group if group != "cottage_cheese" else "robiola")
+
         return df
 
     @staticmethod
