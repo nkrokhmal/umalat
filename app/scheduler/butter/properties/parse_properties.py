@@ -4,8 +4,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.butter.properties.butter_properties import ButterProperties
 from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df

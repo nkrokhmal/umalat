@@ -6,8 +6,7 @@ from openpyxl import Workbook
 from utils_ak.builtin import delistify
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import ButterSKU, cast_model
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id

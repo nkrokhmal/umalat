@@ -9,8 +9,7 @@ from utils_ak.code_block.code import code
 from utils_ak.iteration.simple_iterator import iter_pairs
 from utils_ak.numeric.numeric import custom_round
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.butter.make_schedule.make_schedule import make_schedule
 from app.scheduler.butter.to_boiling_plan import BoilingPlanLike
 from app.scheduler.time_utils import cast_time

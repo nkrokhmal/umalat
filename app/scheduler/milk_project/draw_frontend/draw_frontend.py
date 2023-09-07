@@ -4,8 +4,7 @@ from typing import Optional
 from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.milk_project.draw_frontend.style import STYLE

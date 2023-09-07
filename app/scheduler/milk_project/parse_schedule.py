@@ -9,9 +9,8 @@ from utils_ak.code_block.code import code
 from utils_ak.numeric.types import is_int_like
 from utils_ak.openpyxl.openpyxl_tools import read_merged_cells_df
 
-from lessmore.utils.get_repo_path import get_repo_path
-
 from app.globals import basedir
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.parsing_new_utils.group_intervals import basic_criteria
 from app.scheduler.parsing_new_utils.parse_line import parse_line
 from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label

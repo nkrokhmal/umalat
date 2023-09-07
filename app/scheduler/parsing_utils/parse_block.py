@@ -4,8 +4,7 @@ import pandas as pd
 
 from utils_ak.block_tree import BlockMaker, add_push
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.parsing_utils.group_neighbor_intervals import group_neighbor_intervals
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
 

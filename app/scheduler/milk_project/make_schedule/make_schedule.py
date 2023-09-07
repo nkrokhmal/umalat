@@ -2,8 +2,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import crop_to_chunks, remove_duplicates
 from utils_ak.iteration.simple_iterator import iter_pairs
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.milk_project.make_schedule._boilings import make_boiling, make_boiling_sequence
 from app.scheduler.milk_project.to_boiling_plan import BoilingPlanLike, to_boiling_plan
 from app.scheduler.time_utils import cast_t

@@ -1,7 +1,6 @@
 import os
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.contour_cleanings.draw_frontend.style import STYLE
 from app.scheduler.contour_cleanings.load_properties_by_department import load_properties_by_department
 from app.scheduler.contour_cleanings.make_schedule import make_schedule

@@ -1,5 +1,4 @@
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_basic import make_schedule_basic
 from app.scheduler.mozzarella.make_schedule.schedule.optimize_schedule_by_start_configuration import (

@@ -1,6 +1,6 @@
 import pandas as pd
 
-from lessmore.utils.get_repo_path import get_repo_path
+from app.lessmore.utils.get_repo_path import get_repo_path
 
 
 def parse_schedule_basic_info(schedule):

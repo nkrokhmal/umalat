@@ -4,8 +4,7 @@ from typing import Optional
 from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.adygea.draw_frontend.style import STYLE
 from app.scheduler.adygea.wrap_frontend import wrap_frontend
 from app.scheduler.boiling_plan_like import BoilingPlanLike

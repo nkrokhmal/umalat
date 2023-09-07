@@ -4,8 +4,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.pushers import add_push
 from utils_ak.numeric.numeric import custom_round
 
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.milk_project.make_schedule.make_schedule import make_schedule
 from app.scheduler.milk_project.to_boiling_plan import BoilingPlanLike
 from app.scheduler.time_utils import cast_time

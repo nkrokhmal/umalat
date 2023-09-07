@@ -2,7 +2,7 @@ import pandas as pd
 
 from utils_ak.openpyxl import cast_workbook
 
-from lessmore.utils.get_repo_path import get_repo_path
+from app.lessmore.utils.get_repo_path import get_repo_path
 
 
 def load_cells_df(wb_obj, sheet_name):

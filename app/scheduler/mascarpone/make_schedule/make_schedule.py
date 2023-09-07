@@ -11,9 +11,8 @@ from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
 from utils_ak.pandas import mark_consecutive_groups
 
-from lessmore.utils.fp import pairwise
-from lessmore.utils.get_repo_path import get_repo_path
-
+from app.lessmore.utils.fp import pairwise
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.mascarpone.make_schedule._make_boiling import _make_boiling
 from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike, to_boiling_plan
 from app.scheduler.split_shifts_utils import split_shifts_by_time
