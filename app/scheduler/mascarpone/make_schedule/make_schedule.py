@@ -37,6 +37,8 @@ class Validator(ClassValidator):
 
         if b1.props["semifinished_group"] == "cream" and b2.props["semifinished_group"] == "cream":
             validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
+        else:
+            validate_disjoint_by_axis(b1["packing_group"], b2["pumping"], distance=-4)  # 20 minutes buffer
 
         if "heating" in b1.children_by_cls and "heating" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["heating"], b2["heating"])
@@ -83,7 +85,10 @@ class Validator(ClassValidator):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        validate_disjoint_by_axis(b1, b2["separation"], ordered=True)
+        if b2.props["semifinished_group"] != "mascarpone":
+            validate_disjoint_by_axis(b1, b2["separation"], ordered=True)
+        else:
+            validate_disjoint_by_axis(b1, b2["separation"], ordered=True, distance=2)
 
     @staticmethod
     def validate__boiling__separator_acceleration(b1, b2):
@@ -106,6 +111,8 @@ class Validator(ClassValidator):
 
         if b2.props["semifinished_group"] == "cream":
             validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
+        else:
+            validate_disjoint_by_axis(b1, b2["pumping"], ordered=True, distance=-4)  # 20 minutes buffer
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
