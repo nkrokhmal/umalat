@@ -87,7 +87,7 @@ class MascarponeBoilingForm(FlaskForm):
 
     # mutable fields
     output_coeff = FloatField("Коэффициент", validators=[Optional()])
-    output_kg = FloatField("Выход", validators=[Optional()])
+    input_kg = FloatField("Выход", validators=[Optional()])
 
     submit = SubmitField(label="Сохранить")
 

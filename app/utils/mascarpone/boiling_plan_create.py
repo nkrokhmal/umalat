@@ -53,11 +53,17 @@ def handle_group(df: pd.DataFrame, orders: list[Order]) -> pd.DataFrame:
 
         if not df_order.empty:
             groups = [group for _, group in df_order.groupby("boiling_id")]
+            if order.groups[0] == "Сливки":
+                for group in sorted(groups, key=lambda x: (-x["percent"].iloc[0], x["weight"].iloc[0]), reverse=True):
+                    group_dict = group.to_dict("records")
+                    max_weight = order.max_weight
 
-            for group in sorted(groups, key=lambda x: x["weight"].iloc[0], reverse=True):
-                group_dict = group.to_dict("records")
-                max_weight = order.max_weight
+                    handler.handle_group(group_dict, max_weight=max_weight)
+            else:
+                for group in sorted(groups, key=lambda x: x["weight"].iloc[0], reverse=True):
+                    group_dict = group.to_dict("records")
+                    max_weight = order.max_weight
 
-                handler.handle_group(group_dict, max_weight=max_weight)
+                    handler.handle_group(group_dict, max_weight=max_weight)
 
     return add_fields(pd.DataFrame(handler.boiling_groups))
