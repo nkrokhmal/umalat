@@ -22,7 +22,7 @@ from app.scheduler.wrap_header import wrap_header
 LINE_HEIGHT = 14
 
 
-def wrap_line(schedule, line: int, date: datetime, start_time="07:00"):
+def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
     # - Copy schedule
 
     schedule = copy.deepcopy(schedule)
@@ -203,7 +203,7 @@ def wrap_line(schedule, line: int, date: datetime, start_time="07:00"):
 
 def wrap_frontend(
     boiling_plan: BoilingPlanLike,
-    start_times_by_line: dict = {1: "07:00", 2: "08:00"},
+    start_times_by_line: dict = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     date: Optional[datetime] = None,
 ):
@@ -231,8 +231,8 @@ def wrap_frontend(
     )
     m.row("stub", size=0)  # start with 1
 
-    m.block(wrap_line(schedule, line=1, date=date, start_time=min(start_times_by_line.values())))
-    m.block(wrap_line(schedule, line=2, date=date, start_time=min(start_times_by_line.values())))
+    m.block(wrap_line(schedule, line="Маскарпоне", date=date, start_time=min(start_times_by_line.values())))
+    m.block(wrap_line(schedule, line="Кремчиз", date=date, start_time=min(start_times_by_line.values())))
 
     # - Return
 

@@ -127,7 +127,7 @@ class Validator(ClassValidator):
 
 def make_schedule(
     boiling_plan: BoilingPlanLike,
-    start_times_by_line: dict[int, str] = {1: "07:00", 2: "08:00"},
+    start_times_by_line: dict[str, str] = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
 ) -> dict:
     # - Get boiling plan
@@ -139,8 +139,7 @@ def make_schedule(
     m = BlockMaker("schedule")
 
     # - Make schedule by lines
-
-    for line in [1, 2]:
+    for line in ["Маскарпоне", "Кремчиз"]:
         # -- Filter boiling_plan_df
 
         boiling_plan_df1 = boiling_plan_df[boiling_plan_df["line"] == line].copy()
@@ -351,7 +350,7 @@ def make_schedule(
             if group != "cream":
                 current_tub_num = 1 if current_tub_num == 2 else 2
 
-    for line in [1, 2]:
+    for line in ["Маскарпоне", "Кремчиз"]:
 
         # - Skip if no boilings
 
@@ -488,7 +487,7 @@ def test():
 
     schedule = make_schedule(
         # str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/2023-09-05 Расписание маскарпоне.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/boiling.xlsx"),
     )["schedule"]
 
     print(schedule)

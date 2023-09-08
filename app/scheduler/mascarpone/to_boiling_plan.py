@@ -32,12 +32,6 @@ def to_boiling_plan(
     reader = BoilingPlanReader(wb=boiling_plan_source, first_batches=first_batch_ids_by_type)
     df = reader.parse()
 
-    # - Set line number
-
-    # df["line"] = [1] * 10 + [2] * (len(df) - 10)  # План по варкам
-    # df["line"] = [1] * 3 + [2] * 16 + [1] * 12  # 2023-09-05
-    df["line"] = 1  # 2023-09-03
-    # df = df[df["group"] != "cream"]
     # - Return
 
     return df
@@ -45,7 +39,6 @@ def to_boiling_plan(
 
 def test():
     df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/boiling.xlsx"))
-    print(df.iloc[0])
 
 
 if __name__ == "__main__":

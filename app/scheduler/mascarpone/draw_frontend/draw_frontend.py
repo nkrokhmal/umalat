@@ -13,7 +13,7 @@ from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
-    start_times_by_line: dict = {1: "07:00", 2: "08:00"},
+    start_times_by_line: dict = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
@@ -46,7 +46,7 @@ def test():
     output = draw_frontend(
         # str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx"),
         str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/boiling.xlsx"),
-        start_times_by_line={1: "06:00", 2: "06:30"},
+        start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:30"},
     )
 
     output["workbook"].save("test.xlsx")
