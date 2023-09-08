@@ -15,9 +15,10 @@ from app.app import create_app, create_manager
 def run_app(test: bool, debug: bool):
     config_name: str = "test" if test else "default"
     port = 7001 if debug else 5000
+    threaded = not debug
     app, rq = create_app(config_name=config_name)
     create_manager(app)
-    app.run(port=port, threaded=False, host="0.0.0.0", debug=debug)
+    app.run(port=port, threaded=threaded, host="0.0.0.0", debug=debug)
 
 
 if __name__ == "__main__":
