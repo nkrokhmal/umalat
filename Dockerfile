@@ -14,4 +14,3 @@ ADD https://api.github.com/repos/akadaner/python-utils-ak/git/refs/heads/master 
 RUN cd /utils && git clone https://github.com/akadaner/python-utils-ak.git && cd python-utils-ak && git checkout master_new && git pull
 
 COPY . /app/
-EXPOSE 5000
