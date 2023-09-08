@@ -1,13 +1,15 @@
 import io
+
+from pathlib import Path
+
 import flask
 import pandas as pd
 
-from pathlib import Path
 from pytest import fixture
 
 from app.enum import DepartmentName
 from app.globals import db
-from app.main.params.download_mascarpone import get_mascarpone_parameters
+from app.main.mascarpone.download_mascarpone import get_mascarpone_parameters
 from app.models import Department, MascarponeBoiling, MascarponeBoilingTechnology, MascarponeSKU, Washer
 from app.models.fill_db.fill_mascarpone import validate_params
 from tests.conftest import client

@@ -43,7 +43,7 @@ class MascarponeBoiling(Boiling):
 
     @property
     def dynamic_attributes(self) -> tuple[str, ...]:
-        return "output_coeff", "output_kg"
+        return "output_coeff", "input_kg"
 
     @property
     def readonly_attributes(self) -> tuple[str, ...]:

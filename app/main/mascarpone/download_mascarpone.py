@@ -39,7 +39,7 @@ def get_mascarpone_parameters() -> pd.DataFrame:
                 "Посолка": boiling_technology.salting_time,
                 "Ингридиенты": boiling_technology.ingredient_time,
                 "Скорость фасовки": sku.packing_speed,
-                "Выход": boiling.output_kg,
+                "Вход": boiling.input_kg,
                 "Коэффициент": boiling.output_coeff,
                 "Константа": 0 if sku.group.name != "Сливки" else -100,
                 "Kод": sku.code,
