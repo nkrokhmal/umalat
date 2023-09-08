@@ -40,6 +40,8 @@ class Validator(ClassValidator):
         else:
             validate_disjoint_by_axis(b1["packing_group"], b2["pumping"], distance=-4)  # 20 minutes buffer
 
+        validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
+
         if "heating" in b1.children_by_cls and "heating" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["heating"], b2["heating"])
 
@@ -109,9 +111,9 @@ class Validator(ClassValidator):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        if b2.props["semifinished_group"] == "cream":
-            validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
-        else:
+        validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
+
+        if b2.props["semifinished_group"] != "cream":  # todo maybe: why cream excluded? [@marklidenberg]
             validate_disjoint_by_axis(b1, b2["pumping"], distance=-4)  # 20 minutes buffer
 
     @staticmethod
