@@ -58,7 +58,7 @@ def mascarpone_schedule():
         output = draw_frontend(
             boiling_plan=wb,
             first_batch_ids_by_type=first_batch_ids_by_type,
-            start_times_by_line={1: beg_time, 2: beg_time},
+            start_times_by_line={"Маскарпоне": beg_time, "Кремчиз": beg_time},
             date=date,
             workbook=wb,
         )  # todo next: make different times [@marklidenberg]
