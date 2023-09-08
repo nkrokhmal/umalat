@@ -1,3 +1,5 @@
+import pandas as pd
+
 from app.imports.runtime import *
 from app.models import MascarponeSKU
 from app.utils.base.schedule_task import BaseScheduleTask
@@ -36,7 +38,8 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
                         row["start"],
                         row["finish"],
                     ]
-                    df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+                    df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
+                    # df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
         df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 

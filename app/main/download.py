@@ -74,7 +74,7 @@ def download_schedule_plan():
         date,
         flask.current_app.config["SCHEDULE_FOLDER"],
     )
-    response = flask.send_from_directory(directory=uploads, path=file_name, cache_timeout=0, as_attachment=True)
+    response = flask.send_from_directory(directory=uploads, path=file_name, as_attachment=True)
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
 
@@ -90,7 +90,7 @@ def download_schedule_task():
         date,
         flask.current_app.config["TASK_FOLDER"],
     )
-    response = flask.send_from_directory(directory=uploads, path=file_name, cache_timeout=0, as_attachment=True)
+    response = flask.send_from_directory(directory=uploads, path=file_name, as_attachment=True)
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
 
@@ -112,7 +112,7 @@ def download_last_schedule_task(check_date):
     task_dirs = sorted(task_dirs, reverse=True)
     if len(task_dirs) > 0:
         last_dir, filename = os.path.split(task_dirs[0])
-        response = flask.send_from_directory(directory=last_dir, path=filename, cache_timeout=0, as_attachment=True)
+        response = flask.send_from_directory(directory=last_dir, path=filename, as_attachment=True)
         response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
         return response
     else:
@@ -139,7 +139,7 @@ def download_last_boiling_schedule_task(department):
     task_dirs = sorted(task_dirs, reverse=True)
     if len(task_dirs) > 0:
         last_dir, filename = os.path.split(task_dirs[0])
-        response = flask.send_from_directory(directory=last_dir, path=filename, cache_timeout=0, as_attachment=True)
+        response = flask.send_from_directory(directory=last_dir, path=filename, as_attachment=True)
         response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
         return response
     else:
