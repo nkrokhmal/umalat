@@ -1,6 +1,6 @@
 def boiling_header_text(b):
     if b.props["semifinished_group"] == "cream":
-        return f"Производство сливок {int(b.props['total_output_kg'])}кг"
+        return f"Производство сливок {int(b.props['total_input_kg'])}кг"
     elif b.props["semifinished_group"] == "cream_cheese":
         litres = 1000 * len(b.props["boilings"])
         return f"Кремчиз/{litres}л"

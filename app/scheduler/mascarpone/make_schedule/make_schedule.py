@@ -97,7 +97,7 @@ class Validator(ClassValidator):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        validate_disjoint_by_axis(b1["pumping"], b2, ordered=True)  # todo next: check logic [@marklidenberg]
+        validate_disjoint_by_axis(b1["pumping"], b2, ordered=True)
 
     @staticmethod
     def validate__boiling__packing_switch(b1, b2):
@@ -289,6 +289,7 @@ def make_schedule(
                 group_number=current_group_number,
                 line=line,
                 output_kg=grp["kg"].sum(),
+                input_kg=grp["input_kg"].sum(),
                 percent=grp.iloc[0]["boiling"].percent,
                 weight_netto=grp.iloc[0]["sku"].weight_netto,
             )
@@ -396,6 +397,7 @@ def make_schedule(
 
         df["group_number"] = df["boiling"].apply(lambda boiling: boiling.props["group_number"])
         df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
+        df["input_kg"] = df["boiling"].apply(lambda boiling: boiling.props["input_kg"])
         df["semifinished_group"] = df["boiling"].apply(lambda boiling: boiling.props["semifinished_group"])
 
         for i, grp in df.groupby("group_number"):
@@ -411,6 +413,7 @@ def make_schedule(
                     push_func=add_push,
                     semifinished_group=grp.iloc[0]["semifinished_group"],
                     total_output_kg=grp["output_kg"].sum(),
+                    total_input_kg=grp["input_kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,
                 )
@@ -422,6 +425,7 @@ def make_schedule(
                     x=(pouring_start, 0),
                     push_func=add_push,
                     semifinished_group=grp.iloc[0]["semifinished_group"],
+                    total_input_kg=grp["input_kg"].sum(),
                     total_output_kg=grp["output_kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,

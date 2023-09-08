@@ -1,9 +1,9 @@
-# todo next: remove [@marklidenberg]
 import warnings
 
 from utils_ak.block_tree import add_push, stack_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
+from utils_ak.dict import dotdict
 from utils_ak.numeric.numeric import custom_round
 from utils_ak.pandas import mark_consecutive_groups
 
@@ -21,15 +21,26 @@ def _make_boiling(boiling_group_df, **kwargs):
         boiling_model.boiling_technologies, single=True
     )  # there is only one boiling technology is for every boiling model in mascarpone department
 
-    # todo next: delete [@marklidenberg]
-    if "огурцом" in sample_row["sku"].name:
-        technology.ingredient_time = 15
-
     # - Init block maker
 
     m = BlockMaker(
         "boiling", boiling_model=boiling_model, semifinished_group=sample_row["semifinished_group"], **kwargs
     )
+
+    # - Define scaling factor for cream and apply to technology
+
+    scaling_factor = 1 if sample_row["semifinished_group"] != "cream" else kwargs["input_kg"] / 400
+    technology = {
+        "separation_time": technology.separation_time,
+        "pouring_time": technology.pouring_time,
+        "salting_time": technology.salting_time,
+        "analysis_time": technology.analysis_time,
+        "ingredient_time": technology.ingredient_time,
+        "heating_time": technology.heating_time,
+        "pumping_time": technology.pumping_time,
+    }
+    technology = {k: custom_round(v * scaling_factor, 5, rounding="nearest_half_even") for k, v in technology.items()}
+    technology = dotdict(technology)
 
     # - Make pouring
 

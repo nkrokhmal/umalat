@@ -649,7 +649,7 @@ def make_contour_6(properties):
             "cleaning",
             push_func=AxisPusher(
                 start_from=cast_t(properties["ricotta"].start_of_ninth_from_the_end_time)
-                or 0,  # todo next: remove or 0, make properly
+                or 0,  # todo maybe: remove or 0, make properly
                 validator=CleaningValidator(ordered=False),
             ),
             size=cast_t("01:20"),
