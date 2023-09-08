@@ -9,6 +9,7 @@ from utils_ak.openpyxl import cast_workbook
 from app.globals import db
 from app.models.helpers import cast_model
 from app.models.mascarpone import MascarponeSKU
+from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 from app.utils.mascarpone.utils import MascarponeBoilingsHandler
 
 
@@ -108,7 +109,7 @@ class BoilingPlanReader:
     def _saturate(self, df: pd.DataFrame) -> pd.DataFrame:
         df.index = range(len(df))
         df["batch_id"] = 0
-
+        df["batch_type"] = df["group"]
         df["sku"] = df["sku_name"].apply(lambda x: cast_model([MascarponeSKU], x))
         df["boiling"] = df["sku"].apply(lambda x: x.made_from_boilings[0])
         df["boiling_id"] = df["boiling"].apply(lambda boiling: boiling.id)
@@ -150,6 +151,7 @@ class BoilingPlanReader:
         df = self._unwind_boilings(boilings)
         df = self._saturate(df)
         df = self._set_batches(df)
+        update_absolute_batch_id(df, self.first_batches)
         return df
 
 

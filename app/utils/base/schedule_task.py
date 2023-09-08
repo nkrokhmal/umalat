@@ -31,8 +31,8 @@ class BaseScheduleTask(Generic[ModelType]):
             else:
                 self.df["original_kg"] = self.df["kg"]
 
-        if "line" in self.df.columns:
-            self.df["line"] = self.df["line"].apply(lambda x: x.name)
+        # if "line" in self.df.columns:
+        #     self.df["line"] = self.df["line"].apply(lambda x: x.name)
 
     def update_boiling_schedule_task(self):
         logger.debug("update_boiling_schedule_task")
