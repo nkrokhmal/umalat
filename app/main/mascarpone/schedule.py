@@ -60,6 +60,7 @@ def mascarpone_schedule():
             first_batch_ids_by_type=first_batch_ids_by_type,
             start_times_by_line={1: beg_time, 2: beg_time},
             date=date,
+            workbook=wb,
         )  # todo next: make different times [@marklidenberg]
 
         schedule, schedule_wb = output["schedule"], output["workbook"]
