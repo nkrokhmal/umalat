@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.11
 
 ENV PYTHONPATH "${PYTHONPATH}:/utils/python-utils-ak"
 RUN export PIP_DEFAULT_TIMEOUT=1000
