@@ -14,9 +14,10 @@ from app.app import create_app, create_manager
 @click.option("--debug", is_flag=True, default=False, required=False)
 def run_app(test: bool, debug: bool):
     config_name: str = "test" if test else "default"
+    port = 7001 if debug else 5000
     app, rq = create_app(config_name=config_name)
     create_manager(app)
-    app.run(port=7001, threaded=False, host="0.0.0.0", debug=debug)
+    app.run(port=port, threaded=False, host="0.0.0.0", debug=debug)
 
 
 if __name__ == "__main__":
