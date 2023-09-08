@@ -139,7 +139,7 @@ def make_schedule(
     m = BlockMaker("schedule")
 
     # - Make schedule by lines
-    for line in ["Маскарпоне", "Кремчиз"]:
+    for line in ["Кремчиз", "Маскарпоне"]:
         # -- Filter boiling_plan_df
 
         boiling_plan_df1 = boiling_plan_df[boiling_plan_df["line"] == line].copy()
@@ -350,7 +350,7 @@ def make_schedule(
             if group != "cream":
                 current_tub_num = 1 if current_tub_num == 2 else 2
 
-    for line in ["Маскарпоне", "Кремчиз"]:
+    for line in ["Кремчиз", "Маскарпоне"]:
 
         # - Skip if no boilings
 
@@ -474,7 +474,7 @@ def make_schedule(
         push_kwargs={"validator": Validator()},
         cleaning_object="heat_exchanger",
         contour="2",
-        line=1,
+        line="Кремчиз",
     )
 
     # - Return result

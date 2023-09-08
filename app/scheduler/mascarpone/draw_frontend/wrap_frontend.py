@@ -231,8 +231,8 @@ def wrap_frontend(
     )
     m.row("stub", size=0)  # start with 1
 
-    m.block(wrap_line(schedule, line="Маскарпоне", date=date, start_time=min(start_times_by_line.values())))
     m.block(wrap_line(schedule, line="Кремчиз", date=date, start_time=min(start_times_by_line.values())))
+    m.block(wrap_line(schedule, line="Маскарпоне", date=date, start_time=min(start_times_by_line.values())))
 
     # - Return
 
