@@ -51,13 +51,12 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
 
         self.df["coeff"] = self.df["boiling"].apply(lambda x: x.output_coeff)
         for sku_name, grp in df_filter.groupby("sku_name"):
-            kg = round((grp["kg"] * grp["coeff"]).sum())
             boxes_count = math.ceil(grp["kg"].sum() / grp.iloc[0]["sku"].in_box / grp.iloc[0]["sku"].weight_netto)
             values = [
                 index,
                 sku_name,
                 grp.iloc[0]["sku"].in_box,
-                kg,
+                grp["kg"].sum(),
                 boxes_count,
                 grp.iloc[0]["sku"].code,
             ]
