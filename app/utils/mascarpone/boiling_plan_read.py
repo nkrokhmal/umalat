@@ -79,7 +79,7 @@ class BoilingPlanReader:
             match boiling.type:
                 case "cream":
 
-                    if not 390 <= boiling.input_kg <= 810:
+                    if not 390 <= boiling.input_kg <= 1010:
                         raise BoilingPlanReaderException(f"Указано неверное число килограмм в варке {boiling.type}")
 
                     df = pd.DataFrame(boiling.skus)
