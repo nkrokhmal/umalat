@@ -100,7 +100,6 @@ def generate_mozzarella_lines():
             chedderization_time=params[1],
             output_kg=params[2],
             input_ton=params[3],
-            # melting_speed=params[4],
             serving_time=params[5],
             pouring_time=params[6],
         )

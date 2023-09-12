@@ -1,3 +1,5 @@
+import pandas as pd
+
 from app.models.mozzarella import MozzarellaSKU
 from app.utils.base.schedule_task import *
 
@@ -34,14 +36,14 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                     row["start"],
                     row["finish"],
                 ]
-                df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+                df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
 
         if self.df_packing is not None:
             for i, row in self.df_packing.iterrows():
                 kg = round(row["kg"])
                 boxes_count = math.ceil(1000 * row["kg"] / row["sku_obj"].in_box / row["sku_obj"].weight_netto)
                 values = ["", row["sku"], row["sku_obj"].code, row["sku_obj"].in_box, kg, boxes_count, "", ""]
-                df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+                df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
         df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 
@@ -74,7 +76,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                     kg,
                     boxes_count,
                 ]
-                df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+                df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
 
         skus = df_task.sku.values
         if self.df_packing is not None:
@@ -84,7 +86,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
                 if row["sku"] in skus:
                     df_task.loc[df_task.sku == values[0], columns] = values
                 else:
-                    df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
+                    df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
         df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 

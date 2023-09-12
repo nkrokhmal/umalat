@@ -68,7 +68,6 @@ class BaseScheduleTask(Generic[ModelType]):
                     row["finish"],
                 ]
                 df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
-                # df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
         df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 
@@ -93,7 +92,6 @@ class BaseScheduleTask(Generic[ModelType]):
             boxes_count = math.ceil(grp["kg"].sum() / grp.iloc[0]["sku"].in_box / grp.iloc[0]["sku"].weight_netto)
             values = [sku_name, grp.iloc[0]["sku"].code, grp.iloc[0]["sku"].in_box, kg, boxes_count]
             df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
-            # df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
         df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 

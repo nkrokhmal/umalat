@@ -19,6 +19,7 @@ def test():
     boiling_group_df = df[df["boiling_group"] == 2]
     print(boiling_group_df)
     boiling_model = boiling_group_df.iloc[0]["boiling"]
+    melting_speed = boiling_group_df.iloc[0]["sku"].melting_speed
     boilings_meltings, packings = BoilingGroupToSchema()(boiling_group_df)
     boilings_dataframes = SchemaToBoilingsDataframes()(
         boilings_meltings, packings, boiling_model.line.melting_speed, round=False

@@ -130,7 +130,6 @@ class LineForm(FlaskForm):
     pouring_time = wtforms.IntegerField("Введите время налива", validators=[DataRequired()])
     serving_time = wtforms.IntegerField("Введите время подачи и вымешивания", validators=[DataRequired()])
     chedderization_time = wtforms.IntegerField("Введите время чеддеризации", validators=[DataRequired()])
-    melting_speed = wtforms.IntegerField("Введите скорость плавления", validators=[DataRequired()])
     output_kg = wtforms.IntegerField("Выход", validators=[DataRequired()])
 
 
