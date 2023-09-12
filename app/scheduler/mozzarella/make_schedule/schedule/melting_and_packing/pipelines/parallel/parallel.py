@@ -25,7 +25,8 @@ def make_mpp(boiling_df, left_boiling_volume):
     boiling_df["beg_ts"] = None
     boiling_df["end_ts"] = None
 
-    boiling_model = boiling_df.iloc[0]["boiling"]
+    # boiling_model = boiling_df.iloc[0]["boiling"]
+    melting_speed = boiling_df.iloc[0]["sku"].melting_speed
     boiling_volume = min(boiling_df["left"].sum(), left_boiling_volume)
     packing_team_ids = remove_duplicates(boiling_df["packing_team_id"])
 
@@ -47,7 +48,7 @@ def make_mpp(boiling_df, left_boiling_volume):
             by=["collecting_speed", "packing_team_id"]
         )  # two rows for next packing skus
 
-        collecting_speed_left = boiling_model.line.melting_speed
+        collecting_speed_left = melting_speed
         for i, cur_sku in cur_skus_df.iterrows():
             cur_speed = min(collecting_speed_left, cur_sku["collecting_speed"])
             if not cur_speed:

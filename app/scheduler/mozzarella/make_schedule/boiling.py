@@ -14,7 +14,7 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
     )  # there is only one boiling technology is for every boiling model in mozzarella department
 
     with code("termizator time"):
-        termizator_time = boiling_model.line.pouring_time * boiling_volume / boiling_model.line.output_ton
+        termizator_time = boiling_model.line.pouring_time * boiling_volume / boiling_model.line.output_kg
         termizator_time = custom_round(termizator_time, 5, "ceil")
 
     with m.block(

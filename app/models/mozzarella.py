@@ -12,6 +12,7 @@ class MozzarellaSKU(SKU):
     __mapper_args__ = {"polymorphic_identity": "mozzarella_skus"}
 
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("skus.id"), primary_key=True)
+    melting_speed = mdb.Column(mdb.Integer)
     production_by_request = mdb.Column(mdb.Boolean)
     packing_by_request = mdb.Column(mdb.Boolean)
 
@@ -25,7 +26,6 @@ class MozzarellaLine(Line):
     output_kg = mdb.Column(mdb.Integer)
     pouring_time = mdb.Column(mdb.Integer)
     serving_time = mdb.Column(mdb.Integer)
-    melting_speed = mdb.Column(mdb.Integer)
     chedderization_time = mdb.Column(mdb.Integer)
 
     @property

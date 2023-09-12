@@ -92,15 +92,15 @@ def generate_mozzarella_lines():
 
     mozzarella_department = Department.query.filter_by(name="Моцарельный цех").first()
     for params in [
-        (LineName.SALT, 180, 850, 8000, 1020, 30, 30),
-        (LineName.WATER, 240, 1050, 8000, 900, 30, 30),
+        (LineName.SALT, 180, 850, 8300, 1020, 30, 30),
+        (LineName.WATER, 240, 1050, 8300, 900, 30, 30),
     ]:
         line = MozzarellaLine(
             name=params[0],
             chedderization_time=params[1],
             output_kg=params[2],
             input_ton=params[3],
-            melting_speed=params[4],
+            # melting_speed=params[4],
             serving_time=params[5],
             pouring_time=params[6],
         )

@@ -247,6 +247,7 @@ def fill_sku():
         "Охлаждение 2(для воды)",
         "Время посолки",
         "Kод",
+        "Скорость плавления",
     ]
 
     sku_data = df[columns]
@@ -263,6 +264,7 @@ def fill_sku():
             collecting_speed=_cast_non_nan(sku["Скорость сборки"]),
             packing_speed=sku["Скорость упаковки"],
             in_box=sku["Коробки"],
+            melting_speed=sku["Скорость плавления"],
             code=sku["Kод"],
         )
 

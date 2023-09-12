@@ -82,7 +82,7 @@ class BaseClass:
         "Робиола",
         "Сливки",
     ]
-    BOILING_VOLUME_LIMITS = {"MIN": 6000, "MAX": 8000}
+    BOILING_VOLUME_LIMITS = {"MIN": 6000, "MAX": 8300}
     CONSTRUCTOR_CELLS = {
         "value": "J",
         "remains_cumsum": "K",

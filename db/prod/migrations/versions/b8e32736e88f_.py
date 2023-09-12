@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 775520ac879c
+Revision ID: b8e32736e88f
 Revises: 
-Create Date: 2023-09-07 23:54:21.939954
+Create Date: 2023-09-12 14:48:36.858764
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ from alembic import op
 
 
 # revision identifiers, used by Alembic.
-revision = "775520ac879c"
+revision = "b8e32736e88f"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -182,7 +182,6 @@ def upgrade():
         sa.Column("output_kg", sa.Integer(), nullable=True),
         sa.Column("pouring_time", sa.Integer(), nullable=True),
         sa.Column("serving_time", sa.Integer(), nullable=True),
-        sa.Column("melting_speed", sa.Integer(), nullable=True),
         sa.Column("chedderization_time", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["id"],
@@ -526,6 +525,7 @@ def upgrade():
     op.create_table(
         "mozzarella_skus",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("melting_speed", sa.Integer(), nullable=True),
         sa.Column("production_by_request", sa.Boolean(), nullable=True),
         sa.Column("packing_by_request", sa.Boolean(), nullable=True),
         sa.ForeignKeyConstraint(
