@@ -175,7 +175,7 @@ def fill_boilings(df: pd.DataFrame) -> tp.Generator[MascarponeBoiling, None, Non
     df.fillna("", inplace=True)
 
     for item in df.to_dict("records"):
-        line_name = "Маскарпоне" if item["Название форм фактора"] != "Кремчиз" else "Кремчиз"
+        line_name = "Маскарпоне" if item["Название форм фактора"] == "Маскарпоне" else "Кремчиз"
         line: int = next((x for x in lines if x.name == line_name))
 
         bts_name = MascarponeBoilingTechnology.create_name(
@@ -241,7 +241,7 @@ def fill_sku(df: pd.DataFrame) -> tp.Generator[MascarponeSKU, None, None]:
             code=sku["Kод"],
         )
 
-        line_name = "Маскарпоне" if sku["Название форм фактора"] != "Кремчиз" else "Кремчиз"
+        line_name = "Маскарпоне" if sku["Название форм фактора"] == "Маскарпоне" else "Кремчиз"
         add_sku.line = next((x for x in lines if x.name == line_name), None)
         add_sku.made_from_boilings = [
             x
