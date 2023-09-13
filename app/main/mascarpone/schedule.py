@@ -13,7 +13,6 @@ from app.scheduler.frontend_utils import fill_grid
 from app.scheduler.mascarpone.draw_frontend.draw_frontend import draw_frontend
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
-from app.utils.mascarpone.boiling_plan_read import BoilingPlanReader
 
 
 BATCH_TYPES = ["mascarpone", "cream_cheese", "robiola", "cottage_cheese", "cream"]

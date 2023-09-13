@@ -92,15 +92,26 @@ class BoilingPlanReader:
                     dfs.append(df)
                     group_id += 1
                 case _:
-                    num: int = int(boiling.input_kg / 1000)
-                    if boiling.input_kg / 1000 - num > 0.1:
+                    num: int = round(boiling.input_kg / 1000)
+                    if boiling.input_kg / 1000 - num > 0.1 or boiling.input_kg / 1000 - num < -0.1:
                         raise BoilingPlanReaderException(f"Указано неверное число килограмм в варке {boiling.type}")
 
                     max_weight: float = boiling.output_kg / num
                     handler = MascarponeBoilingsHandler()
                     handler.handle_group(boiling.skus, max_weight=max_weight, weight_key="kg")
-                    for group in handler.boilings:
+                    for i, group in enumerate(handler.boilings):
                         df = pd.DataFrame(group.skus)
+                        if i == len(handler.boilings) - 1:
+                            if df["kg"].sum() < 100:
+                                df[["output_kg", "input_kg", "group_id", "group"]] = (
+                                    max_weight,
+                                    1000,
+                                    group_id - 1,
+                                    boiling.type,
+                                )
+                                dfs[-1] = pd.concat([dfs[-1], df])
+                                continue
+
                         df[["output_kg", "input_kg", "group_id", "group"]] = (max_weight, 1000, group_id, boiling.type)
                         dfs.append(df)
                         group_id += 1
