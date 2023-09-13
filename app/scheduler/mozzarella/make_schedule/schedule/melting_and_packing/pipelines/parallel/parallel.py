@@ -50,12 +50,11 @@ def make_mpp(boiling_df, left_boiling_volume):
 
         collecting_speed_left = melting_speed
         for i, cur_sku in cur_skus_df.iterrows():
-            # cur_speed = min(collecting_speed_left, cur_sku["collecting_speed"])
-            cur_speed = collecting_speed_left
+            cur_speed = min(collecting_speed_left, cur_sku["collecting_speed"])
             if not cur_speed:
                 continue
             boiling_df.at[cur_sku.name, "cur_speed"] = cur_speed
-            # collecting_speed_left -= cur_speed
+            collecting_speed_left -= cur_speed
 
             # set start of packing
             if cur_sku["beg_ts"] is None:
@@ -177,12 +176,18 @@ def make_mpp(boiling_df, left_boiling_volume):
 
     bff = boiling_df.iloc[0]["bff"]
     # todo: @akadaner, check this
-
-    m.row(
-        "melting_process",
-        size=round(boiling_df["kg"].sum() / boiling_df["sku"].iloc[0].melting_speed * 60) // 5,
-        bff=bff,
-    )
+    if boiling_df["sku"].iloc[0].line.name == "Пицца чиз":
+        m.row(
+            "melting_process",
+            size=round(boiling_df["kg"].sum() / boiling_df["sku"].iloc[0].melting_speed * 60) // 5,
+            bff=bff,
+        )
+    else:
+        m.row(
+            "melting_process",
+            size=last_collecting_process_y,
+            bff=bff,
+        )
 
     m.block(
         make_cooling_process(
