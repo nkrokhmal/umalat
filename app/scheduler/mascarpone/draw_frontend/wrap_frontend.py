@@ -113,7 +113,8 @@ def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
 
     with m.block("tub_3_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: cls in ["analysis", "ingredient", "packing", "packing_switch"]):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+            if not block.props["disabled"]:
+                m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add packing lines
 

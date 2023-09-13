@@ -21,7 +21,7 @@ from app.scheduler.time_utils import cast_t
 
 class Validator(ClassValidator):
     def __init__(self):
-        super().__init__(window=20)
+        super().__init__(window=100)
 
     @staticmethod
     def validate__boiling__boiling(b1, b2):
@@ -50,6 +50,10 @@ class Validator(ClassValidator):
         if b1.props["line"] != b2.props["line"]:
             return
 
+        validate_disjoint_by_axis(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__preparation__preparation(b1, b2):
         validate_disjoint_by_axis(b1, b2, ordered=True)
 
     @staticmethod
@@ -139,6 +143,7 @@ def make_schedule(
     m = BlockMaker("schedule")
 
     # - Make schedule by lines
+
     for line in ["Кремчиз", "Маскарпоне"]:
         # -- Filter boiling_plan_df
 
@@ -149,7 +154,13 @@ def make_schedule(
 
         # -- Make preparation block
 
-        m.row("preparation", size=6, line=line, x=cast_t(start_times_by_line[line]), push_func=add_push)
+        m.row(
+            "preparation",
+            size=6,
+            line=line,
+            push_func=AxisPusher(start_from=cast_t(start_times_by_line[line])),
+            push_kwargs={"validator": Validator()},
+        )
 
         # -- Make boiling and packing blocks
 
@@ -295,27 +306,31 @@ def make_schedule(
 
             # - Insert packing_switch if needed
 
+            packing_switch = None
             if (
                 not is_first
                 and not is_new_group
                 and grp.iloc[0]["sku"].weight_netto != prev_grp.iloc[-1]["sku"].weight_netto
             ):
-                # packing switching
-                m.block(
+                packing_switch = m.block(
                     "packing_switch",
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                     push_kwargs={"validator": Validator()},
                     size=(6, 0),
                     line=line,
-                )
+                ).block
 
             # - Insert new boiling
 
-            m.block(
+            boiling_block = m.block(
                 boiling,
                 push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                 push_kwargs={"validator": Validator()},
-            )
+            ).block
+
+            # - Mark packing switch disabled if distance between next boilign is too large
+            if packing_switch and boiling_block["packing_group"].x[0] - packing_switch.y[0] > 12:
+                packing_switch.props.update(disabled=True)
 
             # - Fix packing group if there is a overlap
 
@@ -351,7 +366,6 @@ def make_schedule(
                 current_tub_num = 1 if current_tub_num == 2 else 2
 
     for line in ["Кремчиз", "Маскарпоне"]:
-
         # - Skip if no boilings
 
         if len(list(m.root.iter(cls="boiling", line=line))) == 0:
@@ -397,6 +411,7 @@ def make_schedule(
         df["group_number"] = df["boiling"].apply(lambda boiling: boiling.props["group_number"])
         df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
         df["input_kg"] = df["boiling"].apply(lambda boiling: boiling.props["input_kg"])
+        df["kg"] = df["boiling"].apply(lambda boiling: boiling.props["kg"])
         df["semifinished_group"] = df["boiling"].apply(lambda boiling: boiling.props["semifinished_group"])
 
         for i, grp in df.groupby("group_number"):
@@ -404,7 +419,6 @@ def make_schedule(
             pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
 
             if grp.iloc[0]["semifinished_group"] in ["cream_cheese", "robiola"]:
-
                 m.block(
                     "boiling_header",
                     size=(pouring_finish - pouring_start, 0),
@@ -413,6 +427,7 @@ def make_schedule(
                     semifinished_group=grp.iloc[0]["semifinished_group"],
                     total_output_kg=grp["output_kg"].sum(),
                     total_input_kg=grp["input_kg"].sum(),
+                    total_kg=grp["kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,
                 )
@@ -426,6 +441,7 @@ def make_schedule(
                     semifinished_group=grp.iloc[0]["semifinished_group"],
                     total_input_kg=grp["input_kg"].sum(),
                     total_output_kg=grp["output_kg"].sum(),
+                    total_kg=grp["kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,
                 )

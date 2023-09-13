@@ -38,7 +38,16 @@ def to_boiling_plan(
 
 
 def test():
-    df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/boiling.xlsx"))
+    pd.set_option("display.max_rows", 500)
+    pd.set_option("display.max_columns", 500)
+    pd.set_option("display.width", 1000)
+    df = to_boiling_plan(
+        str(
+            get_repo_path()
+            / "app/data/static/samples/by_department/mascarpone/2023-09-13 Расписание маскарпоне (2).xlsx"
+        )
+    )
+    print(df)
 
 
 if __name__ == "__main__":
