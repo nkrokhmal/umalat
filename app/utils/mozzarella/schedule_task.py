@@ -91,7 +91,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
         df_task.to_csv(path, index=False, sep=";")
 
     def draw_task_original(self, excel_client, cur_row, task_name, line_name, draw_packing=True):
-        df_filter = self.df[self.df["line"] == line_name]
+        df_filter = self.df[self.df["line"].apply(lambda x: x.name == line_name)]
         index = 1
 
         cur_row, excel_client = draw_header(excel_client, self.date, cur_row, task_name)
@@ -135,7 +135,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
         return cur_row
 
     def draw_task_boiling(self, excel_client, cur_row, task_name, line_name, draw_packing=True):
-        df_filter = self.df[self.df["line"] == line_name]
+        df_filter = self.df[self.df["line"].apply(lambda x: x.name == line_name)]
 
         cur_row, excel_client = draw_header(excel_client, self.date, cur_row, task_name, "варки")
         for batch_id, grp in df_filter.groupby("absolute_batch_id"):
