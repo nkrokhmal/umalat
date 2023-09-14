@@ -7,8 +7,6 @@ from app.main import main
 def download_departments_schedule():
     date = flask.request.args.get("date")
     uploads = config.abs_path("app/data/dynamic/{}/approved/".format(date))
-    response = flask.send_from_directory(
-        directory=uploads, filename=f"{date} Расписание общее.xlsx", as_attachment=True
-    )
+    response = flask.send_from_directory(directory=uploads, path=f"{date} Расписание общее.xlsx", as_attachment=True)
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response

@@ -44,7 +44,7 @@ def download_butter():
             os.path.dirname(flask.current_app.root_path),
             flask.current_app.config["UPLOAD_TMP_FOLDER"],
         ),
-        filename=filename,
+        path=filename,
         cache_timeout=0,
         as_attachment=True,
     )

@@ -13,7 +13,7 @@ def download_milk_project_schedule():
         flask.current_app.config["SCHEDULE_FOLDER"],
     )
     response = flask.send_from_directory(
-        directory=uploads, filename=f"{date} Расписание милкпроджект.xlsx", as_attachment=True
+        directory=uploads, path=f"{date} Расписание милкпроджект.xlsx", as_attachment=True
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
@@ -30,7 +30,7 @@ def download_milk_project_boiling_plan():
         flask.current_app.config["BOILING_PLAN_FOLDER"],
     )
     response = flask.send_from_directory(
-        directory=uploads, filename=f"{date} План по варкам милкпроджект.xlsx", as_attachment=True
+        directory=uploads, path=f"{date} План по варкам милкпроджект.xlsx", as_attachment=True
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response

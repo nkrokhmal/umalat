@@ -17,7 +17,7 @@ def download_mascarpone_schedule():
         flask.current_app.config["SCHEDULE_FOLDER"],
     )
     response = flask.send_from_directory(
-        directory=uploads, filename=f"{date} Расписание маскарпоне.xlsx", as_attachment=True
+        directory=uploads, path=f"{date} Расписание маскарпоне.xlsx", as_attachment=True
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
@@ -34,7 +34,7 @@ def download_mascarpone_boiling_plan():
         flask.current_app.config["BOILING_PLAN_FOLDER"],
     )
     response = flask.send_from_directory(
-        directory=uploads, filename=f"{date} План по варкам маскарпоне.xlsx", as_attachment=True
+        directory=uploads, path=f"{date} План по варкам маскарпоне.xlsx", as_attachment=True
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
