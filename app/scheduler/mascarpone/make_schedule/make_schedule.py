@@ -306,6 +306,7 @@ def make_schedule(
                 input_kg=grp["input_kg"].sum(),
                 percent=grp.iloc[0]["boiling"].percent,
                 weight_netto=grp.iloc[0]["sku"].weight_netto,
+                block_id=grp.iloc[0]["block_id"],
             )
 
             # - Insert packing_switch if needed
@@ -420,12 +421,15 @@ def make_schedule(
         df = pd.DataFrame(boilings, columns=["boiling"])
 
         df["group_number"] = df["boiling"].apply(lambda boiling: boiling.props["group_number"])
+        df["block_id"] = df["boiling"].apply(lambda boiling: boiling.props["block_id"])
+        df["percent"] = df["boiling"].apply(lambda boiling: boiling.props["boiling_model"].percent)
         df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
         df["input_kg"] = df["boiling"].apply(lambda boiling: boiling.props["input_kg"])
         df["kg"] = df["boiling"].apply(lambda boiling: boiling.props["kg"])
         df["semifinished_group"] = df["boiling"].apply(lambda boiling: boiling.props["semifinished_group"])
+        df["total_input_kg"] = df["boiling"].apply(lambda boiling: boiling.props["total_input_kg"])
 
-        for i, grp in df.groupby("group_number"):
+        for i, grp in df.groupby("block_id"):
             pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
             pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
 
@@ -436,8 +440,7 @@ def make_schedule(
                     x=(pouring_start, 0),
                     push_func=add_push,
                     semifinished_group=grp.iloc[0]["semifinished_group"],
-                    total_output_kg=grp["output_kg"].sum(),
-                    total_input_kg=grp["input_kg"].sum(),
+                    total_input_kg=grp.iloc[0]["total_input_kg"],
                     total_kg=grp["kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,
@@ -450,8 +453,8 @@ def make_schedule(
                     x=(pouring_start, 0),
                     push_func=add_push,
                     semifinished_group=grp.iloc[0]["semifinished_group"],
-                    total_input_kg=grp["input_kg"].sum(),
-                    total_output_kg=grp["output_kg"].sum(),
+                    percent=grp.iloc[0]["percent"],
+                    total_input_kg=grp.iloc[0]["total_input_kg"],
                     total_kg=grp["kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,

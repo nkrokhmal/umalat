@@ -44,7 +44,7 @@ def test():
     df = to_boiling_plan(
         str(
             get_repo_path()
-            / "app/data/static/samples/by_department/mascarpone/2023-09-13 Расписание маскарпоне (2).xlsx"
+            / "app/data/static/samples/by_department/mascarpone/2023-09-12 Расписание маскарпоне (2).xlsx"
         )
     )
     print(df)

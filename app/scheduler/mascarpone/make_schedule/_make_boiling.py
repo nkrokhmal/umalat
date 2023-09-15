@@ -23,16 +23,6 @@ def _make_boiling(boiling_group_df, **kwargs):
         boiling_model.boiling_technologies, single=True
     )  # there is only one boiling technology is for every boiling model in mascarpone department
 
-    # - Init block maker
-
-    m = BlockMaker(
-        "boiling",
-        boiling_model=boiling_model,
-        semifinished_group=sample_row["semifinished_group"],
-        kg=boiling_group_df["kg"].sum(),
-        **kwargs
-    )
-
     # - Define scaling factor for cream and apply to technology
 
     technology = {
@@ -44,12 +34,12 @@ def _make_boiling(boiling_group_df, **kwargs):
         "heating_time": technology.heating_time,
         "pumping_time": technology.pumping_time,
     }
+    total_input_kg = (
+        boiling_group_df["input_kg"].iloc[0]
+        if sample_row["semifinished_group"] != "cream"
+        else boiling_group_df["kg"].sum() + 100
+    )
     if sample_row["semifinished_group"] == "cream":
-        total_input_kg = (
-            boiling_group_df["input_kg"]
-            if sample_row["semifinished_group"] != "cream"
-            else boiling_group_df["kg"].sum() + 100
-        )
         scaling_factor = total_input_kg / 900
 
         technology["pouring_time"] = custom_round(
@@ -60,6 +50,16 @@ def _make_boiling(boiling_group_df, **kwargs):
         )
 
     technology = dotdict(technology)
+
+    # - Init block maker
+    m = BlockMaker(
+        "boiling",
+        boiling_model=boiling_model,
+        semifinished_group=sample_row["semifinished_group"],
+        kg=boiling_group_df["kg"].sum(),
+        total_input_kg=total_input_kg,
+        **kwargs,
+    )
 
     # - Make pouring
 

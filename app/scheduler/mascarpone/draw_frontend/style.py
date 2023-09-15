@@ -1,6 +1,6 @@
 def boiling_header_text(b):
     if b.props["semifinished_group"] == "cream":
-        return f"Производство сливок {int(b.props['total_kg'])}кг"
+        return f"Сливки {int(b.props['percent'])}% {int(b.props['total_input_kg'])}кг"
     elif b.props["semifinished_group"] == "cream_cheese":
         litres = 1000 * len(b.props["boilings"])
         return f"Кремчиз/{litres}л"
@@ -16,15 +16,15 @@ def boiling_header_text(b):
 
 
 def pouring_text(b):
-    if b.props["group"] == "cream":
-        return f"Прием сливок {int(b.props['percent'])}% 400кг"
-    elif b.props["group"] in ["cream_cheese", "robiola", "cottage_cheese"]:
-        return "прием п/ф 400 кг"
-    elif b.props["group"] == "mascarpone":
-        return "прием п/ф 600 кг"
+    if b.props["semifinished_group"] == "cream":
+        return f"Прием {int(b.props['total_input_kg'])}кг"
+    elif b.props["semifinished_group"] in ["cream_cheese", "robiola", "cottage_cheese"]:
+        return "Прием п/ф 400 кг"
+    elif b.props["semifinished_group"] == "mascarpone":
+        return "Прием п/ф 600 кг"
     else:
         # should not happen
-        return "прием"
+        return "Прием"
 
 
 def cleaning_text(b):
