@@ -24,10 +24,10 @@ def mascarpone_schedule():
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
-        beg_time = form.beg_time.data
+        beg_time = form.beg_mascarpone_time.data
 
         # validate time
-        time_validator(form, form.beg_time)
+        time_validator(form, form.beg_mascarpone_time)
         file = flask.request.files["input_file"]
 
         data_dir = os.path.join(

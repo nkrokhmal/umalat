@@ -116,8 +116,13 @@ class ScheduleForm(FlaskForm):
     cream_batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
 
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
-    beg_time = StringField(
-        'Начало первой подачи"',
+    beg_mascarpone_time = StringField(
+        'Начало первой подачи линии маскарпоне"',
+        validators=[Optional()],
+        default="06:00",
+    )
+    beg_cream_cheese_time = StringField(
+        'Начало первой подачи линии кремчиз"',
         validators=[Optional()],
         default="06:00",
     )
