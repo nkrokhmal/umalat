@@ -19,6 +19,7 @@ class BoilingPlanReaderException(Exception):
 
 @dataclass
 class HugeBoiling:
+    block_id: int = 0
     skus: list[dict] | None = None
     input_kg: int = 0
     output_kg: int = 0
@@ -50,6 +51,7 @@ class BoilingPlanReader:
         boilings: list[HugeBoiling] = []
         boiling = HugeBoiling()
         skus = db.session.query(MascarponeSKU).all()
+        block_id = 1
 
         for i in range(2, 200):
             sku_name = ws.cell(i, 4).value
@@ -58,8 +60,10 @@ class BoilingPlanReader:
                     item = {column: ws.cell(i, j + 1).value for j, column in enumerate(COLUMNS.values())}
                     boiling.input_kg = item["input_kg"]
                     boiling.output_kg = item["output_kg"]
+                    boiling.block_id = block_id
                     boilings.append(boiling)
 
+                    block_id += 1
                     boiling = HugeBoiling()
                 case None | "":
                     continue
@@ -83,11 +87,12 @@ class BoilingPlanReader:
                         raise BoilingPlanReaderException(f"Указано неверное число килограмм в варке {boiling.type}")
 
                     df = pd.DataFrame(boiling.skus)
-                    df[["output_kg", "input_kg", "group_id", "group"]] = (
+                    df[["output_kg", "input_kg", "group_id", "group", "block_id"]] = (
                         boiling.output_kg,
                         boiling.input_kg,
                         group_id,
                         boiling.type,
+                        boiling.block_id,
                     )
                     dfs.append(df)
                     group_id += 1
@@ -103,16 +108,23 @@ class BoilingPlanReader:
                         df = pd.DataFrame(group.skus)
                         if i == len(handler.boilings) - 1:
                             if df["kg"].sum() < 100:
-                                df[["output_kg", "input_kg", "group_id", "group"]] = (
+                                df[["output_kg", "input_kg", "group_id", "group", "block_id"]] = (
                                     max_weight,
                                     1000,
                                     group_id - 1,
                                     boiling.type,
+                                    boiling.block_id,
                                 )
                                 dfs[-1] = pd.concat([dfs[-1], df])
                                 continue
 
-                        df[["output_kg", "input_kg", "group_id", "group"]] = (max_weight, 1000, group_id, boiling.type)
+                        df[["output_kg", "input_kg", "group_id", "group", "block_id"]] = (
+                            max_weight,
+                            1000,
+                            group_id,
+                            boiling.type,
+                            boiling.block_id,
+                        )
                         dfs.append(df)
                         group_id += 1
         return pd.concat(dfs)
