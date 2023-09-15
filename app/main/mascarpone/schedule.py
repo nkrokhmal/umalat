@@ -24,7 +24,8 @@ def mascarpone_schedule():
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
-        beg_time = form.beg_mascarpone_time.data
+        beg_time_mascarpone = form.beg_mascarpone_time.data
+        beg_time_cream_cheese = form.beg_cream_cheese_time.data
 
         # validate time
         time_validator(form, form.beg_mascarpone_time)
@@ -57,7 +58,7 @@ def mascarpone_schedule():
         output = draw_frontend(
             boiling_plan=wb,
             first_batch_ids_by_type=first_batch_ids_by_type,
-            start_times_by_line={"Маскарпоне": beg_time, "Кремчиз": beg_time},
+            start_times_by_line={"Маскарпоне": beg_time_mascarpone, "Кремчиз": beg_time_cream_cheese},
             date=date,
             workbook=wb,
         )  # todo next: make different times [@marklidenberg]
