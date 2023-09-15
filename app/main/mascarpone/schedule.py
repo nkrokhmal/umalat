@@ -47,6 +47,10 @@ def mascarpone_schedule():
             data_only=True,
         )
 
+        # Delete list "Расписание" if exists
+        if "Расписание" in wb.sheetnames:
+            wb.remove(wb["Расписание"])
+
         first_batch_ids_by_type = {
             "mascarpone": form.mascarpone_batch_number.data,
             "cream": form.cream_batch_number.data,

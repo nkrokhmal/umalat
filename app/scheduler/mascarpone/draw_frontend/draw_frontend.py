@@ -44,8 +44,8 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str("/Users/arsenijkadaner/Desktop/2023-09-12 Расписание маскарпоне.xlsx"),
-        start_times_by_line={"Маскарпоне": "06:30", "Кремчиз": "06:30"},
+        str("/Users/arsenijkadaner/Desktop/Свежее расписание/2023-09-12 Расписание маскарпоне (2).xlsx"),
+        start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:00"},
     )
 
     output["workbook"].save("test.xlsx")
