@@ -46,6 +46,13 @@ class Validator(ClassValidator):
         if b1.props["semifinished_group"] != "mascarpone":
             validate_disjoint_by_axis(b1["packing_group"], b2["pumping"])
 
+        if (
+            "separation" in b1.children_by_cls
+            and "separation" in b2.children_by_cls
+            and b1.props["semifinished_group"] != b2.props["semifinished_group"]
+        ):
+            validate_disjoint_by_axis(b1["separation"], b2["separation"], distance=2)
+
     @staticmethod
     def validate__preparation__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
