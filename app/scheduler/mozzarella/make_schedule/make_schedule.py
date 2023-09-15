@@ -43,8 +43,13 @@ def make_schedule(
 
 
 def test():
-    make_schedule(
-        str(get_repo_path() / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx")
+    print(
+        make_schedule(
+            str(
+                get_repo_path()
+                / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
+            )
+        )
     )
 
 

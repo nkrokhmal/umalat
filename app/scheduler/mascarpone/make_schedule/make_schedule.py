@@ -45,6 +45,9 @@ class Validator(ClassValidator):
         if "heating" in b1.children_by_cls and "heating" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["heating"], b2["heating"])
 
+        if b1.props["semifinished_group"] != "mascarpone":
+            validate_disjoint_by_axis(b1["packing_group"], b2["pumping"])
+
     @staticmethod
     def validate__preparation__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
@@ -98,6 +101,10 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__separator_acceleration(b1, b2):
+
+        if b1.props["semifinished_group"] == "cream":
+            validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
+
         if b1.props["line"] != b2.props["line"]:
             return
 

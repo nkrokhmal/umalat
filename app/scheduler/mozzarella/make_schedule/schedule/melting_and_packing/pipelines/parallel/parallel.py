@@ -7,6 +7,7 @@ from utils_ak.builtin.collection import remove_duplicates
 from utils_ak.numeric.numeric import custom_round
 
 from app.globals import ERROR
+from app.models import MozzarellaSKU, cast_model
 from app.scheduler.mozzarella.make_schedule.boiling import make_boiling
 from app.scheduler.mozzarella.make_schedule.cooling import make_cooling_process
 from app.scheduler.mozzarella.make_schedule.packing import get_configuration_time
@@ -175,25 +176,26 @@ def make_mpp(boiling_df, left_boiling_volume):
                         )
 
     bff = boiling_df.iloc[0]["bff"]
-    # todo: @akadaner, check this
-    if boiling_df["sku"].iloc[0].line.name == "Пицца чиз":
-        m.row(
-            "melting_process",
-            size=round(boiling_df["kg"].sum() / boiling_df["sku"].iloc[0].melting_speed * 60) // 5,
-            bff=bff,
+
+    melting_process_size = (
+        min(
+            round(boiling_df["kg"].sum() / boiling_df["sku"].iloc[0].melting_speed * 60) // 5, last_collecting_process_y
         )
-    else:
-        m.row(
-            "melting_process",
-            size=last_collecting_process_y,
-            bff=bff,
-        )
+        if boiling_df["sku"].iloc[0].line.name == "Пицца чиз"
+        else last_collecting_process_y
+    )
+
+    m.row(
+        "melting_process",
+        size=melting_process_size,
+        bff=bff,
+    )
 
     m.block(
         make_cooling_process(
-            boiling_model.line.name,
-            bff.default_cooling_technology,
-            last_collecting_process_y,
+            line_name=boiling_model.line.name,
+            cooling_technology=bff.default_cooling_technology,
+            melting_process_size=melting_process_size,
         )
     )
 
