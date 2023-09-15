@@ -1,7 +1,5 @@
 import json
 
-from typing import Callable
-
 import pandas as pd
 
 from more_itertools import last, mark_ends
@@ -9,11 +7,11 @@ from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
-from utils_ak.pandas import mark_consecutive_groups
 
 from app.lessmore.utils.fp import pairwise
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.mascarpone.make_schedule._make_boiling import _make_boiling
+from app.scheduler.mascarpone.make_schedule.get_packing_switch_size import get_packing_swith_size
 from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike, to_boiling_plan
 from app.scheduler.split_shifts_utils import split_shifts_by_time
 from app.scheduler.time_utils import cast_t
@@ -101,7 +99,6 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__separator_acceleration(b1, b2):
-
         if b1.props["semifinished_group"] == "cream":
             validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
 
@@ -323,7 +320,13 @@ def make_schedule(
                     "packing_switch",
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                     push_kwargs={"validator": Validator()},
-                    size=(6, 0),
+                    size=(
+                        get_packing_swith_size(
+                            weight_netto1=grp.iloc[0]["sku"].weight_netto,
+                            weight_netto2=prev_grp.iloc[-1]["sku"].weight_netto,
+                        ),
+                        0,
+                    ),
                     line=line,
                 ).block
 
@@ -336,6 +339,7 @@ def make_schedule(
             ).block
 
             # - Mark packing switch disabled if distance between next boilign is too large
+
             if packing_switch and boiling_block["packing_group"].x[0] - packing_switch.y[0] > 12:
                 packing_switch.props.update(disabled=True)
 
@@ -506,8 +510,6 @@ def make_schedule(
 
 
 def test():
-    from copy import deepcopy
-
     schedule = make_schedule(
         # str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")
         str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/boiling.xlsx"),

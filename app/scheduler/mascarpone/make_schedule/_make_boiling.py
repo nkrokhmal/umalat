@@ -7,6 +7,8 @@ from utils_ak.dict import dotdict
 from utils_ak.numeric.numeric import custom_round
 from utils_ak.pandas import mark_consecutive_groups
 
+from app.scheduler.mascarpone.make_schedule.get_packing_switch_size import get_packing_swith_size
+
 
 warnings.filterwarnings("ignore")
 
@@ -33,7 +35,6 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     # - Define scaling factor for cream and apply to technology
 
-    scaling_factor = 1 if sample_row["semifinished_group"] != "cream" else boiling_group_df["kg"].sum() / 400
     technology = {
         "separation_time": technology.separation_time,
         "pouring_time": technology.pouring_time,
@@ -43,7 +44,21 @@ def _make_boiling(boiling_group_df, **kwargs):
         "heating_time": technology.heating_time,
         "pumping_time": technology.pumping_time,
     }
-    technology = {k: custom_round(v * scaling_factor, 5, rounding="nearest_half_even") for k, v in technology.items()}
+    if sample_row["semifinished_group"] == "cream":
+        total_input_kg = (
+            boiling_group_df["input_kg"]
+            if sample_row["semifinished_group"] != "cream"
+            else boiling_group_df["kg"].sum() + 100
+        )
+        scaling_factor = total_input_kg / 900
+
+        technology["pouring_time"] = custom_round(
+            technology["pouring_time"] * scaling_factor, 5, rounding="nearest_half_even"
+        )
+        technology["pumping_time"] = custom_round(
+            technology["pumping_time"] * scaling_factor, 5, rounding="nearest_half_even"
+        )
+
     technology = dotdict(technology)
 
     # - Make pouring
@@ -81,7 +96,9 @@ def _make_boiling(boiling_group_df, **kwargs):
 
             if previous_weight and current_weight != previous_weight:
                 packing_m.row(
-                    "packing_switch", size=10 // 5, push_func=stack_push
+                    "packing_switch",
+                    size=get_packing_swith_size(weight_netto1=previous_weight, weight_netto2=current_weight),
+                    push_func=stack_push,
                 )  # todo next: make proper change of packing [@marklidenberg]
 
             packing_size = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in grp.iterrows()])
