@@ -231,7 +231,7 @@ def make_schedule(
 
             # -- Pasteurizer cleaning
 
-            if is_mascarpone_filled or (prev_group == "mascarpone" and is_new_group):
+            if is_mascarpone_filled or (prev_group == "mascarpone" and (is_new_group or is_last)):
                 # add pasteurizer cleaning
                 m.block(
                     "cleaning",
@@ -504,15 +504,16 @@ def make_schedule(
 
     # - Add last cleaning
 
-    m.block(
-        "cleaning",
-        size=(13, 0),
-        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-        push_kwargs={"validator": Validator()},
-        cleaning_object="heat_exchanger",
-        contour="2",
-        line="Кремчиз" if any(m.root.iter(cls="boiling", line="Кремчиз")) else "Маскарпоне",
-    )
+    if any(m.root.iter(cls="boiling", line="Кремчиз")):
+        m.block(
+            "cleaning",
+            size=(13, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="heat_exchanger",
+            contour="2",
+            line="Кремчиз",
+        )
 
     # - Return result
 
