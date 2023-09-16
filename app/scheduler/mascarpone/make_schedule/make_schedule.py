@@ -511,7 +511,7 @@ def make_schedule(
         push_kwargs={"validator": Validator()},
         cleaning_object="heat_exchanger",
         contour="2",
-        line="Кремчиз",
+        line="Кремчиз" if any(m.root.iter(cls="boiling", line="Кремчиз")) else "Маскарпоне",
     )
 
     # - Return result
@@ -522,7 +522,10 @@ def make_schedule(
 def test():
     schedule = make_schedule(
         # str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/boiling.xlsx"),
+        str(
+            get_repo_path()
+            / "app/data/static/samples/by_department/mascarpone/2023-09-17 План по варкам маскарпоне.xlsx"
+        ),
     )["schedule"]
 
     print(schedule)

@@ -44,7 +44,10 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str("/Users/arsenijkadaner/Desktop/Свежее расписание/2023-09-12 Расписание маскарпоне (2).xlsx"),
+        str(
+            get_repo_path()
+            / "app/data/static/samples/by_department/mascarpone/2023-09-17 План по варкам маскарпоне.xlsx"
+        ),
         start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:00"},
     )
 
