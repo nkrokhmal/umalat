@@ -31,6 +31,8 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
         "boiling",
         boiling_model=boiling_model,
         percent=boiling_model.percent,
+        absolute_batch_id=boiling_group_df.iloc[0]["absolute_batch_id"],
+        whey_kg=boiling_group_df.iloc[0]["sum_weight_kg"] / boiling_group_df.iloc[0]["floculators_num"],
         **kwargs,
     )
 
@@ -63,12 +65,17 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
 
     # -- Pumping
 
-    m.row("pumping", size=technology.pumping_time // 5)
+    m.row("pumping", size=technology.pumping_time // 5 * boiling_group_df.iloc[0]["floculators_num"])
 
     # -- Packing
 
     packing_minutes = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in boiling_group_df.iterrows()])
     packing_minutes = int(custom_round(packing_minutes, 5, "ceil", pre_round_precision=1))
-    m.row("packing", size=packing_minutes // 5)
+    m.row(
+        "packing",
+        size=packing_minutes // 5,
+        label="/".join([f"{row['sku'].brand_name} {row['sku'].weight_netto}" for i, row in boiling_group_df.iterrows()])
+        + f"  {boiling_group_df.iloc[0]['boiling'].percent}%",
+    )
 
     return m.root

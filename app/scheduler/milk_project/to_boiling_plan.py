@@ -30,7 +30,7 @@ def to_boiling_plan(boiling_plan: BoilingPlanLike, first_batch_ids_by_type={"mil
 
     with code("Load boiling plan"):
         ws = None
-        for key in ["План варок", "План варок милкпроджект"]:
+        for key in ["План варок адыгейский", "План варок милкпроджект"]:
             if key in wb.sheetnames:
                 ws = wb[key]
         if not ws:

@@ -5,6 +5,7 @@ from utils_ak.time import cast_datetime
 from app.imports.runtime import *
 from app.models import RicottaSKU
 from app.scheduler.archive.ricotta.update_interval_times import update_interval_times
+from app.scheduler.ricotta.to_boiling_plan import to_boiling_plan
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.ricotta.schedule_tasks import RicottaScheduleTask
 from app.utils.schedule import cast_schedule
@@ -18,7 +19,7 @@ def update_task_and_batches(schedule_obj):
     # - Prepare
     wb = cast_schedule(schedule_obj)
     metadata = json.loads(read_metadata(wb))
-    boiling_plan_df = to_boiling_plan(wb, first_batch_ids=metadata["first_batch_ids"])
+    boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=metadata["first_batch_ids"])
     date = cast_datetime(metadata["date"])
 
     # - Batch

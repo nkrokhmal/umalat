@@ -2,7 +2,7 @@ import json
 
 import pandas as pd
 
-from more_itertools import last, mark_ends
+from more_itertools import first, last, mark_ends
 from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
@@ -42,7 +42,7 @@ class Validator(ClassValidator):
     def validate__boiling__cleaning(b1, b2):
         f1 = b1["floculator", True][-1]
         if b2.props["cleaning_object"] == "floculator" and b1.props["floculator_num"] == b2.props["floculator_num"]:
-            validate_disjoint_by_axis(f1["pouring"], b2, ordered=True)
+            validate_disjoint_by_axis(f1["dray_ricotta"], b2, ordered=True)
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -92,7 +92,7 @@ def make_schedule(
 
     # - Add cleanings
 
-    for floculator_num in [boiling.props["floculator_num"] for boiling in m.root.iter(cls="boiling")][-3:]:
+    for floculator_num in [floculator.props["floculator_num"] for floculator in m.root.iter(cls="floculator")][-3:]:
         m.block(
             "cleaning",
             size=(12, 0),
@@ -129,8 +129,8 @@ def make_schedule(
 
     for i, (a, b) in enumerate(
         split_shifts_by_time(
-            a=next(m.root.iter(cls="preparation")).y[0],
-            b=last(m.root.iter(cls="boiling")).y[0] + 12,
+            a=first(m.root.iter(cls="packing")).x[0] - 12,
+            b=last(m.root.iter(cls="packing")).y[0] + 12,
             split=cast_t("18:00"),
             min_shift=6,
         )

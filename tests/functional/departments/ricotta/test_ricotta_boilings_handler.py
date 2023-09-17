@@ -47,7 +47,7 @@ CASES: list[HandlerCase] = [
 
 
 @pytest.mark.parametrize("case", CASES)
-def test_boiling_handler(case: HandlerCase) -> None:
+def test_ricotta_boiling_handler(case: HandlerCase) -> None:
     handler = RicottaBoilingsHandler()
     for group in case.groups:
         handler.handle_group(skus=group["skus"], max_weight=group["max_weight"])
