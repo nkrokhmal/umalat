@@ -1,7 +1,8 @@
+from collections import namedtuple
+
 import openpyxl
 import pandas as pd
 
-from collections import namedtuple
 from openpyxl.utils.cell import column_index_from_string
 
 from app.globals import db
@@ -19,10 +20,10 @@ COLUMNS = {
     "kg": Cell(column_index_from_string("E"), "E"),
     "remainings": Cell(column_index_from_string("F"), "F"),
     "total_output": Cell(column_index_from_string("G"), "G"),
-    "boiling_count": Cell(column_index_from_string("P"), "P"),
-    "delimiter": Cell(column_index_from_string("I"), "I"),
-    "delimiter_int": Cell(column_index_from_string("L"), "L"),
-    "total_volume": Cell(column_index_from_string("Q"), "Q"),
+    "boiling_count": Cell(column_index_from_string("I"), "I"),
+    "delimiter": Cell(column_index_from_string("J"), "J"),
+    "delimiter_int": Cell(column_index_from_string("M"), "M"),
+    "total_volume": Cell(column_index_from_string("R"), "R"),
 }
 
 ROWS = {

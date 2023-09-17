@@ -149,7 +149,7 @@ def generate_washer():
     adygea_department = Department.query.filter_by(name="Адыгейский цех").first()
 
     for data in [
-        WasherData("Короткая мойка термизатора", 40),
+        WasherData("Короткая мойка термизатора", 25),
         WasherData("Длинная мойка термизатора", 80),
     ]:
         washer = Washer(

@@ -48,6 +48,7 @@ def download_mozzarella():
             "Дополнительное время": sku.made_from_boilings[0].boiling_technologies[0].extra_time,
             "Откачка": sku.made_from_boilings[0].boiling_technologies[0].pumping_out_time,
             "Kод": sku.code,
+            "Скорость плавления": sku.melting_speed,
         }
         for sku in skus
     ]
