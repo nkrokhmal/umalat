@@ -13,8 +13,7 @@ def load_cells_df(wb_obj, sheet_name):
     # - Get merged cells
 
     df = pd.DataFrame()
-
-    df["cell"] = ws.merged_cells.ranges
+    df["cell"] = list(ws.merged_cells.ranges)
 
     bound_names = ("x0", "x1", "y0", "y1")
 

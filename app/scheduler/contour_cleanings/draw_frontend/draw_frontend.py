@@ -16,6 +16,7 @@ def draw_frontend(
     schedules_by_department=None,
     properties_by_department=None,
     prefix="",
+    open_file: bool = False,
     **kwargs,
 ):
     if not schedule:
@@ -50,7 +51,7 @@ def draw_frontend(
 
     workbook = draw_excel_frontend(
         frontend,
-        open_file=False,
+        open_file=open_file,
         fn=output_fn,
         style=STYLE,
     )

@@ -3,7 +3,7 @@ import json
 
 from flask_wtf import FlaskForm
 from utils_ak.builtin import cast_bool
-from wtforms import *
+from wtforms import BooleanField, DateTimeField, FloatField, IntegerField, StringField
 from wtforms.validators import DataRequired, Optional
 
 from app.models import *
