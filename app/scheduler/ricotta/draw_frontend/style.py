@@ -7,6 +7,7 @@ STYLE = {
     "dray_ricotta": {"text": "Слив рикотты 500 кг п/ф", "color": "#948A54"},
     "draw_ricotta_break": {"text": "", "color": "white"},
     "salting": {"text": "Посолка/анализ", "color": "#D9D9D9"},
+    "ingredient": {"text": "Внесение ингедиентов", "color": "yellow"},
     "pumping": {"text": "Перекачивание", "color": "#00B050"},
     "packing": {"text": lambda b: b.props["label"], "color": "#FFC000"},
     "packing_header": {"text": lambda b: str(int(b.props["absolute_batch_id"])), "color": "#FFC000"},
