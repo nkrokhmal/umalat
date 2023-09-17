@@ -94,7 +94,7 @@ class BoilingPlanReader:
                     group_id,
                     2,
                     1,
-                    6500,
+                    6500 * 2,
                 )
                 group_id += 1
                 dfs.append(df)
@@ -106,7 +106,7 @@ class BoilingPlanReader:
                     group_id,
                     1,
                     0.5,
-                    6500 * 0.5,
+                    6500,
                 )
                 group_id += 1
                 dfs.append(df)
