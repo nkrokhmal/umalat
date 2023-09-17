@@ -37,10 +37,16 @@ def _make_boiling(boiling_group_df, **kwargs):
     m.row("heating", size=technology.heating_time // 5, x=pouring.x[0] + 2, push_func=add_push)
     m.row("lactic_acid", size=technology.lactic_acid_time // 5)
     m.row("draw_whey", size=technology.drain_whey_time // 5)
-    m.row("draw_ricotta", size=technology.dray_ricotta_time // 5)
-    m.row("draw_ricotta_break", size=3)
-    m.row("draw_ricotta", size=technology.dray_ricotta_time // 5)
-    m.row("salting", size=technology.salting_time // 5)
+
+    def _make_draw_group():
+        m = BlockMaker("draw_group")
+        m.row("draw_ricotta", size=technology.dray_ricotta_time // 5)
+        m.row("draw_ricotta_break", size=3)
+        m.row("draw_ricotta", size=technology.dray_ricotta_time // 5)
+        m.row("salting", size=technology.salting_time // 5)
+        return m.root
+
+    m.row(_make_draw_group())
     m.row("pumping", size=technology.pumping_time // 5)
 
     # m.row('ingredient', size=technology.ingredient_time // 5)

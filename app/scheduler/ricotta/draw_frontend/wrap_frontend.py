@@ -46,6 +46,9 @@ def wrap_line(
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы рикотты"))
 
+    m.block("stub", size=(0, 1))  # start with 1
+    m.block("stub", size=(0, 1))  # start with 1
+
     # - Add shifts
 
     # with m.block("shift_line", start_time=start_time, size=(0, 1)):
@@ -71,39 +74,57 @@ def wrap_line(
     # -- Floculators
 
     for i in range(3):
-        with m.block(f"floculator_{i + 1}", size=(0, 1)):
-            for block in schedule.iter(cls="pouring", floculator_num=i + 1):
-                first = m.row(m.copy(block, with_props=True, size=(2, 1)), push_func=add_push).block
-                m.row(m.copy(block, with_props=True, size=(block.size[0] - 2, 1)), x=first.x[0] + 2, push_func=add_push)
+        with m.block(f"floculator_{i + 1}", size=(0, 2)):
+            for boiling in schedule.iter(cls="boiling", floculator_num=i + 1):
+                with m.block("first_row", size=(0, 1), x=(0, 0), push_func=add_push):
+                    first = m.row(m.copy(boiling["pouring"], with_props=True, size=(2, 1)), push_func=add_push).block
+                    m.row(
+                        m.copy(boiling["pouring"], with_props=True, size=(boiling["pouring"].size[0] - 2, 1)),
+                        x=first.x[0] + 2,
+                        push_func=add_push,
+                    )
+                with m.block("second_row", size=(0, 1), x=(0, 1), push_func=add_push):
+                    m.row(m.copy(boiling["heating"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.row(m.copy(boiling["lactic_acid"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.row(m.copy(boiling["draw_whey"], with_props=True, size=(None, 1)), push_func=add_push)
+
+    # -- Drenators
+
+    for i in range(2):
+        with m.block(f"drenator_{i + 1}", size=(0, 1)):
+            for block in schedule.iter(cls=lambda cls: cls in ["draw_ricotta", "salting"], drenator_num=i + 1):
+                m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add preparation
 
-    m.block(m.copy(schedule["preparation"], with_props=True), size=(6, 10), x=(0, 1), push_func=add_push)
+    m.block(m.copy(schedule["preparation"], with_props=True), size=(6, 13), x=(0, 1), push_func=add_push)
 
-    # # - Add template
-    #
-    # with m.block("template_block", index_width=1, push_func=add_push):
-    #     for i, row_name in enumerate(
-    #         [
-    #             "Бригадир",
-    #             "Упаковка",
-    #             "Флокулятор №1",
-    #             "Флокулятор №2",
-    #             "Флокулятор №3",
-    #             "Дренатор/Бак 1",
-    #             "Дренатор/Бак 2",
-    #             "Перекачивание в буферный танк",
-    #             "Упаковка на Ильпре",
-    #             "Сип-мойка контур 2",
-    #         ]
-    #     ):
-    #         m.block(
-    #             "template",
-    #             push_func=add_push,
-    #             x=(1, i + 2),
-    #             size=(2, 1),
-    #             text="Сепаратор",
-    #         )
+    # - Add template
+
+    with m.block("template_block", index_width=1, push_func=add_push):
+        current_row = 1
+        for i, (row_name, size) in enumerate(
+            [
+                ("Бригадир", 1),
+                ("Упаковка", 1),
+                ("Флокулятор №1", 2),
+                ("Флокулятор №2", 2),
+                ("Флокулятор №3", 2),
+                ("Дренатор/Бак 1", 1),
+                ("Дренатор/Бак 2", 1),
+                ("Перекачивание в буферный танк", 1),
+                ("Упаковка на Ильпре", 1),
+                ("Сип-мойка контур 2", 1),
+            ]
+        ):
+            m.block(
+                "template",
+                push_func=add_push,
+                x=(1, current_row),
+                size=(2, size),
+                text=row_name,
+            )
+            current_row += size
 
     return m.root
 

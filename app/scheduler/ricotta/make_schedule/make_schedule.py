@@ -21,6 +21,10 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling__boiling(b1, b2):
         validate_disjoint_by_axis(b1["pouring"], b2["pouring"])
+        if b1.props["floculator_num"] == b2.props["floculator_num"]:
+            validate_disjoint_by_axis(b1["draw_whey"], b2["heating"])
+        if b1.props["drenator_num"] == b2.props["drenator_num"]:
+            validate_disjoint_by_axis(b1["draw_group"], b2["draw_group"])
 
     @staticmethod
     def validate__preparation__boiling(b1, b2):
@@ -59,6 +63,7 @@ def make_schedule(
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
             push_kwargs={"validator": Validator()},
             floculator_num=i % 3 + 1,
+            drenator_num=i % 2 + 1,
         )
 
     # # - Add cleanings
