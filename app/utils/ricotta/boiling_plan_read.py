@@ -20,7 +20,7 @@ class RicottaBoilingPlanReaderException(Exception):
 class HugeBoiling:
     skus: list[dict] | None = None
     output_kg: int = 0
-    boiling_num: int = 1
+    boiling_num: float = 1.0
 
     def __post_init__(self) -> None:
         self.skus = []
@@ -35,6 +35,7 @@ COLUMNS: dict[str, str] = {
     "Остатки": "leftovers",
     "Суммарный вес  сыворотки": "sum_weight",
     "Вес на выходе одной варки": "output_kg",
+    "Количество флокуляторов": "floculators_num",
     "Количество варок": "boilings_num",
 }
 
@@ -84,12 +85,16 @@ class BoilingPlanReader:
         dfs = []
         group_id = 0
         for boiling in boilings:
-            for i in range(boiling.boiling_num):
+            full_boilings = int(boiling.boiling_num)
+            for i in range(full_boilings):
                 df = pd.DataFrame(boiling.skus)
-                df[["output_kg", "group_id"]] = (
-                    boiling.output_kg,
-                    group_id,
-                )
+                df[["output_kg", "group_id", "floculators_num", "boilings_num"]] = (boiling.output_kg, group_id, 2, 1)
+                group_id += 1
+                dfs.append(df)
+
+            if boiling.boiling_num - full_boilings > 0.1:
+                df = pd.DataFrame(boiling.skus)
+                df[["output_kg", "group_id", "floculators_num", "boilings_num"]] = (boiling.output_kg, group_id, 1, 0.5)
                 group_id += 1
                 dfs.append(df)
         return pd.concat(dfs)
@@ -100,6 +105,7 @@ class BoilingPlanReader:
         df["boiling"] = df["sku"].apply(lambda x: x.made_from_boilings[0])
         df["boiling_id"] = df["boiling"].apply(lambda boiling: boiling.id)
         df["batch_type"] = "ricotta"
+        df.drop(["leftovers", "sum_weight", "output_kg"], axis=1)
 
         return df
 

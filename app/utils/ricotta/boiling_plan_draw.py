@@ -20,10 +20,10 @@ COLUMNS = {
     "kg": Cell(column_index_from_string("E"), "E"),
     "remainings": Cell(column_index_from_string("F"), "F"),
     "total_output": Cell(column_index_from_string("G"), "G"),
-    "boiling_count": Cell(column_index_from_string("I"), "I"),
-    "delimiter": Cell(column_index_from_string("J"), "J"),
-    "delimiter_int": Cell(column_index_from_string("M"), "M"),
-    "total_volume": Cell(column_index_from_string("R"), "R"),
+    "boiling_count": Cell(column_index_from_string("J"), "J"),
+    "delimiter": Cell(column_index_from_string("K"), "K"),
+    "delimiter_int": Cell(column_index_from_string("N"), "N"),
+    "total_volume": Cell(column_index_from_string("S"), "S"),
 }
 
 ROWS = {
