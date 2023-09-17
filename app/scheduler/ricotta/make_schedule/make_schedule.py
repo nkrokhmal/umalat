@@ -42,7 +42,7 @@ class Validator(ClassValidator):
     def validate__boiling__cleaning(b1, b2):
         f1 = b1["floculator", True][-1]
         if b2.props["cleaning_object"] == "floculator" and b1.props["floculator_num"] == b2.props["floculator_num"]:
-            validate_disjoint_by_axis(f1["pouring"], b2, ordered=True)
+            validate_disjoint_by_axis(f1["dray_ricotta"], b2, ordered=True)
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -92,7 +92,7 @@ def make_schedule(
 
     # - Add cleanings
 
-    for floculator_num in [boiling.props["floculator_num"] for boiling in m.root.iter(cls="boiling")][-3:]:
+    for floculator_num in [floculator.props["floculator_num"] for floculator in m.root.iter(cls="floculator")][-3:]:
         m.block(
             "cleaning",
             size=(12, 0),
