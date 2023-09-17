@@ -492,15 +492,16 @@ def make_schedule(
 
         # -- Brigadir and packer
 
-        shifts = split_shifts_by_time(
-            a=next(m.root.iter(cls="preparation", line=line)).x[0],
-            b=last(m.root.iter(cls="cleaning", line=line, cleaning_object="buffer_tank_and_packer")).y[0],
-            split=cast_t("18:00"),
-            min_shift=6,
-        )
-        for a, b in shifts:
-            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line)
-            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", line=line)
+        for i, (a, b) in enumerate(
+            split_shifts_by_time(
+                a=next(m.root.iter(cls="preparation", line=line)).x[0],
+                b=last(m.root.iter(cls="cleaning", line=line, cleaning_object="buffer_tank_and_packer")).y[0],
+                split=cast_t("18:00"),
+                min_shift=6,
+            )
+        ):
+            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line, shift_num=i)
+            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", line=line, shift_num=i)
 
     # - Add last cleaning
 

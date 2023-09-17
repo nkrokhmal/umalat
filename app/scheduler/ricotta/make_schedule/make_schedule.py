@@ -12,6 +12,8 @@ from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.ricotta.make_schedule._make_boiling import _make_boiling
 from app.scheduler.ricotta.to_boiling_plan import to_boiling_plan
+from app.scheduler.split_shifts_utils import split_shifts_by_time
+from app.scheduler.time_utils import cast_t
 
 
 class Validator(ClassValidator):
@@ -20,16 +22,27 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__boiling(b1, b2):
-        validate_disjoint_by_axis(b1["pouring"], b2["pouring"])
-        if b1.props["floculator_num"] == b2.props["floculator_num"]:
-            validate_disjoint_by_axis(b1["draw_whey"], b2["heating"])
-        if b1.props["drenator_num"] == b2.props["drenator_num"]:
-            validate_disjoint_by_axis(b1["draw_group"], b2["draw_group"])
+        f1, f2 = b1["floculator", True][-1], b2["floculator", True][0]
+        validate_disjoint_by_axis(f1["pouring"], f2["pouring"])
+        if f1.props["floculator_num"] == f2.props["floculator_num"]:
+            validate_disjoint_by_axis(f1["draw_whey"], f2["heating"])
+        if f1.props["drenator_num"] == f2.props["drenator_num"]:
+            validate_disjoint_by_axis(b1["extra_processing"], f2["dray_ricotta"], ordered=True)
         validate_disjoint_by_axis(b1["pumping"], b2["pumping"])
 
     @staticmethod
     def validate__preparation__boiling(b1, b2):
         validate_disjoint_by_axis(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__boiling__cleaning(b1, b2):
+        f1 = b1["floculator", True][-1]
+        if b2.props["cleaning_object"] == "floculator" and b1.props["floculator_num"] == b2.props["floculator_num"]:
+            validate_disjoint_by_axis(f1["pouring"], b2, ordered=True)
+
+    @staticmethod
+    def validate__cleaning__cleaning(b1, b2):
+        validate_disjoint_by_axis(b1, b2, ordered=True, distance=1)
 
 
 def make_schedule(
@@ -47,15 +60,19 @@ def make_schedule(
 
     # - Make preparation block
 
-    m.row("preparation", size=6)
+    m.row(
+        "preparation",
+        size=6,
+        push_func=AxisPusher(start_from=cast_t(start_time)),
+        push_kwargs={"validator": Validator()},
+    )
 
     # - Make boilings
-
-    for i, (idx, grp) in enumerate(boiling_plan_df.groupby("boiling_id")):
-
+    current_floculator_index = 0
+    for i, (idx, grp) in enumerate(boiling_plan_df.groupby("batch_id")):
         # - Prepare boiling
 
-        boiling = _make_boiling(grp)
+        boiling = _make_boiling(grp, current_floculator_index=current_floculator_index)
 
         # - Insert new boiling
 
@@ -67,48 +84,56 @@ def make_schedule(
             drenator_num=i % 2 + 1,
         )
 
-    # # - Add cleanings
-    # m.block(
-    #     "cleaning",
-    #     size=(13, 0),
-    #     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-    #     push_kwargs={"validator": Validator()},
-    #     cleaning_object="separator",
-    #     contour="2",
-    #     line=line,
-    # )
-    #
-    # m.block(
-    #     "cleaning",
-    #     size=(13, 0),
-    #     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-    #     push_kwargs={"validator": Validator()},
-    #     cleaning_object="tubs",
-    #     contour="2",
-    #     line=line,
-    # )
-    #
-    # m.block(
-    #     "cleaning",
-    #     size=(13, 0),
-    #     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-    #     push_kwargs={"validator": Validator()},
-    #     cleaning_object="buffer_tank_and_packer",
-    #     contour="2",
-    #     line=line,
-    # )
-    #
-    #     # - Make shifts
-    #
-    #     shifts = split_shifts_by_time(
-    #         a=next(m.root.iter(cls="preparation", line=line)).x[0],
-    #         b=last(m.root.iter(cls="cleaning", line=line, cleaning_object="buffer_tank_and_packer")).y[0],
-    #         split=cast_t("18:00"),
-    #         min_shift=6,
-    #     )
-    #     for a, b in shifts:
-    #         m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line)
-    #         m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", line=line)
+        current_floculator_index += grp.iloc[0]["floculators_num"]
+
+        break
+
+    # - Add cleanings
+
+    for floculator_num in [boiling.props["floculator_num"] for boiling in m.root.iter(cls="boiling")][-3:]:
+        m.block(
+            "cleaning",
+            size=(12, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="floculator",
+            floculator_num=floculator_num,
+        )
+
+    for cleaning_object in ["drenator", "lishat_richi", "buffer_tank"]:
+        m.block(
+            "cleaning",
+            size=(12, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object=cleaning_object,
+        )
+
+    # - Make shifts
+
+    # -- Brigadir
+
+    for i, (a, b) in enumerate(
+        split_shifts_by_time(
+            a=next(m.root.iter(cls="preparation")).y[0],
+            b=last(m.root.iter(cls="cleaning", cleaning_object="lishat_richi")).y[0],
+            split=cast_t("18:00"),
+            min_shift=6,
+        )
+    ):
+        m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", shift_num=i)
+
+    # -- Packing
+
+    for i, (a, b) in enumerate(
+        split_shifts_by_time(
+            a=next(m.root.iter(cls="preparation")).y[0],
+            b=last(m.root.iter(cls="boiling")).y[0] + 12,
+            split=cast_t("18:00"),
+            min_shift=6,
+        )
+    ):
+        m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", shift_num=i)
 
     # - Return result
 
@@ -125,7 +150,7 @@ def test():
     # - Make schedule
 
     schedule = make_schedule(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/boiling.xlsx"),
+        str(get_repo_path() / "app/data/tests/ricotta/boiling.xlsx"),
     )["schedule"]
 
     print(schedule)

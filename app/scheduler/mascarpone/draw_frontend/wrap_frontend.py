@@ -56,22 +56,14 @@ def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
     # - Add shifts
 
     with m.block("shift_line", start_time=start_time, size=(0, 1)):
-        for i, block in enumerate(schedule.iter(cls="shift", team="Бригадир")):
-            m.row(
-                m.copy(block, with_props=True, size=(None, 1)),
-                push_func=add_push,
-                push_kwargs={"new_props": {"shift_num": i}},
-            )
+        for block in schedule.iter(cls="shift", team="Бригадир"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add shifts
 
     with m.block("shift_line", start_time=start_time, size=(0, 1)):
-        for i, block in enumerate(schedule.iter(cls="shift", team="Упаковка")):
-            m.row(
-                m.copy(block, with_props=True, size=(None, 1)),
-                push_func=add_push,
-                push_kwargs={"new_props": {"shift_num": i}},
-            )
+        for block in schedule.iter(cls="shift", team="Упаковка"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add boiling header
 
@@ -131,6 +123,7 @@ def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add preparation
+
     m.block(
         "preparation",
         x=(next(schedule.iter(cls="preparation")).x[0], 4),
