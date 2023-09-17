@@ -42,6 +42,7 @@ def _make_boiling(boiling_group_df, **kwargs):
     m.row("draw_ricotta", size=technology.dray_ricotta_time // 5)
     m.row("salting", size=technology.salting_time // 5)
     m.row("pumping", size=technology.pumping_time // 5)
+
     # m.row('ingredient', size=technology.ingredient_time // 5)
 
     return m.root

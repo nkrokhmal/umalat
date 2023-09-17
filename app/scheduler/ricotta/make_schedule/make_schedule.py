@@ -46,7 +46,7 @@ def make_schedule(
 
     # - Make boilings
 
-    for idx, grp in boiling_plan_df.groupby("boiling_id"):
+    for i, (idx, grp) in enumerate(boiling_plan_df.groupby("boiling_id")):
 
         # - Prepare boiling
 
@@ -54,14 +54,14 @@ def make_schedule(
 
         # - Insert new boiling
 
-        boiling_block = m.block(
+        m.block(
             boiling,
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
             push_kwargs={"validator": Validator()},
-        ).block
+            floculator_num=i % 3 + 1,
+        )
 
     # # - Add cleanings
-    #
     # m.block(
     #     "cleaning",
     #     size=(13, 0),

@@ -5,16 +5,16 @@ from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
 from app.lessmore.utils.get_repo_path import get_repo_path
+from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.frontend_utils import draw_excel_frontend
-from app.scheduler.mascarpone.draw_frontend.style import STYLE
-from app.scheduler.mascarpone.draw_frontend.wrap_frontend import wrap_frontend
-from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike
+from app.scheduler.ricotta.draw_frontend.style import STYLE
+from app.scheduler.ricotta.draw_frontend.wrap_frontend import wrap_frontend
 
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
-    start_times_by_line: dict = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
-    first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
+    start_time: str = "07:00",
+    first_batch_ids_by_type: dict = {"ricotta": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:
@@ -22,7 +22,7 @@ def draw_frontend(
 
     output = wrap_frontend(
         boiling_plan=boiling_plan,
-        start_times_by_line=start_times_by_line,
+        start_time=start_time,
         first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,
     )
@@ -44,11 +44,7 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(
-            get_repo_path()
-            / "app/data/static/samples/by_department/mascarpone/2023-09-17 План по варкам маскарпоне.xlsx"
-        ),
-        start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:00"},
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/boiling.xlsx"),
     )
 
     output["workbook"].save("test.xlsx")
