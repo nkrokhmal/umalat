@@ -99,7 +99,7 @@ def _make_boiling(boiling_group_df, **kwargs):
                     "packing_switch",
                     size=get_packing_swith_size(weight_netto1=previous_weight, weight_netto2=current_weight),
                     push_func=stack_push,
-                )  # todo next: make proper change of packing [@marklidenberg]
+                )
 
             packing_size = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in grp.iterrows()])
             packing_size = int(custom_round(packing_size, 5, "ceil", pre_round_precision=1))
