@@ -30,11 +30,13 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
     m = BlockMaker(
         "boiling",
         boiling_model=boiling_model,
+        percent=boiling_model.percent,
         **kwargs,
     )
 
     # - Fill blocks
 
+    # -- Floculators
     current_shift = 0
     for i in range(boiling_group_df.iloc[0]["floculators_num"]):
         with m.row(
@@ -45,16 +47,24 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
         ):
             m.row("boiling_preparation", size=2)
             pouring = m.row("pouring", size=technology.pouring_time // 5).block
-            m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
+            m.row("heating", size=technology.heating_time // 5, x=pouring.x[0] - current_shift, push_func=add_push)
             m.row("lactic_acid", size=technology.lactic_acid_time // 5)
             m.row("draw_whey", size=technology.drain_whey_time // 5)
             m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
         current_shift += technology.pouring_time // 5 + 2
 
+    # -- Extra processing: salting, ingredient
     with m.row("extra_processing"):
         m.row("salting", size=technology.salting_time // 5)
 
         # m.row('ingredient', size=technology.ingredient_time // 5)
+    # -- Pumping
     m.row("pumping", size=technology.pumping_time // 5)
+
+    # -- Packing
+
+    packing_minutes = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in boiling_group_df.iterrows()])
+    packing_minutes = int(custom_round(packing_minutes, 5, "ceil", pre_round_precision=1))
+    m.row("packing", size=packing_minutes // 5)
 
     return m.root

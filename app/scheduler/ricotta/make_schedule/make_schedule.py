@@ -28,7 +28,11 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(f1["draw_whey"], f2["heating"])
         if f1.props["drenator_num"] == f2.props["drenator_num"]:
             validate_disjoint_by_axis(b1["extra_processing"], f2["dray_ricotta"], ordered=True)
-        validate_disjoint_by_axis(b1["pumping"], b2["pumping"])
+        validate_disjoint_by_axis(b1["pumping"], b2["pumping"], distance=2, ordered=True)
+        validate_disjoint_by_axis(b1["packing"], b2["packing"], ordered=True)
+
+        if b1.props["percent"] != b2.props["percent"]:
+            validate_disjoint_by_axis(b1["packing"], b2["pumping"], ordered=True)
 
     @staticmethod
     def validate__preparation__boiling(b1, b2):
@@ -85,8 +89,6 @@ def make_schedule(
         )
 
         current_floculator_index += grp.iloc[0]["floculators_num"]
-
-        break
 
     # - Add cleanings
 

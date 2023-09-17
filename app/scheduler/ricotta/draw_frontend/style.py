@@ -8,6 +8,7 @@ STYLE = {
     "draw_ricotta_break": {"text": "", "color": "white"},
     "salting": {"text": "Посолка/анализ", "color": "#D9D9D9"},
     "pumping": {"text": "Перекачивание", "color": "#00B050"},
+    "packing": {"text": "Фасовка", "color": "#FFC000"},
     "cleaning": {
         "text": lambda b: {
             "floculator": f"Мойка флокулятора №{b.props['floculator_num']}",

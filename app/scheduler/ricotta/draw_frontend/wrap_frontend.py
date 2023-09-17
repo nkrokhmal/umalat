@@ -86,6 +86,12 @@ def wrap_line(
         for block in schedule.iter(cls="pumping"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
+    # -- Packing
+
+    with m.block("packing_line", start_time=start_time, size=(0, 1)):
+        for block in schedule.iter(cls="packing"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
     # - Cleaning
 
     with m.block("cleaning_line", start_time=start_time, size=(0, 1)):
