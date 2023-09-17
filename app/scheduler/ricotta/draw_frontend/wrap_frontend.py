@@ -95,6 +95,12 @@ def wrap_line(
             for block in schedule.iter(cls=lambda cls: cls in ["draw_ricotta", "salting"], drenator_num=i + 1):
                 m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
+    # -- Pumping
+
+    with m.block("pumping_line", size=(0, 1)):
+        for block in schedule.iter(cls="pumping"):
+            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+
     # - Add preparation
 
     m.block(m.copy(schedule["preparation"], with_props=True), size=(6, 13), x=(0, 1), push_func=add_push)

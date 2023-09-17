@@ -25,6 +25,7 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(b1["draw_whey"], b2["heating"])
         if b1.props["drenator_num"] == b2.props["drenator_num"]:
             validate_disjoint_by_axis(b1["draw_group"], b2["draw_group"])
+        validate_disjoint_by_axis(b1["pumping"], b2["pumping"])
 
     @staticmethod
     def validate__preparation__boiling(b1, b2):
