@@ -37,6 +37,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
     # - Fill blocks
 
     # -- Floculators
+
     current_shift = 0
     for i in range(boiling_group_df.iloc[0]["floculators_num"]):
         with m.row(
@@ -54,11 +55,14 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
         current_shift += technology.pouring_time // 5 + 2
 
     # -- Extra processing: salting, ingredient
+
     with m.row("extra_processing"):
         m.row("salting", size=technology.salting_time // 5)
 
         # m.row('ingredient', size=technology.ingredient_time // 5)
+
     # -- Pumping
+
     m.row("pumping", size=technology.pumping_time // 5)
 
     # -- Packing
