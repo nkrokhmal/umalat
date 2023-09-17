@@ -32,9 +32,9 @@ def _make_boiling(boiling_group_df, **kwargs):
     )
 
     # - Fill blocks
-
+    m.row("boiling_preparation", size=2)
     pouring = m.row("pouring", size=technology.pouring_time // 5).block
-    m.row("heating", size=technology.heating_time // 5, x=pouring.x[0] + 2, push_func=add_push)
+    m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
     m.row("lactic_acid", size=technology.lactic_acid_time // 5)
     m.row("draw_whey", size=technology.drain_whey_time // 5)
 
