@@ -29,7 +29,6 @@ class Validator(ClassValidator):
         if f1.props["drenator_num"] == f2.props["drenator_num"]:
             validate_disjoint_by_axis(b1["extra_processing"], f2["dray_ricotta"], ordered=True)
         validate_disjoint_by_axis(b1["pumping"], b2["pumping"], distance=2, ordered=True)
-        validate_disjoint_by_axis(b1["packing"], b2["packing"], ordered=True)
 
         if b1.props["percent"] != b2.props["percent"]:
             validate_disjoint_by_axis(b1["packing"], b2["pumping"], ordered=True)
@@ -93,6 +92,19 @@ def make_schedule(
         )
 
         current_floculator_index += grp.iloc[0]["floculators_num"]
+
+        # - Fix packing group if there is a overlap
+
+        if len(m.root.children) >= 2:
+            b1, b2 = m.root.children[-2:]
+
+            if b1.props["cls"] == "boiling" and b2.props["cls"] == "boiling":
+                try:
+                    validate_disjoint_by_axis(b1["packing"], b2["packing"], ordered=True)
+                except AssertionError as e:
+                    disposition = json.loads(str(e))["disposition"]
+
+                    b2["packing"].props.update(x=[b2["packing"].props["x_rel"][0] + disposition, b2["packing"].x[1]])
 
     # - Add cleanings
     for floculator_num in [floculator.props["floculator_num"] for floculator in m.root.iter(cls="floculator")][-3:]:
