@@ -21,6 +21,7 @@ TECHNOLOGIES_COLUMNS: list[str] = [
     "слив рикотты",
     "посолка/анализ",
     "Перекачивание",
+    "Внесение ингредиентов",
 ]
 
 
@@ -96,6 +97,7 @@ class RicottaFiller(BaseFiller):
                 dray_ricotta_time=row["слив рикотты"],
                 salting_time=row["посолка/анализ"],
                 pumping_time=row["Перекачивание"],
+                ingredient_time=row["Внесение ингредиентов"],
             )
 
     def fill_boiling(self, df: pd.DataFrame) -> tp.Generator[RicottaBoiling, None, None]:

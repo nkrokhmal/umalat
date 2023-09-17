@@ -60,6 +60,6 @@ def handle_ricotta(df: pd.DataFrame) -> pd.DataFrame:
                 group_dict = group.to_dict("records")
                 max_weight = group_dict[0]["output_kg"]
 
-                handler.handle_group(group_dict, max_weight=max_weight)
+                handler.handle_group(group_dict, max_weight=2 * max_weight)
 
     return pd.DataFrame(handler.boiling_groups)

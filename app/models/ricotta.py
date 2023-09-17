@@ -59,6 +59,7 @@ class RicottaBoilingTechnology(BoilingTechnology):
     dray_ricotta_time = mdb.Column(mdb.Integer)  # слив рикотты
     salting_time = mdb.Column(mdb.Integer)  # посолка/анализ
     pumping_time = mdb.Column(mdb.Integer)  # Перекачивание
+    ingredient_time = mdb.Column(mdb.Integer)
 
     @staticmethod
     def create_name(line: str, percent: float | int, flavoring_agent: str, weight: float) -> str:
