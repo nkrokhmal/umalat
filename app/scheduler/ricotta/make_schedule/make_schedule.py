@@ -22,11 +22,12 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__boiling(b1, b2):
-        validate_disjoint_by_axis(b1["pouring"], b2["pouring"])
-        if b1.props["floculator_num"] == b2.props["floculator_num"]:
-            validate_disjoint_by_axis(b1["draw_whey"], b2["heating"])
-        if b1.props["drenator_num"] == b2.props["drenator_num"]:
-            validate_disjoint_by_axis(b1["draw_group"], b2["draw_group"])
+        f1, f2 = b1["floculator", True][-1], b2["floculator", True][0]
+        validate_disjoint_by_axis(f1["pouring"], f2["pouring"])
+        if f1.props["floculator_num"] == f2.props["floculator_num"]:
+            validate_disjoint_by_axis(f1["draw_whey"], f2["heating"])
+        if f1.props["drenator_num"] == f2.props["drenator_num"]:
+            validate_disjoint_by_axis(b1["extra_processing"], f2["dray_ricotta"], ordered=True)
         validate_disjoint_by_axis(b1["pumping"], b2["pumping"])
 
     @staticmethod
@@ -35,8 +36,9 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
+        f1 = b1["floculator", True][-1]
         if b2.props["cleaning_object"] == "floculator" and b1.props["floculator_num"] == b2.props["floculator_num"]:
-            validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
+            validate_disjoint_by_axis(f1["pouring"], b2, ordered=True)
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -66,11 +68,11 @@ def make_schedule(
     )
 
     # - Make boilings
-
-    for i, (idx, grp) in enumerate(boiling_plan_df.groupby("boiling_id")):
+    current_floculator_index = 0
+    for i, (idx, grp) in enumerate(boiling_plan_df.groupby("batch_id")):
         # - Prepare boiling
 
-        boiling = _make_boiling(grp)
+        boiling = _make_boiling(grp, current_floculator_index=current_floculator_index)
 
         # - Insert new boiling
 
@@ -81,6 +83,10 @@ def make_schedule(
             floculator_num=i % 3 + 1,
             drenator_num=i % 2 + 1,
         )
+
+        current_floculator_index += grp.iloc[0]["floculators_num"]
+
+        break
 
     # - Add cleanings
 
@@ -144,7 +150,7 @@ def test():
     # - Make schedule
 
     schedule = make_schedule(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/boiling.xlsx"),
+        str(get_repo_path() / "app/data/tests/ricotta/boiling.xlsx"),
     )["schedule"]
 
     print(schedule)

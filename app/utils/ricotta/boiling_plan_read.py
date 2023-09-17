@@ -7,6 +7,7 @@ import pandas as pd
 from utils_ak.openpyxl import cast_workbook
 
 from app.globals import db
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models.helpers import cast_model
 from app.models.ricotta import RicottaSKU
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
@@ -120,4 +121,24 @@ class BoilingPlanReader:
         return df
 
 
+def test():
+    # - Configure pandas
+
+    pd.set_option("display.max_rows", 500)
+    pd.set_option("display.max_columns", 500)
+    pd.set_option("display.width", 1000)
+
+    # - Parse and read dataframe
+
+    print(
+        BoilingPlanReader(
+            openpyxl.load_workbook(str(get_repo_path() / "app/data/tests/ricotta/boiling.xlsx"), data_only=True),
+            first_batches={"ricotta": 1},
+        ).parse()
+    )
+
+
 __all__ = ["BoilingPlanReader", "RicottaBoilingPlanReaderException"]
+
+if __name__ == "__main__":
+    test()

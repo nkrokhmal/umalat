@@ -1,5 +1,7 @@
 import warnings
 
+import pandas as pd
+
 from utils_ak.block_tree import add_push, stack_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
@@ -13,7 +15,7 @@ from app.scheduler.mascarpone.make_schedule.get_packing_switch_size import get_p
 warnings.filterwarnings("ignore")
 
 
-def _make_boiling(boiling_group_df, **kwargs):
+def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int, **kwargs):
     # - Unfold boiling group params
 
     sample_row = boiling_group_df.iloc[0]
@@ -32,23 +34,27 @@ def _make_boiling(boiling_group_df, **kwargs):
     )
 
     # - Fill blocks
-    m.row("boiling_preparation", size=2)
-    pouring = m.row("pouring", size=technology.pouring_time // 5).block
-    m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
-    m.row("lactic_acid", size=technology.lactic_acid_time // 5)
-    m.row("draw_whey", size=technology.drain_whey_time // 5)
 
-    def _make_draw_group():
-        m = BlockMaker("draw_group")
-        m.row("draw_ricotta", size=technology.dray_ricotta_time // 5)
-        m.row("draw_ricotta_break", size=3)
-        m.row("draw_ricotta", size=technology.dray_ricotta_time // 5)
+    current_shift = 0
+    for i in range(boiling_group_df.iloc[0]["floculators_num"]):
+        with m.row(
+            "floculator",
+            x=current_shift,
+            push_func=add_push,
+            floculator_num=(current_floculator_index + i) % 3 + 1,
+        ):
+            m.row("boiling_preparation", size=2)
+            pouring = m.row("pouring", size=technology.pouring_time // 5).block
+            m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
+            m.row("lactic_acid", size=technology.lactic_acid_time // 5)
+            m.row("draw_whey", size=technology.drain_whey_time // 5)
+            m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
+        current_shift += technology.pouring_time // 5 + 2
+
+    with m.row("extra_processing"):
         m.row("salting", size=technology.salting_time // 5)
-        return m.root
 
-    m.row(_make_draw_group())
+        # m.row('ingredient', size=technology.ingredient_time // 5)
     m.row("pumping", size=technology.pumping_time // 5)
-
-    # m.row('ingredient', size=technology.ingredient_time // 5)
 
     return m.root

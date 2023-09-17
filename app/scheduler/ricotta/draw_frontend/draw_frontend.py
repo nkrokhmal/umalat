@@ -44,7 +44,7 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/boiling.xlsx"),
+        str(get_repo_path() / "app/data/tests/ricotta/boiling.xlsx"),
     )
 
     output["workbook"].save("test.xlsx")
