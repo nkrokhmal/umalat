@@ -90,7 +90,14 @@ def wrap_line(
 
     with m.block("packing_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="packing"):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+            m.block(
+                "packing_header",
+                size=(2, 1),
+                x=(block.x[0], 0),
+                absolute_batch_id=block.props["absolute_batch_id"],
+                push_func=add_push,
+            )
+            m.row(m.copy(block, with_props=True, size=(block.size[0] - 2, 1)), x=block.x[0] + 2, push_func=add_push)
 
     # - Cleaning
 

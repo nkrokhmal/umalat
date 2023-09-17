@@ -2,7 +2,7 @@ import json
 
 import pandas as pd
 
-from more_itertools import last, mark_ends
+from more_itertools import first, last, mark_ends
 from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
@@ -129,8 +129,8 @@ def make_schedule(
 
     for i, (a, b) in enumerate(
         split_shifts_by_time(
-            a=next(m.root.iter(cls="preparation")).y[0],
-            b=last(m.root.iter(cls="boiling")).y[0] + 12,
+            a=first(m.root.iter(cls="packing")).x[0] - 12,
+            b=last(m.root.iter(cls="packing")).y[0] + 12,
             split=cast_t("18:00"),
             min_shift=6,
         )

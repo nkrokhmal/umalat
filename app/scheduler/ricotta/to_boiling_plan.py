@@ -31,10 +31,6 @@ def to_boiling_plan(
     reader = BoilingPlanReader(wb=boiling_plan_source, first_batches=first_batch_ids_by_type)
     df = reader.parse()
 
-    # - Hardcode
-
-    df["floculators_num"] = 2
-
     # - Return
 
     return df

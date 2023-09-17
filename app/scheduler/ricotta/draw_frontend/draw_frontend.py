@@ -41,8 +41,8 @@ def draw_frontend(
     set_zoom(ws, 55)
     set_dimensions(ws, "column", range(1, 5), 21)
     set_dimensions(ws, "column", range(5, 288 * 2), 2.4)
-    set_dimensions(ws, "row", range(1, 4), 25)
-    set_dimensions(ws, "row", range(4, 220), 50)
+    set_dimensions(ws, "row", range(1, 2), 25)
+    set_dimensions(ws, "row", range(2, 220), 50)
 
     # - Draw frontend
 

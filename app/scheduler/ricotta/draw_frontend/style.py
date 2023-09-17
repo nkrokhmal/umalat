@@ -1,6 +1,6 @@
 STYLE = {
-    "boiling_preparation": {"text": "Подготовка", "color": "white"},
-    "pouring": {"text": "Набор сыворотки 6500 кг", "color": "#00B050"},
+    "boiling_preparation": {"text": lambda b: str(int(b.props["absolute_batch_id"])), "color": "white"},
+    "pouring": {"text": lambda b: f"Набор сыворотки {int(b.props['whey_kg'])}кг", "color": "#00B050"},
     "heating": {"text": "Нагрев до 90 градусов", "color": "#E26B0A"},
     "lactic_acid": {"text": "Молочная кислота/выдерживание", "color": "#00B0F0"},
     "draw_whey": {"text": "Слив сыворотки", "color": "#FFC000"},
@@ -8,7 +8,8 @@ STYLE = {
     "draw_ricotta_break": {"text": "", "color": "white"},
     "salting": {"text": "Посолка/анализ", "color": "#D9D9D9"},
     "pumping": {"text": "Перекачивание", "color": "#00B050"},
-    "packing": {"text": "Фасовка", "color": "#FFC000"},
+    "packing": {"text": lambda b: b.props["label"], "color": "#FFC000"},
+    "packing_header": {"text": lambda b: str(int(b.props["absolute_batch_id"])), "color": "#FFC000"},
     "cleaning": {
         "text": lambda b: {
             "floculator": f"Мойка флокулятора №{b.props['floculator_num']}",
