@@ -33,8 +33,8 @@ def draw_frontend(
     if not workbook:
         workbook = init_workbook(["Расписание"])
 
-        if "Расписание" not in workbook.sheetnames:
-            workbook.create_sheet("Расписание")
+    if "Расписание" not in workbook.sheetnames:
+        workbook.create_sheet("Расписание")
 
     # - Set dimensions
     ws = workbook["Расписание"]

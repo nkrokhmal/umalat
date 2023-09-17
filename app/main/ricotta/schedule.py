@@ -14,6 +14,8 @@ from app.main.ricotta.forms import ScheduleForm
 from app.main.ricotta.update_task_and_batches import update_task_and_batches
 from app.main.validators import time_validator
 from app.models import BatchNumber
+from app.scheduler.frontend_utils import fill_grid
+from app.scheduler.ricotta.draw_frontend.draw_frontend import draw_frontend
 
 # from app.scheduler import *
 # from app.utils.batches.batch import *
@@ -26,7 +28,6 @@ from app.utils.ricotta.schedule_tasks import RicottaScheduleTask
 @main.route("/ricotta_schedule", methods=["GET", "POST"])
 @flask_login.login_required
 def ricotta_schedule():
-
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
@@ -47,18 +48,29 @@ def ricotta_schedule():
         file_path = os.path.join(data_dir, file.filename)
         if file:
             file.save(file_path)
+
+        first_batch_ids_by_type = {"ricotta": form.batch_number.data}
+
         wb = openpyxl.load_workbook(
             filename=os.path.join(data_dir, file.filename),
             data_only=True,
         )
-        first_batch_ids = {"ricotta": form.batch_number.data}
-        boiling_plan_df = read_boiling_plan(wb, first_batch_ids=first_batch_ids)
 
-        schedule = make_schedule(boiling_plan_df, start_time=beg_time)
-        frontend = wrap_frontend(schedule, date=date)
+        # Delete list "Расписание" if exists
+        if "Расписание" in wb.sheetnames:
+            wb.remove(wb["Расписание"])
 
-        schedule_wb = draw_excel_frontend(frontend, STYLE, open_file=False, fn=None, wb=wb)
-        write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
+        output = draw_frontend(
+            boiling_plan=wb,
+            first_batch_ids_by_type=first_batch_ids_by_type,
+            start_time=beg_time,
+            date=date,
+            workbook=wb,
+        )
+
+        schedule, schedule_wb = output["schedule"], output["workbook"]
+
+        write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids_by_type, "date": str(date)}))
 
         schedule_task = update_task_and_batches(schedule_wb)
 

@@ -65,7 +65,7 @@ def mascarpone_schedule():
             start_times_by_line={"Маскарпоне": beg_time_mascarpone, "Кремчиз": beg_time_cream_cheese},
             date=date,
             workbook=wb,
-        )  # todo next: make different times [@marklidenberg]
+        )
 
         schedule, schedule_wb = output["schedule"], output["workbook"]
 
