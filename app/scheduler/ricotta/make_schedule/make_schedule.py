@@ -12,6 +12,8 @@ from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.ricotta.make_schedule._make_boiling import _make_boiling
 from app.scheduler.ricotta.to_boiling_plan import to_boiling_plan
+from app.scheduler.split_shifts_utils import split_shifts_by_time
+from app.scheduler.time_utils import cast_t
 
 
 class Validator(ClassValidator):
@@ -31,6 +33,15 @@ class Validator(ClassValidator):
     def validate__preparation__boiling(b1, b2):
         validate_disjoint_by_axis(b1, b2, ordered=True)
 
+    @staticmethod
+    def validate__boiling__cleaning(b1, b2):
+        if b2.props["cleaning_object"] == "floculator" and b1.props["floculator_num"] == b2.props["floculator_num"]:
+            validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
+
+    @staticmethod
+    def validate__cleaning__cleaning(b1, b2):
+        validate_disjoint_by_axis(b1, b2, ordered=True, distance=1)
+
 
 def make_schedule(
     boiling_plan: BoilingPlanLike,
@@ -47,12 +58,16 @@ def make_schedule(
 
     # - Make preparation block
 
-    m.row("preparation", size=6)
+    m.row(
+        "preparation",
+        size=6,
+        push_func=AxisPusher(start_from=cast_t(start_time)),
+        push_kwargs={"validator": Validator()},
+    )
 
     # - Make boilings
 
     for i, (idx, grp) in enumerate(boiling_plan_df.groupby("boiling_id")):
-
         # - Prepare boiling
 
         boiling = _make_boiling(grp)
@@ -67,48 +82,52 @@ def make_schedule(
             drenator_num=i % 2 + 1,
         )
 
-    # # - Add cleanings
-    # m.block(
-    #     "cleaning",
-    #     size=(13, 0),
-    #     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-    #     push_kwargs={"validator": Validator()},
-    #     cleaning_object="separator",
-    #     contour="2",
-    #     line=line,
-    # )
-    #
-    # m.block(
-    #     "cleaning",
-    #     size=(13, 0),
-    #     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-    #     push_kwargs={"validator": Validator()},
-    #     cleaning_object="tubs",
-    #     contour="2",
-    #     line=line,
-    # )
-    #
-    # m.block(
-    #     "cleaning",
-    #     size=(13, 0),
-    #     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-    #     push_kwargs={"validator": Validator()},
-    #     cleaning_object="buffer_tank_and_packer",
-    #     contour="2",
-    #     line=line,
-    # )
-    #
-    #     # - Make shifts
-    #
-    #     shifts = split_shifts_by_time(
-    #         a=next(m.root.iter(cls="preparation", line=line)).x[0],
-    #         b=last(m.root.iter(cls="cleaning", line=line, cleaning_object="buffer_tank_and_packer")).y[0],
-    #         split=cast_t("18:00"),
-    #         min_shift=6,
-    #     )
-    #     for a, b in shifts:
-    #         m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line)
-    #         m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", line=line)
+    # - Add cleanings
+
+    for floculator_num in [boiling.props["floculator_num"] for boiling in m.root.iter(cls="boiling")][-3:]:
+        m.block(
+            "cleaning",
+            size=(12, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="floculator",
+            floculator_num=floculator_num,
+        )
+
+    for cleaning_object in ["drenator", "lishat_richi", "buffer_tank"]:
+        m.block(
+            "cleaning",
+            size=(12, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object=cleaning_object,
+        )
+
+    # - Make shifts
+
+    # -- Brigadir
+
+    for i, (a, b) in enumerate(
+        split_shifts_by_time(
+            a=next(m.root.iter(cls="preparation")).y[0],
+            b=last(m.root.iter(cls="cleaning", cleaning_object="lishat_richi")).y[0],
+            split=cast_t("18:00"),
+            min_shift=6,
+        )
+    ):
+        m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", shift_num=i)
+
+    # -- Packing
+
+    for i, (a, b) in enumerate(
+        split_shifts_by_time(
+            a=next(m.root.iter(cls="preparation")).y[0],
+            b=last(m.root.iter(cls="boiling")).y[0] + 12,
+            split=cast_t("18:00"),
+            min_shift=6,
+        )
+    ):
+        m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", shift_num=i)
 
     # - Return result
 

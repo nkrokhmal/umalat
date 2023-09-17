@@ -8,6 +8,15 @@ STYLE = {
     "draw_ricotta_break": {"text": "", "color": "white"},
     "salting": {"text": "Посолка/анализ", "color": "#D9D9D9"},
     "pumping": {"text": "Перекачивание", "color": "#00B050"},
+    "cleaning": {
+        "text": lambda b: {
+            "floculator": f"Мойка флокулятора №{b.props['floculator_num']}",
+            "drenator": "Мойка дренатора",
+            "lishat_richi": "Мойка 1-го и 2-го бакол лишатричи + Бертоли",
+            "buffer_tank": "Мойка буферного танка и Фасовочника Ильпра",
+        }[b.props["cleaning_object"]],
+        "color": "#92D050",
+    },
     "shift": {
         "text": lambda b: f"Смена {b.props['shift_num'] + 1} {b.props['team']}",
         "color": lambda b: ["yellow", "#95B3D7"][b.props["shift_num"]],
