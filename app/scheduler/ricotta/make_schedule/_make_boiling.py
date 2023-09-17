@@ -65,7 +65,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
 
     # -- Pumping
 
-    m.row("pumping", size=technology.pumping_time // 5)
+    m.row("pumping", size=technology.pumping_time // 5 * boiling_group_df.iloc[0]["floculators_num"])
 
     # -- Packing
 
