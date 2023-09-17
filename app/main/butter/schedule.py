@@ -58,7 +58,11 @@ def butter_schedule():
         # - Read boiling plan, generate schedule, frontend and frontend workbook
 
         _output = draw_frontend(
-            boiling_plan=wb, first_batch_ids_by_type=first_batch_ids_by_type, date=date, start_time=beg_time
+            boiling_plan=wb,
+            first_batch_ids_by_type=first_batch_ids_by_type,
+            date=date,
+            start_time=beg_time,
+            workbook=wb,
         )
         schedule, boiling_plan_df, schedule_wb = _output["schedule"], _output["boiling_plan_df"], _output["workbook"]
 

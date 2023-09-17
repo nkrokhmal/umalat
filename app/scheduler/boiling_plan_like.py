@@ -5,4 +5,4 @@ import pandas as pd
 from openpyxl import Workbook
 
 
-BoilingPlanLike = Union[str, Workbook, pd.DataFrame]
+BoilingPlanLike = str | Workbook | pd.DataFrame

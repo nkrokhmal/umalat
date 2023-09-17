@@ -8,6 +8,7 @@ from openpyxl.utils.cell import column_index_from_string
 from utils_ak.openpyxl import cast_workbook
 
 from app.lessmore.utils.get_repo_path import get_repo_path
+from app.models import RicottaSKU, cast_model
 
 
 def to_boiling_plan(wb_obj: str | Workbook | pd.DataFrame, saturate=True, first_batch_ids_by_type={"ricotta": 1}):
@@ -47,8 +48,8 @@ def to_boiling_plan(wb_obj: str | Workbook | pd.DataFrame, saturate=True, first_
     df = df.fillna(method="bfill")
 
     df = df[["Номер группы варок", "SKU", "КГ", "Количество варок"]]
-    df.columns = ["boiling_group_id", "sku", "kg", "n_boilings"]
-    df = df[df["sku"] != "-"]
+    df.columns = ["boiling_group_id", "sku_name", "kg", "n_boilings"]
+    df = df[df["sku_name"] != "-"]
     df["boiling_group_id"] = df["boiling_group_id"].astype(int)
     df["n_boilings"] = df["n_boilings"].astype(int)
 
@@ -66,13 +67,19 @@ def to_boiling_plan(wb_obj: str | Workbook | pd.DataFrame, saturate=True, first_
             # - Update boiling_group_id
 
             for group_record in current_group_records:
-                group_record["boiling_id"] = f"{idx}-{i + 1}"
+                # format idx to 3 digits
+                group_record["boiling_id"] = f"{idx:02d}-{i + 1}"
 
             # - Add group to values
 
             values += current_group_records
 
     df = pd.DataFrame(values)
+
+    # - Saturate
+
+    df["sku"] = df["sku_name"].apply(lambda x: cast_model([RicottaSKU], x))
+    df["boiling"] = df["sku"].apply(lambda x: x.made_from_boilings[0])
 
     return df
 
