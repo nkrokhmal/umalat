@@ -1,5 +1,8 @@
 # fmt: off
+import json
+
 from flask_wtf import FlaskForm
+from utils_ak.builtin import cast_bool
 from wtforms import *
 from wtforms.validators import DataRequired, Optional
 
@@ -34,7 +37,7 @@ def fill_properties(form, properties):
         elif v['type'] == 'integer':
             setattr(properties, field, int(form[properties.department() + '__' + field]))
         elif v['type'] == 'boolean':
-            setattr(properties, field, utils.cast_bool(form[properties.department() + '__' + field]))
+            setattr(properties, field, cast_bool(form[properties.department() + '__' + field]))
         else:
             setattr(properties, field, form[properties.department() + '__' + field])
     return properties

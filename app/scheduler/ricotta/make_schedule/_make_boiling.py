@@ -60,8 +60,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
 
     with m.row("extra_processing"):
         m.row("salting", size=technology.salting_time // 5)
-
-        # m.row('ingredient', size=technology.ingredient_time // 5)
+        m.row("ingredient", size=technology.ingredient_time // 5)
 
     # -- Pumping
 
