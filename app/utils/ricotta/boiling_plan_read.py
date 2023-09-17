@@ -34,7 +34,7 @@ COLUMNS: dict[str, str] = {
     "SKU": "sku_name",
     "КГ": "kg",
     "Остатки": "leftovers",
-    "Суммарный вес  сыворотки": "sum_weight",
+    "Суммарный вес  сыворотки": "sum_weight_kg",
     "Вес на выходе одной варки": "output_kg",
     "Количество флокуляторов": "floculators_num",
     "Количество варок": "boilings_num",
@@ -89,13 +89,25 @@ class BoilingPlanReader:
             full_boilings = int(boiling.boiling_num)
             for i in range(full_boilings):
                 df = pd.DataFrame(boiling.skus)
-                df[["output_kg", "group_id", "floculators_num", "boilings_num"]] = (boiling.output_kg, group_id, 2, 1)
+                df[["output_kg", "group_id", "floculators_num", "boilings_num", "sum_weight_kg"]] = (
+                    boiling.output_kg,
+                    group_id,
+                    2,
+                    1,
+                    6500,
+                )
                 group_id += 1
                 dfs.append(df)
 
             if boiling.boiling_num - full_boilings > 0.1:
                 df = pd.DataFrame(boiling.skus)
-                df[["output_kg", "group_id", "floculators_num", "boilings_num"]] = (boiling.output_kg, group_id, 1, 0.5)
+                df[["output_kg", "group_id", "floculators_num", "boilings_num", "sum_weight_kg"]] = (
+                    boiling.output_kg,
+                    group_id,
+                    1,
+                    0.5,
+                    6500 * 0.5,
+                )
                 group_id += 1
                 dfs.append(df)
         return pd.concat(dfs)
@@ -106,7 +118,7 @@ class BoilingPlanReader:
         df["boiling"] = df["sku"].apply(lambda x: x.made_from_boilings[0])
         df["boiling_id"] = df["boiling"].apply(lambda boiling: boiling.id)
         df["batch_type"] = "ricotta"
-        df.drop(["leftovers", "sum_weight", "output_kg"], axis=1)
+        df.drop(["leftovers", "output_kg"], axis=1)
 
         return df
 

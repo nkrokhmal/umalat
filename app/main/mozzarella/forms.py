@@ -75,6 +75,7 @@ class SKUForm(FlaskForm):
     brand_name = wtforms.StringField("Введите имя бренда", validators=[Optional()])
     weight_netto = wtforms.FloatField("Введите вес нетто", validators=[Optional()])
     packing_speed = wtforms.IntegerField("Введите скорость фасовки", validators=[Optional()])
+    melting_speed = wtforms.IntegerField("Введите скорость плавления", validators=[Optional()])
     shelf_life = wtforms.IntegerField("Введите время хранения, д", validators=[Optional()])
     code = wtforms.StringField("Введите код SKU", validators=[Optional()])
     in_box = wtforms.IntegerField("Введите количество упаковок в коробке, шт", validators=[Optional()])

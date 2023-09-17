@@ -92,7 +92,7 @@ def adygea_get_sku(page):
         db.session.query(AdygeaSKU)
         .join(Group)
         .order_by(AdygeaSKU.name)
-        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page=page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return flask.render_template(
         "adygea/get_sku.html",
