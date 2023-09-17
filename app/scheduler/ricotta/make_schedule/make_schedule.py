@@ -2,7 +2,7 @@ import json
 
 import pandas as pd
 
-from more_itertools import first, last, mark_ends
+from more_itertools import first, last, mark_ends, nth
 from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
@@ -40,9 +40,13 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
-        f1 = b1["floculator", True][-1]
-        if b2.props["cleaning_object"] == "floculator" and b1.props["floculator_num"] == b2.props["floculator_num"]:
-            validate_disjoint_by_axis(f1["dray_ricotta"], b2, ordered=True)
+        floculator = nth(
+            [f for f in b1["floculator", True] if f.props["floculator_num"] == b2.props["floculator_num"]],
+            0,
+            default=None,
+        )
+        if b2.props["cleaning_object"] == "floculator" and floculator:
+            validate_disjoint_by_axis(floculator["dray_ricotta"], b2, ordered=True)
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -91,7 +95,6 @@ def make_schedule(
         current_floculator_index += grp.iloc[0]["floculators_num"]
 
     # - Add cleanings
-
     for floculator_num in [floculator.props["floculator_num"] for floculator in m.root.iter(cls="floculator")][-3:]:
         m.block(
             "cleaning",
