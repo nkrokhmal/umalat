@@ -91,7 +91,7 @@ def mozzarella_copy_sku(sku_id):
         db.session.add(copy_sku)
         db.session.commit()
         flask.flash("SKU успешно добавлено", "success")
-        return redirect(flask.url_for(".mozzarella_get_sku", page=1))
+        return redirect(flask.request.referrer or flask.url_for(".mozzarella_get_sku", page=1))
     form.name.data = sku.name
     form.brand_name.data = sku.brand_name
     form.code.data = sku.code
@@ -118,7 +118,7 @@ def mozzarella_edit_sku(sku_id):
         db.session.commit()
 
         flask.flash("SKU успешно изменено", "success")
-        return redirect(flask.url_for(".mozzarella_get_sku", page=1))
+        return redirect(flask.request.referrer or flask.url_for(".mozzarella_get_sku", page=1))
 
     if len(sku.made_from_boilings) > 0:
         default_form_value(form.boiling, sku.made_from_boilings[0].to_str())
@@ -154,10 +154,11 @@ def mozzarella_edit_sku(sku_id):
 
 @main.route("/mozzarella/delete_sku/<int:sku_id>", methods=["DELETE"])
 @flask_login.login_required
-def mozzarella_delete_sku(sku_id):
-    sku = db.session.query(SKU).get_or_404(sku_id)
+def mozzarella_delete_sku(sku_id: int):
+    sku = db.session.query(MozzarellaSKU).get_or_404(sku_id)
+    logger.info(sku.name)
     if sku:
         db.session.delete(sku)
         db.session.commit()
         # flask.flash("SKU успешно удалено", "success")
-    return redirect(flask.request.referrer)
+    return redirect(flask.request.referrer or flask.url_for(".mozzarella_get_sku", page=1))

@@ -82,10 +82,6 @@ class BoilingPlanReader:
         for boiling in boilings:
             match boiling.type:
                 case "cream":
-
-                    if not 390 <= boiling.input_kg <= 1010:
-                        raise BoilingPlanReaderException(f"Указано неверное число килограмм в варке {boiling.type}")
-
                     df = pd.DataFrame(boiling.skus)
                     df[["output_kg", "input_kg", "group_id", "group", "block_id"]] = (
                         boiling.output_kg,
