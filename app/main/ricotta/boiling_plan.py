@@ -12,6 +12,7 @@ from app.main import main
 from app.main.ricotta.forms import BoilingPlanForm
 from app.models.basic import SKU
 from app.models.ricotta import RicottaBoiling, RicottaSKU
+from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.utils.files.utils import move_boiling_file, save_request
 from app.utils.parse_remainings import get_skus, group_skus, parse_file_path, parse_sheet
 from app.utils.ricotta.boiling_plan_create import boiling_plan_create
@@ -45,7 +46,7 @@ def ricotta_boiling_plan():
         else:
             wb = openpyxl.load_workbook(filename=upload_path, data_only=True)
             if "Вода" in wb.sheetnames and "Соль" in wb.sheetnames:
-                boiling_plan_df = mozzarella_read_boiling_plan(wb, validate=False)
+                boiling_plan_df = to_boiling_plan(wb)
                 boiling_plan_df["configuration"] = boiling_plan_df["configuration"].apply(lambda x: int(x))
                 total_volume = int(boiling_plan_df.groupby("group_id").first()["configuration"].sum() * 0.81)
 

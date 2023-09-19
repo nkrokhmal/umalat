@@ -41,6 +41,7 @@ def download_ricotta() -> flask.Response:
                 "слив рикотты": technology.dray_ricotta_time,
                 "посолка/анализ": technology.salting_time,
                 "Перекачивание": technology.pumping_time,
+                "Внесение ингредиентов": technology.ingredient_time,
                 "Kод": sku.code,
             }
         )
