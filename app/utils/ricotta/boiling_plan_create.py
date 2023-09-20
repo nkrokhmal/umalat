@@ -60,6 +60,9 @@ def handle_ricotta(df: pd.DataFrame) -> pd.DataFrame:
                 group_dict = group.to_dict("records")
                 max_weight = group_dict[0]["output_kg"]
 
-                handler.handle_group(group_dict, max_weight=2 * max_weight)
+                if order.flavoring_agent is None:
+                    handler.handle_group(group_dict, max_weight=2 * max_weight)
+                else:
+                    handler.handle_group(group_dict, max_weight=max_weight, flavoring_agent=order.flavoring_agent)
 
     return pd.DataFrame(handler.boiling_groups)

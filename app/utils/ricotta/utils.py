@@ -9,7 +9,7 @@ from app.utils.base.boiling_group import BoilingGroup, BoilingsHandler
 
 @dataclass
 class RicottaBoilingGroup(BoilingGroup):
-    count: int = 1
+    count: float = 1
 
     @property
     def is_single_instance(self) -> bool:
@@ -28,14 +28,24 @@ class RicottaBoilingsHandler(BoilingsHandler):
                 result.append((lambda d: d.update({"boiling_count": group.count}) or d)(sku.copy()))
         return result
 
-    def handle_group(self, skus: list[dict], max_weight: float, weight_key: str = "plan") -> None:
-        boiling = RicottaBoilingGroup(max_weight, id=self.boiling_id)
+    def handle_group(
+        self,
+        skus: list[dict],
+        max_weight: float,
+        weight_key: str = "plan",
+        flavoring_agent: str | None = None,
+        **kwargs
+    ) -> None:
+        group_boilings = []
+        boiling_num = 1 if flavoring_agent is None else 0.5
+
+        boiling = RicottaBoilingGroup(max_weight, id=self.boiling_id, count=boiling_num)
         for sku in skus:
             while sku[weight_key] > 0:
                 if boiling.is_full:
-                    self.boilings.append(boiling)
+                    group_boilings.append(boiling)
                     self.boiling_id += 1
-                    boiling = RicottaBoilingGroup(max_weight, id=self.boiling_id)
+                    boiling = RicottaBoilingGroup(max_weight, id=self.boiling_id, count=boiling_num)
 
                 else:
                     weight = min(sku[weight_key], boiling.leftovers)
@@ -45,15 +55,19 @@ class RicottaBoilingsHandler(BoilingsHandler):
                     sku[weight_key] -= weight
 
         if boiling.leftovers != max_weight:
-            self.boilings.append(boiling)
+            group_boilings.append(boiling)
             self.boiling_id += 1
 
-        self.boilings = list(self.merge_boilings())
+        if flavoring_agent is None:
+            self.boilings += list(self.merge_boilings(group_boilings))
+        else:
+            self.boilings += group_boilings
 
-    def merge_boilings(self) -> tp.Generator[RicottaBoilingGroup, None, None]:
+    @staticmethod
+    def merge_boilings(group_boilings: list[RicottaBoilingGroup]) -> tp.Generator[RicottaBoilingGroup, None, None]:
         boiling_group: RicottaBoilingGroup | None = None
 
-        for boiling in self.boilings:
+        for boiling in group_boilings:
             if not boiling.is_single_instance or not boiling.is_full:
                 if boiling_group is not None:
                     yield boiling_group

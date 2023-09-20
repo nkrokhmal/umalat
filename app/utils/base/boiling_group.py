@@ -37,5 +37,5 @@ class BoilingsHandler(ABC):
         return list(itertools.chain.from_iterable(boiling.skus for boiling in self.boilings))
 
     @abstractmethod
-    def handle_group(self, skus: list[dict], max_weight: float, weight_key: str = "plan") -> None:
+    def handle_group(self, skus: list[dict], max_weight: float, weight_key: str = "plan", **kwargs) -> None:
         ...

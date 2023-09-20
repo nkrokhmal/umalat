@@ -7,7 +7,7 @@ class MascarponeBoilingsHandler(BoilingsHandler):
     def __init__(self):
         super().__init__()
 
-    def handle_group(self, skus: list[dict], max_weight: float, weight_key: str = "plan") -> None:
+    def handle_group(self, skus: list[dict], max_weight: float, weight_key: str = "plan", **kwargs) -> None:
         boiling = BoilingGroup(max_weight, id=self.boiling_id)
         for sku in skus:
             while sku[weight_key] > 0:
