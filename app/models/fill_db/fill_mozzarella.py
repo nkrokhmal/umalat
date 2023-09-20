@@ -301,6 +301,7 @@ def fill_sku():
                 x for x in form_factors if x.name == "Терка {}".format(sku["Название форм фактора"])
             ][0]
 
+        print(add_sku.packers)
         db.session.add(add_sku)
     db.session.commit()
 

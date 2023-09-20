@@ -75,6 +75,7 @@ def generate_packer():
         "САККАРДО",
         "САККАРДО другой цех",
         "ручная работа",
+        "Сипак",
     ]:
         packer = Packer(name=name)
         db.session.add(packer)
