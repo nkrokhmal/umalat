@@ -64,7 +64,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
 
     # -- Pumping
 
-    m.row("pumping", size=technology.pumping_time // 5 * boiling_group_df.iloc[0]["floculators_num"])
+    pumping = m.row("pumping", size=technology.pumping_time // 5 * boiling_group_df.iloc[0]["floculators_num"]).block
 
     # -- Packing
 
@@ -73,8 +73,10 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
     m.row(
         "packing",
         size=packing_minutes // 5,
+        x=pumping.x[0] + 1,  # 5 minutes after pumping starts
         label="/".join([f"{row['sku'].brand_name} {row['sku'].weight_netto}" for i, row in boiling_group_df.iterrows()])
         + f"  {boiling_group_df.iloc[0]['boiling'].percent}%",
+        push_func=add_push,
     )
 
     return m.root
