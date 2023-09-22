@@ -29,8 +29,8 @@ class HugeBoiling:
 
 COLUMNS: dict[str, str] = {
     "Номер группы варок": "group_id",
-    "Выход с одной варки, кг": "output_kg_per_one",
     "Тип варки": "boiling_type",
+    "Выход с одной варки, кг": "output_kg_per_one",
     "SKU": "sku_name",
     "КГ": "kg",
     "Остатки": "leftovers",
@@ -96,6 +96,8 @@ class BoilingPlanReader:
                     1,
                     6500 * 2,
                 )
+                if full_boilings > 1:
+                    df["kg"] = df["output_kg"]
                 group_id += 1
                 dfs.append(df)
 
