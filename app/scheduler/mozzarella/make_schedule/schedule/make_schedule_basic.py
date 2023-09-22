@@ -24,9 +24,9 @@ def make_schedule_basic(
     # - Get start configuration
 
     if not start_configuration:
-        with code("Make basic schedule"):
-            boilings = make_boilings(boiling_plan_df)
-            schedule = make_schedule_from_boilings(boilings, cleanings={}, start_times=start_times)
+        # make basic schedule
+        boilings = make_boilings(boiling_plan_df)
+        schedule = make_schedule_from_boilings(boilings, cleanings={}, start_times=start_times)
 
         start_configuration = parse_start_configuration(schedule)
 

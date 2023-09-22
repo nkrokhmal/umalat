@@ -1,8 +1,9 @@
+import json
 import warnings
 
 import pandas as pd
 
-from utils_ak.block_tree import add_push, stack_push
+from utils_ak.block_tree import add_push, stack_push, validate_disjoint_by_axis
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
 from utils_ak.dict import dotdict
@@ -55,6 +56,18 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
             m.row("draw_whey", size=technology.drain_whey_time // 5)
             m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
         current_shift += technology.pouring_time // 5 + 2
+
+    # - draw_whey and dray_ricotta should not overlap
+
+    if len(m.root["floculator", True]) > 1:
+        b1, b2 = m.root["floculator", True]
+
+        try:
+            validate_disjoint_by_axis(b1["dray_ricotta"], b2["draw_whey"], ordered=True)
+        except AssertionError as e:
+            disposition = json.loads(str(e))["disposition"]
+
+            b2.props.update(x=[b2.props["x_rel"][0] + disposition, b2.x[1]])
 
     # -- Extra processing: salting, ingredient
 
