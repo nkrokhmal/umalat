@@ -22,13 +22,35 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__boiling(b1, b2):
+        # - Validate main
+
         f1, f2 = b1["floculator", True][-1], b2["floculator", True][0]
         validate_disjoint_by_axis(f1["pouring"], f2["pouring"])
         if f1.props["floculator_num"] == f2.props["floculator_num"]:
             validate_disjoint_by_axis(f1["draw_whey"], f2["heating"])
         if f1.props["drenator_num"] == f2.props["drenator_num"]:
             validate_disjoint_by_axis(b1["extra_processing"], f2["dray_ricotta"], ordered=True)
-        validate_disjoint_by_axis(b1["pumping"], b2["pumping"], distance=2, ordered=True)
+
+        # - Validate pumping
+
+        # -- Calculate current lag between pumping and packing
+
+        pumping_packing_lag = b1["packing"].x[0] - b1["pumping"].x[0]
+
+        # -- Calculate new lag delta - how lag will increase if we start next boiling tight after previous one
+
+        new_lag_delta = b2["packing"].size[0] - b1["pumping"].size[0]
+
+        # -- Set constants
+
+        allowed_lag = 12
+        allowed_lag_delta = max(0, min(1, allowed_lag - pumping_packing_lag))  # 1 or 0 in this case
+
+        validate_disjoint_by_axis(
+            b1["pumping"], b2["pumping"], distance=max(0, new_lag_delta - allowed_lag_delta), ordered=True
+        )
+
+        # - Validate packing and pumping
 
         if b1.props["percent"] != b2.props["percent"]:
             validate_disjoint_by_axis(b1["packing"], b2["pumping"], ordered=True)
@@ -75,6 +97,7 @@ def make_schedule(
     )
 
     # - Make boilings
+
     current_floculator_index = 0
     for i, (idx, grp) in enumerate(boiling_plan_df.groupby("batch_id")):
         # - Prepare boiling
@@ -107,6 +130,7 @@ def make_schedule(
                     b2["packing"].props.update(x=[b2["packing"].props["x_rel"][0] + disposition, b2["packing"].x[1]])
 
     # - Add cleanings
+
     for floculator_num in [floculator.props["floculator_num"] for floculator in m.root.iter(cls="floculator")][-3:]:
         m.block(
             "cleaning",
@@ -167,7 +191,7 @@ def test():
     # - Make schedule
 
     schedule = make_schedule(
-        str(get_repo_path() / "app/data/tests/ricotta/boiling.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2023-09-23 Расписание рикотта.xlsx"),
     )["schedule"]
 
     print(schedule)

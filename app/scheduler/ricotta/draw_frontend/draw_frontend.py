@@ -37,6 +37,7 @@ def draw_frontend(
         workbook.create_sheet("Расписание")
 
     # - Set dimensions
+
     ws = workbook["Расписание"]
     set_zoom(ws, 55)
     set_dimensions(ws, "column", range(1, 5), 21)
