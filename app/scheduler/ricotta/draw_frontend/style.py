@@ -4,7 +4,11 @@ STYLE = {
     "heating": {"text": "Нагрев до 90 градусов", "color": "#E26B0A"},
     "lactic_acid": {"text": "Молочная кислота/выдерживание", "color": "#00B0F0"},
     "draw_whey": {"text": "Слив сыворотки", "color": "#FFC000"},
-    "dray_ricotta": {"text": "Слив рикотты 500 кг п/ф", "color": "#948A54"},
+    "dray_ricotta": {
+        "text": lambda b: f"Слив рикотты {int(b.props['output_kg'])}кг п/ф",
+        "color": "#948A54",
+        "font_size": 9,
+    },
     "draw_ricotta_break": {"text": "", "color": "white"},
     "salting": {"text": "Посолка/анализ", "color": "#D9D9D9"},
     "ingredient": {"text": "Внесение ингедиентов", "color": "yellow"},

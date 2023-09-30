@@ -49,6 +49,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
             x=current_shift,
             push_func=add_push,
             floculator_num=(current_floculator_index + i) % 3 + 1,
+            output_kg=boiling_group_df.iloc[0]["output_kg"] / 2,  # one boiling is measured in 2 floculators
         ):
             m.row("boiling_preparation", size=2)
             pouring = m.row("pouring", size=technology.pouring_time // 5).block
