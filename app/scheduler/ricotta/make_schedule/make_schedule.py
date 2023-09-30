@@ -47,7 +47,7 @@ class Validator(ClassValidator):
         # -- Calculate buffer tank distance to meet capacity requirements
 
         min_pumping_start_to_not_overfill_buffer_tank = 0
-        left_kg = 1000 * 0.9  # buffer tank size with 10% reserve
+        left_kg = 1000 * 0.8  # buffer tank size with 20% reserve
         for is_first, is_last, packing in mark_ends([b2["packing"]] + list(reversed(b1["packing", True]))):
             if packing.props["kg"] <= left_kg:
                 left_kg -= packing.props["kg"]
