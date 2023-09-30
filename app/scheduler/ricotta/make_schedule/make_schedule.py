@@ -10,6 +10,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
 from utils_ak.loguru import configure_loguru
+from utils_ak.numeric import custom_round
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
@@ -45,12 +46,9 @@ class Validator(ClassValidator):
 
         # -- Calculate buffer tank distance to meet capacity requirements
 
+        min_pumping_start_to_not_overfill_buffer_tank = 0
         left_kg = 1000  # buffer tank size
-        packings = [b2["packing"]] + list(reversed(b1["packing", True]))
-
-        # collect kg
-        min_pumping_start_to_not_overfill_buffer_tank = None
-        for is_first, is_last, packing in mark_ends(packings):
+        for is_first, is_last, packing in mark_ends([b2["packing"]] + list(reversed(b1["packing", True]))):
             if packing.props["kg"] <= left_kg:
                 left_kg -= packing.props["kg"]
                 continue
@@ -59,7 +57,9 @@ class Validator(ClassValidator):
                 min_pumping_start_to_not_overfill_buffer_tank = (
                     packing.y[0] if not is_first else b1["packing"].y[0] + b2["packing"].size[0]
                 ) - left_kg / packing.props["kg"] * packing.size[0]
+                min_pumping_start_to_not_overfill_buffer_tank = math.ceil(min_pumping_start_to_not_overfill_buffer_tank)
                 break
+
         min_distance_to_not_overfill_buffer_tank = max(
             0, (min_pumping_start_to_not_overfill_buffer_tank - b2["pumping"].size[0] - b1["pumping"].y[0])
         )
