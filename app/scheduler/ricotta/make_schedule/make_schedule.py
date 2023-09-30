@@ -38,8 +38,9 @@ class Validator(ClassValidator):
 
         # -- Calculate current lag between pumping and packing
 
-        pumping_packing_lag = b1["packing"].x[0] - b1["pumping"].x[0]
-        delta_lag = b2["packing"].size[0] - b1["pumping"].size[0]
+        pumping_packing_lag = b1["packing"].y[0] - b1["pumping"].y[0]
+        assert pumping_packing_lag >= 0, "Packing should be after pumping"
+        delta_lag = max(0, b2["packing"].size[0] - b1["pumping"].size[0])
         new_lag = pumping_packing_lag + delta_lag
 
         # -- Calculate buffer tank distance to meet capacity requirements
@@ -59,15 +60,16 @@ class Validator(ClassValidator):
                     packing.y[0] if not is_first else b1["packing"].y[0] + b2["packing"].size[0]
                 ) - left_kg / packing.props["kg"] * packing.size[0]
                 break
-        min_distance_to_not_overfill_buffer_tank = (
-            min_pumping_start_to_not_overfill_buffer_tank - b2["pumping"].size[0] - b1["pumping"].y[0]
+        min_distance_to_not_overfill_buffer_tank = max(
+            0, (min_pumping_start_to_not_overfill_buffer_tank - b2["pumping"].size[0] - b1["pumping"].y[0])
         )
 
         # -- Validate
+
         validate_disjoint_by_axis(
             b1["pumping"],
             b2["pumping"],
-            distance=max(0, min(3, new_lag), min_distance_to_not_overfill_buffer_tank),
+            distance=max(min(3, new_lag), min_distance_to_not_overfill_buffer_tank),
             ordered=True,
         )
 
@@ -143,12 +145,21 @@ def make_schedule(
             b1, b2 = m.root.children[-2:]
 
             if b1.props["cls"] == "boiling" and b2.props["cls"] == "boiling":
+                # - Fix packing position
+
                 try:
                     validate_disjoint_by_axis(b1["packing"], b2["packing"], ordered=True)
                 except AssertionError as e:
                     disposition = json.loads(str(e))["disposition"]
 
                     b2["packing"].props.update(x=[b2["packing"].props["x_rel"][0] + disposition, b2["packing"].x[1]])
+
+                # - Fix packing size if pumping is slow
+
+                if b2["packing"].y[0] < b2["pumping"].y[0]:
+                    b2["packing"].update_size(
+                        size=(b2["packing"].size[0] + (b2["pumping"].y[0] - b2["packing"].y[0]), b2["packing"].size[1])
+                    )
 
     # - Add cleanings
 
