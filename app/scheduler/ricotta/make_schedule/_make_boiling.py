@@ -34,6 +34,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
         percent=boiling_model.percent,
         absolute_batch_id=boiling_group_df.iloc[0]["absolute_batch_id"],
         whey_kg=boiling_group_df.iloc[0]["sum_weight_kg"] / boiling_group_df.iloc[0]["floculators_num"],
+        kg=boiling_group_df["kg"].sum(),
         **kwargs,
     )
 
@@ -57,7 +58,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
             m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
         current_shift += technology.pouring_time // 5 + 2
 
-    # - draw_whey and dray_ricotta should not overlap
+    # - Draw_whey and dray_ricotta should not overlap
 
     if len(m.root["floculator", True]) > 1:
         b1, b2 = m.root["floculator", True]
@@ -82,7 +83,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
     # -- Packing
 
     packing_minutes = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in boiling_group_df.iterrows()])
-    packing_minutes = int(custom_round(packing_minutes, 5, "ceil", pre_round_precision=1))
+    packing_minutes = int(custom_round(a=packing_minutes, b=5, rounding="nearest_half_even", pre_round_precision=1))
     m.row(
         "packing",
         size=packing_minutes // 5,

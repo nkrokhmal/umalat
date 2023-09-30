@@ -1,12 +1,15 @@
 import json
+import math
 
 import pandas as pd
 
+from loguru import logger
 from more_itertools import first, last, mark_ends, nth
 from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
+from utils_ak.loguru import configure_loguru
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
@@ -36,18 +39,36 @@ class Validator(ClassValidator):
         # -- Calculate current lag between pumping and packing
 
         pumping_packing_lag = b1["packing"].x[0] - b1["pumping"].x[0]
+        delta_lag = b2["packing"].size[0] - b1["pumping"].size[0]
+        new_lag = pumping_packing_lag + delta_lag
 
-        # -- Calculate new lag delta - how lag will increase if we start next boiling tight after previous one
+        # -- Calculate buffer tank distance to meet capacity requirements
 
-        new_lag_delta = b2["packing"].size[0] - b1["pumping"].size[0]
+        left_kg = 1000  # buffer tank size
+        packings = [b2["packing"]] + list(reversed(b1["packing", True]))
 
-        # -- Set constants
+        # collect kg
+        min_pumping_start_to_not_overfill_buffer_tank = None
+        for is_first, is_last, packing in mark_ends(packings):
+            if packing.props["kg"] <= left_kg:
+                left_kg -= packing.props["kg"]
+                continue
+            else:
+                # finish here
+                min_pumping_start_to_not_overfill_buffer_tank = (
+                    packing.y[0] if not is_first else b1["packing"].y[0] + b2["packing"].size[0]
+                ) - left_kg / packing.props["kg"] * packing.size[0]
+                break
+        min_distance_to_not_overfill_buffer_tank = (
+            min_pumping_start_to_not_overfill_buffer_tank - b2["pumping"].size[0] - b1["pumping"].y[0]
+        )
 
-        allowed_lag = 12
-        allowed_lag_delta = max(0, min(1, allowed_lag - pumping_packing_lag))  # 1 or 0 in this case
-
+        # -- Validate
         validate_disjoint_by_axis(
-            b1["pumping"], b2["pumping"], distance=max(0, new_lag_delta - allowed_lag_delta), ordered=True
+            b1["pumping"],
+            b2["pumping"],
+            distance=max(0, min(3, new_lag), min_distance_to_not_overfill_buffer_tank),
+            ordered=True,
         )
 
         # - Validate packing and pumping
