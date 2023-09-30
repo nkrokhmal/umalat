@@ -41,8 +41,8 @@ class Validator(ClassValidator):
 
         pumping_packing_lag = b1["packing"].y[0] - b1["pumping"].y[0]
         assert pumping_packing_lag >= 0, "Packing should be after pumping"
-        delta_lag = max(0, b2["packing"].size[0] - b1["pumping"].size[0])
-        new_lag = pumping_packing_lag + delta_lag
+        delta_lag = b2["packing"].size[0] - b1["pumping"].size[0] - 1  # packing is at least 5 minutes after pumping
+        new_lag = max(0, pumping_packing_lag + delta_lag)
 
         # -- Calculate buffer tank distance to meet capacity requirements
 
@@ -154,12 +154,15 @@ def make_schedule(
 
                     b2["packing"].props.update(x=[b2["packing"].props["x_rel"][0] + disposition, b2["packing"].x[1]])
 
-                # - Fix packing size if pumping is slow
+        # - Fix packing placement if packing is earlier than pumping
 
-                if b2["packing"].y[0] < b2["pumping"].y[0]:
-                    b2["packing"].update_size(
-                        size=(b2["packing"].size[0] + (b2["pumping"].y[0] - b2["packing"].y[0]), b2["packing"].size[1])
-                    )
+        if boiling["packing"].y[0] <= boiling["pumping"].y[0]:
+            boiling["packing"].props.update(
+                x=[
+                    boiling["pumping"].props["x_rel"][0] + boiling["pumping"].size[0] - boiling["packing"].size[0] + 1,
+                    boiling["packing"].x[1],
+                ]
+            )
 
     # - Add cleanings
 
