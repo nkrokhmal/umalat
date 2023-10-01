@@ -483,7 +483,8 @@ def wrap_extra_packings(extra_packings):
 def wrap_frontend(
     boiling_plan: BoilingPlanLike,
     coolings_mode="first",
-    optimize=True,
+    optimize_start_configurations=True,
+    optimize_water_gaps=True,
     saturate=True,
     normalization=True,
     validate=True,
@@ -499,7 +500,8 @@ def wrap_frontend(
 
     output = make_schedule(
         boiling_plan=boiling_plan,
-        optimize=optimize,
+        optimize_start_configurations=optimize_start_configurations,
+        optimize_water_gaps=optimize_water_gaps,
         saturate=saturate,
         normalization=normalization,
         validate=validate,

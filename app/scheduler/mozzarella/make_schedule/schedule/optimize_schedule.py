@@ -43,8 +43,10 @@ def test_seq():
         pass
 
 
-def optimize_schedule_by_start_configuration(
+def optimize_schedule(
     boiling_plan_df,
+    optimize_start_configurations=True,
+    optimize_water_gaps=True,
     # - Make schedule basic kwargs
     optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
@@ -65,47 +67,50 @@ def optimize_schedule_by_start_configuration(
 
     # - Get neighbor start configurations
 
-    logger.debug("Initial start configuration", start_configuration=start_configuration)
-    if not start_configuration:
-        start_configurations = [None]
-    else:
-        start_configurations = []
-        n = _parse_seq(start_configuration, a=LineName.WATER, b=LineName.SALT)
-        with code("Calc neighborhood"):
-            # - 1 -> -3, -2, -1, skip, 1,  2
+    if optimize_start_configurations:
+        logger.debug("Initial start configuration", start_configuration=start_configuration)
+        if not start_configuration:
+            start_configurations = [None]
+        else:
+            start_configurations = []
+            n = _parse_seq(start_configuration, a=LineName.WATER, b=LineName.SALT)
+            with code("Calc neighborhood"):
+                # - 1 -> -3, -2, -1, skip, 1,  2
 
-            n_neighborhood = [n + i for i in range(-2, 3) if n + i != 0]
+                n_neighborhood = [n + i for i in range(-2, 3) if n + i != 0]
 
-            # add one if skipped
-            if 0 < n <= 2:
-                n_neighborhood.append(n - 2 - 1)
-            if -2 <= n < 0:
-                n_neighborhood.append(n + 2 + 1)
-            n_neighborhood = list(sorted(n_neighborhood))
+                # add one if skipped
+                if 0 < n <= 2:
+                    n_neighborhood.append(n - 2 - 1)
+                if -2 <= n < 0:
+                    n_neighborhood.append(n + 2 + 1)
+                n_neighborhood = list(sorted(n_neighborhood))
 
-        for _n in n_neighborhood:
-            start_configurations.append(_gen_seq(_n, a=LineName.WATER, b=LineName.SALT))
+            for _n in n_neighborhood:
+                start_configurations.append(_gen_seq(_n, a=LineName.WATER, b=LineName.SALT))
 
-    logger.debug("Start configurations", start_configurations=start_configurations)
+        logger.debug("Start configurations", start_configurations=start_configurations)
 
-    # - Filter invalid start configurations
+        # - Filter invalid start configurations
 
-    # count boiling per line
-    counter = collections.Counter()
-    for i, grp in boiling_plan_df.groupby("group_id"):
-        counter[grp.iloc[0]["boiling"].line.name] += 1
+        # count boiling per line
+        counter = collections.Counter()
+        for i, grp in boiling_plan_df.groupby("group_id"):
+            counter[grp.iloc[0]["boiling"].line.name] += 1
 
-    def _start_start_configuration_valid(sc):
-        if not sc:
+        def _start_start_configuration_valid(sc):
+            if not sc:
+                return True
+            for line_name in [LineName.WATER, LineName.SALT]:
+                if sc.count(line_name) > counter[line_name]:
+                    return False
             return True
-        for line_name in [LineName.WATER, LineName.SALT]:
-            if sc.count(line_name) > counter[line_name]:
-                return False
-        return True
 
-    start_configurations = [
-        configuration for configuration in start_configurations if _start_start_configuration_valid(configuration)
-    ]
+        start_configurations = [
+            configuration for configuration in start_configurations if _start_start_configuration_valid(configuration)
+        ]
+    else:
+        start_configurations = [start_configuration]
 
     logger.debug("Optimizing start configurations", start_configuration=start_configurations)
 
@@ -113,14 +118,25 @@ def optimize_schedule_by_start_configuration(
 
     res = []
     for configuration in start_configurations:
-        schedule = optimize_schedule_by_swapping_water_gaps(
-            boiling_plan_df,
-            date=date,
-            optimize_cleanings=optimize_cleanings,
-            start_times=start_times,
-            exact_start_time_line_name=exact_start_time_line_name,
-            start_configuration=configuration,
-        )
+        if optimize_water_gaps:
+            schedule = optimize_schedule_by_swapping_water_gaps(
+                boiling_plan_df,
+                # - Make schedule basic kwargs
+                date=date,
+                optimize_cleanings=optimize_cleanings,
+                start_times=start_times,
+                exact_start_time_line_name=exact_start_time_line_name,
+                start_configuration=configuration,
+            )
+        else:
+            schedule = make_schedule_basic(
+                boiling_plan_df,
+                date=date,
+                optimize_cleanings=optimize_cleanings,
+                start_times=start_times,
+                exact_start_time_line_name=exact_start_time_line_name,
+                start_configuration=configuration,
+            )
         res.append(
             dict(
                 schedule=schedule,

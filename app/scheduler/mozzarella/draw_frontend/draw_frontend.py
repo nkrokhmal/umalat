@@ -17,7 +17,8 @@ def draw_frontend(
     boiling_plan: BoilingPlanLike,
     date: Optional[datetime] = None,
     workbook: Workbook = None,
-    optimize=True,
+    optimize_start_configurations=True,
+    optimize_water_gaps=True,
     saturate=True,
     normalization=True,
     validate=True,
@@ -33,7 +34,8 @@ def draw_frontend(
     output = wrap_frontend(
         boiling_plan=boiling_plan,
         first_batch_ids_by_type=first_batch_ids_by_type,
-        optimize=optimize,
+        optimize_start_configurations=optimize_start_configurations,
+        optimize_water_gaps=optimize_water_gaps,
         saturate=saturate,
         normalization=normalization,
         validate=validate,
@@ -72,14 +74,16 @@ def test():
     configure_loguru()
 
     # - Draw frontend
+
     output = draw_frontend(
         str(
             get_repo_path()
             / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
         ),
         start_times={LineName.WATER: "06:00", LineName.SALT: "05:00"},
-        exact_start_time_line_name=LineName.WATER,
-        optimize=True,
+        exact_start_time_line_name=LineName.SALT,
+        optimize_start_configurations=False,
+        optimize_water_gaps=True,
     )
 
     output["workbook"].save("test.xlsx")
