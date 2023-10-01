@@ -47,13 +47,13 @@ class ScheduleForm(FlaskForm):
         default="08:00",
     )
     exact_melting_time_by_line = wtforms.SelectField(
-        "Выберите основную линию (по ней время будет выставляться точно)",
+        "Выберите линию, по которой время будет выставляться точно (по оставшейся - приблизительно)",
         validators=[Optional()],
         choices=[(LineName.SALT, LineName.SALT), (LineName.WATER, LineName.WATER)],
         default=LineName.SALT,
     )
     optimize = wtforms.BooleanField(
-        "Оптимизировать время побочной линии",
+        "Оптимизировать время оставшейся линии",
         validators=[Optional()],
         default=True,
     )
