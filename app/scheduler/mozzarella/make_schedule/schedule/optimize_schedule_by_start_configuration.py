@@ -43,21 +43,26 @@ def test_seq():
         pass
 
 
-def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time_by_line=None, *args, **kwargs):
-    start_times = kwargs.get("start_times", {LineName.WATER: "08:00", LineName.SALT: "07:00"})
-    start_configuration = kwargs.get("start_configuration")
+def optimize_schedule_by_start_configuration(
+    boiling_plan_df,
+    exact_start_time_line_name=None,
+    **make_schedule_basic_kwargs,
+):
+    # - Prepare arguments
+    start_times = make_schedule_basic_kwargs.get("start_times", {LineName.WATER: "08:00", LineName.SALT: "07:00"})
+    start_configuration = make_schedule_basic_kwargs.get("start_configuration")
 
+    # - Get start configuration if needed
     if not start_configuration:
-        with code("Make basic schedule"):
-            boilings_by_line_name = make_boilings(boiling_plan_df)
-            schedule = make_schedule_from_boilings(
-                boilings_by_line_name,
-                cleanings={},
-                start_times=start_times,
-            )
-
+        boilings_by_line_name = make_boilings(boiling_plan_df)
+        schedule = make_schedule_from_boilings(
+            boilings_by_line_name,
+            cleanings={},
+            start_times=start_times,
+        )
         start_configuration = parse_start_configuration(schedule)
 
+    # - Get neighbor start configurations
     logger.debug("Initial start configuration", start_configuration=start_configuration)
     if not start_configuration:
         start_configurations = [None]
@@ -81,10 +86,12 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
 
     logger.debug("Start configurations", start_configurations=start_configurations)
 
-    with code("Count boilings per line"):
-        counter = collections.Counter()
-        for i, grp in boiling_plan_df.groupby("group_id"):
-            counter[grp.iloc[0]["boiling"].line.name] += 1
+    # - Filter invalid start configurations
+
+    # count boiling per line
+    counter = collections.Counter()
+    for i, grp in boiling_plan_df.groupby("group_id"):
+        counter[grp.iloc[0]["boiling"].line.name] += 1
 
     def _start_start_configuration_valid(sc):
         if not sc:
@@ -100,23 +107,23 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
 
     logger.debug("Optimizing start configurations", start_configuration=start_configurations)
 
-    with code("Optimization"):
-        res = []
-        for configuration in start_configurations:
-            schedule = optimize_schedule_by_swapping_water_gaps(
-                boiling_plan_df,
-                start_configuration=configuration,
-                *args,
-                **kwargs,
-            )
-            res.append(
-                {
-                    "schedule": schedule,
-                    "start_configuration": configuration,
-                    "args": args,
-                    "kwargs": kwargs,
-                }
-            )
+    # - Make schedule with optimization for each start configuration
+
+    res = []
+    for configuration in start_configurations:
+        schedule = optimize_schedule_by_swapping_water_gaps(
+            boiling_plan_df,
+            start_configuration=configuration,
+            **make_schedule_basic_kwargs,
+        )
+        res.append(
+            {
+                "schedule": schedule,
+                "start_configuration": configuration,
+                "args": args,
+                "kwargs": make_schedule_basic_kwargs,
+            }
+        )
     logger.debug(
         "Optimization results", results=[calc_score(value["schedule"], start_times=start_times) for value in res]
     )
@@ -129,12 +136,12 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
 
     # - Fix start time if needed
 
-    if not exact_melting_time_by_line:
+    if not exact_start_time_line_name:
         return value["schedule"]
 
     start_times = dict(start_times)
 
-    time_by_line = exact_melting_time_by_line
+    time_by_line = exact_start_time_line_name
     time_not_by_line = LineName.WATER if time_by_line == LineName.SALT else LineName.SALT
     boilings_by_line_name = {
         line_name: [

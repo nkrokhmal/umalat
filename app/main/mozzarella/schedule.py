@@ -65,7 +65,7 @@ def mozzarella_schedule():
                     LineName.SALT: form.salt_beg_time.data,
                 },
                 optimize=optimize,
-                exact_melting_time_by_line=exact_melting_time_by_line,
+                exact_start_time_line_name=exact_melting_time_by_line,
                 optimize_cleanings=add_full_boiling,
                 date=date,
                 workbook=schedule_wb,

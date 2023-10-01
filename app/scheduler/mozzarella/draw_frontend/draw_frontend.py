@@ -17,27 +17,31 @@ def draw_frontend(
     date: Optional[datetime] = None,
     workbook: Workbook = None,
     optimize=True,
-    exact_melting_time_by_line=None,
     saturate=True,
     normalization=True,
     validate=True,
     first_batch_ids_by_type={"mozzarella": 1},
-    *args,
-    **kwargs,
+    # - Make schedule basic kwargs
+    exact_start_time_line_name=None,
+    optimize_cleanings=False,
+    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+    start_configuration=None,
 ) -> dict:
     # - Wrap frontend
 
     output = wrap_frontend(
         boiling_plan=boiling_plan,
         first_batch_ids_by_type=first_batch_ids_by_type,
-        date=date,
         optimize=optimize,
-        exact_melting_time_by_line=exact_melting_time_by_line,
         saturate=saturate,
         normalization=normalization,
         validate=validate,
-        *args,
-        **kwargs,
+        # - Make schedule basic kwargs
+        date=date,
+        optimize_cleanings=optimize_cleanings,
+        start_times=start_times,
+        start_configuration=start_configuration,
+        exact_start_time_line_name=exact_start_time_line_name,
     )
 
     # - Draw frontend

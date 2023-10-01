@@ -484,26 +484,32 @@ def wrap_frontend(
     boiling_plan: BoilingPlanLike,
     coolings_mode="first",
     optimize=True,
-    exact_melting_time_by_line=None,
     saturate=True,
     normalization=True,
     validate=True,
     first_batch_ids_by_type={"mozzarella": 1},
-    *args,
-    **kwargs,
+    # - Make basic schedule kwargs
+    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+    exact_start_time_line_name=None,
+    optimize_cleanings=False,
+    start_configuration=None,
+    date=None,
 ):
     # - Get schedule first
 
     output = make_schedule(
         boiling_plan=boiling_plan,
         optimize=optimize,
-        exact_melting_time_by_line=exact_melting_time_by_line,
         saturate=saturate,
         normalization=normalization,
         validate=validate,
         first_batch_ids_by_type=first_batch_ids_by_type,
-        *args,
-        **kwargs,
+        # - Make basic schedule kwargs
+        date=date,
+        optimize_cleanings=optimize_cleanings,
+        start_times=start_times,
+        exact_start_time_line_name=exact_start_time_line_name,
+        start_configuration=start_configuration,
     )
     schedule = output["schedule"]
 

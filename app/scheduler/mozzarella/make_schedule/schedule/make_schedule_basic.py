@@ -1,3 +1,5 @@
+from typing import Literal, Optional
+
 from loguru import logger
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
@@ -16,7 +18,7 @@ def make_schedule_basic(
     boiling_plan_obj,
     optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
-    exact_start_time_line_name=LineName.WATER,
+    exact_start_time_line_name: Optional[str] = LineName.WATER,
     start_configuration=None,
     date=None,
 ):

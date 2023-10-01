@@ -1,3 +1,4 @@
+from app.enum import LineName
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_basic import make_schedule_basic
@@ -10,13 +11,16 @@ from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_
 def make_schedule(
     boiling_plan: BoilingPlanLike,
     optimize=True,
-    exact_melting_time_by_line=None,
     saturate=True,
     normalization=True,
     validate=True,
     first_batch_ids_by_type={"mozzarella": 1},
-    *args,
-    **kwargs,
+    # - Make schedule basic kwargs
+    optimize_cleanings=False,
+    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+    exact_start_time_line_name=None,
+    start_configuration=None,
+    date=None,
 ) -> dict:
     # - Get boiling plan
 
@@ -32,10 +36,22 @@ def make_schedule(
 
     if optimize:
         schedule = optimize_schedule_by_start_configuration(
-            boiling_plan_df, exact_melting_time_by_line=exact_melting_time_by_line, *args, **kwargs
+            boiling_plan_df,
+            # - Make schedule basic kwargs
+            optimize_cleanings=optimize_cleanings,
+            start_times=start_times,
+            exact_start_time_line_name=exact_start_time_line_name,
+            start_configuration=start_configuration,
+            date=date,
         )
     else:
-        schedule = make_schedule_basic(boiling_plan_df, *args, **kwargs)
+        schedule = make_schedule_basic(
+            boiling_plan_df,
+            start_times=start_times,
+            exact_start_time_line_name=exact_start_time_line_name,
+            start_configuration=start_configuration,
+            date=date,
+        )
 
     # - Return
 
