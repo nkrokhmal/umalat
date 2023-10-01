@@ -56,10 +56,25 @@ def combine_groups(boiling_plan_df, groups):
     return df
 
 
-def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, **make_schedule_basic_kwargs):
+def optimize_schedule_by_swapping_water_gaps(
+    boiling_plan_df,
+    # - Make schedule basic kwargs
+    optimize_cleanings=False,
+    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+    exact_start_time_line_name=None,
+    start_configuration=None,
+    date=None,
+):
     # - Make initial schedule
 
-    schedule = make_schedule_basic(boiling_plan_df, **make_schedule_basic_kwargs)
+    schedule = make_schedule_basic(
+        boiling_plan_df,
+        date=date,
+        optimize_cleanings=optimize_cleanings,
+        start_times=start_times,
+        start_configuration=start_configuration,
+        exact_start_time_line_name=exact_start_time_line_name,
+    )
     boiling_plan_df = parse_schedule_basic_info(schedule)
 
     # - Run optimization
@@ -117,7 +132,14 @@ def optimize_schedule_by_swapping_water_gaps(boiling_plan_df, **make_schedule_ba
 
         # - Make new schedule
 
-        swapped_schedule = make_schedule_basic(swapped_df, **make_schedule_basic_kwargs)
+        swapped_schedule = make_schedule_basic(
+            swapped_df,
+            date=date,
+            optimize_cleanings=optimize_cleanings,
+            start_times=start_times,
+            start_configuration=start_configuration,
+            exact_start_time_line_name=exact_start_time_line_name,
+        )
         swapped_score = calc_score(swapped_schedule)
         logger.debug("Got new score", score=score, swapped_score=swapped_score)
         if swapped_score < score:

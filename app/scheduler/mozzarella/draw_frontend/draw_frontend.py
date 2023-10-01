@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from openpyxl import Workbook
+from utils_ak.loguru import configure_loguru
 from utils_ak.os import open_file_in_os
 
 from app.enum import LineName
@@ -60,14 +61,25 @@ def draw_frontend(
 
 
 def test():
+    # - Ignore warnings
+
+    import warnings
+
+    warnings.filterwarnings("ignore")
+
+    # - Configure loguru
+
+    configure_loguru()
+
+    # - Draw frontend
     output = draw_frontend(
         str(
             get_repo_path()
             / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
         ),
         start_times={LineName.WATER: "06:00", LineName.SALT: "05:00"},
-        exact_start_time_line_name=LineName.SALT,
-        optimize=False,
+        exact_start_time_line_name=LineName.WATER,
+        optimize=True,
     )
 
     output["workbook"].save("test.xlsx")

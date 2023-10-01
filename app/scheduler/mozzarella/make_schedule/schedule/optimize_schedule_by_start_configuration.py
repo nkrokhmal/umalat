@@ -45,14 +45,15 @@ def test_seq():
 
 def optimize_schedule_by_start_configuration(
     boiling_plan_df,
+    # - Make schedule basic kwargs
+    optimize_cleanings=False,
+    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
     exact_start_time_line_name=None,
-    **make_schedule_basic_kwargs,
+    start_configuration=None,
+    date=None,
 ):
-    # - Prepare arguments
-    start_times = make_schedule_basic_kwargs.get("start_times", {LineName.WATER: "08:00", LineName.SALT: "07:00"})
-    start_configuration = make_schedule_basic_kwargs.get("start_configuration")
-
     # - Get start configuration if needed
+
     if not start_configuration:
         boilings_by_line_name = make_boilings(boiling_plan_df)
         schedule = make_schedule_from_boilings(
@@ -63,6 +64,7 @@ def optimize_schedule_by_start_configuration(
         start_configuration = parse_start_configuration(schedule)
 
     # - Get neighbor start configurations
+
     logger.debug("Initial start configuration", start_configuration=start_configuration)
     if not start_configuration:
         start_configurations = [None]
@@ -113,16 +115,21 @@ def optimize_schedule_by_start_configuration(
     for configuration in start_configurations:
         schedule = optimize_schedule_by_swapping_water_gaps(
             boiling_plan_df,
+            date=date,
+            optimize_cleanings=optimize_cleanings,
+            start_times=start_times,
+            exact_start_time_line_name=exact_start_time_line_name,
             start_configuration=configuration,
-            **make_schedule_basic_kwargs,
         )
         res.append(
-            {
-                "schedule": schedule,
-                "start_configuration": configuration,
-                "args": args,
-                "kwargs": make_schedule_basic_kwargs,
-            }
+            dict(
+                schedule=schedule,
+                date=date,
+                optimize_cleanings=optimize_cleanings,
+                start_times=start_times,
+                exact_start_time_line_name=exact_start_time_line_name,
+                start_configuration=configuration,
+            )
         )
     logger.debug(
         "Optimization results", results=[calc_score(value["schedule"], start_times=start_times) for value in res]
@@ -133,49 +140,6 @@ def optimize_schedule_by_start_configuration(
     value = min(
         res, key=lambda value: calc_score(value["schedule"], start_times=start_times)
     )  # return minimum score time
-
-    # - Fix start time if needed
-
-    if not exact_start_time_line_name:
-        return value["schedule"]
-
-    start_times = dict(start_times)
-
-    time_by_line = exact_start_time_line_name
-    time_not_by_line = LineName.WATER if time_by_line == LineName.SALT else LineName.SALT
-    boilings_by_line_name = {
-        line_name: [
-            boiling
-            for boiling in value["schedule"]["master"]["boiling", True]
-            if boiling.props["boiling_model"].line.name == line_name
-        ]
-        for line_name in [LineName.WATER, LineName.SALT]
-    }
-
-    if not all(boilings_by_line_name.values()):
-        return value["schedule"]
-
-    first_boilings = {k: v[0] for k, v in boilings_by_line_name.items()}
-    first_boiling = min(first_boilings.values(), key=lambda boiling: boiling.x[0])
-    second_boiling = max(first_boilings.values(), key=lambda boiling: boiling.x[0])
-    if first_boiling.props["boiling_model"].line.name == time_by_line:
-        # time already set by proper line
-        return value["schedule"]
-    else:
-        start_times[time_not_by_line] = cast_time(
-            cast_t(start_times[time_not_by_line])
-            + cast_t(start_times[time_by_line])
-            - second_boiling["melting_and_packing"].x[0]
-        )
-
-    value["kwargs"].pop("start_times", None)
-    value["kwargs"].pop("start_configuration", None)
-    schedule = make_schedule_basic(
-        boiling_plan_df,
-        start_times=start_times,
-        start_configuration=value["start_configuration"],
-        *value["args"],
-        **value["kwargs"],
-    )
+    schedule = value["schedule"]
 
     return schedule
