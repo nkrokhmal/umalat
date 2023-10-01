@@ -46,21 +46,21 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default="08:00",
     )
+    exact_melting_time_by_line = wtforms.SelectField(
+        "Выберите основную линию (по ней время будет выставляться точно)",
+        validators=[Optional()],
+        choices=[(LineName.SALT, LineName.SALT), (LineName.WATER, LineName.WATER)],
+        default=LineName.SALT,
+    )
+    optimize = wtforms.BooleanField(
+        "Оптимизировать время побочной линии",
+        validators=[Optional()],
+        default=True,
+    )
     add_full_boiling = wtforms.BooleanField(
         "Вставить короткую мойку внутри дня по правилу 15 часов",
         validators=[Optional()],
         default=True,
-    )
-    optimize = wtforms.BooleanField(
-        "Оптимизировать расписание",
-        validators=[Optional()],
-        default=True,
-    )
-    exact_melting_time_by_line = wtforms.SelectField(
-        "Выберите линию, по которой будет выставляться точное время начала плавления при оптимизации",
-        validators=[Optional()],
-        choices=[(LineName.SALT, LineName.SALT), (LineName.WATER, LineName.WATER)],
-        default=LineName.SALT,
     )
 
 

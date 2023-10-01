@@ -21,7 +21,7 @@ def calc_score(
             line_lengths[line_name] = end - beg
 
             # add penalty for time difference from start_times
-            if start_times:
+            if start_times and start_times.get(line_name):
                 score += abs(beg_melting - cast_t(start_times[line_name])) / 10
         else:
             line_lengths[line_name] = 0
