@@ -79,7 +79,7 @@ def optimize_schedule_by_swapping_water_gaps(
 
     # - Run optimization
 
-    score = calc_score(schedule)
+    score = calc_score(schedule, start_times=start_times)
 
     water_boilings = [
         b for b in schedule["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.WATER
@@ -140,7 +140,7 @@ def optimize_schedule_by_swapping_water_gaps(
             start_configuration=start_configuration,
             exact_start_time_line_name=exact_start_time_line_name,
         )
-        swapped_score = calc_score(swapped_schedule)
+        swapped_score = calc_score(swapped_schedule, start_times=start_times)
         logger.debug("Got new score", score=score, swapped_score=swapped_score)
         if swapped_score < score:
             # success - found something better!

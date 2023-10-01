@@ -132,13 +132,24 @@ def optimize_schedule_by_start_configuration(
             )
         )
     logger.debug(
-        "Optimization results", results=[calc_score(value["schedule"], start_times=start_times) for value in res]
+        "Optimization results",
+        results=[
+            calc_score(
+                value["schedule"],
+                start_times=start_times,
+            )
+            for value in res
+        ],
     )
 
     # - Get output value
 
     value = min(
-        res, key=lambda value: calc_score(value["schedule"], start_times=start_times)
+        res,
+        key=lambda value: calc_score(
+            value["schedule"],
+            start_times=start_times,
+        ),
     )  # return minimum score time
     schedule = value["schedule"]
 
