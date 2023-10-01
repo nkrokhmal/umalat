@@ -36,11 +36,12 @@ def make_schedule_basic(
 
     # - Make tight schedule by approximate start_times
 
-    # at least two lines present
-    days, _, _ = parse_time(start_times[start_configuration[0]])
+    if start_configuration:  # in case of one line
+        # at least two lines present
+        days, _, _ = parse_time(start_times[start_configuration[0]])
 
-    # start latter before the former
-    start_times[start_configuration[-1]] = cast_time(cast_t((days, 0, 0)))
+        # start latter before the former
+        start_times[start_configuration[-1]] = cast_time(cast_t((days, 0, 0)))
 
     # - Find optimal cleanings
 
@@ -81,7 +82,7 @@ def make_schedule_basic(
         for line_name in [LineName.WATER, LineName.SALT]
     }
 
-    if len(boilings_by_line_name.keys()) == 1:
+    if not all(boilings_by_line_name.values()):
         # Only one line - it is already fixed
         return schedule
 

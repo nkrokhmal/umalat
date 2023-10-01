@@ -82,7 +82,7 @@ def test():
         ),
         start_times={LineName.WATER: "06:00", LineName.SALT: "05:00"},
         exact_start_time_line_name=LineName.SALT,
-        optimize_start_configurations=False,
+        optimize_start_configurations=True,
         optimize_water_gaps=True,
     )
 

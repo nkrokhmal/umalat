@@ -63,11 +63,11 @@ def optimize_schedule(
             cleanings={},
             start_times=start_times,
         )
-        start_configuration = parse_start_configuration(schedule)
+        start_configuration = parse_start_configuration(schedule)  # maybe None if only one line
 
     # - Get neighbor start configurations
 
-    if optimize_start_configurations:
+    if optimize_start_configurations and start_configuration:
         logger.debug("Initial start configuration", start_configuration=start_configuration)
         if not start_configuration:
             start_configurations = [None]
