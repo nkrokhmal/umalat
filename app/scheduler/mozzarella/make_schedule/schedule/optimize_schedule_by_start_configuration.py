@@ -49,9 +49,9 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
 
     if not start_configuration:
         with code("Make basic schedule"):
-            boilings = make_boilings(boiling_plan_df)
+            boilings_by_line_name = make_boilings(boiling_plan_df)
             schedule = make_schedule_from_boilings(
-                boilings,
+                boilings_by_line_name,
                 cleanings={},
                 start_times=start_times,
             )
@@ -136,7 +136,7 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
 
     time_by_line = exact_melting_time_by_line
     time_not_by_line = LineName.WATER if time_by_line == LineName.SALT else LineName.SALT
-    boilings = {
+    boilings_by_line_name = {
         line_name: [
             boiling
             for boiling in value["schedule"]["master"]["boiling", True]
@@ -145,10 +145,10 @@ def optimize_schedule_by_start_configuration(boiling_plan_df, exact_melting_time
         for line_name in [LineName.WATER, LineName.SALT]
     }
 
-    if not all(boilings.values()):
+    if not all(boilings_by_line_name.values()):
         return value["schedule"]
 
-    first_boilings = {k: v[0] for k, v in boilings.items()}
+    first_boilings = {k: v[0] for k, v in boilings_by_line_name.items()}
     first_boiling = min(first_boilings.values(), key=lambda boiling: boiling.x[0])
     second_boiling = max(first_boilings.values(), key=lambda boiling: boiling.x[0])
     if first_boiling.props["boiling_model"].line.name == time_by_line:

@@ -62,8 +62,8 @@ def test():
             / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
         ),
         start_times={LineName.WATER: "06:00", LineName.SALT: "05:00"},
-        exact_melting_time_by_line=LineName.WATER,
-        optimize=True,
+        exact_start_time_line_name=LineName.SALT,
+        optimize=False,
     )
 
     output["workbook"].save("test.xlsx")
