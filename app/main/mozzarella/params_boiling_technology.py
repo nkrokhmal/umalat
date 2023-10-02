@@ -1,7 +1,6 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
+from app.imports.runtime import *
 from app.main import main
 from app.models import MozzarellaBoilingTechnology
 from app.utils.features.form_utils import *
@@ -27,9 +26,7 @@ def get_boiling_technology():
 @flask_login.login_required
 def edit_boiling_technology(boiling_technology_id):
     form = BoilingTechnologyForm()
-    boiling_technology = db.session.query(MozzarellaBoilingTechnology).get_or_404(
-        boiling_technology_id
-    )
+    boiling_technology = db.session.query(MozzarellaBoilingTechnology).get_or_404(boiling_technology_id)
     if form.validate_on_submit() and boiling_technology is not None:
         boiling_technology.name = form.name.data
         boiling_technology.pouring_time = form.pouring_time.data
@@ -43,9 +40,7 @@ def edit_boiling_technology(boiling_technology_id):
         return redirect(flask.url_for(".get_boiling_technology"))
 
     if boiling_technology.boiling.line is not None:
-        form.line.default = default_form_value(
-            form.line, boiling_technology.boiling.line.name
-        )
+        form.line.default = default_form_value(form.line, boiling_technology.boiling.line.name)
 
     form.process()
 

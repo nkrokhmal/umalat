@@ -1,18 +1,20 @@
 import os
 
+
 os.environ["APP_ENVIRONMENT"] = "runtime"
 
-from app.app import *
+from app.app import create_app, create_manager
+
 
 app, rq = create_app()
-manager = create_manager(app)
+create_manager(app)
 
 
-@manager.command
+@app.cli.command("run_worker")
 def run_worker():
     default_worker = rq.get_worker()
     default_worker.work()
 
 
 if __name__ == "__main__":
-    manager.run()
+    app.run()

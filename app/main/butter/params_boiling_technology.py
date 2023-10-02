@@ -1,10 +1,12 @@
-from app.imports.runtime import *
+import itertools
 
 from werkzeug.utils import redirect
-import itertools
+
+from app.imports.runtime import *
 from app.main import main
-from .forms import ButterBoilingTechnologyForm
 from app.models import ButterBoilingTechnology, ButterSKU
+
+from .forms import ButterBoilingTechnologyForm
 
 
 @main.route("/butter/get_boiling_technology", methods=["GET", "POST"])
@@ -27,9 +29,7 @@ def butter_get_boiling_technology():
 @flask_login.login_required
 def butter_edit_boiling_technology(boiling_technology_id):
     form = ButterBoilingTechnologyForm()
-    boiling_technology = db.session.query(ButterBoilingTechnology).get_or_404(
-        boiling_technology_id
-    )
+    boiling_technology = db.session.query(ButterBoilingTechnology).get_or_404(boiling_technology_id)
     if form.validate_on_submit() and boiling_technology is not None:
         boiling_technology.name = form.name.data
         boiling_technology.separator_runaway_time = form.separator_runaway_time.data

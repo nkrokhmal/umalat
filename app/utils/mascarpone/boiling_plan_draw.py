@@ -1,242 +1,150 @@
-from app.imports.runtime import *
+from dataclasses import dataclass
+
+import openpyxl
+import pandas as pd
 
 from openpyxl.utils.cell import column_index_from_string
 
+from app.imports.runtime import *
+from app.models import *
 from app.utils.features.merge_boiling_utils import CircularList
 from app.utils.features.openpyxl_wrapper import ExcelBlock
-from app.models import *
+
 
 Cell = collections.namedtuple("Cell", "col, col_name")
 
 COLUMNS = {
     "boiling_number": Cell(column_index_from_string("A"), "A"),
-    "boiling_type": Cell(column_index_from_string("B"), "B"),
-    "output": Cell(column_index_from_string("C"), "C"),
-    "fermentators": Cell(column_index_from_string("D"), "D"),
-    "name": Cell(column_index_from_string("E"), "E"),
-    "kg_output": Cell(column_index_from_string("F"), "F"),
-    "kg": Cell(column_index_from_string("G"), "G"),
-    "remainings": Cell(column_index_from_string("H"), "H"),
-    "total_output": Cell(column_index_from_string("J"), "J"),
-    "delimiter": Cell(column_index_from_string("K"), "K"),
-    "delimiter_int": Cell(column_index_from_string("N"), "N"),
+    "line": Cell(column_index_from_string("B"), "B"),
+    "boiling_type": Cell(column_index_from_string("C"), "C"),
+    "name": Cell(column_index_from_string("D"), "D"),
+    "kg": Cell(column_index_from_string("E"), "E"),
+    "remainings": Cell(column_index_from_string("G"), "G"),
+    "total_output_kg": Cell(column_index_from_string("G"), "G"),
+    "total_input_kg": Cell(column_index_from_string("H"), "H"),
+    "delimiter": Cell(column_index_from_string("I"), "I"),
+    "delimiter_int": Cell(column_index_from_string("L"), "L"),
 }
 
 ROWS = {
     "total_volume": 2,
 }
 
-SKU_SHEET_NAME = "SKU Маскарпоне"
-PLAN_SHEET_NAME = "План варок"
+SKU_SHEET_NAME: str = "SKU Маскарпоне"
+PLAN_SHEET_NAME: str = "План варок"
 
 
-def draw_skus_fermentator(wb):
-    sheet_name = "SKU заквасочник"
+def draw_skus(wb: openpyxl.Workbook, skus: list[SKU], sheet_name: str, row_number: int | None = None) -> int:
     excel_client = ExcelBlock(wb[sheet_name])
-
-    cur_i = 1
-    cur_i += 1
-
-    excel_client.draw_row(
-        cur_i,
-        ["-"],
-        set_border=False,
-    )
-    cur_i += 1
-
-    skus_mascarpone = db.session.query(MascarponeSKU).all()
-    for sku in skus_mascarpone:
-        if sku.group.name == "Маскарпоне":
-            sku_fermentator = [sku.name, 480, 450, 255] + [225] * 3 + [""] * 4
-        else:
-            sku_fermentator = [sku.name] + [""] * 9 + [250]
-
+    if row_number is None:
         excel_client.draw_row(
-            cur_i,
-            sku_fermentator,
-            set_border=False,
-        )
-        cur_i += 1
-
-    skus_cream_cheese = db.session.query(CreamCheeseSKU).all()
-    for sku in skus_cream_cheese:
-        sku_fermentator = [sku.name] + [""] * 2 + [450] * 8
-        excel_client.draw_row(
-            cur_i,
-            sku_fermentator,
-            set_border=False,
-        )
-        cur_i += 1
-
-
-def draw_skus(wb, data_sku, sheet_name, cur_i=None):
-    grouped_skus = data_sku
-    grouped_skus.sort(key=lambda x: x.name, reverse=False)
-    excel_client = ExcelBlock(wb[sheet_name])
-    excel_client.draw_row(1, ["-", "-", "-"], set_border=False)
-    if not cur_i:
-        cur_i = 2
-
-    for group_sku in grouped_skus:
-        excel_client.draw_row(
-            cur_i,
+            1,
             [
-                group_sku.name,
-                group_sku.made_from_boilings[0].to_str(),
-                group_sku.made_from_boilings[0].output_coeff,
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
             ],
             set_border=False,
         )
-        cur_i += 1
+        row_number = 2
 
-    return cur_i
-
-
-def draw_fermentators(wb):
-    sheet_name = "Заквасочники"
-    excel_client = ExcelBlock(wb[sheet_name])
-    cur_i = 2
-    for fermentators in [
-        ["1-2"],
-        ["3-4"],
-        ["1"],
-        ["2"],
-        ["3"],
-        ["4"],
-        ["5"],
-        ["6"],
-        ["7"],
-    ]:
+    for sku in sorted(skus, key=lambda x: x.name, reverse=False):
+        b: MascarponeBoiling = sku.made_from_boilings[0]
         excel_client.draw_row(
-            cur_i,
-            fermentators,
+            row_number,
+            [sku.name, b.to_str(), b.output_coeff, b.output_constant, b.input_kg, sku.line.name],
             set_border=False,
         )
-        cur_i += 1
+        row_number += 1
+
+    return row_number
 
 
-def get_colour_by_name(sku_name, skus):
-    sku = [x for x in skus if x.name == sku_name]
-    if len(sku) > 0:
-        return sku[0].colour
-    else:
-        return flask.current_app.config["COLORS"]["Default"]
+def get_sku_color(sku_name: str, skus: list[SKU]) -> str:
+    sku = next((x for x in skus if x.name == sku_name), None)
+    return flask.current_app.config["COLORS"]["Default"] if sku is None else sku.colour
 
 
 def draw_boiling_sheet(
-    wb, df, skus, sheet_name, type=None, cur_row=None, normalize=True
+    wb: openpyxl.Workbook, df: pd.DataFrame, skus: list[SKU], sheet_name: str, row: int | None = None
 ):
-    if not cur_row:
-        cur_row = 3
+    if df.empty:
+        return wb, row
 
-    if not df.empty:
-        excel_client = ExcelBlock(wb[sheet_name])
+    if row is None:
+        row = 3
 
-        if type:
-            fermentator_circular = CircularList(1)
-            fermentator_circular.create([5, 6, 7])
-            fermentator_iterator = iter(fermentator_circular)
-            fermentator_number = next(fermentator_iterator)
-        values = []
+    excel_client = ExcelBlock(wb[sheet_name])
+    sku_columns = ["name", "kg", "boiling_type", "line"]
+    empty_columns = ["name", "delimiter", "kg"]
+    total_input_kg = 0
 
-        sku_names = [x.name for x in skus]
-        df_filter = df[df["name"].isin(sku_names)].copy()
+    for group_id, group in df.groupby("id", sort=False):
+        for i, sku in group.iterrows():
+            excel_client.colour = sku["sku"].colour[1:]
+            total_input_kg = sku["total_input_kg"]
 
-        for id, grp in df_filter.groupby("id", sort=False):
-            for i, row in grp.iterrows():
-                columns = [x for x in row.index if x in COLUMNS.keys()]
-                v = [row[column] for column in columns]
-                c = [COLUMNS[column] for column in columns]
-                values.append(dict(zip(c, v)))
-            empty_columns = [
-                COLUMNS["name"],
-                COLUMNS["output"],
-                COLUMNS["delimiter"],
-            ]
-            values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
+            excel_client.color_cell(row=row, col=COLUMNS["boiling_type"].col)
 
-        for v in values:
-            if v[COLUMNS["name"]] != "-":
-                del v[COLUMNS["boiling_type"]]
-                del v[COLUMNS["output"]]
-            value = v.values()
-
-            column = [x.col for x in v.keys()]
             formula = '=IF({1}{0}="-", "", 1 + SUM(INDIRECT(ADDRESS(2,COLUMN({2}{0})) & ":" & ADDRESS(ROW(),COLUMN({2}{0})))))'.format(
-                cur_row,
+                row,
                 COLUMNS["delimiter"].col_name,
                 COLUMNS["delimiter_int"].col_name,
             )
-
-            colour = get_colour_by_name(v[COLUMNS["name"]], skus)
-            excel_client.colour = colour[1:]
-
             excel_client.draw_cell(
-                row=cur_row,
+                row=row,
                 col=COLUMNS["boiling_number"].col,
                 value=formula,
                 set_border=False,
             )
             excel_client.draw_row(
-                row=cur_row, values=value, cols=column, set_border=False
+                row=row,
+                values=[sku[key] for key in sku_columns],
+                cols=[COLUMNS[key].col for key in sku_columns],
+                set_border=False,
             )
+            row += 1
 
-            excel_client.color_cell(row=cur_row, col=COLUMNS["boiling_type"].col)
-            excel_client.color_cell(row=cur_row, col=COLUMNS["output"].col)
-            excel_client.color_cell(row=cur_row, col=COLUMNS["kg_output"].col)
+        excel_client.colour = "FFFFFF"
+        excel_client.draw_row(
+            row=row,
+            values=["-"] * len(empty_columns),
+            cols=[COLUMNS[key].col for key in empty_columns],
+            set_border=False,
+        )
+        excel_client.draw_cell(
+            row=row,
+            col=COLUMNS["total_input_kg"].col,
+            value=total_input_kg,
+            set_border=False,
+        )
+        row += 1
 
-            if type:
-                if v[COLUMNS["name"]] != "-":
-                    excel_client.draw_cell(
-                        row=cur_row,
-                        col=COLUMNS["fermentators"].col,
-                        value=fermentator_number,
-                        set_border=False,
-                    )
-                else:
-                    fermentator_number = next(fermentator_iterator)
-            cur_row += 1
-    return wb, cur_row
+    return wb, row
 
 
 def draw_boiling_plan(mascarpone_df, cream_cheese_df, cream_df, wb):
-    mascarpone_skus = (
-        db.session.query(MascarponeSKU)
-        .join(Group)
-        .filter(Group.name == "Маскарпоне")
-        .all()
-    )
-    cream_cheese_skus = db.session.query(CreamCheeseSKU).all()
-    cream_skus = (
-        db.session.query(MascarponeSKU).join(Group).filter(Group.name == "Сливки").all()
-    )
+    skus: list[SKU] = db.session.query(MascarponeSKU).join(Group).all()
 
-    cur_i = None
-    cur_i = draw_skus(wb, mascarpone_skus, SKU_SHEET_NAME, cur_i)
-    cur_i = draw_skus(wb, cream_cheese_skus, SKU_SHEET_NAME, cur_i)
-    _ = draw_skus(wb, cream_skus, "SKU Маскарпоне", cur_i)
-    draw_skus_fermentator(wb)
+    draw_skus(wb, skus, SKU_SHEET_NAME)
 
-    draw_fermentators(wb)
-
-    SkuGroup = collections.namedtuple("SkuGroup", "df, sheet_name, skus, type")
-    cur_row = None
+    SkuGroup = collections.namedtuple("SkuGroup", "df, sheet_name, skus")
+    row_number = None
     for item in [
-        SkuGroup(cream_df, PLAN_SHEET_NAME, cream_skus, None),
-        SkuGroup(mascarpone_df, PLAN_SHEET_NAME, mascarpone_skus, None),
-        SkuGroup(cream_cheese_df, PLAN_SHEET_NAME, cream_cheese_skus, "cream_cheese"),
+        SkuGroup(cream_df, PLAN_SHEET_NAME, skus),
+        SkuGroup(mascarpone_df, PLAN_SHEET_NAME, skus),
+        SkuGroup(cream_cheese_df, PLAN_SHEET_NAME, skus),
     ]:
 
-        wb, cur_row = draw_boiling_sheet(
-            wb=wb,
-            df=item.df,
-            sheet_name=item.sheet_name,
-            skus=item.skus,
-            type=item.type,
-            cur_row=cur_row,
+        wb, row_number = draw_boiling_sheet(
+            wb=wb, df=item.df, sheet_name=item.sheet_name, skus=item.skus, row=row_number
         )
 
-    for sheet in wb.sheetnames:
-        wb[sheet].views.sheetView[0].tabSelected = False
+    # for sheet in wb.sheetnames:
+    #     wb[sheet].views.sheetView[0].tabSelected = False
+
     wb.active = 2
     return wb

@@ -1,16 +1,18 @@
 from flask import Blueprint
 
+
 main = Blueprint("main", __name__)
 
-from . import download, index, batch, login
-from .mozzarella import *
-from .ricotta import *
-from .mascarpone import *
+from app.main.adygea import *
+
+from . import batch, download, index, login
 from .additional import *
-from .butter import *
-from .milk_project import *
-from .adygea import *
-from .contour_washers import *
 from .approved import *
-from .params import *
+from .butter import *
+from .contour_washers import *
 from .departments_schedule import *
+from .mascarpone import *
+from .milk_project import *
+from .mozzarella import *
+from .params import *
+from .ricotta import *

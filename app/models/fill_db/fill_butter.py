@@ -1,7 +1,11 @@
-from ...enum import LineName
+import os
+
 import pandas as pd
-import json
-from app.models import *
+
+from app.enum import LineName
+from app.globals import db
+from app.models.basic import Group, Line
+from app.models.butter import ButterBoiling, ButterBoilingTechnology, ButterFormFactor, ButterSKU
 
 
 def read_params():
@@ -40,11 +44,12 @@ def fill_boiling_technologies():
         line_name = LineName.BUTTER
         technology = ButterBoilingTechnology(
             name=ButterBoilingTechnology.create_name(
-                line=line_name, percent=bt["Процент"],
+                line=line_name,
+                percent=bt["Процент"],
                 weight=bt["Вес нетто"],
                 form_factor=bt["Название форм фактора"],
                 flavoring_agent=bt["Вкусовая добавка"],
-                is_lactose=True if bt["Наличие лактозы"] == "Да" else False
+                is_lactose=True if bt["Наличие лактозы"] == "Да" else False,
             ),
             separator_runaway_time=bt["Разгон сепаратора"],
             pasteurization_time=bt["Пастеризация"],
@@ -85,12 +90,12 @@ def fill_boilings():
             & (
                 x.name
                 == ButterBoilingTechnology.create_name(
-                   line=line_name,
-                   percent=b["Процент"],
-                   weight=b["Вес нетто"],
-                   form_factor=b["Название форм фактора"],
-                   flavoring_agent=b["Вкусовая добавка"],
-                   is_lactose=True if b["Наличие лактозы"] == "Да" else False
+                    line=line_name,
+                    percent=b["Процент"],
+                    weight=b["Вес нетто"],
+                    form_factor=b["Название форм фактора"],
+                    flavoring_agent=b["Вкусовая добавка"],
+                    is_lactose=True if b["Наличие лактозы"] == "Да" else False,
                 )
             )
         ]
@@ -162,11 +167,11 @@ def fill_sku():
         add_sku.made_from_boilings = [
             x
             for x in boilings
-            if (x.percent == sku["Процент"]) &
-               (x.line_id == add_sku.line.id) &
-               (x.flavoring_agent == sku["Вкусовая добавка"]) &
-               (x.is_lactose == (True if sku["Наличие лактозы"] == "Да" else False)) &
-               (x.weight_netto == sku["Вес нетто"])
+            if (x.percent == sku["Процент"])
+            & (x.line_id == add_sku.line.id)
+            & (x.flavoring_agent == sku["Вкусовая добавка"])
+            & (x.is_lactose == (True if sku["Наличие лактозы"] == "Да" else False))
+            & (x.weight_netto == sku["Вес нетто"])
         ]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]

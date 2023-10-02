@@ -1,6 +1,6 @@
 from wtforms.validators import ValidationError
 
-from app.scheduler.time import *
+from app.scheduler.time_utils import *
 
 
 def time_validator(form, field):
@@ -12,6 +12,5 @@ def time_validator(form, field):
         raise ValidationError(wrong_input_msg)
 
 
-if __name__ == '__main__':
-    time_validator(None, utils.dotdict({'data': '7:00+1'}))
-
+if __name__ == "__main__":
+    time_validator(None, utils.dotdict({"data": "7:00+1"}))

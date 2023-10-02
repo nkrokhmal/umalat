@@ -1,8 +1,13 @@
 # fmt: off
+import json
+
 from flask_wtf import FlaskForm
-from wtforms import *
-from wtforms.validators import Required, Optional
+from utils_ak.builtin import cast_bool
+from wtforms import BooleanField, DateTimeField, FloatField, IntegerField, StringField
+from wtforms.validators import DataRequired, Optional
+
 from app.models import *
+
 
 # todo maybe: better list form
 
@@ -32,14 +37,14 @@ def fill_properties(form, properties):
         elif v['type'] == 'integer':
             setattr(properties, field, int(form[properties.department() + '__' + field]))
         elif v['type'] == 'boolean':
-            setattr(properties, field, utils.cast_bool(form[properties.department() + '__' + field]))
+            setattr(properties, field, cast_bool(form[properties.department() + '__' + field]))
         else:
             setattr(properties, field, form[properties.department() + '__' + field])
     return properties
 
 
 class ScheduleForm(FlaskForm):
-    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[Required()])
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
 
 
 class ScheduleDateForm(FlaskForm):

@@ -1,7 +1,16 @@
-from ...enum import LineName
+import os
+
 import pandas as pd
-import json
-from app.models import *
+
+from app.enum import LineName
+from app.globals import db
+from app.models.basic import Group, Line
+from app.models.milk_project import (
+    MilkProjectBoiling,
+    MilkProjectBoilingTechnology,
+    MilkProjectFormFactor,
+    MilkProjectSKU,
+)
 
 
 def read_params():
@@ -81,10 +90,10 @@ def fill_boilings():
             & (
                 x.name
                 == MilkProjectBoilingTechnology.create_name(
-                   line=line_name,
-                   percent=b["Процент"],
-                   weight=b["Вес нетто"],
-                   form_factor=b["Название форм фактора"],
+                    line=line_name,
+                    percent=b["Процент"],
+                    weight=b["Вес нетто"],
+                    form_factor=b["Название форм фактора"],
                 )
             )
         ]
@@ -154,10 +163,10 @@ def fill_sku():
         add_sku.made_from_boilings = [
             x
             for x in boilings
-            if (x.percent == sku["Процент"]) &
-               (x.line_id == add_sku.line.id) &
-               (x.weight_netto == sku["Вес нетто"]) &
-               (x.name == sku["Название варки"])
+            if (x.percent == sku["Процент"])
+            & (x.line_id == add_sku.line.id)
+            & (x.weight_netto == sku["Вес нетто"])
+            & (x.name == sku["Название варки"])
         ]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]

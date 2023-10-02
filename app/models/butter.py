@@ -1,8 +1,5 @@
-from app.imports.runtime import *
-
-from sqlalchemy.orm import backref
-
-from .basic import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from app.globals import mdb
+from app.models.basic import SKU, Boiling, BoilingTechnology, FormFactor, Group, Line
 
 
 class ButterSKU(SKU):
@@ -41,29 +38,43 @@ class ButterBoiling(Boiling):
     is_lactose = mdb.Column(mdb.Boolean)
     percent = mdb.Column(mdb.Integer)
 
-    def to_str(self):
-        values = [self.percent]
-        values = [str(v) for v in values if v]
-        return ", ".join(values)
+    def to_str(self) -> str:
+        return ", ".join([str(self.percent)])
 
 
 class ButterBoilingTechnology(BoilingTechnology):
     __tablename__ = "butter_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "butter_boiling_technology"}
 
-    id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
-    )
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
 
     separator_runaway_time = mdb.Column(mdb.Integer)
     pasteurization_time = mdb.Column(mdb.Integer)
     increasing_temperature_time = mdb.Column(mdb.Integer)
 
     @staticmethod
-    def create_name(form_factor, line, percent, weight, flavoring_agent, is_lactose):
-        boiling_name = [percent]
-        boiling_name = ", ".join([str(v) for v in boiling_name if v])
+    def create_name(
+        form_factor: str,
+        line: str,
+        percent: float | int,
+        weight: float | int,
+        flavoring_agent: str,
+        is_lactose: bool,
+    ) -> str:
         return "Линия {}, Форм фактор {}, Вес {}, Вкусовая добавка {}, {}, {}".format(
-            line, form_factor, weight, flavoring_agent, 'без лактозы' if not is_lactose else '', boiling_name,
+            line,
+            form_factor,
+            weight,
+            flavoring_agent,
+            "без лактозы" if not is_lactose else "",
+            percent,
         )
 
+
+__all__ = [
+    "ButterBoiling",
+    "ButterBoilingTechnology",
+    "ButterLine",
+    "ButterSKU",
+    "ButterFormFactor",
+]

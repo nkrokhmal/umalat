@@ -15,7 +15,7 @@
 #
 #         values = []
 #
-#         default_boiling_volume = cast_model(Line, line_name).output_ton
+#         default_boiling_volume = cast_model(Line, line_name).output_kg
 #
 #         left = default_boiling_volume
 #

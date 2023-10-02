@@ -1,12 +1,13 @@
 from app.imports.runtime import *
-from app.utils.mozzarella.boiling_plan_create import boiling_plan_create
-from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan
-from app.utils.files.utils import move_boiling_file, save_request
-from app.scheduler.mozzarella import *
-from app.utils.sku_plan import *
-from app.utils.parse_remainings import *
 from app.main import main
 from app.models import *
+from app.scheduler.mozzarella import *
+from app.utils.files.utils import move_boiling_file, save_request
+from app.utils.mozzarella.boiling_plan_create import boiling_plan_create
+from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan
+from app.utils.parse_remainings import *
+from app.utils.sku_plan import *
+
 from .forms import BoilingPlanFastForm
 
 
@@ -37,8 +38,10 @@ def mozzarella_boiling_plan():
                     filename=tmp_file_path,
                     data_only=True,
                 )
-                yesterday_boiling_plan_df = read_boiling_plan(wb_not_calculated, validate=False)[['sku_name', 'original_kg']]
-                yesterday_boiling_plan_df = yesterday_boiling_plan_df.groupby('sku_name').sum()
+                yesterday_boiling_plan_df = read_boiling_plan(wb_not_calculated, validate=False)[
+                    ["sku_name", "original_kg"]
+                ]
+                yesterday_boiling_plan_df = yesterday_boiling_plan_df.groupby("sku_name").sum()
 
         skus_req = get_skus(skus_req, skus, total_skus)
         skus_grouped = group_skus(skus_req, boilings)
@@ -49,7 +52,7 @@ def mozzarella_boiling_plan():
             template_path=flask.current_app.config["TEMPLATE_MOZZARELLA_BOILING_PLAN"],
             yesterday_boiling_plan_df=yesterday_boiling_plan_df,
         )
-        sku_plan_client.fill_remainigs_list()
+        sku_plan_client.fill_remainings_list()
         sku_plan_client.fill_mozzarella_sku_plan()
 
         excel_compiler, wb, wb_data_only, filename, filepath = move_boiling_file(

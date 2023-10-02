@@ -1,8 +1,5 @@
-from app.imports.runtime import *
-
-from sqlalchemy.orm import backref
-
-from .basic import SKU, Group, Line, FormFactor, Boiling, BoilingTechnology
+from app.globals import mdb
+from app.models.basic import SKU, Boiling, BoilingTechnology, FormFactor, Line
 
 
 class AdygeaSKU(SKU):
@@ -39,29 +36,34 @@ class AdygeaBoiling(Boiling):
     output_kg = mdb.Column(mdb.Integer)
     percent = mdb.Column(mdb.Integer)
 
-    def to_str(self):
-        values = [self.percent]
-        values = [str(v) for v in values if v]
-        return ", ".join(values)
+    def to_str(self) -> str:
+        return str(self.percent)
 
 
 class AdygeaBoilingTechnology(BoilingTechnology):
     __tablename__ = "adygea_boiling_technologies"
     __mapper_args__ = {"polymorphic_identity": "adygea_boiling_technology"}
 
-    id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True
-    )
+    id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
 
     collecting_time = mdb.Column(mdb.Integer)
     coagulation_time = mdb.Column(mdb.Integer)
     pouring_off_time = mdb.Column(mdb.Integer)
 
     @staticmethod
-    def create_name(form_factor, line, percent, weight,):
-        boiling_name = [percent]
-        boiling_name = ", ".join([str(v) for v in boiling_name if v])
-        return "Линия {}, Форм фактор {}, Вес {}, {}".format(
-            line, form_factor, weight, boiling_name,
-        )
+    def create_name(
+        form_factor: str,
+        line: str,
+        percent: float | int,
+        weight: float | int,
+    ) -> str:
+        return f"Линия {line}, Форм фактор {form_factor}, Вес {weight}, {percent}"
 
+
+__all__ = [
+    "AdygeaBoiling",
+    "AdygeaBoilingTechnology",
+    "AdygeaLine",
+    "AdygeaSKU",
+    "AdygeaFormFactor",
+]

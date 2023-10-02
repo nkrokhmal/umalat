@@ -1,6 +1,6 @@
-from app.imports.runtime import *
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
-from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
+from app.imports.runtime import *
 
 
 class ExcelBlock:
@@ -15,9 +15,7 @@ class ExcelBlock:
     def default_colour(self, row, col, set_colour):
         if set_colour:
             if (self.colour != "FFFFFF") and (self.colour != None):
-                self.sheet.cell(row, col).fill = PatternFill(
-                    "solid", fgColor=self.colour
-                )
+                self.sheet.cell(row, col).fill = PatternFill("solid", fgColor=self.colour)
 
     def color_cell(self, row, col, color=None):
         color = color if color else self.colour
@@ -96,9 +94,7 @@ class ExcelBlock:
         font_size=None,
         is_bold=False,
     ):
-        self.sheet.merge_cells(
-            start_row=beg_row, end_row=end_row, start_column=beg_col, end_column=end_col
-        )
+        self.sheet.merge_cells(start_row=beg_row, end_row=end_row, start_column=beg_col, end_column=end_col)
         self.default_colour(beg_row, beg_col, set_colour)
         self.default_font(beg_row, beg_col, set_font)
         self.draw_cell(
@@ -126,35 +122,26 @@ def merge_workbooks(wb1, wb2):
         ws2 = wb2.create_sheet(sheet_name, i)
 
         for i in range(1, max_col + 1):
-            ws2.column_dimensions[
+            ws2.column_dimensions[openpyxl.utils.get_column_letter(i)].hidden = ws1.column_dimensions[
                 openpyxl.utils.get_column_letter(i)
-            ].hidden = ws1.column_dimensions[openpyxl.utils.get_column_letter(i)].hidden
-            ws2.column_dimensions[
+            ].hidden
+            ws2.column_dimensions[openpyxl.utils.get_column_letter(i)].width = ws1.column_dimensions[
                 openpyxl.utils.get_column_letter(i)
-            ].width = ws1.column_dimensions[openpyxl.utils.get_column_letter(i)].width
+            ].width
 
         for i in range(1, max_row + 1):
             for j in range(1, max_col + 1):
                 ws2.cell(row=i, column=j).value = ws1.cell(row=i, column=j).value
                 if ws1.cell(row=i, column=j).has_style:
-                    ws2.cell(row=i, column=j).fill = copy.copy(
-                        ws1.cell(row=i, column=j).fill
-                    )
-                    ws2.cell(row=i, column=j).font = copy.copy(
-                        ws1.cell(row=i, column=j).font
-                    )
-                    ws2.cell(row=i, column=j).border = copy.copy(
-                        ws1.cell(row=i, column=j).border
-                    )
-                    ws2.cell(row=i, column=j).alignment = copy.copy(
-                        ws1.cell(row=i, column=j).alignment
-                    )
+                    ws2.cell(row=i, column=j).fill = copy.copy(ws1.cell(row=i, column=j).fill)
+                    ws2.cell(row=i, column=j).font = copy.copy(ws1.cell(row=i, column=j).font)
+                    ws2.cell(row=i, column=j).border = copy.copy(ws1.cell(row=i, column=j).border)
+                    ws2.cell(row=i, column=j).alignment = copy.copy(ws1.cell(row=i, column=j).alignment)
     return ws2
 
 
-def set_default_sheet(wb, sheet_name='Расписание'):
+def set_default_sheet(wb, sheet_name="Расписание"):
     for s in range(len(wb.sheetnames)):
         if wb.sheetnames[s] == sheet_name:
             wb.active = s
             break
-

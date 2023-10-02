@@ -1,23 +1,22 @@
 import flask
+import flask_login
+import openpyxl
 
-from app.imports.runtime import *
+from utils_ak.openpyxl import write_metadata
 
 from app.main import main
-from app.scheduler import run_adygea, run_milk_project, run_consolidated_old
-from app.models import MilkProjectSKU, AdygeaSKU
-
-from app.utils.batches.batch import *
-from app.scheduler import draw_excel_frontend
-from app.utils.files.utils import save_schedule, save_schedule_dict, create_if_not_exists
-from app.utils.milk_project.schedule_tasks import MilkProjectScheduleTask
-from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
-from app.scheduler.time import *
 from app.main.adygea.update_task_and_batches import update_task_and_batches as update_task_and_batches_adygea
-from app.main.milk_project.update_task_and_batches import update_task_and_batches as update_task_and_batches_milk_project
+from app.main.milk_project.forms import ScheduleForm
+from app.main.milk_project.run_consolidated_old import run_consolidated_old
+from app.main.milk_project.update_task_and_batches import (
+    update_task_and_batches as update_task_and_batches_milk_project,
+)
 from app.main.validators import *
-
-from .forms import ScheduleForm
-from app.scheduler.frontend import fill_grid
+from app.scheduler.adygea.draw_frontend.draw_frontend import draw_frontend as draw_frontend_adygea
+from app.scheduler.frontend_utils import fill_grid
+from app.scheduler.time_utils import *
+from app.utils.batches.batch import *
+from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 
 
 @main.route("/milk_project_schedule", methods=["GET", "POST"])
@@ -36,62 +35,31 @@ def milk_project_schedule():
         data_dir = os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
             date.strftime("%Y-%m-%d"),
-            flask.current_app.config["BOILING_PLAN_FOLDER"])
+            flask.current_app.config["BOILING_PLAN_FOLDER"],
+        )
         create_if_not_exists(data_dir)
 
         file_path = os.path.join(data_dir, file.filename)
         if file:
             file.save(file_path)
         wb = openpyxl.load_workbook(
-            filename=os.path.join(
-                data_dir, file.filename
-            ),
+            filename=os.path.join(data_dir, file.filename),
             data_only=True,
         )
-        first_batch_ids = {'milk_project': form.batch_number.data}
-        milk_project_output = run_milk_project(wb,
-                                               path=None,
-                                               start_time=beg_time)
-        prepare_start_time = beg_time
-        if len(milk_project_output["boiling_plan_df"]) > 0:
-            beg_time = cast_time(milk_project_output["schedule"].y[0] - 3) # 15 minutes before milk project ends # todo maybe: take from parameters
-        else:
-            # when no milk project - prepare start time is before beg_time
-            prepare_start_time = cast_time(cast_t(prepare_start_time) - 12)
-            # run milk project output again to match the new timing (will be empty, but with a timeline)
-            milk_project_output = run_milk_project(wb, path=None, start_time=prepare_start_time)
+        first_batch_ids = {"milk_project": form.batch_number.data}
 
-        adygea_output = run_adygea(wb,
-                                   path=None,
-                                   start_time=beg_time,
-                                   prepare_start_time=prepare_start_time)
+        adygea_output = draw_frontend_adygea(wb, start_time=beg_time, workbook=wb)
+        schedule, schedule_wb = adygea_output["schedule"], adygea_output["workbook"]
 
-        if (
-            len(adygea_output["boiling_plan_df"]) > 0
-            and len(milk_project_output["boiling_plan_df"]) > 0
-        ):
-            with code("Set preferred header time"):
-                adygea_output["schedule"].props.update(
-                    preferred_header_time=cast_time(
-                        milk_project_output["schedule"].x[0]
-                    ),
-                )
+        if len(adygea_output["boiling_plan_df"]) > 0 and len(adygea_output["boiling_plan_df"]) > 0:
+            # Set preferred header time"
+            adygea_output["schedule"].props.update(preferred_header_time=cast_time(adygea_output["schedule"].x[0]))
 
-        schedule_wb = run_consolidated_old(
-            input_path=None,
-            prefix=None,
-            output_path=None,
-            schedules={
-                "milk_project": milk_project_output["schedule"],
-                "adygea": adygea_output["schedule"],
-            },
-            date=date,
-            wb=wb
-        )
-        utils.write_metadata(schedule_wb, json.dumps({'first_batch_ids': first_batch_ids, 'date': str(date)}))
+        write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
 
         schedule_tasks = [
-            update_task_and_batches_milk_project(schedule_wb), update_task_and_batches_adygea(schedule_wb)
+            update_task_and_batches_milk_project(schedule_wb),
+            update_task_and_batches_adygea(schedule_wb),
         ]
 
         cur_row = 2
@@ -104,12 +72,10 @@ def milk_project_schedule():
         _ = fill_grid(schedule_wb["Расписание"])
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
-        filename_schedule_pickle = (
-            f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
-        )
+        filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
         save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(
-            milk_project_output["schedule"].to_dict(),
+            adygea_output["schedule"].to_dict(),
             filename_schedule_pickle,
             date.strftime("%Y-%m-%d"),
         )
@@ -122,12 +88,7 @@ def milk_project_schedule():
 
     form.date.data = datetime.today() + timedelta(days=1)
     form.batch_number.data = (
-        BatchNumber.last_batch_number(
-            datetime.today() + timedelta(days=1),
-            "Милкпроджект",
-            group='milk_project'
-        )
-        + 1
+        BatchNumber.last_batch_number(datetime.today() + timedelta(days=1), "Милкпроджект", group="milk_project") + 1
     )
 
     return flask.render_template("milk_project/schedule.html", form=form, filename=None)

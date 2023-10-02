@@ -23,14 +23,14 @@ def forbidden(message):
     return response
 
 
-@main.errorhandler(flask_restplus.ValidationError)
+@main.errorhandler(ValueError)
 def validation_error(e):
     return bad_request(e.args[0])
 
 
 @main.errorhandler(404)
 def not_found(e):
-    return flask.render_template('404.html'), 404
+    return flask.render_template("404.html"), 404
 
 
 @main.errorhandler(500)

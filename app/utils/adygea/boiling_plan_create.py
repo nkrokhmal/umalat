@@ -16,9 +16,7 @@ def boiling_plan_create(df, request_ton=0):
     result = handle_adygea(df)
     result["kg"] = result["plan"]
     result["name"] = result["sku"].apply(lambda sku: sku.name)
-    result["boiling_type"] = result["sku"].apply(
-        lambda sku: sku.made_from_boilings[0].to_str()
-    )
+    result["boiling_type"] = result["sku"].apply(lambda sku: sku.made_from_boilings[0].to_str())
     result = result[
         [
             "id",
@@ -33,15 +31,15 @@ def boiling_plan_create(df, request_ton=0):
     return result
 
 
-
 def handle_adygea(df):
     adygea_dfs = []
-    for i, df_grouped in df.groupby('weight'):
-        df_grouped['id'] = i
+    for i, df_grouped in df.groupby("weight"):
+        df_grouped["id"] = i
         if not df.empty:
             adygea_dfs.append(df_grouped)
 
     return pd.concat(adygea_dfs)
+
 
 # def handle_adygea(df):
 #     Order = collections.namedtuple("Collection", "group")

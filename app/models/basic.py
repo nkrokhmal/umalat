@@ -1,57 +1,60 @@
 import binascii
 import hashlib
+import os
+
+import flask
 
 from flask_login import UserMixin
-from sqlalchemy import func, extract, or_
+from sqlalchemy import extract, func, or_
 from sqlalchemy.orm import backref
 
-from app.imports.runtime import *
+from app.globals import login_manager, mdb
 
 
 class User(mdb.Model, UserMixin):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = mdb.Column(mdb.Integer, primary_key=True)
     username = mdb.Column(mdb.String, unique=True)
     email = mdb.Column(mdb.String, unique=True)
-    password = mdb.Column(mdb.Binary)
+    password = mdb.Column(mdb.String)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         for property, value in kwargs.items():
-            if hasattr(value, '__iter__') and not isinstance(value, str):
+            if hasattr(value, "__iter__") and not isinstance(value, str):
                 value = value[0]
-            if property == 'password':
+            if property == "password":
                 value = self.hash_pass(value)
 
             setattr(self, property, value)
 
-    def __repr__(self):
-        return str(self.username)
+    def __repr__(self) -> str:
+        return self.username
 
     @staticmethod
-    def hash_pass(password):
-        salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
-        pwd_hash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), salt, 100000)
+    def hash_pass(password: str) -> bytes:
+        salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
+        pwd_hash = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, 100000)
         pwd_hash = binascii.hexlify(pwd_hash)
         return salt + pwd_hash
 
     @staticmethod
-    def verify_pass(provided_password, stored_password):
-        stored_password = stored_password.decode('ascii')
+    def verify_pass(provided_password: str, stored_password: str) -> bool:
+        stored_password = stored_password.decode("ascii")
         salt = stored_password[:64]
         stored_password = stored_password[64:]
-        pwd_hash = hashlib.pbkdf2_hmac('sha512', provided_password.encode('utf-8'), salt.encode('ascii'), 100000)
-        pwd_hash = binascii.hexlify(pwd_hash).decode('ascii')
+        pwd_hash = hashlib.pbkdf2_hmac("sha512", provided_password.encode("utf-8"), salt.encode("ascii"), 100000)
+        pwd_hash = binascii.hexlify(pwd_hash).decode("ascii")
         return pwd_hash == stored_password
 
 
 @login_manager.user_loader
-def user_loader(id):
-    return mdb.session.query(User).filter_by(id=id).first()
+def user_loader(user_id: int) -> User:
+    return mdb.session.query(User).filter_by(id=user_id).first()
 
 
 @login_manager.request_loader
-def request_loader(request):
-    username = request.form.get('username')
+def request_loader(request) -> User | None:
+    username = request.form.get("username")
     user = mdb.session.query(User).filter_by(username=username).first()
     return user if user else None
 
@@ -78,14 +81,10 @@ class Department(mdb.Model):
     washer = mdb.relationship("Washer", backref=backref("department", uselist=False))
 
     @staticmethod
-    def get_by_name(department_name):
-        return (
-            mdb.session.query(Department)
-                .filter(Department.name == department_name)
-                .first()
-        )
+    def get_by_name(department_name) -> "Department":
+        return mdb.session.query(Department).filter(Department.name == department_name).first()
 
-    def serialize(self):
+    def serialize(self) -> dict[str, int | str]:
         return {"id": self.id, "name": self.name}
 
 
@@ -103,23 +102,19 @@ class SKU(mdb.Model):
 
     group_id = mdb.Column(mdb.Integer, mdb.ForeignKey("groups.id"), nullable=True)
     line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), nullable=True)
-    form_factor_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("form_factors.id"), nullable=True
-    )
-    pack_type_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("pack_types.id"), nullable=True
-    )
+    form_factor_id = mdb.Column(mdb.Integer, mdb.ForeignKey("form_factors.id"), nullable=True)
+    pack_type_id = mdb.Column(mdb.Integer, mdb.ForeignKey("pack_types.id"), nullable=True)
 
     type = mdb.Column(mdb.String)
     __mapper_args__ = {"polymorphic_identity": "skus", "polymorphic_on": type}
 
     @property
-    def packers_str(self):
+    def packers_str(self) -> str:
         return "/".join([x.name for x in self.packers])
 
     @property
     def colour(self):
-        COLOURS = {
+        COLOURS: dict[str, str] = {
             "Для пиццы": "#E5B7B6",
             "Моцарелла": "#DAE5F1",
             "Фиор Ди Латте": "#CBC0D9",
@@ -149,36 +144,27 @@ class Line(mdb.Model):
     __tablename__ = "lines"
     id = mdb.Column(mdb.Integer, primary_key=True)
     name = mdb.Column(mdb.String)
-    department_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True
-    )
+    department_id = mdb.Column(mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True)
 
-    skus = mdb.relationship(
-        "SKU", backref=backref("line", uselist=False, lazy="subquery")
-    )
-    form_factors = mdb.relationship(
-        "FormFactor", backref=backref("line", uselist=False, lazy="subquery")
-    )
+    skus = mdb.relationship("SKU", backref=backref("line", uselist=False, lazy="subquery"))
+    form_factors = mdb.relationship("FormFactor", backref=backref("line", uselist=False, lazy="subquery"))
     boilings = mdb.relationship("Boiling", backref=backref("line", uselist=False))
-    steam_consumption = mdb.relationship(
-        "SteamConsumption", backref=backref("line", uselist=False)
-    )
-
+    steam_consumption = mdb.relationship("SteamConsumption", backref=backref("line", uselist=False))
     type = mdb.Column(mdb.String)
+
     __mapper_args__ = {"polymorphic_identity": "lines", "polymorphic_on": type}
 
-    def serialize(self):
+    def serialize(self) -> dict[str, str | int]:
         return {"id": self.id, "name": self.name}
 
 
 class Washer(mdb.Model):
     __tablename__ = "washer"
     id = mdb.Column(mdb.Integer, primary_key=True)
+    original_name = mdb.Column(mdb.String)
     name = mdb.Column(mdb.String)
     time = mdb.Column(mdb.Integer)
-    department_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True
-    )
+    department_id = mdb.Column(mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True)
 
 
 class Group(mdb.Model):
@@ -187,7 +173,11 @@ class Group(mdb.Model):
     name = mdb.Column(mdb.String)
     short_name = mdb.Column(mdb.String)
 
-    skus = mdb.relationship("SKU", backref="group", lazy='subquery', )
+    skus = mdb.relationship(
+        "SKU",
+        backref="group",
+        lazy="subquery",
+    )
 
 
 parent_child = mdb.Table(
@@ -203,9 +193,7 @@ class FormFactor(mdb.Model):
     id = mdb.Column(mdb.Integer, primary_key=True)
     name = mdb.Column(mdb.String)
     relative_weight = mdb.Column(mdb.Integer)
-    skus = mdb.relationship(
-        "SKU", backref=backref("form_factor", uselist=False, lazy="subquery")
-    )
+    skus = mdb.relationship("SKU", backref=backref("form_factor", uselist=False, lazy="subquery"))
     line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), nullable=True)
 
     made_from = mdb.relationship(
@@ -219,27 +207,22 @@ class FormFactor(mdb.Model):
     type = mdb.Column(mdb.String)
     __mapper_args__ = {"polymorphic_identity": "form_factors", "polymorphic_on": type}
 
-    def add_made_from(self, ff):
-        if ff not in self.made_from:
-            self.made_from.append(ff)
+    def add_made_from(self, form_factor: "FormFactor") -> None:
+        if form_factor not in self.made_from:
+            self.made_from.append(form_factor)
 
     @property
-    def weight_with_line(self):
-        if self.line:
-            return "{}: {}".format(self.line.name_short, self.relative_weight)
-        else:
-            return "{}".format(self.name)
+    def weight_with_line(self) -> str:
+        return f"{self.line.name_short}: {self.relative_weight}" if self.line else self.name
 
     @property
-    def full_name(self):
-        return "{}, {}".format("Форм фактор", self.name)
+    def full_name(self) -> str:
+        return f"Форм фактор {self.name}"
 
 
 sku_boiling = mdb.Table(
     "sku_boiling",
-    mdb.Column(
-        "boiling_id", mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True
-    ),
+    mdb.Column("boiling_id", mdb.Integer, mdb.ForeignKey("boilings.id"), primary_key=True),
     mdb.Column("sku_id", mdb.Integer, mdb.ForeignKey("skus.id"), primary_key=True),
 )
 
@@ -250,10 +233,17 @@ class Boiling(mdb.Model):
     output_coeff = mdb.Column(mdb.Float, default=1)
     line_id = mdb.Column(mdb.Integer, mdb.ForeignKey("lines.id"), nullable=True)
     boiling_technologies = mdb.relationship(
-        "BoilingTechnology", backref=backref("boiling"), lazy='subquery',
+        "BoilingTechnology",
+        backref=backref("boiling"),
+        lazy="subquery",
     )
 
-    skus = mdb.relationship("SKU", secondary=sku_boiling, backref="made_from_boilings", lazy='subquery', )
+    skus = mdb.relationship(
+        "SKU",
+        secondary=sku_boiling,
+        backref="made_from_boilings",
+        lazy="subquery",
+    )
 
     type = mdb.Column(mdb.String)
     __mapper_args__ = {"polymorphic_identity": "boilings", "polymorphic_on": type}
@@ -275,9 +265,7 @@ class BoilingTechnology(mdb.Model):
 
 sku_packer = mdb.Table(
     "sku_packer",
-    mdb.Column(
-        "packer_id", mdb.Integer, mdb.ForeignKey("packers.id"), primary_key=True
-    ),
+    mdb.Column("packer_id", mdb.Integer, mdb.ForeignKey("packers.id"), primary_key=True),
     mdb.Column("sku_id", mdb.Integer, mdb.ForeignKey("skus.id"), primary_key=True),
 )
 
@@ -287,11 +275,9 @@ class Packer(mdb.Model):
     __table_args__ = {"extend_existing": True}
     id = mdb.Column(mdb.Integer, primary_key=True)
     name = mdb.Column(mdb.String)
-    skus = mdb.relationship(
-        "SKU", secondary=sku_packer, backref=backref("packers", lazy="subquery")
-    )
+    skus = mdb.relationship("SKU", secondary=sku_packer, backref=backref("packers", lazy="subquery"))
 
-    def serialize(self):
+    def serialize(self) -> dict[str, str | int]:
         return {"id": self.id, "name": self.name}
 
 
@@ -316,22 +302,20 @@ class BatchNumber(mdb.Model):
     beg_number = mdb.Column(mdb.Integer)
     end_number = mdb.Column(mdb.Integer)
     group = mdb.Column(mdb.String)
-    department_id = mdb.Column(
-        mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True
-    )
+    department_id = mdb.Column(mdb.Integer, mdb.ForeignKey("departments.id"), nullable=True)
 
-    def serialize(self):
+    def serialize(self) -> dict[str, str | int]:
         return {
             "id": self.id,
             "datetime": self.datetime.strftime(flask.current_app.config["DATE_FORMAT"]),
             "beg_number": self.beg_number,
             "end_number": self.end_number,
             "department_id": self.department_id,
-            'group': self.group
+            "group": self.group,
         }
 
     @staticmethod
-    def remove_department_batches(department_name):
+    def remove_department_batches(department_name: str) -> None:
         department = Department.get_by_name(department_name)
         department_batches = mdb.session.query(BatchNumber).filter(BatchNumber.department_id == department.id).all()
         for batch in department_batches:
@@ -339,21 +323,18 @@ class BatchNumber(mdb.Model):
         mdb.session.commit()
 
     @staticmethod
-    def last_batch_department(department_name):
+    def last_batch_department(department_name: str) -> int:
         department = Department.get_by_name(department_name)
         last_batch = (
             mdb.session.query(BatchNumber)
-                .filter(BatchNumber.department_id == department.id)
-                .order_by(BatchNumber.datetime.desc())
-                .first()
+            .filter(BatchNumber.department_id == department.id)
+            .order_by(BatchNumber.datetime.desc())
+            .first()
         )
-        if last_batch:
-            return last_batch.end_number
-        else:
-            return 0
+        return last_batch.end_number if last_batch is not None else 0
 
     @staticmethod
-    def last_batch_number(date, department_name, group=None):
+    def last_batch_number(date: datetime, department_name: str, group: str | None = None) -> int:
         department = Department.get_by_name(department_name)
         last_batch = (
             mdb.session.query(BatchNumber)
@@ -365,17 +346,35 @@ class BatchNumber(mdb.Model):
             .order_by(BatchNumber.datetime.desc())
             .first()
         )
-        if last_batch is not None:
-            return last_batch.end_number
-        else:
-            return 0
+        return last_batch.end_number if last_batch is not None else 0
 
     @staticmethod
-    def get_batch_by_date(date, department_id, group=None):
+    def get_batch_by_date(
+        date: datetime,
+        department_id: int,
+        group: str | None = None,
+    ) -> "BatchNumber":
         return (
             mdb.session.query(BatchNumber)
-                .filter(func.DATE(BatchNumber.datetime) == date.date())
-                .filter(BatchNumber.department_id == department_id)
-                .filter(or_(group is None, BatchNumber.group == group))
-                .first()
+            .filter(func.DATE(BatchNumber.datetime) == date.date())
+            .filter(BatchNumber.department_id == department_id)
+            .filter(or_(group is None, BatchNumber.group == group))
+            .first()
         )
+
+
+__all__ = [
+    "BatchNumber",
+    "Boiling",
+    "BoilingTechnology",
+    "User",
+    "SteamConsumption",
+    "Washer",
+    "Packer",
+    "PackType",
+    "FormFactor",
+    "SKU",
+    "Department",
+    "Group",
+    "Line",
+]

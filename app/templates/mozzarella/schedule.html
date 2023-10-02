@@ -67,23 +67,23 @@
                                 {{form.salt_beg_time(place_holder='SaltBegTime', class='form-control')}}
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3">
+                          <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label>Выберите линию, по которой время будет выставляться точно (по оставшейся - приблизительно)</label>
+                            {{form.exact_melting_time_by_line(place_holder='Line', class='form-select')}}
+                        </div>
+                          <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Оптимизировать время оставшейся линии</label>
+                                {{form.optimize(place_holder='Optimize', checked=True)}}
+                            </div>
+                        </div>
+                              <div class="col-md-12 mb-3">
                             <div class="form-group">
                                 <label>Вставить короткую мойку внутри дня по правилу 15 часов </label>
                                 {{form.add_full_boiling(place_holder='AddFullBoiling', checked=True)}}
                             </div>
                         </div>
-                          <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label>Оптимизировать расписание</label>
-                                {{form.optimize(place_holder='Optimize', checked=True)}}
-                            </div>
-                        </div>
-                     <div class="col-md-12 mb-3">
-                        <div class="form-group">
-                            <label>Выберите линию, по которой будет выставляться точное время начала плавления при оптимизации</label>
-                            {{form.exact_melting_time_by_line(place_holder='Line', class='form-select')}}
-                    </div>
                 </div>
                     </div>
                     <div class="col-lg-6 col-sm-6">

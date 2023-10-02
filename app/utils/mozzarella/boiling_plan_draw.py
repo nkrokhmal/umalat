@@ -1,11 +1,12 @@
-from app.imports.runtime import *
+from collections import namedtuple
 
 from openpyxl.utils.cell import column_index_from_string
 
+from app.imports.runtime import *
+from app.models import FormFactor, MozzarellaBoiling, MozzarellaLine, MozzarellaSKU
 from app.utils.features.db_utils import sku_is_rubber
 from app.utils.features.openpyxl_wrapper import ExcelBlock
-from collections import namedtuple
-from app.models import MozzarellaSKU, MozzarellaBoiling, FormFactor, MozzarellaLine
+
 
 Cell = namedtuple("Cell", "col, col_name")
 
@@ -159,9 +160,7 @@ def draw_boiling_plan(df, df_extra, wb):
                 value=formula,
                 set_border=False,
             )
-            excel_client.draw_row(
-                row=cur_row, values=value, cols=column, set_border=False
-            )
+            excel_client.draw_row(row=cur_row, values=value, cols=column, set_border=False)
             if sku_is_rubber(skus, v[COLUMNS["name"]]):
                 pass
                 # excel_client.draw_cell(
@@ -203,7 +202,7 @@ def draw_boiling_plan(df, df_extra, wb):
 def draw_boiling_plan_merged(df, wb):
     line_kg = db.session.query(MozzarellaLine).all()[0].input_ton
     skus = db.session.query(MozzarellaSKU).all()
-    sheet_name = 'План варок'
+    sheet_name = "План варок"
 
     values = []
     excel_client = ExcelBlock(wb[sheet_name])
@@ -226,7 +225,7 @@ def draw_boiling_plan_merged(df, wb):
             COLUMNS["packer"],
             COLUMNS["name"],
             COLUMNS["delimiter"],
-            COLUMNS["boiling_configuration"]
+            COLUMNS["boiling_configuration"],
         ]
         values.append(dict(zip(empty_columns, ["-"] * len(empty_columns))))
 
@@ -254,9 +253,7 @@ def draw_boiling_plan_merged(df, wb):
             value=formula,
             set_border=False,
         )
-        excel_client.draw_row(
-            row=cur_row, values=value, cols=column, set_border=False
-        )
+        excel_client.draw_row(row=cur_row, values=value, cols=column, set_border=False)
         if v[COLUMNS["name"]] == "-":
             excel_client.draw_cell(
                 row=cur_row,

@@ -1,6 +1,8 @@
-from app.imports.runtime import *
 import telebot
+
 from loguru import logger
+
+from app.imports.runtime import *
 
 
 DEPARTMENT_CHAT_ID = {
@@ -14,29 +16,18 @@ DEPARTMENT_CHAT_ID = {
 
 @rq.job
 def send_file(path, date, department):
-    tb = telebot.TeleBot(
-        flask.current_app.config["TELEGRAM_BOT_TOKEN"]
-    )
-    document = open(path, 'rb')
+    tb = telebot.TeleBot(flask.current_app.config["TELEGRAM_BOT_TOKEN"])
+    document = open(path, "rb")
     tb.send_message(
         flask.current_app.config["TELEGRAM_CHAT_FILES_ID"],
-        f"Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode('utf-8')
+        f"Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode("utf-8"),
     )
-    tb.send_document(
-        flask.current_app.config["TELEGRAM_CHAT_FILES_ID"],
-        document
-    )
+    tb.send_document(flask.current_app.config["TELEGRAM_CHAT_FILES_ID"], document)
     try:
-        document = open(path, 'rb')
+        document = open(path, "rb")
         tb.send_message(
-            DEPARTMENT_CHAT_ID[department],
-            f"Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode('utf-8')
+            DEPARTMENT_CHAT_ID[department], f"Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode("utf-8")
         )
-        tb.send_document(
-            DEPARTMENT_CHAT_ID[department],
-            document
-        )
+        tb.send_document(DEPARTMENT_CHAT_ID[department], document)
     except:
         pass
-
-

@@ -2,9 +2,7 @@ from app.imports.runtime import *
 
 
 class Boilings:
-    def __init__(
-        self, max_iter_weight=None, max_weight=1000, min_weight=1000, boiling_number=0
-    ):
+    def __init__(self, max_iter_weight=None, max_weight=1000, min_weight=1000, boiling_number=0):
         self.max_weight = max_weight
         self.min_weight = min_weight
         self.boiling_number = boiling_number
@@ -42,11 +40,7 @@ class Boilings:
             if self.is_next:
                 self.cur_weight = next(self.iterator)
                 self.is_next = False
-            remainings = (
-                self.max_weight - self.cur_sum()
-                if not self.cur_weight
-                else self.cur_weight - self.cur_sum()
-            )
+            remainings = self.max_weight - self.cur_sum() if not self.cur_weight else self.cur_weight - self.cur_sum()
             boiling_weight = min(remainings, sku["plan"])
 
             new_boiling = copy.deepcopy(sku)

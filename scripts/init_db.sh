@@ -1,1 +1,1 @@
-cd .. && rm -f db/prod/data.sqlite && rm -r -f db/prod/migrations && python3 manage.py db init --directory db/prod/migrations && python3 manage.py db migrate && python3 manage.py db upgrade && python3 db/fill_db.py
+cd .. && rm -f db/prod/data.sqlite && rm -r -f db/prod/migrations && flask db init --directory db/prod/migrations && flask db migrate && flask db upgrade && python db/fill_db.py

@@ -1,19 +1,20 @@
+import pandas as pd
+
+from app.imports.runtime import *
 from app.models import MascarponeSKU
 from app.utils.base.schedule_task import BaseScheduleTask
-from app.utils.files.utils import create_dir
-from app.imports.runtime import *
 from app.utils.features.draw_utils import *
+from app.utils.files.utils import create_dir
 
 
 # todo maybe: possible
 class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
     def update_boiling_schedule_task(self):
         data_dir = create_dir(
-            self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
-            flask.current_app.config["TASK_FOLDER"]
+            self.date.strftime(flask.current_app.config["DATE_FORMAT"]), flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()} {self.department}.csv")
-        columns = ["batch", "sku", "code", "in_box", "kg", "boxes_count", 'start', 'finish']
+        columns = ["batch", "sku", "code", "in_box", "kg", "boxes_count", "start", "finish"]
         if not os.path.exists(path):
             df_task = pd.DataFrame(columns=columns)
             df_task.to_csv(path, index=False, sep=";")
@@ -25,11 +26,7 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
             for batch_id, grp in group_df.groupby("absolute_batch_id"):
                 for i, row in grp.iterrows():
                     kg = round(row["original_kg"] * row["coeff"])
-                    boxes_count = math.ceil(
-                        row["original_kg"]
-                        / row["sku"].in_box
-                        / row["sku"].weight_netto
-                    )
+                    boxes_count = math.ceil(row["original_kg"] / row["sku"].in_box / row["sku"].weight_netto)
 
                     values = [
                         batch_id,
@@ -38,11 +35,11 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
                         row["sku"].in_box,
                         kg,
                         boxes_count,
-                        row['start'],
-                        row['finish']
+                        row["start"],
+                        row["finish"],
                     ]
-                    df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
-        df_task = df_task[columns] # fix order just in case
+                    df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
+        df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 
     def draw_task_original(self, excel_client, cur_row, task_name):
@@ -53,17 +50,12 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
 
         self.df["coeff"] = self.df["boiling"].apply(lambda x: x.output_coeff)
         for sku_name, grp in df_filter.groupby("sku_name"):
-            kg = round((grp["kg"] * grp["coeff"]).sum())
-            boxes_count = math.ceil(
-                grp["kg"].sum()
-                / grp.iloc[0]["sku"].in_box
-                / grp.iloc[0]["sku"].weight_netto
-            )
+            boxes_count = math.ceil(grp["kg"].sum() / grp.iloc[0]["sku"].in_box / grp.iloc[0]["sku"].weight_netto)
             values = [
                 index,
                 sku_name,
                 grp.iloc[0]["sku"].in_box,
-                kg,
+                grp["kg"].sum(),
                 boxes_count,
                 grp.iloc[0]["sku"].code,
             ]

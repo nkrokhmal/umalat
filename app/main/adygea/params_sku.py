@@ -1,13 +1,12 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
-from app.models import AdygeaSKU, AdygeaLine, AdygeaFormFactor, Group
 from app.enum import *
+from app.imports.runtime import *
+from app.main import main
+from app.models import AdygeaFormFactor, AdygeaLine, AdygeaSKU, Group
 from app.utils.features.form_utils import *
 
-from .forms import SKUAdygeaForm, CopySKUForm
+from .forms import CopySKUForm, SKUAdygeaForm
 
 
 @main.route("/adygea/add_sku", methods=["POST", "GET"])
@@ -29,11 +28,7 @@ def adygea_add_sku():
             form_factor=form_factor,
         )
         sku = fill_adygea_sku_from_form(sku, form)
-        adygea_line = (
-            db.session.query(AdygeaLine)
-            .filter(AdygeaLine.name == LineName.ADYGEA)
-            .first()
-        )
+        adygea_line = db.session.query(AdygeaLine).filter(AdygeaLine.name == LineName.ADYGEA).first()
         sku.line = adygea_line
 
         db.session.add(sku)
@@ -88,6 +83,7 @@ def adygea_copy_sku(sku_id):
 def adygea_get_sku(page):
     db.session.remove()
     import time
+
     time.sleep(0.1)
     form = SKUAdygeaForm()
     skus_count = db.session.query(AdygeaSKU).count()
@@ -96,7 +92,7 @@ def adygea_get_sku(page):
         db.session.query(AdygeaSKU)
         .join(Group)
         .order_by(AdygeaSKU.name)
-        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page=page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return flask.render_template(
         "adygea/get_sku.html",
@@ -145,9 +141,7 @@ def adygea_edit_sku(sku_id):
     form.packing_speed.data = sku.packing_speed
     form.in_box.data = sku.in_box
 
-    return flask.render_template(
-        "adygea/edit_sku.html", form=form, sku_id=sku_id
-    )
+    return flask.render_template("adygea/edit_sku.html", form=form, sku_id=sku_id)
 
 
 @main.route("/adygea/delete_sku/<int:sku_id>", methods=["DELETE"])

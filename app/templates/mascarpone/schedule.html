@@ -7,7 +7,7 @@
 <div class="row", style="padding:20px">
     <h1 class="h4 mb-4">Расписание маскарпоне</h1>
     <div class="header-img">
-        <img src= "{{ url_for('static', filename='imgs/mascarpone_schedule.jpg') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 40vh; opacity: 1; object-position: center 50%;">
+        <img src= "{{ url_for('static', filename='imgs/mascarpone_schedule.PNG') }}" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 40vh; opacity: 1; object-position: center 50%;">
     </div>
 </div>
 {% endblock %}
@@ -59,10 +59,10 @@
                                 {{form.date(place_holder='Date', class='form-control')}}
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3">
+                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label>Введите номер первой партии Маскарпоне в текущем дне</label>
-                                {{form.mascarpone_batch_number(place_holder='BatchNumber', class='form-control')}}
+                                <label> Время начала подготовки цеха линия Кремчиза</label>
+                                {{form.beg_cream_cheese_time(place_holder='Cream cheese time', class='form-control')}}
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
@@ -81,8 +81,14 @@
                     <div class="col-lg-6 col-sm-6">
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label> Время начала подготовки цеха </label>
-                                {{form.beg_time(place_holder='SaltBegTime', class='form-control')}}
+                                <label> Время начала подготовки цеха линия Маскарпоне</label>
+                                {{form.beg_mascarpone_time(place_holder='SaltBegTime', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Введите номер первой партии Маскарпоне в текущем дне</label>
+                                {{form.mascarpone_batch_number(place_holder='BatchNumber', class='form-control')}}
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">

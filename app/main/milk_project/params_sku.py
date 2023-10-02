@@ -1,13 +1,12 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
-from app.main import main
-from app.models import MilkProjectSKU, MilkProjectLine, MilkProjectFormFactor, Group
 from app.enum import *
+from app.imports.runtime import *
+from app.main import main
+from app.models import Group, MilkProjectFormFactor, MilkProjectLine, MilkProjectSKU
 from app.utils.features.form_utils import *
 
-from .forms import SKUMilkProjectForm, CopySKUForm
+from .forms import CopySKUForm, SKUMilkProjectForm
 
 
 @main.route("/milk_project/add_sku", methods=["POST", "GET"])
@@ -30,9 +29,7 @@ def milk_project_add_sku():
         )
         sku = fill_milk_project_sku_from_form(sku, form)
         milk_project_line = (
-            db.session.query(MilkProjectLine)
-            .filter(MilkProjectLine.name == LineName.MILKPROJECT)
-            .first()
+            db.session.query(MilkProjectLine).filter(MilkProjectLine.name == LineName.MILKPROJECT).first()
         )
         sku.line = milk_project_line
 
@@ -88,6 +85,7 @@ def milk_project_copy_sku(sku_id):
 def milk_project_get_sku(page):
     db.session.remove()
     import time
+
     time.sleep(0.1)
     form = SKUMilkProjectForm()
     skus_count = db.session.query(MilkProjectSKU).count()
@@ -96,7 +94,7 @@ def milk_project_get_sku(page):
         db.session.query(MilkProjectSKU)
         .join(Group)
         .order_by(MilkProjectSKU.name)
-        .paginate(page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
+        .paginate(page=page, per_page=flask.current_app.config["SKU_PER_PAGE"], error_out=False)
     )
     return flask.render_template(
         "milk_project/get_sku.html",
@@ -145,9 +143,7 @@ def milk_project_edit_sku(sku_id):
     form.packing_speed.data = sku.packing_speed
     form.in_box.data = sku.in_box
 
-    return flask.render_template(
-        "milk_project/edit_sku.html", form=form, sku_id=sku_id
-    )
+    return flask.render_template("milk_project/edit_sku.html", form=form, sku_id=sku_id)
 
 
 @main.route("/milk_project/delete_sku/<int:sku_id>", methods=["DELETE"])

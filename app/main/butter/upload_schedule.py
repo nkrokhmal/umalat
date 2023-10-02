@@ -2,9 +2,10 @@ import time
 
 from app.imports.runtime import *
 from app.main import main
-from .forms import UploadForm
-from app.utils.files.utils import save_schedule, cast_dynamic_fn
 from app.utils.batches import *
+from app.utils.files.utils import cast_dynamic_fn, save_schedule
+
+from .forms import UploadForm
 
 
 @main.route("/butter_upload_schedule", methods=["GET", "POST"])
@@ -24,6 +25,4 @@ def butter_upload_schedule():
         )
 
     form.date.data = datetime.today() + timedelta(days=1)
-    return flask.render_template(
-        "butter/upload_schedule.html", form=form, filename=None, date=None
-    )
+    return flask.render_template("butter/upload_schedule.html", form=form, filename=None, date=None)

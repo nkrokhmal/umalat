@@ -6,4 +6,3 @@ from app.main import main
 @flask_login.login_required
 def butter_params():
     return flask.render_template("butter/params.html")
-

@@ -1,5 +1,12 @@
+import os
+
+import flask
+import flask_login
+import pandas as pd
+
+from app.globals import db
 from app.main import main
-from app.models import *
+from app.models.adygea import AdygeaSKU
 
 
 @main.route("/download_adygea", methods=["POST", "GET"])
@@ -8,20 +15,20 @@ def download_adygea():
     skus = db.session.query(AdygeaSKU).all()
     data = [
         {
-            'Название SKU': sku.name,
-            'Процент': sku.made_from_boilings[0].percent,
-            'Название форм фактора': sku.group.name,
-            'Вход': sku.made_from_boilings[0].input_kg,
-            'Выход': sku.made_from_boilings[0].output_kg,
-            'Линия': "Адегейский",
-            'Имя бренда': sku.brand_name,
-            'Вес нетто': sku.weight_netto,
-            'Коробки': sku.in_box,
-            'Вес форм фактора': 0,
-            'Набор': sku.made_from_boilings[0].boiling_technologies[0].collecting_time,
-            'Коагуляция': sku.made_from_boilings[0].boiling_technologies[0].coagulation_time,
-            'Слив': sku.made_from_boilings[0].boiling_technologies[0].pouring_off_time,
-            'Kод': sku.code,
+            "Название SKU": sku.name,
+            "Процент": sku.made_from_boilings[0].percent,
+            "Название форм фактора": sku.group.name,
+            "Вход": sku.made_from_boilings[0].input_kg,
+            "Выход": sku.made_from_boilings[0].output_kg,
+            "Линия": "Адегейский",
+            "Имя бренда": sku.brand_name,
+            "Вес нетто": sku.weight_netto,
+            "Коробки": sku.in_box,
+            "Вес форм фактора": 0,
+            "Набор": sku.made_from_boilings[0].boiling_technologies[0].collecting_time,
+            "Коагуляция": sku.made_from_boilings[0].boiling_technologies[0].coagulation_time,
+            "Слив": sku.made_from_boilings[0].boiling_technologies[0].pouring_off_time,
+            "Kод": sku.code,
         }
         for sku in skus
     ]
@@ -39,10 +46,7 @@ def download_adygea():
             flask.current_app.config["UPLOAD_TMP_FOLDER"],
         ),
         filename=filename,
-        cache_timeout=0,
         as_attachment=True,
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
     return response
-
-

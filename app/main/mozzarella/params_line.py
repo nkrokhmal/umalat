@@ -1,9 +1,9 @@
-from app.imports.runtime import *
-
 from werkzeug.utils import redirect
 
+from app.imports.runtime import *
 from app.main import main
-from app.models import MozzarellaLine, MozzarellaBoiling
+from app.models import MozzarellaBoiling, MozzarellaLine
+
 from .forms import LineForm
 
 
@@ -11,9 +11,7 @@ from .forms import LineForm
 @flask_login.login_required
 def get_line():
     lines = db.session.query(MozzarellaLine).all()
-    return flask.render_template(
-        "mozzarella/get_line.html", lines=lines, endpoints=".get_line"
-    )
+    return flask.render_template("mozzarella/get_line.html", lines=lines, endpoints=".get_line")
 
 
 @main.route("/mozzarella/edit_line/<int:line_id>", methods=["GET", "POST"])
@@ -26,8 +24,7 @@ def edit_line(line_id):
         line.pouring_time = form.pouring_time.data
         line.serving_time = form.serving_time.data
         line.chedderization_time = form.chedderization_time.data
-        line.melting_speed = form.melting_speed.data
-        line.output_ton = form.output_kg.data
+        line.output_kg = form.output_kg.data
 
         db.session.commit()
 
@@ -38,7 +35,6 @@ def edit_line(line_id):
     form.pouring_time.data = line.pouring_time
     form.serving_time.data = line.serving_time
     form.chedderization_time.data = line.chedderization_time
-    form.melting_speed.data = line.melting_speed
-    form.output_kg.data = line.output_ton
+    form.output_kg.data = line.output_kg
 
     return flask.render_template("mozzarella/edit_line.html", form=form, line_id=line.id)

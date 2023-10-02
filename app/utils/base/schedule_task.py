@@ -1,9 +1,11 @@
+from typing import Generic, Type, TypeVar
+
 import flask
 import pandas as pd
-from app.utils.files.utils import create_dir
-from app.utils.features.draw_utils import *
+
 from app.imports.runtime import *
-from typing import Generic, TypeVar, Type
+from app.utils.features.draw_utils import *
+from app.utils.files.utils import create_dir
 
 
 ModelType = TypeVar("ModelType")
@@ -29,17 +31,16 @@ class BaseScheduleTask(Generic[ModelType]):
             else:
                 self.df["original_kg"] = self.df["kg"]
 
-        if "line" in self.df.columns:
-            self.df["line"] = self.df["line"].apply(lambda x: x.name)
+        # if "line" in self.df.columns:
+        #     self.df["line"] = self.df["line"].apply(lambda x: x.name)
 
     def update_boiling_schedule_task(self):
-        logger.debug('update_boiling_schedule_task')
+        logger.debug("update_boiling_schedule_task")
         data_dir = create_dir(
-            self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
-            flask.current_app.config["TASK_FOLDER"]
+            self.date.strftime(flask.current_app.config["DATE_FORMAT"]), flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()} {self.department}.csv")
-        columns = ["batch", "sku", "code", "in_box", "kg", "boxes_count", 'start', 'finish']
+        columns = ["batch", "sku", "code", "in_box", "kg", "boxes_count", "start", "finish"]
         if not os.path.exists(path):
             df_task = pd.DataFrame(columns=columns)
             df_task.to_csv(path, index=False, sep=";")
@@ -51,11 +52,7 @@ class BaseScheduleTask(Generic[ModelType]):
             for i, row in grp.iterrows():
                 if row["sku"].group.name != "Качокавалло":
                     kg = round(row["original_kg"])
-                    boxes_count = math.ceil(
-                        row["original_kg"]
-                        / row["sku"].in_box
-                        / row["sku"].weight_netto
-                    )
+                    boxes_count = math.ceil(row["original_kg"] / row["sku"].in_box / row["sku"].weight_netto)
                 else:
                     kg = ""
                     boxes_count = ""
@@ -67,17 +64,16 @@ class BaseScheduleTask(Generic[ModelType]):
                     row["sku"].in_box,
                     kg,
                     boxes_count,
-                    row['start'],
-                    row['finish']
+                    row["start"],
+                    row["finish"],
                 ]
-                df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
-        df_task = df_task[columns] # fix order just in case
+                df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
+        df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 
     def update_total_schedule_task(self):
         data_dir = create_dir(
-            self.date.strftime(flask.current_app.config["DATE_FORMAT"]),
-            flask.current_app.config["TASK_FOLDER"]
+            self.date.strftime(flask.current_app.config["DATE_FORMAT"]), flask.current_app.config["TASK_FOLDER"]
         )
         path = os.path.join(data_dir, f"{self.date.date()}.csv")
         columns = ["sku", "code", "in_box", "kg", "boxes_count"]
@@ -89,24 +85,14 @@ class BaseScheduleTask(Generic[ModelType]):
 
         sku_names = db.session.query(self.model).all()
         sku_names = [x.name for x in sku_names]
-        df_task = df_task[~df_task['sku'].isin(sku_names)]
+        df_task = df_task[~df_task["sku"].isin(sku_names)]
 
         for sku_name, grp in self.df.groupby("sku_name"):
             kg = round(grp["kg"].sum())
-            boxes_count = math.ceil(
-                grp["kg"].sum()
-                / grp.iloc[0]["sku"].in_box
-                / grp.iloc[0]["sku"].weight_netto
-            )
-            values = [
-                sku_name,
-                grp.iloc[0]["sku"].code,
-                grp.iloc[0]["sku"].in_box,
-                kg,
-                boxes_count
-            ]
-            df_task = df_task.append(dict(zip(columns, values)), ignore_index=True)
-        df_task = df_task[columns] # fix order just in case
+            boxes_count = math.ceil(grp["kg"].sum() / grp.iloc[0]["sku"].in_box / grp.iloc[0]["sku"].weight_netto)
+            values = [sku_name, grp.iloc[0]["sku"].code, grp.iloc[0]["sku"].in_box, kg, boxes_count]
+            df_task = pd.concat([df_task, pd.DataFrame([dict(zip(columns, values))])], ignore_index=True)
+        df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 
     def draw_task_original(self, excel_client, cur_row, task_name):
@@ -117,11 +103,7 @@ class BaseScheduleTask(Generic[ModelType]):
 
         for sku_name, grp in df_filter.groupby("sku_name"):
             kg = round(grp["kg"].sum())
-            boxes_count = math.ceil(
-                grp["kg"].sum()
-                / grp.iloc[0]["sku"].in_box
-                / grp.iloc[0]["sku"].weight_netto
-            )
+            boxes_count = math.ceil(grp["kg"].sum() / grp.iloc[0]["sku"].in_box / grp.iloc[0]["sku"].weight_netto)
             values = [
                 index,
                 sku_name,
@@ -134,19 +116,13 @@ class BaseScheduleTask(Generic[ModelType]):
             index += 1
         return cur_row
 
-    def draw_task_boiling(
-            self, excel_client, cur_row, task_name
-    ):
+    def draw_task_boiling(self, excel_client, cur_row, task_name):
         cur_row, excel_client = draw_header(excel_client, self.date, cur_row, task_name, "варки")
         for batch_id, grp in self.df.groupby("absolute_batch_id"):
             for i, row in grp.iterrows():
                 if row["sku"].group.name != "Качокавалло":
                     kg = round(row["original_kg"])
-                    boxes_count = math.ceil(
-                        row["original_kg"]
-                        / row["sku"].in_box
-                        / row["sku"].weight_netto
-                    )
+                    boxes_count = math.ceil(row["original_kg"] / row["sku"].in_box / row["sku"].weight_netto)
                 else:
                     kg = ""
                     boxes_count = ""
