@@ -1,8 +1,9 @@
+import flask
 import telebot
 
 from loguru import logger
 
-from app.imports.runtime import *
+from app.app import rq
 
 
 DEPARTMENT_CHAT_ID = {
@@ -29,5 +30,5 @@ def send_file(path, date, department):
             DEPARTMENT_CHAT_ID[department], f"Дата: {date} \nЦех: {department}  " + b"\xE2\x9C\x85".decode("utf-8")
         )
         tb.send_document(DEPARTMENT_CHAT_ID[department], document)
-    except:
-        pass
+    except Exception as e:
+        logger.error(f"Exception occurred {e}")

@@ -3,22 +3,25 @@ version: '3.3'
 services:
   umalat:
     build: .
-    command: python -u /app/runserver.py
+    command: python -u /umalat/runserver.py
     restart: always
     volumes:
-      - .:/app
-      - /root/home/data/umalat:/app/app/data/dynamic
+      - .:/umalat
+      - /root/home/data/umalat:/umalat/app/data/dynamic
     ports:
       - 5000:5000
     depends_on:
       - redis
   worker:
     build: .
-    command: python -u /app/manage.py run_worker
+    command: bash -c "env FLASK_APP=manage.py python -m flask run_worker"
+#    command: python -u -m flask run_worker
     volumes:
-      - .:/app
-      - /root/home/data/umalat:/app/app/data/dynamic
+      - .:/umalat
+      - /root/home/data/umalat:/umalat/app/data/dynamic
     restart: always
+    environment:
+      FLASK_APP: "manage.py"
     depends_on:
       - redis
   redis:
