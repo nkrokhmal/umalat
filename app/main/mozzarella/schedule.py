@@ -67,6 +67,7 @@ def mozzarella_schedule():
                 optimize_water_gaps=True,
                 optimize_start_configurations=optimize,
                 exact_start_time_line_name=exact_melting_time_by_line,
+                first_batch_ids_by_type=first_batch_ids,
                 optimize_cleanings=add_full_boiling,
                 date=date,
                 workbook=schedule_wb,
