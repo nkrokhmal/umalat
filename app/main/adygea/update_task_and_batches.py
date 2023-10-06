@@ -4,8 +4,10 @@ from utils_ak.time import cast_datetime
 
 from app.imports.runtime import *
 from app.models import AdygeaSKU
+from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.milk_project.parse_schedule import parse_schedule
-from app.scheduler.milk_project.to_boiling_plan import to_boiling_plan
+
+# from app.scheduler.milk_project.to_boiling_plan import to_boiling_plan
 from app.utils.adygea.schedule_tasks import AdygeaScheduleTask
 from app.utils.batches import add_batch_from_boiling_plan_df
 from app.utils.schedule import cast_schedule
