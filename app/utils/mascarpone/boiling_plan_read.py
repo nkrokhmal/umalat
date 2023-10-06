@@ -76,6 +76,22 @@ class BoilingPlanReader:
                     boiling.skus.append(item)
         return boilings
 
+    def _get_boilings(self, boilings: list[HugeBoiling]) -> pd.DataFrame:
+        dfs = []
+        group_dict = defaultdict(lambda: 1)
+        for boiling in boilings:
+            df = pd.DataFrame(boiling.skus)
+            df[["output_kg", "input_kg", "group_id", "group"]] = (
+                boiling.output_kg,
+                boiling.input_kg,
+                group_dict[boiling.type],
+                boiling.type,
+            )
+            dfs.append(df)
+            group_dict[boiling.type] += 1
+
+        return pd.concat(dfs)
+
     def _unwind_boilings(self, boilings: list[HugeBoiling]) -> pd.DataFrame:
         dfs = []
         group_id = 1
@@ -158,19 +174,21 @@ class BoilingPlanReader:
                 )
 
     def _set_batches(self, df: pd.DataFrame) -> pd.DataFrame:
-        for _, grp in df.groupby("group_id"):
+        for _, grp in df.groupby(["group_id", "batch_type"]):
             group = grp.iloc[0][["group"]]
             df.loc[grp.index, "batch_id"] = self.first_batches[group[0]]
             self.first_batches[group[0]] += 1
 
+        df["absolute_batch_id"] = df["batch_id"]
         return df
 
-    def parse(self) -> pd.DataFrame:
+    def parse(self, unwind: bool = False) -> pd.DataFrame:
         boilings = self._read_workbook()
-        df = self._unwind_boilings(boilings)
+        df = self._get_boilings(boilings) if unwind else self._unwind_boilings(boilings)
         df = self._saturate(df)
         df = self._set_batches(df)
-        update_absolute_batch_id(df, self.first_batches)
+
+        # update_absolute_batch_id(df, self.first_batches)
         return df
 
 

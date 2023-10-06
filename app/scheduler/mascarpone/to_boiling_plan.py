@@ -17,6 +17,7 @@ from app.utils.mascarpone.boiling_plan_read import BoilingPlanReader
 def to_boiling_plan(
     boiling_plan_source: BoilingPlanLike,
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
+    unwind: bool = False,
 ) -> pd.DataFrame:
     """
     :param boiling_plan_source: str or openpyxl.Workbook
@@ -30,7 +31,7 @@ def to_boiling_plan(
     # - Read boiling plan
 
     reader = BoilingPlanReader(wb=boiling_plan_source, first_batches=first_batch_ids_by_type)
-    df = reader.parse()
+    df = reader.parse(unwind=unwind)
 
     # - Return
 

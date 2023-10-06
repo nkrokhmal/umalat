@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 
 from app.imports.runtime import *
@@ -21,12 +23,12 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
 
         df_task = pd.read_csv(path, sep=";")
         df_task.drop(df_task.index, inplace=True)
-        self.df["coeff"] = self.df["boiling"].apply(lambda x: x.output_coeff)
+
         for _, group_df in self.df.groupby("batch_type"):
             for batch_id, grp in group_df.groupby("absolute_batch_id"):
                 for i, row in grp.iterrows():
-                    kg = round(row["original_kg"] * row["coeff"])
-                    boxes_count = math.ceil(row["original_kg"] / row["sku"].in_box / row["sku"].weight_netto)
+                    kg = row["original_kg"]
+                    boxes_count = math.ceil(kg / row["sku"].in_box / row["sku"].weight_netto)
 
                     values = [
                         batch_id,
@@ -48,7 +50,6 @@ class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
 
         cur_row, excel_client = draw_header(excel_client, self.date, cur_row, task_name)
 
-        self.df["coeff"] = self.df["boiling"].apply(lambda x: x.output_coeff)
         for sku_name, grp in df_filter.groupby("sku_name"):
             boxes_count = math.ceil(grp["kg"].sum() / grp.iloc[0]["sku"].in_box / grp.iloc[0]["sku"].weight_netto)
             values = [

@@ -23,7 +23,7 @@ def update_task_and_batches(schedule_obj):
 
     wb = cast_schedule(schedule_obj)
     metadata = json.loads(read_metadata(wb))
-    boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=metadata["first_batch_ids"])
+    boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=metadata["first_batch_ids"], unwind=True)
     date = cast_datetime(metadata["date"])
 
     # - Batch
