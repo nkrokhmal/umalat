@@ -47,7 +47,7 @@ def download_mozzarella_boiling_plan():
     return response
 
 
-@main.route("/download_last_packer_plan", methods=["GET"])
+@main.route("/download_last_packer_plan", methods=["GET", "POST"])
 def download_last_packer_plan():
     last_schedule_path = max(
         glob.glob(
