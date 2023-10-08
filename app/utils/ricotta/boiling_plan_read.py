@@ -127,7 +127,7 @@ class BoilingPlanReader:
     def _set_batches(self, df: pd.DataFrame) -> pd.DataFrame:
         for _, grp in df.groupby("group_id"):
             group = grp.iloc[0][["batch_type"]]
-            df.loc[grp.index, "batch_id"] = self.first_batches[group[0]]
+            df.loc[grp.index, "batch_id"] = self.first_batches[group.iloc[0]]
             self.first_batches[group[0]] += 1
 
         df["absolute_batch_id"] = df["batch_id"]
