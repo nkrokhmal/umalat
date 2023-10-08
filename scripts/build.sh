@@ -6,5 +6,5 @@ docker-compose -f docker-compose-test.yaml up --build &&
 docker-compose down &&
 docker-compose up --build -d &&
 cd scripts &&
-sleep 30 &&
+sleep 60 &&
 sh upload_batches.sh
