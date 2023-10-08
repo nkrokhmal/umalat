@@ -130,6 +130,7 @@ class BoilingPlanReader:
             df.loc[grp.index, "batch_id"] = self.first_batches[group[0]]
             self.first_batches[group[0]] += 1
 
+        df["absolute_batch_id"] = df["batch_id"]
         return df
 
     def parse(self) -> pd.DataFrame:
@@ -137,7 +138,6 @@ class BoilingPlanReader:
         df = self._unwind_boilings(boilings)
         df = self._saturate(df)
         df = self._set_batches(df)
-        update_absolute_batch_id(df, self.first_batches)
         return df
 
 
