@@ -120,8 +120,8 @@ def handle_water(df, max_weight=1000, min_weight=1000, portion=100, boiling_numb
     return pd.DataFrame(boilings_water.boilings), boilings_water.boiling_number
 
 
-def handle_salt(df, max_weight=850, min_weight=850, boiling_number=1):
-    boilings = Boilings(max_weight=850, min_weight=850, boiling_number=boiling_number)
+def handle_salt(df, max_weight=960, min_weight=960, boiling_number=1):
+    boilings = Boilings(max_weight=960, min_weight=960, boiling_number=boiling_number)
 
     for weight, df_grouped_weight in df.groupby("weight"):
         for boiling_id, df_grouped_boiling_id in df_grouped_weight.groupby("boiling_id"):

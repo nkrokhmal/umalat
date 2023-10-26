@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import pandas as pd
 
@@ -179,7 +181,8 @@ def make_mpp(boiling_df, left_boiling_volume):
 
     melting_process_size = (
         min(
-            round(boiling_df["kg"].sum() / boiling_df["sku"].iloc[0].melting_speed * 60) // 5, last_collecting_process_y
+            math.ceil(boiling_df["kg"].sum() / boiling_df["sku"].iloc[0].melting_speed * 60 / 5),
+            last_collecting_process_y,
         )
         if boiling_df["sku"].iloc[0].line.name == "Пицца чиз"
         else last_collecting_process_y
