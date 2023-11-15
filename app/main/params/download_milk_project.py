@@ -48,7 +48,6 @@ def download_milk_project():
             flask.current_app.config["UPLOAD_TMP_FOLDER"],
         ),
         path=filename,
-        cache_timeout=0,
         as_attachment=True,
     )
     response.cache_control.max_age = flask.current_app.config["CACHE_FILE_MAX_AGE"]
