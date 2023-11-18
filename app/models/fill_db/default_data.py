@@ -4,6 +4,7 @@ from app.enum import DepartmentName, LineName
 from app.globals import db
 from app.models.adygea import AdygeaLine
 from app.models.basic import Department, Group, Packer, PackType, User, Washer
+from app.models.brynza import BrynzaLine
 from app.models.butter import ButterLine
 from app.models.mascarpone import MascarponeLine
 from app.models.milk_project import MilkProjectLine
@@ -55,6 +56,7 @@ def generate_group():
             "Качорикотта": "КЧРКТ",
             "Кавказский": "КВК",
             "Черкесский": "ЧРКС",
+            "Брынза": "БРНЗ",
         }
         for name, short_name in groups.items():
             ff = Group(name=name, short_name=short_name)

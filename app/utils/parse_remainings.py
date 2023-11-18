@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from app.globals import db
-from app.models import SKU, AdygeaSKU, ButterSKU, MascarponeSKU, MilkProjectSKU, MozzarellaSKU, RicottaSKU
+from app.models import SKU, AdygeaSKU, BrynzaSKU, ButterSKU, MascarponeSKU, MilkProjectSKU, MozzarellaSKU, RicottaSKU
 from app.utils.features.db_utils import get_sku_by_name
 
 
@@ -163,6 +163,8 @@ def cast_volume(obj):
         return obj.made_from_boilings[0].output_kg
     elif isinstance(obj, AdygeaSKU):
         return obj.made_from_boilings[0].output_kg
+    elif isinstance(obj, BrynzaSKU):
+        return 1000
     else:
         raise Exception("Unknown sku type")
 

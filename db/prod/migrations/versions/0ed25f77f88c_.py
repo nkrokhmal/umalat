@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5ff834bdc6d1
+Revision ID: 0ed25f77f88c
 Revises: 
-Create Date: 2023-10-28 22:40:07.508717
+Create Date: 2023-11-18 11:02:37.576294
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ from alembic import op
 
 
 # revision identifiers, used by Alembic.
-revision = "5ff834bdc6d1"
+revision = "0ed25f77f88c"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -120,6 +120,15 @@ def upgrade():
         sa.Column("type", sa.String(), nullable=True),
         sa.ForeignKeyConstraint(
             ["line_id"],
+            ["lines.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
+        "brynza_lines",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["id"],
             ["lines.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
@@ -257,6 +266,27 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["boiling_id"],
             ["boilings.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
+        "brynza_boilings",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("name", sa.String(), nullable=True),
+        sa.Column("weight", sa.Float(), nullable=True),
+        sa.Column("percent", sa.Integer(), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["id"],
+            ["boilings.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
+        "brynza_form_factors",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["id"],
+            ["form_factors.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -435,6 +465,25 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
+        "brynza_boiling_technologies",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("boiling_speed", sa.Integer(), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["id"],
+            ["boiling_technologies.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
+        "brynza_skus",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["id"],
+            ["skus.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
         "butter_boiling_technologies",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("separator_runaway_time", sa.Integer(), nullable=True),
@@ -605,6 +654,8 @@ def downgrade():
     op.drop_table("mascarpone_boiling_technologies")
     op.drop_table("butter_skus")
     op.drop_table("butter_boiling_technologies")
+    op.drop_table("brynza_skus")
+    op.drop_table("brynza_boiling_technologies")
     op.drop_table("adygea_skus")
     op.drop_table("adygea_boiling_technologies")
     op.drop_table("skus")
@@ -618,6 +669,8 @@ def downgrade():
     op.drop_table("mascarpone_boilings")
     op.drop_table("butter_form_factors")
     op.drop_table("butter_boilings")
+    op.drop_table("brynza_form_factors")
+    op.drop_table("brynza_boilings")
     op.drop_table("boiling_technologies")
     op.drop_table("adygea_form_factors")
     op.drop_table("adygea_boilings")
@@ -629,6 +682,7 @@ def downgrade():
     op.drop_table("mascarpone_lines")
     op.drop_table("form_factors")
     op.drop_table("butter_lines")
+    op.drop_table("brynza_lines")
     op.drop_table("boilings")
     op.drop_table("adygea_lines")
     op.drop_table("washer")
