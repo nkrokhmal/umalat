@@ -15,22 +15,25 @@ from utils_ak.portion.portion_tools import cast_interval
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaLine, BrynzaLine, Washer, cast_model
 from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_cleaning, make_lunch, make_preparation
-from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
+from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import (
+    to_boiling_plan,
+    to_boiling_plan as to_boiling_plan_adygea,
+)
 from app.scheduler.boiling_plan_like import BoilingPlanLike
+from app.scheduler.brynza.to_boiling_plan import to_boiling_plan as to_boiling_plan_brynza
 from app.scheduler.time_utils import cast_t, cast_time
 
 
 def make_packing_schedule(
-    adygea_boiling_plan_df,
-    brynza_boiling_plan_df,
+    boiling_plan: BoilingPlanLike,
     start_time="07:00",
     prepare_start_time="07:00",
     lunch_times=None,
 ):
     # - Alias dataframes
 
-    df1 = brynza_boiling_plan_df
-    df2 = adygea_boiling_plan_df
+    df1 = to_boiling_plan_brynza(boiling_plan)
+    df2 = to_boiling_plan_adygea(boiling_plan)
 
     # - Make schedule
 
@@ -79,21 +82,17 @@ def make_packing_schedule(
 
     return {
         "schedule": m.root,
-        "adygea_boiling_plan_df": adygea_boiling_plan_df,
-        "brynza_boiling_plan_df": brynza_boiling_plan_df,
+        "brynza_boiling_plan_df": df1,
+        "adygea_boiling_plan_df": df2,
     }
 
 
 def test():
     # - Read boiling plan
 
-    from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan as to_boiling_plan_adygea
-    from app.scheduler.brynza.to_boiling_plan import to_boiling_plan as to_boiling_plan_brynza
-
-    fn = f"/Users/arsenijkadaner/FileApps/coding_projects/umalat/app/data/static/samples/by_department/milk_project/2023-11-19 План по варкам милкпроджект Новый.xlsx"
     print(
         make_packing_schedule(
-            brynza_boiling_plan_df=to_boiling_plan_brynza(fn), adygea_boiling_plan_df=to_boiling_plan_adygea(fn)
+            boiling_plan=f"/Users/arsenijkadaner/FileApps/coding_projects/umalat/app/data/static/samples/by_department/milk_project/2023-11-19 План по варкам милкпроджект Новый.xlsx"
         )
     )
 
