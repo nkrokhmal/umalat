@@ -72,6 +72,9 @@ def make_schedule_basic(
 
     cleanings = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleanings.items() if v}
     boilings = make_boilings(boiling_plan_df)
+    logger.error(
+        "Final schedule!", start_times=start_times, cleanings=cleanings, start_configuration=start_configuration
+    )
     schedule = make_schedule_from_boilings(
         boilings,
         cleanings=cleanings,
@@ -97,25 +100,25 @@ def make_schedule_basic(
     if not all(boilings_by_line_name.values()):
         # Only one line - it is already fixed
         return schedule
-
-    start_times[time_by_line] = original_start_times[time_by_line]
-    start_times[time_not_by_line] = cast_time(
-        cast_t(start_times[time_by_line])
-        + boilings_by_line_name[time_not_by_line][0]["melting_and_packing"].x[0]
-        - boilings_by_line_name[time_by_line][0]["melting_and_packing"].x[0]
-    )
-
-    # - If start_times changed - make final schedule
-
-    if start_times != original_start_times:
-        boilings = make_boilings(boiling_plan_df)
-        schedule = make_schedule_from_boilings(
-            boilings,
-            cleanings=cleanings,
-            start_times=start_times,
-            start_configuration=start_configuration,
-            date=date,
-        )
+    # todo next: fix timing
+    # start_times[time_by_line] = original_start_times[time_by_line]
+    # start_times[time_not_by_line] = cast_time(
+    #     cast_t(start_times[time_by_line])
+    #     + boilings_by_line_name[time_not_by_line][0]["melting_and_packing"].x[0]
+    #     - boilings_by_line_name[time_by_line][0]["melting_and_packing"].x[0]
+    # )
+    #
+    # # - If start_times changed - make final schedule
+    #
+    # if start_times != original_start_times:
+    #     boilings = make_boilings(boiling_plan_df)
+    #     schedule = make_schedule_from_boilings(
+    #         boilings,
+    #         cleanings=cleanings,
+    #         start_times=start_times,
+    #         start_configuration=start_configuration,
+    #         date=date,
+    #     )
 
     # - Return schedule
 
@@ -123,11 +126,18 @@ def make_schedule_basic(
 
 
 def test():
+    import warnings
+
+    warnings.filterwarnings("ignore")
+    from deeplay.utils.loguru_utils.configure_loguru import configure_loguru
+
+    configure_loguru("DEBUG")
     make_schedule_basic(
-        str(
-            get_repo_path()
-            / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
-        ),
+        # str(
+        #     get_repo_path()
+        #     / "app/data/static/samples/by_department/mozzarella/2023-11-22 План по варкам моцарелла.xlsx"
+        # ),
+        "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx",
         start_times={LineName.WATER: "06:00", LineName.SALT: "11:00"},
     )
 

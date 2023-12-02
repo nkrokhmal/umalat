@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
+from deeplay.utils.loguru_utils.configure_loguru import configure_loguru
 from openpyxl import Workbook
-from utils_ak.loguru import configure_loguru
 from utils_ak.os import open_file_in_os
 
 from app.enum import LineName

@@ -6,7 +6,7 @@ from app.enum import LineName
 from app.scheduler.time_utils import cast_t
 
 
-def calc_score(
+def calc_partial_score(
     schedule,
     start_times: Optional[dict] = None,
 ):

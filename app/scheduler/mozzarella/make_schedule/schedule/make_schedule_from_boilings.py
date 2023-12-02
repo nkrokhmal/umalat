@@ -17,6 +17,7 @@ from utils_ak.iteration.simple_iterator import iter_pairs
 from app.enum import LineName
 from app.models import Washer, cast_model
 from app.scheduler.mozzarella.make_schedule.packing import boiling_has_multihead_packing, make_configuration_blocks
+from app.scheduler.mozzarella.make_schedule.schedule.calc_score import calc_score
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.awaiting_pusher import AwaitingPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.backwards_pusher import BackwardsPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.drenator_shrinking_pusher import DrenatorShrinkingPusher
@@ -330,12 +331,11 @@ class ScheduleMaker:
                 line_name,
                 between_boilings=True,
             )
-            for conf in configuration_blocks:
+            for block in configuration_blocks:
                 # SIDE EFFECT
-                conf.props.update(line_name=line_name)
                 push(
                     self.m.root["master"],
-                    conf,
+                    block,
                     push_func=AxisPusher(start_from="beg"),
                     validator=Validator(),
                 )
@@ -466,20 +466,17 @@ class ScheduleMaker:
 
             logger.debug("Current Lines", cur_lines=cur_lines)
 
+            strict_order = cur_boiling_num < len(
+                start_configuration
+            )  # all configuration blocks should start in strict order
+
             next_row = self._select_next_row(
-                start_configuration=start_configuration,
-                cur_boiling_num=cur_boiling_num,
-                cur_lines=cur_lines,
+                cur_lines=cur_lines, start_configuration=start_configuration, cur_boiling_num=cur_boiling_num
             )
+            next_row["boiling"].props.update(boiling_id=cur_boiling_num)
 
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
-
-            if cur_boiling_num < len(start_configuration):
-                # all configuration blocks should start in strict order
-                strict_order = True
-            else:
-                strict_order = False
 
             # insert boiling
             self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
@@ -786,7 +783,12 @@ def make_schedule_from_boilings(
     shrink_drenators=True,
     start_configuration=None,
 ):
-    logger.info("Making schedule from boilings", cleanings=cleanings)
+    logger.info(
+        "Making schedule from boilings",
+        start_times=start_times,
+        start_configuration=start_configuration,
+        cleanings=cleanings,
+    )
     return ScheduleMaker().make(
         boilings=boilings,
         date=date,

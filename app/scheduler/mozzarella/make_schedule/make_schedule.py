@@ -43,7 +43,7 @@ def make_schedule(
 
     # - Make schedule
 
-    if optimize_start_configurations or optimize_water_gaps:
+    if False and optimize_start_configurations or optimize_water_gaps:  # todo next: switch back
         schedule = optimize_schedule(
             boiling_plan_df,
             optimize_start_configurations=optimize_start_configurations,
