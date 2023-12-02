@@ -59,7 +59,7 @@ def make_packing_schedule(
 
     mark_consecutive_groups(df2, key="boiling_type", groups_key="boiling_type_num")
 
-    for is_first, is_last, (i, grp) in mark_ends(list(df2.groupby("boiling_type_num"))):
+    for i, grp in list(df2.groupby("boiling_type_num")):
         boiling = grp.iloc[0]["boiling"]
         total_kg = grp["kg"].sum()
         packing_speed = (
@@ -75,10 +75,9 @@ def make_packing_schedule(
             if not _is_last:
                 m.row("packing_configuration", size=1)
 
-        if not is_last:
-            m.row("packing_configuration", size=1)
+        m.row("packing_configuration", size=1)
 
-        m.row("cleaning")
+        m.row("cleaning", size=12)
 
     return {
         "schedule": m.root,

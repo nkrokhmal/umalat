@@ -40,13 +40,13 @@ def wrap_frontend(
     _m = BlockMaker(
         "packing_line",
         default_row_width=1,
-        default_col_width=1,
+        default_col_width=3,
         # props
         axis=1,
     )
 
     for block in schedule.children:
-        _m.block(_m.copy(block, with_props=True, size=(block.size[0], 1)), push_func=add_push)
+        _m.block(_m.copy(block, with_props=True, size=(block.size[0], 4)), push_func=add_push)
     m.block(_m.root)
 
     # - Add frontend to output and return
