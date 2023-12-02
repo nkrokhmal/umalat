@@ -440,64 +440,61 @@ class ScheduleMaker:
         # logger.debug('Start configuration', start_configuration=start_configuration)
         cur_boiling_num = 0
 
-        with code("add boilings loop"):
-            while True:
-                # check if finished
-                if len(self.left_df) == 0:
-                    break
+        while True:
+            # check if finished
+            if len(self.left_df) == 0:
+                break
 
-                # check if only salt left -> start working on 3 line
-                if (self.left_df["line_name"] == LineName.SALT).all():
-                    self.lines_df.at[LineName.SALT, "iter_props"] = [
-                        {"pouring_line": str(v1), "drenator_num": str(v2)}
-                        for v1, v2 in itertools.product([2, 3, 1], [0, 1])
-                    ]
+            # check if only salt left -> start working on 3 line
+            if (self.left_df["line_name"] == LineName.SALT).all():
+                self.lines_df.at[LineName.SALT, "iter_props"] = [
+                    {"pouring_line": str(v1), "drenator_num": str(v2)}
+                    for v1, v2 in itertools.product([2, 3, 1], [0, 1])
+                ]
 
-                next_rows = [
-                    grp.iloc[0] for i, grp in self.left_df.groupby("sheet")
-                ]  # select first rows from each sheet
-                cur_lines = len(set([row["line_name"] for row in next_rows]))
+            next_rows = [grp.iloc[0] for i, grp in self.left_df.groupby("sheet")]  # select first rows from each sheet
+            cur_lines = len(set([row["line_name"] for row in next_rows]))
 
-                # logger.debug('Current Lines', cur_lines=cur_lines)
+            # logger.debug('Current Lines', cur_lines=cur_lines)
 
-                # select next row
-                if cur_lines == 1:
-                    # one line of sheet left
-                    next_row = self.left_df.iloc[0]
-                elif cur_lines == 2:
-                    # filter rows with latest boiling (any boiling is already present for line)
-                    df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
-
-                    if cur_boiling_num < len(start_configuration):
-                        # start from specified configuration
-                        line_name = start_configuration[cur_boiling_num]
-
-                        # logger.debug('Chose line by start configuration', line_name=line_name)
-                    else:
-                        # choose most latest line
-                        line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
-
-                        # reverse
-                        line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
-                        # logger.debug('Chose line by most latest line', line_name=line_name)
-
-                    # select next row -> first for selected line
-                    next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
-                else:
-                    raise Exception("Should not happen")
-
-                # remove newly added row from left rows
-                self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
+            # select next row
+            if cur_lines == 1:
+                # one line of sheet left
+                next_row = self.left_df.iloc[0]
+            elif cur_lines == 2:
+                # filter rows with latest boiling (any boiling is already present for line)
+                df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
 
                 if cur_boiling_num < len(start_configuration):
-                    # all configuration blocks should start in strict order
-                    strict_order = True
-                else:
-                    strict_order = False
+                    # start from specified configuration
+                    line_name = start_configuration[cur_boiling_num]
 
-                # insert boiling
-                self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
-                cur_boiling_num += 1
+                    # logger.debug('Chose line by start configuration', line_name=line_name)
+                else:
+                    # choose most latest line
+                    line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
+
+                    # reverse
+                    line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                    # logger.debug('Chose line by most latest line', line_name=line_name)
+
+                # select next row -> first for selected line
+                next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
+            else:
+                raise Exception("Should not happen")
+
+            # remove newly added row from left rows
+            self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
+
+            if cur_boiling_num < len(start_configuration):
+                # all configuration blocks should start in strict order
+                strict_order = True
+            else:
+                strict_order = False
+
+            # insert boiling
+            self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
+            cur_boiling_num += 1
 
     def _process_extras(self):
         # push extra packings
@@ -531,35 +528,37 @@ class ScheduleMaker:
             )
 
     def _process_cleanings(self):
-        with code("Add cleanings if necessary"):
-            # extract boilings
-            boilings = self.m.root["master"]["boiling", True]
-            boilings = list(sorted(boilings, key=lambda b: b.x[0]))
+        # - Add cleanings if necessary
 
-            for a, b in iter_pairs(boilings):
-                rest = b["pouring"]["first"]["termizator"].x[0] - a["pouring"]["first"]["termizator"].y[0]
+        # extract boilings
+        boilings = self.m.root["master"]["boiling", True]
+        boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
-                # extract current cleanings
-                cleanings = list(self.m.root["master"].iter(cls="cleaning"))
+        for a, b in iter_pairs(boilings):
+            rest = b["pouring"]["first"]["termizator"].x[0] - a["pouring"]["first"]["termizator"].y[0]
 
-                # calc in_between and previous cleanings
-                in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
-                previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
-                if previous_cleanings:
-                    previous_cleaning = max(previous_cleanings, key=lambda c: c.x[0])
-                else:
-                    previous_cleaning = None
+            # extract current cleanings
+            cleanings = list(self.m.root["master"].iter(cls="cleaning"))
 
-                if not in_between_cleanings:
-                    # no current in between cleanings -> try to add if needed
+            # calc in_between and previous cleanings
+            in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
+            previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
+            if previous_cleanings:
+                previous_cleaning = max(previous_cleanings, key=lambda c: c.x[0])
+            else:
+                previous_cleaning = None
 
-                    # if rest is more than an hour and less than 80 minutes -> short cleaning
-                    if rest >= 24:
-                        cleaning = make_termizator_cleaning_block("short", rule="rest_after_two_hours")
-                        cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
-                        push(self.m.root["master"], cleaning, push_func=add_push)
+            if not in_between_cleanings:
+                # no current in between cleanings -> try to add if needed
 
-        # add last full cleaning
+                # if rest is more than an hour and less than 80 minutes -> short cleaning
+                if rest >= 24:
+                    cleaning = make_termizator_cleaning_block("short", rule="rest_after_two_hours")
+                    cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
+                    push(self.m.root["master"], cleaning, push_func=add_push)
+
+        # - Add last full cleaning
+
         last_boiling = max(self.m.root["master"]["boiling", True], key=lambda b: b.y[0])
         start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1
         cleaning = make_termizator_cleaning_block("full", rule="closing")  # add five extra minutes
@@ -571,91 +570,94 @@ class ScheduleMaker:
         )
 
     def _process_shifts(self):
-        with code("cheese makers"):
-            beg = min(self.m.root["master"]["boiling", True], key=lambda b: b.x[0]).x[0] - 6  # 0.5h before start
-            end = (
-                max(self.m.root["master"]["boiling", True], key=lambda b: b.y[0])["pouring"]["second"]["pouring_off"].y[
-                    0
-                ]
-                + 24
-            )  # 2h after last pouring off
+        # - Cheese makers
+
+        beg = min(self.m.root["master"]["boiling", True], key=lambda b: b.x[0]).x[0] - 6  # 0.5h before start
+        end = (
+            max(self.m.root["master"]["boiling", True], key=lambda b: b.y[0])["pouring"]["second"]["pouring_off"].y[0]
+            + 24
+        )  # 2h after last pouring off
+        shifts = split_shifts(beg, end)
+
+        for i, (beg, end) in enumerate(shifts, 1):
+            push(
+                self.m.root["shifts"]["cheese_makers"],
+                push_func=add_push,
+                block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
+            )
+
+        # - Water
+
+        # todo maybe: refactor, code duplication [@marklidenberg]
+        water_boilings = [
+            b for b in self.m.root["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.WATER
+        ]
+
+        if water_boilings:
+            # - Water meltings
+
+            beg = water_boilings[0]["melting_and_packing"]["melting"].x[0] - 12  # 1h before start
+            end = water_boilings[-1]["melting_and_packing"]["melting"].y[0] + 12  # 1h after end
+
             shifts = split_shifts(beg, end)
 
             for i, (beg, end) in enumerate(shifts, 1):
                 push(
-                    self.m.root["shifts"]["cheese_makers"],
+                    self.m.root["shifts"]["water_meltings"],
                     push_func=add_push,
                     block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
                 )
 
-        # todo maybe: refactor, code duplication [@marklidenberg]
-        with code("Water"):
-            water_boilings = [
-                b
-                for b in self.m.root["master"]["boiling", True]
-                if b.props["boiling_model"].line.name == LineName.WATER
-            ]
+            # - Water packings
 
-            if water_boilings:
-                with code("water meltings"):
-                    beg = water_boilings[0]["melting_and_packing"]["melting"].x[0] - 12  # 1h before start
-                    end = water_boilings[-1]["melting_and_packing"]["melting"].y[0] + 12  # 1h after end
+            beg = water_boilings[0]["melting_and_packing"]["packing"].x[0] - 18  # 1.5h before start
+            end = water_boilings[-1]["melting_and_packing"]["packing"].y[0] + 6  # 0.5h after end
 
-                    shifts = split_shifts(beg, end)
+            shifts = split_shifts(beg, end)
 
-                    for i, (beg, end) in enumerate(shifts, 1):
-                        push(
-                            self.m.root["shifts"]["water_meltings"],
-                            push_func=add_push,
-                            block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
-                        )
+            for i, (beg, end) in enumerate(shifts, 1):
+                push(
+                    self.m.root["shifts"]["water_packings"],
+                    push_func=add_push,
+                    block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
+                )
 
-                with code("water packings"):
-                    beg = water_boilings[0]["melting_and_packing"]["packing"].x[0] - 18  # 1.5h before start
-                    end = water_boilings[-1]["melting_and_packing"]["packing"].y[0] + 6  # 0.5h after end
+        # - Salt
 
-                    shifts = split_shifts(beg, end)
+        salt_boilings = [
+            b for b in self.m.root["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.SALT
+        ]
+        if salt_boilings:
+            # - Salt meltings
 
-                    for i, (beg, end) in enumerate(shifts, 1):
-                        push(
-                            self.m.root["shifts"]["water_packings"],
-                            push_func=add_push,
-                            block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
-                        )
+            beg = salt_boilings[0]["melting_and_packing"]["melting"].x[0] - 12  # 1h before start
+            end = salt_boilings[-1]["melting_and_packing"]["packing", True][-1].y[0]  # end of packing
 
-        with code("Salt"):
-            salt_boilings = [
-                b for b in self.m.root["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.SALT
-            ]
-            if salt_boilings:
-                with code("salt meltings"):
-                    beg = salt_boilings[0]["melting_and_packing"]["melting"].x[0] - 12  # 1h before start
-                    end = salt_boilings[-1]["melting_and_packing"]["packing", True][-1].y[0]  # end of packing
+            shifts = split_shifts(beg, end)
 
-                    shifts = split_shifts(beg, end)
+            for i, (beg, end) in enumerate(shifts, 1):
+                push(
+                    self.m.root["shifts"]["salt_meltings"],
+                    push_func=add_push,
+                    block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
+                )
 
-                    for i, (beg, end) in enumerate(shifts, 1):
-                        push(
-                            self.m.root["shifts"]["salt_meltings"],
-                            push_func=add_push,
-                            block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
-                        )
+            # - Salt packings
 
-                with code("salt packings"):
-                    try:
-                        beg = salt_boilings[0]["melting_and_packing"]["packing", True][0].x[0] - 12  # 1h before start
-                        end = salt_boilings[-1]["melting_and_packing"]["packing", True][-1].y[0] + 6  # 0.5h after end
+            try:
+                beg = salt_boilings[0]["melting_and_packing"]["packing", True][0].x[0] - 12  # 1h before start
+                end = salt_boilings[-1]["melting_and_packing"]["packing", True][-1].y[0] + 6  # 0.5h after end
 
-                        shifts = split_shifts(beg, end)
+                shifts = split_shifts(beg, end)
 
-                        for i, (beg, end) in enumerate(shifts, 1):
-                            push(
-                                self.m.root["shifts"]["salt_packings"],
-                                push_func=add_push,
-                                block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
-                            )
-                    except:
-                        pass
+                for i, (beg, end) in enumerate(shifts, 1):
+                    push(
+                        self.m.root["shifts"]["salt_packings"],
+                        push_func=add_push,
+                        block=self.m.create_block("shift", x=(beg, 0), size=(end - beg, 0), shift_num=i),
+                    )
+            except:
+                pass
 
     def _fix_first_boiling_of_later_line(self, start_configuration):
         if len(start_configuration) == 1:
@@ -683,34 +685,37 @@ class ScheduleMaker:
             if index != len(boilings_on_line1) - 1:
                 # not last boiling
                 b3 = boilings_on_line1[index + 1]
-                with code("Find packing configuration between b2 and b3"):
-                    packing_configurations = [
-                        pc
-                        for pc in self.m.root["master"]["packing_configuration", True]
-                        if pc.x[0]
-                        > b1["melting_and_packing"]["collecting", True][0].x[
-                            0
-                        ]  # todo maybe: we take first collecting here, but this is not very straightforward [@marklidenberg]
-                        and pc.x[0] <= b3["melting_and_packing"]["collecting", True][0].x[0]
-                        and pc.props["line_name"] == b1.props["boiling_model"].line.name
-                    ]
 
-                    if packing_configurations:
-                        pc = delistify(packing_configurations, single=True)
-                    else:
-                        pc = None
+                # - Find packing configuration between b2 and b3
 
-                with code("Push packing configuration further"):
-                    if pc:
-                        max_push = b3["melting_and_packing"]["collecting", True][0].x[0] - pc.x[0]
-                        pc.detach_from_parent()
-                        push(
-                            self.m.root["master"],
-                            pc,
-                            push_func=BackwardsPusher(max_period=max_push),
-                            validator=Validator(window=100, sheet_order=False),
-                            max_tries=max_push + 1,
-                        )
+                packing_configurations = [
+                    pc
+                    for pc in self.m.root["master"]["packing_configuration", True]
+                    if pc.x[0]
+                    > b1["melting_and_packing"]["collecting", True][0].x[
+                        0
+                    ]  # todo maybe: we take first collecting here, but this is not very straightforward [@marklidenberg]
+                    and pc.x[0] <= b3["melting_and_packing"]["collecting", True][0].x[0]
+                    and pc.props["line_name"] == b1.props["boiling_model"].line.name
+                ]
+
+                if packing_configurations:
+                    pc = delistify(packing_configurations, single=True)
+                else:
+                    pc = None
+
+                # - Push packing configuration further
+
+                if pc:
+                    max_push = b3["melting_and_packing"]["collecting", True][0].x[0] - pc.x[0]
+                    pc.detach_from_parent()
+                    push(
+                        self.m.root["master"],
+                        pc,
+                        push_func=BackwardsPusher(max_period=max_push),
+                        validator=Validator(window=100, sheet_order=False),
+                        max_tries=max_push + 1,
+                    )
 
         # fix boiling
         max_push = b2.x[0] - b1.x[0]
