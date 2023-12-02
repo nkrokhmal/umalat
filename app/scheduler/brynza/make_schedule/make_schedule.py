@@ -28,8 +28,6 @@ from app.scheduler.time_utils import cast_t, cast_time
 def make_packing_schedule(
     boiling_plan: BoilingPlanLike,
     start_time="07:00",
-    prepare_start_time="07:00",
-    lunch_times=None,
 ):
     # - Alias dataframes
 
@@ -40,7 +38,7 @@ def make_packing_schedule(
 
     brynza_line = cast_model(cls=BrynzaLine, obj="Брынза")
 
-    start_t = cast_t("11:00")
+    start_t = cast_t(start_time)
 
     m = BlockMaker("schedule")
 
@@ -86,7 +84,7 @@ def make_packing_schedule(
             m.row(
                 "packing_adygea",
                 size=round(piece_kg / packing_speed * 12),
-                label=f"Паковка адыгейского {boiling.weight_netto}, {piece_kg}кг",
+                label=f"Паковка адыгейского {boiling.weight_netto}, {round(piece_kg)}кг",
             )
             if not _is_last:
                 m.row("packing_configuration", size=1)

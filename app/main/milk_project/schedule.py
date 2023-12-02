@@ -2,7 +2,7 @@ import flask
 import flask_login
 import openpyxl
 
-from utils_ak.openpyxl import write_metadata
+from utils_ak.openpyxl import draw_sheet_sequence, write_metadata
 
 from app.main import main
 from app.main.adygea.update_task_and_batches import update_task_and_batches as update_task_and_batches_adygea
@@ -13,6 +13,7 @@ from app.main.milk_project.update_task_and_batches import (
 )
 from app.main.validators import *
 from app.scheduler.adygea.draw_frontend.draw_frontend import draw_frontend as draw_frontend_adygea
+from app.scheduler.brynza.draw_frontend.draw_frontend import draw_frontend as draw_frontend_brynza
 from app.scheduler.frontend_utils import fill_grid
 from app.scheduler.time_utils import *
 from app.utils.batches.batch import *
@@ -48,32 +49,38 @@ def milk_project_schedule():
         )
         first_batch_ids = {"milk_project": form.batch_number.data}
 
-        adygea_output = draw_frontend_adygea(wb, start_time=beg_time, workbook=wb)
-        schedule, schedule_wb = adygea_output["schedule"], adygea_output["workbook"]
-
+        adygea_output = draw_frontend_adygea(boiling_plan=wb, start_time=beg_time, workbook=wb)
+        adygea_schedule, adygea_schedule_wb = adygea_output["schedule"], adygea_output["workbook"]
         if len(adygea_output["boiling_plan_df"]) > 0 and len(adygea_output["boiling_plan_df"]) > 0:
             # Set preferred header time"
             adygea_output["schedule"].props.update(preferred_header_time=cast_time(adygea_output["schedule"].x[0]))
 
-        write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
+        brynza_output = draw_frontend_brynza(boiling_plan=wb, start_time=beg_time)
+        brynza_schedule, brynza_schedule_wb = brynza_output["schedule"], brynza_output["workbook"]
+
+        draw_sheet_sequence(
+            (wb, "Расписание"), [(adygea_schedule_wb, "Расписание"), (brynza_schedule_wb, "Расписание")]
+        )
+
+        write_metadata(adygea_schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
 
         schedule_tasks = [
-            update_task_and_batches_milk_project(schedule_wb),
-            update_task_and_batches_adygea(schedule_wb),
+            update_task_and_batches_milk_project(adygea_schedule_wb),
+            update_task_and_batches_adygea(adygea_schedule_wb),
         ]
 
         cur_row = 2
         for schedule_task in schedule_tasks:
-            schedule_wb, cur_row = schedule_task.schedule_task_original(schedule_wb, cur_row=cur_row)
+            adygea_schedule_wb, cur_row = schedule_task.schedule_task_original(adygea_schedule_wb, cur_row=cur_row)
             # schedule_wb, cur_row = schedule_task.schedule_task_boilings(
             #     schedule_wb, form.batch_number.data, cur_row=cur_row
             # )
 
-        _ = fill_grid(schedule_wb["Расписание"])
+        _ = fill_grid(adygea_schedule_wb["Расписание"])
 
         filename_schedule = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.xlsx"
         filename_schedule_pickle = f"{date.strftime('%Y-%m-%d')} Расписание милкпроджект.pickle"
-        save_schedule(schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
+        save_schedule(adygea_schedule_wb, filename_schedule, date.strftime("%Y-%m-%d"))
         save_schedule_dict(
             adygea_output["schedule"].to_dict(),
             filename_schedule_pickle,
