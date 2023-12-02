@@ -54,6 +54,15 @@ def optimize_schedule(
     start_configuration=None,
     date=None,
 ):
+    """
+    - Find start configuration if needed by making a schedule
+    - Generate start configurations (neighborhood)
+    - Make a schedule for each start configuration with make_schedule_basic or optimize_schedule_by_swapping_water_gaps
+    - Return the best
+    Returns
+    -------
+
+    """
     # - Get start configuration if needed
 
     if not start_configuration:

@@ -65,6 +65,14 @@ def optimize_schedule_by_swapping_water_gaps(
     start_configuration=None,
     date=None,
 ):
+    """
+    - Make schedule basic
+    - Try to swap boiling_plan df and try again
+    - Find the best schedule
+    Returns
+    -------
+
+    """
     # - Make initial schedule
 
     schedule = make_schedule_basic(

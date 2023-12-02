@@ -22,6 +22,16 @@ def make_schedule_basic(
     start_configuration=None,
     date=None,
 ):
+    """
+    - Find start_configuration if needed by making a schedule
+    - Find optimal cleanings
+    - Make schedule with cleanings and start configuration
+    - Fix times
+    - Reschedule if needed
+    Returns
+    -------
+
+    """
     boiling_plan_df = to_boiling_plan(boiling_plan_obj)
     original_start_times = dict(start_times)
     start_times = dict(start_times)
