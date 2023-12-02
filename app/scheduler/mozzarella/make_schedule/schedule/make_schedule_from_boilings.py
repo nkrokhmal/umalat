@@ -1,5 +1,6 @@
 import itertools
 
+from copy import deepcopy
 from datetime import datetime
 
 import pandas as pd
@@ -24,6 +25,8 @@ from app.scheduler.mozzarella.make_schedule.schedule.pushers.drenator_shrinking_
 from app.scheduler.split_shifts_utils import split_shifts
 from app.scheduler.time_utils import cast_t, cast_time
 
+
+BLOCKS = []
 
 STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
 
@@ -303,7 +306,7 @@ class ScheduleMaker:
         else:
             self.last_multihead_water_boiling = None
 
-    def _process_boiling(self, boiling, shrink_drenators=True, strict_order=False):
+    def _process_boiling(self, boiling, shrink_drenators=True, strict_order=False, is_temporary=False):
         # extract line name
         line_name = boiling.props["boiling_model"].line.name
 
@@ -332,6 +335,8 @@ class ScheduleMaker:
             )
             for block in configuration_blocks:
                 # SIDE EFFECT
+                block.props.update(is_temporary=is_temporary)
+                # print("Pushing", block.props['cls'])
                 push(
                     self.m.root["master"],
                     block,
@@ -347,6 +352,9 @@ class ScheduleMaker:
 
         # push boiling
         # SIDE EFFECT
+        boiling.props.update(is_temporary_boiling=is_temporary)
+        # print("Pushing", boiling.props['cls'])
+
         push(
             self.m.root["master"],
             boiling,
@@ -357,7 +365,7 @@ class ScheduleMaker:
         )
 
         # fix water a little bit: try to push water before - allowing awaiting in line
-        if line_name == LineName.WATER and self.get_latest_boiling(line_name):
+        if line_name == LineName.WATER and self.get_latest_boiling(line_name) and not is_temporary:
             # SIDE EFFECT
             boiling.detach_from_parent()
             push(
@@ -370,7 +378,7 @@ class ScheduleMaker:
 
         if shrink_drenators:
             # fix water a little bit: try to shrink drenator a little bit for compactness
-            if self.get_latest_boiling(LineName.WATER):
+            if self.get_latest_boiling(LineName.WATER) and not is_temporary:
                 # SIDE EFFECT
                 boiling.detach_from_parent()
                 push(
@@ -397,17 +405,23 @@ class ScheduleMaker:
             packing.props.update(deactivated=True)  # used in make_configuration_blocks function
 
             # SIDE EFFECT
+            # print("Pushing", packing_copy.props['cls'])
+
+            packing_copy.props.update(is_temporary=is_temporary)
             push(self.m.root["extra"], packing_copy, push_func=add_push)
 
         # add multihead boiling after all water boilings if multihead was present
         if boiling == self.last_multihead_water_boiling:
             # SIDE EFFECT
+            # print("Pushing", 'multihead_cleaning')
+
             push(
                 self.m.root["master"],
                 self.m.create_block(
                     "multihead_cleaning",
                     x=(boiling.y[0], 0),
                     size=(cast_t("03:00"), 0),
+                    is_temporary=is_temporary,
                 ),
                 push_func=add_push,
             )
@@ -417,6 +431,7 @@ class ScheduleMaker:
                     "multihead_cleaning",
                     x=(boiling.y[0], 0),
                     size=(cast_t("03:00"), 0),
+                    is_temporary=is_temporary,
                 ),
                 push_func=add_push,
             )
@@ -432,6 +447,7 @@ class ScheduleMaker:
             )
 
             # SIDE EFFECT
+            cleaning.props.update(is_temporary=is_temporary)
             push(
                 self.m.root["master"],
                 cleaning,
@@ -476,8 +492,14 @@ class ScheduleMaker:
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
+            x_rel_before = next_row["boiling"].props["x_rel"]
             # insert boiling
-            self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
+            self._process_boiling(
+                next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order, is_temporary=True
+            )
+
+            # try to remove boiling and then process it again
+
             cur_boiling_num += 1
 
     def get_latest_boiling(self, line_name):
