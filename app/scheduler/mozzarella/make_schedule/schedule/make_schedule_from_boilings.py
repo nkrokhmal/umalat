@@ -240,9 +240,8 @@ class ScheduleMaker:
         # init lines df
         lines_df = pd.DataFrame(
             index=[LineName.WATER, LineName.SALT],
-            columns=["iter_props", "start_time", "boilings_left", "latest_boiling"],
+            columns=["iter_props", "start_time", "boilings_left"],
         )
-        lines_df["latest_boiling"] = None
 
         # init iter_props
         lines_df.at[LineName.WATER, "iter_props"] = [
@@ -309,23 +308,23 @@ class ScheduleMaker:
         line_name = boiling.props["boiling_model"].line.name
 
         # find start_from
-        if not self.lines_df.at[line_name, "latest_boiling"]:
+        if not self.get_latest_boiling(line_name):
             # init
             if self.lines_df.at[line_name, "start_time"]:
                 # start time present
                 start_from = cast_t(self.lines_df.at[line_name, "start_time"]) - boiling["melting_and_packing"].x[0]
             else:
                 # start time not present - start from overall latest boiling from both lines
-                latest_boiling = self.lines_df[~self.lines_df["latest_boiling"].isnull()].iloc[0]["latest_boiling"]
+                latest_boiling = self.get_latest_boilings()[0]
                 start_from = latest_boiling.x[0]
         else:
             # start from latest boiling
-            start_from = self.lines_df.at[line_name, "latest_boiling"].x[0]
+            start_from = self.get_latest_boiling(line_name).x[0]
 
         # add configuration if needed
-        if self.lines_df.at[line_name, "latest_boiling"]:
+        if self.get_latest_boiling(line_name):
             configuration_blocks = make_configuration_blocks(
-                self.lines_df.at[line_name, "latest_boiling"],
+                self.get_latest_boiling(line_name),
                 boiling,
                 self.m,
                 line_name,
@@ -342,8 +341,8 @@ class ScheduleMaker:
 
         # filter iter_props: no two boilings allowed sequentially on the same pouring line
         iter_props = self.lines_df.at[line_name, "iter_props"]
-        if self.lines_df.at[line_name, "latest_boiling"]:
-            current_pouring_line = self.lines_df.at[line_name, "latest_boiling"].props["pouring_line"]
+        if self.get_latest_boiling(line_name):
+            current_pouring_line = self.get_latest_boiling(line_name).props["pouring_line"]
             iter_props = [props for props in iter_props if props["pouring_line"] != current_pouring_line]
 
         # push boiling
@@ -358,7 +357,7 @@ class ScheduleMaker:
         )
 
         # fix water a little bit: try to push water before - allowing awaiting in line
-        if line_name == LineName.WATER and self.lines_df.at[LineName.WATER, "latest_boiling"]:
+        if line_name == LineName.WATER and self.get_latest_boiling(line_name):
             # SIDE EFFECT
             boiling.detach_from_parent()
             push(
@@ -371,7 +370,7 @@ class ScheduleMaker:
 
         if shrink_drenators:
             # fix water a little bit: try to shrink drenator a little bit for compactness
-            if self.lines_df.at[LineName.WATER, "latest_boiling"]:
+            if self.get_latest_boiling(LineName.WATER):
                 # SIDE EFFECT
                 boiling.detach_from_parent()
                 push(
@@ -440,9 +439,6 @@ class ScheduleMaker:
                 validator=Validator(),
             )
 
-        # set latest boiling
-        # SIDE EFFECT
-        self.lines_df.at[line_name, "latest_boiling"] = boiling
         return boiling
 
     def _process_boilings(self, start_configuration, shrink_drenators=True):
@@ -504,8 +500,6 @@ class ScheduleMaker:
             next_row = self.left_df.iloc[0]
         elif cur_lines == 2:
             # filter rows with latest boiling (any boiling is already present for line)
-            df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
-
             if cur_boiling_num < len(start_configuration):
                 # start from specified configuration
 
@@ -513,7 +507,9 @@ class ScheduleMaker:
             else:
                 # choose most latest line
 
-                line_name = max(df["latest_boiling"], key=lambda b: b["pouring"].x[0]).props["boiling_model"].line.name
+                line_name = (
+                    max(self.get_latest_boilings(), key=lambda b: b["pouring"].x[0]).props["boiling_model"].line.name
+                )
 
                 # reverse
                 line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
