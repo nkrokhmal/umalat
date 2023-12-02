@@ -492,7 +492,6 @@ class ScheduleMaker:
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
-            x_rel_before = next_row["boiling"].props["x_rel"]
             # insert boiling
             self._process_boiling(
                 next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order, is_temporary=True
@@ -519,32 +518,20 @@ class ScheduleMaker:
         # select next row
         if cur_lines == 1:
             # one line of sheet left
-            next_row = self.left_df.iloc[0]
-        elif cur_lines == 2:
-            # filter rows with latest boiling (any boiling is already present for line)
-            if cur_boiling_num < len(start_configuration):
-                # start from specified configuration
+            return self.left_df.iloc[0]
 
-                line_name = start_configuration[cur_boiling_num]
-            else:
-                # choose most latest line
+        if cur_lines == 2 and cur_boiling_num < len(start_configuration):
+            return self.left_df[self.left_df["line_name"] == start_configuration[cur_boiling_num]].iloc[0]
+            # choose most latest line
 
-                line_name = (
-                    max(self.get_latest_boilings(), key=lambda b: b["pouring"].x[0]).props["boiling_model"].line.name
-                )
+        line_name = max(self.get_latest_boilings(), key=lambda b: b["pouring"].x[0]).props["boiling_model"].line.name
 
-                # reverse
-                line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
-                # logger.debug('Chose line by most latest line', line_name=line_name)
+        # reverse
+        line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+        # logger.debug('Chose line by most latest line', line_name=line_name)
 
-            # select next row -> first for selected line
-            next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
-        else:
-            raise Exception("Should not happen")
-
-        logger.info("Selected next row", next_row=next_row["line_name"], cur_boiling_num=cur_boiling_num)
-        next_row["boiling"].props.update(boiling_id=cur_boiling_num)
-        return next_row
+        # select next row -> first for selected line
+        return self.left_df[self.left_df["line_name"] == line_name].iloc[0]
 
     def _process_extras(self):
         # push extra packings
