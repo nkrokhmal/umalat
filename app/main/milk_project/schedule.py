@@ -27,6 +27,7 @@ def milk_project_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         beg_time = form.beg_time.data
+        packing_beg_time = form.packing_beg_time.data
 
         # validate time
         time_validator(form, form.beg_time)
@@ -55,7 +56,7 @@ def milk_project_schedule():
             # Set preferred header time"
             adygea_output["schedule"].props.update(preferred_header_time=cast_time(adygea_output["schedule"].x[0]))
 
-        brynza_output = draw_frontend_brynza(boiling_plan=wb, start_time=beg_time)
+        brynza_output = draw_frontend_brynza(boiling_plan=wb, start_time=packing_beg_time)
         brynza_schedule, brynza_schedule_wb = brynza_output["schedule"], brynza_output["workbook"]
 
         draw_sheet_sequence(

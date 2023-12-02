@@ -37,6 +37,11 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default="07:00",
     )
+    packing_beg_time = StringField(
+        "Время начала паковки",
+        validators=[Optional()],
+        default="11:00",
+    )
 
 
 class MilkProjectBoilingForm(FlaskForm):
