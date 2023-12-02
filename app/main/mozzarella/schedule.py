@@ -52,6 +52,11 @@ def mozzarella_schedule():
             filename=os.path.join(data_dir, file.filename),
             data_only=True,
         )
+
+        # Delete list "Расписание" if exists
+        if "Расписание" in wb.sheetnames:
+            wb.remove(wb["Расписание"])
+
         first_batch_ids = {"mozzarella": form.batch_number.data}
         boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=first_batch_ids)
 

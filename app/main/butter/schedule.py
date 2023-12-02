@@ -53,6 +53,10 @@ def butter_schedule():
             data_only=True,
         )
 
+        # Delete list "Расписание" if exists
+        if "Расписание" in wb.sheetnames:
+            wb.remove(wb["Расписание"])
+
         first_batch_ids_by_type = {"butter": batch_number}
 
         # - Read boiling plan, generate schedule, frontend and frontend workbook
