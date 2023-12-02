@@ -5,16 +5,15 @@ from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
 from app.lessmore.utils.get_repo_path import get_repo_path
-from app.scheduler.adygea.draw_frontend.style import STYLE
-from app.scheduler.adygea.wrap_frontend import wrap_frontend
 from app.scheduler.boiling_plan_like import BoilingPlanLike
+from app.scheduler.brynza.draw_frontend.style import STYLE
+from app.scheduler.brynza.draw_frontend.wrap_frontend import wrap_frontend
 from app.scheduler.frontend_utils import draw_excel_frontend
 
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
-    first_batch_ids_by_type: dict = {"adygea": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:
@@ -23,7 +22,6 @@ def draw_frontend(
     output = wrap_frontend(
         boiling_plan=boiling_plan,
         start_time=start_time,
-        first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,
     )
 
@@ -44,9 +42,7 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(
-            get_repo_path() / "app/data/static/samples/by_department/adygea/2023-09-03 План по варкам милкпроджект.xlsx"
-        )
+        boiling_plan=f"/Users/arsenijkadaner/FileApps/coding_projects/umalat/app/data/static/samples/by_department/milk_project/2023-11-19 План по варкам милкпроджект Новый.xlsx"
     )
 
     output["workbook"].save("test.xlsx")

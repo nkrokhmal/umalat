@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from utils_ak.block_tree import BlockMaker
+from utils_ak.block_tree import BlockMaker, add_push
 
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.brynza.make_schedule.make_schedule import make_packing_schedule
@@ -11,14 +11,12 @@ def wrap_frontend(
     boiling_plan: BoilingPlanLike,
     date=None,
     start_time: str = "07:00",
-    first_batch_ids_by_type: dict = {"adygea": 1},
-):
+) -> dict:
     # - Get schedule
 
     output = make_packing_schedule(
         boiling_plan=boiling_plan,
         start_time=start_time,
-        first_batch_ids_by_type=first_batch_ids_by_type,
     )
     schedule = output["schedule"]
 
@@ -35,7 +33,7 @@ def wrap_frontend(
     )
     m.row("stub", size=0)  # start with 1
 
-    m.block(wrap_header(date=date, start_time="11:00", header="График паковки"))
+    m.block(wrap_header(date=date, start_time=start_time, header="График паковки"))
 
     # make packing line
 
@@ -51,8 +49,20 @@ def wrap_frontend(
         _m.block(_m.copy(block, with_props=True, size=(block.size[0], 1)), push_func=add_push)
     m.block(_m.root)
 
-    return m.root
+    # - Add frontend to output and return
+
+    output["frontend"] = m.root
+
+    return output
 
 
 def test():
-    pass
+    print(
+        wrap_frontend(
+            boiling_plan=f"/Users/arsenijkadaner/FileApps/coding_projects/umalat/app/data/static/samples/by_department/milk_project/2023-11-19 План по варкам милкпроджект Новый.xlsx"
+        )
+    )
+
+
+if __name__ == "__main__":
+    test()
