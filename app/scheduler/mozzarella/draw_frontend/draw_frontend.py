@@ -80,12 +80,12 @@ def test():
         #     get_repo_path()
         #     / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
         # ),
-        "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 Расписание моцарелла.xlsx",
+        "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx",
         start_times={LineName.WATER: "08:30", LineName.SALT: "06:00"},
         exact_start_time_line_name=LineName.SALT,
         optimize_start_configurations=False,
         optimize_water_gaps=False,
-        first_batch_ids_by_type={"mozzarella": 398},
+        first_batch_ids_by_type={"mozzarella": 1},
     )
 
     output["workbook"].save("test.xlsx")

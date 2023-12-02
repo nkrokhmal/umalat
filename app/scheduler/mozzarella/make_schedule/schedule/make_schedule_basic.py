@@ -32,6 +32,8 @@ def make_schedule_basic(
     -------
 
     """
+    logger.info("Making basic schedule")
+
     boiling_plan_df = to_boiling_plan(boiling_plan_obj)
     original_start_times = dict(start_times)
     start_times = dict(start_times)
