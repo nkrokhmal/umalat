@@ -1,4 +1,5 @@
 import itertools
+import math
 
 from more_itertools import mark_ends
 from utils_ak.block_tree.block_maker import BlockMaker
@@ -46,9 +47,20 @@ def make_packing_schedule(
     m.row("preparation", size=7)
 
     boiling_technology = df1.iloc[0]["boiling"].boiling_technologies[0]
+
+    # build label for brynza
+    mark_consecutive_groups(df1, key="boiling", groups_key="boiling_num")
+    values = []
+    for i, grp in list(df1.groupby("boiling_num")):
+        boiling = grp.iloc[0]["boiling"]
+        sku = grp.iloc[0]["sku"]
+        values.append(f"{sku.name} - {round(grp['kg'].sum())}кг")
+    label = ", ".join(values)
+
     m.row(
         "packing_brynza",
         size=round((df1["kg"].sum() / df1["sku"].apply(lambda sku: sku.packing_speed + 175)).sum() * 12),
+        label=label,
     )
     m.row("small_cleaning", size=5)
     m.row("labelling", size=14)
@@ -68,10 +80,14 @@ def make_packing_schedule(
 
         # crop to pieces of 200kg
 
-        pieces = [200] * int(total_kg / 200) + [total_kg - 200 * int(total_kg / 200)]
+        pieces_kg = [200] * int(total_kg / 200) + [total_kg - 200 * int(total_kg / 200)]
 
-        for _is_first, _is_last, piece in mark_ends(pieces):
-            m.row("packing_adygea", size=round(piece / packing_speed * 12))
+        for _is_first, _is_last, piece_kg in mark_ends(pieces_kg):
+            m.row(
+                "packing_adygea",
+                size=round(piece_kg / packing_speed * 12),
+                label=f"Паковка адыгейского {boiling.weight_netto}, {piece_kg}кг",
+            )
             if not _is_last:
                 m.row("packing_configuration", size=1)
 
