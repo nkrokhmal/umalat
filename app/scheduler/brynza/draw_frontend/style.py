@@ -6,4 +6,5 @@ STYLE = {
     "packing_configuration": {"color": "red"},
     "packing_adygea": {"text": lambda b: b.props["label"], "color": "#DAE4C0"},
     "labelling": {"text": "Маркировка"},
+    "template": {"text": lambda b: b.props["label"]},
 }

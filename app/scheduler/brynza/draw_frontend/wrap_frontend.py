@@ -40,14 +40,40 @@ def wrap_frontend(
     _m = BlockMaker(
         "packing_line",
         default_row_width=1,
-        default_col_width=3,
+        default_col_width=1,
         # props
         axis=1,
     )
 
     for block in schedule.children:
-        _m.block(_m.copy(block, with_props=True, size=(block.size[0], 4)), push_func=add_push)
+        is_packing = block.props["cls"].startswith("packing_")
+        is_packing_brynza = block.props["cls"] == "packing_brynza"
+        is_packing_adygea = block.props["cls"] == "packing_adygea"
+        _m.block(
+            _m.copy(block, with_props=True, size=(block.size[0], 4 if not is_packing else 2)),
+            x=(block.x[0], 0 if not is_packing_brynza else 2),
+            push_func=add_push,
+        )
+
     m.block(_m.root)
+
+    # - Add template
+
+    with m.block("template_block", index_width=1, push_func=add_push):
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 2),
+            size=(2, 2),
+            label="САККАРДО",
+        )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 4),
+            size=(2, 2),
+            label="МУЛЬТИВАК",
+        )
 
     # - Add frontend to output and return
 
