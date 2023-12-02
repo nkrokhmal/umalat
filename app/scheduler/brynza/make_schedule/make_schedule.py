@@ -84,7 +84,7 @@ def make_packing_schedule(
             m.row(
                 "packing_adygea",
                 size=round(piece_kg / packing_speed * 12),
-                label=f"Паковка адыгейского {boiling.weight_netto}, {round(piece_kg)}кг",
+                label=f"Адыгейский {boiling.weight_netto}, {round(piece_kg)}кг",
             )
             if not _is_last:
                 m.row("packing_configuration", size=1)
