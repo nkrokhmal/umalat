@@ -396,6 +396,7 @@ class ScheduleMaker:
             packing_copy = self.m.copy(packing, with_props=True)
             packing_copy.props.update(extra_props={"start_from": packing.x[0]})
             packing.props.update(deactivated=True)  # used in make_configuration_blocks function
+
             # SIDE EFFECT
             push(self.m.root["extra"], packing_copy, push_func=add_push)
 
@@ -430,6 +431,7 @@ class ScheduleMaker:
                 x=(boiling["pouring"]["first"]["termizator"].y[0], 0),
                 rule="manual",
             )
+
             # SIDE EFFECT
             push(
                 self.m.root["master"],
@@ -481,6 +483,19 @@ class ScheduleMaker:
             # insert boiling
             self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
             cur_boiling_num += 1
+
+    def get_latest_boiling(self, line_name):
+        boilings = self.m.root["master"]["boiling", True]
+        line_names = [b.props["boiling_model"].line.name for b in boilings]
+
+        if line_name not in line_names:
+            return None
+        return [b for b in boilings if b.props["boiling_model"].line.name == line_name][-1]
+
+    def get_latest_boilings(self):
+        result = [self.get_latest_boiling(line_name) for line_name in [LineName.WATER, LineName.SALT]]
+        result = [b for b in result if b is not None]
+        return result
 
     def _select_next_row(self, start_configuration, cur_boiling_num, cur_lines):
         # select next row
