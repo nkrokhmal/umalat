@@ -33,7 +33,10 @@ class Validator(ClassValidator):
     def validate__boiling__boiling(b1, b2):
         validate_disjoint_by_axis(b1["collecting"], b2["collecting"])
         if b1.props["boiler_num"] == b2.props["boiler_num"]:
-            validate_disjoint_by_axis(b1, b2)
+            if b1.props["boiling_model"].weight_netto != b2.props["boiling_model"].weight_netto:
+                validate_disjoint_by_axis(b1, b2, ordered=True, distance=2)
+            else:
+                validate_disjoint_by_axis(b1, b2)
 
         if b2.parent["boiling", True].index(b2) <= 3 and b1.props["pair_num"] == b2.props["pair_num"]:
             validate_disjoint_by_axis(b1["coagulation"], b2["coagulation"], ordered=True)
