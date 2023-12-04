@@ -18,7 +18,7 @@ from utils_ak.iteration.simple_iterator import iter_pairs
 from app.enum import LineName
 from app.models import Washer, cast_model
 from app.scheduler.mozzarella.make_schedule.packing import boiling_has_multihead_packing, make_configuration_blocks
-from app.scheduler.mozzarella.make_schedule.schedule.calc_score import calc_score
+from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.awaiting_pusher import AwaitingPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.backwards_pusher import BackwardsPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.drenator_shrinking_pusher import DrenatorShrinkingPusher
@@ -336,6 +336,7 @@ class ScheduleMaker:
             for block in configuration_blocks:
                 # SIDE EFFECT
                 block.props.update(is_temporary=is_temporary)
+
                 # print("Pushing", block.props['cls'])
                 push(
                     self.m.root["master"],
@@ -406,7 +407,6 @@ class ScheduleMaker:
 
             # SIDE EFFECT
             # print("Pushing", packing_copy.props['cls'])
-
             packing_copy.props.update(is_temporary=is_temporary)
             push(self.m.root["extra"], packing_copy, push_func=add_push)
 
@@ -492,12 +492,7 @@ class ScheduleMaker:
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
-            # insert boiling
-            self._process_boiling(
-                next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order, is_temporary=True
-            )
-
-            # try to remove boiling and then process it again
+            self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
 
             cur_boiling_num += 1
 
@@ -522,15 +517,82 @@ class ScheduleMaker:
 
         if cur_lines == 2 and cur_boiling_num < len(start_configuration):
             return self.left_df[self.left_df["line_name"] == start_configuration[cur_boiling_num]].iloc[0]
-            # choose most latest line
 
-        line_name = max(self.get_latest_boilings(), key=lambda b: b["pouring"].x[0]).props["boiling_model"].line.name
+        # - Try water->salt and salt->water and choose best
 
-        # reverse
-        line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
-        # logger.debug('Chose line by most latest line', line_name=line_name)
+        # water->salt
 
-        # select next row -> first for selected line
+        x_water_before = list(self.left_df[self.left_df["line_name"] == LineName.WATER].iloc[0]["boiling"].x)
+        x_salt_before = list(self.left_df[self.left_df["line_name"] == LineName.SALT].iloc[0]["boiling"].x)
+
+        self._process_boiling(
+            self.left_df[self.left_df["line_name"] == LineName.WATER].iloc[0]["boiling"],
+            shrink_drenators=False,
+            strict_order=False,
+            is_temporary=True,
+        )
+        self._process_boiling(
+            self.left_df[self.left_df["line_name"] == LineName.SALT].iloc[0]["boiling"],
+            shrink_drenators=False,
+            strict_order=False,
+            is_temporary=True,
+        )
+
+        water_score = calc_partial_score(self.m.root)
+
+        # clean up
+        for block in list(self.m.root.iter(cls="boiling", is_temporary_boiling=True)) + list(
+            self.m.root.iter(is_temporary=True)
+        ):
+            # print('Cleaning up block', block.props['cls'])
+            block.props.update(is_temporary=False)
+            block.detach_from_parent()
+            if block.props["cls"] == "boiling" and block.props["boiling_model"].line.name == LineName.WATER:
+                block.props.update(x=x_water_before)
+            elif block.props["cls"] == "boiling" and block.props["boiling_model"].line.name == LineName.SALT:
+                block.props.update(x=x_salt_before)
+        # salt->water
+
+        self._process_boiling(
+            self.left_df[self.left_df["line_name"] == LineName.SALT].iloc[0]["boiling"],
+            shrink_drenators=False,
+            strict_order=False,
+            is_temporary=True,
+        )
+        self._process_boiling(
+            self.left_df[self.left_df["line_name"] == LineName.WATER].iloc[0]["boiling"],
+            shrink_drenators=False,
+            strict_order=False,
+            is_temporary=True,
+        )
+
+        salt_score = calc_partial_score(self.m.root)
+
+        # clean up
+        for block in list(self.m.root.iter(cls="boiling", is_temporary_boiling=True)) + list(
+            self.m.root.iter(is_temporary=True)
+        ):
+            # print('Cleaning up block', block.props['cls'])
+            block.props.update(is_temporary=False)
+            block.detach_from_parent()
+
+            if block.props["cls"] == "boiling" and block.props["boiling_model"].line.name == LineName.WATER:
+                block.props.update(x=x_water_before)
+            elif block.props["cls"] == "boiling" and block.props["boiling_model"].line.name == LineName.SALT:
+                block.props.update(x=x_salt_before)
+
+        if salt_score == water_score:
+            line_name = (
+                max(self.get_latest_boilings(), key=lambda b: b["pouring"].x[0]).props["boiling_model"].line.name
+            )
+
+            # reverse
+            line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+            # logger.debug('Chose line by most latest line', line_name=line_name)
+        else:
+            line_name = LineName.WATER if water_score < salt_score else LineName.SALT
+        logger.info("Selected line", line_name=line_name, water_score=water_score, salt_score=salt_score)
+
         return self.left_df[self.left_df["line_name"] == line_name].iloc[0]
 
     def _process_extras(self):
