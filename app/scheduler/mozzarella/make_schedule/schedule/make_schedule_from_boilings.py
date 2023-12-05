@@ -466,21 +466,20 @@ class ScheduleMaker:
 
     def _process_boilings(self, shrink_drenators=True):
         # logger.debug('Start configuration', start_configuration=start_configuration)
-        cur_boiling_num = 0
 
         # - Find optimal configuration
 
-        start_configuration, score = self._find_optimal_configuration()
+        configuration, score = self._find_optimal_configuration()
 
         logger.error(
             "Optimal configuration",
             score=score,
-            start_configuration="-".join(["В" if x == LineName.WATER else "С" for x in start_configuration]),
+            start_configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
         )
 
         # - Process boilings
 
-        for line_name in start_configuration:
+        for i, line_name in enumerate(configuration):
             # - Select next row
 
             next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
@@ -507,7 +506,7 @@ class ScheduleMaker:
         result = [b for b in result if b is not None]
         return result
 
-    def _process_line(self, start_configuration, line_name, depth: int = 0):
+    def _process_line(self, configuration_prefix, line_name, depth: int = 0):
         # - Add boiling and process it
 
         self._process_boiling(
@@ -524,8 +523,8 @@ class ScheduleMaker:
 
         # - Recursively find optimal configuration
 
-        start_configuration, score = self._find_optimal_configuration(
-            start_configuration + [line_name], depth=depth + 1
+        configuration_prefix, score = self._find_optimal_configuration(
+            configuration_prefix + [line_name], depth=depth + 1
         )
 
         # - Clean up - remove temporary blocks and add boiling back to left_df
@@ -539,9 +538,9 @@ class ScheduleMaker:
 
         self.left_df = pd.concat([pd.DataFrame([row]), self.left_df])
 
-        return start_configuration, score
+        return configuration_prefix, score
 
-    def _find_optimal_configuration(self, start_configuration: list = [], depth: int = 0):
+    def _find_optimal_configuration(self, configuration: list = [], depth: int = 0):
         # - Get cur_lines
 
         lines_left_count = len(
@@ -554,30 +553,30 @@ class ScheduleMaker:
             logger.info(
                 "Configuration",
                 score=score,
-                start_configuration="-".join(["В" if x == LineName.WATER else "С" for x in start_configuration]),
+                start_configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
             )
-            return start_configuration, score
+            return configuration, score
         elif lines_left_count == 1:
             # - Get line name
 
             return self._process_line(
-                start_configuration=start_configuration,
+                configuration_prefix=configuration,
                 line_name=self.left_df.iloc[0]["line_name"],
                 depth=depth,
             )
 
         elif lines_left_count == 2:
-            if len(start_configuration) >= 2 and start_configuration[-2] == start_configuration[-1]:
+            if len(configuration) >= 2 and configuration[-2] == configuration[-1]:
                 # no sequential element s
                 return self._process_line(
-                    start_configuration=start_configuration,
-                    line_name=LineName.WATER if start_configuration[-1] == LineName.SALT else LineName.SALT,
+                    configuration_prefix=configuration,
+                    line_name=LineName.WATER if configuration[-1] == LineName.SALT else LineName.SALT,
                     depth=depth,
                 )
             else:
                 return max(
                     [
-                        self._process_line(start_configuration=start_configuration, line_name=line_name)
+                        self._process_line(configuration_prefix=configuration, line_name=line_name)
                         for line_name in [LineName.WATER, LineName.SALT]
                     ],
                     key=lambda x: x[1],
