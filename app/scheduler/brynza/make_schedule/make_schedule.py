@@ -57,9 +57,7 @@ def make_packing_schedule(
 
     m.row(
         "packing_brynza",
-        size=round(
-            (df1["kg"].sum() / df1["sku"].apply(lambda sku: sku.packing_speed + 175)).sum() * 12
-        ),  # todo later: parameters
+        size=round((df1["kg"] / boiling_technology.boiling_speed).sum() * 12),
         label=label,
     )
     m.row("small_cleaning", size=5)
@@ -75,8 +73,8 @@ def make_packing_schedule(
         boiling = grp.iloc[0]["boiling"]
         total_kg = grp["kg"].sum()
         packing_speed = (
-            grp["sku"].iloc[0].packing_speed or 0 + 267  # todo later: parameters
-        )  # note: packing_speed is the same for all skus in adygea # todo later: check [@marklidenberg]
+            grp["sku"].iloc[0].packing_speed or 267
+        )  # note: packing_speed is the same for all skus in adygea
 
         # crop to pieces of 200kg
 

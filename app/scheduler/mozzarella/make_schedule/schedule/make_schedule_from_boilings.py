@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pandas as pd
 
+from loguru import logger
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push, push
@@ -330,6 +331,7 @@ class ScheduleMaker:
                 between_boilings=True,
             )
             for conf in configuration_blocks:
+                # SIDE EFFECT
                 conf.props.update(line_name=line_name)
                 push(
                     self.m.root["master"],
@@ -345,6 +347,7 @@ class ScheduleMaker:
             iter_props = [props for props in iter_props if props["pouring_line"] != current_pouring_line]
 
         # push boiling
+        # SIDE EFFECT
         push(
             self.m.root["master"],
             boiling,
@@ -356,6 +359,7 @@ class ScheduleMaker:
 
         # fix water a little bit: try to push water before - allowing awaiting in line
         if line_name == LineName.WATER and self.lines_df.at[LineName.WATER, "latest_boiling"]:
+            # SIDE EFFECT
             boiling.detach_from_parent()
             push(
                 self.m.root["master"],
@@ -368,6 +372,7 @@ class ScheduleMaker:
         if shrink_drenators:
             # fix water a little bit: try to shrink drenator a little bit for compactness
             if self.lines_df.at[LineName.WATER, "latest_boiling"]:
+                # SIDE EFFECT
                 boiling.detach_from_parent()
                 push(
                     self.m.root["master"],
@@ -391,10 +396,12 @@ class ScheduleMaker:
             packing_copy = self.m.copy(packing, with_props=True)
             packing_copy.props.update(extra_props={"start_from": packing.x[0]})
             packing.props.update(deactivated=True)  # used in make_configuration_blocks function
+            # SIDE EFFECT
             push(self.m.root["extra"], packing_copy, push_func=add_push)
 
         # add multihead boiling after all water boilings if multihead was present
         if boiling == self.last_multihead_water_boiling:
+            # SIDE EFFECT
             push(
                 self.m.root["master"],
                 self.m.create_block(
@@ -423,6 +430,7 @@ class ScheduleMaker:
                 x=(boiling["pouring"]["first"]["termizator"].y[0], 0),
                 rule="manual",
             )
+            # SIDE EFFECT
             push(
                 self.m.root["master"],
                 cleaning,
@@ -431,6 +439,7 @@ class ScheduleMaker:
             )
 
         # set latest boiling
+        # SIDE EFFECT
         self.lines_df.at[line_name, "latest_boiling"] = boiling
         return boiling
 
@@ -455,33 +464,13 @@ class ScheduleMaker:
             next_rows = [grp.iloc[0] for i, grp in self.left_df.groupby("sheet")]  # select first rows from each sheet
             cur_lines = len(set([row["line_name"] for row in next_rows]))
 
-            # logger.debug('Current Lines', cur_lines=cur_lines)
+            logger.debug("Current Lines", cur_lines=cur_lines)
 
-            # select next row
-            if cur_lines == 1:
-                # one line of sheet left
-                next_row = self.left_df.iloc[0]
-            elif cur_lines == 2:
-                # filter rows with latest boiling (any boiling is already present for line)
-                df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
-
-                if cur_boiling_num < len(start_configuration):
-                    # start from specified configuration
-                    line_name = start_configuration[cur_boiling_num]
-
-                    # logger.debug('Chose line by start configuration', line_name=line_name)
-                else:
-                    # choose most latest line
-                    line_name = max(df["latest_boiling"], key=lambda b: b.x[0]).props["boiling_model"].line.name
-
-                    # reverse
-                    line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
-                    # logger.debug('Chose line by most latest line', line_name=line_name)
-
-                # select next row -> first for selected line
-                next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
-            else:
-                raise Exception("Should not happen")
+            next_row = self._select_next_row(
+                start_configuration=start_configuration,
+                cur_boiling_num=cur_boiling_num,
+                cur_lines=cur_lines,
+            )
 
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
@@ -495,6 +484,37 @@ class ScheduleMaker:
             # insert boiling
             self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=strict_order)
             cur_boiling_num += 1
+
+    def _select_next_row(self, start_configuration, cur_boiling_num, cur_lines):
+        # select next row
+        if cur_lines == 1:
+            # one line of sheet left
+            next_row = self.left_df.iloc[0]
+        elif cur_lines == 2:
+            # filter rows with latest boiling (any boiling is already present for line)
+            df = self.lines_df[~self.lines_df["latest_boiling"].isnull()]
+
+            if cur_boiling_num < len(start_configuration):
+                # start from specified configuration
+
+                line_name = start_configuration[cur_boiling_num]
+            else:
+                # choose most latest line
+
+                line_name = max(df["latest_boiling"], key=lambda b: b["pouring"].x[0]).props["boiling_model"].line.name
+
+                # reverse
+                line_name = LineName.WATER if line_name == LineName.SALT else LineName.SALT
+                # logger.debug('Chose line by most latest line', line_name=line_name)
+
+            # select next row -> first for selected line
+            next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
+        else:
+            raise Exception("Should not happen")
+
+        logger.info("Selected next row", next_row=next_row["line_name"], cur_boiling_num=cur_boiling_num)
+        next_row["boiling"].props.update(boiling_id=cur_boiling_num)
+        return next_row
 
     def _process_extras(self):
         # push extra packings
@@ -766,6 +786,7 @@ def make_schedule_from_boilings(
     shrink_drenators=True,
     start_configuration=None,
 ):
+    logger.info("Making schedule from boilings", cleanings=cleanings)
     return ScheduleMaker().make(
         boilings=boilings,
         date=date,
