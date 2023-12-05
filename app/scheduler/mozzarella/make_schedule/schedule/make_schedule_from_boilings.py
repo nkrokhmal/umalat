@@ -18,6 +18,7 @@ from utils_ak.iteration.simple_iterator import iter_pairs
 from app.enum import LineName
 from app.models import Washer, cast_model
 from app.scheduler.mozzarella.make_schedule.packing import boiling_has_multihead_packing, make_configuration_blocks
+from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
 from app.scheduler.mozzarella.make_schedule.schedule.calc_score import calc_score
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.awaiting_pusher import AwaitingPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.backwards_pusher import BackwardsPusher
@@ -504,7 +505,9 @@ class ScheduleMaker:
         result = [b for b in result if b is not None]
         return result
 
-    def _process_line(self, configuration_prefix, line_name, depth: int = 0):
+    def _process_line(self, configuration, line_name, depth: int = 0):
+        # logger.debug("Process line", configuration_prefix=configuration_prefix, line_name=line_name, depth=depth)
+
         # - Add boiling and process it
 
         self._process_boiling(
@@ -516,14 +519,23 @@ class ScheduleMaker:
 
         # - Remove boiling from left_df
 
-        row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
-        self.left_df = self.left_df[self.left_df["line_name"] != line_name]
+        next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
+        self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
-        # - Recursively find optimal configuration
+        # - Calc current depth score
 
-        configuration_prefix, score = self._find_optimal_configuration(
-            configuration_prefix + [line_name], depth=depth + 1
-        )
+        score = calc_partial_score(self.m.root)
+        self.depth_to_min_score[depth] = min(self.depth_to_min_score.get(depth, 100000000), score)
+        # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
+
+        if depth <= 3 or score - self.depth_to_min_score[depth] <= 20:
+
+            # - Recursively find optimal configuration
+
+            configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
+        else:
+            # logger.info('Skipping depth', depth=depth)
+            configuration, score = [], 10000000000
 
         # - Clean up - remove temporary blocks and add boiling back to left_df
 
@@ -534,11 +546,13 @@ class ScheduleMaker:
             block.props.update(tag="")
             block.detach_from_parent()
 
-        self.left_df = pd.concat([pd.DataFrame([row]), self.left_df])
+        self.left_df = pd.concat([pd.DataFrame([next_row]), self.left_df])
 
-        return configuration_prefix, score
+        return configuration, score
 
     def _find_optimal_configuration(self, configuration: list = [], depth: int = 0):
+        # logger.debug("Find optimal configuration", configuration=configuration, depth=depth)
+
         # - Get cur_lines
 
         lines_left_count = len(
@@ -550,15 +564,15 @@ class ScheduleMaker:
 
             logger.info(
                 "Configuration",
-                score=score,
-                configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
+                score=int(score),
+                configuration=["В" if x == LineName.WATER else "С" for x in configuration],
             )
             return configuration, score
         elif lines_left_count == 1:
             # - Get line name
 
             return self._process_line(
-                configuration_prefix=configuration,
+                configuration=configuration,
                 line_name=self.left_df.iloc[0]["line_name"],
                 depth=depth,
             )
@@ -567,14 +581,14 @@ class ScheduleMaker:
             if len(configuration) >= 2 and configuration[-2] == configuration[-1]:
                 # no sequential element s
                 return self._process_line(
-                    configuration_prefix=configuration,
+                    configuration=configuration,
                     line_name=LineName.WATER if configuration[-1] == LineName.SALT else LineName.SALT,
                     depth=depth,
                 )
             else:
-                return max(
+                return min(
                     [
-                        self._process_line(configuration_prefix=configuration, line_name=line_name)
+                        self._process_line(configuration=configuration, line_name=line_name)
                         for line_name in [LineName.WATER, LineName.SALT]
                     ],
                     key=lambda x: x[1],
@@ -829,6 +843,8 @@ class ScheduleMaker:
         self.start_times = {k: v if v else None for k, v in start_times.items()}
         self.cleanings = cleanings or {}  # {boiling_id: cleaning}
         self.boilings = boilings
+
+        self.depth_to_min_score = {}
 
         self._init_block_maker()
         self._init_lines_df()
