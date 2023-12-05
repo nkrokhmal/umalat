@@ -248,10 +248,10 @@ class ScheduleMaker:
 
         # init iter_props
         lines_df.at[LineName.WATER, "iter_props"] = [
-            {"pouring_line": str(v1), "drenator_num": str(v2)} for v1, v2 in itertools.product([0, 1], [0, 1])
+            {"pouring_line": str(v1), "drenator_num": str(v2)} for v1, v2 in itertools.product([0, 1], [0, 1, 2, 3])
         ]
         lines_df.at[LineName.SALT, "iter_props"] = [
-            {"pouring_line": str(v1), "drenator_num": str(v2)} for v1, v2 in itertools.product([2, 3], [0, 1])
+            {"pouring_line": str(v1), "drenator_num": str(v2)} for v1, v2 in itertools.product([2, 3], [4, 5, 6, 7])
         ]
 
         # init start times
@@ -461,7 +461,7 @@ class ScheduleMaker:
         assert len(start_configuration) != 0, "Start configuration not specified"
 
         # logger.debug('Start configuration', start_configuration=start_configuration)
-        cur_boiling_num = 0
+        cur_boiling_num = 1
 
         while True:
             # check if finished
@@ -472,7 +472,7 @@ class ScheduleMaker:
             if (self.left_df["line_name"] == LineName.SALT).all():
                 self.lines_df.at[LineName.SALT, "iter_props"] = [
                     {"pouring_line": str(v1), "drenator_num": str(v2)}
-                    for v1, v2 in itertools.product([2, 3, 1], [0, 1])
+                    for v1, v2 in itertools.product([2, 3, 1], [4, 5, 6, 7])
                 ]
 
             next_rows = [grp.iloc[0] for i, grp in self.left_df.groupby("sheet")]  # select first rows from each sheet

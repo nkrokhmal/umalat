@@ -25,7 +25,6 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
     for i in range(2, 200):
         if not ws.cell(i, 2).value:
             continue
-
         values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
     df = pd.DataFrame(values, columns=header)
@@ -247,12 +246,7 @@ def to_boiling_plan(
 
 
 def test():
-    df = to_boiling_plan(
-        str(
-            get_repo_path()
-            / "app/data/static/samples/by_department/mozzarella/2023-09-04 План по варкам моцарелла.xlsx"
-        )
-    )
+    df = to_boiling_plan(str("/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx"))
     print(df["batch_id"])
     print(df.iloc[0])
 

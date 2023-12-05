@@ -82,11 +82,11 @@ def test():
     # - Draw frontend
     repo_path = __file__.split("app")[0][:-1]
 
-    fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx"
+    # fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx"
+    fn = "perfect_plan.xlsx"
     schedule_wb = openpyxl.load_workbook(
-        filename=Path(repo_path) / "app/data/static/templates/constructor_mozzarella.xlsx"
+        filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
     )
-
     output = draw_frontend(
         # str(
         #     get_repo_path()
@@ -116,8 +116,8 @@ def test():
     schedule_df = prepare_schedule_json(schedule_json, cleanings)
     schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
-    schedule_wb.save("test.xlsx")
-    open_file_in_os("test.xlsx")
+    schedule_wb.save("schedule_swap.xlsx")
+    open_file_in_os("schedule_swap.xlsx")
 
 
 if __name__ == "__main__":
