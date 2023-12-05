@@ -474,7 +474,7 @@ class ScheduleMaker:
         logger.error(
             "Optimal configuration",
             score=score,
-            start_configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
+            configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
         )
 
         # - Process boilings
@@ -484,14 +484,12 @@ class ScheduleMaker:
 
             next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
 
-            next_row["boiling"].props.update(boiling_id=cur_boiling_num)
+            next_row["boiling"].props.update(boiling_id=i + 1)
 
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
             self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=True)
-
-            cur_boiling_num += 1
 
     def get_latest_boiling(self, line_name):
         boilings = self.m.root["master"]["boiling", True]
@@ -553,7 +551,7 @@ class ScheduleMaker:
             logger.info(
                 "Configuration",
                 score=score,
-                start_configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
+                configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
             )
             return configuration, score
         elif lines_left_count == 1:
