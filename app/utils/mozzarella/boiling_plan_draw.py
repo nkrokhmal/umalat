@@ -96,7 +96,10 @@ def get_colour_by_name(sku_name, skus):
     if len(sku) > 0:
         return sku[0].colour
     else:
-        return flask.current_app.config["COLORS"]["Default"]
+        try:
+            return flask.current_app.config["COLORS"]["Default"]
+        except RuntimeError:
+            return "#FFFFFF"
 
 
 def draw_boiling_plan(df, df_extra, wb):
@@ -203,6 +206,9 @@ def draw_boiling_plan_merged(df, wb):
     line_kg = db.session.query(MozzarellaLine).all()[0].input_ton
     skus = db.session.query(MozzarellaSKU).all()
     sheet_name = "План варок"
+
+    if sheet_name not in wb.sheetnames:
+        wb.create_sheet(sheet_name)
 
     values = []
     excel_client = ExcelBlock(wb[sheet_name])
