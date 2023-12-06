@@ -100,7 +100,10 @@ def test():
         optimize_start_configurations=False,
         optimize_water_gaps=False,
         first_batch_ids_by_type={"mozzarella": 1},
-        start_configuration=[LineName.SALT, LineName.SALT, LineName.WATER],
+        start_configuration=[
+            LineName.WATER if value == "В" else LineName.SALT
+            for value in "С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В".split("-")
+        ],
     )
 
     schedule_json = output["schedule"].to_dict(
@@ -118,8 +121,8 @@ def test():
     schedule_df = prepare_schedule_json(schedule_json, cleanings)
     schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
-    # schedule_wb.save("schedule.xlsx")
-    # open_file_in_os("schedule.xlsx")
+    schedule_wb.save("schedule.xlsx")
+    open_file_in_os("schedule.xlsx")
 
 
 if __name__ == "__main__":

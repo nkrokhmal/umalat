@@ -38,50 +38,48 @@ def make_schedule_basic(
     original_start_times = dict(start_times)
     start_times = dict(start_times)
 
-    # - Get start configuration by approximate start_times
-
-    if not start_configuration:
-        # make basic schedule
-        boilings = make_boilings(boiling_plan_df)
-        schedule = make_schedule_from_boilings(boilings, cleanings={}, start_times=start_times)
-        start_configuration = parse_start_configuration(schedule)
-
-    # - Make tight schedule by approximate start_times
-
-    if start_configuration:  # in case of one line
-        # at least two lines present
-        days, _, _ = parse_time(start_times[start_configuration[0]])
-
-        # start latter before the former
-        start_times[start_configuration[-1]] = cast_time(cast_t((days, 0, 0)))
-
-    # - Find optimal cleanings
-
-    if optimize_cleanings:
-        cleanings = find_optimal_cleanings(
-            boiling_plan_df=boiling_plan_df,
-            start_times=start_times,
-            start_configuration=start_configuration,
-        )
-        logger.debug("Found optimal cleanings", cleanings=cleanings)
-    else:
-        cleanings = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
-        logger.debug("Using boiling plan cleanings", cleanings=cleanings)
-
-    # - Make schedule with cleanings and start configuration
-
-    cleanings = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleanings.items() if v}
+    # make basic schedule
     boilings = make_boilings(boiling_plan_df)
-    logger.error(
-        "Final schedule!", start_times=start_times, cleanings=cleanings, start_configuration=start_configuration
-    )
     schedule = make_schedule_from_boilings(
-        boilings,
-        cleanings=cleanings,
-        start_times=start_times,
-        start_configuration=start_configuration,
-        date=date,
+        boilings, cleanings={}, start_times=start_times, start_configuration=start_configuration
     )
+
+    # # - Make tight schedule by approximate start_times
+    #
+    # if start_configuration:  # in case of one line
+    #     # at least two lines present
+    #     days, _, _ = parse_time(start_times[start_configuration[0]])
+    #
+    #     # start latter before the former
+    #     start_times[start_configuration[-1]] = cast_time(cast_t((days, 0, 0)))
+    #
+    # # - Find optimal cleanings
+    #
+    # if optimize_cleanings:
+    #     cleanings = find_optimal_cleanings(
+    #         boiling_plan_df=boiling_plan_df,
+    #         start_times=start_times,
+    #         start_configuration=start_configuration,
+    #     )
+    #     logger.debug("Found optimal cleanings", cleanings=cleanings)
+    # else:
+    #     cleanings = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
+    #     logger.debug("Using boiling plan cleanings", cleanings=cleanings)
+    #
+    # # - Make schedule with cleanings and start configuration
+    #
+    # cleanings = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleanings.items() if v}
+    # boilings = make_boilings(boiling_plan_df)
+    # logger.error(
+    #     "Final schedule!", start_times=start_times, cleanings=cleanings, start_configuration=start_configuration
+    # )
+    # schedule = make_schedule_from_boilings(
+    #     boilings,
+    #     cleanings=cleanings,
+    #     start_times=start_times,
+    #     start_configuration=start_configuration,
+    #     date=date,
+    # )
 
     # - Fix start time for exact_start_time_line_name
 
@@ -101,24 +99,25 @@ def make_schedule_basic(
         # Only one line - it is already fixed
         return schedule
     # todo next: fix timing
-    # start_times[time_by_line] = original_start_times[time_by_line]
-    # start_times[time_not_by_line] = cast_time(
-    #     cast_t(start_times[time_by_line])
-    #     + boilings_by_line_name[time_not_by_line][0]["melting_and_packing"].x[0]
-    #     - boilings_by_line_name[time_by_line][0]["melting_and_packing"].x[0]
-    # )
-    #
-    # # - If start_times changed - make final schedule
-    #
-    # if start_times != original_start_times:
-    #     boilings = make_boilings(boiling_plan_df)
-    #     schedule = make_schedule_from_boilings(
-    #         boilings,
-    #         cleanings=cleanings,
-    #         start_times=start_times,
-    #         start_configuration=start_configuration,
-    #         date=date,
-    #     )
+    start_times[time_by_line] = original_start_times[time_by_line]
+    start_times[time_not_by_line] = cast_time(
+        cast_t(start_times[time_by_line])
+        + boilings_by_line_name[time_not_by_line][0]["melting_and_packing"].x[0]
+        - boilings_by_line_name[time_by_line][0]["melting_and_packing"].x[0]
+    )
+
+    print(start_times)
+    # - If start_times changed - make final schedule
+
+    if start_times != original_start_times:
+        boilings = make_boilings(boiling_plan_df)
+        schedule = make_schedule_from_boilings(
+            boilings,
+            cleanings={},
+            start_times=start_times,
+            start_configuration=start_configuration,
+            date=date,
+        )
 
     # - Return schedule
 

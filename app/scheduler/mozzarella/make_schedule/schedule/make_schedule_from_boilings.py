@@ -569,14 +569,17 @@ class ScheduleMaker:
             )
             return configuration, score
         elif lines_left_count == 1:
-            # - Get line name
-
             return self._process_line(
                 configuration=configuration,
                 line_name=self.left_df.iloc[0]["line_name"],
                 depth=depth,
             )
-
+        elif self.start_configuration and depth < len(self.start_configuration):
+            return self._process_line(
+                configuration=configuration,
+                line_name=self.start_configuration[depth],
+                depth=depth,
+            )
         elif lines_left_count == 2:
             if len(configuration) >= 2 and configuration[-2] == configuration[-1]:
                 # no sequential element s
@@ -838,7 +841,7 @@ class ScheduleMaker:
         start_configuration=None,
         shrink_drenators=True,
     ):
-        start_configuration = start_configuration or [LineName.SALT]
+        self.start_configuration = start_configuration or [LineName.SALT]
         self.date = date or datetime.now()
         self.start_times = {k: v if v else None for k, v in start_times.items()}
         self.cleanings = cleanings or {}  # {boiling_id: cleaning}
@@ -852,7 +855,7 @@ class ScheduleMaker:
         self._init_multihead_water_boilings()
         self._process_boilings(shrink_drenators=shrink_drenators)
         self._process_extras()
-        self._fix_first_boiling_of_later_line(start_configuration)
+        self._fix_first_boiling_of_later_line(self.start_configuration)
         self._process_cleanings()
         self._process_shifts()
         return self.m.root
