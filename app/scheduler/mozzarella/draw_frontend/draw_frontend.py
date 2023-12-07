@@ -95,11 +95,13 @@ def test():
         start_times={LineName.WATER: "08:30", LineName.SALT: "06:00"},
         exact_start_time_line_name=LineName.WATER,
         first_batch_ids_by_type={"mozzarella": 1},
-        # start_configuration=[
-        #     LineName.WATER if value == "В" else LineName.SALT
-        #     # for value in "С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С".split("-")
-        #     for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")
-        # ],
+        start_configuration=[
+            LineName.WATER if value == "В" else LineName.SALT
+            # for value in "С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С".split("-")
+            # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-") # handmade
+            for value in "С-С-В-В-С-В-В-С-В-В-С-В-В-С-В-В-С-С-С-С-С-С-С-С-С-С-С-С-С-С".split("-")  # 1
+            # for value in 'С-С-В-В-С-В-В-С-В-В-С-В-В-С-В-С-В-С-С-С-С-С-С-С-С-С-С-С-С-С'.split('-') # 2
+        ],
     )
 
     schedule_json = output["schedule"].to_dict(

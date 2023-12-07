@@ -606,10 +606,10 @@ class ScheduleMaker:
                 line_name=self.left_df.iloc[0]["line_name"],
                 depth=depth,
             )
-        elif self.start_configuration and depth < len(self.start_configuration):
+        elif self.start_configuration and depth <= len(self.start_configuration):
             return self._process_line(
                 configuration=configuration,
-                line_name=self.start_configuration[depth],
+                line_name=self.start_configuration[depth - 1],
                 depth=depth,
             )
         elif lines_left_count == 2:
