@@ -543,16 +543,20 @@ class ScheduleMaker:
         # - Calc current depth score
 
         score = calc_partial_score(self.m.root)
-        self.depth_to_min_score[depth] = min(self.depth_to_min_score.get(depth, 100000000), score)
         # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
 
-        if depth <= 3 or score - self.depth_to_min_score[depth] <= 20:
+        current_line_names = [b.props["boiling_model"].line.name for b in self.m.root["master"]["boiling", True]]
+        if (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names)) or (
+            score < self.depth_to_min_score.get(depth, 100000000)
+        ):
             # - Recursively find optimal configuration
-
+            print(score - self.depth_to_min_score.get(depth, 100000000))
             configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
         else:
             # logger.info('Skipping depth', depth=depth)
             configuration, score = [], 10000000000
+
+        self.depth_to_min_score[depth] = min(self.depth_to_min_score.get(depth, 100000000), score)
 
         # - Clean up - remove temporary blocks and add boiling back to left_df
 

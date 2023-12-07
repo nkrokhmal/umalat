@@ -94,10 +94,10 @@ def test():
         start_times={LineName.WATER: "08:30", LineName.SALT: "06:00"},
         exact_start_time_line_name=LineName.WATER,
         first_batch_ids_by_type={"mozzarella": 1},
-        start_configuration=[
-            LineName.WATER if value == "В" else LineName.SALT
-            for value in "С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В".split("-")
-        ],
+        # start_configuration=[
+        #     LineName.WATER if value == "В" else LineName.SALT
+        #     for value in "С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С".split("-")
+        # ],
     )
 
     schedule_json = output["schedule"].to_dict(
