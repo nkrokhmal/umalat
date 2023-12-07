@@ -80,6 +80,7 @@ def test():
     repo_path = __file__.split("app")[0][:-1]
 
     fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx"
+
     # fn = "perfect_plan2.xlsx"
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
@@ -96,7 +97,8 @@ def test():
         first_batch_ids_by_type={"mozzarella": 1},
         # start_configuration=[
         #     LineName.WATER if value == "В" else LineName.SALT
-        #     for value in "С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С".split("-")
+        #     # for value in "С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С".split("-")
+        #     for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")
         # ],
     )
 
