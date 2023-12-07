@@ -495,6 +495,21 @@ class ScheduleMaker:
 
             self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=True)
 
+        # - Fix timing
+
+        first_line_boiling = [
+            b
+            for b in self.m.root["master"]["boiling", True]
+            if b.props["boiling_model"].line.name == self.exact_start_time_line_name
+        ][0]
+        self.m.root.props.update(
+            x=[
+                cast_t(self.start_times[self.exact_start_time_line_name])
+                - first_line_boiling["melting_and_packing"].x[0],
+                self.m.root.x[0],
+            ]
+        )
+
     def get_latest_boiling(self, line_name):
         boilings = self.m.root["master"]["boiling", True]
         line_names = [b.props["boiling_model"].line.name for b in boilings]
@@ -547,6 +562,7 @@ class ScheduleMaker:
             # print('Cleaning up block', block.props['cls'])
             block.props.update(tag="")
             block.detach_from_parent()
+            block.props.update(x=[0, 0])
 
         self.left_df = pd.concat([pd.DataFrame([next_row]), self.left_df])
 
@@ -842,9 +858,11 @@ class ScheduleMaker:
         start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
         start_configuration=None,
         shrink_drenators=True,
+        exact_start_time_line_name: str = LineName.WATER,
     ):
         self.start_configuration = start_configuration or [LineName.SALT]
         self.date = date or datetime.now()
+        self.exact_start_time_line_name = exact_start_time_line_name
         self.start_times = {k: v if v else None for k, v in start_times.items()}
         self.cleanings = cleanings or {}  # {boiling_id: cleaning}
         self.boilings = boilings
@@ -860,6 +878,7 @@ class ScheduleMaker:
         self._fix_first_boiling_of_later_line(self.start_configuration)
         self._process_cleanings()
         self._process_shifts()
+
         return self.m.root
 
 
@@ -885,4 +904,5 @@ def make_schedule_basic(
         start_times=dict(start_times),
         shrink_drenators=shrink_drenators,
         start_configuration=start_configuration,
+        exact_start_time_line_name=exact_start_time_line_name,
     )
