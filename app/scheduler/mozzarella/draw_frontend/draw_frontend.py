@@ -23,8 +23,6 @@ def draw_frontend(
     boiling_plan: BoilingPlanLike,
     date: Optional[datetime] = None,
     workbook: Workbook = None,
-    optimize_start_configurations=True,
-    optimize_water_gaps=True,
     saturate=True,
     normalization=True,
     validate=True,
@@ -40,8 +38,6 @@ def draw_frontend(
     output = wrap_frontend(
         boiling_plan=boiling_plan,
         first_batch_ids_by_type=first_batch_ids_by_type,
-        optimize_start_configurations=optimize_start_configurations,
-        optimize_water_gaps=optimize_water_gaps,
         saturate=saturate,
         normalization=normalization,
         validate=validate,

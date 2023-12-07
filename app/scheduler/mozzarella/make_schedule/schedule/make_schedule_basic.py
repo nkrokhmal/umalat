@@ -878,15 +878,11 @@ def make_schedule_basic(
         start_configuration=start_configuration,
         cleanings=cleanings,
     )
-    boiling_plan_df = to_boiling_plan(boiling_plan_obj)
-    original_start_times = dict(start_times)
-    start_times = dict(start_times)
-    boilings = make_boilings(boiling_plan_df)
     return ScheduleMaker().make(
-        boilings=boilings,
+        boilings=make_boilings(to_boiling_plan(boiling_plan_obj)),
         date=date,
         cleanings=cleanings,
-        start_times=start_times,
+        start_times=dict(start_times),
         shrink_drenators=shrink_drenators,
         start_configuration=start_configuration,
     )
