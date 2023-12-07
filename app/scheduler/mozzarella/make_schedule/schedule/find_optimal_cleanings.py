@@ -8,7 +8,7 @@ from utils_ak.iteration.simple_iterator import iter_pairs
 from app.enum import LineName
 from app.models import Washer, cast_model
 from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_boilings
-from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_from_boilings import make_schedule_from_boilings
+from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_from_boilings import make_schedule_basic
 from app.scheduler.time_utils import cast_t
 
 
@@ -100,5 +100,5 @@ def find_optimal_cleanings(
     **make_schedule_kwargs,
 ):
     boilings = make_boilings(boiling_plan_df)
-    schedule = make_schedule_from_boilings(boilings, start_times=start_times, **make_schedule_kwargs)
+    schedule = make_schedule_basic(boilings, start_times=start_times, **make_schedule_kwargs)
     return _find_optimal_cleanings_combination_by_schedule(schedule)

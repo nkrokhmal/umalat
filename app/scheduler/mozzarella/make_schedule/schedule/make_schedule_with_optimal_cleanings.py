@@ -8,7 +8,7 @@ from app.enum import LineName
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.mozzarella.make_schedule.schedule.find_optimal_cleanings import find_optimal_cleanings
 from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_boilings
-from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_from_boilings import make_schedule_from_boilings
+from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_from_boilings import make_schedule_basic
 from app.scheduler.mozzarella.make_schedule.schedule.parse_start_configuration import parse_start_configuration
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.time_utils import cast_t, cast_time, parse_time
@@ -33,13 +33,7 @@ def make_schedule_with_optimal_cleanings(
     """
     logger.info("Making basic schedule")
 
-    boiling_plan_df = to_boiling_plan(boiling_plan_obj)
-    original_start_times = dict(start_times)
-    start_times = dict(start_times)
-
-    # make basic schedule
-    boilings = make_boilings(boiling_plan_df)
-    schedule = make_schedule_from_boilings(
+    schedule = make_schedule_basic(
         boilings, cleanings={}, start_times=start_times, start_configuration=start_configuration
     )
 
@@ -110,7 +104,7 @@ def make_schedule_with_optimal_cleanings(
 
     if start_times != original_start_times:
         boilings = make_boilings(boiling_plan_df)
-        schedule = make_schedule_from_boilings(
+        schedule = make_schedule_basic(
             boilings,
             cleanings={},
             start_times=start_times,

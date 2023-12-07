@@ -2,6 +2,7 @@ import itertools
 
 from copy import deepcopy
 from datetime import datetime
+from typing import Optional
 
 import pandas as pd
 
@@ -20,9 +21,11 @@ from app.models import Washer, cast_model
 from app.scheduler.mozzarella.make_schedule.packing import boiling_has_multihead_packing, make_configuration_blocks
 from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
 from app.scheduler.mozzarella.make_schedule.schedule.calc_score import calc_score
+from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_boilings
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.awaiting_pusher import AwaitingPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.backwards_pusher import BackwardsPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.drenator_shrinking_pusher import DrenatorShrinkingPusher
+from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.split_shifts_utils import split_shifts
 from app.scheduler.time_utils import cast_t, cast_time
 
@@ -860,13 +863,14 @@ class ScheduleMaker:
         return self.m.root
 
 
-def make_schedule(
-    boilings,
-    date=None,
+def make_schedule_basic(
+    boiling_plan_obj,
     cleanings=None,
-    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
     shrink_drenators=True,
+    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+    exact_start_time_line_name: Optional[str] = LineName.WATER,
     start_configuration=None,
+    date=None,
 ):
     logger.info(
         "Making schedule from boilings",
@@ -874,6 +878,10 @@ def make_schedule(
         start_configuration=start_configuration,
         cleanings=cleanings,
     )
+    boiling_plan_df = to_boiling_plan(boiling_plan_obj)
+    original_start_times = dict(start_times)
+    start_times = dict(start_times)
+    boilings = make_boilings(boiling_plan_df)
     return ScheduleMaker().make(
         boilings=boilings,
         date=date,
