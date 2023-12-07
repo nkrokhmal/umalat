@@ -14,9 +14,8 @@ from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_
 from app.scheduler.time_utils import cast_t, cast_time, parse_time
 
 
-def make_schedule_basic(
+def make_schedule_with_optimal_cleanings(
     boiling_plan_obj,
-    optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
     exact_start_time_line_name: Optional[str] = LineName.WATER,
     start_configuration=None,
@@ -131,7 +130,7 @@ def test():
     from deeplay.utils.loguru_utils.configure_loguru import configure_loguru
 
     configure_loguru("DEBUG")
-    make_schedule_basic(
+    make_schedule_with_optimal_cleanings(
         # str(
         #     get_repo_path()
         #     / "app/data/static/samples/by_department/mozzarella/2023-11-22 План по варкам моцарелла.xlsx"

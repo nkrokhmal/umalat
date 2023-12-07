@@ -529,7 +529,6 @@ class ScheduleMaker:
         # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
 
         if depth <= 3 or score - self.depth_to_min_score[depth] <= 20:
-
             # - Recursively find optimal configuration
 
             configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
@@ -861,7 +860,7 @@ class ScheduleMaker:
         return self.m.root
 
 
-def make_schedule_from_boilings(
+def make_schedule(
     boilings,
     date=None,
     cleanings=None,
