@@ -524,7 +524,7 @@ class ScheduleMaker:
         result = [b for b in result if b is not None]
         return result
 
-    def _process_line(self, configuration, line_name, depth: int = 1):
+    def _process_line(self, configuration, line_name, depth: int = 0):
         # logger.debug("Process line", configuration_prefix=configuration_prefix, line_name=line_name, depth=depth)
 
         # - Add boiling and process it
@@ -546,7 +546,7 @@ class ScheduleMaker:
 
         # - Rest self.depth_to_min_score if needed
 
-        if depth == 2 and self.prev_prefix != current_line_names:
+        if depth == 1 and self.prev_prefix != current_line_names:
             print("Resetting depth_to_min_score", current_line_names)
             self.depth_to_min_score = {}
             self.prev_prefix = current_line_names
@@ -579,10 +579,10 @@ class ScheduleMaker:
             block.props.update(x=[0, 0])
 
         self.left_df = pd.concat([pd.DataFrame([next_row]), self.left_df])
-        self.lines_df["iter_props"] = old_iter_props
+        # self.lines_df["iter_props"] = old_iter_props
         return configuration, score
 
-    def _find_optimal_configuration(self, configuration: list = [], depth: int = 1):
+    def _find_optimal_configuration(self, configuration: list = [], depth: int = 0):
         # logger.debug("Find optimal configuration", configuration=configuration, depth=depth)
 
         # - Get cur_lines
@@ -606,10 +606,10 @@ class ScheduleMaker:
                 line_name=self.left_df.iloc[0]["line_name"],
                 depth=depth,
             )
-        elif self.start_configuration and depth <= len(self.start_configuration):
+        elif self.start_configuration and depth < len(self.start_configuration):
             return self._process_line(
                 configuration=configuration,
-                line_name=self.start_configuration[depth - 1],
+                line_name=self.start_configuration[depth],
                 depth=depth,
             )
         elif lines_left_count == 2:
