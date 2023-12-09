@@ -524,7 +524,7 @@ class ScheduleMaker:
         result = [b for b in result if b is not None]
         return result
 
-    def _process_line(self, configuration, line_name, depth: int = 0):
+    def _process_line(self, configuration, line_name, depth: int = 1):
         # logger.debug("Process line", configuration_prefix=configuration_prefix, line_name=line_name, depth=depth)
 
         # - Add boiling and process it
@@ -546,7 +546,7 @@ class ScheduleMaker:
 
         # - Rest self.depth_to_min_score if needed
 
-        if depth == 1 and self.prev_prefix != current_line_names:
+        if depth == 2 and self.prev_prefix != current_line_names:
             print("Resetting depth_to_min_score", current_line_names)
             self.depth_to_min_score = {}
             self.prev_prefix = current_line_names
@@ -579,10 +579,10 @@ class ScheduleMaker:
             block.props.update(x=[0, 0])
 
         self.left_df = pd.concat([pd.DataFrame([next_row]), self.left_df])
-        # self.lines_df["iter_props"] = old_iter_props
+        self.lines_df["iter_props"] = old_iter_props
         return configuration, score
 
-    def _find_optimal_configuration(self, configuration: list = [], depth: int = 0):
+    def _find_optimal_configuration(self, configuration: list = [], depth: int = 1):
         # logger.debug("Find optimal configuration", configuration=configuration, depth=depth)
 
         # - Get cur_lines
@@ -606,10 +606,10 @@ class ScheduleMaker:
                 line_name=self.left_df.iloc[0]["line_name"],
                 depth=depth,
             )
-        elif self.start_configuration and depth < len(self.start_configuration):
+        elif self.start_configuration and depth <= len(self.start_configuration):
             return self._process_line(
                 configuration=configuration,
-                line_name=self.start_configuration[depth],
+                line_name=self.start_configuration[depth - 1],
                 depth=depth,
             )
         elif lines_left_count == 2:
@@ -617,7 +617,7 @@ class ScheduleMaker:
                 # no sequential element s
                 return self._process_line(
                     configuration=configuration,
-                    line_name=LineName.WATER if configuration[-1] == LineName.SALT else LineName.SALT,
+                    line_name=LineName.WATER if configuration[-1] == LineName.SALT else LineName.SALT,  # reverse
                     depth=depth,
                 )
             else:
