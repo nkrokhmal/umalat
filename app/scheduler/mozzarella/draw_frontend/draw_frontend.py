@@ -97,14 +97,15 @@ def test():
         start_times={LineName.WATER: "08:30", LineName.SALT: "06:00"},
         exact_start_time_line_name=LineName.WATER,
         first_batch_ids_by_type={"mozzarella": 1},
-        start_configuration=[
-            LineName.WATER if value == "В" else LineName.SALT
-            # for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
-            # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
-            for value in "С-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-С-В-С-В-С-С-С-С-С-С".split(
-                "-"
-            )  # best for all boilings
-        ],
+        # start_configuration=[
+        #     LineName.WATER if value == "В" else LineName.SALT
+        # #     for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
+        #     # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
+        #     # for value in "С-С-В-С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
+        #     for value in "С-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-С-В-С-В-С-С-С-С-С-С".split(
+        #         "-"
+        #     )  # best for all boilings
+        # ],
     )
 
     schedule_json = output["schedule"].to_dict(
@@ -124,7 +125,7 @@ def test():
 
     print(calc_partial_score(output["schedule"]))
     # fn = "schedule_optimal_hand_made.xlsx"
-    fn = "schedule_optimal_optimization.xlsx"
+    fn = "schedule.xlsx"
     schedule_wb.save(fn)
     open_file_in_os(fn)
 

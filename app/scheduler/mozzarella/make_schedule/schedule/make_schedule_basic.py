@@ -539,6 +539,7 @@ class ScheduleMaker:
         boiling_dic = boiling.to_dict()  # copy props to restore later from it
 
         # - Process boiling
+
         self._process_boiling(
             boiling,
             shrink_drenators=False,
@@ -546,7 +547,9 @@ class ScheduleMaker:
         )
 
         # - Post-process
+
         # -- Calculate configuration and its properties
+
         current_boilings = self.m.root["master"]["boiling", True]
         current_boilings = list(sorted(current_boilings, key=lambda b: b.x[0]))
         current_line_names = [
@@ -576,14 +579,14 @@ class ScheduleMaker:
         current_best_score = self.depth_to_min_score.get(depth, 100000000)
         self.depth_to_min_score[depth] = min(current_best_score, score)
 
-        # todo next: delete
-        if len(configuration) >= 1 and (configuration + [line_name])[:2] != [LineName.SALT, LineName.SALT]:
-            configuration, score = [], 10000000000
+        # # todo next: delete [@marklidenberg]
+        # if len(configuration) >= 1 and (configuration + [line_name])[:2] != [LineName.SALT, LineName.SALT]:
+        #     configuration, score = [], 10000000000
 
         # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
         if not (
             (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
-            or (score - current_best_score <= 0)
+            or (score - current_best_score <= 4)
         ):
             configuration, score = [], 10000000000
         else:

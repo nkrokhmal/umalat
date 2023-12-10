@@ -27,16 +27,12 @@ def calc_partial_score(schedule):
 
     boilings_list = []
     factors = []
-    # todo next: clean up
-    # if len(water_boilings) >= 2 and len(salt_boilings) >= 2:
-    #     boilings_list.append(water_boilings)
-    #     factors.append(2)
-    #     boilings_list.append(salt_boilings)
-    #     factors.append(1)
 
-    if len(all_boilings) >= 2:
-        boilings_list.append(all_boilings)
-        factors.append(1000)
+    if len(water_boilings) >= 2 and len(salt_boilings) >= 2:
+        boilings_list.append(water_boilings)
+        factors.append(2)
+        boilings_list.append(salt_boilings)
+        factors.append(1)
 
     if not boilings_list:
         return 0
