@@ -25,7 +25,16 @@ def calc_partial_score(schedule):
         b for b in schedule["master"]["boiling", True] if b.props["boiling_model"].line.name == LineName.SALT
     ]
 
-    boilings_list = [all_boilings, water_boilings, salt_boilings]
-    factors = [1, 2, 1]
+    boilings_list = []
+    factors = []
+
+    if len(water_boilings) >= 2 and len(salt_boilings) >= 2:
+        boilings_list.append(water_boilings)
+        factors.append(2)
+        boilings_list.append(salt_boilings)
+        factors.append(1)
+
+    if not boilings_list:
+        return 0
 
     return sum([_get_score(boilings) * factor for boilings, factor in zip(boilings_list, factors)]) / sum(factors)
