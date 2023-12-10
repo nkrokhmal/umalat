@@ -100,8 +100,8 @@ def test():
         # start_configuration=[
         #     LineName.WATER if value == "В" else LineName.SALT
         #     # for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
-        #     # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
-        #     for value in "С-С-В-В-С-В-С-В-С-С-В-С-С-В-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-")  # handmade
+        #     for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
+        #     # for value in "С-С-В-В-С-В-С-В-С-С-В-С-С-В-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-")  # handmade
         # ],
     )
 
@@ -121,8 +121,8 @@ def test():
     schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
     print(calc_partial_score(output["schedule"]))
-    schedule_wb.save("schedule_optimal.xlsx")
-    open_file_in_os("schedule_optimal.xlsx")
+    schedule_wb.save("schedule_optimal3.xlsx")
+    open_file_in_os("schedule_optimal3.xlsx")
 
 
 if __name__ == "__main__":

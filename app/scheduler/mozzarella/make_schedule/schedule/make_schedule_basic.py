@@ -574,11 +574,11 @@ class ScheduleMaker:
 
         # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
         if current_line_names != configuration + [line_name]:
-            logger.info("Reverse configuration found, skipping")
+            # logger.info("Reverse configuration found, skipping")
             configuration, score = [], 10000000000
         elif not (
             (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
-            or (score - current_best_score <= 2)
+            or (score - current_best_score <= 4)
         ):
             configuration, score = [], 10000000000
         else:
