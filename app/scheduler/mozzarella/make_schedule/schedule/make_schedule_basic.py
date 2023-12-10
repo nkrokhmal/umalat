@@ -544,9 +544,14 @@ class ScheduleMaker:
 
         current_boilings = self.m.root["master"]["boiling", True]
         current_boilings = list(sorted(current_boilings, key=lambda b: b.x[0]))
-        current_line_names = [b.props["boiling_model"].line.name for b in current_boilings]
+        current_line_names = [
+            pair[0]
+            for pair in sorted(
+                [(b.props["boiling_model"].line.name, b.x[0]) for b in current_boilings], key=lambda pair: pair[1]
+            )
+        ]
         current_timed_configuration = tuple(
-            sorted([(line_name, boiling.x[0]) for boiling in current_boilings], key=lambda x: x[1])
+            sorted([(boiling.props["line_name"], boiling.x[0]) for boiling in current_boilings], key=lambda x: x[1])
         )
 
         # - Remove boiling from left_df
@@ -568,10 +573,9 @@ class ScheduleMaker:
         self.depth_to_min_score[depth] = min(current_best_score, score)
 
         # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
-
-        if current_timed_configuration in self.timed_configuration_to_prefix:
+        if current_line_names != configuration + [line_name]:
+            logger.info("Reverse configuration found, skipping")
             configuration, score = [], 10000000000
-            logger.info("Found a duplicate of a configuration, skipping")
         elif not (
             (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
             or (score - current_best_score <= 2)
