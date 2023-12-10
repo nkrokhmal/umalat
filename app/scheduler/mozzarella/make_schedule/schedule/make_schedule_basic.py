@@ -8,6 +8,7 @@ from typing import Optional
 import pandas as pd
 
 from loguru import logger
+from utils_ak.block_tree import ParallelepipedBlock
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push, push
@@ -496,7 +497,7 @@ class ScheduleMaker:
 
             self._process_boiling(
                 next_row["boiling"],
-                shrink_drenators=shrink_drenators,
+                shrink_drenators=False,
             )
 
         # - Fix timing
@@ -530,16 +531,22 @@ class ScheduleMaker:
     def _process_line(self, configuration, line_name, depth: int = 1):
         # logger.debug("Process line", configuration_prefix=configuration_prefix, line_name=line_name, depth=depth)
 
-        # - Add boiling and process it
+        # - Preprocess
 
         old_iter_props = self.lines_df["iter_props"].copy()
+        boiling_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
+        boiling_index, boiling = boiling_row.name, boiling_row["boiling"]
+        boiling_dic = boiling.to_dict()  # copy props to restore later from it
 
+        # - Process boiling
         self._process_boiling(
-            self.left_df[self.left_df["line_name"] == line_name].iloc[0]["boiling"],
+            boiling,
             shrink_drenators=False,
             tag=str(depth),
         )
 
+        # - Post-process
+        # -- Calculate configuration and its properties
         current_boilings = self.m.root["master"]["boiling", True]
         current_boilings = list(sorted(current_boilings, key=lambda b: b.x[0]))
         current_line_names = [
@@ -552,23 +559,26 @@ class ScheduleMaker:
             sorted([(boiling.props["line_name"], boiling.x[0]) for boiling in current_boilings], key=lambda x: x[1])
         )
 
-        # - Remove boiling from left_df
+        # -- Remove boiling from left_df
 
-        next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
-        self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
+        self.left_df = self.left_df[self.left_df["index"] != boiling_row["index"]]
 
-        # - Rest self.depth_to_min_score if needed
+        # -- Reset self.depth_to_min_score if needed
 
         if depth == 2 and self.prev_prefix != current_line_names:
             print("Resetting depth_to_min_score", current_line_names)
             self.depth_to_min_score = {}
             self.prev_prefix = current_line_names
 
-        # - Calc current depth score
+        # -- Calc current depth score
 
         score = calc_partial_score(self.m.root)
         current_best_score = self.depth_to_min_score.get(depth, 100000000)
         self.depth_to_min_score[depth] = min(current_best_score, score)
+
+        # todo next: delete
+        if len(configuration) >= 1 and (configuration + [line_name])[:2] != [LineName.SALT, LineName.SALT]:
+            configuration, score = [], 10000000000
 
         # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
         if not (
@@ -581,11 +591,11 @@ class ScheduleMaker:
 
             configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
 
-        # - Set line_name_and_types_to_prefix
+        # -- Set line_name_and_types_to_prefix
 
         self.timed_configuration_to_prefix[current_timed_configuration] = tuple(configuration + [line_name])
 
-        # - Clean up - remove temporary blocks, add boiling back to left_df and restore iter_props
+        # -- Clean up - remove temporary blocks, add boiling back to left_df and restore iter_props
 
         for block in list(self.m.root.iter(cls="boiling", tag_boiling=str(depth))) + list(
             self.m.root.iter(tag=str(depth))
@@ -595,8 +605,10 @@ class ScheduleMaker:
             block.detach_from_parent()
             block.props.update(x=[0, 0])
 
-        self.left_df = pd.concat([pd.DataFrame([next_row]), self.left_df])
+        boiling_row["boiling"] = ParallelepipedBlock.from_dict(boiling_dic)
+        self.left_df = pd.concat([pd.DataFrame([boiling_row]), self.left_df])
         self.lines_df["iter_props"] = old_iter_props
+
         return configuration, score
 
     def _find_optimal_configuration(self, configuration: list = [], depth: int = 1):
