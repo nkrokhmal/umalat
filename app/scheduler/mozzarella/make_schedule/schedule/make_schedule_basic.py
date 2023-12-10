@@ -541,7 +541,13 @@ class ScheduleMaker:
             strict_order=False,
             tag=str(depth),
         )
-        current_line_names = [b.props["boiling_model"].line.name for b in self.m.root["master"]["boiling", True]]
+
+        current_boilings = self.m.root["master"]["boiling", True]
+        current_boilings = list(sorted(current_boilings, key=lambda b: b.x[0]))
+        current_line_names = [b.props["boiling_model"].line.name for b in current_boilings]
+        current_timed_configuration = tuple(
+            sorted([(line_name, boiling.x[0]) for boiling in current_boilings], key=lambda x: x[1])
+        )
 
         # - Remove boiling from left_df
 
@@ -563,15 +569,22 @@ class ScheduleMaker:
 
         # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
 
-        if (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names)) or (
-            score - current_best_score <= 2
+        if current_timed_configuration in self.timed_configuration_to_prefix:
+            configuration, score = [], 10000000000
+            logger.info("Found a duplicate of a configuration, skipping")
+        elif not (
+            (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
+            or (score - current_best_score <= 2)
         ):
+            configuration, score = [], 10000000000
+        else:
             # - Recursively find optimal configuration
 
             configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
-        else:
-            # logger.info('Skipping depth', depth=depth)
-            configuration, score = [], 10000000000
+
+        # - Set line_name_and_types_to_prefix
+
+        self.timed_configuration_to_prefix[current_timed_configuration] = tuple(configuration + [line_name])
 
         # - Clean up - remove temporary blocks, add boiling back to left_df and restore iter_props
 
@@ -891,7 +904,9 @@ class ScheduleMaker:
         self.cleanings = cleanings or {}  # {boiling_id: cleaning}
         self.boilings = boilings
 
-        self.prev_prefix = None  # used for _find_optimal_configuration
+        # used for _find_optimal_configuration
+        self.prev_prefix = None
+        self.timed_configuration_to_prefix = {}
 
         self.depth_to_min_score = {}
 
