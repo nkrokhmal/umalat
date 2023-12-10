@@ -494,7 +494,11 @@ class ScheduleMaker:
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]
 
-            self._process_boiling(next_row["boiling"], shrink_drenators=shrink_drenators, strict_order=True)
+            self._process_boiling(
+                next_row["boiling"],
+                shrink_drenators=shrink_drenators,
+                strict_order=False,
+            )
 
         # - Fix timing
 
@@ -563,6 +567,7 @@ class ScheduleMaker:
             score - current_best_score <= 2
         ):
             # - Recursively find optimal configuration
+
             configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
         else:
             # logger.info('Skipping depth', depth=depth)
@@ -592,13 +597,14 @@ class ScheduleMaker:
         )
 
         if lines_left_count == 0:
-            score = calc_score(self.m.root)
+            score = calc_partial_score(self.m.root)
 
             logger.info(
                 "Configuration",
                 score=int(score),
                 configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
             )
+
             return configuration, score
         elif lines_left_count == 1:
             return self._process_line(

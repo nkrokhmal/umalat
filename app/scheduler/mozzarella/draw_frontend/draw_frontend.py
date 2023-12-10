@@ -14,7 +14,9 @@ from app.enum import LineName
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.mozzarella.draw_frontend.style import STYLE
+from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
 from app.scheduler.mozzarella.wrap_frontend import wrap_frontend
+from app.scheduler.time_utils import cast_t
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
 from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 
@@ -95,13 +97,12 @@ def test():
         start_times={LineName.WATER: "08:30", LineName.SALT: "06:00"},
         exact_start_time_line_name=LineName.WATER,
         first_batch_ids_by_type={"mozzarella": 1},
-        start_configuration=[
-            LineName.WATER if value == "В" else LineName.SALT
-            # for value in "С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С".split("-")
-            for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
-            # for value in "С-С-В-В-С-В-В-С-В-В-С-В-В-С-В-В-С-С-С-С-С-С-С-С-С-С-С-С-С-С".split("-")  # 1
-            # for value in 'С-С-В-В-С-В-В-С-В-В-С-В-В-С-В-С-В-С-С-С-С-С-С-С-С-С-С-С-С-С'.split('-') # 2
-        ],
+        # start_configuration=[
+        #     LineName.WATER if value == "В" else LineName.SALT
+        #     # for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
+        #     # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
+        #     for value in "С-С-В-В-С-В-С-В-С-С-В-С-С-В-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-")  # handmade
+        # ],
     )
 
     schedule_json = output["schedule"].to_dict(
@@ -119,9 +120,11 @@ def test():
     schedule_df = prepare_schedule_json(schedule_json, cleanings)
     schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
-    schedule_wb.save("schedule.xlsx")
-    open_file_in_os("schedule.xlsx")
+    print(calc_partial_score(output["schedule"]))
+    schedule_wb.save("schedule_optimal.xlsx")
+    open_file_in_os("schedule_optimal.xlsx")
 
 
 if __name__ == "__main__":
     test()
+    # print(cast_t('01:00:35') - cast_t('01:40'))
