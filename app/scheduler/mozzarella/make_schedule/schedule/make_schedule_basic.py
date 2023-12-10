@@ -311,7 +311,7 @@ class ScheduleMaker:
         else:
             self.last_multihead_water_boiling = None
 
-    def _process_boiling(self, boiling, shrink_drenators=True, strict_order=False, tag: str = ""):
+    def _process_boiling(self, boiling, shrink_drenators=True, strict_order=True, tag: str = ""):
         # extract line name
         line_name = boiling.props["boiling_model"].line.name
 
@@ -497,7 +497,6 @@ class ScheduleMaker:
             self._process_boiling(
                 next_row["boiling"],
                 shrink_drenators=shrink_drenators,
-                strict_order=False,
             )
 
         # - Fix timing
@@ -538,7 +537,6 @@ class ScheduleMaker:
         self._process_boiling(
             self.left_df[self.left_df["line_name"] == line_name].iloc[0]["boiling"],
             shrink_drenators=False,
-            strict_order=False,
             tag=str(depth),
         )
 
@@ -573,12 +571,9 @@ class ScheduleMaker:
         self.depth_to_min_score[depth] = min(current_best_score, score)
 
         # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
-        if current_line_names != configuration + [line_name]:
-            # logger.info("Reverse configuration found, skipping")
-            configuration, score = [], 10000000000
-        elif not (
+        if not (
             (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
-            or (score - current_best_score <= 4)
+            or (score - current_best_score <= 2)
         ):
             configuration, score = [], 10000000000
         else:
@@ -819,16 +814,18 @@ class ScheduleMaker:
             except:
                 pass
 
-    def _fix_first_boiling_of_later_line(self, start_configuration):
-        if len(start_configuration) == 1:
-            # only one line present - no need for fix
+    def _fix_first_boiling_of_later_line(self):
+        boilings = list(sorted(self.m.root["master"]["boiling", True], key=lambda b: b.x[0]))
+        configuration = [b.props["boiling_model"].line.name for b in boilings]
+
+        if len(set(configuration)) == 1:
+            # only one line
             return
 
-        boilings = list(sorted(self.m.root["master"]["boiling", True], key=lambda b: b.x[0]))
-        boiling_line_names = [b.props["boiling_model"].line.name for b in boilings]
+        later_line = LineName.WATER if configuration[0] == LineName.SALT else LineName.SALT
 
         # first_boiling_of_later_line_index
-        index = boiling_line_names.index(start_configuration[-1])
+        index = configuration.index(later_line)
 
         if index == len(boilings) - 1:
             # first boiling of later line is last boiling
@@ -901,7 +898,7 @@ class ScheduleMaker:
         shrink_drenators=True,
         exact_start_time_line_name: str = LineName.WATER,
     ):
-        self.start_configuration = start_configuration or [LineName.SALT]
+        self.start_configuration = start_configuration or []
         self.date = date or datetime.now()
         self.exact_start_time_line_name = exact_start_time_line_name
         self.start_times = {k: v if v else None for k, v in start_times.items()}
@@ -920,7 +917,7 @@ class ScheduleMaker:
         self._init_multihead_water_boilings()
         self._process_boilings(shrink_drenators=shrink_drenators)
         self._process_extras()
-        self._fix_first_boiling_of_later_line(self.start_configuration)
+        self._fix_first_boiling_of_later_line()
         self._process_cleanings()
         self._process_shifts()
 
