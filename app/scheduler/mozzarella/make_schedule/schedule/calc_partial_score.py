@@ -15,7 +15,10 @@ def _get_score(boilings: list) -> float:
 
 
 def time_diff(a, b):
-    return ((abs(a - b) / 6) ** 2) * 6 / 6  # last 6 is a normalizer
+    if abs(a - b) < 6:
+        return 0
+    else:
+        return ((abs(a - b) / 6) ** 2) * 6 / 6  # last 6 is a normalizer
 
 
 def calc_partial_score(schedule, start_times: dict):

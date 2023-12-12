@@ -82,7 +82,7 @@ def test():
 
     repo_path = __file__.split("app")[0][:-1]
 
-    fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx"
+    fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx"
     dirname, raw_name, ext = os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0], os.path.splitext(fn)[1]
 
     # fn = "perfect_plan2.xlsx"
@@ -96,8 +96,8 @@ def test():
         # ),
         boiling_plan=fn,
         workbook=schedule_wb,
-        start_times={LineName.SALT: "06:30"},
-        exact_start_time_line_name=LineName.WATER,
+        start_times={LineName.SALT: "06:30", LineName.WATER: "12:00"},
+        exact_start_time_line_name=LineName.SALT,
         first_batch_ids_by_type={"mozzarella": 100},
         # start_configuration=[
         #     LineName.WATER if value == "В" else LineName.SALT
