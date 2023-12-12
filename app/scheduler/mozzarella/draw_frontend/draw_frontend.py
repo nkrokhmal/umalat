@@ -82,55 +82,46 @@ def test():
 
     repo_path = __file__.split("app")[0][:-1]
 
-    for fn in ["/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx"]:
-        # for fn in [
-        #     fn
-        #     for fn in glob.glob("/Users/arsenijkadaner/Desktop/моцарелла/*")
-        #     if "План по варкам" in fn and "drawn" not in fn
-        # ]:
-        print("Processing filename", fn)
-        dirname, raw_name, ext = os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0], os.path.splitext(fn)[1]
+    fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx"
+    dirname, raw_name, ext = os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0], os.path.splitext(fn)[1]
 
-        # if os.path.exists(f"{dirname}/{raw_name}_drawn{ext}"):
-        #     continue
+    # fn = "perfect_plan2.xlsx"
+    schedule_wb = openpyxl.load_workbook(
+        filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
+    )
+    output = draw_frontend(
+        # str(
+        #     get_repo_path()
+        #     / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
+        # ),
+        boiling_plan=fn,
+        workbook=schedule_wb,
+        start_times={LineName.SALT: "06:30"},
+        exact_start_time_line_name=LineName.WATER,
+        first_batch_ids_by_type={"mozzarella": 100},
+        # start_configuration=[
+        #     LineName.WATER if value == "В" else LineName.SALT
+        #     for value in "В-С-В-С-В-В-С-В-С-В-С-В-С-С-В-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
+        # ],
+    )
 
-        # fn = "perfect_plan2.xlsx"
-        schedule_wb = openpyxl.load_workbook(
-            filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
-        )
-        output = draw_frontend(
-            # str(
-            #     get_repo_path()
-            #     / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
-            # ),
-            boiling_plan=fn,
-            workbook=schedule_wb,
-            start_times={LineName.SALT: "06:30"},
-            exact_start_time_line_name=LineName.WATER,
-            first_batch_ids_by_type={"mozzarella": 100},
-            # start_configuration=[
-            #     LineName.WATER if value == "В" else LineName.SALT
-            #     for value in "В-С-В-С-В-В-С-В-С-В-С-В-С-С-В-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
-            # ],
-        )
+    schedule_json = output["schedule"].to_dict(
+        props=[
+            {"key": "x", "value": lambda b: list(b.props["x"])},
+            {"key": "size", "value": lambda b: list(b.props["size"])},
+            {"key": "cleaning_type", "cls": "cleaning"},
+            {
+                "key": "boiling_group_df",
+                "cls": "boiling",
+            },
+        ]
+    )
+    cleanings = [x for x in schedule_json["children"][0]["children"] if x["cls"] == "cleaning"]
+    schedule_df = prepare_schedule_json(schedule_json, cleanings)
+    schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
-        schedule_json = output["schedule"].to_dict(
-            props=[
-                {"key": "x", "value": lambda b: list(b.props["x"])},
-                {"key": "size", "value": lambda b: list(b.props["size"])},
-                {"key": "cleaning_type", "cls": "cleaning"},
-                {
-                    "key": "boiling_group_df",
-                    "cls": "boiling",
-                },
-            ]
-        )
-        cleanings = [x for x in schedule_json["children"][0]["children"] if x["cls"] == "cleaning"]
-        schedule_df = prepare_schedule_json(schedule_json, cleanings)
-        schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
-
-        schedule_wb.save(f"{dirname}/{raw_name}_drawn{ext}")
-        open_file_in_os(f"{dirname}/{raw_name}_drawn{ext}")
+    schedule_wb.save("schedule.xlsx")
+    open_file_in_os("schedule.xlsx")
 
 
 if __name__ == "__main__":
