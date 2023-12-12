@@ -58,7 +58,6 @@ def make_schedule_with_optimal_cleanings(
 
     # - Make schedule with cleanings and start configuration
 
-    cleanings = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleanings.items() if v}
     cleanings = {int(k): v for k, v in cleanings.items() if v}
     logger.error(
         "Final schedule using cleanings",
@@ -92,7 +91,7 @@ def test():
         #     get_repo_path()
         #     / "app/data/static/samples/by_department/mozzarella/2023-11-22 План по варкам моцарелла.xlsx"
         # ),
-        "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx",
+        "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx",
         start_times={LineName.WATER: "06:00", LineName.SALT: "11:00"},
         exact_start_time_line_name=LineName.SALT,
     )

@@ -82,7 +82,7 @@ def test():
 
     repo_path = __file__.split("app")[0][:-1]
 
-    for fn in ["/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx"]:
+    for fn in ["/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx"]:
         # for fn in [
         #     fn
         #     for fn in glob.glob("/Users/arsenijkadaner/Desktop/моцарелла/*")
@@ -130,7 +130,7 @@ def test():
         schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
         schedule_wb.save(f"{dirname}/{raw_name}_drawn{ext}")
-        # open_file_in_os(f"{dirname}/{raw_name}_drawn{ext}")
+        open_file_in_os(f"{dirname}/{raw_name}_drawn{ext}")
 
 
 if __name__ == "__main__":
