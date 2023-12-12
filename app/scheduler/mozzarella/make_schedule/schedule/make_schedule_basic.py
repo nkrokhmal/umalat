@@ -598,25 +598,6 @@ class ScheduleMaker:
         ):
             configuration, score = [], MAX_SCORE
 
-        reverse_time_line = LineName.WATER if self.exact_start_time_line_name == LineName.SALT else LineName.SALT
-        if is_time_set and reverse_time_line in self.start_times and reverse_time_line in current_line_names:
-            first_line_boiling = [
-                b for b in current_boilings if b.props["boiling_model"].line.name == reverse_time_line
-            ][0]
-            if not (
-                cast_t(self.start_times[reverse_time_line]) - 6
-                <= first_line_boiling["melting_and_packing"].x[0]
-                <= cast_t(self.start_times[reverse_time_line]) + 6
-            ):
-                logger.info(
-                    "Failed to match time",
-                    line_name=line_name,
-                    start_time=cast_t(self.start_times[line_name]),
-                    boiling_start_time=boiling["melting_and_packing"].x[0],
-                    configuration=configuration,
-                )
-                configuration, score = [], MAX_SCORE
-
         if score != MAX_SCORE:
             # - Recursively find optimal configuration
 
@@ -984,10 +965,6 @@ class ScheduleMaker:
             self.exact_start_time_line_name = list(self.start_times.keys())[0]  # overwrite exact start time line name
         else:
             raise Exception("Не указано время начала подачи на линиях")
-
-        # for line_name in [LineName.WATER, LineName.SALT]:
-        #     if line_name not in self.start_times:
-        #         self.start_times[line_name] = "00:00"
 
         # -- Validate there is at least one boiling with exact start time line name
 

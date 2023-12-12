@@ -1,3 +1,4 @@
+import glob
 import os
 
 from datetime import datetime
@@ -81,53 +82,53 @@ def test():
 
     repo_path = __file__.split("app")[0][:-1]
 
-    fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx"
+    for fn in ["/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx"]:
+        # for fn in glob.glob('/Users/arsenijkadaner/Desktop/моцарелла/*'):
+        dirname, raw_name, ext = os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0], os.path.splitext(fn)[1]
 
-    # fn = "perfect_plan2.xlsx"
-    schedule_wb = openpyxl.load_workbook(
-        filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
-    )
-    output = draw_frontend(
-        # str(
-        #     get_repo_path()
-        #     / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
-        # ),
-        boiling_plan=fn,
-        workbook=schedule_wb,
-        start_times={LineName.SALT: "08:30", LineName.WATER: "13:00"},
-        exact_start_time_line_name=LineName.SALT,
-        first_batch_ids_by_type={"mozzarella": 1},
-        # start_configuration=[
-        #     LineName.WATER if value == "В" else LineName.SALT
-        #     #     for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
-        #     # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
-        #     for value in "С-С-В-С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
-        #     # for value in "С-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-С-В-С-В-С-С-С-С-С-С".split(
-        #     #     "-"
-        #     # )  # best for all boilings
-        # ],
-    )
+        # fn = "perfect_plan2.xlsx"
+        schedule_wb = openpyxl.load_workbook(
+            filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
+        )
+        output = draw_frontend(
+            # str(
+            #     get_repo_path()
+            #     / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
+            # ),
+            boiling_plan=fn,
+            workbook=schedule_wb,
+            start_times={LineName.WATER: "06:30"},
+            exact_start_time_line_name=LineName.WATER,
+            first_batch_ids_by_type={"mozzarella": 1},
+            # start_configuration=[
+            #     LineName.WATER if value == "В" else LineName.SALT
+            #     #     for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
+            #     # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
+            #     for value in "С-С-В-С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
+            #     # for value in "С-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-С-В-С-В-С-С-С-С-С-С".split(
+            #     #     "-"
+            #     # )  # best for all boilings
+            # ],
+        )
 
-    schedule_json = output["schedule"].to_dict(
-        props=[
-            {"key": "x", "value": lambda b: list(b.props["x"])},
-            {"key": "size", "value": lambda b: list(b.props["size"])},
-            {"key": "cleaning_type", "cls": "cleaning"},
-            {
-                "key": "boiling_group_df",
-                "cls": "boiling",
-            },
-        ]
-    )
-    cleanings = [x for x in schedule_json["children"][0]["children"] if x["cls"] == "cleaning"]
-    schedule_df = prepare_schedule_json(schedule_json, cleanings)
-    schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
+        schedule_json = output["schedule"].to_dict(
+            props=[
+                {"key": "x", "value": lambda b: list(b.props["x"])},
+                {"key": "size", "value": lambda b: list(b.props["size"])},
+                {"key": "cleaning_type", "cls": "cleaning"},
+                {
+                    "key": "boiling_group_df",
+                    "cls": "boiling",
+                },
+            ]
+        )
+        cleanings = [x for x in schedule_json["children"][0]["children"] if x["cls"] == "cleaning"]
+        schedule_df = prepare_schedule_json(schedule_json, cleanings)
+        schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
-    print(calc_partial_score(output["schedule"]))
-    # fn = "schedule_optimal_hand_made.xlsx"
-    fn = "schedule2.xlsx"
-    schedule_wb.save(fn)
-    open_file_in_os(fn)
+        print(calc_partial_score(output["schedule"]))
+        schedule_wb.save(f"{dirname}/{raw_name}_drawn{ext}")
+        # open_file_in_os(fn)
 
 
 if __name__ == "__main__":
