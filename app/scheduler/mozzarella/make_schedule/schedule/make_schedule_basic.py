@@ -1005,7 +1005,7 @@ def make_schedule_basic(
     date=None,
 ):
     logger.info(
-        "Making schedule from boilings",
+        "Making basic schedule",
         start_times=start_times,
         start_configuration=start_configuration,
         cleanings=cleanings,
