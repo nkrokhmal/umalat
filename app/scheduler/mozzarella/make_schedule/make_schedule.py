@@ -4,6 +4,9 @@ from app.enum import LineName
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_basic import make_schedule_basic
+from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_with_optimal_cleanings import (
+    make_schedule_with_optimal_cleanings,
+)
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 
 
@@ -32,7 +35,7 @@ def make_schedule(
 
     # - Make schedule
 
-    schedule = make_schedule_basic(
+    schedule = make_schedule_with_optimal_cleanings(
         boiling_plan_obj=boiling_plan_df,
         start_times=start_times,
         exact_start_time_line_name=exact_start_time_line_name,

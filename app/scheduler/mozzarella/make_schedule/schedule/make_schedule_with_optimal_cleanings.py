@@ -45,6 +45,8 @@ def make_schedule_with_optimal_cleanings(
         date=date,
     )
 
+    configuration = [b.props["boiling_model"].line.name for b in schedule["master"]["boiling", True]]
+
     # - Find optimal cleanings
 
     boiling_plan_df = to_boiling_plan(boiling_plan_obj)
@@ -66,13 +68,13 @@ def make_schedule_with_optimal_cleanings(
         "Final schedule!",
         start_times=start_times,
         cleanings=cleanings,
-        start_configuration=start_configuration,
+        configuration=configuration,
     )
     schedule = make_schedule_basic(
         boiling_plan_obj=boiling_plan_obj,
         cleanings=cleanings,
         start_times=start_times,
-        start_configuration=start_configuration,
+        start_configuration=configuration,
         exact_start_time_line_name=exact_start_time_line_name,
         date=date,
     )
@@ -94,7 +96,7 @@ def test():
         #     get_repo_path()
         #     / "app/data/static/samples/by_department/mozzarella/2023-11-22 План по варкам моцарелла.xlsx"
         # ),
-        "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx",
+        "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx",
         start_times={LineName.WATER: "06:00", LineName.SALT: "11:00"},
         exact_start_time_line_name=LineName.SALT,
     )

@@ -82,17 +82,17 @@ def test():
 
     repo_path = __file__.split("app")[0][:-1]
 
-    # for fn in ["/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx"]:
-    for fn in [
-        fn
-        for fn in glob.glob("/Users/arsenijkadaner/Desktop/моцарелла/*")
-        if "План по варкам" in fn and "drawn" not in fn
-    ]:
+    for fn in ["/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx"]:
+        # for fn in [
+        #     fn
+        #     for fn in glob.glob("/Users/arsenijkadaner/Desktop/моцарелла/*")
+        #     if "План по варкам" in fn and "drawn" not in fn
+        # ]:
         print("Processing filename", fn)
         dirname, raw_name, ext = os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0], os.path.splitext(fn)[1]
 
-        if os.path.exists(f"{dirname}/{raw_name}_drawn{ext}"):
-            continue
+        # if os.path.exists(f"{dirname}/{raw_name}_drawn{ext}"):
+        #     continue
 
         # fn = "perfect_plan2.xlsx"
         schedule_wb = openpyxl.load_workbook(
