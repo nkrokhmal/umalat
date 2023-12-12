@@ -30,7 +30,6 @@ def mozzarella_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
-        optimize = form.optimize.data
         exact_melting_time_by_line = form.exact_melting_time_by_line.data
 
         # validate time
@@ -69,8 +68,6 @@ def mozzarella_schedule():
                     LineName.WATER: form.water_beg_time.data,
                     LineName.SALT: form.salt_beg_time.data,
                 },
-                optimize_water_gaps=True,
-                optimize_start_configurations=optimize,
                 exact_start_time_line_name=exact_melting_time_by_line,
                 first_batch_ids_by_type=first_batch_ids,
                 optimize_cleanings=add_full_boiling,

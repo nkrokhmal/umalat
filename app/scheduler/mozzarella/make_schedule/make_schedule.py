@@ -35,13 +35,22 @@ def make_schedule(
 
     # - Make schedule
 
-    schedule = make_schedule_with_optimal_cleanings(
-        boiling_plan_obj=boiling_plan_df,
-        start_times=start_times,
-        exact_start_time_line_name=exact_start_time_line_name,
-        start_configuration=start_configuration,
-        date=date,
-    )
+    if not optimize_cleanings:
+        schedule = make_schedule_basic(
+            boiling_plan_obj=boiling_plan_df,
+            start_times=start_times,
+            exact_start_time_line_name=exact_start_time_line_name,
+            start_configuration=start_configuration,
+            date=date,
+        )
+    else:
+        schedule = make_schedule_with_optimal_cleanings(
+            boiling_plan_obj=boiling_plan_df,
+            start_times=start_times,
+            exact_start_time_line_name=exact_start_time_line_name,
+            start_configuration=start_configuration,
+            date=date,
+        )
 
     # - Return
 
