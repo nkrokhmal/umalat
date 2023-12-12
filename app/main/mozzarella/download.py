@@ -6,12 +6,14 @@ from pathlib import Path
 import openpyxl.worksheet.worksheet
 import pandas as pd
 
+from utils_ak.openpyxl.openpyxl_tools import (  # todo next: fix import [@marklidenberg, #kolya]
+    read_merged_and_colored_cells_df,
+    read_merged_cells_df,
+)
+
 from app.imports.runtime import *
 from app.main import main
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
-
-
-# from utils_ak.openpyxl.openpyxl_tools import read_merged_and_colored_cells_df, read_merged_cells_df # todo next: fix import [@marklidenberg, #kolya]
 
 
 @main.route("/download_mozzarella_schedule", methods=["GET"])

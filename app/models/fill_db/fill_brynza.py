@@ -99,6 +99,7 @@ class BrynzaFiller(BaseFiller):
             "Линия",
             "Вес форм фактора",
             "Название форм фактора",
+            "Скорость варки",
             "Kод",
         ]
 
@@ -114,7 +115,7 @@ class BrynzaFiller(BaseFiller):
                 name=row["Название SKU"],
                 brand_name=row["Имя бренда"],
                 weight_netto=row["Вес нетто"],
-                packing_speed=0,
+                packing_speed=row["Скорость варки"],
                 in_box=row["Коробки"],
                 code=row["Kод"],
                 line=line,
