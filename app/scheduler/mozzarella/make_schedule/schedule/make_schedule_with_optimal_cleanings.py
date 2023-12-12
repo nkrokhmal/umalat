@@ -78,9 +78,7 @@ def test():
     import warnings
 
     warnings.filterwarnings("ignore")
-    from deeplay.utils.loguru_utils.configure_loguru import configure_loguru
 
-    configure_loguru("DEBUG")
     make_schedule_with_optimal_cleanings(
         # str(
         #     get_repo_path()

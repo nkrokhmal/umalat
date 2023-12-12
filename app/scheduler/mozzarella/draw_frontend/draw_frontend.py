@@ -7,7 +7,6 @@ from typing import Optional
 
 import openpyxl
 
-from deeplay.utils.loguru_utils.configure_loguru import configure_loguru
 from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
@@ -73,10 +72,6 @@ def test():
     import warnings
 
     warnings.filterwarnings("ignore")
-
-    # - Configure loguru
-
-    configure_loguru()
 
     # - Draw frontend
 
