@@ -513,7 +513,6 @@ class ScheduleMaker:
             raise Exception("Should not happen")
 
         logger.info("Selected next row", next_row=next_row["line_name"], cur_boiling_num=cur_boiling_num)
-        next_row["boiling"].props.update(boiling_id=cur_boiling_num)
         return next_row
 
     def _process_extras(self):

@@ -85,7 +85,7 @@ def test():
         exact_start_time_line_name=LineName.SALT,
         optimize_start_configurations=False,
         optimize_water_gaps=False,
-        first_batch_ids_by_type={"mozzarella": 1},
+        first_batch_ids_by_type={"mozzarella": 102},
     )
 
     output["workbook"].save("test.xlsx")
