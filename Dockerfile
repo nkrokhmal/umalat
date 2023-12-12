@@ -9,7 +9,7 @@ WORKDIR /umalat
 
 COPY pyproject.toml poetry.lock /umalat/
 RUN mkdir /utils
-RUN pip install poetry && poetry config virtualenvs.create false && poetry install
+RUN pip install poetry && poetry config virtualenvs.create false && poetry config installer.max-workers 10 && poetry install --no-interaction --no-ansi -vvv
 ADD https://api.github.com/repos/akadaner/python-utils-ak/git/refs/heads/master version.json
 RUN cd /utils && git clone https://github.com/akadaner/python-utils-ak.git && cd python-utils-ak && git pull
 
