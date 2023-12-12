@@ -321,7 +321,7 @@ class ScheduleMaker:
             start_from = 0
         else:
             # start from latest boiling
-            start_from = self.get_latest_boiling().x[0]
+            start_from = self.get_latest_boiling().x[0] - self.m.root.x[0]  # remove root offset
 
         # add configuration if needed
         if self.get_latest_boiling(line_name):
@@ -542,18 +542,6 @@ class ScheduleMaker:
             tag=str(depth),
         )
 
-        # - Set time
-
-        #
-        # if not self.time_has_been_set and boiling.props["boiling_model"].line.name == self.exact_start_time_line_name:
-        #     self.m.root.props.update(
-        #         x=[
-        #             cast_t(self.start_times[self.exact_start_time_line_name]) - boiling["melting_and_packing"].x[0],
-        #             self.m.root.x[0],
-        #         ]
-        #     )
-        #     self.time_has_been_set = True
-
         # - Post-process
 
         # -- Calculate configuration and its properties
@@ -569,6 +557,20 @@ class ScheduleMaker:
         current_timed_configuration = tuple(
             sorted([(boiling.props["line_name"], boiling.x[0]) for boiling in current_boilings], key=lambda x: x[1])
         )
+
+        # - Set time
+
+        old_root_x = list(self.m.root.x)
+        if (boiling.props["boiling_model"].line.name == self.exact_start_time_line_name) and (
+            boiling
+            == [b for b in current_boilings if b.props["boiling_model"].line.name == self.exact_start_time_line_name][0]
+        ):
+            self.m.root.props.update(
+                x=[
+                    cast_t(self.start_times[self.exact_start_time_line_name]) - boiling["melting_and_packing"].x[0],
+                    self.m.root.x[1],
+                ]
+            )
 
         # -- Remove boiling from left_df
 
@@ -602,6 +604,9 @@ class ScheduleMaker:
 
             configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
 
+        # if score == 0:
+        #     return configuration, 0
+
         # -- Set line_name_and_types_to_prefix
 
         self.timed_configuration_to_prefix[current_timed_configuration] = tuple(configuration + [line_name])
@@ -622,8 +627,7 @@ class ScheduleMaker:
 
         # - Rest timing set up
 
-        self.m.root.props.update(x=[0, 0])
-        self.time_has_been_set = False
+        self.m.root.props.update(x=old_root_x)
 
         return configuration, score
 
@@ -646,6 +650,7 @@ class ScheduleMaker:
             )
 
             return configuration, score
+            # return configuration, 0
         elif lines_left_count == 1:
             return self._process_line(
                 configuration=configuration,
@@ -958,7 +963,7 @@ class ScheduleMaker:
 
         # -- Add a flag that time has been set
 
-        self.time_has_been_set = False
+        self.is_time_set = False
 
         # - Other
 
