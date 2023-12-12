@@ -730,13 +730,13 @@ class ScheduleMaker:
                 # if rest is more than an hour and less than 80 minutes -> short cleaning
                 if rest >= 24:
                     cleaning = make_termizator_cleaning_block("short", rule="rest_after_two_hours")
-                    cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0], 0))
+                    cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0] - self.m.root.x[0], 0))
                     push(self.m.root["master"], cleaning, push_func=add_push)
 
         # - Add last full cleaning
 
         last_boiling = max(self.m.root["master"]["boiling", True], key=lambda b: b.y[0])
-        start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1
+        start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1 - self.m.root.x[0]
         cleaning = make_termizator_cleaning_block("full", rule="closing")  # add five extra minutes
         push(
             self.m.root["master"],
@@ -748,11 +748,15 @@ class ScheduleMaker:
     def _process_shifts(self):
         # - Cheese makers
 
-        beg = min(self.m.root["master"]["boiling", True], key=lambda b: b.x[0]).x[0] - 6  # 0.5h before start
+        beg = (
+            min(self.m.root["master"]["boiling", True], key=lambda b: b.x[0]).x[0] - 6 - self.m.root.x[0]
+        )  # 0.5h before start
         end = (
             max(self.m.root["master"]["boiling", True], key=lambda b: b.y[0])["pouring"]["second"]["pouring_off"].y[0]
             + 24
-        )  # 2h after last pouring off
+        ) - self.m.root.x[
+            0
+        ]  # 2h after last pouring off
         shifts = split_shifts(beg, end)
 
         for i, (beg, end) in enumerate(shifts, 1):
@@ -772,8 +776,8 @@ class ScheduleMaker:
         if water_boilings:
             # - Water meltings
 
-            beg = water_boilings[0]["melting_and_packing"]["melting"].x[0] - 12  # 1h before start
-            end = water_boilings[-1]["melting_and_packing"]["melting"].y[0] + 12  # 1h after end
+            beg = water_boilings[0]["melting_and_packing"]["melting"].x[0] - 12 - self.m.root.x[0]  # 1h before start
+            end = water_boilings[-1]["melting_and_packing"]["melting"].y[0] + 12 - self.m.root.x[0]  # 1h after end
 
             shifts = split_shifts(beg, end)
 
@@ -786,8 +790,8 @@ class ScheduleMaker:
 
             # - Water packings
 
-            beg = water_boilings[0]["melting_and_packing"]["packing"].x[0] - 18  # 1.5h before start
-            end = water_boilings[-1]["melting_and_packing"]["packing"].y[0] + 6  # 0.5h after end
+            beg = water_boilings[0]["melting_and_packing"]["packing"].x[0] - 18 - self.m.root.x[0]  # 1.5h before start
+            end = water_boilings[-1]["melting_and_packing"]["packing"].y[0] + 6 - self.m.root.x[0]  # 0.5h after end
 
             shifts = split_shifts(beg, end)
 
@@ -806,8 +810,10 @@ class ScheduleMaker:
         if salt_boilings:
             # - Salt meltings
 
-            beg = salt_boilings[0]["melting_and_packing"]["melting"].x[0] - 12  # 1h before start
-            end = salt_boilings[-1]["melting_and_packing"]["packing", True][-1].y[0]  # end of packing
+            beg = salt_boilings[0]["melting_and_packing"]["melting"].x[0] - 12 - self.m.root.x[0]  # 1h before start
+            end = (
+                salt_boilings[-1]["melting_and_packing"]["packing", True][-1].y[0] - self.m.root.x[0]
+            )  # end of packing
 
             shifts = split_shifts(beg, end)
 
@@ -821,8 +827,12 @@ class ScheduleMaker:
             # - Salt packings
 
             try:
-                beg = salt_boilings[0]["melting_and_packing"]["packing", True][0].x[0] - 12  # 1h before start
-                end = salt_boilings[-1]["melting_and_packing"]["packing", True][-1].y[0] + 6  # 0.5h after end
+                beg = (
+                    salt_boilings[0]["melting_and_packing"]["packing", True][0].x[0] - 12 - self.m.root.x[0]
+                )  # 1h before start
+                end = (
+                    salt_boilings[-1]["melting_and_packing"]["packing", True][-1].y[0] + 6 - self.m.root.x[0]
+                )  # 0.5h after end
 
                 shifts = split_shifts(beg, end)
 
