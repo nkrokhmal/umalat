@@ -312,23 +312,16 @@ class ScheduleMaker:
         else:
             self.last_multihead_water_boiling = None
 
-    def _process_boiling(self, boiling, shrink_drenators=True, strict_order=True, tag: str = ""):
+    def _process_boiling(self, boiling, shrink_drenators=True, tag: str = ""):
         # extract line name
         line_name = boiling.props["boiling_model"].line.name
 
         # find start_from
-        if not self.get_latest_boiling(line_name):
-            # init
-            if self.lines_df.at[line_name, "start_time"]:
-                # start time present
-                start_from = cast_t(self.lines_df.at[line_name, "start_time"]) - boiling["melting_and_packing"].x[0]
-            else:
-                # start time not present - start from overall latest boiling from both lines
-                latest_boiling = self.get_latest_boilings()[0]
-                start_from = latest_boiling.x[0]
+        if not self.get_latest_boiling():
+            start_from = 0
         else:
             # start from latest boiling
-            start_from = self.get_latest_boiling(line_name).x[0]
+            start_from = self.get_latest_boiling().x[0]
 
         # add configuration if needed
         if self.get_latest_boiling(line_name):
@@ -367,7 +360,7 @@ class ScheduleMaker:
             boiling,
             push_func=AxisPusher(start_from=start_from),
             iter_props=iter_props,
-            validator=Validator(strict_order=strict_order),
+            validator=Validator(strict_order=True),
             max_tries=100,
         )
 
@@ -379,7 +372,7 @@ class ScheduleMaker:
                 self.m.root["master"],
                 boiling,
                 push_func=AwaitingPusher(max_period=8),
-                validator=Validator(strict_order=strict_order),
+                validator=Validator(strict_order=True),
                 max_tries=9,
             )
 
@@ -392,7 +385,7 @@ class ScheduleMaker:
                     self.m.root["master"],
                     boiling,
                     push_func=DrenatorShrinkingPusher(max_period=-2),
-                    validator=Validator(strict_order=strict_order),
+                    validator=Validator(strict_order=True),
                     max_tries=3,
                 )
 
@@ -515,13 +508,16 @@ class ScheduleMaker:
             ]
         )
 
-    def get_latest_boiling(self, line_name):
+    def get_latest_boiling(self, line_name: Optional[str] = None):
         boilings = self.m.root["master"]["boiling", True]
-        line_names = [b.props["boiling_model"].line.name for b in boilings]
 
-        if line_name not in line_names:
+        if line_name is not None:
+            boilings = [b for b in boilings if b.props["boiling_model"].line.name == line_name]
+
+        if not boilings:
             return None
-        return [b for b in boilings if b.props["boiling_model"].line.name == line_name][-1]
+
+        return boilings[-1]
 
     def get_latest_boilings(self):
         result = [self.get_latest_boiling(line_name) for line_name in [LineName.WATER, LineName.SALT]]
@@ -547,6 +543,7 @@ class ScheduleMaker:
         )
 
         # - Set time
+
         #
         # if not self.time_has_been_set and boiling.props["boiling_model"].line.name == self.exact_start_time_line_name:
         #     self.m.root.props.update(

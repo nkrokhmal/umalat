@@ -94,7 +94,7 @@ def test():
         # ),
         boiling_plan=fn,
         workbook=schedule_wb,
-        start_times={LineName.WATER: "08:30", LineName.SALT: "06:00"},
+        start_times={LineName.WATER: "08:30", LineName.SALT: "-2:00:00"},
         exact_start_time_line_name=LineName.WATER,
         first_batch_ids_by_type={"mozzarella": 1},
         start_configuration=[
@@ -126,8 +126,8 @@ def test():
     print(calc_partial_score(output["schedule"]))
     # fn = "schedule_optimal_hand_made.xlsx"
     fn = "schedule2.xlsx"
-    # schedule_wb.save(fn)
-    # open_file_in_os(fn)
+    schedule_wb.save(fn)
+    open_file_in_os(fn)
 
 
 if __name__ == "__main__":
