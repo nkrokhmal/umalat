@@ -582,7 +582,7 @@ class ScheduleMaker:
 
         # -- Calc current depth score
 
-        score = calc_partial_score(self.m.root)
+        score = calc_partial_score(self.m.root, start_times=self.start_times)
         current_best_score = self.depth_to_min_score.get(depth, 100000000)
         self.depth_to_min_score[depth] = min(current_best_score, score)
 
@@ -594,7 +594,7 @@ class ScheduleMaker:
 
         if not (
             (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
-            or (score - current_best_score <= 4)
+            or (score - current_best_score <= 6)
         ):
             configuration, score = [], MAX_SCORE
 
@@ -640,7 +640,7 @@ class ScheduleMaker:
         )
 
         if lines_left_count == 0:
-            score = calc_partial_score(self.m.root)
+            score = calc_partial_score(self.m.root, start_times=self.start_times)
 
             logger.info(
                 "Configuration",

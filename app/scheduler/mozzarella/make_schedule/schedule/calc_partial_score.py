@@ -46,7 +46,9 @@ def calc_partial_score(schedule, start_times: dict):
     # - Add penalty for time deviation
 
     for line_name, start_time in start_times.items():
-        first_line_boiling = [b for b in all_boilings if b.props["boiling_model"].line.name == line_name][0]
-        score += abs(first_line_boiling["melting_and_packing"].x[0] - cast_t(start_time)) / 10
+        line_boilings = [b for b in all_boilings if b.props["boiling_model"].line.name == line_name]
+        if line_boilings:
+            first_line_boiling = line_boilings[0]
+            score += abs(first_line_boiling["melting_and_packing"].x[0] - cast_t(start_time)) / 10
 
     return score
