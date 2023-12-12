@@ -598,25 +598,24 @@ class ScheduleMaker:
         ):
             configuration, score = [], MAX_SCORE
 
-        if (
-            is_time_set
-            and line_name != self.exact_start_time_line_name
-            and line_name in self.start_times
-            and boiling == [b for b in current_boilings if b.props["boiling_model"].line.name == line_name][0]
-            and not (
-                cast_t(self.start_times[line_name]) - 6
-                <= boiling["melting_and_packing"].x[0]
-                <= cast_t(self.start_times[line_name]) + 6
-            )
-        ):
-            logger.info(
-                "Failed to match time",
-                line_name=line_name,
-                start_time=cast_t(self.start_times[line_name]),
-                boiling_start_time=boiling["melting_and_packing"].x[0],
-                configuration=configuration,
-            )
-            configuration, score = [], MAX_SCORE
+        reverse_time_line = LineName.WATER if self.exact_start_time_line_name == LineName.SALT else LineName.SALT
+        if is_time_set and reverse_time_line in self.start_times and reverse_time_line in current_line_names:
+            first_line_boiling = [
+                b for b in current_boilings if b.props["boiling_model"].line.name == reverse_time_line
+            ][0]
+            if not (
+                cast_t(self.start_times[reverse_time_line]) - 6
+                <= first_line_boiling["melting_and_packing"].x[0]
+                <= cast_t(self.start_times[reverse_time_line]) + 6
+            ):
+                logger.info(
+                    "Failed to match time",
+                    line_name=line_name,
+                    start_time=cast_t(self.start_times[line_name]),
+                    boiling_start_time=boiling["melting_and_packing"].x[0],
+                    configuration=configuration,
+                )
+                configuration, score = [], MAX_SCORE
 
         if score != MAX_SCORE:
             # - Recursively find optimal configuration
