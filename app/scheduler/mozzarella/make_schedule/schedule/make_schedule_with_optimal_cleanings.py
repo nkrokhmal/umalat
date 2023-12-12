@@ -53,19 +53,15 @@ def make_schedule_with_optimal_cleanings(
 
     if optimize_cleanings:
         cleanings = _find_optimal_cleanings_combination_by_schedule(schedule)
-        cleanings = {int(k): v for k, v in cleanings.items() if v}
-        logger.debug("Found optimal cleaning", cleanings=cleanings)
     else:
         cleanings = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
-        cleanings = {int(k): v for k, v in cleanings.items() if v}
-        logger.debug("Using boiling plan cleanings", cleanings=cleanings)
 
     # - Make schedule with cleanings and start configuration
 
     cleanings = {k + boiling_plan_df["absolute_batch_id"].min() - 1: v for k, v in cleanings.items() if v}
     cleanings = {int(k): v for k, v in cleanings.items() if v}
     logger.error(
-        "Final schedule!",
+        "Final schedule using cleanings",
         start_times=start_times,
         cleanings=cleanings,
         configuration=configuration,
