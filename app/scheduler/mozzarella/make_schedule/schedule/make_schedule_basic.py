@@ -470,7 +470,7 @@ class ScheduleMaker:
 
         return boiling
 
-    def _process_boilings(self, shrink_drenators=True):
+    def _process_boilings(self):
         # logger.debug('Start configuration', start_configuration=start_configuration)
 
         # - Find optimal configuration
@@ -497,7 +497,7 @@ class ScheduleMaker:
 
             self._process_boiling(
                 next_row["boiling"],
-                shrink_drenators=False,
+                shrink_drenators=True,
             )
 
         # - Fix timing
@@ -910,7 +910,6 @@ class ScheduleMaker:
         cleanings=None,
         start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
         start_configuration=None,
-        shrink_drenators=True,
         exact_start_time_line_name: str = LineName.WATER,
     ):
         self.start_configuration = start_configuration or []
@@ -930,7 +929,7 @@ class ScheduleMaker:
         self._init_lines_df()
         self._init_left_df()
         self._init_multihead_water_boilings()
-        self._process_boilings(shrink_drenators=shrink_drenators)
+        self._process_boilings()
         self._process_extras()
         self._fix_first_boiling_of_later_line()
         self._process_cleanings()
