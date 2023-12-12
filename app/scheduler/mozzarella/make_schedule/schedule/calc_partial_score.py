@@ -14,6 +14,10 @@ def _get_score(boilings: list) -> float:
     )
 
 
+def time_diff(a, b):
+    return ((abs(a - b) / 6) ** 2) * 6 / 6  # last 6 is a normalizer
+
+
 def calc_partial_score(schedule, start_times: dict):
     """The lower - the better"""
 
@@ -45,10 +49,11 @@ def calc_partial_score(schedule, start_times: dict):
 
     # - Add penalty for time deviation
 
-    for line_name, start_time in start_times.items():
-        line_boilings = [b for b in all_boilings if b.props["boiling_model"].line.name == line_name]
-        if line_boilings:
-            first_line_boiling = line_boilings[0]
-            score += abs(first_line_boiling["melting_and_packing"].x[0] - cast_t(start_time)) / 10
+    if len(water_boilings) >= 1 and len(salt_boilings) >= 1:
+        for line_name, start_time in start_times.items():
+            line_boilings = [b for b in all_boilings if b.props["boiling_model"].line.name == line_name]
+            if line_boilings:
+                first_line_boiling = line_boilings[0]
+                score += time_diff(first_line_boiling["melting_and_packing"].x[0], cast_t(start_time))
 
     return score

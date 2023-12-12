@@ -82,9 +82,17 @@ def test():
 
     repo_path = __file__.split("app")[0][:-1]
 
-    for fn in ["/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx"]:
-        # for fn in glob.glob('/Users/arsenijkadaner/Desktop/моцарелла/*'):
+    # for fn in ["/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx"]:
+    for fn in [
+        fn
+        for fn in glob.glob("/Users/arsenijkadaner/Desktop/моцарелла/*")
+        if "План по варкам" in fn and "drawn" not in fn
+    ]:
+        print("Processing filename", fn)
         dirname, raw_name, ext = os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0], os.path.splitext(fn)[1]
+
+        if os.path.exists(f"{dirname}/{raw_name}_drawn{ext}"):
+            continue
 
         # fn = "perfect_plan2.xlsx"
         schedule_wb = openpyxl.load_workbook(
@@ -97,17 +105,12 @@ def test():
             # ),
             boiling_plan=fn,
             workbook=schedule_wb,
-            start_times={LineName.WATER: "06:30"},
+            start_times={LineName.SALT: "06:30"},
             exact_start_time_line_name=LineName.WATER,
             first_batch_ids_by_type={"mozzarella": 1},
             # start_configuration=[
             #     LineName.WATER if value == "В" else LineName.SALT
-            #     #     for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
-            #     # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
-            #     for value in "С-С-В-С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
-            #     # for value in "С-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-С-В-С-В-С-С-С-С-С-С".split(
-            #     #     "-"
-            #     # )  # best for all boilings
+            #     for value in "В-С-В-С-В-В-С-В-С-В-С-В-С-С-В-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
             # ],
         )
 
@@ -126,9 +129,8 @@ def test():
         schedule_df = prepare_schedule_json(schedule_json, cleanings)
         schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
-        print(calc_partial_score(output["schedule"]))
         schedule_wb.save(f"{dirname}/{raw_name}_drawn{ext}")
-        # open_file_in_os(fn)
+        # open_file_in_os(f"{dirname}/{raw_name}_drawn{ext}")
 
 
 if __name__ == "__main__":

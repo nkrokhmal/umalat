@@ -58,7 +58,7 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["second"]["pouring_off"])
             validate_disjoint_by_axis(b1s["pouring"]["first"]["pumping_out"], b2s["pouring"]["second"]["pouring_off"])
             validate_disjoint_by_axis(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["first"]["pumping_out"])
-
+        #
         with code("Process boilings on the same pouring line"):
             if b1s["pouring"].props["pouring_line"] == b2s["pouring"].props["pouring_line"]:
                 # pourings should not intersect, but also five minutes should be between boilings
@@ -126,35 +126,35 @@ class Validator(ClassValidator):
                         b1s["melting_and_packing"]["melting"]["meltings"],
                         b2s["melting_and_packing"]["melting"]["serving"],
                     )
+            #
+            # with code('there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors'):
+            #     mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
+            #     mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
+            #
+            #     bff1_name = mp1.props["bff"].name
+            #     bff2_name = mp2.props["bff"].name
+            #
+            #     sticks = STICK_FORM_FACTOR_NAMES
+            #     if bff1_name not in sticks and bff2_name in sticks:
+            #         _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
+            #         _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
+            #
+            #         # at least one hour should pass between meltings
+            #         validate_disjoint_by_axis(_b1s, _b2s, distance=12, ordered=True)
 
-            with code('there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors'):
-                mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
-                mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
-
-                bff1_name = mp1.props["bff"].name
-                bff2_name = mp2.props["bff"].name
-
-                sticks = STICK_FORM_FACTOR_NAMES
-                if bff1_name not in sticks and bff2_name in sticks:
-                    _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
-                    _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
-
-                    # at least one hour should pass between meltings
-                    validate_disjoint_by_axis(_b1s, _b2s, distance=12, ordered=True)
-
-            with code('there should be one two hour pause between "Палочки 15/7" and non-"Палочки 15/7" form-factors'):
-                mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
-                mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
-
-                bff1_name = mp1.props["bff"].name
-                bff2_name = mp2.props["bff"].name
-                sticks = STICK_FORM_FACTOR_NAMES
-                if bff1_name in sticks and bff2_name not in sticks:
-                    _b1s = b1s["melting_and_packing"]["melting"]["coolings"]
-                    _b2s = b2s["melting_and_packing"]["melting"]["coolings"]
-
-                    # at least one hour should pass between meltings
-                    validate_disjoint_by_axis(_b1s, _b2s, distance=24, ordered=True)
+            # with code('there should be one two hour pause between "Палочки 15/7" and non-"Палочки 15/7" form-factors'):
+            #     mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
+            #     mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
+            #
+            #     bff1_name = mp1.props["bff"].name
+            #     bff2_name = mp2.props["bff"].name
+            #     sticks = STICK_FORM_FACTOR_NAMES
+            #     if bff1_name in sticks and bff2_name not in sticks:
+            #         _b1s = b1s["melting_and_packing"]["melting"]["coolings"]
+            #         _b2s = b2s["melting_and_packing"]["melting"]["coolings"]
+            #
+            #         # at least one hour should pass between meltings
+            #         validate_disjoint_by_axis(_b1s, _b2s, distance=24, ordered=True)
 
             with code("Process lactose switch on salt line"):
                 if boiling_model1.line.name == LineName.SALT:
@@ -594,7 +594,7 @@ class ScheduleMaker:
 
         if not (
             (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
-            or (score - current_best_score <= 6)
+            or (score - current_best_score <= 4)
         ):
             configuration, score = [], MAX_SCORE
 
@@ -969,7 +969,7 @@ class ScheduleMaker:
         # -- Validate there is at least one boiling with exact start time line name
 
         if not any([b.props["boiling_model"].line.name == self.exact_start_time_line_name for b in boilings]):
-            raise Exception(f"Не указано время начала подачи на линии {self.exact_start_time_line_name}")
+            raise Exception(f"Не указано время начала подачи на одной из линий")
 
         # -- Add a flag that time has been set
 

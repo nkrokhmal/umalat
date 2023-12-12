@@ -246,7 +246,7 @@ def to_boiling_plan(
 
 
 def test():
-    df = to_boiling_plan(str("/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx"))
+    df = to_boiling_plan(str("/Users/arsenijkadaner/Desktop/моцарелла/2023-11-25 План по варкам моцарелла.xlsx"))
     print(df["batch_id"])
     print(df.iloc[0])
 
