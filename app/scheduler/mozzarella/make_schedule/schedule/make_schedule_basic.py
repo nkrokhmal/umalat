@@ -260,18 +260,6 @@ class ScheduleMaker:
             {"pouring_line": str(v1), "drenator_num": str(v2)} for v1, v2 in itertools.product([2, 3], [4, 5, 6, 7])
         ]
 
-        # init start times
-        for line_name in [LineName.WATER, LineName.SALT]:
-            try:
-                lines_df.at[line_name, "start_time"] = cast_time(self.start_times[line_name])
-            except:
-                raise AssertionError(f"Неверно указано время первой подачи на линии {line_name}")
-
-        # check for missing start time
-        if lines_df["start_time"].isnull().any():
-            missing_lines = lines_df[lines_df["start_time"].isnull()].index
-            raise AssertionError(f'Укажите время начала подачи на следующих линиях: {", ".join(missing_lines)}')
-
         self.lines_df = lines_df
 
     def _init_left_df(self):

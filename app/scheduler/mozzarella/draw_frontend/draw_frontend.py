@@ -94,7 +94,7 @@ def test():
         # ),
         boiling_plan=fn,
         workbook=schedule_wb,
-        start_times={LineName.WATER: "08:30", LineName.SALT: "-2:00:00"},
+        start_times={LineName.SALT: "08:30"},
         exact_start_time_line_name=LineName.WATER,
         first_batch_ids_by_type={"mozzarella": 1},
         start_configuration=[
