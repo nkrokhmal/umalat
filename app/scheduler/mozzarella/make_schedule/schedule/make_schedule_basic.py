@@ -546,6 +546,17 @@ class ScheduleMaker:
             tag=str(depth),
         )
 
+        # - Set time
+        #
+        # if not self.time_has_been_set and boiling.props["boiling_model"].line.name == self.exact_start_time_line_name:
+        #     self.m.root.props.update(
+        #         x=[
+        #             cast_t(self.start_times[self.exact_start_time_line_name]) - boiling["melting_and_packing"].x[0],
+        #             self.m.root.x[0],
+        #         ]
+        #     )
+        #     self.time_has_been_set = True
+
         # - Post-process
 
         # -- Calculate configuration and its properties
@@ -611,6 +622,11 @@ class ScheduleMaker:
         boiling_row["boiling"] = ParallelepipedBlock.from_dict(boiling_dic)
         self.left_df = pd.concat([pd.DataFrame([boiling_row]), self.left_df])
         self.lines_df["iter_props"] = old_iter_props
+
+        # - Rest timing set up
+
+        self.m.root.props.update(x=[0, 0])
+        self.time_has_been_set = False
 
         return configuration, score
 
@@ -912,12 +928,42 @@ class ScheduleMaker:
         start_configuration=None,
         exact_start_time_line_name: str = LineName.WATER,
     ):
+        # - Arguments
+
         self.start_configuration = start_configuration or []
         self.date = date or datetime.now()
-        self.exact_start_time_line_name = exact_start_time_line_name
-        self.start_times = {k: v if v else None for k, v in start_times.items()}
         self.cleanings = cleanings or {}  # {boiling_id: cleaning}
         self.boilings = boilings
+
+        # - Start times
+
+        # -- Set start_times
+
+        self.start_times = {k: v if v else None for k, v in start_times.items()}
+
+        # -- Set exact_start_time_line_name
+
+        if len(self.start_times) == 2:
+            self.exact_start_time_line_name = exact_start_time_line_name
+        elif len(self.start_times) == 1:
+            self.exact_start_time_line_name = list(self.start_times.keys())[0]  # overwrite exact start time line name
+        else:
+            raise Exception("Не указано время начала подачи на линиях")
+
+        # for line_name in [LineName.WATER, LineName.SALT]:
+        #     if line_name not in self.start_times:
+        #         self.start_times[line_name] = "00:00"
+
+        # -- Validate there is at least one boiling with exact start time line name
+
+        if not any([b.props["boiling_model"].line.name == self.exact_start_time_line_name for b in boilings]):
+            raise Exception(f"Не указано время начала подачи на линии {self.exact_start_time_line_name}")
+
+        # -- Add a flag that time has been set
+
+        self.time_has_been_set = False
+
+        # - Other
 
         # used for _find_optimal_configuration
         self.prev_prefix = None
@@ -941,7 +987,6 @@ class ScheduleMaker:
 def make_schedule_basic(
     boiling_plan_obj,
     cleanings=None,
-    shrink_drenators=True,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
     exact_start_time_line_name: Optional[str] = LineName.WATER,
     start_configuration=None,
@@ -958,7 +1003,6 @@ def make_schedule_basic(
         date=date,
         cleanings=cleanings,
         start_times=dict(start_times),
-        shrink_drenators=shrink_drenators,
         start_configuration=start_configuration,
         exact_start_time_line_name=exact_start_time_line_name,
     )
