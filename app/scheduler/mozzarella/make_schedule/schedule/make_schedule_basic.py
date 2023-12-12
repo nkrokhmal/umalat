@@ -37,6 +37,9 @@ BLOCKS = []
 STICK_FORM_FACTOR_NAMES = ["Палочки 15.0г", "Палочки 7.5г"]
 
 
+MAX_SCORE = 10000000000
+
+
 class Validator(ClassValidator):
     def __init__(self, window=20, strict_order=False, sheet_order=True):
         super().__init__(window=window)
@@ -549,7 +552,8 @@ class ScheduleMaker:
         # - Set time
 
         old_root_x = list(self.m.root.x)
-        if (boiling.props["boiling_model"].line.name == self.exact_start_time_line_name) and (
+
+        if (line_name == self.exact_start_time_line_name) and (
             boiling
             == [b for b in current_boilings if b.props["boiling_model"].line.name == self.exact_start_time_line_name][0]
         ):
@@ -559,6 +563,11 @@ class ScheduleMaker:
                     self.m.root.x[1],
                 ]
             )
+
+        is_time_set = (
+            len([b for b in current_boilings if b.props["boiling_model"].line.name == self.exact_start_time_line_name])
+            > 0
+        )
 
         # -- Remove boiling from left_df
 
@@ -579,15 +588,37 @@ class ScheduleMaker:
 
         # # todo next: delete [@marklidenberg]
         # if len(configuration) >= 1 and (configuration + [line_name])[:2] != [LineName.SALT, LineName.SALT]:
-        #     configuration, score = [], 10000000000
+        #     configuration, score = [], MAX_SCORE
 
-        # logger.info('Current depth score', depth=depth, score=int(score), min_depth_score=self.depth_to_min_score[depth])
+        # - Check if configuration is valid. If not - set score to MAX_SCORE (basically, exit)
+
         if not (
             (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
             or (score - current_best_score <= 4)
         ):
-            configuration, score = [], 10000000000
-        else:
+            configuration, score = [], MAX_SCORE
+
+        if (
+            is_time_set
+            and line_name != self.exact_start_time_line_name
+            and line_name in self.start_times
+            and boiling == [b for b in current_boilings if b.props["boiling_model"].line.name == line_name][0]
+            and not (
+                cast_t(self.start_times[line_name]) - 6
+                <= boiling["melting_and_packing"].x[0]
+                <= cast_t(self.start_times[line_name]) + 6
+            )
+        ):
+            logger.info(
+                "Failed to match time",
+                line_name=line_name,
+                start_time=cast_t(self.start_times[line_name]),
+                boiling_start_time=boiling["melting_and_packing"].x[0],
+                configuration=configuration,
+            )
+            configuration, score = [], MAX_SCORE
+
+        if score != MAX_SCORE:
             # - Recursively find optimal configuration
 
             configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
@@ -638,6 +669,7 @@ class ScheduleMaker:
             )
 
             return configuration, score
+
             # return configuration, 0
         elif lines_left_count == 1:
             return self._process_line(
@@ -652,7 +684,11 @@ class ScheduleMaker:
                 depth=depth,
             )
         elif lines_left_count == 2:
-            if len(configuration) >= 2 and configuration[-2] == configuration[-1]:
+            if (
+                len(configuration) >= 2
+                and configuration[-2] == configuration[-1]
+                and not all(value == configuration[0] for value in configuration)
+            ):
                 # no sequential element s
                 return self._process_line(
                     configuration=configuration,

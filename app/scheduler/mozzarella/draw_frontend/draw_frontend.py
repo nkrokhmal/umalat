@@ -94,18 +94,18 @@ def test():
         # ),
         boiling_plan=fn,
         workbook=schedule_wb,
-        start_times={LineName.SALT: "08:30"},
-        exact_start_time_line_name=LineName.WATER,
+        start_times={LineName.SALT: "08:30", LineName.WATER: "13:00"},
+        exact_start_time_line_name=LineName.SALT,
         first_batch_ids_by_type={"mozzarella": 1},
-        start_configuration=[
-            LineName.WATER if value == "В" else LineName.SALT
-            #     for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
-            # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
-            for value in "С-С-В-С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
-            # for value in "С-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-С-В-С-В-С-С-С-С-С-С".split(
-            #     "-"
-            # )  # best for all boilings
-        ],
+        # start_configuration=[
+        #     LineName.WATER if value == "В" else LineName.SALT
+        #     #     for value in "С-В-В-С-В-С-В-С-С-В-С-С-В-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С-С-С".split("-") # found a better one
+        #     # for value in "С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-В-С-С-С".split("-")  # handmade
+        #     for value in "С-С-В-С-С-В-С-В-С-В-С-В-С-С-В-С-С-В-С-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
+        #     # for value in "С-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-С-В-С-В-С-С-С-С-С-С".split(
+        #     #     "-"
+        #     # )  # best for all boilings
+        # ],
     )
 
     schedule_json = output["schedule"].to_dict(
