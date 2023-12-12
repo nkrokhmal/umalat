@@ -10,6 +10,7 @@ from app.scheduler.mozzarella.make_schedule.schedule.melting_and_packing.pipelin
 from app.scheduler.mozzarella.make_schedule.schedule.melting_and_packing.pipelines.parallel.parallel import (
     make_boilings_parallel_dynamic,
 )
+from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 
 
 def make_boilings(boiling_plan_df):
@@ -43,3 +44,16 @@ def make_boilings(boiling_plan_df):
         res += boilings
 
     return res
+
+
+def test():
+    boilings = make_boilings(
+        boiling_plan_df=to_boiling_plan(
+            "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-22 План по варкам моцарелла.xlsx"
+        )
+    )
+    pass
+
+
+if __name__ == "__main__":
+    test()

@@ -52,11 +52,6 @@ class ScheduleForm(FlaskForm):
         choices=[(LineName.SALT, LineName.SALT), (LineName.WATER, LineName.WATER)],
         default=LineName.SALT,
     )
-    optimize = wtforms.BooleanField(
-        "Оптимизировать время оставшейся линии",
-        validators=[Optional()],
-        default=True,
-    )
     add_full_boiling = wtforms.BooleanField(
         "Вставить короткую мойку внутри дня по правилу 15 часов",
         validators=[Optional()],

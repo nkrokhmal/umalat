@@ -6,7 +6,8 @@ from utils_ak.loguru.configuration import format_with_trace
 
 from app.db import create_external_db
 from app.imports.external import *
-from app.notifier import Notifier
+
+# from app.notifier import Notifier
 from config import config
 
 
@@ -28,11 +29,11 @@ basedir = os.path.dirname(os.path.dirname(__file__))
 
 lazy_tester.configure(root=os.path.join(basedir, "tests/lazy_tester_logs"), app_path=basedir)
 
-notifier = Notifier()
+# notifier = Notifier()
 
 # configure loguru for telegram notifications
-logger.add(
-    NotificationHandler("telegram", defaults={"token": config.TELEGRAM_BOT_TOKEN, "chat_id": config.TELEGRAM_CHAT_ID}),
-    level="WARNING",
-    format=format_with_trace,
-)
+# logger.add(
+#     NotificationHandler("telegram", defaults={"token": config.TELEGRAM_BOT_TOKEN, "chat_id": config.TELEGRAM_CHAT_ID}),
+#     level="WARNING",
+#     format=format_with_trace,
+# )

@@ -46,7 +46,7 @@ def test():
     output = draw_frontend(
         str(
             get_repo_path()
-            / "app/data/static/samples/by_department/milk_project/2023-11-08 Расписание милкпроджект.xlsx"
+            / "app/data/static/samples/by_department/milk_project/2023_12_04_План_по_варкам_милкпроджект (2).xlsx"
         )
     )
 

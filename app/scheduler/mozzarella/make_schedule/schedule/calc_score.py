@@ -10,6 +10,7 @@ def calc_score(
     schedule,
     start_times: Optional[dict] = None,
 ):
+    """The lower - the better"""
     score = 0
     line_lengths = {}
     for line_name in [LineName.WATER, LineName.SALT]:
@@ -26,6 +27,6 @@ def calc_score(
         else:
             line_lengths[line_name] = 0
 
-    score += line_lengths[LineName.WATER] + line_lengths[LineName.SALT] / 3
+    score += line_lengths[LineName.WATER] * 3 / 4 + line_lengths[LineName.SALT] / 4
 
     return custom_round(score, 0.01)

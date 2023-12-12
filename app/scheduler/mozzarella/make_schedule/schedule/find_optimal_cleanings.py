@@ -8,7 +8,6 @@ from utils_ak.iteration.simple_iterator import iter_pairs
 from app.enum import LineName
 from app.models import Washer, cast_model
 from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_boilings
-from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_from_boilings import make_schedule_from_boilings
 from app.scheduler.time_utils import cast_t
 
 
@@ -92,13 +91,3 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
         return {df.loc[s]["group_id"]: "short" for s in combo}
 
     raise Exception("Failed to fill cleanings")
-
-
-def find_optimal_cleanings(
-    boiling_plan_df,
-    start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
-    **make_schedule_kwargs,
-):
-    boilings = make_boilings(boiling_plan_df)
-    schedule = make_schedule_from_boilings(boilings, start_times=start_times, **make_schedule_kwargs)
-    return _find_optimal_cleanings_combination_by_schedule(schedule)
