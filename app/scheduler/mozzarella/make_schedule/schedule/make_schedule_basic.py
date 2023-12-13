@@ -474,7 +474,8 @@ class ScheduleMaker:
 
             next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
 
-            next_row["boiling"].props.update(boiling_id=i + 1)
+            # for debug for easier navigatiohn
+            # next_row["boiling"].props.update(boiling_id=i + 1)
 
             # remove newly added row from left rows
             self.left_df = self.left_df[self.left_df["index"] != next_row["index"]]

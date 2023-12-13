@@ -3,6 +3,7 @@ from typing import Literal, Optional
 from loguru import logger
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
+from utils_ak.loguru import configure_loguru
 
 from app.enum import LineName
 from app.lessmore.utils.get_repo_path import get_repo_path
@@ -78,7 +79,6 @@ def test():
     import warnings
 
     warnings.filterwarnings("ignore")
-    from deeplay.utils.loguru_utils.configure_loguru import configure_loguru
 
     configure_loguru("DEBUG")
     make_schedule_with_optimal_cleanings(

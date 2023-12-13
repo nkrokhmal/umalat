@@ -7,8 +7,8 @@ from typing import Optional
 
 import openpyxl
 
-from deeplay.utils.loguru_utils.configure_loguru import configure_loguru
 from openpyxl import Workbook
+from utils_ak.loguru import configure_loguru
 from utils_ak.os import open_file_in_os
 
 from app.enum import LineName
@@ -83,26 +83,20 @@ def test():
     repo_path = __file__.split("app")[0][:-1]
 
     fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx"
-    dirname, raw_name, ext = os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0], os.path.splitext(fn)[1]
 
-    # fn = "perfect_plan2.xlsx"
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
     )
     output = draw_frontend(
-        # str(
-        #     get_repo_path()
-        #     / "app/data/static/samples/by_department/mozzarella/2023-09-22 План по варкам моцарелла.xlsx"
-        # ),
         boiling_plan=fn,
         workbook=schedule_wb,
         start_times={LineName.SALT: "06:30", LineName.WATER: "12:00"},
         exact_start_time_line_name=LineName.SALT,
-        first_batch_ids_by_type={"mozzarella": 100},
-        # start_configuration=[
-        #     LineName.WATER if value == "В" else LineName.SALT
-        #     for value in "В-С-В-С-В-В-С-В-С-В-С-В-С-С-В-С-В-С-В-С-С-В-С-С-С-С".split("-")  # 4
-        # ],
+        first_batch_ids_by_type={"mozzarella": 1000},
+        start_configuration=[
+            LineName.WATER if value == "В" else LineName.SALT
+            for value in "С-С-В-В-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-В-С-С".split("-")  # 4
+        ],
     )
 
     schedule_json = output["schedule"].to_dict(
