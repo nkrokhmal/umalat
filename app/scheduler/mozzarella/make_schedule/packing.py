@@ -34,7 +34,7 @@ def make_configuration_blocks(b1, b2, m, line_name, between_boilings=False):
                     "packing_configuration",
                     size=[1, 0],
                     packing_team_id=packing_team_id,
-                    x=[packing1.y[0], 0],
+                    x=[packing1.y[0] - m.root.x[0], 0],
                 )
                 res.append(conf_block)
             continue
@@ -52,7 +52,7 @@ def make_configuration_blocks(b1, b2, m, line_name, between_boilings=False):
                 "packing_configuration",
                 size=[conf_time_size // 5, 0],
                 packing_team_id=packing_team_id,
-                x=[packing1.y[0], 0],
+                x=[packing1.y[0] - m.root.x[0], 0],
             )
             res.append(conf_block)
     return res

@@ -8,7 +8,6 @@ from typing import Optional
 import openpyxl
 
 from openpyxl import Workbook
-from utils_ak.loguru import configure_loguru
 from utils_ak.os import open_file_in_os
 
 from app.enum import LineName
@@ -68,6 +67,9 @@ def draw_frontend(
 
 
 def test():
+    from utils_ak.loguru import configure_loguru
+
+    configure_loguru()
     # - Ignore warnings
 
     import warnings

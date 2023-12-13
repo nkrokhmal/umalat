@@ -325,7 +325,7 @@ class ScheduleMaker:
             )
             for block in configuration_blocks:
                 # SIDE EFFECT
-                block.props.update(tag=tag)
+                block.props.update(tag=tag, line_name=line_name)
 
                 # print("Pushing", block.props['cls'])
                 push(
@@ -474,7 +474,7 @@ class ScheduleMaker:
 
             next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
 
-            # for debug for easier navigatiohn
+            # for debug for easier navigation
             # next_row["boiling"].props.update(boiling_id=i + 1)
 
             # remove newly added row from left rows
@@ -499,6 +499,8 @@ class ScheduleMaker:
                 self.m.root.x[0],
             ]
         )
+
+        logger.info("Final score", score=calc_partial_score(self.m.root, start_times=self.start_times))
 
     def get_latest_boiling(self, line_name: Optional[str] = None):
         boilings = self.m.root["master"]["boiling", True]
@@ -993,7 +995,6 @@ class ScheduleMaker:
         self._fix_first_boiling_of_later_line()
         self._process_cleanings()
         self._process_shifts()
-
         return self.m.root
 
 
