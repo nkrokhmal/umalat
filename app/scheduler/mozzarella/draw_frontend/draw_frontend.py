@@ -74,10 +74,6 @@ def test():
 
     warnings.filterwarnings("ignore")
 
-    # - Configure loguru
-
-    configure_loguru()
-
     # - Draw frontend
 
     repo_path = __file__.split("app")[0][:-1]

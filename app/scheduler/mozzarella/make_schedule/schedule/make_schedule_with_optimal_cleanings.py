@@ -80,7 +80,6 @@ def test():
 
     warnings.filterwarnings("ignore")
 
-    configure_loguru("DEBUG")
     make_schedule_with_optimal_cleanings(
         # str(
         #     get_repo_path()
