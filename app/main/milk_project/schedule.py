@@ -7,15 +7,16 @@ from utils_ak.openpyxl import draw_sheet_sequence, write_metadata
 from app.main import main
 from app.main.adygea.update_task_and_batches import update_task_and_batches as update_task_and_batches_adygea
 from app.main.milk_project.forms import ScheduleForm
-from app.main.milk_project.run_consolidated_old import run_consolidated_old
 from app.main.milk_project.update_task_and_batches import (
     update_task_and_batches as update_task_and_batches_milk_project,
 )
 from app.main.validators import *
+from app.models import BrynzaSKU
 from app.scheduler.adygea.draw_frontend.draw_frontend import draw_frontend as draw_frontend_adygea
 from app.scheduler.brynza.draw_frontend.draw_frontend import draw_frontend as draw_frontend_brynza
 from app.scheduler.frontend_utils import fill_grid
 from app.scheduler.time_utils import *
+from app.utils.base.schedule_task import BaseScheduleTask
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 
@@ -78,9 +79,13 @@ def milk_project_schedule():
         cur_row = 2
         for schedule_task in schedule_tasks:
             adygea_schedule_wb, cur_row = schedule_task.schedule_task_original(adygea_schedule_wb, cur_row=cur_row)
-            # schedule_wb, cur_row = schedule_task.schedule_task_boilings(
-            #     schedule_wb, form.batch_number.data, cur_row=cur_row
-            # )
+
+        brynza_df = brynza_output["brynza_boiling_plan_df"]
+        brynza_df["absolute_batch_id"] = brynza_df["batch_id"]
+        brynza_df[["start", "finish"]] = "", ""
+        brynza_task = BaseScheduleTask(brynza_df, date=date, model=BrynzaSKU, department="Брынза")
+        brynza_task.schedule_task_original(adygea_schedule_wb, cur_row=cur_row)
+        brynza_task.update_schedule_task()
 
         _ = fill_grid(adygea_schedule_wb["Расписание"])
 
