@@ -2,15 +2,7 @@ from app.enum import LineName
 
 
 def get_configuration_time(line_name, sku1, sku2):
-    if all(
-        [
-            line_name == LineName.SALT,
-            sku1.form_factor.relative_weight != sku2.form_factor.relative_weight,
-            sku1.packers[0].name == sku2.packers[0].name == "Ульма",
-        ]
-    ):
-        return 25
-    elif sku1 == sku2:
+    if sku1 == sku2:
         return 0
     else:
         return 5
