@@ -22,8 +22,9 @@ COLUMNS = {
     "remainings": Cell(column_index_from_string("G"), "G"),
     "total_output_kg": Cell(column_index_from_string("G"), "G"),
     "total_input_kg": Cell(column_index_from_string("H"), "H"),
-    "delimiter": Cell(column_index_from_string("I"), "I"),
-    "delimiter_int": Cell(column_index_from_string("L"), "L"),
+    "delimiter": Cell(column_index_from_string("J"), "J"),
+    "delimiter_int": Cell(column_index_from_string("M"), "M"),
+    "washing": Cell(column_index_from_string("I"), "I"),
 }
 
 ROWS = {
@@ -119,6 +120,12 @@ def draw_boiling_sheet(
             row=row,
             col=COLUMNS["total_input_kg"].col,
             value=total_input_kg,
+            set_border=False,
+        )
+        excel_client.draw_cell(
+            row=row,
+            col=COLUMNS["washing"].col,
+            value=0,
             set_border=False,
         )
         row += 1
