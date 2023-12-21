@@ -356,7 +356,7 @@ class ScheduleMaker:
         )
 
         # fix water a little bit: try to push water before - allowing awaiting in line
-        if line_name == LineName.WATER and boiling != self.get_latest_boiling(line_name):
+        if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
             # SIDE EFFECT
             boiling.detach_from_parent()
             push(
@@ -501,6 +501,17 @@ class ScheduleMaker:
         )
 
         logger.info("Final score", score=calc_partial_score(self.m.root, start_times=self.start_times))
+
+    def get_earliest_boiling(self, line_name: Optional[str] = None):
+        boilings = self.m.root["master"]["boiling", True]
+
+        if line_name is not None:
+            boilings = [b for b in boilings if b.props["boiling_model"].line.name == line_name]
+
+        if not boilings:
+            return None
+
+        return boilings[0]
 
     def get_latest_boiling(self, line_name: Optional[str] = None):
         boilings = self.m.root["master"]["boiling", True]
