@@ -15,6 +15,7 @@ from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.mozzarella.draw_frontend.style import STYLE
 from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
+from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.mozzarella.wrap_frontend import wrap_frontend
 from app.scheduler.time_utils import cast_t
 from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan_merged
@@ -70,6 +71,7 @@ def test():
     from utils_ak.loguru import configure_loguru
 
     configure_loguru()
+
     # - Ignore warnings
 
     import warnings
@@ -80,7 +82,7 @@ def test():
 
     repo_path = __file__.split("app")[0][:-1]
 
-    fn = "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла.xlsx"
+    fn = "/Users/marklidenberg/Desktop/2023.12.20 Моцарелла/2023-12-20 План по варкам моцарелла.xlsx"
 
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
@@ -88,12 +90,12 @@ def test():
     output = draw_frontend(
         boiling_plan=fn,
         workbook=schedule_wb,
-        start_times={LineName.SALT: "06:30", LineName.WATER: "12:00"},
-        exact_start_time_line_name=LineName.SALT,
+        start_times={LineName.SALT: "12:00", LineName.WATER: "06:00"},
+        exact_start_time_line_name=LineName.WATER,
         first_batch_ids_by_type={"mozzarella": 1000},
         start_configuration=[
             LineName.WATER if value == "В" else LineName.SALT
-            for value in "С-С-В-В-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-В-С-С".split("-")  # 4
+            for value in "В-В-В-В-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-В-С-С-С-С-С".split("-")  # 4
         ],
     )
 
@@ -112,8 +114,9 @@ def test():
     schedule_df = prepare_schedule_json(schedule_json, cleanings)
     schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
-    schedule_wb.save("schedule.xlsx")
-    open_file_in_os("schedule.xlsx")
+    # print(output["schedule"])
+    schedule_wb.save("schedule2.xlsx")
+    open_file_in_os("schedule2.xlsx")
 
 
 if __name__ == "__main__":

@@ -356,7 +356,7 @@ class ScheduleMaker:
         )
 
         # fix water a little bit: try to push water before - allowing awaiting in line
-        if line_name == LineName.WATER and self.get_latest_boiling(line_name):
+        if line_name == LineName.WATER and boiling != self.get_latest_boiling(line_name):
             # SIDE EFFECT
             boiling.detach_from_parent()
             push(
