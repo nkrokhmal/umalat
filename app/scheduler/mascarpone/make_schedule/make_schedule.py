@@ -144,6 +144,7 @@ def make_schedule(
     boiling_plan: BoilingPlanLike,
     start_times_by_line: dict[str, str] = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
+    add_cleaning_after_eight_mascarpone_boilings: bool = False,
 ) -> dict:
     # - Get boiling plan
 
@@ -196,15 +197,21 @@ def make_schedule(
             is_new_group = (
                 False
                 if (is_first or is_last)
-                else (prev_grp.iloc[0]["semifinished_group"] != grp.iloc[0]["semifinished_group"])
+                else prev_grp.iloc[0]["semifinished_group"] != grp.iloc[0]["semifinished_group"]
+                or prev_grp.iloc[0]["block_id"] != grp.iloc[0]["block_id"]
             )
             prev_group = None if is_first else prev_grp.iloc[0]["semifinished_group"]
             group = None if is_last else grp.iloc[0]["semifinished_group"]
+            is_cleaning_needed = False if is_first else prev_grp.iloc[0]["washing"]
 
             is_mascarpone_filled = (
                 (current_group_count >= 8 + 1 and current_group_count % 8 == 1)
                 and prev_group == "mascarpone"
                 and group == "mascarpone"
+            )
+
+            is_cleaning_needed = is_cleaning_needed or (
+                add_cleaning_after_eight_mascarpone_boilings and is_mascarpone_filled
             )
 
             # - Reset current group count if new group
@@ -231,7 +238,7 @@ def make_schedule(
 
             # -- Pasteurizer cleaning
 
-            if is_mascarpone_filled or (prev_group == "mascarpone" and (is_new_group or is_last)):
+            if prev_group == "mascarpone" and (is_cleaning_needed or is_last):
                 # add pasteurizer cleaning
                 m.block(
                     "cleaning",
@@ -245,7 +252,7 @@ def make_schedule(
 
             # - Full cleaning
 
-            if is_mascarpone_filled and not is_last:
+            if prev_group == "mascarpone" and is_cleaning_needed and not is_last:
                 m.block(
                     "cleaning",
                     size=(13, 0),
@@ -276,7 +283,7 @@ def make_schedule(
                     line=line,
                 )
 
-            if prev_group == "cream_cheese" and (is_last or is_new_group):
+            if prev_group == "cream_cheese" and (is_cleaning_needed or is_last):
                 m.block(
                     "cleaning",
                     size=(13, 0),
@@ -287,7 +294,7 @@ def make_schedule(
                     line=line,
                 )
 
-            if prev_group == "robiola" and (is_last or is_new_group):
+            if prev_group == "robiola" and (is_cleaning_needed or is_last):
                 m.block(
                     "cleaning",
                     size=(13, 0),

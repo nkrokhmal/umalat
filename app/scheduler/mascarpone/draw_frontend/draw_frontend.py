@@ -17,6 +17,7 @@ def draw_frontend(
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
+    add_cleaning_after_eight_mascarpone_boilings: bool = False,
 ) -> dict:
     # - Wrap frontend
 
@@ -25,6 +26,7 @@ def draw_frontend(
         start_times_by_line=start_times_by_line,
         first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,
+        add_cleaning_after_eight_mascarpone_boilings=add_cleaning_after_eight_mascarpone_boilings,
     )
 
     # - Draw frontend
