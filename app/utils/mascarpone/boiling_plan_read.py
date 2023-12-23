@@ -39,7 +39,7 @@ COLUMNS: dict[str, str] = {
     "Остатки": "leftovers",
     "Выход, кг": "output_kg",
     "Вход, кг": "input_kg",
-    "Мойка": "washing",
+    "Вставить мойку": "washing",
 }
 
 
