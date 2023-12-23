@@ -52,7 +52,7 @@ STYLE = {
     "analysis": {"text": "анализ", "color": "white"},
     "packing": {"text": lambda b: f"фасовка {b.props['weight_netto']}кг", "color": "#C0504D"},
     "packing_switch": {"text": "Ф", "color": "grey"},
-    "separation": {"text": lambda b: f"Сепарирование 1000кг", "color": "#00B0F0"},
+    "separation": {"text": lambda b: f"Сепарирование 1600кг", "color": "#00B0F0"},
     "heating": {"text": "Н", "color": "#F79646"},
     "ingredient": {"text": "добавка/нагре/перемешивание/анализ", "color": "#92D050"},
     "cleaning": {"text": cleaning_text, "color": "yellow"},

@@ -129,6 +129,7 @@ def wrap_frontend(
     output = make_schedule(
         boiling_plan=boiling_plan,
         start_time=start_time,
+        prepare_start_time=cast_time(cast_t(start_time) - 12),
         first_batch_ids_by_type=first_batch_ids_by_type,
     )
     schedule = output["schedule"]
