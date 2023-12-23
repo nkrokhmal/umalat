@@ -19,9 +19,9 @@ def pouring_text(b):
     if b.props["semifinished_group"] == "cream":
         return f"Прием {int(b.props['total_input_kg'])}кг"
     elif b.props["semifinished_group"] in ["cream_cheese", "robiola", "cottage_cheese"]:
-        return "Прием п/ф 400 кг"
+        return f"Прием п/ф {int(b.props['kg'])} кг"
     elif b.props["semifinished_group"] == "mascarpone":
-        return "Прием п/ф 600 кг"
+        return f"Прием п/ф {int(b.props['kg'])} кг"
     else:
         # should not happen
         return "Прием"

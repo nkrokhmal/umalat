@@ -43,10 +43,11 @@ def test():
     pd.set_option("display.max_columns", 500)
     pd.set_option("display.width", 1000)
     df = to_boiling_plan(
-        str(
-            get_repo_path()
-            / "app/data/static/samples/by_department/mascarpone/2023-09-12 Расписание маскарпоне (2).xlsx"
-        )
+        # str(
+        #     get_repo_path()
+        #     / "app/data/static/samples/by_department/mascarpone/2023-09-12 Расписание маскарпоне (2).xlsx"
+        # )
+        "/Users/marklidenberg/Desktop/2023.12.23 Маскарпоне и брынза/mascarpone_example.xlsx",
     )
     print(df)
 

@@ -32,7 +32,7 @@ def _make_boiling(boiling_group_df, **kwargs):
         "analysis_time": technology.analysis_time,
         "ingredient_time": technology.ingredient_time,
         "heating_time": technology.heating_time,
-        "pumping_time": technology.pumping_time,
+        "pumping_time": custom_round(boiling_group_df["kg"].sum() / 1200 * 60, 5, rounding="nearest_half_even"),
     }
     total_input_kg = (
         boiling_group_df["input_kg"].iloc[0]
