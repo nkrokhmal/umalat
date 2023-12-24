@@ -25,6 +25,8 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     # - Define scaling factor for cream and apply to technology
 
+    PUMPING_SPEED = 1500  # todo later: put to parameters
+
     technology = {
         "separation_time": technology.separation_time,
         "pouring_time": technology.pouring_time,
@@ -32,7 +34,9 @@ def _make_boiling(boiling_group_df, **kwargs):
         "analysis_time": technology.analysis_time,
         "ingredient_time": technology.ingredient_time,
         "heating_time": technology.heating_time,
-        "pumping_time": custom_round(boiling_group_df["kg"].sum() / 1200 * 60, 5, rounding="nearest_half_even"),
+        "pumping_time": custom_round(
+            boiling_group_df["kg"].sum() / PUMPING_SPEED * 60, 5, rounding="nearest_half_even"
+        ),
     }
     total_input_kg = (
         boiling_group_df["input_kg"].iloc[0]

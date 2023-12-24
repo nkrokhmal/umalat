@@ -317,7 +317,7 @@ def make_schedule(
                 group_number=current_group_number,
                 line=line,
                 output_kg=grp["kg"].sum(),
-                input_kg=grp["input_kg"].sum(),
+                input_kg=grp.iloc[0]["input_kg"],
                 percent=grp.iloc[0]["boiling"].percent,
                 weight_netto=grp.iloc[0]["sku"].weight_netto,
                 block_id=grp.iloc[0]["block_id"],
