@@ -125,7 +125,7 @@ def draw_boiling_sheet(
         excel_client.draw_cell(
             row=row,
             col=COLUMNS["washing"].col,
-            value=0,
+            value=1,
             set_border=False,
         )
         row += 1
