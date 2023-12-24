@@ -30,6 +30,7 @@ def add_fields(df: pd.DataFrame) -> pd.DataFrame:
 
 def mascarpone_boiling_plan_create(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     df["plan"] = df["plan"].apply(lambda x: round(x))
+    df["sku_name"] = df["sku"].apply(lambda x: x.name)
     df[["group", "form_factor"]] = df["sku"].apply(lambda x: pd.Series([x.group.name, x.form_factor.name]))
 
     boiling_lambda = lambda x: pd.Series([x.weight_netto, x.percent, x.is_lactose, x.flavoring_agent])

@@ -26,6 +26,7 @@ def mascarpone_schedule():
         date = form.date.data
         beg_time_mascarpone = form.beg_mascarpone_time.data
         beg_time_cream_cheese = form.beg_cream_cheese_time.data
+        add_washing = form.add_washing
 
         # validate time
         time_validator(form, form.beg_mascarpone_time)
@@ -65,6 +66,7 @@ def mascarpone_schedule():
             start_times_by_line={"Маскарпоне": beg_time_mascarpone, "Кремчиз": beg_time_cream_cheese},
             date=date,
             workbook=wb,
+            add_cleaning_after_eight_mascarpone_boilings=add_washing,
         )
 
         schedule, schedule_wb = output["schedule"], output["workbook"]

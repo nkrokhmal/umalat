@@ -19,9 +19,9 @@ def pouring_text(b):
     if b.props["semifinished_group"] == "cream":
         return f"Прием {int(b.props['total_input_kg'])}кг"
     elif b.props["semifinished_group"] in ["cream_cheese", "robiola", "cottage_cheese"]:
-        return "Прием п/ф 400 кг"
+        return f"Прием п/ф {int(b.props['kg'])} кг"
     elif b.props["semifinished_group"] == "mascarpone":
-        return "Прием п/ф 600 кг"
+        return f"Прием п/ф {int(b.props['kg'])} кг"
     else:
         # should not happen
         return "Прием"
@@ -52,7 +52,7 @@ STYLE = {
     "analysis": {"text": "анализ", "color": "white"},
     "packing": {"text": lambda b: f"фасовка {b.props['weight_netto']}кг", "color": "#C0504D"},
     "packing_switch": {"text": "Ф", "color": "grey"},
-    "separation": {"text": lambda b: f"Сепарирование 1000кг", "color": "#00B0F0"},
+    "separation": {"text": lambda b: f"Сепарирование {int(b.props['input_kg'])}кг", "color": "#00B0F0"},
     "heating": {"text": "Н", "color": "#F79646"},
     "ingredient": {"text": "добавка/нагре/перемешивание/анализ", "color": "#92D050"},
     "cleaning": {"text": cleaning_text, "color": "yellow"},

@@ -9,8 +9,8 @@ from utils_ak.openpyxl import cast_workbook
 from app.globals import db
 from app.models.helpers import cast_model
 from app.models.mascarpone import MascarponeSKU
-from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 from app.utils.mascarpone.utils import MascarponeBoilingsHandler
+from app.utils.parse_remainings import cast_sku_name
 
 
 class BoilingPlanReaderException(Exception):
@@ -24,6 +24,7 @@ class HugeBoiling:
     input_kg: int = 0
     output_kg: int = 0
     type: str | None = None
+    washing: bool = False
 
     def __post_init__(self) -> None:
         self.skus = []
@@ -38,6 +39,7 @@ COLUMNS: dict[str, str] = {
     "Остатки": "leftovers",
     "Выход, кг": "output_kg",
     "Вход, кг": "input_kg",
+    "Вставить мойку": "washing",
 }
 
 
@@ -60,6 +62,7 @@ class BoilingPlanReader:
                     item = {column: ws.cell(i, j + 1).value for j, column in enumerate(COLUMNS.values())}
                     boiling.input_kg = item["input_kg"]
                     boiling.output_kg = item["output_kg"]
+                    boiling.washing = item["washing"] == 1
                     boiling.block_id = block_id
                     boilings.append(boiling)
 
@@ -92,6 +95,13 @@ class BoilingPlanReader:
 
         return pd.concat(dfs)
 
+    @staticmethod
+    def add_input_output_kg(df: pd.DataFrame) -> None:
+        boilings = df["sku_name"].apply(lambda x: cast_sku_name(x).made_from_boilings[0])
+
+        df["input_kg"] = boilings.apply(lambda x: x.input_kg)
+        df["output_kg"] = boilings.apply(lambda x: x.input_kg * x.output_coeff)
+
     def _unwind_boilings(self, boilings: list[HugeBoiling]) -> pd.DataFrame:
         dfs = []
         group_id = 1
@@ -99,46 +109,44 @@ class BoilingPlanReader:
             match boiling.type:
                 case "cream":
                     df = pd.DataFrame(boiling.skus)
-                    df[["output_kg", "input_kg", "group_id", "group", "block_id"]] = (
+                    df[["output_kg", "input_kg", "group_id", "group", "block_id", "washing"]] = (
                         boiling.output_kg,
                         boiling.input_kg,
                         group_id,
                         boiling.type,
                         boiling.block_id,
+                        boiling.washing,
                     )
                     dfs.append(df)
                     group_id += 1
                 case _:
-                    num: int = round(boiling.input_kg / 1000)
-                    if boiling.input_kg / 1000 - num > 0.1 or boiling.input_kg / 1000 - num < -0.1:
-                        raise BoilingPlanReaderException(f"Указано неверное число килограмм в варке {boiling.type}")
-
-                    max_weight: float = boiling.output_kg / num
-                    handler = MascarponeBoilingsHandler()
-                    handler.handle_group(boiling.skus, max_weight=max_weight, weight_key="kg")
+                    handler = MascarponeBoilingsHandler(check_boilings=True, use_boiling_weight=True)
+                    handler.handle_group(boiling.skus, max_weight=0, weight_key="kg")
                     for i, group in enumerate(handler.boilings):
                         df = pd.DataFrame(group.skus)
                         if i == len(handler.boilings) - 1:
                             if df["kg"].sum() < 100:
-                                df[["output_kg", "input_kg", "group_id", "group", "block_id"]] = (
-                                    max_weight,
-                                    1000,
+                                df[["group_id", "group", "block_id", "washing"]] = (
                                     group_id - 1,
                                     boiling.type,
                                     boiling.block_id,
+                                    False,
                                 )
+                                self.add_input_output_kg(df)
                                 dfs[-1] = pd.concat([dfs[-1], df])
                                 continue
 
-                        df[["output_kg", "input_kg", "group_id", "group", "block_id"]] = (
-                            max_weight,
-                            1000,
+                        df[["group_id", "group", "block_id", "washing"]] = (
                             group_id,
                             boiling.type,
                             boiling.block_id,
+                            False,
                         )
+                        self.add_input_output_kg(df)
                         dfs.append(df)
                         group_id += 1
+
+                    dfs[-1].iloc[-1, dfs[-1].columns.get_loc("washing")] = boiling.washing
         return pd.concat(dfs)
 
     def _saturate(self, df: pd.DataFrame) -> pd.DataFrame:

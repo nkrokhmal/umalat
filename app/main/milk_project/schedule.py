@@ -56,7 +56,7 @@ def milk_project_schedule():
 
         first_batch_ids = {"milk_project": form.batch_number.data}
 
-        adygea_output = draw_frontend_adygea(boiling_plan=wb, start_time=beg_time, workbook=wb)
+        adygea_output = draw_frontend_adygea(boiling_plan=wb, start_time=beg_time, workbook=wb, date=date)
         adygea_schedule, adygea_schedule_wb = adygea_output["schedule"], adygea_output["workbook"]
         if len(adygea_output["boiling_plan_df"]) > 0 and len(adygea_output["boiling_plan_df"]) > 0:
             # Set preferred header time"

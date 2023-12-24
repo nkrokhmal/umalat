@@ -200,6 +200,7 @@ def wrap_frontend(
     start_times_by_line: dict = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     date: Optional[datetime] = None,
+    add_cleaning_after_eight_mascarpone_boilings: bool = False,
 ):
     # - Get schedule
 
@@ -207,6 +208,7 @@ def wrap_frontend(
         boiling_plan,
         start_times_by_line=start_times_by_line,
         first_batch_ids_by_type=first_batch_ids_by_type,
+        add_cleaning_after_eight_mascarpone_boilings=add_cleaning_after_eight_mascarpone_boilings,
     )
     schedule = output["schedule"]
 

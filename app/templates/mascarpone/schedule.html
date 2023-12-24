@@ -12,6 +12,10 @@
 </div>
 {% endblock %}
 
+{% block notifications %}
+    {% include 'includes/notification.html' %}
+{% endblock notifications %}
+
 {% block page_content %}
 {% if filename %}
     <div class="row" id="Approved">
@@ -75,6 +79,12 @@
                             <div class="form-group">
                                 <label>Введите номер первой партии Сливки в текущем дне</label>
                                 {{form.cream_batch_number(place_holder='BatchNumber', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Вставить мойку после 8 варок </label>
+                                {{form.add_washing(place_holder='AddWashing', checked=False)}}
                             </div>
                         </div>
                     </div>

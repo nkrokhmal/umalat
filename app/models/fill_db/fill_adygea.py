@@ -71,9 +71,16 @@ def fill_boilings():
     ]
     b_data = df[columns]
     b_data = b_data.drop_duplicates()
+
     b_data = b_data.to_dict("records")
     for b in b_data:
         line_name = LineName.ADYGEA
+        name = AdygeaBoilingTechnology.create_name(
+            line=line_name,
+            percent=b["Процент"],
+            weight=b["Вес нетто"],
+            form_factor=b["Название форм фактора"],
+        )
 
         line_id = [x for x in lines if x.name == line_name][0].id
         bts_name = [
@@ -82,15 +89,7 @@ def fill_boilings():
             if (x.collecting_time == b["Набор"])
             & (x.coagulation_time == b["Коагуляция"])
             & (x.pouring_off_time == b["Слив"])
-            & (
-                x.name
-                == AdygeaBoilingTechnology.create_name(
-                    line=line_name,
-                    percent=b["Процент"],
-                    weight=b["Вес нетто"],
-                    form_factor=b["Название форм фактора"],
-                )
-            )
+            & (x.name == name)
         ]
         boiling = AdygeaBoiling(
             percent=b["Процент"],
@@ -99,6 +98,7 @@ def fill_boilings():
             weight_netto=b["Вес нетто"],
             output_kg=b["Выход"],
             input_kg=b["Вход"],
+            name=name,
         )
         db.session.add(boiling)
         db.session.commit()
@@ -153,12 +153,14 @@ def fill_sku():
 
         line_name = LineName.ADYGEA
         add_sku.line = [x for x in lines if x.name == line_name][0]
+        boiling_name = AdygeaBoilingTechnology.create_name(
+            line=line_name,
+            percent=sku["Процент"],
+            weight=sku["Вес нетто"],
+            form_factor=sku["Название форм фактора"],
+        )
 
-        add_sku.made_from_boilings = [
-            x
-            for x in boilings
-            if (x.percent == sku["Процент"]) & (x.line_id == add_sku.line.id) & (x.weight_netto == sku["Вес нетто"])
-        ]
+        add_sku.made_from_boilings = [x for x in boilings if x.name == boiling_name]
         add_sku.group = [x for x in groups if x.name == sku["Название форм фактора"]][0]
         add_sku.form_factor = [x for x in form_factors if x.name == "Масса"][0]
         db.session.add(add_sku)

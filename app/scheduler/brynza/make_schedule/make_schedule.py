@@ -63,13 +63,11 @@ def make_packing_schedule(
     m.row("small_cleaning", size=5)
     m.row("labelling", size=14)
 
-    df2["boiling_type"] = df2["boiling"].apply(
-        lambda boiling: str(df2["boiling"].iloc[0].weight_netto) + "-" + str(df2["boiling"].iloc[0].percent)
-    )
+    df2["boiling_type"] = df2["boiling"].apply(lambda boiling: str(boiling.weight_netto) + "-" + str(boiling.percent))
 
     mark_consecutive_groups(df2, key="boiling_type", groups_key="boiling_type_num")
 
-    for i, grp in list(df2.groupby("boiling_type_num")):
+    for is_first, is_last, (i, grp) in mark_ends(list(df2.groupby("boiling_type_num"))):
         boiling = grp.iloc[0]["boiling"]
         total_kg = grp["kg"].sum()
         packing_speed = grp["sku"].iloc[0].packing_speed  # note: packing_speed is the same for all skus in adygea
@@ -77,6 +75,7 @@ def make_packing_schedule(
         # crop to pieces of 200kg
 
         pieces_kg = [200] * int(total_kg / 200) + [total_kg - 200 * int(total_kg / 200)]
+        pieces_kg = [piece_kg for piece_kg in pieces_kg if abs(piece_kg) > 0.1]
 
         for _is_first, _is_last, piece_kg in mark_ends(pieces_kg):
             m.row(
@@ -87,9 +86,10 @@ def make_packing_schedule(
             if not _is_last:
                 m.row("packing_configuration", size=1)
 
-        m.row("packing_configuration", size=1)
+        if not is_last:
+            m.row("packing_configuration", size=1)
 
-        m.row("cleaning", size=12)
+    m.row("cleaning", size=12)
 
     return {
         "schedule": m.root,
