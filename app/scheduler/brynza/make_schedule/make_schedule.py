@@ -44,7 +44,7 @@ def make_packing_schedule(
 
     m.row("preparation", size=7)
 
-    boiling_technology = df1.iloc[0]["boiling"].boiling_technologies[0]
+    # boiling_technology = df1.iloc[0]["boiling"].boiling_technologies[0]
 
     # build label for brynza
     mark_consecutive_groups(df1, key="boiling", groups_key="boiling_num")
