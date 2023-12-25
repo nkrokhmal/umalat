@@ -6,6 +6,8 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from loguru import logger
+
 from app.enum import DepartmentName, LineName
 from app.globals import db
 from app.models.basic import Department, Group, Line, Washer
@@ -85,6 +87,7 @@ def validate_params(df: pd.DataFrame) -> tuple[bool, str | None]:
         "Вес технология",
         "Константа",
         "Коэффициент",
+        "Вход",
     ]
     df = df[boiling_technologies_columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
@@ -101,6 +104,7 @@ def validate_params(df: pd.DataFrame) -> tuple[bool, str | None]:
             cheese_type=row["Название форм фактора"],
             flavoring_agent=row["Вкусовая добавка"],
             is_lactose=row["Наличие лактозы"],
+            input_kg=row["Вход"],
         )
 
         same_technologies = [x for x in bt_names if x[0] == bt_name]
@@ -128,6 +132,7 @@ def fill_boiling_technologies(df: pd.DataFrame) -> tp.Generator[MascarponeBoilin
         "Наличие лактозы",
         "Вкусовая добавка",
         "Вес технология",
+        "Вход",
     ]
     df = df[boiling_technologies_columns]
     df["Наличие лактозы"] = df["Наличие лактозы"].apply(lambda x: True if x.lower() == "да" else False)
@@ -142,6 +147,7 @@ def fill_boiling_technologies(df: pd.DataFrame) -> tp.Generator[MascarponeBoilin
             cheese_type=row["Название форм фактора"],
             flavoring_agent=row["Вкусовая добавка"],
             is_lactose=row["Наличие лактозы"],
+            input_kg=row["Вход"],
         )
         yield MascarponeBoilingTechnology(
             name=bt_name,
@@ -185,7 +191,9 @@ def fill_boilings(df: pd.DataFrame) -> tp.Generator[MascarponeBoiling, None, Non
             cheese_type=item["Название форм фактора"],
             flavoring_agent=item["Вкусовая добавка"],
             is_lactose=item["Наличие лактозы"],
+            input_kg=item["Вход"],
         )
+
         yield MascarponeBoiling(
             percent=item["Процент"],
             weight_netto=item["Вес технология"],

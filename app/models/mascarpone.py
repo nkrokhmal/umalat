@@ -88,10 +88,18 @@ class MascarponeBoilingTechnology(BoilingTechnology):
 
     @staticmethod
     def create_name(
-        line: str, weight: float | int, percent: float | type, cheese_type: str, flavoring_agent: str, is_lactose: bool
+        line: str,
+        weight: float | int,
+        percent: float | type,
+        cheese_type: str,
+        flavoring_agent: str,
+        is_lactose: bool,
+        input_kg: int,
     ) -> str:
         boiling_name = f"{weight} кг, {percent}, {flavoring_agent}"
-        return "Линия {}, {}, {}, {}".format(line, cheese_type, boiling_name, "" if is_lactose else "без лактозы")
+        return "Линия {}, {}, {}, {}, {}".format(
+            line, cheese_type, boiling_name, "" if is_lactose else "без лактозы", f"{input_kg} kg"
+        )
 
 
 __all__ = [
