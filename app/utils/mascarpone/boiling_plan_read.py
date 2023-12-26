@@ -74,7 +74,9 @@ class BoilingPlanReader:
                     item = {column: ws.cell(i, j + 1).value for j, column in enumerate(COLUMNS.values())}
                     sku = next((sku for sku in skus if sku.name == item["sku_name"]), None)
                     if sku is None:
-                        raise BoilingPlanReaderException(f"Неверно указано имя sku {item['name']}, линия {i}")
+                        raise BoilingPlanReaderException(
+                            f"Неверно указано имя sku {item['sku_name']}, линия {i}, {item}"
+                        )
                     boiling.type = self._get_type(sku)
                     boiling.skus.append(item)
         return boilings
