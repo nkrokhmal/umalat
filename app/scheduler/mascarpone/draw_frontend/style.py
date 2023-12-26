@@ -2,17 +2,17 @@ def boiling_header_text(b):
     if b.props["semifinished_group"] == "cream":
         return f"Сливки {int(b.props['percent'])}% {int(b.props['total_input_kg'])}кг"
     elif b.props["semifinished_group"] == "cream_cheese":
-        litres = 1000 * len(b.props["boilings"])
+        litres = int(sum(boiling.props["input_kg"] for boiling in b.props["boilings"]))
         return f"Кремчиз/{litres}л"
     elif b.props["semifinished_group"] == "robiola":
-        litres = 1000 * len(b.props["boilings"])
+        litres = int(sum(boiling.props["input_kg"] for boiling in b.props["boilings"]))
         return f"Робиола/{litres}л"
     elif b.props["semifinished_group"] == "cottage_cheese":
-        litres = 1000 * len(b.props["boilings"])
+        litres = int(sum(boiling.props["input_kg"] for boiling in b.props["boilings"]))
         return f"Творожный/{litres}л"
     elif b.props["semifinished_group"] == "mascarpone":
-        kgs = 1000 * len(b.props["boilings"])
-        return f"Производство маскарпоне {kgs}кг"
+        litres = int(sum(boiling.props["input_kg"] for boiling in b.props["boilings"]))
+        return f"Производство маскарпоне {litres}кг"
 
 
 def pouring_text(b):

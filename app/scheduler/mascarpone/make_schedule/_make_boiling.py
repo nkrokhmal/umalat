@@ -19,6 +19,7 @@ def _make_boiling(boiling_group_df, **kwargs):
     sample_row = boiling_group_df.iloc[0]
 
     boiling_model = sample_row["boiling"]
+
     technology = delistify(
         boiling_model.boiling_technologies, single=True
     )  # there is only one boiling technology is for every boiling model in mascarpone department
