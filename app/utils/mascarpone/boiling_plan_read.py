@@ -86,11 +86,10 @@ class BoilingPlanReader:
         group_dict = defaultdict(lambda: 1)
         for boiling in boilings:
             df = pd.DataFrame(boiling.skus)
-            df[["output_kg", "input_kg", "group_id", "group"]] = (
+            df[["output_kg", "input_kg", "group_id"]] = (
                 boiling.output_kg,
                 boiling.input_kg,
                 group_dict[boiling.type],
-                boiling.type,
             )
             dfs.append(df)
             group_dict[boiling.type] += 1
@@ -128,9 +127,8 @@ class BoilingPlanReader:
                         df = pd.DataFrame(group.skus)
                         if i == len(handler.boilings) - 1:
                             if df["kg"].sum() < 100:
-                                df[["group_id", "group", "block_id", "washing"]] = (
+                                df[["group_id", "block_id", "washing"]] = (
                                     group_id - 1,
-                                    boiling.type,
                                     boiling.block_id,
                                     False,
                                 )
@@ -138,9 +136,8 @@ class BoilingPlanReader:
                                 dfs[-1] = pd.concat([dfs[-1], df])
                                 continue
 
-                        df[["group_id", "group", "block_id", "washing"]] = (
+                        df[["group_id", "block_id", "washing"]] = (
                             group_id,
-                            boiling.type,
                             boiling.block_id,
                             False,
                         )
@@ -153,9 +150,10 @@ class BoilingPlanReader:
 
     def _saturate(self, df: pd.DataFrame) -> pd.DataFrame:
         df.index = range(len(df))
+        df["sku"] = df["sku_name"].apply(lambda x: cast_model([MascarponeSKU], x))
+        df["group"] = df["sku"].apply(lambda x: self._get_type(x))
         df["batch_id"] = 0
         df["batch_type"] = df["group"]
-        df["sku"] = df["sku_name"].apply(lambda x: cast_model([MascarponeSKU], x))
         df["boiling"] = df["sku"].apply(lambda x: x.made_from_boilings[0])
         df["boiling_id"] = df["boiling"].apply(lambda boiling: boiling.id)
         df["semifinished_group"] = df["group"].apply(lambda group: group if group != "cottage_cheese" else "robiola")
