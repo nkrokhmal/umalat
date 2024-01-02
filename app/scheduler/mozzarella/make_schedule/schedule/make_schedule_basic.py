@@ -608,7 +608,7 @@ class ScheduleMaker:
 
         if not (
             (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
-            or (score - current_best_score <= 4)
+            or (score - current_best_score <= 3)
         ):
             configuration, score = [], MAX_SCORE
 
