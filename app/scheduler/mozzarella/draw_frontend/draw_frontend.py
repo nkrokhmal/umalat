@@ -1,5 +1,6 @@
 import glob
 import os
+import time
 
 from datetime import datetime
 from pathlib import Path
@@ -80,9 +81,13 @@ def test():
 
     # - Draw frontend
 
+    started_at = time.time()
+
     repo_path = __file__.split("app")[0][:-1]
 
-    fn = "/Users/marklidenberg/Desktop/2023.12.20 Моцарелла/2023-12-20 План по варкам моцарелла.xlsx"
+    fn = str(
+        Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
+    )
 
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
@@ -90,13 +95,13 @@ def test():
     output = draw_frontend(
         boiling_plan=fn,
         workbook=schedule_wb,
-        start_times={LineName.SALT: "12:00", LineName.WATER: "06:00"},
+        start_times={LineName.SALT: "08:00", LineName.WATER: "07:00"},
         exact_start_time_line_name=LineName.WATER,
         first_batch_ids_by_type={"mozzarella": 1000},
-        start_configuration=[
-            LineName.WATER if value == "В" else LineName.SALT
-            for value in "В-В-В-В-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-В-С-С-С-С-С".split("-")  # 4
-        ],
+        # start_configuration=[
+        #     LineName.WATER if value == "В" else LineName.SALT
+        #     for value in "В-В-В-В-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-В-С-С-С-С-С".split("-")  # 4
+        # ],
     )
 
     schedule_json = output["schedule"].to_dict(
@@ -116,7 +121,9 @@ def test():
 
     # print(output["schedule"])
     schedule_wb.save("schedule2.xlsx")
-    open_file_in_os("schedule2.xlsx")
+    # open_file_in_os("schedule2.xlsx")
+
+    print("Elapsed", time.time() - started_at)
 
 
 if __name__ == "__main__":
