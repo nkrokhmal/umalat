@@ -2,11 +2,16 @@ import os
 
 import click
 
+from utils_ak.loguru import configure_loguru
+
 
 os.environ["ENVIRONMENT"] = "production"
 os.environ["APP_ENVIRONMENT"] = "runtime"
 
 from app.app import create_app, create_manager
+
+
+configure_loguru()
 
 
 @click.command()
