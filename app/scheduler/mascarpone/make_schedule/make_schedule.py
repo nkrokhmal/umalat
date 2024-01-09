@@ -99,6 +99,9 @@ class Validator(ClassValidator):
         if b1.props["line"] != b2.props["line"]:
             return
 
+        if "separation" not in [child.props["cls"] for child in b2.children]:
+            return
+
         if b2.props["semifinished_group"] != "mascarpone":
             validate_disjoint_by_axis(b1, b2["separation"], ordered=True)
         else:
@@ -226,7 +229,7 @@ def make_schedule(
 
             # -- Separator acceleration
 
-            if is_first and group != "cream" or (prev_group == "cream" and is_new_group):
+            if group != "cream" and (is_first or prev_group == "cream" and is_new_group):
                 # first non-cream of first non-cream after cream
                 m.block(
                     "separator_acceleration",
