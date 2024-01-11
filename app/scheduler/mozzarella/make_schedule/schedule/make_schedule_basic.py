@@ -75,7 +75,7 @@ class Validator(ClassValidator):
         if boiling_model1.line.name == boiling_model2.line.name:
             # same lines
 
-            # basic validation
+            # basic_example validation
             validate_disjoint_by_axis(
                 b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"]
             )
@@ -173,7 +173,7 @@ class Validator(ClassValidator):
             if wln1 == wln2:
                 # same working lines (means that salt and water on the same working line - due to salt switching to the first pouring_line)
 
-                # basic validations
+                # basic_example validations
                 validate_disjoint_by_axis(
                     b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"]
                 )
@@ -1018,7 +1018,7 @@ def make_schedule_basic(
     date=None,
 ):
     logger.info(
-        "Making basic schedule",
+        "Making basic_example schedule",
         start_times=start_times,
         start_configuration=start_configuration,
         cleanings=cleanings,

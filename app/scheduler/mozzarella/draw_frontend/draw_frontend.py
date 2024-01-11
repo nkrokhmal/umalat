@@ -31,7 +31,7 @@ def draw_frontend(
     normalization=True,
     validate=True,
     first_batch_ids_by_type={"mozzarella": 1},
-    # - Make schedule basic kwargs
+    # - Make schedule basic_example kwargs
     exact_start_time_line_name=None,
     optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
@@ -45,7 +45,7 @@ def draw_frontend(
         saturate=saturate,
         normalization=normalization,
         validate=validate,
-        # - Make schedule basic kwargs
+        # - Make schedule basic_example kwargs
         date=date,
         optimize_cleanings=optimize_cleanings,
         start_times=start_times,

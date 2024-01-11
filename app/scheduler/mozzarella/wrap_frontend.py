@@ -487,7 +487,7 @@ def wrap_frontend(
     normalization=True,
     validate=True,
     first_batch_ids_by_type={"mozzarella": 1},
-    # - Make basic schedule kwargs
+    # - Make basic_example schedule kwargs
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
     exact_start_time_line_name=None,
     optimize_cleanings=False,
@@ -502,7 +502,7 @@ def wrap_frontend(
         normalization=normalization,
         validate=validate,
         first_batch_ids_by_type=first_batch_ids_by_type,
-        # - Make basic schedule kwargs
+        # - Make basic_example schedule kwargs
         date=date,
         optimize_cleanings=optimize_cleanings,
         start_times=start_times,

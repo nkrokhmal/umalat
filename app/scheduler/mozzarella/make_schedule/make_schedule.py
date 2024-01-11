@@ -16,7 +16,7 @@ def make_schedule(
     normalization=True,
     validate=True,
     first_batch_ids_by_type={"mozzarella": 1},
-    # - Make schedule basic kwargs
+    # - Make schedule basic_example kwargs
     optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
     exact_start_time_line_name=None,

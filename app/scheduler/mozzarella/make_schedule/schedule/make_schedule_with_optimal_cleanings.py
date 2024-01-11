@@ -30,7 +30,7 @@ def make_schedule_with_optimal_cleanings(
     -------
 
     """
-    logger.info("Making basic schedule")
+    logger.info("Making basic_example schedule")
 
     schedule = make_schedule_basic(
         boiling_plan_obj=boiling_plan_obj,
