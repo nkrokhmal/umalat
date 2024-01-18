@@ -42,7 +42,7 @@ def make_packing_schedule(
 
     m = BlockMaker("schedule")
 
-    m.row("preparation", size=7)
+    m.row("preparation", size=6)
 
     # boiling_technology = df1.iloc[0]["boiling"].boiling_technologies[0]
 

@@ -22,7 +22,7 @@ def wrap_frontend(
 
     # - Plot boilings
 
-    date = datetime.now()
+    date = date or datetime.now()
 
     m = BlockMaker(
         "frontend",

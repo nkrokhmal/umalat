@@ -62,7 +62,7 @@ def milk_project_schedule():
             # Set preferred header time"
             adygea_output["schedule"].props.update(preferred_header_time=cast_time(adygea_output["schedule"].x[0]))
 
-        brynza_output = draw_frontend_brynza(boiling_plan=wb, start_time=packing_beg_time)
+        brynza_output = draw_frontend_brynza(boiling_plan=wb, date=date, start_time=packing_beg_time)
         brynza_schedule, brynza_schedule_wb = brynza_output["schedule"], brynza_output["workbook"]
 
         draw_sheet_sequence(
