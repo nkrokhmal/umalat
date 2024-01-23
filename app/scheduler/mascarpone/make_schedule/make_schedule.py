@@ -53,6 +53,11 @@ class Validator(ClassValidator):
         ):
             validate_disjoint_by_axis(b1["separation"], b2["separation"], distance=2)
 
+        # - Validate pumping and separation overlap for the same tub
+
+        if b1.props["tub_num"] == b2.props["tub_num"]:
+            validate_disjoint_by_axis(b1["pumping"], b2["separation"], distance=0)
+
     @staticmethod
     def validate__preparation__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
