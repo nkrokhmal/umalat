@@ -40,7 +40,7 @@ def make_boilings(boiling_plan_df):
             res_s += boilings
 
         for boiling in boilings:
-            boiling.props.update(boiling_group_df=grp, sheet=grp.iloc[0]["sheet"])
+            boiling.props.update(boiling_group_df=grp, group_id=grp.iloc[0]["group_id"], sheet=grp.iloc[0]["sheet"])
         res += boilings
 
     return res

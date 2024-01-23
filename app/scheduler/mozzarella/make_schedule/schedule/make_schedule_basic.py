@@ -427,7 +427,8 @@ class ScheduleMaker:
             )
 
         # add cleaning after boiling if needed
-        cleaning_type = self.cleanings.get(boiling.props["boiling_id"])
+        cleaning_type = self.cleanings.get(boiling.props["group_id"])
+
         if cleaning_type:
             start_from = boiling["pouring"]["first"]["termizator"].y[0]
             cleaning = make_termizator_cleaning_block(

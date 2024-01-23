@@ -25,12 +25,24 @@ def make_schedule_with_optimal_cleanings(
     date=None,
     optimize_cleanings: bool = True,
 ):
-    """
-    Returns
-    -------
+    # - Process case with not optimized cleanings
 
-    """
-    logger.info("Making basic_example schedule")
+    if not optimize_cleanings:
+        boiling_plan_df = to_boiling_plan(boiling_plan_obj)
+
+        cleanings = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
+        cleanings = {int(k): v for k, v in cleanings.items() if v}
+
+        return make_schedule_basic(
+            boiling_plan_obj=boiling_plan_obj,
+            cleanings=cleanings,
+            start_times=start_times,
+            start_configuration=start_configuration,
+            exact_start_time_line_name=exact_start_time_line_name,
+            date=date,
+        )
+
+    # - Make schedule with no cleanings
 
     schedule = make_schedule_basic(
         boiling_plan_obj=boiling_plan_obj,
@@ -41,38 +53,21 @@ def make_schedule_with_optimal_cleanings(
         date=date,
     )
 
-    configuration = [b.props["boiling_model"].line.name for b in schedule["master"]["boiling", True]]
+    # - Get cleanings
 
-    # - Find optimal cleanings
-
-    boiling_plan_df = to_boiling_plan(boiling_plan_obj)
-
-    if optimize_cleanings:
-        cleanings = _find_optimal_cleanings_combination_by_schedule(schedule)
-    else:
-        cleanings = boiling_plan_df.groupby("group_id").agg({"cleaning": "first"}).to_dict()["cleaning"]
-
-    # - Make schedule with cleanings and start configuration
-
+    cleanings = _find_optimal_cleanings_combination_by_schedule(schedule)
     cleanings = {int(k): v for k, v in cleanings.items() if v}
-    logger.error(
-        "Final schedule using cleanings",
-        start_times=start_times,
-        cleanings=cleanings,
-        configuration=configuration,
-    )
-    schedule = make_schedule_basic(
+
+    # - Make schedule with cleanings, with configuration from previously built schedule
+
+    return make_schedule_basic(
         boiling_plan_obj=boiling_plan_obj,
         cleanings=cleanings,
         start_times=start_times,
-        start_configuration=configuration,
+        start_configuration=[b.props["boiling_model"].line.name for b in schedule["master"]["boiling", True]],
         exact_start_time_line_name=exact_start_time_line_name,
         date=date,
     )
-
-    # - Return schedule
-
-    return schedule
 
 
 def test():
