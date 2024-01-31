@@ -974,17 +974,20 @@ class ScheduleMaker:
 
         # -- Set exact_start_time_line_name
 
-        if len(self.start_times) == 2:
-            self.exact_start_time_line_name = exact_start_time_line_name
-        elif len(self.start_times) == 1:
-            self.exact_start_time_line_name = list(self.start_times.keys())[0]  # overwrite exact start time line name
+        if len(set(b.props["boiling_model"].line.name for b in boilings)) == 1:
+            self.exact_start_time_line_name = list(set(b.props["boiling_model"].line.name for b in boilings))[0]
+            if not self.start_times.get(self.exact_start_time_line_name):
+                raise Exception(f"Укажите время на линии {self.exact_start_time_line_name}")
         else:
-            raise Exception("Не указано время начала подачи на линиях")
-
-        # -- Validate there is at least one boiling with exact start time line name
-
-        if not any([b.props["boiling_model"].line.name == self.exact_start_time_line_name for b in boilings]):
-            raise Exception(f"Не указано время начала подачи на одной из линий")
+            # two lines
+            if len(self.start_times) == 2:
+                self.exact_start_time_line_name = exact_start_time_line_name
+            elif len(self.start_times) == 1:
+                self.exact_start_time_line_name = list(self.start_times.keys())[
+                    0
+                ]  # overwrite exact start time line name
+            else:
+                raise Exception("Не указано время начала подачи на линиях")
 
         # -- Add a flag that time has been set
 
