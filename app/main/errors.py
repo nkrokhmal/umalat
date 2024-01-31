@@ -35,6 +35,6 @@ def not_found(e):
 
 @main.errorhandler(500)
 def internal_error(error):
-    original = getattr(error, "original_exception", None)
+    original = getattr(error, "original_exception", str(error))
     trace = traceback.format_exc()
     return flask.render_template("500.html", error=original, trace=trace), 500
