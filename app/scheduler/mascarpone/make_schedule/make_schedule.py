@@ -55,7 +55,7 @@ class Validator(ClassValidator):
 
         # - Validate pumping and separation overlap for the same tub
 
-        if b1.props["tub_num"] == b2.props["tub_num"]:
+        if b1.props["tub_num"] == b2.props["tub_num"] and "separation" in b2.children_by_cls:
             validate_disjoint_by_axis(b1["pumping"], b2["separation"], distance=0)
 
     @staticmethod
