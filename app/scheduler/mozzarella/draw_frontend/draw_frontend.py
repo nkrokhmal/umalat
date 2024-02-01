@@ -85,9 +85,11 @@ def test():
 
     repo_path = __file__.split("app")[0][:-1]
 
-    fn = str(
-        Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
-    )
+    # fn = str(
+    #     Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
+    # )
+
+    fn = """/Users/marklidenberg/Downloads/2024-01-31 План по варкам моцарелла.xlsx"""
 
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
@@ -95,8 +97,8 @@ def test():
     output = draw_frontend(
         boiling_plan=fn,
         workbook=schedule_wb,
-        start_times={LineName.SALT: "08:00", LineName.WATER: "07:00"},
-        exact_start_time_line_name=LineName.WATER,
+        start_times={LineName.SALT: "07:00", LineName.WATER: "08:00"},
+        exact_start_time_line_name=LineName.SALT,
         first_batch_ids_by_type={"mozzarella": 1000},
         # start_configuration=[
         #     LineName.WATER if value == "В" else LineName.SALT
