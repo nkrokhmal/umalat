@@ -43,6 +43,12 @@ class BrynzaBoilingTechnology(BoilingTechnology):
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
     boiling_speed = mdb.Column(mdb.Integer)
 
+    pouring_time = mdb.Column(mdb.Integer)
+    soldification_time = mdb.Column(mdb.Integer)
+    cutting_time = mdb.Column(mdb.Integer)
+    pouring_off_time = mdb.Column(mdb.Integer)
+    salting_time = mdb.Column(mdb.Integer)
+
     @staticmethod
     def create_name(
         form_factor: str,

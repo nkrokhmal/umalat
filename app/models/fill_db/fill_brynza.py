@@ -15,6 +15,11 @@ class BrynzaFillerException(Exception):
 
 TECHNOLOGIES_COLUMNS: list[str] = [
     "Скорость варки",
+    "Налив",
+    "Схватка",
+    "Резка",
+    "Слив",
+    "Посолка",
 ]
 
 
@@ -72,6 +77,11 @@ class BrynzaFiller(BaseFiller):
             yield BrynzaBoilingTechnology(
                 name=self._boiling_technology_name(row),
                 boiling_speed=row["Скорость варки"],
+                pouring_time=row["Налив"],
+                soldification_time=row["Схватка"],
+                cutting_time=row["Резка"],
+                pouring_off_time=row["Слив"],
+                salting_time=row["Посолка"],
             )
 
     def fill_boiling(self, df: pd.DataFrame) -> tp.Generator[BrynzaBoiling, None, None]:

@@ -44,6 +44,18 @@ class ScheduleForm(FlaskForm):
     )
 
 
+class BrynzaScheduleForm(FlaskForm):
+    validators = [FileRequired(message="Отсутствует файл!")]
+    input_file = FileField("", validators=validators)
+    batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
+    date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
+    beg_time = StringField(
+        "Начало первой варки",
+        validators=[Optional()],
+        default="07:00",
+    )
+
+
 class MilkProjectBoilingForm(FlaskForm):
     name = StringField("Название варки", validators=[Optional()])
     output_coeff = FloatField("Коэффициент", validators=[Optional()])
