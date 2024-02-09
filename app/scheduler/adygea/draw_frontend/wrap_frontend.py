@@ -110,7 +110,7 @@ def wrap_boiling_lines(schedule):
 
     with code("add cleaning"):
         block = schedule.find_one(cls="cleaning")
-        last_block = schedule["boiling", True][-1]
+        last_block = max([b for b in schedule["boiling", True]], key=lambda b: b.y[0])
         if len(schedule["lunch", True]) > 0:
             last_block = max([last_block, schedule["lunch", True][-1]], key=lambda b: b.y[0])
         push(boiling_lines[0], wrap_cleaning(block, last_block), push_func=add_push)
