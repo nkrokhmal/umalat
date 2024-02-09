@@ -1,6 +1,7 @@
 from loguru import logger
 from openpyxl.styles import Side
 from openpyxl.styles.borders import BORDER_THIN
+from utils_ak.block_tree import is_disjoint, validate_disjoint_by_axis
 from utils_ak.color.color import cast_color
 from utils_ak.openpyxl.openpyxl_tools import (
     cast_worksheet,
@@ -57,6 +58,19 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
             b.props.update(**block_style)
 
     schedule.props.update(index_width=4)
+
+    # - Check for conflicts (not tested extensively, hence for debugging only for now)
+
+    # leaves = [b for b in schedule.iter() if b.is_leaf() and b.props.get("visible", True) and b.size[0] > 0 and b.size[1] > 0]
+    # for i, b2 in enumerate(leaves):
+    #     for b1 in leaves[:i]:
+    #         if not is_disjoint(b1, b2):
+    #             print("Block conflict")
+    #             print(b1)
+    #             print(b2)
+    #             raise Exception("Ошибка в построении расписания, произошли накладки одних блоков на другие. Такого быть не должно, нужно обращатсья к разработчикам.")
+
+    # - Draw schedule
 
     for b in schedule.iter():
         logger.trace("Processing", b=b)
