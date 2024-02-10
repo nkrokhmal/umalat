@@ -64,14 +64,15 @@ class BrynzaFiller(BaseFiller):
     @staticmethod
     def _boiling_technology_name(row: dict | pd.Series) -> str:
         return BrynzaBoilingTechnology.create_name(
-            form_factor="Брынза",
+            form_factor=row["Название форм фактора"],
             line=LineName.BRYNZA,
             percent=row["Процент"],
             weight=row["Вес нетто"],
+            output_kg=row["Выход"],
         )
 
     def fill_boiling_technologies(self, df: pd.DataFrame) -> tp.Generator[BrynzaBoilingTechnology, None, None]:
-        _df = self._filter_df(df, TECHNOLOGIES_COLUMNS + ["Процент", "Вес нетто"])
+        _df = self._filter_df(df, TECHNOLOGIES_COLUMNS + ["Процент", "Вес нетто", "Выход", "Название форм фактора"])
 
         for _, row in _df.iterrows():
             yield BrynzaBoilingTechnology(
@@ -88,14 +89,16 @@ class BrynzaFiller(BaseFiller):
         technologies = db.session.query(BrynzaBoilingTechnology).all()
         line = db.session.query(Line).filter_by(name=LineName.BRYNZA).first()
 
-        _df = self._filter_df(df, ["Процент", "Вес нетто"])
+        _df = self._filter_df(df, ["Процент", "Вес нетто", "Выход", "Название форм фактора"])
 
         for _, row in _df.iterrows():
             name = self._boiling_technology_name(row)
             yield BrynzaBoiling(
+                name=f"{row['Процент']}_{row['Выход']}",
                 percent=row["Процент"],
                 weight=row["Вес нетто"],
                 boiling_technologies=[t for t in technologies if t.name == name],
+                output_kg=row["Выход"],
                 line=line,
             )
 

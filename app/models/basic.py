@@ -134,6 +134,7 @@ class SKU(mdb.Model):
             "Кавказский": "#E5B7B6",
             "Черкесский": "#CBC0D9",
             "Брынза": "#E5B7B6",
+            "Чанах": "#E5B7B6",
         }
         if "Терка" not in self.form_factor.name:
             return COLOURS[self.group.name]

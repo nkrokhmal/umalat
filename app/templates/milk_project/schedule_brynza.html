@@ -47,12 +47,6 @@
             <form method="post" action="/brynza_schedule" enctype="multipart/form-data" class="mt-4">
                 {{ form.hidden_tag() }}
                 <div class="row mb-4">
-                    <div class="col-md-12 mb-3">
-                        <div class="form-group">
-                            <label>Выберите файл плана варки</label>
-                            {{form.input_file(place_holder='InputFile', class='form-control')}}
-                        </div>
-                    </div>
                     <div class="col-lg-6 col-sm-6">
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
@@ -63,7 +57,13 @@
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
                                 <label>Введите время первой подачи </label>
-                                {{form.beg_time(place_holder='SaltBegTime', class='form-control')}}
+                                {{form.beg_time(place_holder='BegTime', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Введите количество кг брынзы </label>
+                                {{form.brynza_kg(place_holder='brynza', class='form-control')}}
                             </div>
                         </div>
                     </div>
@@ -72,6 +72,12 @@
                             <div class="form-group">
                                 <label>Введите номер первой партии в текущем дне</label>
                                 {{form.batch_number(place_holder='BatchNumber', class='form-control')}}
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Введите количество кг чанаха </label>
+                                {{form.chanakh_kg(place_holder='chanakh', class='form-control')}}
                             </div>
                         </div>
                     </div>

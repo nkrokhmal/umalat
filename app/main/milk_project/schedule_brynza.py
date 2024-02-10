@@ -15,7 +15,8 @@ def brynza_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         beg_time = form.beg_time.data
-        file = flask.request.files["input_file"]
+        brynza_kg = form.brynza_kg
+        chanakh_kg = form.chanakh_kg
 
     form.date.data = datetime.today() + timedelta(days=1)
     form.batch_number.data = (

@@ -31,9 +31,10 @@ class BrynzaBoiling(Boiling):
     name = mdb.Column(mdb.String)
     weight = mdb.Column(mdb.Float)
     percent = mdb.Column(mdb.Integer)
+    output_kg = mdb.Column(mdb.Integer)
 
     def to_str(self) -> str:
-        return str(self.percent)
+        return f"{self.percent}_{self.output_kg}"
 
 
 class BrynzaBoilingTechnology(BoilingTechnology):
@@ -55,8 +56,9 @@ class BrynzaBoilingTechnology(BoilingTechnology):
         line: str,
         percent: float | int,
         weight: float | int,
+        output_kg: float | int,
     ) -> str:
-        return f"Линия {line}, Форм фактор {form_factor}, Вес {weight}, {percent}"
+        return f"Линия {line}, Форм фактор {form_factor}, Вес {weight}, {percent}, {output_kg}"
 
 
 __all__ = [
