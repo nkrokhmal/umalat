@@ -67,7 +67,7 @@ def download_last_packer_plan():
         logger.warning(f"Schedule file hasn't saved properly {e}")
         wb.save(last_schedule_path)
         wb = openpyxl.load_workbook(filename=last_schedule_path, data_only=True)
-        boiling_plan_df = to_boiling_plan(wb)
+        boiling_plan_df = to_boiling_plan(wb, validate=False)
 
     parser = PackerParser(wb["Расписание"], boiling_plan_df)
     dfs_water = list(parser.parse_water())
