@@ -130,7 +130,14 @@ class PackerParser:
 
     @staticmethod
     def group_boiling_sku(df) -> pd.DataFrame:
-        return df.groupby(["group_id", "sku_name"]).agg({"kg": "sum", "sku": "first"}).reset_index()
+        tmp = df.copy()
+        tmp["order_id"] = tmp.index
+        return (
+            tmp.groupby(["group_id", "sku_name"])
+            .agg({"kg": "sum", "sku": "first", "order_id": "first"})
+            .sort_values(by="order_id")
+            .reset_index()
+        )
 
     @staticmethod
     def match_boiling_and_packer(
