@@ -9,7 +9,9 @@ from app.scheduler.time_utils import cast_t
 
 
 def make_schedule(
-    boiling_plan: BoilingPlanLike, start_time="07:00", first_batch_ids_by_type: dict = {"milk_project": 1}
+    boiling_plan: BoilingPlanLike,
+    start_time="07:00",
+    first_batch_ids_by_type: dict = {"milk_project": 1},
 ) -> dict:
     # - Process boiling plna
 
