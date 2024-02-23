@@ -6,6 +6,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.brynza.make_schedule2.make_boiling import make_boiling
 from app.scheduler.brynza.make_schedule2.make_salting import make_salting
+from app.scheduler.time_utils import cast_t
 
 
 BOILING_NUMS = [0, 2, 1, 3]
@@ -45,7 +46,7 @@ def make_schedule2(
 ) -> dict:
     # - Init blockmaker
 
-    m = BlockMaker("schedule")
+    m = BlockMaker("schedule", x=(cast_t(start_time), 0))
 
     # - Make brynza boilings
 

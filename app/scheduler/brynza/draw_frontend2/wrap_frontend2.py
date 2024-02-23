@@ -5,6 +5,7 @@ from utils_ak.block_tree import BlockMaker, add_push
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.brynza.make_schedule2.make_schedule2 import make_schedule2
 from app.scheduler.brynza.make_schedule.make_schedule import make_packing_schedule
+from app.scheduler.time_utils import cast_t
 from app.scheduler.wrap_header import wrap_header
 
 
@@ -36,12 +37,12 @@ def wrap_frontend2(
     )
     m.block("stub", size=(0, 1))
 
-    # m.block(wrap_header(date=date, start_time=start_time, header="График наливов"))
+    m.block(wrap_header(date=date, start_time=start_time, header="График наливов"))
 
     # - Make cheese makers
 
     for cheese_maker_num in range(1, 5):
-        with m.block(f"cheese_maker"):
+        with m.block(f"cheese_maker", start_time=start_time):
             for boiling in schedule.iter(
                 cls="boiling",
                 cheese_maker_num=cheese_maker_num,
@@ -72,15 +73,27 @@ def wrap_frontend2(
 
     # - Make saltings
 
+    # -- Time
+
+    m.block(wrap_header(date=date, start_time=start_time, header="График посолки"))
+
     # -- Total salting block
 
     saltings = list(schedule.iter(cls="salting"))
-    m.row("total_salting", x=saltings[0].x[0], size=saltings[-1].y[0] - saltings[0].x[0])
+    m.row(
+        "total_salting",
+        x=saltings[0].x[0],
+        size=saltings[-1].y[0] - saltings[0].x[0],
+        start_time=start_time,
+    )
 
     # -- Saltings
 
     for cheese_maker_num in range(1, 5):
-        with m.block(f"salting_cheese_maker"):
+        with m.block(
+            f"salting_cheese_maker",
+            start_time=start_time,
+        ):
             for salting in schedule.iter(
                 cls="salting",
                 cheese_maker_num=cheese_maker_num,
@@ -105,6 +118,26 @@ def wrap_frontend2(
                             size=(salting.size[0] - 2, 2),
                             boiling_label="boiling_label",
                         )
+
+    # - Add template
+
+    with m.block("template_block", index_width=1, push_func=add_push):
+        for cheese_maker_num in range(1, 5):
+            m.block(
+                "template",
+                push_func=add_push,
+                x=(1, 2 + 4 * (cheese_maker_num - 1)),
+                size=(2, 2),
+                text=f"Сыроизготовитель №1 Poly {cheese_maker_num}",
+                color=(183, 222, 232),
+            )
+        m.block(
+            "template",
+            push_func=add_push,
+            x=(1, 20),
+            size=(2, 2),
+            text="ПОСОЛКА",
+        )
 
     # - Add frontend to output and return
 
