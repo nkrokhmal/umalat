@@ -9,7 +9,7 @@ from app.globals import db
 from app.models import BrynzaBoiling, BrynzaSKU
 
 
-def make_brynza_boiling(boiling_id: int):
+def make_salting(boiling_id: int):
     # - Init block maker
 
     m = BlockMaker("root")
@@ -34,20 +34,16 @@ def make_brynza_boiling(boiling_id: int):
 
     # - Make brynza boiling
     with m.block(
-        "boiling",
+        "salting",
         boiling_id=boiling_id,
     ):
-        m.row("pouring", size=boiling_technology.pouring_time // 5)
-        m.row("soldification", size=boiling_technology.soldification_time // 5)
-        m.row("cutting", size=boiling_technology.cutting_time // 5)
-        m.row("pouring_off", size=boiling_technology.pouring_off_time // 5)
-        m.row("extra", size=2)
+        m.row("salting", size=boiling_technology.salting_time // 5)
 
-    return m.root["boiling"]
+    return m.root["salting"]
 
 
 def test():
-    print(make_brynza_boiling(1))
+    print(make_salting(1))
 
 
 if __name__ == "__main__":
