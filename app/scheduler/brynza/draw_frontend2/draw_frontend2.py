@@ -16,6 +16,7 @@ def draw_frontend2(
     brynza_kg: int,
     chanah_kg: int,
     start_time: str = "07:00",
+    first_batch_ids_by_type: dict = {"brynza": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:
@@ -26,6 +27,7 @@ def draw_frontend2(
         chanah_kg=chanah_kg,
         start_time=start_time,
         date=date,
+        first_batch_ids_by_type=first_batch_ids_by_type,
     )
 
     # - Draw frontend

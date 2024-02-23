@@ -14,13 +14,12 @@ def wrap_frontend2(
     chanah_kg: int,
     date=None,
     start_time: str = "07:00",
+    first_batch_ids_by_type: dict = {"brynza": 1},
 ) -> dict:
     # - Get schedule
 
     output = make_schedule2(
-        brynza_kg=brynza_kg,
-        chanah_kg=chanah_kg,
-        start_time=start_time,
+        brynza_kg=brynza_kg, chanah_kg=chanah_kg, start_time=start_time, first_batch_ids_by_type=first_batch_ids_by_type
     )
     schedule = output["schedule"]
 
