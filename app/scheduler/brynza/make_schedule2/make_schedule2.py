@@ -50,55 +50,55 @@ def make_schedule2(
     # - Make brynza boilings
 
     current_id = first_batch_ids_by_type["brynza"]
-    cheese_maker_num = 1
+    cheese_maker_id = 0
 
-    for boiling_id in range(math.ceil(int(brynza_kg / 3500))):
+    for boiling_id in range(math.ceil(int(brynza_kg / 3150)) + 1):
         push(
             m.root,
             make_boiling(
                 boiling_id=current_id,
                 group_name="Брынза",
-                cheese_maker_num=cheese_maker_num,
+                cheese_maker_num=cheese_maker_id + 1,
             ),
             push_func=AxisPusher(start_from="max_beg"),
             validator=Validator(),
         )
         current_id += 1
-        cheese_maker_num += 1
+        cheese_maker_id = (cheese_maker_id + 1) % 4
 
     # - Make chanah boilings
 
-    for boiling_id in range(math.ceil(int(chanah_kg / 3500))):
+    for boiling_id in range(math.ceil(int(chanah_kg / 3150)) + 1):
         push(
             m.root,
             make_boiling(
                 boiling_id=current_id,
                 group_name="Чанах",
-                cheese_maker_num=cheese_maker_num,
+                cheese_maker_num=cheese_maker_id + 1,
             ),
             push_func=AxisPusher(start_from="max_beg"),
             validator=Validator(),
         )
         current_id += 1
-        cheese_maker_num += 1
+        cheese_maker_id = (cheese_maker_id + 1) % 4
 
     # - Make satlings
 
-    cheese_maker_num = 1
+    cheese_maker_id = 1
 
-    for boiling_id in range(math.ceil(int(brynza_kg / 3500))):
+    for boiling_id in range(math.ceil(int(brynza_kg / 3150)) + 1):
         push(
             m.root,
             make_salting(
                 boiling_id=current_id,
-                cheese_maker_num=cheese_maker_num,
+                cheese_maker_num=cheese_maker_id,
                 group_name="Брынза",
             ),
             push_func=AxisPusher(start_from="max_beg"),
             validator=Validator(),
         )
         current_id += 1
-        cheese_maker_num += 1
+        cheese_maker_id += 1
 
     return {"schedule": m.root}
 

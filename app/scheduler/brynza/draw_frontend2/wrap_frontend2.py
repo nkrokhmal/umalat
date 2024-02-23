@@ -34,10 +34,11 @@ def wrap_frontend2(
         # props
         axis=1,
     )
+    m.block("stub", size=(0, 1))
+
     # m.block(wrap_header(date=date, start_time=start_time, header="График наливов"))
 
     # - Make cheese makers
-
     for cheese_maker_num in range(1, 5):
         with m.block(f"cheese_maker"):
             for boiling in schedule.iter(
@@ -53,11 +54,11 @@ def wrap_frontend2(
                     axis=1,
                 ):
                     with m.block():
-                        m.row("boiling_id_label", size=6)
+                        m.row("boiling_id_label", size=6, boiling_id=boiling.props["boiling_id"])
                         m.row(
-                            "name_label",
+                            "boiling_name_label",
                             size=boiling.size[0] - 6,
-                            boiling_label="boiling_label",
+                            boiling_label=f"{'Брынза' if boiling.props['group_name'] == 'Брынза' else 'Халуми'} 3,05 PCS(12-13)  3150кг",
                         )
                     with m.block(font_size=8):
                         m.row("pouring", size=boiling["pouring"].size[0])
@@ -84,9 +85,9 @@ def wrap_frontend2(
                     axis=1,
                 ):
                     with m.block():
-                        m.row("boiling_id_label", size=1)
+                        m.row("salting_id_label", size=1, boiling_id=salting.props["boiling_id"])
                         m.row(
-                            "name_label",
+                            "salting_name_label",
                             size=salting.size[0] - 1,
                             boiling_label="boiling_label",
                         )
@@ -99,8 +100,8 @@ def wrap_frontend2(
 
 
 def test():
-    print(wrap_frontend2(brynza_kg=3500, chanah_kg=0)["schedule"])
-    print(wrap_frontend2(brynza_kg=3500, chanah_kg=0)["frontend"])
+    print(wrap_frontend2(brynza_kg=10000, chanah_kg=10000)["schedule"])
+    print(wrap_frontend2(brynza_kg=10000, chanah_kg=10000)["frontend"])
 
 
 if __name__ == "__main__":
