@@ -9,6 +9,7 @@ STYLE = {
     "cutting": {"text": "пауза/резка/пауза/обсушка", "color": "#92d050"},  # light green color
     "pumping_out": {"text": "откачка", "color": "#add8e6"},  # light blue color
     "pouring_off": {"text": "слив", "color": "red"},
+    "total_salting": {"text": "посолка"},
     "salting_id_label": {"text": "{boiling_id}", "bold": True, "color": "#F8E5D8"},
     "salting_name_label": {"text": "посолка сухой солью", "color": "#F8E5D8"},
 }

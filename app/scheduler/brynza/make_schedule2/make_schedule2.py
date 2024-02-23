@@ -82,16 +82,17 @@ def make_schedule2(
         current_id += 1
         cheese_maker_id = (cheese_maker_id + 1) % 4
 
-    # - Make satlings
+    # - Make saltings
 
-    cheese_maker_id = 1
+    current_id = 1
+    cheese_maker_id = 0
 
     for boiling_id in range(math.ceil(int(brynza_kg / 3150)) + 1):
         push(
             m.root,
             make_salting(
                 boiling_id=current_id,
-                cheese_maker_num=cheese_maker_id,
+                cheese_maker_num=cheese_maker_id + 1,
                 group_name="Брынза",
             ),
             push_func=AxisPusher(start_from="max_beg"),

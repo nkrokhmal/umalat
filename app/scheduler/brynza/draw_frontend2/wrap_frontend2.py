@@ -39,6 +39,7 @@ def wrap_frontend2(
     # m.block(wrap_header(date=date, start_time=start_time, header="График наливов"))
 
     # - Make cheese makers
+
     for cheese_maker_num in range(1, 5):
         with m.block(f"cheese_maker"):
             for boiling in schedule.iter(
@@ -67,7 +68,16 @@ def wrap_frontend2(
                         m.row("pouring_off", size=boiling["pouring_off"].size[0])
                         m.row("extra", size=2)
 
+        m.block("stub", size=(0, 2))
+
     # - Make saltings
+
+    # -- Total salting block
+
+    saltings = list(schedule.iter(cls="salting"))
+    m.row("total_salting", x=saltings[0].x[0], size=saltings[-1].y[0] - saltings[0].x[0])
+
+    # -- Saltings
 
     for cheese_maker_num in range(1, 5):
         with m.block(f"salting_cheese_maker"):
@@ -85,10 +95,14 @@ def wrap_frontend2(
                     axis=1,
                 ):
                     with m.block():
-                        m.row("salting_id_label", size=1, boiling_id=salting.props["boiling_id"])
-                        m.row(
+                        m.block(
+                            "salting_id_label",
+                            size=(2, 2),
+                            boiling_id=salting.props["boiling_id"],
+                        )
+                        m.block(
                             "salting_name_label",
-                            size=salting.size[0] - 1,
+                            size=(salting.size[0] - 2, 2),
                             boiling_label="boiling_label",
                         )
 
