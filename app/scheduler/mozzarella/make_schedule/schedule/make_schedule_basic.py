@@ -83,55 +83,32 @@ class Validator(ClassValidator):
             ):
                 validate_disjoint_by_axis(p1, p2)
 
+            # - Process lactose to non-lactose and vice versa
+
             # if water and different boilings - cannot intersect serving with meltings
-            if boiling_model1.line.name == LineName.WATER and boiling_model1 != boiling_model2:
-                # todo later: deprecated, delete [@marklidenberg]
-                # validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
+            if boiling_model1 != boiling_model2:
+                if not boiling_model1.is_lactose and boiling_model2.is_lactose:
+                    # - Check if first non-lactose boiling is full
 
-                # todo next
-                # 3.2
-                # бл полная, можем 10 наложить
-                # бл неполная, можем 30 наложить
-
-                if not boiling_model1.is_lactose:
                     _df = b1s.props["boiling_group_df"]
                     _df["is_lactose"] = _df["sku"].apply(lambda sku: sku.made_from_boilings[0].is_lactose)
-                    if not _df["is_lactose"].any():
-                        if boiling_model1.percent == boiling_model2.percent:
-                            # 3.3 бл неполная -> 3.3
-                            validate_disjoint_by_axis(
-                                b1s["melting_and_packing"]["melting"]["meltings"],
-                                b2s["melting_and_packing"]["melting"]["serving"],
-                                distance=-4,
-                            )
-                        else:
-                            # 3.3 бл неполная -> 3.6
-                            validate_disjoint_by_axis(
-                                b1s["melting_and_packing"]["melting"]["meltings"],
-                                b2s["melting_and_packing"]["melting"]["serving"],
-                                distance=-2,
-                            )
-                    else:
-                        # 3.3 бл полная -> 3.3/3.6
-                        validate_disjoint_by_axis(
-                            b1s["melting_and_packing"]["melting"]["meltings"],
-                            b2s["melting_and_packing"]["melting"]["serving"],
-                            distance=-2,
-                        )
-                elif boiling_model1.percent != boiling_model2.percent:
-                    # 3.6, 3.3 - add extra 10 minutes
+                    _is_full = not _df["is_lactose"].any()
+
                     validate_disjoint_by_axis(
                         b1s["melting_and_packing"]["melting"]["meltings"],
                         b2s["melting_and_packing"]["melting"]["serving"],
-                        distance=-2,
+                        distance=-2 if _is_full else -6,  # 10 минут, если полная и 30м, если неполная
+                        ordered=True,
                     )
-                else:
-                    # 3.3 Альче Белзактозная -> 3.3 Сакко
+                elif boiling_model1.is_lactose and not boiling_model2.is_lactose:
                     validate_disjoint_by_axis(
                         b1s["melting_and_packing"]["melting"]["meltings"],
                         b2s["melting_and_packing"]["melting"]["serving"],
+                        distance=2,
+                        ordered=True,
                     )
-            #
+
+            # deprecated
             # with code('there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors'):
             #     mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
             #     mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
@@ -161,20 +138,6 @@ class Validator(ClassValidator):
             #         # at least one hour should pass between meltings
             #         validate_disjoint_by_axis(_b1s, _b2s, distance=24, ordered=True)
 
-            with code("Process lactose switch on salt line"):
-                if boiling_model1.line.name == LineName.SALT:
-                    if boiling_model1.is_lactose and not boiling_model2.is_lactose:
-                        _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
-                        _b2s = b2s["melting_and_packing"]["melting"]["serving"]
-                        validate_disjoint_by_axis(_b1s, _b2s, distance=2, ordered=True)
-
-                    if not boiling_model1.is_lactose and boiling_model2.is_lactose:
-                        _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
-                        _b2s = b2s["melting_and_packing"]["melting"]["serving"]
-                        validate_disjoint_by_axis(_b1s, _b2s, distance=-2, ordered=True)
-
-                        # todo next
-                        # если неполная - можно больше наложить
         else:
             # different lines
 
@@ -630,7 +593,7 @@ class ScheduleMaker:
         current_best_score = self.depth_to_min_score.get(depth, 100000000)
         self.depth_to_min_score[depth] = min(current_best_score, score)
 
-        # # todo next: delete [@marklidenberg]
+        # [DEBUG]
         # if len(configuration) >= 1 and (configuration + [line_name])[:2] != [LineName.SALT, LineName.SALT]:
         #     configuration, score = [], MAX_SCORE
 
