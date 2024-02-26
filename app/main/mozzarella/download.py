@@ -75,7 +75,7 @@ def download_last_packer_plan():
 
     result_df = pd.concat(dfs_water + dfs_salt)
     result_df["speed"] = result_df["sku"].apply(lambda x: x.packing_speed)
-    result_df = result_df[["sku_name", "packer", "speed", "total_time", "pause", "kg"]]
+    result_df = result_df[["sku_name", "code", "packer", "speed", "total_time", "pause", "kg"]]
     result_df["sku_name"] = result_df["sku_name"].apply(lambda x: x.replace(";", ","))
     result_df["packer"] = result_df["packer"].apply(lambda x: x.replace(";", ","))
 
@@ -148,7 +148,6 @@ class PackerParser:
             raise PackerParserException(f"Число различных SKU на линии {line_name} в варках не совпадает с расписанием")
 
         boiling_df = boiling_df.drop(boiling_df.nsmallest(len(boiling_df) - len(packer_df), columns=["kg"]).index)
-
         for i, (_, row) in enumerate(packer_df.iterrows()):
             beg, end = row["x0"], row["y0"]
             if not reconfiguration_df[reconfiguration_df["y0"] == beg].empty:
@@ -165,9 +164,10 @@ class PackerParser:
             )
         df = pd.DataFrame(result)
         if not df.empty:
-            df["pause"] = (df["beg"].shift(-1) - df["end"]).fillna(0)
+            df["pause"] = (df["beg"] - df["end"].shift(1)).fillna(0)
             df["pause"] = 5 * df["pause"]
             df["sku_name"] = df["sku"].apply(lambda x: x.name)
+            df["code"] = df["sku"].apply(lambda x: x.code)
             df["packer"] = df["sku"].apply(lambda x: x.packers[0].name)
         return df
 
