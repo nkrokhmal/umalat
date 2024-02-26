@@ -41,10 +41,9 @@ MAX_SCORE = 10000000000
 
 
 class Validator(ClassValidator):
-    def __init__(self, window=20, strict_order=False, sheet_order=True):
+    def __init__(self, window=20, strict_order=False):
         super().__init__(window=window)
         self.strict_order = strict_order
-        self.sheet_order = sheet_order
 
     def validate__boiling__boiling(self, b1, b2):
         b1s, b2s = min([b1, b2], key=lambda b: b.x[0]), max([b1, b2], key=lambda b: b.x[0])
@@ -88,6 +87,12 @@ class Validator(ClassValidator):
             if boiling_model1.line.name == LineName.WATER and boiling_model1 != boiling_model2:
                 # todo later: deprecated, delete [@marklidenberg]
                 # validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
+
+                # todo next
+                # 3.2
+                # бл полная, можем 10 наложить
+                # бл неполная, можем 30 наложить
+
                 if not boiling_model1.is_lactose:
                     _df = b1s.props["boiling_group_df"]
                     _df["is_lactose"] = _df["sku"].apply(lambda sku: sku.made_from_boilings[0].is_lactose)
@@ -167,6 +172,9 @@ class Validator(ClassValidator):
                         _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
                         _b2s = b2s["melting_and_packing"]["melting"]["serving"]
                         validate_disjoint_by_axis(_b1s, _b2s, distance=-2, ordered=True)
+
+                        # todo next
+                        # если неполная - можно больше наложить
         else:
             # different lines
 
@@ -187,10 +195,6 @@ class Validator(ClassValidator):
 
         if self.strict_order:
             validate_order_by_axis(b1, b2)
-
-        with code("Order should be strict inside one configuration sheet"):
-            if self.sheet_order and b1.props["sheet"] == b2.props["sheet"]:
-                validate_order_by_axis(b1, b2)
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
@@ -362,9 +366,9 @@ class ScheduleMaker:
             push(
                 self.m.root["master"],
                 boiling,
-                push_func=AwaitingPusher(max_period=8),
+                push_func=AwaitingPusher(max_period=13),
                 validator=Validator(strict_order=True),
-                max_tries=9,
+                max_tries=14,
             )
 
         if shrink_drenators:
@@ -460,7 +464,14 @@ class ScheduleMaker:
 
         # - Find optimal configuration
 
-        configuration, score = self._find_optimal_configuration()
+        if self.start_configuration and len(self.start_configuration) == len(self.left_df):
+            configuration, score = self.start_configuration, 0
+        else:
+            if len(self.left_df["sheet"].unique()) == 1:
+                # take from list as is (usually from final schedule where everything is in order, both lines on one boiling plan sheet)
+                configuration, score = self.left_df["line_name"].tolist(), 0
+            else:
+                configuration, score = self._find_optimal_configuration()
 
         logger.error(
             "Optimal configuration",
@@ -650,9 +661,7 @@ class ScheduleMaker:
 
         # - Get cur_lines
 
-        lines_left_count = len(
-            set([row["line_name"] for row in [grp.iloc[0] for i, grp in self.left_df.groupby("sheet")]])
-        )
+        lines_left_count = len(set([row["line_name"] for i, row in self.left_df.iterrows()]))
 
         if lines_left_count == 0:
             score = calc_partial_score(self.m.root, start_times=self.start_times)
@@ -932,7 +941,7 @@ class ScheduleMaker:
                         self.m.root["master"],
                         pc,
                         push_func=BackwardsPusher(max_period=max_push),
-                        validator=Validator(window=100, sheet_order=False),
+                        validator=Validator(window=100),
                         max_tries=max_push + 1,
                     )
 
@@ -943,7 +952,7 @@ class ScheduleMaker:
             self.m.root["master"],
             b1,
             push_func=BackwardsPusher(max_period=max_push),
-            validator=Validator(window=100, sheet_order=False),
+            validator=Validator(window=100),
             max_tries=max_push + 1,
         )
 
