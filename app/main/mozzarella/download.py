@@ -50,14 +50,25 @@ def download_mozzarella_boiling_plan():
     return response
 
 
-@main.route("/download_last_packer_plan", methods=["GET", "POST"])
+@main.route("/download_last_packer_plan", methods=["GET"])
 def download_last_packer_plan():
-    last_schedule_path = max(
-        glob.glob(
-            f"{os.path.dirname(flask.current_app.root_path)}/{flask.current_app.config['DYNAMIC_DIR']}/*/"
+    date = flask.request.args.get("date", None)
+
+    if date is None:
+        last_schedule_path = max(
+            glob.glob(
+                f"{os.path.dirname(flask.current_app.root_path)}/{flask.current_app.config['DYNAMIC_DIR']}/*/"
+                f"approved/*Расписание моцарелла*"
+            )
+        )
+    else:
+        last_schedule_paths = glob.glob(
+            f"{os.path.dirname(flask.current_app.root_path)}/{flask.current_app.config['DYNAMIC_DIR']}/{date}/"
             f"approved/*Расписание моцарелла*"
         )
-    )
+        if not last_schedule_paths:
+            raise PackerParserException(f"Нет файла расписания моцареллы за дату {date}")
+        last_schedule_path = last_schedule_paths[0]
 
     wb = openpyxl.load_workbook(filename=last_schedule_path, data_only=True)
 
