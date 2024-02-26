@@ -465,7 +465,25 @@ class ScheduleMaker:
         # - Find optimal configuration
 
         if self.start_configuration and len(self.start_configuration) >= len(self.left_df):
-            configuration, score = self.start_configuration, 0
+            # - Take self.start_configuration as is, but crop it to fit the left_df
+
+            water_count = len(self.left_df[self.left_df["line_name"] == LineName.WATER])
+            salt_count = len(self.left_df[self.left_df["line_name"] == LineName.SALT])
+
+            configuration = []
+            for line_name in self.start_configuration:
+                if line_name == LineName.WATER and water_count > 0:
+                    configuration.append(line_name)
+                    water_count -= 1
+                if line_name == LineName.SALT and salt_count > 0:
+                    configuration.append(line_name)
+                    salt_count -= 1
+
+            if len(configuration) < len(self.left_df):
+                raise Exception("Start configuration is not enough to process all boilings")
+
+            score = 0
+
         else:
             if len(self.left_df["sheet"].unique()) == 1:
                 # take from list as is (usually from final schedule where everything is in order, both lines on one boiling plan sheet)
