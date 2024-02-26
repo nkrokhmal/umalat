@@ -41,10 +41,9 @@ MAX_SCORE = 10000000000
 
 
 class Validator(ClassValidator):
-    def __init__(self, window=20, strict_order=False, sheet_order=True):
+    def __init__(self, window=20, strict_order=False):
         super().__init__(window=window)
         self.strict_order = strict_order
-        self.sheet_order = sheet_order
 
     def validate__boiling__boiling(self, b1, b2):
         b1s, b2s = min([b1, b2], key=lambda b: b.x[0]), max([b1, b2], key=lambda b: b.x[0])
@@ -84,49 +83,32 @@ class Validator(ClassValidator):
             ):
                 validate_disjoint_by_axis(p1, p2)
 
+            # - Process lactose to non-lactose and vice versa
+
             # if water and different boilings - cannot intersect serving with meltings
-            if boiling_model1.line.name == LineName.WATER and boiling_model1 != boiling_model2:
-                # todo later: deprecated, delete [@marklidenberg]
-                # validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"])
-                if not boiling_model1.is_lactose:
+            if boiling_model1 != boiling_model2:
+                if not boiling_model1.is_lactose and boiling_model2.is_lactose:
+                    # - Check if first non-lactose boiling is full
+
                     _df = b1s.props["boiling_group_df"]
                     _df["is_lactose"] = _df["sku"].apply(lambda sku: sku.made_from_boilings[0].is_lactose)
-                    if not _df["is_lactose"].any():
-                        if boiling_model1.percent == boiling_model2.percent:
-                            # 3.3 бл неполная -> 3.3
-                            validate_disjoint_by_axis(
-                                b1s["melting_and_packing"]["melting"]["meltings"],
-                                b2s["melting_and_packing"]["melting"]["serving"],
-                                distance=-4,
-                            )
-                        else:
-                            # 3.3 бл неполная -> 3.6
-                            validate_disjoint_by_axis(
-                                b1s["melting_and_packing"]["melting"]["meltings"],
-                                b2s["melting_and_packing"]["melting"]["serving"],
-                                distance=-2,
-                            )
-                    else:
-                        # 3.3 бл полная -> 3.3/3.6
-                        validate_disjoint_by_axis(
-                            b1s["melting_and_packing"]["melting"]["meltings"],
-                            b2s["melting_and_packing"]["melting"]["serving"],
-                            distance=-2,
-                        )
-                elif boiling_model1.percent != boiling_model2.percent:
-                    # 3.6, 3.3 - add extra 10 minutes
+                    _is_full = not _df["is_lactose"].any()
+
                     validate_disjoint_by_axis(
                         b1s["melting_and_packing"]["melting"]["meltings"],
                         b2s["melting_and_packing"]["melting"]["serving"],
-                        distance=-2,
+                        distance=-2 if _is_full else -6,  # 10 минут, если полная и 30м, если неполная
+                        ordered=True,
                     )
-                else:
-                    # 3.3 Альче Белзактозная -> 3.3 Сакко
+                elif boiling_model1.is_lactose and not boiling_model2.is_lactose:
                     validate_disjoint_by_axis(
                         b1s["melting_and_packing"]["melting"]["meltings"],
                         b2s["melting_and_packing"]["melting"]["serving"],
+                        distance=2,
+                        ordered=True,
                     )
-            #
+
+            # deprecated
             # with code('there should be one hour pause between non-"Палочки 15/7" and "Палочки 15/7" form-factors'):
             #     mp1 = b1s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][-1]
             #     mp2 = b2s["melting_and_packing"]["melting"]["meltings"]["melting_process", True][0]
@@ -156,17 +138,6 @@ class Validator(ClassValidator):
             #         # at least one hour should pass between meltings
             #         validate_disjoint_by_axis(_b1s, _b2s, distance=24, ordered=True)
 
-            with code("Process lactose switch on salt line"):
-                if boiling_model1.line.name == LineName.SALT:
-                    if boiling_model1.is_lactose and not boiling_model2.is_lactose:
-                        _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
-                        _b2s = b2s["melting_and_packing"]["melting"]["serving"]
-                        validate_disjoint_by_axis(_b1s, _b2s, distance=2, ordered=True)
-
-                    if not boiling_model1.is_lactose and boiling_model2.is_lactose:
-                        _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
-                        _b2s = b2s["melting_and_packing"]["melting"]["serving"]
-                        validate_disjoint_by_axis(_b1s, _b2s, distance=-2, ordered=True)
         else:
             # different lines
 
@@ -187,10 +158,6 @@ class Validator(ClassValidator):
 
         if self.strict_order:
             validate_order_by_axis(b1, b2)
-
-        with code("Order should be strict inside one configuration sheet"):
-            if self.sheet_order and b1.props["sheet"] == b2.props["sheet"]:
-                validate_order_by_axis(b1, b2)
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
@@ -362,9 +329,9 @@ class ScheduleMaker:
             push(
                 self.m.root["master"],
                 boiling,
-                push_func=AwaitingPusher(max_period=8),
+                push_func=AwaitingPusher(max_period=13),
                 validator=Validator(strict_order=True),
-                max_tries=9,
+                max_tries=14,
             )
 
         if shrink_drenators:
@@ -460,7 +427,32 @@ class ScheduleMaker:
 
         # - Find optimal configuration
 
-        configuration, score = self._find_optimal_configuration()
+        if self.start_configuration and len(self.start_configuration) >= len(self.left_df):
+            # - Take self.start_configuration as is, but crop it to fit the left_df
+
+            water_count = len(self.left_df[self.left_df["line_name"] == LineName.WATER])
+            salt_count = len(self.left_df[self.left_df["line_name"] == LineName.SALT])
+
+            configuration = []
+            for line_name in self.start_configuration:
+                if line_name == LineName.WATER and water_count > 0:
+                    configuration.append(line_name)
+                    water_count -= 1
+                if line_name == LineName.SALT and salt_count > 0:
+                    configuration.append(line_name)
+                    salt_count -= 1
+
+            if len(configuration) < len(self.left_df):
+                raise Exception("Start configuration is not enough to process all boilings")
+
+            score = 0
+
+        else:
+            if len(self.left_df["sheet"].unique()) == 1:
+                # take from list as is (usually from final schedule where everything is in order, both lines on one boiling plan sheet)
+                configuration, score = self.left_df["line_name"].tolist(), 0
+            else:
+                configuration, score = self._find_optimal_configuration()
 
         logger.error(
             "Optimal configuration",
@@ -601,7 +593,7 @@ class ScheduleMaker:
         current_best_score = self.depth_to_min_score.get(depth, 100000000)
         self.depth_to_min_score[depth] = min(current_best_score, score)
 
-        # # todo next: delete [@marklidenberg]
+        # [DEBUG]
         # if len(configuration) >= 1 and (configuration + [line_name])[:2] != [LineName.SALT, LineName.SALT]:
         #     configuration, score = [], MAX_SCORE
 
@@ -650,9 +642,7 @@ class ScheduleMaker:
 
         # - Get cur_lines
 
-        lines_left_count = len(
-            set([row["line_name"] for row in [grp.iloc[0] for i, grp in self.left_df.groupby("sheet")]])
-        )
+        lines_left_count = len(set([row["line_name"] for i, row in self.left_df.iterrows()]))
 
         if lines_left_count == 0:
             score = calc_partial_score(self.m.root, start_times=self.start_times)
@@ -932,7 +922,7 @@ class ScheduleMaker:
                         self.m.root["master"],
                         pc,
                         push_func=BackwardsPusher(max_period=max_push),
-                        validator=Validator(window=100, sheet_order=False),
+                        validator=Validator(window=100),
                         max_tries=max_push + 1,
                     )
 
@@ -943,7 +933,7 @@ class ScheduleMaker:
             self.m.root["master"],
             b1,
             push_func=BackwardsPusher(max_period=max_push),
-            validator=Validator(window=100, sheet_order=False),
+            validator=Validator(window=100),
             max_tries=max_push + 1,
         )
 
