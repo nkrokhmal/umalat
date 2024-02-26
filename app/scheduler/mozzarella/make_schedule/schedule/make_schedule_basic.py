@@ -464,7 +464,7 @@ class ScheduleMaker:
 
         # - Find optimal configuration
 
-        if self.start_configuration and len(self.start_configuration) == len(self.left_df):
+        if self.start_configuration and len(self.start_configuration) >= len(self.left_df):
             configuration, score = self.start_configuration, 0
         else:
             if len(self.left_df["sheet"].unique()) == 1:
