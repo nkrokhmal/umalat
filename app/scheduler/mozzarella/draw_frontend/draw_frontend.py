@@ -89,7 +89,7 @@ def test():
     #     Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
     # )
 
-    fn = """/Users/marklidenberg/Downloads/2024-01-31 План по варкам моцарелла.xlsx"""
+    fn = """/Users/marklidenberg/Desktop/2024.02.29 mozzarella fix/2024-03-01 План по варкам моцарелла.xlsx"""
 
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
@@ -102,7 +102,7 @@ def test():
         first_batch_ids_by_type={"mozzarella": 1000},
         # start_configuration=[
         #     LineName.WATER if value == "В" else LineName.SALT
-        #     for value in "В-В-В-В-В-С-В-С-В-С-В-С-С-В-С-В-С-С-В-С-В-С-С-С-С-С".split("-")  # 4
+        #     for value in "В-С-В-С-В-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С".split("-")  # 4
         # ],
     )
 
@@ -123,7 +123,7 @@ def test():
 
     # print(output["schedule"])
     schedule_wb.save("schedule2.xlsx")
-    # open_file_in_os("schedule2.xlsx")
+    open_file_in_os("schedule2.xlsx")
 
     print("Elapsed", time.time() - started_at)
 
