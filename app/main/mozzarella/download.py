@@ -238,15 +238,17 @@ class PackerParser:
                         "pause": 0,
                     }
                 )
+        df = pd.DataFrame(result)
+        if df.empty:
+            return df
 
-        df = pd.DataFrame(result).sort_values(by="beg")
-        if not df.empty:
-            df["pause"] = (df["beg"] - df["end"].shift(1)).fillna(0)
-            df["pause"] = 5 * df["pause"]
-            df.loc[df["pause"] < 0, "pause"] = 0
-            df["sku_name"] = df["sku"].apply(lambda x: x.name)
-            df["code"] = df["sku"].apply(lambda x: x.code)
-            df["packer"] = df["sku"].apply(lambda x: x.packers[0].name)
+        df = df.sort_values(by="beg")
+        df["pause"] = (df["beg"] - df["end"].shift(1)).fillna(0)
+        df["pause"] = 5 * df["pause"]
+        df.loc[df["pause"] < 0, "pause"] = 0
+        df["sku_name"] = df["sku"].apply(lambda x: x.name)
+        df["code"] = df["sku"].apply(lambda x: x.code)
+        df["packer"] = df["sku"].apply(lambda x: x.packers[0].name)
 
         for i, row in df.iterrows():
             if i == 0:
