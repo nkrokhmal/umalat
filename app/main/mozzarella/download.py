@@ -169,7 +169,7 @@ class PackerParser:
                     raise PackerParserException(f"Не удается считать варку с номером {row['label']}")
 
                 beg, end = row["x0"], descr_df.iloc[0]["y0"]
-                boiling_packing_df = packing_df[(packing_df["x0"] >= beg) & (packing_df["x0"] <= end)]
+                boiling_packing_df = packing_df[(packing_df["x0"] >= beg) & (packing_df["x0"] < end)]
 
                 packings = []
                 for _, p_row in boiling_packing_df.iterrows():
