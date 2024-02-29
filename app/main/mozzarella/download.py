@@ -16,6 +16,14 @@ from app.main import main
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 
 
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
 @main.route("/download_mozzarella_schedule", methods=["GET"])
 @flask_login.login_required
 def download_mozzarella_schedule():
@@ -86,7 +94,8 @@ def download_last_packer_plan():
 
     result_df = pd.concat(dfs_water + dfs_salt)
     result_df["speed"] = result_df["sku"].apply(lambda x: x.packing_speed)
-    result_df = result_df[["sku_name", "code", "packer", "speed", "total_time", "pause", "kg"]]
+    result_df = result_df[["sku_name", "code", "packer", "speed", "total_time", "pause", "original_kg", "batch_id"]]
+    result_df.rename({"original_kg": "kg"}, axis=1, inplace=True)
     result_df["sku_name"] = result_df["sku_name"].apply(lambda x: x.replace(";", ","))
     result_df["packer"] = result_df["packer"].apply(lambda x: x.replace(";", ","))
 
@@ -102,7 +111,7 @@ class ScheduleParams:
     reconfiguration_color: str = "#ff0000"
     packer_color: str = "#f2dcdb"
 
-    water_packer_x: int = None
+    water_packer_x: tuple[int] | None = None
     salt_packers_x: tuple[int, int] | None = None
 
 
@@ -124,7 +133,9 @@ class PackerParser:
             self.params.water_packer_x = None
         else:
             x1 = water_df.iloc[0]
-            self.params.water_packer_x = self.df[(self.df["x1"] > x1) & (self.df["label"] == "Смена 1")]["x1"].min() + 3
+            self.params.water_packer_x = (
+                self.df[(self.df["x1"] > x1) & (self.df["label"] == "Смена 1")]["x1"].min() + 3,
+            )
 
         salt_df = self.df[self.df["label"] == "Линия плавления моцареллы в рассоле №2"]["x1"]
         if salt_df.empty:
@@ -134,10 +145,59 @@ class PackerParser:
             salt_x = self.df[(self.df["x1"] > x1) & (self.df["label"] == "Смена 1")]["x1"].min() + 3
             self.params.salt_packers_x = (salt_x, salt_x + 3)
 
-    def filter_packer(self, packer_x: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-        packing_df = self.df[(self.df["x1"] == packer_x) & (self.df["color"] == self.params.packer_color)]
-        reconfig_df = self.df[(self.df["x1"] == packer_x) & (self.df["color"] == self.params.reconfiguration_color)]
-        return packing_df, reconfig_df
+    def parse_packings(self, line="water"):
+        x_coordinates = self.params.water_packer_x if line == "water" else self.params.salt_packers_x
+        packing_info = {}
+        extra_change_dfs = []
+        for x in x_coordinates[::-1]:
+            batch_df = self.df[self.df["x1"] == x - 2]
+            batch_df["is_int"] = batch_df.label.apply(is_int)
+
+            extra_change_df = batch_df[batch_df.label == "замена воды "]
+            extra_change_df["diff"] = extra_change_df["y0"] - extra_change_df["x0"]
+            extra_change_dfs.append(extra_change_df)
+
+            packing_df = self.df[(self.df["x1"] == x) & (self.df["color"] == self.params.packer_color)]
+            reconfig_df = self.df[(self.df["x1"] == x) & (self.df["color"] == self.params.reconfiguration_color)]
+
+            for _, row in batch_df[batch_df["is_int"]].iterrows():
+                if row["y0"] - row["x0"] != 3:
+                    continue
+
+                descr_df = batch_df[batch_df["x0"] == row["y0"]]
+                if descr_df.empty:
+                    raise PackerParserException(f"Не удается считать варку с номером {row['label']}")
+
+                beg, end = row["x0"], descr_df.iloc[0]["y0"]
+                boiling_packing_df = packing_df[(packing_df["x0"] >= beg) & (packing_df["x0"] <= end)]
+
+                packings = []
+                for _, p_row in boiling_packing_df.iterrows():
+                    p_beg, p_end = p_row["x0"], p_row["y0"]
+                    if not reconfig_df[reconfig_df["y0"] == p_beg].empty:
+                        p_beg -= 1
+                    packings.append(
+                        {
+                            "beg": p_beg,
+                            "end": p_end,
+                            "line": x,
+                        }
+                    )
+
+                batch_id = int(row["label"])
+                if batch_id in packing_info:
+                    packing_info[batch_id]["beg"] = min(packing_info[batch_id]["beg"], beg)
+                    packing_info[batch_id]["packings"] += packings
+                    packing_info[batch_id]["lines"].append(x)
+
+                else:
+                    packing_info[batch_id] = {"beg": beg, "end": end, "lines": [x], "packings": packings}
+        return packing_info, pd.concat(extra_change_dfs)
+
+    # def filter_packer(self, packer_x: int) -> tuple[pd.DataFrame, pd.DataFrame]:
+    #     packing_df = self.df[(self.df["x1"] == packer_x) & (self.df["color"] == self.params.packer_color)]
+    #     reconfig_df = self.df[(self.df["x1"] == packer_x) & (self.df["color"] == self.params.reconfiguration_color)]
+    #     return packing_df, reconfig_df
 
     @staticmethod
     def group_boiling_sku(df) -> pd.DataFrame:
@@ -145,41 +205,78 @@ class PackerParser:
         tmp["order_id"] = tmp.index
         return (
             tmp.groupby(["group_id", "sku_name"])
-            .agg({"kg": "sum", "sku": "first", "order_id": "first"})
+            .agg({"original_kg": "sum", "sku": "first", "order_id": "first"})
             .sort_values(by="order_id")
             .reset_index()
         )
 
-    @staticmethod
     def match_boiling_and_packer(
-        boiling_df: pd.DataFrame, packer_df: pd.DataFrame, reconfiguration_df: pd.DataFrame, line_name: str
+        self, boiling_df: pd.DataFrame, packer_info: dict, extra_change_df: pd.DataFrame, line_name: str
     ) -> pd.DataFrame:
         result = []
-        if len(packer_df) > len(boiling_df):
-            raise PackerParserException(f"Число различных SKU на линии {line_name} в варках не совпадает с расписанием")
+        group_ids = sorted(boiling_df.group_id.unique())
+        if len(packer_info) != len(group_ids):
+            raise PackerParserException(f"Число варок  на линии {line_name} не совпадает с расписанием")
 
-        boiling_df = boiling_df.drop(boiling_df.nsmallest(len(boiling_df) - len(packer_df), columns=["kg"]).index)
-        for i, (_, row) in enumerate(packer_df.iterrows()):
-            beg, end = row["x0"], row["y0"]
-            if not reconfiguration_df[reconfiguration_df["y0"] == beg].empty:
-                beg -= 1
-            result.append(
-                {
-                    "beg": beg,
-                    "end": end,
-                    "total_time": (end - beg) * 5,
-                    "sku": boiling_df["sku"].iloc[i],
-                    "kg": boiling_df["kg"].iloc[i],
-                    "pause": 0,
-                }
-            )
-        df = pd.DataFrame(result)
+        for key, group_id in zip(sorted(packer_info.keys()), group_ids):
+            info = packer_info[key]
+            df = boiling_df[boiling_df.group_id == group_id]
+            if len(info["packings"]) != len(df):
+                raise PackerParserException(
+                    f"Количество sku в варке {key} на линии {line_name} не совпадает с расписанием"
+                )
+
+            for i, value in enumerate(info["packings"]):
+                result.append(
+                    {
+                        "beg": value["beg"],
+                        "end": value["end"],
+                        "batch_id": key,
+                        "total_time": (value["end"] - value["beg"]) * 5,
+                        "sku": df["sku"].iloc[i],
+                        "original_kg": df["original_kg"].iloc[i],
+                        "pause": 0,
+                    }
+                )
+
+        df = pd.DataFrame(result).sort_values(by="beg")
         if not df.empty:
             df["pause"] = (df["beg"] - df["end"].shift(1)).fillna(0)
             df["pause"] = 5 * df["pause"]
+            df.loc[df["pause"] < 0, "pause"] = 0
             df["sku_name"] = df["sku"].apply(lambda x: x.name)
             df["code"] = df["sku"].apply(lambda x: x.code)
             df["packer"] = df["sku"].apply(lambda x: x.packers[0].name)
+
+        for i, row in df.iterrows():
+            if i == 0:
+                continue
+            if row["pause"] == 0:
+                continue
+            df.loc[i, "pause"] -= (
+                extra_change_df[
+                    (extra_change_df["y0"] <= row["beg"]) & (extra_change_df["x0"] >= df.iloc[i - 1]["end"])
+                ]["diff"].sum()
+                * 5
+            )
+
+        self.distribute_pause(df)
+        return df
+
+    @staticmethod
+    def distribute_pause(df: pd.DataFrame):
+        for _, df_batch in df.groupby("batch_id"):
+            idx = []
+            for i, (row_id, row) in enumerate(df_batch[::-1].iterrows()):
+                if i == len(df_batch) - 1:
+                    break
+                idx.append(row_id)
+                if row["pause"] != 0:
+                    sum_kg = df.loc[idx]["original_kg"].sum()
+                    df.loc[idx, "pause"] = row["pause"] * df["original_kg"] / sum_kg
+                    idx = []
+
+        df["pause"] = np.round(df["pause"], 2)
         return df
 
     def parse_water(self) -> tp.Generator[pd.DataFrame, None, None]:
@@ -188,10 +285,10 @@ class PackerParser:
             return
 
         water_df = self.boiling_plan_df[self.boiling_plan_df["line"].apply(lambda x: x.name == LineName.WATER)]
-        packing_df, reconfig_df = self.filter_packer(self.params.water_packer_x)
-
         water_df = self.group_boiling_sku(water_df)
-        yield self.match_boiling_and_packer(water_df, packing_df, reconfig_df, "Вода")
+        packing_info, extra_change_df = self.parse_packings("water")
+
+        yield self.match_boiling_and_packer(water_df, packing_info, extra_change_df, "Вода")
 
     def parse_salt(self) -> tp.Generator[pd.DataFrame, None, None]:
         if self.params.salt_packers_x is None:
@@ -199,15 +296,7 @@ class PackerParser:
             return
 
         salt_df = self.boiling_plan_df[self.boiling_plan_df["line"].apply(lambda x: x.name == LineName.SALT)]
-        for i, x in enumerate(self.params.salt_packers_x):
-            packing_df, reconfig_df = self.filter_packer(x)
-            if i == 0:
-                line_name = "Соль"
-                salt_df_filter = salt_df[salt_df["sku"].apply(lambda x: "Терка" not in x.form_factor.name)]
-            else:
-                line_name = "Соль, терка"
-                salt_df_filter = salt_df[salt_df["sku"].apply(lambda x: "Терка" in x.form_factor.name)]
+        salt_df = self.group_boiling_sku(salt_df)
+        packing_info, extra_change_df = self.parse_packings("salt")
 
-            salt_df_filter = self.group_boiling_sku(salt_df_filter)
-
-            yield self.match_boiling_and_packer(salt_df_filter, packing_df, reconfig_df, line_name)
+        yield self.match_boiling_and_packer(salt_df, packing_info, extra_change_df, "Соль")
