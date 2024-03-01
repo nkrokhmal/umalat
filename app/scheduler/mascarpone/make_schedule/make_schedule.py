@@ -338,6 +338,7 @@ def make_schedule(
                 not is_first
                 and not is_new_group
                 and grp.iloc[0]["sku"].weight_netto != prev_grp.iloc[-1]["sku"].weight_netto
+                and {grp.iloc[0]["sku"].weight_netto, prev_grp.iloc[-1]["sku"].weight_netto} != {0.14, 0.18}
             ):
                 packing_switch = m.block(
                     "packing_switch",
