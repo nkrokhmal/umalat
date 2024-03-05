@@ -94,7 +94,7 @@ class BrynzaFiller(BaseFiller):
         for _, row in _df.iterrows():
             name = self._boiling_technology_name(row)
             yield BrynzaBoiling(
-                name=f"{row['Процент']}_{row['Выход']}",
+                name=f"{row['Процент']}_{row['Выход']}_{row['Вес нетто']}",
                 percent=row["Процент"],
                 weight=row["Вес нетто"],
                 boiling_technologies=[t for t in technologies if t.name == name],
@@ -114,6 +114,7 @@ class BrynzaFiller(BaseFiller):
             "Название форм фактора",
             "Скорость варки",
             "Kод",
+            "Выход",
         ]
 
         line = db.session.query(Line).filter_by(name=LineName.BRYNZA).first()
@@ -133,7 +134,9 @@ class BrynzaFiller(BaseFiller):
                 code=row["Kод"],
                 line=line,
                 made_from_boilings=[
-                    b for b in boilings if b.percent == row["Процент"] and b.weight == row["Вес нетто"]
+                    b
+                    for b in boilings
+                    if b.percent == row["Процент"] and b.weight == row["Вес нетто"] and b.output_kg == row["Выход"]
                 ],
                 group=next(x for x in groups if x.name == row["Название форм фактора"]),
                 form_factor=next(x for x in form_factors if x.name == "Масса"),

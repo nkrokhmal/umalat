@@ -7,12 +7,23 @@ import flask_login
 
 from utils_ak import openpyxl
 
+from app.imports.runtime import db
 from app.main import main
 from app.main.milk_project.forms import BrynzaScheduleForm
-from app.models import BatchNumber
+from app.models import BatchNumber, BrynzaSKU
 from app.scheduler.brynza.draw_frontend2.draw_frontend2 import draw_frontend2
 from app.scheduler.frontend_utils import fill_grid
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
+
+
+class BrynzaScheduleException(Exception):
+    ...
+
+
+def round_to_base(number, base):
+    rounded_number_in_base = round(number / base) * base
+    rounded_number = rounded_number_in_base
+    return rounded_number
 
 
 @main.route("/brynza_schedule", methods=["GET", "POST"])
@@ -24,6 +35,21 @@ def brynza_schedule():
         beg_time = form.beg_time.data
         brynza_kg = form.brynza_kg.data
         chanakh_kg = form.chanakh_kg.data
+
+        skus = db.session.query(BrynzaSKU).all()
+        chanakh_output = [sku for sku in skus if sku.group.name == "Чанах"][0].made_from_boilings[0].output_kg
+        brynza_output = [sku for sku in skus if sku.group.name == "Брынза"][0].made_from_boilings[0].output_kg
+        if abs(brynza_kg - round_to_base(brynza_kg, brynza_output)) > 50:
+            raise BrynzaScheduleException("Значение входа брынзы превышает допустимую погрешность в 50 кг")
+
+        if abs(chanakh_kg - round_to_base(chanakh_kg, chanakh_output)) > 50:
+            raise BrynzaScheduleException("Значение входа чаназа превышает допустимую погрешность в 50 кг")
+
+        brynza_kg = round_to_base(brynza_kg, brynza_output) / brynza_output * 3150 - 0.1
+        chanakh_kg = round_to_base(chanakh_kg, chanakh_output) / chanakh_output * 3150 - 0.1
+
+        print(f"Chanakh input {brynza_kg}")
+        print(f"Brynza input {chanakh_kg}")
 
         data_dir = os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
