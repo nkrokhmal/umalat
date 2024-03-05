@@ -45,8 +45,8 @@ def brynza_schedule():
         if abs(chanakh_kg - round_to_base(chanakh_kg, chanakh_output)) > 50:
             raise BrynzaScheduleException("Значение входа чаназа превышает допустимую погрешность в 50 кг")
 
-        brynza_kg = round_to_base(brynza_kg, brynza_output) / brynza_output * 3150 - 0.1
-        chanakh_kg = round_to_base(chanakh_kg, chanakh_output) / chanakh_output * 3150 - 0.1
+        brynza_kg = round_to_base(brynza_kg, brynza_output) / brynza_output * 3150
+        chanakh_kg = round_to_base(chanakh_kg, chanakh_output) / chanakh_output * 3150
 
         print(f"Chanakh input {brynza_kg}")
         print(f"Brynza input {chanakh_kg}")

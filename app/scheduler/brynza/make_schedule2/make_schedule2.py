@@ -53,7 +53,7 @@ def make_schedule2(
     current_id = first_batch_ids_by_type["brynza"]
     cheese_maker_id = 0
 
-    for boiling_id in range(math.ceil(int(brynza_kg / 3150)) + 1):
+    for boiling_id in range(math.ceil(int(brynza_kg / 3150))):
         push(
             m.root,
             make_boiling(
@@ -69,7 +69,7 @@ def make_schedule2(
 
     # - Make chanah boilings
 
-    for boiling_id in range(math.ceil(int(chanah_kg / 3150)) + 1):
+    for boiling_id in range(math.ceil(int(chanah_kg / 3150))):
         push(
             m.root,
             make_boiling(
@@ -88,7 +88,7 @@ def make_schedule2(
     current_id = 1
     cheese_maker_id = 0
 
-    for boiling_id in range(math.ceil(int(brynza_kg / 3150)) + 1):
+    for boiling_id in range(math.ceil(int(brynza_kg / 3150))):
         push(
             m.root,
             make_salting(
