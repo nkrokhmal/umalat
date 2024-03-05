@@ -40,7 +40,7 @@ def boiling_plan_create(df):
 
 
 def proceed_order(order, df, boilings_brynza, boilings_count=1):
-    df_filter = df[(df["group"] == order.group)]
+    df_filter = df[(df["group"] == "Брынза") | (df["group"] == "Чанах")]
     if not df_filter.empty:
         boilings_brynza.init_iterator(1e10)
         boilings_brynza.add_group(
@@ -57,6 +57,8 @@ def handle_boiling(df):
         Order("Брынза"),
     ]
     for order in orders:
+        logger.info(df)
         boilings_brynza = proceed_order(order, df, boilings_brynza)
+
     boilings_brynza.finish()
     return pd.DataFrame(boilings_brynza.boilings), boilings_brynza.boiling_number

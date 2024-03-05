@@ -6,5 +6,6 @@ from . import (
     params_boiling_technology,
     params_sku,
     schedule,
+    schedule_brynza,
     upload_schedule,
 )

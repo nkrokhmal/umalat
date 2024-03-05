@@ -31,9 +31,10 @@ class BrynzaBoiling(Boiling):
     name = mdb.Column(mdb.String)
     weight = mdb.Column(mdb.Float)
     percent = mdb.Column(mdb.Integer)
+    output_kg = mdb.Column(mdb.Integer)
 
     def to_str(self) -> str:
-        return str(self.percent)
+        return f"{self.percent}_{self.output_kg}"
 
 
 class BrynzaBoilingTechnology(BoilingTechnology):
@@ -43,14 +44,21 @@ class BrynzaBoilingTechnology(BoilingTechnology):
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
     boiling_speed = mdb.Column(mdb.Integer)
 
+    pouring_time = mdb.Column(mdb.Integer)
+    soldification_time = mdb.Column(mdb.Integer)
+    cutting_time = mdb.Column(mdb.Integer)
+    pouring_off_time = mdb.Column(mdb.Integer)
+    salting_time = mdb.Column(mdb.Integer)
+
     @staticmethod
     def create_name(
         form_factor: str,
         line: str,
         percent: float | int,
         weight: float | int,
+        output_kg: float | int,
     ) -> str:
-        return f"Линия {line}, Форм фактор {form_factor}, Вес {weight}, {percent}"
+        return f"Линия {line}, Форм фактор {form_factor}, Вес {weight}, {percent}, {output_kg}"
 
 
 __all__ = [
