@@ -153,7 +153,7 @@ class PackerParser:
             batch_df = self.df[self.df["x1"] == x - 2]
             batch_df["is_int"] = batch_df.label.apply(is_int)
 
-            extra_change_df = batch_df[batch_df.label == "замена воды "]
+            extra_change_df = batch_df[(batch_df.label == "замена воды ") | (batch_df.label == "замена воды")]
             extra_change_df["diff"] = extra_change_df["y0"] - extra_change_df["x0"]
             extra_change_dfs.append(extra_change_df)
 
@@ -161,8 +161,8 @@ class PackerParser:
             reconfig_df = self.df[(self.df["x1"] == x) & (self.df["color"] == self.params.reconfiguration_color)]
 
             for _, row in batch_df[batch_df["is_int"]].iterrows():
-                if row["y0"] - row["x0"] != 3:
-                    continue
+                # if row["y0"] - row["x0"] != 3:
+                #     continue
 
                 descr_df = batch_df[batch_df["x0"] == row["y0"]]
                 if descr_df.empty:
