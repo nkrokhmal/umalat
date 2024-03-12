@@ -262,11 +262,12 @@ class PackerParser:
                 * 5
             )
 
-        self.distribute_pause(df)
+        self.distribute_pause_inside_boiling(df)
+        self.distribute_pause_between_boiling(df)
         return df
 
     @staticmethod
-    def distribute_pause(df: pd.DataFrame):
+    def distribute_pause_inside_boiling(df: pd.DataFrame):
         for _, df_batch in df.groupby("batch_id"):
             idx = []
             for i, (row_id, row) in enumerate(df_batch[::-1].iterrows()):
@@ -278,6 +279,18 @@ class PackerParser:
                     df.loc[idx, "pause"] = row["pause"] * df["original_kg"] / sum_kg
                     idx = []
 
+        df["pause"] = np.round(df["pause"], 2)
+        return df
+
+    @staticmethod
+    def distribute_pause_between_boiling(df: pd.DataFrame):
+        for batch_id, df_batch in df.groupby("batch_id"):
+            pause = df_batch["pause"].iloc[0]
+            if pause == 0:
+                continue
+
+            df.loc[df_batch.index[0], "pause"] = 0
+            df.loc[df["batch_id"] == batch_id, "pause"] += pause * df["original_kg"] / df_batch["original_kg"].sum()
         df["pause"] = np.round(df["pause"], 2)
         return df
 
