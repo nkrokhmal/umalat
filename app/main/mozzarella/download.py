@@ -129,6 +129,8 @@ class PackerParser:
 
     def update_schedule_params(self) -> None:
         water_df = self.df[self.df["label"] == "Линия плавления моцареллы в воде №1"]["x1"]
+        salt_df = self.df[self.df["label"] == "Линия плавления моцареллы в рассоле №2"]["x1"]
+
         if water_df.empty:
             self.params.water_packer_x = None
         else:
@@ -136,8 +138,9 @@ class PackerParser:
             self.params.water_packer_x = (
                 self.df[(self.df["x1"] > x1) & (self.df["label"] == "Смена 1")]["x1"].min() + 3,
             )
+            if self.params.water_packer_x > salt_df.iloc[0]:
+                self.params.water_packer_x = None
 
-        salt_df = self.df[self.df["label"] == "Линия плавления моцареллы в рассоле №2"]["x1"]
         if salt_df.empty:
             self.params.salt_packers_x = None
         else:
