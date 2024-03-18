@@ -19,29 +19,13 @@ def draw_frontend(
     open_file: bool = False,
     **kwargs,
 ):
-    if not schedule:
-        if not properties_by_department:
-            if not schedules_by_department:
-                schedules_by_department = load_schedules_by_department(input_path, prefix=prefix)
+    # - Make frontend
 
-            # todo maybe: need a check here? [@marklidenberg]
-            # assert_schedules_presence(
-            #     schedules,
-            #     raise_if_not_present=["ricotta"],
-            #     warn_if_not_present=[
-            #         "mozzarella",
-            #         "butter",
-            #         "adygea",
-            #         "milk_project",
-            #         "mascarpone",
-            #     ],
-            # )
-
-            properties_by_department = load_properties_by_department(
-                schedules_by_department, path=input_path, prefix=prefix
-            )
-
-        schedule = make_schedule(properties_by_department, **kwargs)
+    schedules_by_department = schedules_by_department or load_schedules_by_department(input_path, prefix=prefix)
+    properties_by_department = properties_by_department or load_properties_by_department(
+        schedules_by_department, path=input_path, prefix=prefix
+    )
+    schedule = schedule or make_schedule(properties_by_department, **kwargs)
     frontend = wrap_frontend(schedule)
 
     # - Draw frontend
