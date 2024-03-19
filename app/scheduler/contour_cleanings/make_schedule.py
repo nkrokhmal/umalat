@@ -73,6 +73,30 @@ def _make_contour_1(properties_by_department: dict, basement_brine: bool = False
         label="Танк Моцарелла и дозаторы",
     )
 
+    # - Танки роникс 1/2
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from=cast_t(properties_by_department["adygea"].end_time) + 12,  # После адыгейского + час
+            validator=CleaningValidator(ordered=False),
+        ),
+        size=cast_t("01:00"),
+        label="Танки роникс 1/2",  # todo question: тут одна мойка? Конец адыгейского - это какой момент точно?
+    )
+
+    # - Сырое молоко на адыгейский
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from=0,
+            validator=CleaningValidator(ordered=True),
+        ),
+        size=cast_t("01:30"),
+        label="Сырое молоко на адыгейский",  # после роникса
+    )
+
     # - Линия подвал рассол
 
     if basement_brine:

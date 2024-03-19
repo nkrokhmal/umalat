@@ -45,7 +45,6 @@ def load_properties_by_department(
 
     for department in [
         "mozzarella",
-        "milk_project",
         "butter",
         "adygea",
     ]:

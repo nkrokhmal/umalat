@@ -20,6 +20,7 @@ def draw_frontend(
     # - Make frontend
 
     properties_by_department = properties_by_department or load_properties_by_department(path=input_path, prefix=prefix)
+
     schedule = schedule or make_schedule(properties_by_department, **kwargs)
     frontend = wrap_frontend(schedule)
 

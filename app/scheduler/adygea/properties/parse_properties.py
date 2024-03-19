@@ -84,9 +84,7 @@ def parse_properties(filename):
 def test():
     print(
         parse_properties(
-            filename=str(
-                get_repo_path() / "app/data/static/samples/by_department/adygea/2023-09-03 Расписание милкпроджект.xlsx"
-            )
+            """/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved/2024-03-15 Расписание милкпроджект.xlsx"""
         )
     )
 
