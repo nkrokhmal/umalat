@@ -6,25 +6,20 @@ from app.scheduler.contour_cleanings.load_properties_by_department import load_p
 from app.scheduler.contour_cleanings.make_schedule import make_schedule
 from app.scheduler.contour_cleanings.wrap_frontend import wrap_frontend
 from app.scheduler.frontend_utils import draw_excel_frontend
-from app.scheduler.load_schedules import load_schedules_by_department
 
 
 def draw_frontend(
     input_path: str,
     output_path: str = "outputs/",
     schedule=None,
-    schedules_by_department=None,
-    properties_by_department=None,
+    properties_by_department: dict = {},
     prefix="",
     open_file: bool = False,
     **kwargs,
 ):
     # - Make frontend
 
-    schedules_by_department = schedules_by_department or load_schedules_by_department(input_path, prefix=prefix)
-    properties_by_department = properties_by_department or load_properties_by_department(
-        schedules_by_department, path=input_path, prefix=prefix
-    )
+    properties_by_department = properties_by_department or load_properties_by_department(path=input_path, prefix=prefix)
     schedule = schedule or make_schedule(properties_by_department, **kwargs)
     frontend = wrap_frontend(schedule)
 
@@ -47,8 +42,8 @@ def draw_frontend(
 
 def test():
     draw_frontend(
-        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2023-09-03"),
-        prefix="2023-09-03",
+        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2023-12-14"),
+        prefix="2023-12-14",
         open_file=True,
     )
 

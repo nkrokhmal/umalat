@@ -37,12 +37,11 @@ EXCEL_PARSERS = {
 
 
 def load_properties_by_department(
-    schedules_by_department,
-    path=None,
-    prefix=None,
+    path: str,
+    prefix: str,
 ):
     # NOTE: RETURN BLANK PROPERTIES IF NOT PRESENT
-    properties = {}
+    properties_by_department = {}
 
     for department in [
         "mozzarella",
@@ -52,31 +51,23 @@ def load_properties_by_department(
         "ricotta",
         "mascarpone",
     ]:
-        if department in schedules_by_department.keys():
-            properties[department] = SCHEDULE_PARSERS[department](schedules_by_department[department])
-        else:
-            # try to find in files
+        # try to find in files
 
-            if path and prefix:
-                filename = os.path.join(
-                    path,
-                    f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES_BY_DEPARTMENT[department]}.xlsx",
+        filename = os.path.join(
+            path,
+            f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES_BY_DEPARTMENT[department]}.xlsx",
+        )
+        if os.path.exists(filename):
+            try:
+                properties_by_department[department] = EXCEL_PARSERS[department](filename)
+            except:
+                raise Exception(
+                    f"Произошла ошибка во время чтения параметров расписания из файла: {os.path.basename(filename)}"
                 )
-                if os.path.exists(filename):
-                    try:
-                        properties[department] = EXCEL_PARSERS[department](filename)
-                    except:
-                        # raise
-                        raise Exception(
-                            f"Произошла ошибка во время чтения параметров расписания из файла: {os.path.basename(filename)}"
-                        )
-                else:
-                    # init empty properties
-                    properties[department] = SCHEDULE_PARSERS[department]()
-            else:
-                # init empty properties
-                properties[department] = SCHEDULE_PARSERS[department]()
-    return properties
+        else:
+            # init empty properties
+            properties_by_department[department] = SCHEDULE_PARSERS[department]()
+    return properties_by_department
 
 
 def assert_properties_presence(properties, raise_if_not_present=None, warn_if_not_present=None):
