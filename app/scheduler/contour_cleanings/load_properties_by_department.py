@@ -48,8 +48,6 @@ def load_properties_by_department(
         "milk_project",
         "butter",
         "adygea",
-        "ricotta",
-        "mascarpone",
     ]:
         # try to find in files
 
@@ -93,11 +91,12 @@ def assert_properties_presence(properties, raise_if_not_present=None, warn_if_no
 
 
 def test():
-    print(
+    from pprint import pprint
+
+    pprint(
         load_properties_by_department(
-            schedules_by_department={},
-            path="/Users/marklidenberg/Downloads/Telegram Desktop/",
-            prefix="2021-09-03",
+            path="/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-16/approved",
+            prefix="2024-03-16",
         )
     )
 

@@ -52,10 +52,29 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
+def _make_contour_1(properties_by_department: dict, basement_brine: bool = False):
     # - Init block maker
 
     m = BlockMaker("1 contour")
+
+    # - Линия подвал рассол
+
+    if basement_brine:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t("07:00"), validator=CleaningValidator(ordered=False)),
+            size=cast_t("00:55"),
+            label="Линия подвал рассол",
+        )
+
+    # - Линия отгрузки сырья
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(start_from=cast_t("00:00"), validator=CleaningValidator(ordered=False)),
+        size=cast_t("00:55"),
+        label="Линия отгрузки сырья",
+    )
 
     # - Танки сырого молока
 
@@ -611,7 +630,7 @@ def make_schedule(properties_by_department, **kwargs):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(properties_by_department, shipping_line=kwargs.get("shipping_line", True)),
+        make_contour_1(properties_by_department),
         make_contour_2(properties_by_department),
         make_contour_3(
             properties_by_department,
