@@ -42,8 +42,8 @@ def draw_frontend(
 
 def test():
     draw_frontend(
-        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2023-12-14"),
-        prefix="2023-12-14",
+        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2023-09-03"),
+        prefix="2023-09-03",
         open_file=True,
     )
 

@@ -57,41 +57,120 @@ def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
 
     m = BlockMaker("1 contour")
 
-    # - Танки сырого молока
+    # - Shipping line
 
+    if shipping_line:
+        m.row("cleaning", push_func=add_push, size=cast_t("01:20"), x=cast_t("06:30"), label="Линиия отгрузки")
+
+    # - Milk reception 1
     m.row(
         "cleaning",
-        push_func=AxisPusher(start_from=cast_t("11:00"), validator=CleaningValidator(ordered=False)),
+        push_func=AxisPusher(start_from=cast_t("08:00"), validator=CleaningValidator()),
         size=cast_t("01:20"),
-        label="Танк сырого молока 1",
-    )
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("17:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("01:20"),
-        label="Танк сырого молока 2",
-    )
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("22:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("01:20"),
-        label="Танк сырого молока 3",
+        label="Линия приемки молока 1 + проверить фильтр",
     )
 
-    # - Линия приемки молока
+    # - Tanks
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("03:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("00:55"),
-        label="Линия приемки молока 1",
-    )
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("04:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("00:55"),
-        label="Линия приемки молока 2",
-    )
+    # get values when different percentage tanks end: [['3.6', 74], ['3.3', 94], ['2.7', 144]]
+    values = []
+    for percent, end_times in properties["mozzarella"].termizator_times().items():
+        if end_times:
+            for end_time in end_times:
+                values.append([percent, end_time, "01:50", False])
+        else:
+            # no tank cleaning - clean at the beginning
+            values.append([percent, "10:00", "01:05", True])
+
+    # filter empty values
+    values = [value for value in values if value[1]]
+
+    with code("remove extra tanks"):
+        n_total_tanks = len(values)
+        n_extra_tanks = max(0, n_total_tanks - 4)
+        full_tanks = [value for value in values if value[3] == False]
+        empty_tanks = [value for value in values if value[3] == True]
+        if n_extra_tanks:
+            empty_tanks = empty_tanks[:-n_extra_tanks]
+        values = full_tanks + empty_tanks
+
+    # convert time to t
+    for value in values:
+        value[1] = cast_t(value[1])
+
+    df = pd.DataFrame(values, columns=["percent", "pouring_end", "time", "is_short"])
+    df = df[["percent", "pouring_end", "time", "is_short"]]
+    df = df.sort_values(by="pouring_end")
+    values = df.values.tolist()
+
+    for percent, end, time, is_short in values:
+        label = f"Танк смесей {percent}" if not is_short else f"Танк смесей {percent} (кор. мойка)"
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=end, validator=CleaningValidator(ordered=False)),
+            size=cast_t(time),
+            label=label,
+        )
+
+    # - Shipping line 2
+
+    if shipping_line:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(validator=CleaningValidator()),
+            size=cast_t("01:20"),
+            label="Линия отгрузки",
+        )
+
+    def f1():
+        if properties["adygea"].is_present():
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(start_from=cast_t(properties["adygea"].end_time), validator=CleaningValidator()),
+                size=cast_t("01:50"),
+                label="Линия адыгейского",
+            )
+
+    def f2():
+        if properties["milk_project"].is_present():
+            start_from = [cast_t(properties["milk_project"].end_time)]
+            if properties["adygea"].is_present():
+                start_from.append(cast_t(properties["adygea"].end_time))
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(start_from=start_from, validator=CleaningValidator()),
+                size=cast_t("02:20"),
+                label="Милкпроджект",
+            )
+
+    def f3():
+        if properties["milk_project"].is_present():
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t(properties["milk_project"].end_time), validator=CleaningValidator(ordered=False)
+                ),
+                size=cast_t("01:20"),
+                label="Танк роникс",
+            )
+
+    run_order([f1, f2, f3], order)
+
+    for _ in range(3):
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False)),
+            size=cast_t("01:50"),
+            label="Танк сырого молока",
+        )
+
+    for _ in range(2):
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=0, validator=CleaningValidator(ordered=False)),
+            size=cast_t("01:50"),
+            label="Танк обрата",
+        )
 
     return m.root
 
