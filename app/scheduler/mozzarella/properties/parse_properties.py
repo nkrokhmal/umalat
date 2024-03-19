@@ -5,6 +5,7 @@ from typing import Union
 
 import pandas as pd
 
+from deeplay.utils.print_json import print_json
 from loguru import logger
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
@@ -15,7 +16,6 @@ from utils_ak.numeric.types import is_int, is_int_like
 from utils_ak.portion.portion_tools import calc_interval_length, cast_interval
 
 from app.enum import LineName
-from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
@@ -313,19 +313,12 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     props.bar12_present = "1.2" in [sku.form_factor.name for sku in boiling_plan_df["sku"]]
 
-    # - 2.7, 3.3, 3.6 tanks
+    # - 2.7, 3.2
 
-    _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.3"]
+    _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.2"]
     if _boilings:
         _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-        props.line33_last_termizator_end_times = [
-            cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings
-        ]
-
-    _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.6"]
-    if _boilings:
-        _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-        props.line36_last_termizator_end_times = [
+        props.line32_last_termizator_end_times = [
             cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings
         ]
 
@@ -391,6 +384,15 @@ def fill_properties(parsed_schedule, boiling_plan_df):
     props.cheesemaker2_end_time = cast_human_time(values_dict.get("1"))
     props.cheesemaker3_end_time = cast_human_time(values_dict.get("2"))
     props.cheesemaker4_end_time = cast_human_time(values_dict.get("3"))
+
+    # - Packing end
+
+    props.water_packing_end_time = cast_human_time(
+        max(b.y[0] for b in parsed_schedule["water_packings"]["packing", True])
+    )
+    props.salt_packing_end_time = cast_human_time(
+        max(b.y[0] for b in parsed_schedule["salt_packings"]["packing", True])
+    )
 
     # - Melting end
 
@@ -466,21 +468,17 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
 def parse_properties(filename):
     parsed_schedule = parse_schedule_file(filename)
-    boiling_plan_df = to_boiling_plan(filename)
+    boiling_plan_df = to_boiling_plan(filename, validate=False)
     boiling_plan_df = prepare_boiling_plan(parsed_schedule, boiling_plan_df=boiling_plan_df)
     props = fill_properties(parsed_schedule, boiling_plan_df=boiling_plan_df)
     return props
 
 
 def test():
-    print(
+    print_json(
         dict(
             parse_properties(
-                str(
-                    get_repo_path()
-                    # / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
-                    / "app/data/static/samples/by_day/2023-09-03/2023-09-03 Расписание моцарелла.xlsx"
-                )
+                """/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved/2024-03-15 Расписание моцарелла.xlsx"""
             )
         )
     )

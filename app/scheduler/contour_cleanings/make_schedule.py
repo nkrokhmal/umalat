@@ -12,18 +12,20 @@ from utils_ak.code_block.code import code
 from utils_ak.numeric.numeric import custom_round
 from utils_ak.optimizer.optimizer import optimize
 
+from lessmore.utils.easy_printing.print_json import print_json
+
 from app.scheduler.time_utils import cast_t
 
 
-# todo maybe: put in more proper place
+# todo maybe: put in more proper place [@marklidenberg]
 def calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings):
     total_scotta = (
         (1900 - 130) * ricotta_n_boilings + adygea_n_boilings * 370 + milk_project_n_boilings * 2400
-    )  # todo maybe: take from parameters
+    )  # todo maybe: take from parameters [@marklidenberg]
 
     assert (
         total_scotta < 80000 + 60000 + 60000
-    ), "Скотты больше, чем могут вместить танки. "  # todo maybe: take from parameters
+    ), "Скотты больше, чем могут вместить танки. "  # todo maybe: take from parameters [@marklidenberg]
 
     left_scotta = total_scotta
     values = [["4", 0.0], ["5", 0.0], ["8", 0.0]]
@@ -56,6 +58,20 @@ def _make_contour_1(properties_by_department: dict, basement_brine: bool = False
     # - Init block maker
 
     m = BlockMaker("1 contour")
+    print_json(dict(properties_by_department["mozzarella"]))
+
+    # - Танк “Моцарелла и дозаторы”
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from=cast_t(properties_by_department["mozzarella"].water_packing_end_time)
+            + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
+            validator=CleaningValidator(ordered=False),
+        ),
+        size=cast_t("01:15"),
+        label="Танк Моцарелла и дозаторы",
+    )
 
     # - Линия подвал рассол
 
@@ -448,6 +464,7 @@ def make_contour_4(properties, is_tomorrow_day_off=False):
 
         with code("Non used drenators"):
             values = []
+
             # run drenators that are not present
             non_used_ids = set(range(1, 9)) - used_ids
             non_used_ids = [str(x) for x in non_used_ids]
@@ -519,109 +536,123 @@ def make_contour_5(properties, input_tanks=None):
 
 def make_contour_6(properties):
     m = BlockMaker("6 contour")
-
-    if properties["milk_project"].is_present() or properties["adygea"].is_present():
-        with code("calc end time"):
-            values = []
-            if properties["adygea"].is_present():
-                values.append(properties["adygea"].end_time)
-            if properties["milk_project"].is_present():
-                values.append(properties["milk_project"].end_time)
-            end_time = max(values)
-
-        m.row(
-            "cleaning",
-            push_func=add_push,
-            x=cast_t(end_time),
-            size=cast_t("01:20"),
-            label="Линия сырого молока на роникс",
-        )
-
-    with code("Танк рикотты 1 внутри дня"):
-        whey_used = 1900 * properties["ricotta"].n_boilings
-        if whey_used > 100000:
-            m.row(
-                "cleaning",
-                push_func=AxisPusher(start_from=cast_t("12:00"), validator=CleaningValidator(ordered=False)),
-                size=cast_t("01:20"),
-                label="Танк рикотты (сладкая сыворотка)",
-            )
-
-    with code("cream tanks"):
-        if properties["mascarpone"].fourth_boiling_group_adding_lactic_acid_time:
-            m.row(
-                "cleaning",
-                push_func=AxisPusher(
-                    start_from=cast_t(properties["mascarpone"].fourth_boiling_group_adding_lactic_acid_time) + 12,
-                    validator=CleaningValidator(ordered=False),
-                ),
-                size=cast_t("01:20"),
-                label="Танк сливок",
-            )  # fourth mascarpone boiling group end + hour
-
-        m.row(
-            "cleaning",
-            push_func=AxisPusher(start_from=cast_t("09:00"), validator=CleaningValidator(ordered=False)),
-            size=cast_t("01:20"),
-            label="Танк сливок",
-        )
-
-    with code("mascarpone"):
-        if properties["mascarpone"].is_present():
-            m.row(
-                "cleaning",
-                push_func=AxisPusher(
-                    start_from=cast_t(properties["mascarpone"].last_pumping_off) + 6,
-                    validator=CleaningValidator(ordered=False),
-                ),
-                size=(cast_t("01:20"), 0),
-                label="Маскарпоне",
-            )
-
-    ricotta_end = cast_t(properties["ricotta"].last_pumping_out_time) or 0 + 12
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
-        size=cast_t("02:30"),
-        label="Линия сладкой сыворотки",
-    )
-
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
-        size=cast_t("01:20"),
-        label="Танк сливок",
-    )  # ricotta end + hour
-
-    with code("Танк рикотты 1"):
-        m.row(
-            "cleaning",
-            push_func=AxisPusher(
-                start_from=cast_t(properties["ricotta"].start_of_ninth_from_the_end_time)
-                or 0,  # todo maybe: remove or 0, make properly
-                validator=CleaningValidator(ordered=False),
-            ),
-            size=cast_t("01:20"),
-            label="Танк рикотты (сладкая сыворотка)",
-        )
-
-    for label in ["Линия сливок на подмес рикотта", "Танк рикотты (скотта)", "Танк рикотты (сладкая сыворотка)"]:
-        m.row(
-            "cleaning",
-            push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
-            size=cast_t("01:20"),
-            label=label,
-        )
-
-    if properties["butter"].is_present():
-        m.row(
-            "cleaning",
-            push_func=AxisPusher(
-                start_from=cast_t(properties["butter"].end_time), validator=CleaningValidator(ordered=False)
-            ),
-            size=cast_t("01:20"),
-            label="Маслоцех",
-        )
+    #
+    # # - Линия сырого молока на роникс
+    #
+    # if properties["milk_project"].is_present() or properties["adygea"].is_present():
+    #     with code("calc end time"):
+    #         values = []
+    #         if properties["adygea"].is_present():
+    #             values.append(properties["adygea"].end_time)
+    #         if properties["milk_project"].is_present():
+    #             values.append(properties["milk_project"].end_time)
+    #         end_time = max(values)
+    #
+    #     m.row(
+    #         "cleaning",
+    #         push_func=add_push,
+    #         x=cast_t(end_time),
+    #         size=cast_t("01:20"),
+    #         label="Линия сырого молока на роникс",
+    #     )
+    #
+    # # - Танк рикотты 1 внутри дня
+    #
+    # whey_used = 1900 * properties["ricotta"].n_boilings
+    # if whey_used > 100000:
+    #     m.row(
+    #         "cleaning",
+    #         push_func=AxisPusher(start_from=cast_t("12:00"), validator=CleaningValidator(ordered=False)),
+    #         size=cast_t("01:20"),
+    #         label="Танк рикотты (сладкая сыворотка)",
+    #     )
+    #
+    # # - Cream tanks
+    #
+    # if properties["mascarpone"].fourth_boiling_group_adding_lactic_acid_time:
+    #     m.row(
+    #         "cleaning",
+    #         push_func=AxisPusher(
+    #             start_from=cast_t(properties["mascarpone"].fourth_boiling_group_adding_lactic_acid_time) + 12,
+    #             validator=CleaningValidator(ordered=False),
+    #         ),
+    #         size=cast_t("01:20"),
+    #         label="Танк сливок",
+    #     )  # fourth mascarpone boiling group end + hour
+    #
+    # m.row(
+    #     "cleaning",
+    #     push_func=AxisPusher(start_from=cast_t("09:00"), validator=CleaningValidator(ordered=False)),
+    #     size=cast_t("01:20"),
+    #     label="Танк сливок",
+    # )
+    #
+    # # - Маcкарпоне
+    #
+    # if properties["mascarpone"].is_present():
+    #     m.row(
+    #         "cleaning",
+    #         push_func=AxisPusher(
+    #             start_from=cast_t(properties["mascarpone"].last_pumping_off) + 6,
+    #             validator=CleaningValidator(ordered=False),
+    #         ),
+    #         size=(cast_t("01:20"), 0),
+    #         label="Маскарпоне",
+    #     )
+    #
+    # # - Линия сладкой сыворотки
+    #
+    # ricotta_end = cast_t(properties["ricotta"].last_pumping_out_time) or 0 + 12
+    # m.row(
+    #     "cleaning",
+    #     push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
+    #     size=cast_t("02:30"),
+    #     label="Линия сладкой сыворотки",
+    # )
+    #
+    # # - Танк сливок
+    #
+    # m.row(
+    #     "cleaning",
+    #     push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
+    #     size=cast_t("01:20"),
+    #     label="Танк сливок",
+    # )  # ricotta end + hour
+    #
+    # # - Танк рикотты (сладкая сыворотка)
+    #
+    # m.row(
+    #     "cleaning",
+    #     push_func=AxisPusher(
+    #         start_from=cast_t(properties["ricotta"].start_of_ninth_from_the_end_time)
+    #         or 0,  # todo maybe: remove or 0, make properly [@marklidenberg]
+    #         validator=CleaningValidator(ordered=False),
+    #     ),
+    #     size=cast_t("01:20"),
+    #     label="Танк рикотты (сладкая сыворотка)",
+    # )
+    #
+    # # - Танк рикотты (скотта)
+    #
+    # for label in ["Линия сливок на подмес рикотта", "Танк рикотты (скотта)", "Танк рикотты (сладкая сыворотка)"]:
+    #     m.row(
+    #         "cleaning",
+    #         push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
+    #         size=cast_t("01:20"),
+    #         label=label,
+    #     )
+    #
+    # # - Маслоцех
+    #
+    # if properties["butter"].is_present():
+    #     m.row(
+    #         "cleaning",
+    #         push_func=AxisPusher(
+    #             start_from=cast_t(properties["butter"].end_time), validator=CleaningValidator(ordered=False)
+    #         ),
+    #         size=cast_t("01:20"),
+    #         label="Маслоцех",
+    #     )
 
     return m.root
 

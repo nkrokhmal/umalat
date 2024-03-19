@@ -42,8 +42,8 @@ def draw_frontend(
 
 def test():
     draw_frontend(
-        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2024-03-16"),
-        prefix="2024-03-16",
+        input_path="""/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved""",
+        prefix="2024-03-15",
         open_file=True,
     )
 

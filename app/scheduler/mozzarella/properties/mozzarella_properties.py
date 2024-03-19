@@ -13,11 +13,8 @@ from app.scheduler.time_utils import cast_human_time
 
 class MozzarellaProperties(pydantic.BaseModel):
     bar12_present: bool = Field(False, description="Присутствует ли брус 1.2")
-    line33_last_termizator_end_times: str = Field(
+    line32_last_termizator_end_times: str = Field(
         [], description="Времена заполнения танков на смеси 3.3% (каждая 9 варка)"
-    )
-    line36_last_termizator_end_times: str = Field(
-        [], description="Времена заполнения танков на смеси 3.6% (каждая 9 варка)"
     )
     line27_last_termizator_end_times: str = Field(
         [], description="Времена заполнения танков на смеси 2.7% (каждая 9 варка)"
@@ -26,7 +23,7 @@ class MozzarellaProperties(pydantic.BaseModel):
     def termizator_times(self):
         res = {
             "2.7": self.line27_last_termizator_end_times,
-            "3.3": self.line33_last_termizator_end_times,
+            "3.3": self.line32_last_termizator_end_times,
             "3.6": self.line36_last_termizator_end_times,
         }
         # todo: maybe, make proper checks, maybe make some warnings or something
@@ -51,8 +48,10 @@ class MozzarellaProperties(pydantic.BaseModel):
         values = [value for value in values if value[1]]
         return values
 
-    water_melting_end_time: str = Field("", description="Конец работы линии воды")
-    salt_melting_end_time: str = Field("", description="Конец работы линии соли")
+    water_packing_end_time: str = Field("", description="Конец работы паковки воды")
+    salt_packing_end_time: str = Field("", description="Конец работы паковки соли")
+    water_melting_end_time: str = Field("", description="Конец работы плавления воды")
+    salt_melting_end_time: str = Field("", description="Конец работы плавления соли")
 
     drenator1_end_time: str = Field("", description="Конец работы 1 дренатора")
     drenator2_end_time: str = Field("", description="Конец работы 2 дренатора")
@@ -95,7 +94,7 @@ def cast_properties(schedule=None):
         _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.3"]
         if _boilings:
             _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-            props.line33_last_termizator_end_times = [
+            props.line32_last_termizator_end_times = [
                 cast_human_time(b["pouring"]["first"]["termizator"].y[0]) for b in _tank_boilings
             ]
 
