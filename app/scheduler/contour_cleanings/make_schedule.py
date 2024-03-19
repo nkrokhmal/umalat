@@ -53,10 +53,16 @@ def run_order(function_or_generators, order):
 
 
 def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
+    # - Init block maker
+
     m = BlockMaker("1 contour")
+
+    # - Shipping line
+
     if shipping_line:
         m.row("cleaning", push_func=add_push, size=cast_t("01:20"), x=cast_t("06:30"), label="Линиия отгрузки")
 
+    # - Milk reception 1
     m.row(
         "cleaning",
         push_func=AxisPusher(start_from=cast_t("08:00"), validator=CleaningValidator()),
@@ -64,46 +70,49 @@ def _make_contour_1(properties, order=(0, 1, 2), shipping_line=True):
         label="Линия приемки молока 1 + проверить фильтр",
     )
 
-    with code("Tanks"):
-        # get values when different percentage tanks end: [['3.6', 74], ['3.3', 94], ['2.7', 144]]
-        values = []
-        for percent, end_times in properties["mozzarella"].termizator_times().items():
-            if end_times:
-                for end_time in end_times:
-                    values.append([percent, end_time, "01:50", False])
-            else:
-                # no tank cleaning - clean at the beginning
-                values.append([percent, "10:00", "01:05", True])
+    # - Tanks
 
-        # filter empty values
-        values = [value for value in values if value[1]]
+    # get values when different percentage tanks end: [['3.6', 74], ['3.3', 94], ['2.7', 144]]
+    values = []
+    for percent, end_times in properties["mozzarella"].termizator_times().items():
+        if end_times:
+            for end_time in end_times:
+                values.append([percent, end_time, "01:50", False])
+        else:
+            # no tank cleaning - clean at the beginning
+            values.append([percent, "10:00", "01:05", True])
 
-        with code("remove extra tanks"):
-            n_total_tanks = len(values)
-            n_extra_tanks = max(0, n_total_tanks - 4)
-            full_tanks = [value for value in values if value[3] == False]
-            empty_tanks = [value for value in values if value[3] == True]
-            if n_extra_tanks:
-                empty_tanks = empty_tanks[:-n_extra_tanks]
-            values = full_tanks + empty_tanks
+    # filter empty values
+    values = [value for value in values if value[1]]
 
-        # convert time to t
-        for value in values:
-            value[1] = cast_t(value[1])
+    with code("remove extra tanks"):
+        n_total_tanks = len(values)
+        n_extra_tanks = max(0, n_total_tanks - 4)
+        full_tanks = [value for value in values if value[3] == False]
+        empty_tanks = [value for value in values if value[3] == True]
+        if n_extra_tanks:
+            empty_tanks = empty_tanks[:-n_extra_tanks]
+        values = full_tanks + empty_tanks
 
-        df = pd.DataFrame(values, columns=["percent", "pouring_end", "time", "is_short"])
-        df = df[["percent", "pouring_end", "time", "is_short"]]
-        df = df.sort_values(by="pouring_end")
-        values = df.values.tolist()
+    # convert time to t
+    for value in values:
+        value[1] = cast_t(value[1])
 
-        for percent, end, time, is_short in values:
-            label = f"Танк смесей {percent}" if not is_short else f"Танк смесей {percent} (кор. мойка)"
-            m.row(
-                "cleaning",
-                push_func=AxisPusher(start_from=end, validator=CleaningValidator(ordered=False)),
-                size=cast_t(time),
-                label=label,
-            )
+    df = pd.DataFrame(values, columns=["percent", "pouring_end", "time", "is_short"])
+    df = df[["percent", "pouring_end", "time", "is_short"]]
+    df = df.sort_values(by="pouring_end")
+    values = df.values.tolist()
+
+    for percent, end, time, is_short in values:
+        label = f"Танк смесей {percent}" if not is_short else f"Танк смесей {percent} (кор. мойка)"
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=end, validator=CleaningValidator(ordered=False)),
+            size=cast_t(time),
+            label=label,
+        )
+
+    # - Shipping line 2
 
     if shipping_line:
         m.row(
