@@ -33,16 +33,23 @@ def brynza_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         beg_time = form.beg_time.data
+
+        khalymi_kg = form.khalymi_kg.data
         brynza_kg = form.brynza_kg.data
         chanakh_kg = form.chanakh_kg.data
 
         skus = db.session.query(BrynzaSKU).all()
+
+        khalymi_output = [sku for sku in skus if sku.group.name == "Халуми"][0].made_from_boilings[0].output_kg
         chanakh_output = [sku for sku in skus if sku.group.name == "Чанах"][0].made_from_boilings[0].output_kg
         brynza_output = [sku for sku in skus if sku.group.name == "Брынза"][0].made_from_boilings[0].output_kg
         if abs(brynza_kg - round_to_base(brynza_kg, brynza_output)) > 50:
             raise BrynzaScheduleException("Значение входа брынзы превышает допустимую погрешность в 50 кг")
 
         if abs(chanakh_kg - round_to_base(chanakh_kg, chanakh_output)) > 50:
+            raise BrynzaScheduleException("Значение входа чаназа превышает допустимую погрешность в 50 кг")
+
+        if abs(khalymi_kg - round_to_base(khalymi_kg, khalymi_output)) > 50:
             raise BrynzaScheduleException("Значение входа чаназа превышает допустимую погрешность в 50 кг")
 
         brynza_kg = round_to_base(brynza_kg, brynza_output) / brynza_output * 3150

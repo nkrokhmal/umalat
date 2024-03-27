@@ -49,6 +49,7 @@ class BrynzaScheduleForm(FlaskForm):
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
     brynza_kg = IntegerField("Введите количество кг брынзы", validators=[Optional()], default=0)
     chanakh_kg = IntegerField("Введите количество кг чанаха", validators=[Optional()], default=0)
+    khalymi_kg = IntegerField("Введите количество кг халуми", validators=[Optional()], default=0)
     beg_time = StringField(
         "Начало первой варки",
         validators=[Optional()],

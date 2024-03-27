@@ -58,6 +58,7 @@ def generate_group():
             "Черкесский": "ЧРКС",
             "Брынза": "БРНЗ",
             "Чанах": "ЧНХ",
+            "Халуми": "ХЛМ",
         }
         for name, short_name in groups.items():
             ff = Group(name=name, short_name=short_name)
