@@ -1,40 +1,14 @@
 import types
 
-import pandas as pd
-
-from loguru import logger
 from utils_ak.block_tree.block_maker import BlockMaker
-from utils_ak.block_tree.pushers.iterative import AxisPusher, ShiftPusher
-from utils_ak.block_tree.pushers.pushers import add_push, push
+from utils_ak.block_tree.pushers.iterative import AxisPusher
+from utils_ak.block_tree.pushers.pushers import add_push
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
-from utils_ak.code_block import code
-from utils_ak.code_block.code import code
-from utils_ak.numeric.numeric import custom_round
-from utils_ak.optimizer.optimizer import optimize
 
 from lessmore.utils.easy_printing.print_json import print_json
 
 from app.models import Washer, cast_model
 from app.scheduler.time_utils import cast_t
-
-
-# todo maybe: put in more proper place [@marklidenberg]
-def calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings):
-    total_scotta = (
-        (1900 - 130) * ricotta_n_boilings + adygea_n_boilings * 370 + milk_project_n_boilings * 2400
-    )  # todo maybe: take from parameters [@marklidenberg]
-
-    assert (
-        total_scotta < 80000 + 60000 + 60000
-    ), "Скотты больше, чем могут вместить танки. "  # todo maybe: take from parameters [@marklidenberg]
-
-    left_scotta = total_scotta
-    values = [["4", 0.0], ["5", 0.0], ["8", 0.0]]
-    for value in values:
-        cur_scotta = min(80000, left_scotta)
-        value[1] = cur_scotta / 1000.0  # value in ton
-        left_scotta -= cur_scotta
-    return values
 
 
 class CleaningValidator(ClassValidator):
