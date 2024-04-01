@@ -37,7 +37,7 @@ def calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_
 
 
 class CleaningValidator(ClassValidator):
-    def __init__(self, window=30, ordered=True):
+    def __init__(self, window=30, ordered=False):
         self.ordered = ordered
         super().__init__(window=window)
 
@@ -67,7 +67,7 @@ def make_contour_1(properties_by_department: dict, basement_brine: bool = False)
         push_func=AxisPusher(
             start_from=cast_t(properties_by_department["mozzarella"].water_packing_end_time)
             + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
-            validator=CleaningValidator(ordered=False),
+            validator=CleaningValidator(),
         ),
         size=cast_t("01:15"),
         label="Танк Моцарелла и дозаторы",
@@ -79,7 +79,7 @@ def make_contour_1(properties_by_department: dict, basement_brine: bool = False)
         "cleaning",
         push_func=AxisPusher(
             start_from=cast_t(properties_by_department["adygea"].end_time) + 12,  # После адыгейского + час
-            validator=CleaningValidator(ordered=False),
+            validator=CleaningValidator(),
         ),
         size=cast_t("01:00"),
         label="Танки роникс 1/2",  # todo question: тут одна мойка? Конец адыгейского - это какой момент точно?
@@ -90,8 +90,8 @@ def make_contour_1(properties_by_department: dict, basement_brine: bool = False)
     m.row(
         "cleaning",
         push_func=AxisPusher(
-            start_from=0,
-            validator=CleaningValidator(ordered=True),
+            start_from="last_end",
+            validator=CleaningValidator(),
         ),
         size=cast_t("01:30"),
         label="Сырое молоко на адыгейский",  # после роникса
@@ -107,7 +107,7 @@ def make_contour_1(properties_by_department: dict, basement_brine: bool = False)
             "cleaning",
             push_func=AxisPusher(
                 start_from=time,
-                validator=CleaningValidator(ordered=False),
+                validator=CleaningValidator(),
             ),
             size=cast_t("01:20"),
             label=f"Танк смесей",
@@ -118,54 +118,38 @@ def make_contour_1(properties_by_department: dict, basement_brine: bool = False)
     if basement_brine:
         m.row(
             "cleaning",
-            push_func=AxisPusher(start_from=cast_t("07:00"), validator=CleaningValidator(ordered=False)),
+            push_func=AxisPusher(start_from=cast_t("07:00"), validator=CleaningValidator()),
             size=cast_t("00:55"),
             label="Линия подвал рассол",
+        )
+
+    # - Танки сырого молока
+
+    for i, time in enumerate(["11:00", "17:00", "22:00"]):
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
+            size=cast_t("01:20"),
+            label=f"Танк сырого молока {i + 1}",
+        )
+
+    # - Линия приемки молока
+
+    for i, time in enumerate(["03:00", "04:00"]):
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
+            size=cast_t("00:55"),
+            label=f"Линия приемки молока {i + 1}",
         )
 
     # - Линия отгрузки сырья
 
     m.row(
         "cleaning",
-        push_func=AxisPusher(start_from=cast_t("00:00"), validator=CleaningValidator(ordered=False)),
+        push_func=AxisPusher(start_from=cast_t("00:00"), validator=CleaningValidator()),
         size=cast_t("00:55"),
         label="Линия отгрузки сырья",
-    )
-
-    # - Танки сырого молока
-
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("11:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("01:20"),
-        label="Танк сырого молока 1",
-    )
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("17:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("01:20"),
-        label="Танк сырого молока 2",
-    )
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("22:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("01:20"),
-        label="Танк сырого молока 3",
-    )
-
-    # - Линия приемки молока
-
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("03:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("00:55"),
-        label="Линия приемки молока 1",
-    )
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("04:00"), validator=CleaningValidator(ordered=False)),
-        size=cast_t("00:55"),
-        label="Линия приемки молока 2",
     )
 
     return m.root
