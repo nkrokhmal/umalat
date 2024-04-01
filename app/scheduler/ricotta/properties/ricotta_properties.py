@@ -6,9 +6,8 @@ from app.scheduler.time_utils import cast_human_time
 
 
 class RicottaProperties(pydantic.BaseModel):
-    n_boilings: int = Field(0, description="Число варок")
     last_pumping_out_time: str = Field("", description="Конец последнего слива")
-    start_of_ninth_from_the_end_time: str = Field("", description="Начало девятой варки с конца")
+    every_5th_pouring_times: list[str] = Field("", description="Каждый 5-й набор")
 
     def is_present(self):
         if self.last_pumping_out_time:
@@ -28,9 +27,5 @@ def cast_properties(schedule=None):
     props.n_boilings = len(ricotta_boilings)
 
     props.last_pumping_out_time = cast_human_time(ricotta_boilings[-1]["pumping_out"].y[0])
-    if len(ricotta_boilings) < 9:
-        props.start_of_ninth_from_the_end_time = cast_human_time(ricotta_boilings[-1].x[0])
-    else:
-        props.start_of_ninth_from_the_end_time = cast_human_time(ricotta_boilings[-9].x[0])
 
     return props
