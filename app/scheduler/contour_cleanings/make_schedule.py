@@ -437,7 +437,7 @@ def make_contour_4(properties, is_tomorrow_day_off=False):
     return m.root
 
 
-def make_contour_5(properties, input_tanks=None):
+def make_contour_5(properties):
     m = BlockMaker("5 contour")
 
     # - Танки рикотты 4-8
@@ -556,18 +556,22 @@ def make_contour_6(properties, butter: bool = False):
     return m.root
 
 
-def make_schedule(properties_by_department, **kwargs):
+def make_schedule(
+    properties: dict,
+    butter: bool = True,
+    naslavuchich: bool = True,
+    basement_brine: bool = True,
+    is_tomorrow_day_off: bool = True,
+):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(properties_by_department),
-        make_contour_2(properties_by_department),
-        make_contour_3(
-            properties_by_department,
-        ),
-        make_contour_4(properties_by_department, is_tomorrow_day_off=kwargs.get("is_tomorrow_day_off", False)),
-        make_contour_5(properties_by_department, input_tanks=kwargs.get("input_tanks")),
-        make_contour_6(properties_by_department),
+        make_contour_1(properties, basement_brine=basement_brine),
+        make_contour_2(properties, naslavuchich=naslavuchich),
+        make_contour_3(properties),
+        make_contour_4(properties, is_tomorrow_day_off=is_tomorrow_day_off),
+        make_contour_5(properties),
+        make_contour_6(properties, butter=butter),
     ]
 
     for contour in contours:
