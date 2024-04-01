@@ -54,7 +54,7 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def _make_contour_1(properties_by_department: dict, basement_brine: bool = False):
+def make_contour_1(properties_by_department: dict, basement_brine: bool = False):
     # - Init block maker
 
     m = BlockMaker("1 contour")
@@ -96,6 +96,22 @@ def _make_contour_1(properties_by_department: dict, basement_brine: bool = False
         size=cast_t("01:30"),
         label="Сырое молоко на адыгейский",  # после роникса
     )
+
+    # - Танки смесей
+
+    times = sum([times for times in properties_by_department["mozzarella"].every_8th_pouring_end.values()], [])
+    times = sorted([cast_t(time) for time in times])
+
+    for i, time in enumerate(times):
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=time,
+                validator=CleaningValidator(ordered=False),
+            ),
+            size=cast_t("01:20"),
+            label=f"Танк смесей",
+        )
 
     # - Линия подвал рассол
 
@@ -153,11 +169,6 @@ def _make_contour_1(properties_by_department: dict, basement_brine: bool = False
     )
 
     return m.root
-
-
-def make_contour_1(properties, *args, **kwargs):
-    df = optimize(_make_contour_1, lambda b: -b.y[0], properties, *args, **kwargs)
-    return df.iloc[-1]["output"]
 
 
 def make_contour_2(properties):

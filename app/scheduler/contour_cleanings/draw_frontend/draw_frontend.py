@@ -42,6 +42,10 @@ def draw_frontend(
 
 
 def test():
+    import warnings
+
+    warnings.filterwarnings("ignore")
+
     draw_frontend(
         input_path="""/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved""",
         prefix="2024-03-15",

@@ -313,20 +313,19 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     props.bar12_present = "1.2" in [sku.form_factor.name for sku in boiling_plan_df["sku"]]
 
-    # - 2.7, 3.2
+    # - Pourings
 
-    _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "3.2"]
-    if _boilings:
-        _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-        props.line32_last_termizator_end_times = [
-            cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings
+    props.every_8th_pouring_end = {}
+
+    for percent in ["2.7", "3.2"]:
+        boilings = [
+            b for b in parsed_schedule["boilings"]["boiling", True] if str(b.props["boiling_model"].percent) == percent
         ]
-
-    _boilings = [b for b in boilings if str(b.props["boiling_model"].percent) == "2.7"]
-    if _boilings:
-        _tank_boilings = [b for i, b in enumerate(_boilings) if (i + 1) % 9 == 0 or i == len(_boilings) - 1]
-        props.line27_last_termizator_end_times = [
-            cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"])) for b in _tank_boilings
+        boilings = list(sorted(boilings, key=lambda b: b.x[0]))
+        boilings = [b for i, b in enumerate(boilings) if i % 8 == 7 or i == len(boilings) - 1]
+        props.every_8th_pouring_end[percent] = [
+            cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"]))
+            for b in boilings  # add termizator length time length
         ]
 
     # - Multihead
@@ -475,6 +474,9 @@ def parse_properties(filename):
 
 
 def test():
+    import warnings
+
+    warnings.filterwarnings("ignore")
     print_json(
         dict(
             parse_properties(
