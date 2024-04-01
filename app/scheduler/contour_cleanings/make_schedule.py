@@ -14,6 +14,7 @@ from utils_ak.optimizer.optimizer import optimize
 
 from lessmore.utils.easy_printing.print_json import print_json
 
+from app.models import Washer, cast_model
 from app.scheduler.time_utils import cast_t
 
 
@@ -169,6 +170,7 @@ def make_contour_2(properties, naslavuchich: bool = False):
         size=cast_t("01:30"),
         label="Комет",
     )
+
     # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
 
     m.row(
@@ -226,6 +228,7 @@ def make_contour_2(properties, naslavuchich: bool = False):
         size=cast_t("01:10"),
         label="Жирная вода на сепаратор (соль)",
     )
+
     # - Сливки от сепаратора жирной воды (по порядку)
 
     m.row(
@@ -237,6 +240,7 @@ def make_contour_2(properties, naslavuchich: bool = False):
         size=cast_t("01:30"),
         label="Сливки от сепаратора жирной воды",
     )
+
     # - Сливки отпастера 25(по порядку)
 
     m.row(
@@ -277,21 +281,37 @@ def make_contour_2(properties, naslavuchich: bool = False):
     return m.root
 
 
-def _make_contour_3(
-    properties,
-    order1=(0, 1, 1, 1, 1),
-    order2=(0, 0, 0, 0, 0, 1),
-    molder=False,
-    alternative=False,
-    is_tomorrow_day_off=False,
-):
+def make_contour_3(properties):
     m = BlockMaker("3 contour")
+
+    # - Сыроизготовитель (Через 10 минут после того, как он слился)
+
+    # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
+    values = properties["mozzarella"].cheesemaker_times()
+
+    # convert time to t
+    for value in values:
+        value[0] = str(value[0])
+        value[1] = cast_t(value[1])
+    values = list(sorted(values, key=lambda value: value[1]))
+
+    for n, cheese_maker_end in values:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(cheese_maker_end) + 1, validator=CleaningValidator(ordered=False)
+            ),  # 10 minutes after pouring_off, 5 minutes after boiling ens
+            size=cast_t("01:20"),
+            label=f"Сыроизготовитель {int(n)}",
+        )
+
+    # - Термизатор (короткие и длинные мойки)
 
     for cleaning_time in properties["mozzarella"].short_cleaning_times:
         m.row(
             "cleaning",
             push_func=add_push,
-            size=cast_t("00:40"),
+            size=cast_model(Washer, "Короткая мойка термизатора").time // 5,
             x=cast_t(cleaning_time),
             label="Короткая мойка термизатора",
         )
@@ -300,195 +320,46 @@ def _make_contour_3(
         m.row(
             "cleaning",
             push_func=add_push,
-            size=cast_t("01:20"),
+            size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
             x=cast_t(cleaning_time),
             label="Полная мойка термизатора",
         )
 
-    def f1():
-        if properties["mozzarella"].salt_melting_start_time:
-            m.row(
-                "cleaning",
-                push_func=AxisPusher(
-                    validator=CleaningValidator(ordered=False),
-                    start_from=cast_t(properties["mozzarella"].salt_melting_start_time) + 6,
-                ),
-                size=90 // 5,
-                label="Контур циркуляции рассола",
-            )
+    # - Плавилка линия пицца чиз (конец плавления пицца чиз + 1 час)
 
-    def g2():
-        with code("cheese_makers"):
-            # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
-            values = properties["mozzarella"].cheesemaker_times()
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from=cast_t(properties["mozzarella"].salt_melting_end_time) + 12,
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:30"),
+        label="Плавилка линия пицца чиз",
+    )
 
-            # convert time to t
-            for value in values:
-                value[0] = str(value[0])
-                value[1] = cast_t(value[1])
-            values = list(sorted(values, key=lambda value: value[1]))
+    # - Контур циркуляции рассола (08:00)
 
-            for n, cheese_maker_end in values:
-                m.row(
-                    "cleaning",
-                    push_func=AxisPusher(start_from=cheese_maker_end, validator=CleaningValidator(ordered=False)),
-                    size=cast_t("01:20"),
-                    label=f"Сыроизготовитель {int(n)}",
-                )
-                yield
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from=cast_t("08:00"),
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:10"),
+        label="Контур циркуляции рассола",
+    )
 
-            used_ids = set([value[0] for value in values])
+    # - Линия пицца чиз формовщик (Если есть брус, то ставим мойку формовщика. Если линия занята - то после всех объектов)
 
-        with code("non-used cheesemakers"):
-            non_used_ids = set([str(x) for x in range(1, 5)]) - used_ids
-            for id in non_used_ids:
-                m.row(
-                    "cleaning",
-                    push_func=AxisPusher(start_from=cast_t("10:00"), validator=CleaningValidator(ordered=False)),
-                    size=cast_t("01:05"),
-                    label=f"Сыроизготовитель {int(id)} (кор. мойка)",
-                )
-                yield
-
-    def g3():
-        with code("melters_and_baths"):
-            lines_df = pd.DataFrame(index=["water", "salt"])
-            lines_df["cleanings"] = [[] for _ in range(2)]
-            if properties["mozzarella"].water_melting_end_time:
-                lines_df.loc["water", "cleanings"].extend(
-                    [
-                        m.create_block("cleaning", size=(cast_t("02:20"), 0), label="Линия 1 плавилка"),
-                        m.create_block("cleaning", size=(cast_t("01:30"), 0), label="Линия 1 ванна 1 + ванна 2"),
-                    ]
-                )
-            else:
-                # no water used
-                m.row(
-                    "cleaning",
-                    push_func=AxisPusher(start_from=cast_t("10:00"), validator=CleaningValidator(ordered=False)),
-                    size=cast_t("01:45"),
-                    label=f"Линия 1 плавилка (кор. мойка)",
-                )
-                m.row(
-                    "cleaning",
-                    push_func=AxisPusher(start_from=cast_t("10:00"), validator=CleaningValidator(ordered=False)),
-                    size=cast_t("01:15"),
-                    label=f"Линия 1 ванна 1 + ванна 2 (кор. мойка)",
-                )
-
-            if properties["mozzarella"].salt_melting_end_time:
-                lines_df.loc["salt", "cleanings"].extend(
-                    [
-                        m.create_block("cleaning", size=(cast_t("02:20"), 0), label="Линия 2 плавилка"),
-                        m.create_block("cleaning", size=(cast_t("01:30"), 0), label="Линия 2 ванна 1"),
-                        m.create_block("cleaning", size=(cast_t("01:30"), 0), label="Линия 2 ванна 2"),
-                    ]
-                )
-            else:
-                # no salt used
-                m.row(
-                    "cleaning",
-                    push_func=AxisPusher(start_from=cast_t("10:00"), validator=CleaningValidator(ordered=False)),
-                    size=cast_t("01:45"),
-                    label=f"Линия 2 плавилка (кор. мойка)",
-                )
-                m.row(
-                    "cleaning",
-                    push_func=AxisPusher(start_from=cast_t("10:00"), validator=CleaningValidator(ordered=False)),
-                    size=cast_t("01:15"),
-                    label=f"Линия 2 ванна 1 (кор. мойка)",
-                )
-                m.row(
-                    "cleaning",
-                    push_func=AxisPusher(start_from=cast_t("10:00"), validator=CleaningValidator(ordered=False)),
-                    size=cast_t("01:15"),
-                    label=f"Линия 2 ванна 2 (кор. мойка)",
-                )
-
-            lines_df["melting_end"] = [
-                cast_t(properties["mozzarella"].water_melting_end_time),
-                cast_t(properties["mozzarella"].salt_melting_end_time),
-            ]
-            lines_df = lines_df.sort_values(by="melting_end")
-
-            for i, row in lines_df.iterrows():
-                for j, c in enumerate(row["cleanings"]):
-                    if j == 0:
-                        m.block(
-                            c,
-                            push_func=AxisPusher(
-                                start_from=["max_end", row["melting_end"] + 12], validator=CleaningValidator()
-                            ),
-                        )  # add hour
-                    else:
-                        m.block(c, push_func=AxisPusher(start_from="max_end", validator=CleaningValidator()))
-                    yield
-
-            # make iterator longer
-            for _ in range(5):
-                yield
-
-    def _should_make_last_short_cleaning():
-        last_full_cleaning = max(m.root.find(label="Полная мойка термизатора"), key=lambda b: b.y[0])
-        return last_full_cleaning.y[0] <= cast_t("21:00") and not is_tomorrow_day_off
-
-    def f4():
-        if _should_make_last_short_cleaning():
-            b = m.row(
-                "cleaning",
-                push_func=AxisPusher(start_from=cast_t("21:00"), validator=CleaningValidator()),
-                size=cast_t("01:00"),
-                label="Короткая мойка термизатора",
-            ).block
-            assert cast_t("21:00") <= b.x[0] and b.y[0] <= cast_t("01:00:00"), "Short cleaning too bad"
-
-    if not alternative:
-        run_order([f1, g2()], order1)
-        run_order([g3(), f4], order2)
-    else:
-        f1()
-        run_order([f4, g2()], order1)
-
-        it = g3()
-        for _ in range(5):
-            next(it)
-
-    if _should_make_last_short_cleaning():
-        # shift short cleaning to make it as late as possible
-        short_cleaning = m.root.find(label="Короткая мойка термизатора")[-1]
-        short_cleaning.detach_from_parent()
-        push(
-            m.root,
-            short_cleaning,
-            push_func=ShiftPusher(period=-1, start_from=cast_t("01:00:00")),
-            validator=CleaningValidator(ordered=False),
-        )
-
-    if molder:
+    if properties["mozzarella"].bar12_present:
         m.row(
             "cleaning",
             push_func=AxisPusher(start_from="max_end", validator=CleaningValidator()),
-            size=cast_t("01:20"),
-            label="Формовщик",
+            size=cast_t("01:10"),
+            label="Линия пицца чиз формовщик",
         )
 
     return m.root
-
-
-def make_contour_3(properties, **kwargs):
-    def value_function(b):
-        try:
-            return -b.y[0], -b.find_one(label="Короткая мойка термизатора").x[0]
-        except:
-            return -b.y[0]
-
-    try:
-        df = optimize(_make_contour_3, value_function, properties, alternative=False, **kwargs)
-    except:
-        logger.info("Running alternative contour 3")
-        df = optimize(_make_contour_3, value_function, properties, alternative=True, **kwargs)
-
-    return df.iloc[-1]["output"]
 
 
 def make_contour_4(properties, is_tomorrow_day_off=False):
@@ -751,8 +622,6 @@ def make_schedule(properties_by_department, **kwargs):
         make_contour_2(properties_by_department),
         make_contour_3(
             properties_by_department,
-            molder=kwargs.get("molder", False),
-            is_tomorrow_day_off=kwargs.get("is_tomorrow_day_off", False),
         ),
         make_contour_4(properties_by_department, is_tomorrow_day_off=kwargs.get("is_tomorrow_day_off", False)),
         make_contour_5(properties_by_department, input_tanks=kwargs.get("input_tanks")),
