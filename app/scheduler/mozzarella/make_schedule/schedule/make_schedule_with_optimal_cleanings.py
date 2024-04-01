@@ -40,6 +40,7 @@ def make_schedule_with_optimal_cleanings(
             start_configuration=start_configuration,
             exact_start_time_line_name=exact_start_time_line_name,
             date=date,
+            parallelism=4,
         )
 
     # - Make schedule with no cleanings
@@ -51,6 +52,7 @@ def make_schedule_with_optimal_cleanings(
         start_configuration=start_configuration,
         exact_start_time_line_name=exact_start_time_line_name,
         date=date,
+        parallelism=4,
     )
 
     # - Get cleanings
@@ -59,7 +61,10 @@ def make_schedule_with_optimal_cleanings(
     cleanings = {int(k): v for k, v in cleanings.items() if v}
 
     # - Make schedule with cleanings, with configuration from previously built schedule
-
+    logger.info(
+        "Using configuration",
+        configuration=[b.props["boiling_model"].line.name for b in schedule["master"]["boiling", True]],
+    )
     return make_schedule_basic(
         boiling_plan_obj=boiling_plan_obj,
         cleanings=cleanings,

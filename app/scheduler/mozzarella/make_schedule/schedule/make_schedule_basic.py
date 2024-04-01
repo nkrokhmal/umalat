@@ -1,10 +1,15 @@
 import itertools
 import json
+import os
+import warnings
 
 from copy import deepcopy
 from datetime import datetime
-from typing import Optional
+from functools import partial
+from multiprocessing import Pool
+from typing import Literal, Optional
 
+import numpy as np
 import pandas as pd
 
 from loguru import logger
@@ -27,6 +32,7 @@ from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_b
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.awaiting_pusher import AwaitingPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.backwards_pusher import BackwardsPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.drenator_shrinking_pusher import DrenatorShrinkingPusher
+from app.scheduler.mozzarella.make_schedule.schedule.run_in_parallel import run_in_parallel
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.split_shifts_utils import split_shifts
 from app.scheduler.time_utils import cast_t, cast_time
@@ -422,7 +428,7 @@ class ScheduleMaker:
 
         return boiling
 
-    def _process_boilings(self):
+    def _find_configuration(self):
         # logger.debug('Start configuration', start_configuration=start_configuration)
 
         # - Find optimal configuration
@@ -454,15 +460,18 @@ class ScheduleMaker:
             else:
                 configuration, score = self._find_optimal_configuration()
 
+        self.configuration, self.score = configuration, score
+
+    def _process_boilings(self):
         logger.error(
             "Optimal configuration",
-            score=score,
-            configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
+            score=self.score,
+            configuration="-".join(["В" if x == LineName.WATER else "С" for x in self.configuration]),
         )
 
         # - Process boilings
 
-        for i, line_name in enumerate(configuration):
+        for i, line_name in enumerate(self.configuration):
             # - Select next row
 
             next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
@@ -948,6 +957,7 @@ class ScheduleMaker:
         start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
         start_configuration=None,
         exact_start_time_line_name: str = LineName.WATER,
+        target_object: Literal["schedule", "configuration_and_score"] = "schedule",
     ):
         # - Arguments
 
@@ -995,6 +1005,11 @@ class ScheduleMaker:
         self._init_lines_df()
         self._init_left_df()
         self._init_multihead_water_boilings()
+        self._find_configuration()
+
+        if target_object == "configuration_and_score":
+            return self.configuration, self.score
+
         self._process_boilings()
         self._process_extras()
         self._fix_first_boiling_of_later_line()
@@ -1010,6 +1025,8 @@ def make_schedule_basic(
     exact_start_time_line_name: Optional[str] = LineName.WATER,
     start_configuration=None,
     date=None,
+    parallelism: int = 1,
+    target_object: Literal["schedule", "configuration_and_score"] = "schedule",
 ):
     logger.info(
         "Making basic_example schedule",
@@ -1017,11 +1034,67 @@ def make_schedule_basic(
         start_configuration=start_configuration,
         cleanings=cleanings,
     )
+
+    # - Configure parallel environment
+
+    if target_object == "configuration_and_score":
+        # - Configure logs (needed for multiprocessing)
+
+        from utils_ak.loguru import configure_loguru
+
+        configure_loguru()
+
+        # - Remove warnings
+
+        warnings.filterwarnings("ignore")
+
+    # - Find optimal configuration
+
+    results = None
+    if not start_configuration and parallelism > 1:
+        # - Assert parallelism is a power of 2
+
+        assert parallelism & (parallelism - 1) == 0, "Parallelism should be a power of 2"
+
+        # - Find optimal configuration as multiprocessing
+
+        logger.info("Finding optimal configuration as multiprocessing")
+
+        from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_basic_parallel import (
+            make_schedule_basic_parallel,
+        )
+
+        results = run_in_parallel(
+            make_schedule_basic_parallel,
+            kwargs_list=[
+                dict(
+                    boiling_plan_obj=boiling_plan_obj,
+                    cleanings=cleanings,
+                    start_times=start_times,
+                    exact_start_time_line_name=exact_start_time_line_name,
+                    start_configuration=sc,
+                    date=date,
+                    target_object="configuration_and_score",
+                )
+                for sc in list(itertools.product([LineName.WATER, LineName.SALT], repeat=int(np.log2(parallelism))))
+            ],
+            parallelism=parallelism,
+        )
+
+        logger.info("Optimal configuration", results=results)
+
+    # - Make schedule
+
     return ScheduleMaker().make(
         boilings=make_boilings(to_boiling_plan(boiling_plan_obj)),
         date=date,
         cleanings=cleanings,
         start_times=dict(start_times),
-        start_configuration=start_configuration,
+        start_configuration=start_configuration
+        if not results
+        else min([result for result in results], key=lambda r: r[1])[
+            0
+        ],  # get results from multiprocessing optimization
         exact_start_time_line_name=exact_start_time_line_name,
+        target_object=target_object,
     )
