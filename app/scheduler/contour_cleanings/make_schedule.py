@@ -54,18 +54,18 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def make_contour_1(properties_by_department: dict, basement_brine: bool = False):
+def make_contour_1(properties: dict, basement_brine: bool = False):
     # - Init block maker
 
     m = BlockMaker("1 contour")
-    print_json(dict(properties_by_department["mozzarella"]))
+    print_json(dict(properties["mozzarella"]))
 
     # - Танк “Моцарелла и дозаторы”
 
     m.row(
         "cleaning",
         push_func=AxisPusher(
-            start_from=cast_t(properties_by_department["mozzarella"].water_packing_end_time)
+            start_from=cast_t(properties["mozzarella"].water_packing_end_time)
             + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
             validator=CleaningValidator(),
         ),
@@ -78,7 +78,7 @@ def make_contour_1(properties_by_department: dict, basement_brine: bool = False)
     m.row(
         "cleaning",
         push_func=AxisPusher(
-            start_from=cast_t(properties_by_department["adygea"].end_time) + 12,  # После адыгейского + час
+            start_from=cast_t(properties["adygea"].end_time) + 12,  # После адыгейского + час
             validator=CleaningValidator(),
         ),
         size=cast_t("01:00"),
@@ -99,7 +99,7 @@ def make_contour_1(properties_by_department: dict, basement_brine: bool = False)
 
     # - Танки смесей
 
-    times = sum([times for times in properties_by_department["mozzarella"].every_8th_pouring_end.values()], [])
+    times = sum([times for times in properties["mozzarella"].every_8th_pouring_end.values()], [])
     times = sorted([cast_t(time) for time in times])
 
     for i, time in enumerate(times):
@@ -157,6 +157,11 @@ def make_contour_1(properties_by_department: dict, basement_brine: bool = False)
 
 def make_contour_2(properties):
     m = BlockMaker("2 contour")
+
+    # - Комет
+
+    m.row()
+
     m.row("cleaning", push_func=add_push, size=cast_t("01:20"), x=cast_t("12:00"), label="Линия обрата в сливки")
 
     m.row(
