@@ -64,7 +64,7 @@ def wrap_frontend2(
                         m.row(
                             "boiling_name_label",
                             size=boiling.size[0] - 6,
-                            boiling_label=f"{boiling.props['group_name']} 3,05 PCS(12-13)  3150кг",
+                            boiling_label=f"{boiling.props['group_name'] if boiling.props['group_name'] != 'Чанах' else 'Халуми'} 3,05 PCS(12-13)  3150кг",
                         )
                     with m.block(font_size=8):
                         m.row("pouring", size=boiling["pouring"].size[0])
