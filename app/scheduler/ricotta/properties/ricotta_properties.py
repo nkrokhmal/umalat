@@ -8,6 +8,7 @@ from app.scheduler.time_utils import cast_human_time
 class RicottaProperties(pydantic.BaseModel):
     last_pumping_out_time: str = Field("", description="Конец последнего слива")
     every_5th_pouring_times: list[str] = Field("", description="Каждый 5-й набор")
+    last_pouring_time: str = Field("", description="Конец последнего набора")
 
     def is_present(self):
         if self.last_pumping_out_time:

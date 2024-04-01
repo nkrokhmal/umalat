@@ -458,6 +458,7 @@ def make_contour_5(properties, input_tanks=None):
         size=cast_t("00:55"),
         label="Линия подачи на НФ",
     )
+
     # - Линия ретентата (по порядку)
 
     m.row(
@@ -479,7 +480,7 @@ def make_contour_5(properties, input_tanks=None):
     return m.root
 
 
-def make_contour_6(properties):
+def make_contour_6(properties, butter: bool = False):
     m = BlockMaker("6 contour")
 
     # - Линия сладкой сыворотки (Завершаем слив на рикотте + час)
@@ -513,8 +514,45 @@ def make_contour_6(properties):
             label=f"Танк сливок {i + 1}",
         )
 
-    # -
+    # - Танк сливок 4
 
+    if properties["mascarpone"].every_8t_of_separation:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["mascarpone"].every_8t_of_separation[0]), validator=CleaningValidator()
+            ),
+            size=cast_t("1:30"),
+            label=f"Танк сливок 4",
+        )
+
+    # - Линия сливок на маскарпоне (после окончания маскарпоне)
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(start_from=cast_t(properties["mascarpone"].end_time), validator=CleaningValidator()),
+        size=cast_t("1:00"),
+        label=f"Линия сливок на маскарпоне",
+    )
+
+    # - Линия сливок на подмес на рикотте (после последнего набора рикотты + 10 минут)
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(start_from=cast_t(properties["ricotta"].last_pouring_time), validator=CleaningValidator()),
+        size=cast_t("0:55"),
+        label=f"Линия сливок на подмес на рикотте",
+    )
+
+    # - Линия сливок маслоцех + обратка (2:00)
+
+    if butter:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t("02:00"), validator=CleaningValidator()),
+            size=cast_t("1:40"),
+            label=f"Линия сливок маслоцех + обратка",
+        )
     return m.root
 
 

@@ -79,6 +79,10 @@ def fill_properties(parsed_schedule):
         cast_time(row.y[0]) for i, row in enumerate(first_rows) if i % 5 == 4 or i == len(first_rows) - 1
     ]
 
+    # - Last pouring time
+
+    props.last_pouring_time = cast_time(first_rows[-1].y[0])
+
     return props
 
 
