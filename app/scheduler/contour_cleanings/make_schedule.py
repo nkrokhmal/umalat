@@ -438,44 +438,41 @@ def make_contour_4(properties, is_tomorrow_day_off=False):
 
 
 def make_contour_5(properties, input_tanks=None):
-    input_tanks = input_tanks or [["4", 80], ["5", 80]]
     m = BlockMaker("5 contour")
 
-    m.row("cleaning", push_func=add_push, size=cast_t("01:20"), label="Танк концентрата")
+    # - Танки рикотты 4-8
 
-    m.row(
-        "cleaning", push_func=AxisPusher(validator=CleaningValidator()), size=cast_t("01:20"), label="Танк концентрата"
-    )
+    for i, time in enumerate(["11:00", "15:30", "01:00", "20:00", "22:00"]):
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
+            size=cast_t("01:20" if i + 4 != 8 else "01:30"),
+            label=f"Танк рикотты {i + 4}",
+        )
 
-    with code("scotta"):
-        start_t = cast_t("06:30")
-        for id, volume in input_tanks:
-            if not volume:
-                continue
-            concentration_t = custom_round(volume / 15 * 12, 1, "ceil")
-            start_t += concentration_t
-            m.row(
-                "cleaning",
-                push_func=AxisPusher(start_from=start_t, validator=CleaningValidator()),
-                size=cast_t("01:20"),
-                label=f"Танк рикотты",
-            )
-
-    m.row(
-        "cleaning", push_func=AxisPusher(validator=CleaningValidator()), size=cast_t("01:20"), label="Линия Ретентата"
-    )
+    # - Линия подачи на НФ (по порядку)
 
     m.row(
         "cleaning",
-        push_func=AxisPusher(validator=CleaningValidator()),
-        size=cast_t("01:20"),
-        label="Линия подачи на НФ открыть кран",
+        push_func=AxisPusher(start_from="last_end", validator=CleaningValidator()),
+        size=cast_t("00:55"),
+        label="Линия подачи на НФ",
     )
+    # - Линия ретентата (по порядку)
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(start_from="last_end", validator=CleaningValidator()),
+        size=cast_t("00:55"),
+        label="Линия ретентата",
+    )
+
+    # - Линия Концентрата на отгрузку (08:30)
 
     m.row(
         "cleaning",
         push_func=AxisPusher(start_from=cast_t("08:30"), validator=CleaningValidator()),
-        size=cast_t("01:20"),
+        size=cast_t("00:55"),
         label="Линия Концентрата на отгрузку",
     )
 
