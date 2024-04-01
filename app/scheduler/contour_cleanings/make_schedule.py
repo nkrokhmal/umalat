@@ -299,7 +299,7 @@ def make_contour_3(properties):
         m.row(
             "cleaning",
             push_func=AxisPusher(
-                start_from=cast_t(cheese_maker_end) + 1, validator=CleaningValidator(ordered=False)
+                start_from=cast_t(cheese_maker_end) + 1, validator=CleaningValidator()
             ),  # 10 minutes after pouring_off, 5 minutes after boiling ens
             size=cast_t("01:20"),
             label=f"Сыроизготовитель {int(n)}",
@@ -365,69 +365,58 @@ def make_contour_3(properties):
 def make_contour_4(properties, is_tomorrow_day_off=False):
     m = BlockMaker("4 contour")
 
-    with code("drenators"):
+    # - Дренаторы (сложная логика)
 
-        def _make_drenators(values, cleaning_time, label_suffix="", force_pairs=False):
-            # logic
-            i = 0
-            while i < len(values):
-                drenator_id, drenator_end = values[i]
-                if i == 0 and not force_pairs:
-                    # run first drenator single if not force pairs
-                    ids = [str(drenator_id)]
+    def _make_drenators(values, cleaning_time, label_suffix="", force_pairs=False):
+        # logic
+        i = 0
+        while i < len(values):
+            drenator_id, drenator_end = values[i]
+            if i == 0 and not force_pairs:
+                # run first drenator single if not force pairs
+                ids = [str(drenator_id)]
+                block = m.row(
+                    "cleaning",
+                    push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator()),
+                    size=cast_t(cleaning_time),
+                    ids=ids,
+                    label=f'Дренатор {", ".join(ids)}{label_suffix}',
+                ).block
+            else:
+                if i + 1 < len(values) and (
+                    force_pairs or values[i + 1][1] <= block.y[0] + 2 and not is_tomorrow_day_off
+                ):
+                    # run pair
+                    ids = [str(drenator_id), str(values[i + 1][0])]
                     block = m.row(
                         "cleaning",
-                        push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator(ordered=False)),
+                        push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator()),
                         size=cast_t(cleaning_time),
                         ids=ids,
                         label=f'Дренатор {", ".join(ids)}{label_suffix}',
                     ).block
+                    i += 1
                 else:
-                    if i + 1 < len(values) and (
-                        force_pairs or values[i + 1][1] <= block.y[0] + 2 and not is_tomorrow_day_off
-                    ):
-                        # run pair
-                        ids = [str(drenator_id), str(values[i + 1][0])]
-                        block = m.row(
-                            "cleaning",
-                            push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator(ordered=False)),
-                            size=cast_t(cleaning_time),
-                            ids=ids,
-                            label=f'Дренатор {", ".join(ids)}{label_suffix}',
-                        ).block
-                        i += 1
-                    else:
-                        # run single
-                        ids = [str(drenator_id)]
-                        block = m.row(
-                            "cleaning",
-                            push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator(ordered=False)),
-                            size=cast_t(cleaning_time),
-                            ids=[drenator_id],
-                            label=f'Дренатор {", ".join(ids)}{label_suffix}',
-                        ).block
-                i += 1
+                    # run single
+                    ids = [str(drenator_id)]
+                    block = m.row(
+                        "cleaning",
+                        push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator()),
+                        size=cast_t(cleaning_time),
+                        ids=[drenator_id],
+                        label=f'Дренатор {", ".join(ids)}{label_suffix}',
+                    ).block
+            i += 1
 
-        with code("Main drenators"):
-            # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
-            values = properties["mozzarella"].drenator_times()
-            for value in values:
-                value[1] = cast_t(value[1])
-                value[1] += 17  # add hour and 25 minutes of buffer
-            values = list(sorted(values, key=lambda value: value[1]))
+    # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
+    values = properties["mozzarella"].drenator_times()
+    for value in values:
+        value[1] = cast_t(value[1])
+        value[1] += 17  # add hour and 25 minutes of buffer
+    values = list(sorted(values, key=lambda value: value[1]))
+    _make_drenators(values, cleaning_time="01:20")
 
-            _make_drenators(values, "01:20")
-            used_ids = set([value[0] for value in values])
-
-        with code("Non used drenators"):
-            values = []
-
-            # run drenators that are not present
-            non_used_ids = set(range(1, 9)) - used_ids
-            non_used_ids = [str(x) for x in non_used_ids]
-            for non_used_id in non_used_ids:
-                values.append([non_used_id, cast_t("10:00")])
-            _make_drenators(values, "01:05", " (кор. мойка)", force_pairs=True)
+    # - Траспортер + линия кислой сыворотки (по порядку)
 
     m.row(
         "cleaning",
@@ -435,6 +424,8 @@ def make_contour_4(properties, is_tomorrow_day_off=False):
         size=cast_t("01:30"),
         label="Транспортер + линия кислой сыворотки",
     )
+
+    # - Линия кислой сыворотки (по порядку)
 
     m.row(
         "cleaning",
@@ -483,7 +474,7 @@ def make_contour_5(properties, input_tanks=None):
 
     m.row(
         "cleaning",
-        push_func=AxisPusher(start_from=cast_t("08:30"), validator=CleaningValidator(ordered=False)),
+        push_func=AxisPusher(start_from=cast_t("08:30"), validator=CleaningValidator()),
         size=cast_t("01:20"),
         label="Линия Концентрата на отгрузку",
     )
@@ -519,7 +510,7 @@ def make_contour_6(properties):
     # if whey_used > 100000:
     #     m.row(
     #         "cleaning",
-    #         push_func=AxisPusher(start_from=cast_t("12:00"), validator=CleaningValidator(ordered=False)),
+    #         push_func=AxisPusher(start_from=cast_t("12:00"), validator=CleaningValidator()),
     #         size=cast_t("01:20"),
     #         label="Танк рикотты (сладкая сыворотка)",
     #     )
@@ -531,7 +522,7 @@ def make_contour_6(properties):
     #         "cleaning",
     #         push_func=AxisPusher(
     #             start_from=cast_t(properties["mascarpone"].fourth_boiling_group_adding_lactic_acid_time) + 12,
-    #             validator=CleaningValidator(ordered=False),
+    #             validator=CleaningValidator(),
     #         ),
     #         size=cast_t("01:20"),
     #         label="Танк сливок",
@@ -539,7 +530,7 @@ def make_contour_6(properties):
     #
     # m.row(
     #     "cleaning",
-    #     push_func=AxisPusher(start_from=cast_t("09:00"), validator=CleaningValidator(ordered=False)),
+    #     push_func=AxisPusher(start_from=cast_t("09:00"), validator=CleaningValidator()),
     #     size=cast_t("01:20"),
     #     label="Танк сливок",
     # )
@@ -551,7 +542,7 @@ def make_contour_6(properties):
     #         "cleaning",
     #         push_func=AxisPusher(
     #             start_from=cast_t(properties["mascarpone"].last_pumping_off) + 6,
-    #             validator=CleaningValidator(ordered=False),
+    #             validator=CleaningValidator(),
     #         ),
     #         size=(cast_t("01:20"), 0),
     #         label="Маскарпоне",
@@ -562,7 +553,7 @@ def make_contour_6(properties):
     # ricotta_end = cast_t(properties["ricotta"].last_pumping_out_time) or 0 + 12
     # m.row(
     #     "cleaning",
-    #     push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
+    #     push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator()),
     #     size=cast_t("02:30"),
     #     label="Линия сладкой сыворотки",
     # )
@@ -571,7 +562,7 @@ def make_contour_6(properties):
     #
     # m.row(
     #     "cleaning",
-    #     push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
+    #     push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator()),
     #     size=cast_t("01:20"),
     #     label="Танк сливок",
     # )  # ricotta end + hour
@@ -583,7 +574,7 @@ def make_contour_6(properties):
     #     push_func=AxisPusher(
     #         start_from=cast_t(properties["ricotta"].start_of_ninth_from_the_end_time)
     #         or 0,  # todo maybe: remove or 0, make properly [@marklidenberg]
-    #         validator=CleaningValidator(ordered=False),
+    #         validator=CleaningValidator(),
     #     ),
     #     size=cast_t("01:20"),
     #     label="Танк рикотты (сладкая сыворотка)",
@@ -594,7 +585,7 @@ def make_contour_6(properties):
     # for label in ["Линия сливок на подмес рикотта", "Танк рикотты (скотта)", "Танк рикотты (сладкая сыворотка)"]:
     #     m.row(
     #         "cleaning",
-    #         push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator(ordered=False)),
+    #         push_func=AxisPusher(start_from=ricotta_end, validator=CleaningValidator()),
     #         size=cast_t("01:20"),
     #         label=label,
     #     )
@@ -605,7 +596,7 @@ def make_contour_6(properties):
     #     m.row(
     #         "cleaning",
     #         push_func=AxisPusher(
-    #             start_from=cast_t(properties["butter"].end_time), validator=CleaningValidator(ordered=False)
+    #             start_from=cast_t(properties["butter"].end_time), validator=CleaningValidator()
     #         ),
     #         size=cast_t("01:20"),
     #         label="Маслоцех",

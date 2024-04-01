@@ -21,7 +21,7 @@ from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_
 from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.parsing_utils.parse_block import parse_elements
-from app.scheduler.time_utils import cast_human_time, cast_t
+from app.scheduler.time_utils import cast_human_time, cast_t, cast_time
 
 
 def _is_datetime(v: Union[str, datetime]):
@@ -283,6 +283,9 @@ def prepare_boiling_plan(parsed_schedule, boiling_plan_df):
     return boiling_plan_df
 
 
+POURING_OFF_PLUS_EXTRA = 4  # # todo later: make pouring off properly [@marklidenberg]
+
+
 def fill_properties(parsed_schedule, boiling_plan_df):
     props = MozzarellaProperties()
 
@@ -318,14 +321,14 @@ def fill_properties(parsed_schedule, boiling_plan_df):
     props.every_8th_pouring_end = {}
 
     for percent in ["2.7", "3.2"]:
-        boilings = [
+        _boilings = [
             b for b in parsed_schedule["boilings"]["boiling", True] if str(b.props["boiling_model"].percent) == percent
         ]
-        boilings = list(sorted(boilings, key=lambda b: b.x[0]))
-        boilings = [b for i, b in enumerate(boilings) if i % 8 == 7 or i == len(boilings) - 1]
+        _boilings = list(sorted(boilings, key=lambda b: b.x[0]))
+        _boilings = [b for i, b in enumerate(boilings) if i % 8 == 7 or i == len(boilings) - 1]
         props.every_8th_pouring_end[percent] = [
             cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"]))
-            for b in boilings  # add termizator length time length
+            for b in _boilings  # add termizator length time length
         ]
 
     # - Multihead
@@ -420,15 +423,15 @@ def fill_properties(parsed_schedule, boiling_plan_df):
                 cur_drenator_num += 1
             else:
                 melting = parsed_schedule.find_one(cls="melting", boiling_id=b1.props["boiling_id"])
-                if b2.y[0] - 5 < melting.props["melting_end"]:  # todo later: make pouring off properly [@marklidenberg]
+                if b2.y[0] - POURING_OFF_PLUS_EXTRA < melting.props["melting_end"]:
                     cur_drenator_num += 1
                 else:
                     # use same drenator for the next boiling
                     pass
             b2.props.update(
                 drenator_num=cur_drenator_num % 2,
-                drenator_end=b2.y[0] + b2.props["boiling_model"].line.chedderization_time // 5 - 5,
-            )  # todo later: make pouring off properly [@marklidenberg]
+                drenator_end=b2.y[0] + b2.props["boiling_model"].line.chedderization_time // 5 - POURING_OFF_PLUS_EXTRA,
+            )
 
     # -- Fill drenator properties
 
@@ -450,7 +453,6 @@ def fill_properties(parsed_schedule, boiling_plan_df):
     df["id"] = df["id"].astype(int) + 1
 
     df = df.sort_values(by="id")
-
     values = df.values.tolist()
     values_dict = dict(values)
     props.drenator1_end_time = cast_human_time(values_dict.get(1))
