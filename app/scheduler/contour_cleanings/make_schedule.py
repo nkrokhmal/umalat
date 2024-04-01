@@ -60,7 +60,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
     m = BlockMaker("1 contour")
     print_json(dict(properties["mozzarella"]))
 
-    # - Танк “Моцарелла и дозаторы”
+    # - Танк “Моцарелла и дозаторы” (после фасовки на моцарелле в воде + 20 минут)
 
     m.row(
         "cleaning",
@@ -73,7 +73,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
         label="Танк Моцарелла и дозаторы",
     )
 
-    # - Танки роникс 1/2
+    # - Танки роникс 1/2 (после адыгейского + час)
 
     m.row(
         "cleaning",
@@ -82,10 +82,10 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
             validator=CleaningValidator(),
         ),
         size=cast_t("01:00"),
-        label="Танки роникс 1/2",  # todo question: тут одна мойка? Конец адыгейского - это какой момент точно?
+        label="Танки роникс 1/2",  # todo later: question: тут одна мойка? Конец адыгейского - это какой момент точно? [@marklidenberg]
     )
 
-    # - Сырое молоко на адыгейский
+    # - Сырое молоко на адыгейский (после роникса)
 
     m.row(
         "cleaning",
@@ -97,7 +97,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
         label="Сырое молоко на адыгейский",  # после роникса
     )
 
-    # - Танки смесей
+    # - Танки смесей (по 8-му наливу по каждой смеси и в конце смеси)
 
     times = sum([times for times in properties["mozzarella"].every_8th_pouring_end.values()], [])
     times = sorted([cast_t(time) for time in times])
@@ -113,7 +113,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
             label=f"Танк смесей",
         )
 
-    # - Линия подвал рассол
+    # - Линия подвал рассол (07:00)
 
     if basement_brine:
         m.row(
@@ -123,7 +123,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
             label="Линия подвал рассол",
         )
 
-    # - Танки сырого молока
+    # - Танки сырого молока (11:00, 17:00, 22:00)
 
     for i, time in enumerate(["11:00", "17:00", "22:00"]):
         m.row(
@@ -133,7 +133,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
             label=f"Танк сырого молока {i + 1}",
         )
 
-    # - Линия приемки молока
+    # - Линия приемки молока (03:00, 04:00)
 
     for i, time in enumerate(["03:00", "04:00"]):
         m.row(
@@ -143,7 +143,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
             label=f"Линия приемки молока {i + 1}",
         )
 
-    # - Линия отгрузки сырья
+    # - Линия отгрузки сырья (00:00)
 
     m.row(
         "cleaning",
@@ -155,62 +155,124 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
     return m.root
 
 
-def make_contour_2(properties):
+def make_contour_2(properties, naslavuchich: bool = False):
     m = BlockMaker("2 contour")
 
-    # - Комет
-
-    m.row()
-
-    m.row("cleaning", push_func=add_push, size=cast_t("01:20"), x=cast_t("12:00"), label="Линия обрата в сливки")
+    # - Комет (После окончания фасовки на моцарелле в воде + 2 часа)
 
     m.row(
         "cleaning",
-        push_func=AxisPusher(validator=CleaningValidator()),
+        push_func=AxisPusher(
+            start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 24,
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:30"),
+        label="Комет",
+    )
+    # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 3,
+            validator=CleaningValidator(),
+        ),
         size=cast_t("01:20"),
-        label="Сливки от пастера 25",
+        label="Фасовочная вода",
     )
 
-    with code("Мультиголова"):
-        if properties["mozzarella"].multihead_end_time:
-            multihead_end = cast_t(properties["mozzarella"].multihead_end_time) + 12
-            m.row(
-                "cleaning",
-                push_func=AxisPusher(start_from=["max_end", multihead_end], validator=CleaningValidator()),
-                size=cast_t("01:20"),
-                label="Комет",
-            )
+    # - Танки жирной воды (22:00, 07:00)
 
-        if properties["mozzarella"].water_multihead_present:
-            m.row(
-                "cleaning",
-                push_func=AxisPusher(validator=CleaningValidator()),
-                size=cast_t("01:20"),
-                label="Фасовочная вода",
-            )
+    for i, time in enumerate(["22:00", "07:00"]):
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
+            size=cast_t("01:10"),
+            label=f"Танк жирной воды {i + 1}",
+        )
+
+    # - Жирная вода на сепаратор (вода) (После окончания плавления на линии воды + 1 час)
 
     m.row(
         "cleaning",
-        push_func=AxisPusher(start_from=cast_t("1:04:00"), validator=CleaningValidator()),
-        size=cast_t("01:20"),
-        label="Танк ЖВиКС 1",
+        push_func=AxisPusher(
+            start_from=cast_t(properties["mozzarella"].water_melting_end_time) + 12,
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:10"),
+        label="Жирная вода на сепаратор (вода)",
     )
 
-    m.row("cleaning", push_func=AxisPusher(validator=CleaningValidator()), size=cast_t("01:20"), label="Танк ЖВиКС 2")
+    # - Ванны моцарелла соль (После окончания посолки на линии пиццы + 15 минут)
 
     m.row(
         "cleaning",
-        push_func=AxisPusher(validator=CleaningValidator()),
-        size=cast_t("01:20"),
-        label="Жирная вода на сепаратор",
+        push_func=AxisPusher(
+            start_from=cast_t(properties["mozzarella"].salt_melting_end_time) + 3,
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:30"),
+        label="Ванны моцарелла соль",
     )
 
+    # - Жирная вода на сепаратор (соль) (по порядку)
+
     m.row(
         "cleaning",
-        push_func=AxisPusher(validator=CleaningValidator()),
-        size=cast_t("01:20"),
+        push_func=AxisPusher(
+            start_from="last_end",
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:10"),
+        label="Жирная вода на сепаратор (соль)",
+    )
+    # - Сливки от сепаратора жирной воды (по порядку)
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from="last_end",
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:30"),
         label="Сливки от сепаратора жирной воды",
     )
+    # - Сливки отпастера 25(по порядку)
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from="last_end",
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:10"),
+        label="Сливки отпастера 25",
+    )
+
+    # - Линия обрата в сливки (по порядку)
+
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(
+            start_from="last_end",
+            validator=CleaningValidator(),
+        ),
+        size=cast_t("01:10"),
+        label="Линия обрата в сливки",
+    )
+
+    # - Линия наславучич (18:00, с галочкой)
+
+    if naslavuchich:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("18:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Линия наславучич",
+        )
 
     return m.root
 
