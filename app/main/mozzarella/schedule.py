@@ -63,7 +63,7 @@ def mozzarella_schedule():
 
         try:
             output = draw_frontend(
-                boiling_plan=wb,
+                boiling_plan=file_path,
                 start_times={
                     LineName.WATER: form.water_beg_time.data,
                     LineName.SALT: form.salt_beg_time.data,

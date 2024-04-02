@@ -12,6 +12,7 @@ from app.scheduler.wrap_header import wrap_header
 def wrap_frontend2(
     brynza_kg: int,
     chanah_kg: int,
+    halumi_kg: int,
     date=None,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
@@ -19,7 +20,11 @@ def wrap_frontend2(
     # - Get schedule
 
     output = make_schedule2(
-        brynza_kg=brynza_kg, chanah_kg=chanah_kg, start_time=start_time, first_batch_ids_by_type=first_batch_ids_by_type
+        brynza_kg=brynza_kg,
+        chanah_kg=chanah_kg,
+        halumi_kg=halumi_kg,
+        start_time=start_time,
+        first_batch_ids_by_type=first_batch_ids_by_type,
     )
     schedule = output["schedule"]
 
@@ -59,7 +64,7 @@ def wrap_frontend2(
                         m.row(
                             "boiling_name_label",
                             size=boiling.size[0] - 6,
-                            boiling_label=f"{'Брынза' if boiling.props['group_name'] == 'Брынза' else 'Халуми'} 3,05 PCS(12-13)  3150кг",
+                            boiling_label=f"{boiling.props['group_name'] if boiling.props['group_name'] != 'Чанах' else 'Халуми'} 3,05 PCS(12-13)  3150кг",
                         )
                     with m.block(font_size=8):
                         m.row("pouring", size=boiling["pouring"].size[0])

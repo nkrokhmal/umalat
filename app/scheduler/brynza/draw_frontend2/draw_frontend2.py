@@ -15,6 +15,7 @@ from app.scheduler.frontend_utils import draw_excel_frontend
 def draw_frontend2(
     brynza_kg: int,
     chanah_kg: int,
+    halumi_kg: int = 0,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
     date: Optional[datetime] = None,
@@ -25,6 +26,7 @@ def draw_frontend2(
     output = wrap_frontend2(
         brynza_kg=brynza_kg,
         chanah_kg=chanah_kg,
+        halumi_kg=halumi_kg,
         start_time=start_time,
         date=date,
         first_batch_ids_by_type=first_batch_ids_by_type,
