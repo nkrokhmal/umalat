@@ -542,7 +542,7 @@ def make_schedule(
     contours = [
         make_contour_1(properties, basement_brine=basement_brine),
         make_contour_2(properties, naslavuchich=naslavuchich),
-        make_contour_3(properties),
+        # make_contour_3(properties),
         make_contour_4(properties, is_tomorrow_day_off=is_tomorrow_day_off),
         make_contour_5(properties),
         make_contour_6(properties, butter=butter),

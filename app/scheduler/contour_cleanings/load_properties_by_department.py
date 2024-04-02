@@ -10,12 +10,14 @@ from app.scheduler.archive.mascarpone.properties import cast_properties as cast_
 from app.scheduler.archive.ricotta.properties import cast_properties as cast_properties_ricotta
 from app.scheduler.butter.properties.butter_properties import cast_properties as cast_properties_butter
 from app.scheduler.butter.properties.parse_properties import parse_properties as parse_properties_butter
+from app.scheduler.mascarpone.properties.parse_properties import parse_properties as parse_properties_mascarpone
 from app.scheduler.milk_project.properties.milk_project_properties import (
     cast_properties as cast_properties_milk_project,
 )
 from app.scheduler.milk_project.properties.parse_properties import parse_properties as parse_properties_milk_project
 from app.scheduler.mozzarella.properties.mozzarella_properties import cast_properties as cast_properties_mozzarella
 from app.scheduler.mozzarella.properties.parse_properties import parse_properties as parse_properties_mozzarella
+from app.scheduler.ricotta.properties.parse_properties import parse_properties as parse_properties_ricotta
 from config import config
 
 
@@ -33,6 +35,8 @@ EXCEL_PARSERS = {
     "milk_project": parse_properties_milk_project,
     "butter": parse_properties_butter,
     "adygea": parse_properties_adygea,
+    "ricotta": parse_properties_ricotta,
+    "mascarpone": parse_properties_mascarpone,
 }
 
 
@@ -47,6 +51,8 @@ def load_properties_by_department(
         "mozzarella",
         "butter",
         "adygea",
+        "ricotta",
+        "mascarpone",
     ]:
         # try to find in files
 
