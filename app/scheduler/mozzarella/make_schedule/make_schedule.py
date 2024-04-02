@@ -42,6 +42,7 @@ def make_schedule(
         start_configuration=start_configuration,
         date=date,
         optimize_cleanings=optimize_cleanings,
+        first_batch_ids_by_type=first_batch_ids_by_type,
     )
 
     # - Return

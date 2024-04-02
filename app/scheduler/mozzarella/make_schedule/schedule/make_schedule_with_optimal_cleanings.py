@@ -24,6 +24,7 @@ def make_schedule_with_optimal_cleanings(
     start_configuration=None,
     date=None,
     optimize_cleanings: bool = True,
+    first_batch_ids_by_type: dict = {"mozzarella": 1},
 ):
     # - Process case with not optimized cleanings
 
@@ -41,6 +42,7 @@ def make_schedule_with_optimal_cleanings(
             exact_start_time_line_name=exact_start_time_line_name,
             date=date,
             parallelism=4,
+            first_batch_ids_by_type=first_batch_ids_by_type,
         )
 
     # - Make schedule with no cleanings
@@ -53,6 +55,7 @@ def make_schedule_with_optimal_cleanings(
         exact_start_time_line_name=exact_start_time_line_name,
         date=date,
         parallelism=4,
+        first_batch_ids_by_type=first_batch_ids_by_type,
     )
 
     # - Get cleanings
@@ -71,6 +74,7 @@ def make_schedule_with_optimal_cleanings(
         start_times=start_times,
         start_configuration=[b.props["boiling_model"].line.name for b in schedule["master"]["boiling", True]],
         exact_start_time_line_name=exact_start_time_line_name,
+        first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,
     )
 

@@ -1027,6 +1027,7 @@ def make_schedule_basic(
     date=None,
     parallelism: int = 1,
     target_object: Literal["schedule", "configuration_and_score"] = "schedule",
+    first_batch_ids_by_type: dict = {"mozzarella": 1},
 ):
     logger.info(
         "Making basic_example schedule",
@@ -1086,7 +1087,12 @@ def make_schedule_basic(
     # - Make schedule
 
     return ScheduleMaker().make(
-        boilings=make_boilings(to_boiling_plan(boiling_plan_obj)),
+        boilings=make_boilings(
+            to_boiling_plan(
+                boiling_plan_obj,
+                first_batch_ids_by_type=first_batch_ids_by_type,
+            )
+        ),
         date=date,
         cleanings=cleanings,
         start_times=dict(start_times),
