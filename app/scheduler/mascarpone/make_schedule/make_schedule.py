@@ -186,6 +186,7 @@ def make_schedule(
 
         current_group_count = 1
         current_group_number = 1
+        current_non_cream_group_number = 1
         current_tub_num = 1  # 1 or 2
 
         for is_first, is_last, (prev_indexed_grp, indexed_grp) in mark_ends(
@@ -229,6 +230,9 @@ def make_schedule(
 
             if is_new_group or is_mascarpone_filled:
                 current_group_number += 1
+
+                if prev_group != "cream" and group != "cream":
+                    current_non_cream_group_number += 1
 
             # - Process edge cases
 
@@ -318,11 +322,10 @@ def make_schedule(
                 continue
 
             # - Prepare boiling
-
             boiling = _make_boiling(
                 grp,
                 tub_num=current_tub_num,
-                group_number=current_group_number,
+                batch_number=current_non_cream_group_number,
                 line=line,
                 output_kg=grp["kg"].sum(),
                 input_kg=grp.iloc[0]["input_kg"],
@@ -444,6 +447,7 @@ def make_schedule(
         df = pd.DataFrame(boilings, columns=["boiling"])
 
         df["group_number"] = df["boiling"].apply(lambda boiling: boiling.props["group_number"])
+        df["batch_number"] = df["boiling"].apply(lambda boiling: boiling.props["batch_number"])
         df["block_id"] = df["boiling"].apply(lambda boiling: boiling.props["block_id"])
         df["percent"] = df["boiling"].apply(lambda boiling: boiling.props["boiling_model"].percent)
         df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
@@ -455,7 +459,6 @@ def make_schedule(
         for i, grp in df.groupby("block_id"):
             pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
             pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
-
             if grp.iloc[0]["semifinished_group"] in ["cream_cheese", "robiola"]:
                 m.block(
                     "boiling_header",
@@ -467,6 +470,7 @@ def make_schedule(
                     total_kg=grp["kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,
+                    batch_number=grp.iloc[0]["batch_number"],
                 )
 
             elif grp.iloc[0]["semifinished_group"] != "mascarpone":
@@ -481,6 +485,7 @@ def make_schedule(
                     total_kg=grp["kg"].sum(),
                     boilings=grp["boiling"].tolist(),
                     line=line,
+                    batch_number=grp.iloc[0]["batch_number"],
                 )
             else:
                 # shifted 10 minutes to the left. Also add pouring_cream block
@@ -493,6 +498,7 @@ def make_schedule(
                     semifinished_group=grp.iloc[0]["semifinished_group"],
                     boilings=grp["boiling"].tolist(),
                     line=line,
+                    batch_number=grp.iloc[0]["batch_number"],
                 )
 
                 m.block(

@@ -12,7 +12,6 @@ from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
 from app.enum import LineName
-from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.mozzarella.draw_frontend.style import STYLE
 from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
@@ -24,7 +23,7 @@ from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 
 
 def draw_frontend(
-    boiling_plan: BoilingPlanLike,
+    boiling_plan: str,
     date: Optional[datetime] = None,
     workbook: Workbook = None,
     saturate=True,
@@ -122,8 +121,8 @@ def test():
     schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
     # print(output["schedule"])
-    schedule_wb.save("schedule2.xlsx")
-    open_file_in_os("schedule2.xlsx")
+    schedule_wb.save("schedule3.xlsx")
+    open_file_in_os("schedule3.xlsx")
 
     print("Elapsed", time.time() - started_at)
 

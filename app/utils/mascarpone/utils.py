@@ -23,11 +23,15 @@ class MascarponeBoilingsHandler(BoilingsHandler):
     @staticmethod
     def check_boiling_kg(boiling: BoilingGroup) -> None:
         if boiling.leftovers > 10:
-            flask.flash(
-                flask.Markup(f'В варке с SKU {boiling.skus[-1]["sku_name"]} не хватает {boiling.leftovers} кг'),
-                "warning",
-            )
-            pass
+            try:
+                flask.flash(
+                    flask.Markup(f'В варке с SKU {boiling.skus[-1]["sku_name"]} не хватает {boiling.leftovers} кг'),
+                    "warning",
+                )
+            except Exception as e:
+                if "Working outside of request context" not in str(e):
+                    # this error happens on local development
+                    raise
 
     def handle_group(self, skus: list[dict], max_weight: float, weight_key: str = "plan", **kwargs) -> None:
         if len(skus) == 0:

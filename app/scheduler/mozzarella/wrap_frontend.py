@@ -481,7 +481,7 @@ def wrap_extra_packings(extra_packings):
 
 
 def wrap_frontend(
-    boiling_plan: BoilingPlanLike,
+    boiling_plan: str,
     coolings_mode="first",
     saturate=True,
     normalization=True,

@@ -11,7 +11,7 @@ from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_
 
 
 def make_schedule(
-    boiling_plan: BoilingPlanLike,
+    boiling_plan: str,
     saturate=True,
     normalization=True,
     validate=True,
@@ -36,12 +36,13 @@ def make_schedule(
     # - Make schedule
 
     schedule = make_schedule_with_optimal_cleanings(
-        boiling_plan_obj=boiling_plan_df,
+        boiling_plan_obj=boiling_plan,
         start_times=start_times,
         exact_start_time_line_name=exact_start_time_line_name,
         start_configuration=start_configuration,
         date=date,
         optimize_cleanings=optimize_cleanings,
+        first_batch_ids_by_type=first_batch_ids_by_type,
     )
 
     # - Return

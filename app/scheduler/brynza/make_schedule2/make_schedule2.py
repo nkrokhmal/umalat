@@ -41,6 +41,7 @@ class Validator(ClassValidator):
 def make_schedule2(
     brynza_kg: int,
     chanah_kg: int,
+    halumi_kg: int,
     start_time="07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
 ) -> dict:
@@ -75,6 +76,22 @@ def make_schedule2(
             make_boiling(
                 boiling_id=current_id,
                 group_name="Чанах",
+                cheese_maker_num=cheese_maker_id + 1,
+            ),
+            push_func=AxisPusher(start_from="max_beg"),
+            validator=Validator(),
+        )
+        current_id += 1
+        cheese_maker_id = (cheese_maker_id + 1) % 4
+
+    # - Make halumi boilings
+
+    for boiling_id in range(math.ceil(int(halumi_kg / 3150))):
+        push(
+            m.root,
+            make_boiling(
+                boiling_id=current_id,
+                group_name="Халуми",
                 cheese_maker_num=cheese_maker_id + 1,
             ),
             push_func=AxisPusher(start_from="max_beg"),
