@@ -372,7 +372,6 @@ def make_contour_4(properties):
     values = properties["mozzarella"].drenator_times()
     for value in values:
         value[1] = cast_t(value[1])
-        value[1] += 17  # add hour and 25 minutes of buffer
     values = list(sorted(values, key=lambda value: value[1]))
     _make_drenators(values, cleaning_time="01:20")
 
@@ -521,7 +520,6 @@ def make_schedule(
     butter: bool = True,
     naslavuchich: bool = True,
     basement_brine: bool = True,
-    is_tomorrow_day_off: bool = True,
 ):
     m = BlockMaker("schedule")
 
@@ -529,7 +527,7 @@ def make_schedule(
         make_contour_1(properties, basement_brine=basement_brine),
         make_contour_2(properties, naslavuchich=naslavuchich),
         make_contour_3(properties),
-        make_contour_4(properties, is_tomorrow_day_off=is_tomorrow_day_off),
+        make_contour_4(properties),
         make_contour_5(properties),
         make_contour_6(properties, butter=butter),
     ]
