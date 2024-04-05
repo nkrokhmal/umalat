@@ -39,9 +39,9 @@ class Validator(ClassValidator):
 
 
 def make_schedule2(
-    brynza_kg: int,
-    chanah_kg: int,
-    halumi_kg: int,
+    brynza_boilings: int,
+    halumi_boilings: int,
+    n_cheese_makers: int = 4,
     start_time="07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
 ) -> dict:
@@ -54,7 +54,7 @@ def make_schedule2(
     current_id = first_batch_ids_by_type["brynza"]
     cheese_maker_id = 0
 
-    for boiling_id in range(math.ceil(int(brynza_kg / 3150))):
+    for boiling_id in range(brynza_boilings):
         push(
             m.root,
             make_boiling(
@@ -66,27 +66,11 @@ def make_schedule2(
             validator=Validator(),
         )
         current_id += 1
-        cheese_maker_id = (cheese_maker_id + 1) % 4
-
-    # - Make chanah boilings
-
-    for boiling_id in range(math.ceil(int(chanah_kg / 3150))):
-        push(
-            m.root,
-            make_boiling(
-                boiling_id=current_id,
-                group_name="Чанах",
-                cheese_maker_num=cheese_maker_id + 1,
-            ),
-            push_func=AxisPusher(start_from="max_beg"),
-            validator=Validator(),
-        )
-        current_id += 1
-        cheese_maker_id = (cheese_maker_id + 1) % 4
+        cheese_maker_id = (cheese_maker_id + 1) % n_cheese_makers
 
     # - Make halumi boilings
 
-    for boiling_id in range(math.ceil(int(halumi_kg / 3150))):
+    for boiling_id in range(halumi_boilings):
         push(
             m.root,
             make_boiling(
@@ -98,14 +82,14 @@ def make_schedule2(
             validator=Validator(),
         )
         current_id += 1
-        cheese_maker_id = (cheese_maker_id + 1) % 4
+        cheese_maker_id = (cheese_maker_id + 1) % n_cheese_makers
 
     # - Make saltings
 
     current_id = 1
     cheese_maker_id = 0
 
-    for boiling_id in range(math.ceil(int(brynza_kg / 3150))):
+    for boiling_id in range(brynza_boilings):
         push(
             m.root,
             make_salting(
@@ -123,7 +107,7 @@ def make_schedule2(
 
 
 def test():
-    print(make_schedule2(brynza_kg=10000, chanah_kg=10000))
+    print(make_schedule2(brynza_boilings=3, halumi_boilings=4))
 
 
 if __name__ == "__main__":

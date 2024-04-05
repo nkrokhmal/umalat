@@ -63,7 +63,7 @@ def brynza_schedule():
         create_if_not_exists(data_dir)
 
         output = draw_frontend2(
-            brynza_kg=brynza_kg,
+            brynza_boilings=brynza_kg,
             chanah_kg=chanakh_kg,
             first_batch_ids_by_type={"brynza": form.batch_number.data},
             date=date,

@@ -10,9 +10,9 @@ from app.scheduler.wrap_header import wrap_header
 
 
 def wrap_frontend2(
-    brynza_kg: int,
-    chanah_kg: int,
-    halumi_kg: int,
+    brynza_boilings: int,
+    halumi_boilings: int,
+    n_cheese_makers: int = 4,
     date=None,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
@@ -20,9 +20,9 @@ def wrap_frontend2(
     # - Get schedule
 
     output = make_schedule2(
-        brynza_kg=brynza_kg,
-        chanah_kg=chanah_kg,
-        halumi_kg=halumi_kg,
+        brynza_boilings=brynza_boilings,
+        halumi_boilings=halumi_boilings,
+        n_cheese_makers=n_cheese_makers,
         start_time=start_time,
         first_batch_ids_by_type=first_batch_ids_by_type,
     )
@@ -45,7 +45,7 @@ def wrap_frontend2(
 
     # - Make cheese makers
 
-    for cheese_maker_num in range(1, 5):
+    for cheese_maker_num in range(1, n_cheese_makers + 1):
         with m.block(f"cheese_maker", start_time=start_time):
             for boiling in schedule.iter(
                 cls="boiling",
@@ -93,7 +93,7 @@ def wrap_frontend2(
 
     # -- Saltings
 
-    for cheese_maker_num in range(1, 5):
+    for cheese_maker_num in range(1, n_cheese_makers + 1):
         with m.block(
             f"salting_cheese_maker",
             start_time=start_time,
@@ -126,7 +126,7 @@ def wrap_frontend2(
     # - Add template
 
     with m.block("template_block", index_width=1, push_func=add_push):
-        for cheese_maker_num in range(1, 5):
+        for cheese_maker_num in range(1, n_cheese_makers + 1):
             m.block(
                 "template",
                 push_func=add_push,
@@ -151,8 +151,8 @@ def wrap_frontend2(
 
 
 def test():
-    print(wrap_frontend2(brynza_kg=10000, chanah_kg=10000)["schedule"])
-    print(wrap_frontend2(brynza_kg=10000, chanah_kg=10000)["frontend"])
+    print(wrap_frontend2(brynza_boilings=3, halumi_boilings=3)["schedule"])
+    print(wrap_frontend2(brynza_boilings=3, halumi_boilings=3)["frontend"])
 
 
 if __name__ == "__main__":
