@@ -485,14 +485,12 @@ def make_contour_6(properties, butter: bool = False):
 
     # - Танк сливок 4
 
-    if properties["mascarpone"].every_8t_of_separation:
+    for i, time in enumerate(properties["mascarpone"].every_8t_of_separation):
         m.row(
             "cleaning",
-            push_func=AxisPusher(
-                start_from=cast_t(properties["mascarpone"].every_8t_of_separation[0]), validator=CleaningValidator()
-            ),
+            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
             size=cast_t("1:30"),
-            label=f"Танк сливок 4",
+            label=f"Танк сливок {i + 4}",
         )
 
     # - Линия сливок на маскарпоне (после окончания маскарпоне)

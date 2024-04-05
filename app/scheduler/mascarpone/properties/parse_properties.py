@@ -85,8 +85,9 @@ def fill_properties(parsed_schedule):
         current_kg += row["kg"]
         if current_kg >= 8000:
             props.every_8t_of_separation.append(cast_human_time(row["y0"]))
-            current_kg = 0
-            break  # only one 8t separation is needed
+            break
+    props.every_8t_of_separation.append(cast_human_time(separation_blocks_df.iloc[-1]["y0"]))  # max 2 times
+    props.every_8t_of_separation = list(sorted(set(props.every_8t_of_separation)))
 
     return props
 
