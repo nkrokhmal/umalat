@@ -20,6 +20,9 @@ class Validator(ClassValidator):
     def validate__boiling__boiling(b1, b2):
         validate_disjoint_by_axis(b1["pouring_off"], b2["cutting"], ordered=True)
 
+        if b1.props["cheese_maker_num"] == b2.props["cheese_maker_num"]:
+            validate_disjoint_by_axis(b1, b2, ordered=True)
+
     @staticmethod
     def validate__boiling__salting(b1, b2):
         validate_disjoint_by_axis(b1["pouring_off"], b2, ordered=True)

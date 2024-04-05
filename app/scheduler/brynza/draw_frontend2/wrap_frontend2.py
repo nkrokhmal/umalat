@@ -130,7 +130,7 @@ def wrap_frontend2(
             m.block(
                 "template",
                 push_func=add_push,
-                x=(1, 2 + 4 * (cheese_maker_num - 1)),
+                x=(1, 2 + n_cheese_makers * (cheese_maker_num - 1)),
                 size=(2, 2),
                 text=f"Сыроизготовитель №1 Poly {cheese_maker_num}",
                 color=(183, 222, 232),
@@ -138,7 +138,7 @@ def wrap_frontend2(
         m.block(
             "template",
             push_func=add_push,
-            x=(1, 20),
+            x=(1, 5 * n_cheese_makers + 2),
             size=(2, 2),
             text="ПОСОЛКА",
         )

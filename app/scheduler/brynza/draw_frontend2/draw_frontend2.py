@@ -51,7 +51,7 @@ def test():
     output = draw_frontend2(
         brynza_boilings=3,
         halumi_boilings=4,
-        n_cheese_makers=3,
+        n_cheese_makers=4,
         start_time="07:00",
         date=datetime(2021, 1, 1),
     )

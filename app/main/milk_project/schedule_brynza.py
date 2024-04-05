@@ -35,6 +35,7 @@ def brynza_schedule():
         beg_time = form.beg_time.data
         brynza_boilings = form.brynza_boilings.data
         halumi_boilings = form.halumi_boilings.data
+        n_cheese_makers = form.n_cheese_makers.data
 
         skus = db.session.query(BrynzaSKU).all()
 
@@ -48,6 +49,7 @@ def brynza_schedule():
         output = draw_frontend2(
             brynza_boilings=brynza_boilings,
             halumi_boilings=halumi_boilings,
+            n_cheese_makers=n_cheese_makers,
             start_time=beg_time,
             first_batch_ids_by_type={"brynza": form.batch_number.data},
             date=date,
