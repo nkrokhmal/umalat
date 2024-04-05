@@ -51,7 +51,7 @@ def _filter_func(group):
 
 def _split_func(row):
     try:
-        return is_int_like(row["label"].split(" ")[0])
+        return is_int_like(row["label"].split(" ")[0]) or "посолка" in row["label"]
     except:
         return False
 
@@ -146,13 +146,30 @@ def parse_schedule_file(wb_obj):
         parse_elements(
             m=m,
             cells_df=cells_df,
-            label="water_meltings",
-            element_label="melting",
+            label="water_melting_headers",
+            element_label="melting_header",
             rows=water_melting_headers,
             start_time=start_times[1],
             filter_=_filter_func,
             split_func=_split_func,
         )
+
+        parse_elements(
+            m=m,
+            cells_df=cells_df,
+            label="water_melting_bodies",
+            element_label="melting_body",
+            rows=[row + 1 for row in water_melting_headers],
+            start_time=start_times[1],
+            filter_=None,
+            split_func=lambda group: True,  # single objects
+        )
+
+        # set boiling id for each melting_body
+
+        assert len(m.root["water_melting_headers"].children) == len(m.root["water_melting_bodies"].children)
+        for row_1, row_2 in zip(m.root["water_melting_headers"].children, m.root["water_melting_bodies"].children):
+            row_2.props.update(boiling_id=row_1.props["boiling_id"], label=str(row_1.props["label"]))
 
         # todo maybe: make properly [@marklidenberg]
 
@@ -160,7 +177,7 @@ def parse_schedule_file(wb_obj):
 
         # -- Melting end
 
-        for melting in m.root["water_meltings"].children:
+        for melting in m.root["water_melting_headers"].children:
             melting.props.update(melting_end=melting.y[0])
 
         # -- Melting end with cooling
@@ -177,7 +194,7 @@ def parse_schedule_file(wb_obj):
         for i, row in df_formings.iterrows():
             overlapping = [
                 m
-                for m in m.root["water_meltings"].children
+                for m in m.root["water_melting_headers"].children
                 if calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row["x0"], row["y0"])) > 0
             ]
             if not overlapping:
@@ -213,13 +230,29 @@ def parse_schedule_file(wb_obj):
         parse_elements(
             m=m,
             cells_df=cells_df,
-            label="salt_meltings",
-            element_label="melting",
+            label="salt_melting_headers",
+            element_label="melting_header",
             rows=salt_melting_headers,
             start_time=start_times[1],
             split_func=_split_func,
             filter_=_filter_func,
         )
+        parse_elements(
+            m=m,
+            cells_df=cells_df,
+            label="salt_melting_bodies",
+            element_label="melting_body",
+            rows=[row + 1 for row in salt_melting_headers],
+            start_time=start_times[1],
+            split_func=_split_func,
+            filter_=lambda group: "посолка" not in group[0]["label"] if len(group) > 0 else False,
+        )
+
+        # set boiling id for each melting_body
+
+        assert len(m.root["salt_melting_headers"].children) == len(m.root["salt_melting_bodies"].children)
+        for row_1, row_2 in zip(m.root["salt_melting_headers"].children, m.root["salt_melting_bodies"].children):
+            row_2.props.update(boiling_id=row_1.props["boiling_id"], label=str(row_1.props["label"]))
 
         # todo maybe: make properly [@marklidenberg]
 
@@ -242,7 +275,7 @@ def parse_schedule_file(wb_obj):
         df_formings = df_formings.sort_values(by="x0")
         for i, row in df_formings.iterrows():
             melting = delistify(
-                [m for m in m.root["salt_meltings"].children if m.x[0] == row["serving_start"]], single=True
+                [m for m in m.root["salt_melting_headers"].children if m.x[0] == row["serving_start"]], single=True
             )
             melting.props.update(melting_start=row["x0"], melting_end=row["y0"], melting_end_with_cooling=melting.y[0])
 
@@ -283,14 +316,11 @@ def prepare_boiling_plan(parsed_schedule, boiling_plan_df):
     return boiling_plan_df
 
 
-POURING_OFF_PLUS_EXTRA = 4  # # todo later: make pouring off properly [@marklidenberg]
-
-
 def fill_properties(parsed_schedule, boiling_plan_df):
     props = MozzarellaProperties()
 
     # save boiling_model to parsed_schedule blocks
-    for block in list(parsed_schedule.iter(cls=lambda cls: cls in ["boiling", "melting", "packing"])):
+    for block in list(parsed_schedule.iter(cls=lambda cls: cls in ["boiling", "melting_header", "packing"])):
         # remove little blocks
         if "boiling_id" not in block.props.all() or not is_int(block.props["boiling_id"]):
             # NOTE: SHOULD NOT HAPPEN IN NEWER FILES SINCE update 2021.10.21 (# update 2021.10.21)
@@ -369,7 +399,7 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     if salt_boilings:
         props.salt_melting_start_time = cast_human_time(
-            parsed_schedule["salt_meltings"]["melting", True][0].props["melting_start"]
+            parsed_schedule["salt_melting_headers"]["melting_header", True][0].props["melting_start"]
         )
 
     # - Cheesemakers
@@ -403,7 +433,7 @@ def fill_properties(parsed_schedule, boiling_plan_df):
             return None
         line_boilings = list(sorted(line_boilings, key=lambda b: b.x[0]))
         last_boiling_id = line_boilings[-1].props["boiling_id"]
-        last_melting = parsed_schedule.find_one(cls="melting", boiling_id=last_boiling_id)
+        last_melting = parsed_schedule.find_one(cls="melting_header", boiling_id=last_boiling_id)
         return last_melting.props["melting_end_with_cooling"]
 
     props.water_melting_end_time = cast_human_time(_get_melting_end(water_boilings))
@@ -422,15 +452,16 @@ def fill_properties(parsed_schedule, boiling_plan_df):
             if not b1:
                 cur_drenator_num += 1
             else:
-                melting = parsed_schedule.find_one(cls="melting", boiling_id=b1.props["boiling_id"])
-                if b2.y[0] - POURING_OFF_PLUS_EXTRA < melting.props["melting_end"]:
+                b1_melting = parsed_schedule.find_one(cls="melting_body", boiling_id=b1.props["boiling_id"])
+                if b2.y[0] < b1_melting.y[0]:
                     cur_drenator_num += 1
                 else:
                     # use same drenator for the next boiling
                     pass
+            b2_melting = parsed_schedule.find_one(cls="melting_body", boiling_id=b2.props["boiling_id"])
             b2.props.update(
                 drenator_num=cur_drenator_num % 2,
-                drenator_end=b2.y[0] + b2.props["boiling_model"].line.chedderization_time // 5 - POURING_OFF_PLUS_EXTRA,
+                drenator_end=b2_melting.y[0] + 4,  # add 20 minutes
             )
 
     # -- Fill drenator properties

@@ -324,7 +324,7 @@ def make_contour_3(properties):
     return m.root
 
 
-def make_contour_4(properties, is_tomorrow_day_off=False):
+def make_contour_4(properties):
     m = BlockMaker("4 contour")
 
     # - Дренаторы (сложная логика)
@@ -345,9 +345,7 @@ def make_contour_4(properties, is_tomorrow_day_off=False):
                     label=f'Дренатор {", ".join(ids)}{label_suffix}',
                 ).block
             else:
-                if i + 1 < len(values) and (
-                    force_pairs or values[i + 1][1] <= block.y[0] + 2 and not is_tomorrow_day_off
-                ):
+                if i + 1 < len(values) and (force_pairs or values[i + 1][1] <= block.y[0] + 2):
                     # run pair
                     ids = [str(drenator_id), str(values[i + 1][0])]
                     block = m.row(
