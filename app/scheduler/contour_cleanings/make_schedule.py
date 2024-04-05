@@ -513,20 +513,18 @@ def make_contour_6(properties, butter: bool = False):
         label=f"Линия сливок на подмес на рикотте",
     )
 
-    if butter:
-        # - После окончания работы маслоцеха + 30 минут
-        m.row(
-            "cleaning",
-            push_func=AxisPusher(start_from=cast_t(properties["butter"].end_time) + 6, validator=CleaningValidator()),
-            size=cast_t("02:50"),
-            label=f"Линия сливок маслоцех + обратка",
-        )
+    # - После окончания работы маслоцеха + 30 минут
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(start_from=cast_t(properties["butter"].end_time) + 6, validator=CleaningValidator()),
+        size=cast_t("02:50"),
+        label=f"Линия сливок маслоцех + обратка",
+    )
     return m.root
 
 
 def make_schedule(
     properties: dict,
-    butter: bool = True,
     naslavuchich: bool = True,
     basement_brine: bool = True,
 ):
@@ -538,7 +536,7 @@ def make_schedule(
         make_contour_3(properties),
         make_contour_4(properties),
         make_contour_5(properties),
-        make_contour_6(properties, butter=butter),
+        make_contour_6(properties),
     ]
 
     for contour in contours:
