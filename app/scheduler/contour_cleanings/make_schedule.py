@@ -448,7 +448,7 @@ def make_contour_6(properties, butter: bool = False):
     m.row(
         "cleaning",
         push_func=AxisPusher(
-            start_from=cast_t(properties["ricotta"].last_pumping_out_time), validator=CleaningValidator()
+            start_from=cast_t(properties["ricotta"].last_pumping_out_time) + 12, validator=CleaningValidator()
         ),
         size=cast_t("02:00"),
         label="Линия сладкой сыворотки",
@@ -456,13 +456,12 @@ def make_contour_6(properties, butter: bool = False):
 
     # - Танк рикотты 3 (после линии сладкой сыворотки)
 
-    for time in properties["ricotta"].every_5th_pouring_times:
-        m.row(
-            "cleaning",
-            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
-            size=cast_t("1:20"),
-            label="Танк рикотты 1-2",
-        )
+    m.row(
+        "cleaning",
+        push_func=AxisPusher(start_from="last_end", validator=CleaningValidator()),
+        size=cast_t("1:20"),
+        label="Танк рикотты 3",
+    )
 
     # - Танк рикотты 1-2 (каждые 5 наборов рикотты)
 

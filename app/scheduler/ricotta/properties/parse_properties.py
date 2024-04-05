@@ -36,7 +36,7 @@ def parse_schedule_file(wb_obj):
 
     def _split_func(row):
         try:
-            return is_int_like(row["label"].split(" ")[0])
+            return is_int_like(row["label"].split(" ")[0]) or "Посолка/анализ" in row["label"]
         except:
             return False
 
@@ -51,11 +51,23 @@ def parse_schedule_file(wb_obj):
         df,
         "boiling_first_rows",
         "boiling_first_row",
-        [i for i in [4, 6, 8]],
+        [4, 6, 8],
         start_time=cast_t(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == 1)].iloc[0]["label"])),
         length=100,
         split_func=_split_func,
         filter_=_filter_func,
+    )
+
+    parse_elements(
+        m,
+        df,
+        "pouring_offs",
+        "pouring_off",
+        [6, 8, 10],
+        start_time=cast_t(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == 1)].iloc[0]["label"])),
+        length=100,
+        split_func=_split_func,
+        filter_=lambda group: "Слив" in group[0]["label"],
     )
 
     return m.root
@@ -68,7 +80,9 @@ def fill_properties(parsed_schedule):
 
     # - Last pumping out time
 
-    props.last_pumping_out_time = cast_time(parsed_schedule["boiling_second_rows"]["boiling_second_row", True][-1].y[0])
+    pouring_offs = parsed_schedule["pouring_offs"]["pouring_off", True]
+    pouring_offs = list(sorted(pouring_offs, key=lambda x: x.y[0]))
+    props.last_pumping_out_time = cast_time(pouring_offs[-1].y[0])
 
     # - Every_5th_pouring_times
 
