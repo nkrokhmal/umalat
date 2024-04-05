@@ -167,16 +167,16 @@ def make_contour_2(properties, naslavuchich: bool = False):
             label=f"Танк жирной воды {i + 1}",
         )
 
-    # - Жирная вода на сепаратор (вода) (После окончания плавления на линии воды + 1 час)
+    # - Жирная вода на сепаратор (по порядку)
 
     m.row(
         "cleaning",
         push_func=AxisPusher(
-            start_from=cast_t(properties["mozzarella"].water_melting_end_time) + 12,
+            start_from="last_end",
             validator=CleaningValidator(),
         ),
         size=cast_t("01:10"),
-        label="Жирная вода на сепаратор (вода)",
+        label="Жирная вода на сепаратор",
     )
 
     # - Ванны моцарелла соль (После окончания посолки на линии пиццы + 15 минут)
@@ -189,18 +189,6 @@ def make_contour_2(properties, naslavuchich: bool = False):
         ),
         size=cast_t("01:30"),
         label="Ванны моцарелла соль",
-    )
-
-    # - Жирная вода на сепаратор (соль) (по порядку)
-
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(
-            start_from="last_end",
-            validator=CleaningValidator(),
-        ),
-        size=cast_t("01:10"),
-        label="Жирная вода на сепаратор (соль)",
     )
 
     # - Сливки от сепаратора жирной воды (по порядку)
