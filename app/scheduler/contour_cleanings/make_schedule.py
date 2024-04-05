@@ -258,6 +258,26 @@ def make_contour_2(properties, naslavuchich: bool = False):
 def make_contour_3(properties):
     m = BlockMaker("3 contour")
 
+    # - Термизатор (короткие и длинные мойки)
+
+    for cleaning_time in properties["mozzarella"].short_cleaning_times:
+        m.row(
+            "cleaning",
+            push_func=add_push,
+            size=cast_model(Washer, "Короткая мойка термизатора").time // 5,
+            x=cast_t(cleaning_time),
+            label="Короткая мойка термизатора",
+        )
+
+    for cleaning_time in properties["mozzarella"].full_cleaning_times:
+        m.row(
+            "cleaning",
+            push_func=add_push,
+            size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
+            x=cast_t(cleaning_time),
+            label="Полная мойка термизатора",
+        )
+
     # - Сыроизготовитель (Через 10 минут после того, как он слился)
 
     # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
@@ -279,27 +299,7 @@ def make_contour_3(properties):
             label=f"Сыроизготовитель {int(n)}",
         )
 
-    # - Термизатор (короткие и длинные мойки)
-
-    for cleaning_time in properties["mozzarella"].short_cleaning_times:
-        m.row(
-            "cleaning",
-            push_func=add_push,
-            size=cast_model(Washer, "Короткая мойка термизатора").time // 5,
-            x=cast_t(cleaning_time),
-            label="Короткая мойка термизатора",
-        )
-
-    for cleaning_time in properties["mozzarella"].full_cleaning_times:
-        m.row(
-            "cleaning",
-            push_func=add_push,
-            size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
-            x=cast_t(cleaning_time),
-            label="Полная мойка термизатора",
-        )
-
-    # - Плавилка линия пицца чиз (конец плавления пицца чиз + 1 час)
+    #  Плавилка линия пицца чиз (конец плавления пицца чиз + 1 час)
 
     m.row(
         "cleaning",
@@ -542,7 +542,7 @@ def make_schedule(
     contours = [
         make_contour_1(properties, basement_brine=basement_brine),
         make_contour_2(properties, naslavuchich=naslavuchich),
-        # make_contour_3(properties),
+        make_contour_3(properties),
         make_contour_4(properties, is_tomorrow_day_off=is_tomorrow_day_off),
         make_contour_5(properties),
         make_contour_6(properties, butter=butter),
