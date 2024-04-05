@@ -167,7 +167,7 @@ def make_contour_2(properties, naslavuchich: bool = False):
             label=f"Танк жирной воды {i + 1}",
         )
 
-    # - Жирная вода на сепаратор (по порядку)
+    # - Жирная вода на сепаратор (по танков)
 
     m.row(
         "cleaning",
@@ -191,7 +191,7 @@ def make_contour_2(properties, naslavuchich: bool = False):
         label="Ванны моцарелла соль",
     )
 
-    # - Сливки от сепаратора жирной воды (по порядку)
+    # - Сливки от сепаратора жирной воды (После Ванны моцарелла соль)
 
     m.row(
         "cleaning",
@@ -203,7 +203,7 @@ def make_contour_2(properties, naslavuchich: bool = False):
         label="Сливки от сепаратора жирной воды",
     )
 
-    # - Сливки отпастера 25(по порядку)
+    # - Сливки отпастера 25 (После Ванны моцарелла соль)
 
     m.row(
         "cleaning",
@@ -215,7 +215,7 @@ def make_contour_2(properties, naslavuchich: bool = False):
         label="Сливки отпастера 25",
     )
 
-    # - Линия обрата в сливки (по порядку)
+    # - Линия обрата в сливки (После Ванны моцарелла соль)
 
     m.row(
         "cleaning",
@@ -375,7 +375,7 @@ def make_contour_4(properties):
     values = list(sorted(values, key=lambda value: value[1]))
     _make_drenators(values, cleaning_time="01:20")
 
-    # - Траспортер + линия кислой сыворотки (по порядку)
+    # - Траспортер + линия кислой сыворотки (после дренаторов)
 
     m.row(
         "cleaning",
@@ -384,7 +384,7 @@ def make_contour_4(properties):
         label="Транспортер + линия кислой сыворотки",
     )
 
-    # - Линия кислой сыворотки (по порядку)
+    # - Линия кислой сыворотки (после дренаторов)
 
     m.row(
         "cleaning",
@@ -409,7 +409,7 @@ def make_contour_5(properties):
             label=f"Танк рикотты {i + 4}",
         )
 
-    # - Линия подачи на НФ (по порядку)
+    # - Линия подачи на НФ (После танка рикотты 8)
 
     m.row(
         "cleaning",
@@ -418,7 +418,7 @@ def make_contour_5(properties):
         label="Линия подачи на НФ",
     )
 
-    # - Линия ретентата (по порядку)
+    # - Линия ретентата (После танка рикотты 8)
 
     m.row(
         "cleaning",
@@ -427,14 +427,15 @@ def make_contour_5(properties):
         label="Линия ретентата",
     )
 
-    # - Линия Концентрата на отгрузку (08:30)
+    # - Линия Концентрата на отгрузку (09:00, 18:00)
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t("08:30"), validator=CleaningValidator()),
-        size=cast_t("00:55"),
-        label="Линия Концентрата на отгрузку",
-    )
+    for time in ["09:00", "18:00"]:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
+            size=cast_t("00:55"),
+            label="Линия Концентрата на отгрузку",
+        )
 
     return m.root
 
@@ -449,9 +450,19 @@ def make_contour_6(properties, butter: bool = False):
         push_func=AxisPusher(
             start_from=cast_t(properties["ricotta"].last_pumping_out_time), validator=CleaningValidator()
         ),
-        size=cast_t("1:20"),
+        size=cast_t("02:00"),
         label="Линия сладкой сыворотки",
     )
+
+    # - Танк рикотты 3 (после линии сладкой сыворотки)
+
+    for time in properties["ricotta"].every_5th_pouring_times:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
+            size=cast_t("1:20"),
+            label="Танк рикотты 1-2",
+        )
 
     # - Танк рикотты 1-2 (каждые 5 наборов рикотты)
 
