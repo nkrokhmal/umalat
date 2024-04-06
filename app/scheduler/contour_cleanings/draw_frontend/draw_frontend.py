@@ -50,6 +50,7 @@ def test():
         input_path="""/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved""",
         prefix="2024-03-15",
         open_file=True,
+        is_today_day_off=True,
     )
 
 

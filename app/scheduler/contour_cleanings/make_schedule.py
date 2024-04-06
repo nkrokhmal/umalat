@@ -29,11 +29,37 @@ def run_order(function_or_generators, order):
             next(obj)
 
 
-def make_contour_1(properties: dict, basement_brine: bool = False):
+def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_off: bool = False):
     # - Init block maker
 
     m = BlockMaker("1 contour")
-    print_json(dict(properties["mozzarella"]))
+
+    # - Process day off - clean, starting from 12:00
+
+    if is_today_day_off:
+        for duration, name in [
+            ("01:15", "Танк Моцарелла и дозаторы"),
+            ("01:00", "Танки роникс 1/2"),
+            ("01:30", "Сырое молоко на адыгейский"),
+            ("01:20", "Танк смесей"),
+            ("00:55", "Линия подвал рассол"),
+            ("01:20", "Танк сырого молока 1"),
+            ("01:20", "Танк сырого молока 2"),
+            ("00:55", "Линия приемки молока 1"),
+            ("00:55", "Линия приемки молока 2"),
+            ("00:55", "Линия отгрузки сырья"),
+        ]:
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t("12:00"),
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t(duration),
+                label=name,
+            )
+
+        return m.root
 
     # - Танк “Моцарелла и дозаторы” (после фасовки на моцарелле в воде + 20 минут)
 
@@ -131,8 +157,35 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
     return m.root
 
 
-def make_contour_2(properties, naslavuchich: bool = False):
+def make_contour_2(properties, naslavuchich: bool = False, is_today_day_off: bool = False):
     m = BlockMaker("2 contour")
+
+    # - Process day off - clean, starting from 12:00
+
+    if is_today_day_off:
+        for duration, name in [
+            ("01:30", "Комет"),
+            ("01:20", "Фасовочная вода"),
+            ("01:10", "Танк жирной воды 1"),
+            ("01:10", "Танк жирной воды 2"),
+            ("01:10", "Жирная вода на сепаратор"),
+            ("01:30", "Ванны моцарелла соль"),
+            ("01:30", "Сливки от сепаратора жирной воды"),
+            ("01:10", "Сливки отпастера 25"),
+            ("01:10", "Линия обрата в сливки"),
+            ("01:30", "Линия наславучич"),
+        ]:
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t("12:00"),
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t(duration),
+                label=name,
+            )
+
+        return m.root
 
     # - Комет (После окончания фасовки на моцарелле в воде + 2 часа)
 
@@ -244,8 +297,33 @@ def make_contour_2(properties, naslavuchich: bool = False):
     return m.root
 
 
-def make_contour_3(properties):
+def make_contour_3(properties: dict, is_today_day_off: bool = False):
     m = BlockMaker("3 contour")
+
+    # - Process day off - clean, starting from 12:00
+
+    if is_today_day_off:
+        for duration, name in [
+            (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора"),
+            ("01:20", "Сыроизготовитель 1"),
+            ("01:20", "Сыроизготовитель 2"),
+            ("01:20", "Сыроизготовитель 3"),
+            ("01:20", "Сыроизготовитель 4"),
+            ("01:30", "Плавилка линия пицца чиз"),
+            ("01:10", "Контур циркуляции рассола"),
+            ("01:10", "Линия пицца чиз формовщик"),
+        ]:
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t("12:00"),
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t(duration),
+                label=name,
+            )
+
+        return m.root
 
     # - Термизатор (короткие и длинные мойки)
 
@@ -325,8 +403,31 @@ def make_contour_3(properties):
     return m.root
 
 
-def make_contour_4(properties):
+def make_contour_4(properties: dict, is_today_day_off: bool = False):
     m = BlockMaker("4 contour")
+
+    # - Process day off - clean, starting from 12:00
+
+    if is_today_day_off:
+        for duration, name in [
+            ("01:20", "Дренатор 1, 2"),
+            ("01:20", "Дренатор 3, 4"),
+            ("01:20", "Дренатор 5, 6"),
+            ("01:20", "Дренатор 7, 8"),
+            ("01:30", "Транспортер + линия кислой сыворотки"),
+            ("01:30", "Линия кислой сыворотки"),
+        ]:
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t("12:00"),
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t(duration),
+                label=name,
+            )
+
+        return m.root
 
     # - Дренаторы (сложная логика)
 
@@ -397,8 +498,33 @@ def make_contour_4(properties):
     return m.root
 
 
-def make_contour_5(properties):
+def make_contour_5(properties: dict, is_today_day_off: bool = False):
     m = BlockMaker("5 contour")
+
+    # - Process day off - clean, starting from 12:00
+
+    if is_today_day_off:
+        for duration, name in [
+            ("01:20", "Танк рикотты 4"),
+            ("01:20", "Танк рикотты 5"),
+            ("01:20", "Танк рикотты 6"),
+            ("01:20", "Танк рикотты 7"),
+            ("01:30", "Танк рикотты 8"),
+            ("00:55", "Линия подачи на НФ"),
+            ("00:55", "Линия ретентата"),
+            ("00:55", "Линия Концентрата на отгрузку"),
+        ]:
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t("12:00"),
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t(duration),
+                label=name,
+            )
+
+        return m.root
 
     # - Танки рикотты 4-8
 
@@ -441,8 +567,35 @@ def make_contour_5(properties):
     return m.root
 
 
-def make_contour_6(properties):
+def make_contour_6(properties: dict, is_today_day_off: bool = False):
     m = BlockMaker("6 contour")
+
+    # - Process day off - clean, starting from 12:00
+
+    if is_today_day_off:
+        for duration, name in [
+            ("02:00", "Линия сладкой сыворотки"),
+            ("01:20", "Танк рикотты 3"),
+            ("01:20", "Танк рикотты 1-2"),
+            ("01:20", "Танк сливок 1"),
+            ("01:20", "Танк сливок 2"),
+            ("01:20", "Танк сливок 3"),
+            ("01:30", "Танк сливок 4"),
+            ("01:00", "Линия сливок на маскарпоне"),
+            ("00:55", "Линия сливок на подмес на рикотте"),
+            ("02:50", "Линия сливок маслоцех + обратка"),
+        ]:
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t("12:00"),
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t(duration),
+                label=name,
+            )
+
+        return m.root
 
     # - Линия сладкой сыворотки (Завершаем слив на рикотте + час)
 
@@ -534,16 +687,17 @@ def make_schedule(
     properties: dict,
     naslavuchich: bool = True,
     basement_brine: bool = True,
+    is_today_day_off: bool = False,
 ):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(properties, basement_brine=basement_brine),
-        make_contour_2(properties, naslavuchich=naslavuchich),
-        make_contour_3(properties),
-        make_contour_4(properties),
-        make_contour_5(properties),
-        make_contour_6(properties),
+        make_contour_1(properties, basement_brine=basement_brine, is_today_day_off=is_today_day_off),
+        make_contour_2(properties, naslavuchich=naslavuchich, is_today_day_off=is_today_day_off),
+        make_contour_3(properties, is_today_day_off=is_today_day_off),
+        make_contour_4(properties, is_today_day_off=is_today_day_off),
+        make_contour_5(properties, is_today_day_off=is_today_day_off),
+        make_contour_6(properties, is_today_day_off=is_today_day_off),
     ]
 
     for contour in contours:
