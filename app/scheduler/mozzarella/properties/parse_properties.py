@@ -89,7 +89,10 @@ def parse_schedule_file(wb_obj):
     headers = []
 
     for row_num in cells_df1["x1"].unique():
-        row_labels = [str(row["label"]) for i, row in cells_df1[cells_df1["x1"] == row_num].iterrows()]
+        row_labels = [
+            str(row["label"])
+            for i, row in cells_df1[(cells_df1["x1"] == row_num) & (cells_df1["y0"] - cells_df1["x0"] >= 2)].iterrows()
+        ]
         row_labels = [re.sub(r"\s+", " ", label) for label in row_labels if label]
 
         if {"налив/внесение закваски", "схватка"}.issubset(set(row_labels)):
@@ -286,7 +289,7 @@ def parse_schedule_file(wb_obj):
             cells_df=cells_df,
             label="salt_packings",
             element_label="packing",
-            rows=[packing_headers[-1], packing_headers[-1] + 6],
+            rows=[packing_headers[-1], packing_headers[-1] + 3],
             start_time=start_times[1],
             split_func=_split_func,
             filter_=_filter_func,
