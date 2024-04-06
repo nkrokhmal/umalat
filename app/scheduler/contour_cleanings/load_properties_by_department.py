@@ -67,9 +67,6 @@ def load_properties_by_department(
                 raise Exception(
                     f"Произошла ошибка во время чтения параметров расписания из файла: {os.path.basename(filename)}"
                 )
-        else:
-            # init empty properties
-            properties_by_department[department] = SCHEDULE_PARSERS[department]()
     return properties_by_department
 
 

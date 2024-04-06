@@ -50,15 +50,16 @@ def make_contour_1(properties: dict, basement_brine: bool = False):
 
     # - Танки роникс 1/2 (после адыгейского + час)
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(
-            start_from=cast_t(properties["adygea"].end_time) + 12,  # После адыгейского + час
-            validator=CleaningValidator(),
-        ),
-        size=cast_t("01:00"),
-        label="Танки роникс 1/2",  # todo later: question: тут одна мойка? Конец адыгейского - это какой момент точно? [@marklidenberg]
-    )
+    if "adygea" in properties:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["adygea"].end_time) + 12,  # После адыгейского + час
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:00"),
+            label="Танки роникс 1/2",  # todo later: question: тут одна мойка? Конец адыгейского - это какой момент точно? [@marklidenberg]
+        )
 
     # - Сырое молоко на адыгейский (после роникса)
 
@@ -440,19 +441,20 @@ def make_contour_5(properties):
     return m.root
 
 
-def make_contour_6(properties, butter: bool = False):
+def make_contour_6(properties):
     m = BlockMaker("6 contour")
 
     # - Линия сладкой сыворотки (Завершаем слив на рикотте + час)
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(
-            start_from=cast_t(properties["ricotta"].last_pumping_out_time) + 12, validator=CleaningValidator()
-        ),
-        size=cast_t("02:00"),
-        label="Линия сладкой сыворотки",
-    )
+    if "ricotta" in properties:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["ricotta"].last_pumping_out_time) + 12, validator=CleaningValidator()
+            ),
+            size=cast_t("02:00"),
+            label="Линия сладкой сыворотки",
+        )
 
     # - Танк рикотты 3 (после линии сладкой сыворотки)
 
@@ -465,13 +467,14 @@ def make_contour_6(properties, butter: bool = False):
 
     # - Танк рикотты 1-2 (каждые 5 наборов рикотты)
 
-    for time in properties["ricotta"].every_5th_pouring_times:
-        m.row(
-            "cleaning",
-            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
-            size=cast_t("1:20"),
-            label="Танк рикотты 1-2",
-        )
+    if "ricotta" in properties:
+        for time in properties["ricotta"].every_5th_pouring_times:
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
+                size=cast_t("1:20"),
+                label="Танк рикотты 1-2",
+            )
 
     # - Танки сливок (1-3) (9:00, 7:00, 15:00)
 
@@ -504,22 +507,26 @@ def make_contour_6(properties, butter: bool = False):
 
     # - Линия сливок на подмес на рикотте (после последнего набора рикотты + 10 минут)
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(
-            start_from=cast_t(properties["ricotta"].last_pouring_time) + 2, validator=CleaningValidator()
-        ),
-        size=cast_t("0:55"),
-        label=f"Линия сливок на подмес на рикотте",
-    )
+    if "ricotta" in properties:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["ricotta"].last_pouring_time) + 2, validator=CleaningValidator()
+            ),
+            size=cast_t("0:55"),
+            label=f"Линия сливок на подмес на рикотте",
+        )
 
     # - После окончания работы маслоцеха + 30 минут
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from=cast_t(properties["butter"].end_time) + 6, validator=CleaningValidator()),
-        size=cast_t("02:50"),
-        label=f"Линия сливок маслоцех + обратка",
-    )
+
+    if "butter" in properties:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t(properties["butter"].end_time) + 6, validator=CleaningValidator()),
+            size=cast_t("02:50"),
+            label=f"Линия сливок маслоцех + обратка",
+        )
+
     return m.root
 
 
