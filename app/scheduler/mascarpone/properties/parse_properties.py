@@ -37,8 +37,9 @@ def parse_schedule_file(wb_obj):
             lambda s: int(s.split(" ")[-1].replace("кг", "")) if "кг" in s else 0
         )
         values += _separation_blocks_df.to_dict(orient="records")
-    separation_blocks_df = pd.DataFrame(values).sort_values(by="x0")
-    m.root.props.update(separation_blocks_df=separation_blocks_df)
+    if values:
+        separation_blocks_df = pd.DataFrame(values).sort_values(by="x0")
+        m.root.props.update(separation_blocks_df=separation_blocks_df)
 
     # - Parse rows to schedule
 
@@ -76,18 +77,20 @@ def fill_properties(parsed_schedule):
     # - Fill every_8t_of_separation
 
     separation_blocks_df = parsed_schedule.props["separation_blocks_df"]
-    separation_blocks_df["kg_cumsum"] = separation_blocks_df["kg"].cumsum()
 
     props.every_8t_of_separation = []
 
-    current_kg = 0
-    for i, row in separation_blocks_df.iterrows():
-        current_kg += row["kg"]
-        if current_kg >= 8000:
-            props.every_8t_of_separation.append(cast_human_time(row["y0"]))
-            break
-    props.every_8t_of_separation.append(cast_human_time(separation_blocks_df.iloc[-1]["y0"]))  # max 2 times
-    props.every_8t_of_separation = list(sorted(set(props.every_8t_of_separation)))
+    if separation_blocks_df is not None:
+        separation_blocks_df["kg_cumsum"] = separation_blocks_df["kg"].cumsum()
+
+        current_kg = 0
+        for i, row in separation_blocks_df.iterrows():
+            current_kg += row["kg"]
+            if current_kg >= 8000:
+                props.every_8t_of_separation.append(cast_human_time(row["y0"]))
+                break
+        props.every_8t_of_separation.append(cast_human_time(separation_blocks_df.iloc[-1]["y0"]))  # max 2 times
+        props.every_8t_of_separation = list(sorted(set(props.every_8t_of_separation)))
 
     return props
 
@@ -102,7 +105,7 @@ def test():
     print(
         pd.DataFrame(
             parse_properties(
-                """/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved/2024-03-15 Расписание маскарпоне.xlsx"""
+                """/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/2024-03-02/approved/2024-03-02 Расписание моцарелла.xlsx"""
             )
         )
     )

@@ -158,7 +158,9 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
     return m.root
 
 
-def make_contour_2(properties, naslavuchich: bool = False, is_today_day_off: bool = False):
+def make_contour_2(
+    properties, naslavuchich: bool = False, is_today_day_off: bool = False, comet_rubber_end_time: str = ""
+):
     m = BlockMaker("2 contour")
 
     # - Process day off - clean, starting from 12:00
@@ -190,13 +192,14 @@ def make_contour_2(properties, naslavuchich: bool = False, is_today_day_off: boo
 
     # - Комет (После окончания фасовки на моцарелле в воде + 2 часа)
 
-    if properties[
-        "mozzarella"
-    ].water_packing_end_time:  # todo next: или если есть терка (после терки или воды), галочка, 20:00 (тоже на вход подавать)
+    if properties["mozzarella"].water_packing_end_time or comet_rubber_end_time:
         m.row(
             "cleaning",
             push_func=AxisPusher(
-                start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 24,
+                start_from=max(
+                    cast_t(properties["mozzarella"].water_packing_end_time or "-999:00:00") + 24,
+                    cast_t(comet_rubber_end_time),
+                ),
                 validator=CleaningValidator(),
             ),
             size=cast_t("01:30"),
@@ -646,13 +649,14 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
 
     # - Танк сливок 4
 
-    for i, time in enumerate(properties["mascarpone"].every_8t_of_separation):
-        m.row(
-            "cleaning",
-            push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
-            size=cast_t("1:30"),
-            label=f"Танк сливок {i + 4}",
-        )
+    if "mascarpone" in properties:
+        for i, time in enumerate(properties["mascarpone"].every_8t_of_separation):
+            m.row(
+                "cleaning",
+                push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
+                size=cast_t("1:30"),
+                label=f"Танк сливок {i + 4}",
+            )
 
     # - Линия сливок на маскарпоне (после танков сливок)
 
