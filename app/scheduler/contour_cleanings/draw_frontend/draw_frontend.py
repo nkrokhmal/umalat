@@ -12,16 +12,16 @@ def draw_frontend(
     input_path: str,
     output_path: str = "outputs/",
     schedule=None,
-    properties_by_department: dict = {},
+    properties: dict = {},
     prefix="",
     open_file: bool = False,
     **kwargs,
 ):
     # - Make frontend
 
-    properties_by_department = properties_by_department or load_properties_by_department(path=input_path, prefix=prefix)
+    properties = properties or load_properties_by_department(path=input_path, prefix=prefix)
 
-    schedule = schedule or make_schedule(properties_by_department, **kwargs)
+    schedule = schedule or make_schedule(properties, **kwargs)
     frontend = wrap_frontend(schedule)
 
     # - Draw frontend
@@ -47,11 +47,24 @@ def test():
     warnings.filterwarnings("ignore")
 
     draw_frontend(
-        input_path="""/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved""",
-        prefix="2024-03-15",
+        input_path="""/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/2024-03-02/approved""",
+        prefix="2024-03-02",
         open_file=True,
         is_today_day_off=True,
     )
+    import glob
+
+    import tqdm
+
+    # for dirname in tqdm.tqdm(sorted(glob.glob('''/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/*'''))):
+    #     date = dirname.split('/')[-1]
+    #     print(date)
+    #     draw_frontend(
+    #         input_path=os.path.join(dirname, 'approved'),
+    #         prefix=date,
+    #         open_file=False,
+    #         is_today_day_off=False,
+    #     )
 
 
 if __name__ == "__main__":

@@ -173,7 +173,7 @@ def contour_washers_schedule():
                 input_tanks = calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings)
             draw_frontend(
                 path,
-                properties_by_department=properties_by_department,
+                properties=properties_by_department,
                 output_path=path,
                 prefix=date_str,
                 input_tanks=input_tanks,

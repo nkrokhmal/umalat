@@ -419,11 +419,15 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     # - Packing end
 
-    props.water_packing_end_time = cast_human_time(
-        max(b.y[0] for b in parsed_schedule["water_packings"]["packing", True])
+    props.water_packing_end_time = (
+        cast_human_time(max(b.y[0] for b in parsed_schedule["water_packings"]["packing", True]))
+        if "water_packings" in [b.props["cls"] for b in parsed_schedule.children]
+        else None
     )
-    props.salt_packing_end_time = cast_human_time(
-        max(b.y[0] for b in parsed_schedule["salt_packings"]["packing", True])
+    props.salt_packing_end_time = (
+        cast_human_time(max(b.y[0] for b in parsed_schedule["salt_packings"]["packing", True]))
+        if "salt_packings" in [b.props["cls"] for b in parsed_schedule.children]
+        else None
     )
 
     # - Melting end
@@ -513,7 +517,7 @@ def test():
     print_json(
         dict(
             parse_properties(
-                """/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved/2024-03-15 Расписание моцарелла.xlsx"""
+                """/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/2024-03-02/approved/2024-03-02 Расписание моцарелла.xlsx"""
             )
         )
     )

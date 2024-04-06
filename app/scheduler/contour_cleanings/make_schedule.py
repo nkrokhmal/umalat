@@ -63,16 +63,17 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
 
     # - Танк “Моцарелла и дозаторы” (после фасовки на моцарелле в воде + 20 минут)
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(
-            start_from=cast_t(properties["mozzarella"].water_packing_end_time)
-            + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
-            validator=CleaningValidator(),
-        ),
-        size=cast_t("01:15"),
-        label="Танк Моцарелла и дозаторы",
-    )
+    if properties["mozzarella"].water_packing_end_time:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["mozzarella"].water_packing_end_time)
+                + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:15"),
+            label="Танк Моцарелла и дозаторы",
+        )
 
     # - Танки роникс 1/2 (после адыгейского + час)
 
@@ -84,7 +85,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
                 validator=CleaningValidator(),
             ),
             size=cast_t("01:00"),
-            label="Танки роникс 1/2",  # todo later: question: тут одна мойка? Конец адыгейского - это какой момент точно? [@marklidenberg]
+            label="Танки роникс 1/2",
         )
 
     # - Сырое молоко на адыгейский (после роникса)
@@ -189,27 +190,31 @@ def make_contour_2(properties, naslavuchich: bool = False, is_today_day_off: boo
 
     # - Комет (После окончания фасовки на моцарелле в воде + 2 часа)
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(
-            start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 24,
-            validator=CleaningValidator(),
-        ),
-        size=cast_t("01:30"),
-        label="Комет",
-    )
+    if properties[
+        "mozzarella"
+    ].water_packing_end_time:  # todo next: или если есть терка (после терки или воды), галочка, 20:00 (тоже на вход подавать)
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 24,
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Комет",
+        )
 
     # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(
-            start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 3,
-            validator=CleaningValidator(),
-        ),
-        size=cast_t("01:20"),
-        label="Фасовочная вода",
-    )
+    if properties["mozzarella"].water_packing_end_time:
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 3,
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:20"),
+            label="Фасовочная вода",
+        )
 
     # - Танки жирной воды (22:00, 07:00)
 
@@ -509,7 +514,7 @@ def make_contour_5(properties: dict, is_today_day_off: bool = False):
             ("01:20", "Танк рикотты 5"),
             ("01:20", "Танк рикотты 6"),
             ("01:20", "Танк рикотты 7"),
-            ("01:30", "Танк рикотты 8"),
+            ("01:20", "Танк рикотты 8"),
             ("00:55", "Линия подачи на НФ"),
             ("00:55", "Линия ретентата"),
             ("00:55", "Линия Концентрата на отгрузку"),
@@ -532,7 +537,7 @@ def make_contour_5(properties: dict, is_today_day_off: bool = False):
         m.row(
             "cleaning",
             push_func=AxisPusher(start_from=cast_t(time), validator=CleaningValidator()),
-            size=cast_t("01:20" if i + 4 != 8 else "01:30"),
+            size=cast_t("01:20"),
             label=f"Танк рикотты {i + 4}",
         )
 
