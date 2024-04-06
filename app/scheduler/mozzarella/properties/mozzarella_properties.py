@@ -56,11 +56,6 @@ class MozzarellaProperties(pydantic.BaseModel):
         values = [value for value in values if value[1]]
         return values
 
-    def is_present(self):
-        if self.water_melting_end_time or self.salt_melting_end_time:
-            return True
-        return False
-
     def department(self):
         return "mozzarella"
 

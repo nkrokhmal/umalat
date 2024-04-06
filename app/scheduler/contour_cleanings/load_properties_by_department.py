@@ -75,13 +75,13 @@ def assert_properties_presence(properties, raise_if_not_present=None, warn_if_no
     warn_if_not_present = warn_if_not_present or []
 
     for department in raise_if_not_present:
-        if not properties[department].is_present():
+        if not properties[department].is_present:
             raise Exception(
                 f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES_BY_DEPARTMENT[department]}"
             )
 
     for department in warn_if_not_present:
-        if not properties[department].is_present():
+        if not properties[department].is_present:
             logger.warning(
                 f"Отсутствует утвержденное расписание для цеха: {config.DEPARTMENT_NAMES_BY_DEPARTMENT[department]}"
             )

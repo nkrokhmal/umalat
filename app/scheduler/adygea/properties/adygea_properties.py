@@ -11,11 +11,6 @@ class AdygeaProperties(pydantic.BaseModel):
     end_time: str = Field("", description="Конец работы адыгейского цеха")
     n_boilings: str = Field(0, description="Количество варок")
 
-    def is_present(self):
-        if self.end_time:
-            return True
-        return False
-
     def department(self):
         return "adygea"
 

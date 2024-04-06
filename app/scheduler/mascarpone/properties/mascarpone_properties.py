@@ -15,9 +15,6 @@ class MascarponeProperties(pydantic.BaseModel):
     end_time: str = Field("", description="Конец работы маслоцеха")
     every_8t_of_separation: list = Field([], description="Каждые 8 тонн сепарации")
 
-    def is_present(self):
-        return bool(self.end_time)
-
     def department(self):
         return "mascarpone"
 

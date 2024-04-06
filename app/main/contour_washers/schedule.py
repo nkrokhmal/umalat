@@ -78,7 +78,7 @@ def contour_washers_schedule():
                     prefix=yesterday_str,
                 )
 
-                if yesterday_properties["mozzarella"].is_present():
+                if yesterday_properties["mozzarella"].is_present:
                     main_form.molder.data = yesterday_properties["mozzarella"].bar12_present
                 else:
                     flask.flash(
@@ -94,7 +94,7 @@ def contour_washers_schedule():
                 #         "warning",
                 #     )
 
-                if yesterday_properties["milk_project"].is_present():
+                if yesterday_properties["milk_project"].is_present:
                     main_form.ricotta_n_boilings_yesterday.data = yesterday_properties["milk_project"].n_boilings
                 else:
                     flask.flash(
@@ -102,7 +102,7 @@ def contour_washers_schedule():
                         "warning",
                     )
 
-                if yesterday_properties["adygea"].is_present():
+                if yesterday_properties["adygea"].is_present:
                     main_form.adygea_n_boilings_yesterday.data = yesterday_properties["adygea"].n_boilings
                 else:
                     flask.flash(

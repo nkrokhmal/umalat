@@ -11,11 +11,6 @@ class MilkProjectProperties(pydantic.BaseModel):
     end_time: str = Field("", description="Конец работы милк-проджекта")
     n_boilings: str = Field(0, description="Количество варок")
 
-    def is_present(self):
-        if self.end_time:
-            return True
-        return False
-
     def department(self):
         return "milk_project"
 
