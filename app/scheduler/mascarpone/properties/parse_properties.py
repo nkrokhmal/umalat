@@ -71,6 +71,7 @@ def parse_schedule_file(wb_obj):
 def fill_properties(parsed_schedule):
     # - Init properties
     props = MascarponeProperties()
+    props.is_present = True
     # - Fill end time
     props.end_time = cast_human_time(parsed_schedule.y[0])
 

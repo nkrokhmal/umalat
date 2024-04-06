@@ -321,6 +321,7 @@ def prepare_boiling_plan(parsed_schedule, boiling_plan_df):
 
 def fill_properties(parsed_schedule, boiling_plan_df):
     props = MozzarellaProperties()
+    props.is_present = True
 
     # save boiling_model to parsed_schedule blocks
     for block in list(parsed_schedule.iter(cls=lambda cls: cls in ["boiling", "melting_header", "packing"])):

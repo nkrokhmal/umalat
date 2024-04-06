@@ -63,7 +63,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
 
     # - Танк “Моцарелла и дозаторы” (после фасовки на моцарелле в воде + 20 минут)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         if properties["mozzarella"].water_packing_end_time:
             m.row(
                 "cleaning",
@@ -78,7 +78,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
 
     # - Танки роникс 1/2 (после адыгейского + час)
 
-    if "adygea" in properties:
+    if properties["adygea"].is_present:
         m.row(
             "cleaning",
             push_func=AxisPusher(
@@ -103,7 +103,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
 
     # - Танки смесей (по 8-му наливу по каждой смеси и в конце смеси)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         times = sum([times for times in properties["mozzarella"].every_8th_pouring_end.values()], [])
         times = sorted([cast_t(time) for time in times])
 
@@ -194,7 +194,7 @@ def make_contour_2(
 
     # - Комет (После окончания фасовки на моцарелле в воде + 2 часа)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         # -- Find time
 
         times = []
@@ -218,7 +218,7 @@ def make_contour_2(
 
     # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         if properties["mozzarella"].water_packing_end_time:
             m.row(
                 "cleaning",
@@ -254,7 +254,7 @@ def make_contour_2(
 
     # - Ванны моцарелла соль (После окончания посолки на линии пиццы + 15 минут)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         m.row(
             "cleaning",
             push_func=AxisPusher(
@@ -347,7 +347,7 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
 
     # - Термизатор (короткие и длинные мойки)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         for cleaning_time in properties["mozzarella"].short_cleaning_times:
             m.row(
                 "cleaning",
@@ -368,7 +368,7 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
 
     # - Сыроизготовитель (Через 10 минут после того, как он слился)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
         values = properties["mozzarella"].cheesemaker_times()
 
@@ -390,7 +390,7 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
 
     #  Плавилка линия пицца чиз (конец плавления пицца чиз + 1 час)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         m.row(
             "cleaning",
             push_func=AxisPusher(
@@ -415,7 +415,7 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
 
     # - Линия пицца чиз формовщик (Если есть брус, то ставим мойку формовщика. Если линия занята - то после всех объектов)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
         if properties["mozzarella"].bar12_present:
             m.row(
                 "cleaning",
@@ -455,7 +455,7 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
 
     # - Дренаторы (сложная логика)
 
-    if "mozzarella" in properties:
+    if properties["mozzarella"].is_present:
 
         def _make_drenators(values, cleaning_time, label_suffix="", force_pairs=False):
             # logic
@@ -625,7 +625,7 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
 
     # - Линия сладкой сыворотки (Завершаем слив на рикотте + час)
 
-    if "ricotta" in properties:
+    if properties["ricotta"].is_present:
         m.row(
             "cleaning",
             push_func=AxisPusher(
@@ -646,7 +646,7 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
 
     # - Танк рикотты 1-2 (каждые 5 наборов рикотты)
 
-    if "ricotta" in properties:
+    if properties["ricotta"].is_present:
         for time in properties["ricotta"].every_5th_pouring_times:
             m.row(
                 "cleaning",
@@ -667,7 +667,7 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
 
     # - Танк сливок 4
 
-    if "mascarpone" in properties:
+    if properties["mascarpone"].is_present:
         for i, time in enumerate(properties["mascarpone"].every_8t_of_separation):
             m.row(
                 "cleaning",
@@ -687,7 +687,7 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
 
     # - Линия сливок на подмес на рикотте (после последнего набора рикотты + 10 минут)
 
-    if "ricotta" in properties:
+    if properties["ricotta"].is_present:
         m.row(
             "cleaning",
             push_func=AxisPusher(
@@ -699,7 +699,7 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
 
     # - После окончания работы маслоцеха + 30 минут
 
-    if "butter" in properties:
+    if properties["butter"].is_present:
         m.row(
             "cleaning",
             push_func=AxisPusher(start_from=cast_t(properties["butter"].end_time) + 6, validator=CleaningValidator()),

@@ -6,6 +6,8 @@ from app.scheduler.time_utils import cast_human_time
 
 
 class MascarponeProperties(pydantic.BaseModel):
+    is_present: bool = Field(False, description="Присутствует ли маскарпоне в этот день")
+
     fourth_boiling_group_adding_lactic_acid_time: str = Field(
         "", description="Конец добавления кислоты во второй варке в 4-й группе варок"
     )

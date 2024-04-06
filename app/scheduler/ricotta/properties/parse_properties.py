@@ -77,7 +77,7 @@ def fill_properties(parsed_schedule):
     # - Init properties
 
     props = RicottaProperties()
-
+    props.is_present = True
     # - Last pumping out time
 
     pouring_offs = parsed_schedule["pouring_offs"]["pouring_off", True]

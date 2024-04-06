@@ -12,6 +12,7 @@ from app.scheduler.time_utils import cast_human_time
 
 
 class MozzarellaProperties(pydantic.BaseModel):
+    is_present: bool = Field(False, description="Присутствует ли моцарелла в этот день")
     bar12_present: bool = Field(False, description="Присутствует ли брус 1.2")
 
     every_8th_pouring_end: Dict[str, list] = Field(

@@ -4,30 +4,28 @@ import flask
 
 from loguru import logger
 
-from app.scheduler.adygea.properties.adygea_properties import cast_properties as cast_properties_adygea
+from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
 from app.scheduler.adygea.properties.parse_properties import parse_properties as parse_properties_adygea
-from app.scheduler.archive.mascarpone.properties import cast_properties as cast_properties_mascarpone
-from app.scheduler.archive.ricotta.properties import cast_properties as cast_properties_ricotta
-from app.scheduler.butter.properties.butter_properties import cast_properties as cast_properties_butter
+from app.scheduler.butter.properties.butter_properties import ButterProperties
 from app.scheduler.butter.properties.parse_properties import parse_properties as parse_properties_butter
+from app.scheduler.mascarpone.properties.mascarpone_properties import MascarponeProperties
 from app.scheduler.mascarpone.properties.parse_properties import parse_properties as parse_properties_mascarpone
-from app.scheduler.milk_project.properties.milk_project_properties import (
-    cast_properties as cast_properties_milk_project,
-)
+from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
 from app.scheduler.milk_project.properties.parse_properties import parse_properties as parse_properties_milk_project
-from app.scheduler.mozzarella.properties.mozzarella_properties import cast_properties as cast_properties_mozzarella
+from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.mozzarella.properties.parse_properties import parse_properties as parse_properties_mozzarella
 from app.scheduler.ricotta.properties.parse_properties import parse_properties as parse_properties_ricotta
+from app.scheduler.ricotta.properties.ricotta_properties import RicottaProperties
 from config import config
 
 
-SCHEDULE_PARSERS = {
-    "mozzarella": cast_properties_mozzarella,
-    "milk_project": cast_properties_milk_project,
-    "butter": cast_properties_butter,
-    "adygea": cast_properties_adygea,
-    "ricotta": cast_properties_ricotta,
-    "mascarpone": cast_properties_mascarpone,
+PROPERTY_CLASSES = {
+    "mozzarella": MozzarellaProperties,
+    "milk_project": MilkProjectProperties,
+    "butter": ButterProperties,
+    "adygea": AdygeaProperties,
+    "ricotta": RicottaProperties,
+    "mascarpone": MascarponeProperties,
 }
 
 EXCEL_PARSERS = {
@@ -44,8 +42,8 @@ def load_properties_by_department(
     path: str,
     prefix: str,
 ):
-    # NOTE: RETURN BLANK PROPERTIES IF NOT PRESENT
-    properties_by_department = {}
+    # NOTE: RETURNS BLANK PROPERTIES IF NOT PRESENT
+    properties = {}
 
     for department in [
         "mozzarella",
@@ -62,12 +60,14 @@ def load_properties_by_department(
         )
         if os.path.exists(filename):
             try:
-                properties_by_department[department] = EXCEL_PARSERS[department](filename)
+                properties[department] = EXCEL_PARSERS[department](filename)
             except:
                 raise Exception(
                     f"Произошла ошибка во время чтения параметров расписания из файла: {os.path.basename(filename)}"
                 )
-    return properties_by_department
+        else:
+            properties[department] = PROPERTY_CLASSES[department]()
+    return properties
 
 
 def assert_properties_presence(properties, raise_if_not_present=None, warn_if_not_present=None):
