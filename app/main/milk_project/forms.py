@@ -47,9 +47,13 @@ class ScheduleForm(FlaskForm):
 class BrynzaScheduleForm(FlaskForm):
     batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
     date = DateTimeField("Введите дату", format="%Y-%m-%d", validators=[DataRequired()])
-    brynza_kg = IntegerField("Введите количество кг брынзы", validators=[Optional()], default=0)
-    chanakh_kg = IntegerField("Введите количество кг чанаха", validators=[Optional()], default=0)
-    khalymi_kg = IntegerField("Введите количество кг халуми", validators=[Optional()], default=0)
+
+    brynza_boilings = IntegerField("Введите количество варок брынзы", validators=[DataRequired()], default=0)
+    halumi_boilings = IntegerField("Введите количество варок халуми", validators=[DataRequired()], default=0)
+    n_cheese_makers = IntegerField(
+        "Введите количество используемых сыроизготовителей", validators=[DataRequired()], default=4
+    )
+
     beg_time = StringField(
         "Начало первой варки",
         validators=[Optional()],
