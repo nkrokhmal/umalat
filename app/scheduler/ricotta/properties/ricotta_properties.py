@@ -14,16 +14,3 @@ class RicottaProperties(pydantic.BaseModel):
 
     def department(self):
         return "ricotta"
-
-
-def cast_properties(schedule=None):
-    props = RicottaProperties()
-    if not schedule:
-        return props
-    ricotta_boilings = list(schedule.iter(cls="boiling"))
-
-    props.n_boilings = len(ricotta_boilings)
-
-    props.last_pumping_out_time = cast_human_time(ricotta_boilings[-1]["pumping_out"].y[0])
-
-    return props
