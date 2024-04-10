@@ -15,6 +15,7 @@ from app.scheduler.mascarpone.properties.mascarpone_properties import Mascarpone
 from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.ricotta.properties.ricotta_properties import RicottaProperties
+from app.scheduler.run_consolidated import run_consolidated
 
 
 @main.route("/contour_washers_schedule", methods=["GET", "POST"])
@@ -122,13 +123,12 @@ def contour_washers_schedule():
                 naslavuchich=cast_bool(main_form.naslavuchich.data),
                 basement_brine=cast_bool(main_form.basement_brine.data),
                 is_today_day_off=cast_bool(main_form.is_today_day_off.data),
-                open_file=True,
             )
-            # run_consolidated(
-            #     path,
-            #     output_path=path,
-            #     prefix=date_str,
-            # )
+            run_consolidated(
+                path,
+                output_path=path,
+                prefix=date_str,
+            )
             filename = f"{date_str} Расписание общее.xlsx"
             return flask.render_template(
                 "contour_washers/schedule_date.html",
