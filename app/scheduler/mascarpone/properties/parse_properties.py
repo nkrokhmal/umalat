@@ -27,6 +27,7 @@ def parse_schedule_file(wb_obj):
     values = []
     for i, row in df.loc[df["label"].str.contains("Производство маскарпоне")].iterrows():
         # - Find all separation blocks in +2 row that are within the same column range
+
         _separation_blocks_df = df[
             df["label"].str.contains("Сепарирование")
             & (df["x0"] >= row["x0"])
@@ -70,9 +71,12 @@ def parse_schedule_file(wb_obj):
 
 def fill_properties(parsed_schedule):
     # - Init properties
+
     props = MascarponeProperties()
     props.is_present = True
+
     # - Fill end time
+
     props.end_time = cast_human_time(parsed_schedule.y[0])
 
     # - Fill every_8t_of_separation
