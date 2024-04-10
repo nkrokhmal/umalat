@@ -5,10 +5,11 @@ from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
 
-from lessmore.utils.easy_printing.print_json import print_json
-
 from app.models import Washer, cast_model
 from app.scheduler.time_utils import cast_t
+
+
+# from lessmore.utils.easy_printing.print_json import print_json
 
 
 class CleaningValidator(ClassValidator):
