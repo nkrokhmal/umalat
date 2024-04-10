@@ -5,7 +5,6 @@ from typing import Union
 
 import pandas as pd
 
-from deeplay.utils.print_json import print_json
 from loguru import logger
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
@@ -520,13 +519,13 @@ def test():
     import warnings
 
     warnings.filterwarnings("ignore")
-    print_json(
-        dict(
-            parse_properties(
-                """/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/2024-03-02/approved/2024-03-02 Расписание моцарелла.xlsx"""
-            )
-        )
-    )
+    # print_json(
+    #     dict(
+    #         parse_properties(
+    #             """/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/2024-03-02/approved/2024-03-02 Расписание моцарелла.xlsx"""
+    #         )
+    #     )
+    # )
 
 
 if __name__ == "__main__":
