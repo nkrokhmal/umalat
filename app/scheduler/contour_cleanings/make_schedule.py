@@ -665,9 +665,9 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
             label=f"Танк сливок {i + 1}",
         )
 
-    # - Танк сливок 4
-
     if properties["mascarpone"].is_present:
+        # - Танк сливок 4/5 (после каждого 8-го набора маскарпоне)
+
         for i, time in enumerate(properties["mascarpone"].every_8t_of_separation):
             m.row(
                 "cleaning",
