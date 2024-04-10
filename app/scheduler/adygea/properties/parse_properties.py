@@ -62,18 +62,6 @@ def parse_schedule_file(wb_obj):
         length=100,
         split_func=_split_func,
     )
-    #
-    # # - Pouring off
-    # parse_elements(
-    #     m,
-    #     df,
-    #     "blocks",
-    #     "block",
-    #     [time_index_row_nums[-1] + i for i in [1, 5, 9, 13]],
-    #     start_times[-1],
-    #     length=100,
-    #     split_func=_split_func,
-    # )
 
     return m.root
 
