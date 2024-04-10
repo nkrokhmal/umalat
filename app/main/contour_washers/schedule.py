@@ -125,7 +125,7 @@ def contour_washers_schedule():
                 is_today_day_off=cast_bool(main_form.is_today_day_off.data),
             )
             run_consolidated(
-                path,
+                input_path=path,
                 output_path=path,
                 prefix=date_str,
             )

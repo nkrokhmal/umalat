@@ -33,7 +33,7 @@ def draw_frontend(
 
     # - Draw frontend
 
-    base_fn = f"{prefix}Расписание контурные мойки.xlsx"
+    base_fn = f"{prefix} Расписание контурные мойки.xlsx"
     output_fn = os.path.join(output_path, base_fn)
 
     workbook = draw_excel_frontend(
