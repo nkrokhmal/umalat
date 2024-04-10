@@ -35,7 +35,7 @@ def parse_schedule_file(wb_obj):
 
 def fill_properties(parsed_schedule):
     props = ButterProperties()
-
+    props.is_present = True
     # save boiling_model to parsed_schedule blocks
     props.end_time = cast_human_time(parsed_schedule.y[0])
     return props

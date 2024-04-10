@@ -3,7 +3,7 @@ import numpy as np
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
 
-from app.scheduler.archive.mascarpone.parser_new import parse_schedule
+from app.scheduler.mascarpone.parse_schedule import parse_schedule
 
 
 def update_interval_times(schedule_wb, boiling_plan_df):
