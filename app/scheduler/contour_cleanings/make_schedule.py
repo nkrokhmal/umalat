@@ -676,14 +676,14 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
                 label=f"Танк сливок {i + 4}",
             )
 
-    # - Линия сливок на маскарпоне (после танков сливок)
+        # - Линия сливок на маскарпоне (после танков сливок)
 
-    m.row(
-        "cleaning",
-        push_func=AxisPusher(start_from="last_end", validator=CleaningValidator()),
-        size=cast_t("1:00"),
-        label=f"Линия сливок на маскарпоне",
-    )
+        m.row(
+            "cleaning",
+            push_func=AxisPusher(start_from="last_end", validator=CleaningValidator()),
+            size=cast_t("1:00"),
+            label=f"Линия сливок на маскарпоне",
+        )
 
     # - Линия сливок на подмес на рикотте (после последнего набора рикотты + 10 минут)
 
