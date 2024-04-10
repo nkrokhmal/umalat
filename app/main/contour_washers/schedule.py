@@ -15,7 +15,6 @@ from ...scheduler.contour_cleanings.load_properties_by_department import (
     assert_properties_presence,
     load_properties_by_department,
 )
-from ...scheduler.contour_cleanings.make_schedule import calc_scotta_input_tanks
 from ...scheduler.load_schedules import load_schedules_by_department
 from ...scheduler.run_consolidated import run_consolidated
 from .forms import ScheduleDateForm, ScheduleForm, create_form, fill_properties
@@ -35,7 +34,6 @@ def contour_washers_schedule():
         ricotta_form = create_form(flask.request.form, RicottaProperties())
         mascarpone_form = create_form(flask.request.form, MascarponeProperties())
         butter_form = create_form(flask.request.form, ButterProperties())
-        milk_project_form = create_form(flask.request.form, MilkProjectProperties())
         adygea_form = create_form(flask.request.form, AdygeaProperties())
 
         date_str = date
