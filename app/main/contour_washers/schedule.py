@@ -2,22 +2,19 @@ from utils_ak.builtin import cast_bool
 
 from app.imports.runtime import *
 from app.main import main
+from app.main.contour_washers.forms import ScheduleDateForm, ScheduleForm, create_form, fill_properties
 from app.main.errors import internal_error
 from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
-from app.scheduler.archive.mascarpone.properties import MascarponeProperties
-from app.scheduler.archive.ricotta.properties import RicottaProperties
 from app.scheduler.butter.properties.butter_properties import ButterProperties
-from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
-from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
-
-from ...scheduler.contour_cleanings.draw_frontend.draw_frontend import draw_frontend
-from ...scheduler.contour_cleanings.load_properties_by_department import (
+from app.scheduler.contour_cleanings.draw_frontend.draw_frontend import draw_frontend
+from app.scheduler.contour_cleanings.load_properties_by_department import (
     assert_properties_presence,
     load_properties_by_department,
 )
-from ...scheduler.load_schedules import load_schedules_by_department
-from ...scheduler.run_consolidated import run_consolidated
-from .forms import ScheduleDateForm, ScheduleForm, create_form, fill_properties
+from app.scheduler.mascarpone.properties.mascarpone_properties import MascarponeProperties
+from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
+from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
+from app.scheduler.ricotta.properties.ricotta_properties import RicottaProperties
 
 
 @main.route("/contour_washers_schedule", methods=["GET", "POST"])
