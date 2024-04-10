@@ -15,6 +15,7 @@ class MozzarellaSKU(SKU):
     melting_speed = mdb.Column(mdb.Integer)
     production_by_request = mdb.Column(mdb.Boolean)
     packing_by_request = mdb.Column(mdb.Boolean)
+    is_multihead_rubber = mdb.Column(mdb.Boolean)
 
 
 class MozzarellaLine(Line):
