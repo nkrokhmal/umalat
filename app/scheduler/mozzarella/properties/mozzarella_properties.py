@@ -15,9 +15,8 @@ class MozzarellaProperties(pydantic.BaseModel):
     is_present: bool = Field(False, description="Присутствует ли моцарелла в этот день")
     bar12_present: bool = Field(False, description="Присутствует ли брус 1.2")
 
-    every_8th_pouring_end: Dict[str, list] = Field(
-        {}, description="Времена окончания каждого 8-й налива на разных смесях"
-    )
+    every_8th_pouring_end_27: list[str] = Field([], description="Времена окончания каждого 8-й налива на 2.7")
+    every_8th_pouring_end_32: list[str] = Field([], description="Времена окончания каждого 8-й налива на 3.2")
 
     multihead_end_time: str = Field("", description="Конец работы мультиголовы (пусто, если мультиголова не работает)")
     water_multihead_present: bool = Field(False, description="Есть ли мультиголова на воде в этот день")
@@ -58,3 +57,7 @@ class MozzarellaProperties(pydantic.BaseModel):
 
     def department(self):
         return "mozzarella"
+
+    @property
+    def every_8th_pouring_end(self):
+        return {"2.7": self.every_8th_pouring_end_27, "3.2": self.every_8th_pouring_end_32}

@@ -49,6 +49,10 @@ def contour_washers_schedule():
 
             props = load_properties_by_department(path=path, prefix=date_str)
 
+            # - Set is_today_day_off
+
+            main_form.is_today_day_off.data = all(not p.is_present for p in props.values())
+
             # - Validate props
 
             assert_properties_presence(
@@ -115,9 +119,9 @@ def contour_washers_schedule():
                 properties=properties_by_department,
                 output_path=path,
                 prefix=date_str,
-                naslavuchich=True,
-                basement_brine=True,
-                is_today_day_off=False,
+                naslavuchich=cast_bool(main_form.naslavuchich.data),
+                basement_brine=cast_bool(main_form.basement_brine.data),
+                is_today_day_off=cast_bool(main_form.is_today_day_off.data),
                 open_file=True,
             )
             # run_consolidated(

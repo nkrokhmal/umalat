@@ -9,8 +9,6 @@ from deeplay.utils.print_json import print_json
 from loguru import logger
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
-from utils_ak.code_block import code
-from utils_ak.code_block.code import code
 from utils_ak.iteration.simple_iterator import iter_pairs
 from utils_ak.numeric.types import is_int, is_int_like
 from utils_ak.portion.portion_tools import calc_interval_length, cast_interval
@@ -352,18 +350,22 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     # - Pourings
 
-    props.every_8th_pouring_end = {}
-
     for percent in ["2.7", "3.2"]:
         _boilings = [
             b for b in parsed_schedule["boilings"]["boiling", True] if str(b.props["boiling_model"].percent) == percent
         ]
         _boilings = list(sorted(boilings, key=lambda b: b.x[0]))
         _boilings = [b for i, b in enumerate(boilings) if i % 8 == 7 or i == len(boilings) - 1]
-        props.every_8th_pouring_end[percent] = [
+
+        values = [
             cast_human_time(b.x[0] + (b.props["group"][0]["y0"] - b.props["group"][0]["x0"]))
             for b in _boilings  # add termizator length time length
         ]
+
+        if percent == "2.7":
+            props.every_8th_pouring_end_27 = values
+        else:
+            props.every_8th_pouring_end_32 = values
 
     # - Multihead
 
