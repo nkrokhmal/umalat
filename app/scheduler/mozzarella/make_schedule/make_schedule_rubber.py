@@ -27,36 +27,37 @@ def make_schedule(
     m.row("preparation", size=24)  # 2 hours
 
     for is_first, is_last, (i, row) in mark_ends(boiling_plan_df.iterrows()):
-        # - Get packing_speed
+        with m.block("packing_group"):
+            # - Get packing_speed
 
-        packing_speed = 350  # todo later:  [@marklidenberg]
+            packing_speed = 350  # todo later:  [@marklidenberg]
 
-        # - Split 1000 to [350, 350, 300], all packings are 1 hour
+            # - Split 1000 to [350, 350, 300], all packings are 1 hour
 
-        kg = row["kg"]
-        n = kg // packing_speed
-        kgs = [packing_speed * 1] * n + [kg - packing_speed * n * 1]
-        kgs = [kg for kg in kgs if kg > 0]
+            kg = row["kg"]
+            n = kg // packing_speed
+            kgs = [packing_speed * 1] * n + [kg - packing_speed * n * 1]
+            kgs = [kg for kg in kgs if kg > 0]
 
-        packing_times = [round(kg / packing_speed * 12) for kg in kgs]
+            packing_times = [round(kg / packing_speed * 12) for kg in kgs]
 
-        for _is_first, _is_last, packing_time in mark_ends(packing_times):
-            m.row(
-                "packing",
-                size=packing_time,
-            )
+            for _is_first, _is_last, packing_time in mark_ends(packing_times):
+                m.row(
+                    "packing",
+                    size=packing_time,
+                )
 
-            if not is_last or not _is_last:
-                if len(m.root["packing", True]) % 2 == 0:
-                    m.row(
-                        "long_switch",
-                        size=2,
-                    )
-                else:
-                    m.row(
-                        "short_switch",
-                        size=1,
-                    )
+                if not is_last or not _is_last:
+                    if len(m.root["packing", True]) % 2 == 0:
+                        m.row(
+                            "long_switch",
+                            size=2,
+                        )
+                    else:
+                        m.row(
+                            "short_switch",
+                            size=1,
+                        )
 
         if not is_last:
             m.row(

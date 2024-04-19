@@ -1,3 +1,5 @@
+from typing import Optional
+
 from utils_ak.block_tree.block import Block
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.pushers import add_push, push, simple_push
@@ -482,6 +484,7 @@ def wrap_extra_packings(extra_packings):
 
 def wrap_frontend(
     boiling_plan: str,
+    boiling_plan_rubber: Optional[str] = None,
     coolings_mode="first",
     saturate=True,
     normalization=True,
