@@ -88,7 +88,7 @@ def test():
     #     Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
     # )
 
-    fn = """/Users/marklidenberg/Desktop/2024.02.29 mozzarella fix/2024-03-01 План по варкам моцарелла.xlsx"""
+    fn = """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx"""
 
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
