@@ -112,6 +112,8 @@ def parse_schedule_file(wb_obj):
             if int_labels:
                 headers.append(row_num)
 
+    cheese_maker_headers = [0] * (4 - len(cheese_maker_headers)) + cheese_maker_headers
+
     packing_headers = set(headers) - set(cheese_maker_headers) - set(water_melting_headers) - set(salt_melting_headers)
     packing_headers = list(sorted(packing_headers))
     if water_melting_headers and salt_melting_headers:
@@ -473,14 +475,15 @@ def parse_properties(filename):
 
 
 def test():
-    print(
+    import warnings
+
+    warnings.filterwarnings("ignore")
+    from lessmore.utils.easy_printing.print_json import print_json
+
+    print_json(
         dict(
             parse_properties(
-                str(
-                    get_repo_path()
-                    # / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
-                    / "app/data/static/samples/by_day/2023-09-03/2023-09-03 Расписание моцарелла.xlsx"
-                )
+                """/Users/marklidenberg/Documents/coding/repos/umalat/app/scheduler/mozzarella/draw_frontend/schedule3.xlsx"""
             )
         )
     )
