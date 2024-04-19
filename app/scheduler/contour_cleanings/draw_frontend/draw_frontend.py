@@ -6,34 +6,47 @@ from app.scheduler.contour_cleanings.load_properties_by_department import load_p
 from app.scheduler.contour_cleanings.make_schedule import make_schedule
 from app.scheduler.contour_cleanings.wrap_frontend import wrap_frontend
 from app.scheduler.frontend_utils import draw_excel_frontend
+from app.scheduler.load_schedules import load_schedules_by_department
 
 
 def draw_frontend(
     input_path: str,
     output_path: str = "outputs/",
     schedule=None,
-    properties: dict = {},
+    schedules_by_department=None,
+    properties_by_department=None,
     prefix="",
     open_file: bool = False,
-    naslavuchich: bool = True,
-    basement_brine: bool = True,
-    is_today_day_off: bool = False,
+    **kwargs,
 ):
-    # - Make frontend
+    if not schedule:
+        if not properties_by_department:
+            if not schedules_by_department:
+                schedules_by_department = load_schedules_by_department(input_path, prefix=prefix)
 
-    properties = properties or load_properties_by_department(path=input_path, prefix=prefix)
+            # todo maybe: need a check here? [@marklidenberg]
+            # assert_schedules_presence(
+            #     schedules,
+            #     raise_if_not_present=["ricotta"],
+            #     warn_if_not_present=[
+            #         "mozzarella",
+            #         "butter",
+            #         "adygea",
+            #         "milk_project",
+            #         "mascarpone",
+            #     ],
+            # )
 
-    schedule = schedule or make_schedule(
-        properties,
-        naslavuchich=naslavuchich,
-        basement_brine=basement_brine,
-        is_today_day_off=is_today_day_off,
-    )
+            properties_by_department = load_properties_by_department(
+                schedules_by_department, path=input_path, prefix=prefix
+            )
+
+        schedule = make_schedule(properties_by_department, **kwargs)
     frontend = wrap_frontend(schedule)
 
     # - Draw frontend
 
-    base_fn = f"{prefix} Расписание контурные мойки.xlsx"
+    base_fn = f"{prefix}Расписание контурные мойки.xlsx"
     output_fn = os.path.join(output_path, base_fn)
 
     workbook = draw_excel_frontend(
@@ -49,31 +62,11 @@ def draw_frontend(
 
 
 def test():
-    import warnings
-
-    warnings.filterwarnings("ignore")
-
-    # draw_frontend(
-    #     input_path="""/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/2024-03-02/approved""",
-    #     prefix="2024-03-02",
-    #     open_file=True,
-    #     is_today_day_off=True,
-    # )
-    import glob
-
-    import tqdm
-
-    for dirname in tqdm.tqdm(
-        sorted(glob.glob("""/Users/marklidenberg/Desktop/inbox/2024.04.06 contour_cleanings/*"""))
-    ):
-        date = dirname.split("/")[-1]
-        print(date)
-        draw_frontend(
-            input_path=os.path.join(dirname, "approved"),
-            prefix=date,
-            open_file=False,
-            is_today_day_off=False,
-        )
+    draw_frontend(
+        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2023-09-03"),
+        prefix="2023-09-03",
+        open_file=True,
+    )
 
 
 if __name__ == "__main__":

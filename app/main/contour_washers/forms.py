@@ -48,18 +48,36 @@ class ScheduleForm(FlaskForm):
 
 
 class ScheduleDateForm(FlaskForm):
-    naslavuchich = BooleanField(
-        'Наславучич (ставится в 18:00)',
+    milk_project_n_boilings_yesterday = IntegerField(
+        "Количество варок в милкпроджект вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default=0,
+    )
+
+    adygea_n_boilings_yesterday = IntegerField(
+        "Количество варок в адыгейском цехе вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default=0,
+    )
+
+    ricotta_n_boilings_yesterday = IntegerField(
+        "Количество варок в рикоттном цехе вчера (используется для подсчета скотты)",
+        validators=[Optional()],
+        default=0,
+    )
+
+    molder = BooleanField(
+        'Формовщик',
         validators=[Optional()],
         default=False
     )
-    basement_brine = BooleanField(
-        "Подвал рассол (ставится в 07:00)",
+    is_tomorrow_not_working_day = BooleanField(
+        "Последующий день нерабочий",
         validators=[Optional()],
         default=False
     )
-    is_today_day_off = BooleanField(
-        "Сегодня был нерабочий день",
+    shipping_line = BooleanField(
+        "Линия отгрузки",
         validators=[Optional()],
-        default=False,
+        default=True,
     )

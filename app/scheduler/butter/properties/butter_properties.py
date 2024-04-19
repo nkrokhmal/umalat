@@ -6,9 +6,18 @@ from app.scheduler.time_utils import cast_human_time
 
 
 class ButterProperties(pydantic.BaseModel):
-    is_present: bool = Field(False, description="Присутствует ли масло в этот день")
-
     end_time: str = Field("", description="Конец работы маслоцеха")
+
+    def is_present(self):
+        return bool(self.end_time)
 
     def department(self):
         return "butter"
+
+
+def cast_properties(schedule=None):
+    props = ButterProperties()
+    if not schedule:
+        return props
+    props.end_time = cast_human_time(schedule.y[0])
+    return props

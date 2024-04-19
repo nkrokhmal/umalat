@@ -45,7 +45,6 @@ def parse_schedule_file(wb_obj):
 
 def fill_properties(parsed_schedule):
     props = MilkProjectProperties()
-    props.is_present = True
 
     # save boiling_model to parsed_schedule blocks
     boilings = list(sorted(parsed_schedule.iter(cls="boiling"), key=lambda boiling: boiling.y[0]))

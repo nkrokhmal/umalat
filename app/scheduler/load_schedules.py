@@ -11,10 +11,10 @@ from app.models import MozzarellaBoiling, MozzarellaSKU, cast_model
 from config import config
 
 
-def load_schedules_by_department(path: str, prefix: str, departments: list = []):
+def load_schedules_by_department(path, prefix, departments=None):
     # NOTE: DOES NOT RETURN DEPARTMENT IF NOT PRESENT
-    schedules_by_department = {}
-    departments = list(departments)
+    schedules = {}
+    departments = departments or []
 
     for department, name in config.DEPARTMENT_NAMES_BY_DEPARTMENT.items():
         if departments and department not in departments:
@@ -22,18 +22,18 @@ def load_schedules_by_department(path: str, prefix: str, departments: list = [])
         fn = os.path.join(path, f"{prefix} Расписание {name}.pickle")
         if os.path.exists(fn):
             with open(fn, "rb") as f:
-                schedules_by_department[department] = ParallelepipedBlock.from_dict(pickle.load(f))
+                schedules[department] = ParallelepipedBlock.from_dict(pickle.load(f))
 
             if department == "mozzarella":
                 # reload models for mozzarella - need for use later
-                for block in schedules_by_department[department].iter(cls="boiling"):
+                for block in schedules[department].iter(cls="boiling"):
                     _id = int(
                         re.findall(r"(\d+)>", str(block.props["boiling_model"]))[0]
                     )  # <MozzarellaBoiling 15> -> 15
                     model = cast_model(MozzarellaBoiling, _id)
                     block.props.update(boiling_model=model)
 
-                for block in schedules_by_department[department].iter(cls="packing"):
+                for block in schedules[department].iter(cls="packing"):
                     bdf = block.props["boiling_group_df"]
                     bdf["sku"] = bdf["sku"].apply(lambda sku: int(re.findall(r"(\d+)>", str(sku))[0]))
                     bdf["sku"] = bdf["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
@@ -41,7 +41,7 @@ def load_schedules_by_department(path: str, prefix: str, departments: list = [])
                     bdf["boiling"] = bdf["boiling"].apply(lambda boiling: int(re.findall(r"(\d+)>", str(boiling))[0]))
                     bdf["boiling"] = bdf["boiling"].apply(lambda boiling: cast_model(MozzarellaBoiling, boiling))
 
-    return schedules_by_department
+    return schedules
 
 
 def assert_schedules_presence(schedules, raise_if_not_present=None, warn_if_not_present=None):
@@ -66,12 +66,8 @@ def assert_schedules_presence(schedules, raise_if_not_present=None, warn_if_not_
                 )
 
 
-def test():
+if __name__ == "__main__":
     load_schedules_by_department(
         "/Users/marklidenberg/Yandex.Disk.localized/master/code/git/2020.10-umalat/umalat/app/data/dynamic/2021-01-01/approved",
         "2021-01-01",
     )
-
-
-if __name__ == "__main__":
-    test()
