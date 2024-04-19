@@ -2,23 +2,20 @@ from utils_ak.builtin import cast_bool
 
 from app.imports.runtime import *
 from app.main import main
+from app.main.contour_washers.forms import ScheduleDateForm, ScheduleForm, create_form, fill_properties
 from app.main.errors import internal_error
 from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
-from app.scheduler.archive.mascarpone.properties import MascarponeProperties
-from app.scheduler.archive.ricotta.properties import RicottaProperties
 from app.scheduler.butter.properties.butter_properties import ButterProperties
-from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
-from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
-
-from ...scheduler.contour_cleanings.draw_frontend.draw_frontend import draw_frontend
-from ...scheduler.contour_cleanings.load_properties_by_department import (
+from app.scheduler.contour_cleanings.draw_frontend.draw_frontend import draw_frontend
+from app.scheduler.contour_cleanings.load_properties_by_department import (
     assert_properties_presence,
     load_properties_by_department,
 )
-from ...scheduler.contour_cleanings.make_schedule import calc_scotta_input_tanks
-from ...scheduler.load_schedules import load_schedules_by_department
-from ...scheduler.run_consolidated import run_consolidated
-from .forms import ScheduleDateForm, ScheduleForm, create_form, fill_properties
+from app.scheduler.mascarpone.properties.mascarpone_properties import MascarponeProperties
+from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
+from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
+from app.scheduler.ricotta.properties.ricotta_properties import RicottaProperties
+from app.scheduler.run_consolidated import run_consolidated
 
 
 @main.route("/contour_washers_schedule", methods=["GET", "POST"])
@@ -35,20 +32,29 @@ def contour_washers_schedule():
         ricotta_form = create_form(flask.request.form, RicottaProperties())
         mascarpone_form = create_form(flask.request.form, MascarponeProperties())
         butter_form = create_form(flask.request.form, ButterProperties())
-        milk_project_form = create_form(flask.request.form, MilkProjectProperties())
         adygea_form = create_form(flask.request.form, AdygeaProperties())
 
         date_str = date
         date = datetime.strptime(date, "%Y-%m-%d")
 
         if flask.request.method == "GET":
+            # - Get path
+
             path = os.path.join(
                 flask.current_app.config["DYNAMIC_DIR"],
                 date_str,
                 flask.current_app.config["APPROVED_FOLDER"],
             )
-            schedules = load_schedules_by_department(path=path, prefix=date_str)
-            props = load_properties_by_department(schedules, path=path, prefix=date_str)
+
+            # - Load props
+
+            props = load_properties_by_department(path=path, prefix=date_str)
+
+            # - Set is_today_day_off
+
+            main_form.is_today_day_off.data = all(not p.is_present for p in props.values())
+
+            # - Validate props
 
             assert_properties_presence(
                 props,
@@ -56,72 +62,19 @@ def contour_washers_schedule():
                     "mozzarella",
                     "butter",
                     "adygea",
-                    "milk_project",
-                    # "ricotta",
-                    # "mascarpone",
+                    "ricotta",
+                    "mascarpone",
                 ],
             )
 
-            # fill main form
-            with code("fill yesterday form values"):
-                yesterday = date - timedelta(days=1)
-                yesterday_str = yesterday.strftime("%Y-%m-%d")
+            # - Fill department forms
 
-                yesterday_schedules = load_schedules_by_department(
-                    config.abs_path("app/data/dynamic/{}/approved/".format(yesterday_str)),
-                    prefix=yesterday_str,
-                    departments=["ricotta", "mozzarella", "adygea", "milk_project"],
-                )
-                yesterday_properties = load_properties_by_department(
-                    yesterday_schedules,
-                    path=config.abs_path("app/data/dynamic/{}/approved/".format(yesterday_str)),
-                    prefix=yesterday_str,
-                )
-
-                if yesterday_properties["mozzarella"].is_present():
-                    main_form.molder.data = yesterday_properties["mozzarella"].bar12_present
-                else:
-                    flask.flash(
-                        "Отсутствует утвержденное расписание по моцарелльному цеху за вчера (определяет, нужен ли формовщик)",
-                        "warning",
-                    )
-                #
-                # if yesterday_properties["ricotta"].is_present():
-                #     main_form.ricotta_n_boilings_yesterday.data = yesterday_properties["ricotta"].n_boilings
-                # else:
-                #     flask.flash(
-                #         "Отсутствует утвержденное расписание по рикоттному цеху за вчера (определяет число варок для скотты)",
-                #         "warning",
-                #     )
-
-                if yesterday_properties["milk_project"].is_present():
-                    main_form.ricotta_n_boilings_yesterday.data = yesterday_properties["milk_project"].n_boilings
-                else:
-                    flask.flash(
-                        "Отсутствует утвержденное расписание по милк-проджекты за вчера (определяет число варок для скотты)",
-                        "warning",
-                    )
-
-                if yesterday_properties["adygea"].is_present():
-                    main_form.adygea_n_boilings_yesterday.data = yesterday_properties["adygea"].n_boilings
-                else:
-                    flask.flash(
-                        "Отсутствует утвержденное расписание по адыгейскому цеху за вчера (определяет число варок для скотты)",
-                        "warning",
-                    )
-
-                main_form.is_tomorrow_not_working_day.data = (
-                    date + timedelta(days=1)
-                ).weekday() not in config.WORKING_WEEKDAYS
-
-            # fill department forms
             for department, form in [
                 ["mozzarella", mozzarella_form],
                 ["mascarpone", mascarpone_form],
                 ["butter", butter_form],
-                ["milk_project", milk_project_form],
-                # ["ricotta", ricotta_form],
-                # ["adygea", adygea_form],
+                ["ricotta", ricotta_form],
+                ["adygea", adygea_form],
             ]:
                 if department not in props:
                     continue
@@ -132,13 +85,14 @@ def contour_washers_schedule():
                     else:
                         getattr(form, department + "__" + key).data = value
 
+            # - Render template
+
             return flask.render_template(
                 "contour_washers/schedule_date.html",
                 mozzarella_form=mozzarella_form,
                 ricotta_form=ricotta_form,
                 mascarpone_form=mascarpone_form,
                 butter_form=butter_form,
-                milk_project_form=milk_project_form,
                 adygea_form=adygea_form,
                 main_form=main_form,
                 date=date_str,
@@ -151,10 +105,9 @@ def contour_washers_schedule():
             properties_by_department = {
                 "mozzarella": fill_properties(form, MozzarellaProperties()),
                 "butter": fill_properties(form, ButterProperties()),
-                "milk_project": fill_properties(form, MilkProjectProperties()),
                 "adygea": fill_properties(form, AdygeaProperties()),
-                # "mascarpone": fill_properties(form, MascarponeProperties()),
-                # "ricotta": fill_properties(form, RicottaProperties()),
+                "mascarpone": fill_properties(form, MascarponeProperties()),
+                "ricotta": fill_properties(form, RicottaProperties()),
             }
 
             path = config.abs_path("app/data/dynamic/{}/approved/".format(date_str))
@@ -162,27 +115,17 @@ def contour_washers_schedule():
             if not os.path.exists(path):
                 raise Exception("Не найдены утвержденные расписания для данной даты: {}".format(date))
 
-            with code("Calc input tanks"):
-                try:
-                    ricotta_n_boilings = int(main_form.ricotta_n_boilings_yesterday.data)
-                    adygea_n_boilings = int(main_form.adygea_n_boilings_yesterday.data)
-                    milk_project_n_boilings = int(main_form.milk_project_n_boilings_yesterday.data)
-                except Exception as e:
-                    return internal_error(e)
-
-                input_tanks = calc_scotta_input_tanks(ricotta_n_boilings, adygea_n_boilings, milk_project_n_boilings)
             draw_frontend(
-                path,
-                properties_by_department=properties_by_department,
+                input_path=path,
+                properties=properties_by_department,
                 output_path=path,
                 prefix=date_str,
-                input_tanks=input_tanks,
-                is_tomorrow_day_off=cast_bool(main_form.is_tomorrow_not_working_day.data),
-                shipping_line=cast_bool(main_form.shipping_line.data),
-                molder=cast_bool(main_form.molder.data),
+                naslavuchich=cast_bool(main_form.naslavuchich.data),
+                basement_brine=cast_bool(main_form.basement_brine.data),
+                is_today_day_off=cast_bool(main_form.is_today_day_off.data),
             )
             run_consolidated(
-                path,
+                input_path=path,
                 output_path=path,
                 prefix=date_str,
             )
@@ -196,7 +139,6 @@ def contour_washers_schedule():
                 ricotta_form=ricotta_form,
                 mascarpone_form=mascarpone_form,
                 butter_form=butter_form,
-                milk_project_form=milk_project_form,
                 adygea_form=adygea_form,
             )
 

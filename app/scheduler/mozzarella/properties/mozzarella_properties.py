@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import pandas as pd
 import pydantic
@@ -12,26 +12,11 @@ from app.scheduler.time_utils import cast_human_time
 
 
 class MozzarellaProperties(pydantic.BaseModel):
+    is_present: bool = Field(False, description="Присутствует ли моцарелла в этот день")
     bar12_present: bool = Field(False, description="Присутствует ли брус 1.2")
-    line33_last_termizator_end_times: str = Field(
-        [], description="Времена заполнения танков на смеси 3.3% (каждая 9 варка)"
-    )
-    line36_last_termizator_end_times: str = Field(
-        [], description="Времена заполнения танков на смеси 3.6% (каждая 9 варка)"
-    )
-    line27_last_termizator_end_times: str = Field(
-        [], description="Времена заполнения танков на смеси 2.7% (каждая 9 варка)"
-    )
 
-    def termizator_times(self):
-        res = {
-            "2.7": self.line27_last_termizator_end_times,
-            "3.3": self.line33_last_termizator_end_times,
-            "3.6": self.line36_last_termizator_end_times,
-        }
-        # todo: maybe, make proper checks, maybe make some warnings or something
-        # assert len(sum(res.values(), [])) <= 4, 'Указано больше 4 танков смесей. В производстве есть только 4 танка смесей. '
-        return res
+    every_8th_pouring_end_27: list[str] = Field([], description="Времена окончания каждого 8-й налива на 2.7")
+    every_8th_pouring_end_32: list[str] = Field([], description="Времена окончания каждого 8-й налива на 3.2")
 
     multihead_end_time: str = Field("", description="Конец работы мультиголовы (пусто, если мультиголова не работает)")
     water_multihead_present: bool = Field(False, description="Есть ли мультиголова на воде в этот день")
@@ -51,8 +36,10 @@ class MozzarellaProperties(pydantic.BaseModel):
         values = [value for value in values if value[1]]
         return values
 
-    water_melting_end_time: str = Field("", description="Конец работы линии воды")
-    salt_melting_end_time: str = Field("", description="Конец работы линии соли")
+    water_packing_end_time: str = Field("", description="Конец работы паковки воды")
+    salt_packing_end_time: str = Field("", description="Конец работы паковки соли")
+    water_melting_end_time: str = Field("", description="Конец работы плавления воды")
+    salt_melting_end_time: str = Field("", description="Конец работы плавления соли")
 
     drenator1_end_time: str = Field("", description="Конец работы 1 дренатора")
     drenator2_end_time: str = Field("", description="Конец работы 2 дренатора")
@@ -68,10 +55,9 @@ class MozzarellaProperties(pydantic.BaseModel):
         values = [value for value in values if value[1]]
         return values
 
-    def is_present(self):
-        if self.water_melting_end_time or self.salt_melting_end_time:
-            return True
-        return False
-
     def department(self):
         return "mozzarella"
+
+    @property
+    def every_8th_pouring_end(self):
+        return {"2.7": self.every_8th_pouring_end_27, "3.2": self.every_8th_pouring_end_32}

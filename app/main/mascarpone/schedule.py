@@ -8,7 +8,6 @@ from app.main import main
 from app.main.mascarpone.forms import ScheduleForm
 from app.main.mascarpone.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
-from app.scheduler.archive.mascarpone.frontend.style import STYLE
 from app.scheduler.frontend_utils import fill_grid
 from app.scheduler.mascarpone.draw_frontend.draw_frontend import draw_frontend
 from app.utils.batches.batch import *
