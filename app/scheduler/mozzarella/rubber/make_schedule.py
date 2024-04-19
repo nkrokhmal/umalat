@@ -30,7 +30,7 @@ def make_schedule(
         with m.block("packing_group", kg=row["kg"], sku=row["sku"]):
             # - Get packing_speed
 
-            packing_speed = 350  # todo later:  [@marklidenberg]
+            packing_speed = row["sku"].packing_speed
 
             # - Split 1000 to [350, 350, 300], all packings are 1 hour
 

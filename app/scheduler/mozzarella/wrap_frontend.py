@@ -544,12 +544,15 @@ def wrap_frontend(
     m.block(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
 
     with m.block("melting", start_time=start_time, axis=1):
-        if boiling_plan_rubber:
+        is_water_present = (
+            len(list(master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == LineName.WATER))) > 0
+        )
+
+        if not is_water_present:
             m.col("stub", size=1)
             m.block(
                 wrap_frontend_rubber(
                     boiling_plan=boiling_plan_rubber,
-                    start_time=rubber_start_time,
                 )["frontend"]
             )
             m.col("stub", size=1)

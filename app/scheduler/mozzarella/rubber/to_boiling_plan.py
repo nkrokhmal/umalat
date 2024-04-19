@@ -52,9 +52,6 @@ def to_boiling_plan(wb_obj: BoilingPlanLike):
 
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
 
-    if df.empty:
-        raise Exception("Укажите хотя бы одну строку в плане варок на паковке терки мультиголовы")
-
     return df
 
 
