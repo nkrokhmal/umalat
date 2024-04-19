@@ -27,7 +27,7 @@ def make_schedule(
     m.row("preparation", size=24)  # 2 hours
 
     for is_first, is_last, (i, row) in mark_ends(boiling_plan_df.iterrows()):
-        with m.block("packing_group"):
+        with m.block("packing_group", kg=row["kg"], sku=row["sku"]):
             # - Get packing_speed
 
             packing_speed = 350  # todo later:  [@marklidenberg]
@@ -41,14 +41,15 @@ def make_schedule(
 
             packing_times = [round(kg / packing_speed * 12) for kg in kgs]
 
-            for _is_first, _is_last, packing_time in mark_ends(packing_times):
+            for _is_first, _is_last, (i, packing_time) in mark_ends(enumerate(packing_times)):
                 m.row(
                     "packing",
                     size=packing_time,
+                    kg=kgs[i],
                 )
 
                 if not is_last or not _is_last:
-                    if len(m.root["packing", True]) % 2 == 0:
+                    if len(list(m.root.iter(cls="packing"))) % 2 == 0:
                         m.row(
                             "long_switch",
                             size=2,
