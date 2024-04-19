@@ -31,6 +31,7 @@ def mozzarella_schedule():
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
         exact_melting_time_by_line = form.exact_melting_time_by_line.data
+        rubber_beg_time = form.rubber_beg_time.data
 
         # validate time
         time_validator(form, form.water_beg_time)

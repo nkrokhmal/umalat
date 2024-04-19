@@ -24,6 +24,7 @@ from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 
 def draw_frontend(
     boiling_plan: str,
+    boiling_plan_rubber: str,
     date: Optional[datetime] = None,
     workbook: Workbook = None,
     saturate=True,
@@ -34,16 +35,19 @@ def draw_frontend(
     exact_start_time_line_name=None,
     optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+    rubber_start_time="07:00",
     start_configuration=None,
 ) -> dict:
     # - Wrap frontend
 
     output = wrap_frontend(
         boiling_plan=boiling_plan,
+        boiling_plan_rubber=boiling_plan_rubber,
         first_batch_ids_by_type=first_batch_ids_by_type,
         saturate=saturate,
         normalization=normalization,
         validate=validate,
+        rubber_start_time=rubber_start_time,
         # - Make schedule basic_example kwargs
         date=date,
         optimize_cleanings=optimize_cleanings,
@@ -88,13 +92,14 @@ def test():
     #     Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
     # )
 
-    fn = """/Users/marklidenberg/Desktop/2024.02.29 mozzarella fix/2024-03-01 План по варкам моцарелла.xlsx"""
+    fn = """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx"""
 
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
     )
     output = draw_frontend(
         boiling_plan=fn,
+        boiling_plan_rubber=fn,
         workbook=schedule_wb,
         start_times={LineName.SALT: "07:00", LineName.WATER: "08:00"},
         exact_start_time_line_name=LineName.SALT,
