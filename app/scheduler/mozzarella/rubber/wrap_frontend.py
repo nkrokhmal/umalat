@@ -40,6 +40,10 @@ def wrap_frontend(
         axis=1,
     )
 
+    if len(schedule["packing_group", True]) == 0:
+        output["frontend"] = m.root
+        return output
+
     # - Make packing groups
 
     for packing_group in schedule["packing_group"]:

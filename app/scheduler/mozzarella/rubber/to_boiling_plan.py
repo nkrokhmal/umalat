@@ -51,7 +51,7 @@ def to_boiling_plan(wb_obj: BoilingPlanLike):
     df.columns = ["sku", "kg"]
 
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
-
+    df = df[df["kg"] > 0]
     return df
 
 

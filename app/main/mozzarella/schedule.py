@@ -69,6 +69,7 @@ def mozzarella_schedule():
                     LineName.WATER: form.water_beg_time.data,
                     LineName.SALT: form.salt_beg_time.data,
                 },
+                rubber_start_time=rubber_beg_time,
                 exact_start_time_line_name=exact_melting_time_by_line,
                 first_batch_ids_by_type=first_batch_ids,
                 optimize_cleanings=add_full_boiling,

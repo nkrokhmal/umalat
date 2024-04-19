@@ -14,13 +14,14 @@ from app.scheduler.milk_project.properties.milk_project_properties import (
     cast_properties as cast_properties_milk_project,
 )
 from app.scheduler.milk_project.properties.parse_properties import parse_properties as parse_properties_milk_project
-from app.scheduler.mozzarella.properties.mozzarella_properties import cast_properties as cast_properties_mozzarella
+
+# from app.scheduler.mozzarella.properties.mozzarella_properties import cast_properties as cast_properties_mozzarella
 from app.scheduler.mozzarella.properties.parse_properties import parse_properties as parse_properties_mozzarella
 from config import config
 
 
 SCHEDULE_PARSERS = {
-    "mozzarella": cast_properties_mozzarella,
+    # "mozzarella": cast_properties_mozzarella,
     "milk_project": cast_properties_milk_project,
     "butter": cast_properties_butter,
     "adygea": cast_properties_adygea,

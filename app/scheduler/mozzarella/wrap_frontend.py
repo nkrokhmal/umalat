@@ -485,7 +485,6 @@ def wrap_extra_packings(extra_packings):
 
 def wrap_frontend(
     boiling_plan: str,
-    boiling_plan_rubber: Optional[str] = None,
     coolings_mode="first",
     saturate=True,
     normalization=True,
@@ -550,11 +549,7 @@ def wrap_frontend(
 
         if not is_water_present:
             m.col("stub", size=1)
-            m.block(
-                wrap_frontend_rubber(
-                    boiling_plan=boiling_plan_rubber,
-                )["frontend"]
-            )
+            m.block(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
             m.col("stub", size=1)
 
             m.block(

@@ -58,7 +58,7 @@ STYLE = {
     "rubber_long_switch": {
         "text": "земена газа и пленки",
         "color": "red",
-        "font": 6,
+        "font_size": 8,
     },
     "rubber_short_switch": {
         "text": "",

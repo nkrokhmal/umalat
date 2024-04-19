@@ -24,7 +24,6 @@ from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 
 def draw_frontend(
     boiling_plan: str,
-    boiling_plan_rubber: str,
     date: Optional[datetime] = None,
     workbook: Workbook = None,
     saturate=True,
@@ -42,7 +41,6 @@ def draw_frontend(
 
     output = wrap_frontend(
         boiling_plan=boiling_plan,
-        boiling_plan_rubber=boiling_plan_rubber,
         first_batch_ids_by_type=first_batch_ids_by_type,
         saturate=saturate,
         normalization=normalization,
@@ -92,7 +90,7 @@ def test():
     #     Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
     # )
 
-    fn = """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx"""
+    fn = """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/С мультиголовой.xlsx"""
 
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
