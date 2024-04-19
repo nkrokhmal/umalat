@@ -12,7 +12,7 @@ from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 
-def to_boiling_plan_rubber(wb_obj: BoilingPlanLike):
+def to_boiling_plan(wb_obj: BoilingPlanLike):
     """
     :param wb_obj: str or openpyxl.Workbook
     :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
@@ -55,7 +55,7 @@ def to_boiling_plan_rubber(wb_obj: BoilingPlanLike):
 
 
 def test():
-    df = to_boiling_plan_rubber(
+    df = to_boiling_plan(
         """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx"""
     )
     print(df.iloc[0])

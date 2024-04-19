@@ -6,7 +6,7 @@ from utils_ak.block_tree.pushers.iterative import AxisPusher
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan_rubber import to_boiling_plan_rubber
+from app.scheduler.mozzarella.rubber.to_boiling_plan import to_boiling_plan
 from app.scheduler.time_utils import cast_t
 
 
@@ -16,7 +16,7 @@ def make_schedule(
 ) -> dict:
     # - Get boiling plan
 
-    boiling_plan_df = to_boiling_plan_rubber(wb_obj=boiling_plan).copy()
+    boiling_plan_df = to_boiling_plan(wb_obj=boiling_plan).copy()
 
     # - Init block maker
 

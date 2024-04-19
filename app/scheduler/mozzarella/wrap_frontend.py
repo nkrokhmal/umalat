@@ -545,19 +545,24 @@ def wrap_frontend(
         # m.block(wrap_multihead_cleanings(master))
         if schedule["shifts"]:
             m.block(wrap_shifts(schedule["shifts"]["water_meltings"]))
-        m.block(
-            wrap_meltings_1(
-                master,
-                LineName.WATER,
-                "Линия плавления моцареллы в воде №1",
-                coolings_mode=coolings_mode,
-            )
-        )
 
-        # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
-        if schedule["shifts"]:
-            m.block(wrap_shifts(schedule["shifts"]["water_packings"]))
-        m.block(wrap_packings(master, LineName.WATER))
+        if boiling_plan_rubber:
+            pass
+        else:
+            m.block(
+                wrap_meltings_1(
+                    master,
+                    LineName.WATER,
+                    "Линия плавления моцареллы в воде №1",
+                    coolings_mode=coolings_mode,
+                )
+            )
+
+            # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
+            if schedule["shifts"]:
+                m.block(wrap_shifts(schedule["shifts"]["water_packings"]))
+
+            m.block(wrap_packings(master, LineName.WATER))
         if schedule["shifts"]:
             m.block(wrap_shifts(schedule["shifts"]["salt_meltings"]))
         m.block(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
