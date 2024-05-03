@@ -1,5 +1,6 @@
 import typing as tp
 
+from app.models import MozzarellaSKU
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -110,8 +111,10 @@ def download_last_packer_plan():
 class ScheduleParams:
     reconfiguration_color: str = "#ff0000"
     packer_color: str = "#f2dcdb"
+    white_color: str = "#ffffff"
 
     water_packer_x: tuple[int] | None = None
+    water_rubber_packer_x: int | None = None
     salt_packers_x: tuple[int, int] | None = None
 
 
@@ -129,10 +132,14 @@ class PackerParser:
 
     def update_schedule_params(self) -> None:
         water_df = self.df[self.df["label"] == "Линия плавления моцареллы в воде №1"]["x1"]
+        water_rubber_df = self.df[self.df["label"] == "Терка на мультиголове"]["x1"]
+
         salt_df = self.df[self.df["label"] == "Линия плавления моцареллы в рассоле №2"]["x1"]
 
-        if water_df.empty:
+        if water_df.empty and water_rubber_df.empty:
             self.params.water_packer_x = None
+        elif water_df.empty:
+            self.params.water_rubber_packer_x = water_rubber_df.iloc[0]
         else:
             x1 = water_df.iloc[0]
             self.params.water_packer_x = (
@@ -147,6 +154,44 @@ class PackerParser:
             x1 = salt_df.iloc[0]
             salt_x = self.df[(self.df["x1"] > x1) & (self.df["label"] == "Смена 1")]["x1"].min() + 3
             self.params.salt_packers_x = (salt_x, salt_x + 3)
+
+    def parse_rubber(self):
+        x1 = self.params.water_rubber_packer_x - 1
+        rubber_skus = db.session.query(MozzarellaSKU).filter_by(is_multihead_rubber=True).all()
+
+        df_total = self.df[self.df["x1"] == x1 + 1]
+        df_total = pd.concat([df_total[df_total.label.str.contains(re.escape(sku.name), case=False)] for sku in
+                              rubber_skus])
+
+        pattern = r'-\s*(\d+)\s*кг'
+        df_total['kg'] = df_total['label'].str.extract(pattern, expand=True).astype(int)
+        total_kg = df_total["kg"].sum()
+
+        pause_df = self.df[(self.df["x1"] == x1 + 2) & (self.df["color"] == self.params.reconfiguration_color)]
+        pause_time = (pause_df["y0"] - pause_df["x0"]).sum() + 1
+
+        reconfig_df = self.df[self.df["label"] == "переностройка терки (ножей) FAM"].iloc[0]
+        reconfig_time = reconfig_df["y0"] - reconfig_df["x0"]
+
+        result = []
+        for i, (_, row) in enumerate(df_total.iterrows()):
+            sku = next((sku for sku in rubber_skus if sku.name in row.label))
+            packing_info = {
+                "beg": row["x0"],
+                "end": row["y0"],
+                "batch_id": "-",
+                "total_time": round(row['kg'] / (sku.packing_speed or sku.collecting_speed) * 12) * 5,
+                "sku": sku,
+                "original_kg": row['kg'],
+                "pause": row['kg'] / total_kg * pause_time * 5,
+                "sku_name": sku.name,
+                "code": sku.code,
+                "packer": sku.packers[0].name
+            }
+            if i >= 1:
+                packing_info["pause"] += reconfig_time * 5
+            result.append(packing_info)
+        return result
 
     def parse_packings(self, line="water"):
         x_coordinates = self.params.water_packer_x if line == "water" else self.params.salt_packers_x
@@ -164,9 +209,6 @@ class PackerParser:
             reconfig_df = self.df[(self.df["x1"] == x) & (self.df["color"] == self.params.reconfiguration_color)]
 
             for _, row in batch_df[batch_df["is_int"]].iterrows():
-                # if row["y0"] - row["x0"] != 3:
-                #     continue
-
                 descr_df = batch_df[batch_df["x0"] == row["y0"]]
                 if descr_df.empty:
                     raise PackerParserException(f"Не удается считать варку с номером {row['label']}")
@@ -196,11 +238,6 @@ class PackerParser:
                 else:
                     packing_info[batch_id] = {"beg": beg, "end": end, "lines": [x], "packings": packings}
         return packing_info, pd.concat(extra_change_dfs)
-
-    # def filter_packer(self, packer_x: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-    #     packing_df = self.df[(self.df["x1"] == packer_x) & (self.df["color"] == self.params.packer_color)]
-    #     reconfig_df = self.df[(self.df["x1"] == packer_x) & (self.df["color"] == self.params.reconfiguration_color)]
-    #     return packing_df, reconfig_df
 
     @staticmethod
     def group_boiling_sku(df) -> pd.DataFrame:
@@ -299,7 +336,8 @@ class PackerParser:
 
     def parse_water(self) -> tp.Generator[pd.DataFrame, None, None]:
         if self.params.water_packer_x is None:
-            yield pd.DataFrame()
+            # yield pd.DataFrame()
+            yield pd.DataFrame(self.parse_rubber())
             return
 
         water_df = self.boiling_plan_df[self.boiling_plan_df["line"].apply(lambda x: x.name == LineName.WATER)]
