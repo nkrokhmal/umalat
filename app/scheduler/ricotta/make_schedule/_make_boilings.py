@@ -95,10 +95,16 @@ def _make_boilings(
 
         # -- Packing
 
+        packing_size = (
+            int(custom_round(a=packing_times[i], b=5, rounding="nearest_half_even", pre_round_precision=1)) // 5
+        )
+
         m.row(
             "packing",
             size=int(custom_round(a=packing_times[i], b=5, rounding="nearest_half_even", pre_round_precision=1)) // 5,
-            x=pumping.x[0] + 1,  # 5 minutes after pumping starts
+            x=pumping.x[0] + 1
+            if packing_size >= pumping.size[0] - 1
+            else pumping.y[0] - packing_size,  # 5 minutes after pumping starts
             label="/".join(
                 [f"{row['sku'].brand_name} {row['sku'].weight_netto}" for i, row in boiling_group_df.iterrows()]
             )

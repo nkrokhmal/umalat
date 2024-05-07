@@ -38,41 +38,41 @@ class Validator(ClassValidator):
 
         # - Validate pumping # todo next: mark, ask guys
 
-        # # -- Calculate current lag between pumping and packing
-        #
-        # current_lag = b1["packing"].y[0] - b1["pumping"].y[0]
-        # assert current_lag >= 0, "Packing should be after pumping"
-        # new_lag = current_lag + b2["packing"].size[0] - b1["pumping"].size[0]
-        # new_lag = max(1, new_lag)  # lag cannot be less than 1
+        # -- Calculate current lag between pumping and packing
+
+        current_lag = b1["packing"].y[0] - b1["pumping"].y[0]
+        assert current_lag >= 0, "Packing should be after pumping"
+        new_lag = current_lag + b2["packing"].size[0] - b1["pumping"].size[0]
+        new_lag = max(1, new_lag)  # lag cannot be less than 1
 
         # -- Calculate buffer tank distance to meet capacity requirements
 
-        # min_pumping_start_to_not_overfill_buffer_tank = 0
-        # left_kg = 1000 * 0.8  # buffer tank size with 20% reserve
-        # for is_first, is_last, packing in mark_ends([b2["packing"]] + list(reversed(b1["packing", True]))):
-        #     if packing.props["kg"] <= left_kg:
-        #         left_kg -= packing.props["kg"]
-        #         continue
-        #     else:
-        #         # finish here
-        #         min_pumping_start_to_not_overfill_buffer_tank = (
-        #             packing.y[0] if not is_first else b1["packing"].y[0] + b2["packing"].size[0]
-        #         ) - left_kg / packing.props["kg"] * packing.size[0]
-        #         min_pumping_start_to_not_overfill_buffer_tank = math.ceil(min_pumping_start_to_not_overfill_buffer_tank)
-        #         break
-        #
-        # min_distance_to_not_overfill_buffer_tank = max(
-        #     0, (min_pumping_start_to_not_overfill_buffer_tank - b2["pumping"].size[0] - b1["pumping"].y[0])
-        # )
-        #
-        # # -- Validate
-        #
-        # validate_disjoint_by_axis(
-        #     b1["pumping"],
-        #     b2["pumping"],
-        #     distance=max(min(3, new_lag - 1), min_distance_to_not_overfill_buffer_tank),
-        #     ordered=True,
-        # )
+        min_pumping_start_to_not_overfill_buffer_tank = 0
+        left_kg = 1000 * 0.8  # buffer tank size with 20% reserve
+        for is_first, is_last, packing in mark_ends([b2["packing"]] + list(reversed(b1["packing", True]))):
+            if packing.props["kg"] <= left_kg:
+                left_kg -= packing.props["kg"]
+                continue
+            else:
+                # finish here
+                min_pumping_start_to_not_overfill_buffer_tank = (
+                    packing.y[0] if not is_first else b1["packing"].y[0] + b2["packing"].size[0]
+                ) - left_kg / packing.props["kg"] * packing.size[0]
+                min_pumping_start_to_not_overfill_buffer_tank = math.ceil(min_pumping_start_to_not_overfill_buffer_tank)
+                break
+
+        min_distance_to_not_overfill_buffer_tank = max(
+            0, (min_pumping_start_to_not_overfill_buffer_tank - b2["pumping"].size[0] - b1["pumping"].y[0])
+        )
+
+        # -- Validate
+
+        validate_disjoint_by_axis(
+            b1["pumping"],
+            b2["pumping"],
+            distance=max(min(3, new_lag - 1), min_distance_to_not_overfill_buffer_tank),
+            ordered=True,
+        )
 
         # - Validate packing and pumping
 
