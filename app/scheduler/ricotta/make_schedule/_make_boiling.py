@@ -37,6 +37,26 @@ def _make_boilings(
 
     result = []
 
+    # - Calc packing times
+
+    left = sample_row["output_kg"] / 2
+    packing_time1 = 0
+    packing_time2 = 0
+
+    for i, row in boiling_group_df.iterrows():
+        if left > 1e-2:
+            if row["kg"] > left:
+                packing_time1 += left / row["sku"].packing_speed * 60
+                packing_time2 += (row["kg"] - left) / row["sku"].packing_speed * 60
+                left = 0
+            else:
+                packing_time1 += row["kg"] / row["sku"].packing_speed * 60
+                left -= row["kg"]
+        else:
+            packing_time2 += row["kg"] / row["sku"].packing_speed * 60
+
+    packing_times = [packing_time1, packing_time2]  # todo next: kolya: check parameters
+
     # -- Floculators
 
     for i in range(boiling_group_df.iloc[0]["floculators_num"]):
@@ -60,20 +80,11 @@ def _make_boilings(
             pouring = m.row("pouring", size=technology.pouring_time // 5).block
             m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
             m.row("lactic_acid", size=technology.lactic_acid_time // 5)
-            m.row("draw_whey", size=technology.drain_whey_time // 5)
+            m.row("heating_short", size=1)  # todo next: kolya: insert from model [@marklidenberg]
+            m.row(
+                "draw_whey", size=(technology.drain_whey_time - 5) // 5
+            )  # todo next: kolya: reduce by 5 minutes [@marklidenberg]
             m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
-
-        # - Draw_whey and dray_ricotta should not overlap
-
-        if len(m.root["floculator", True]) > 1:
-            b1, b2 = m.root["floculator", True]
-
-            try:
-                validate_disjoint_by_axis(b1["dray_ricotta"], b2["draw_whey"], ordered=True)
-            except AssertionError as e:
-                disposition = json.loads(str(e))["disposition"]
-
-                b2.props.update(x=[b2.props["x_rel"][0] + disposition, b2.x[1]])
 
         # -- Extra processing: salting, ingredient
 
@@ -84,16 +95,16 @@ def _make_boilings(
         # -- Pumping
 
         pumping = m.row(
-            "pumping", size=technology.pumping_time // 5 * boiling_group_df.iloc[0]["floculators_num"]
+            "pumping",
+            size=technology.pumping_time
+            // 5,  # todo next: kolya: fix parameters, 25 for non-ingredient, 30 for ingredient. Some formula using speeds? (2 ton/h) [@marklidenberg]
         ).block
 
         # -- Packing
 
-        packing_minutes = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in boiling_group_df.iterrows()])
-        packing_minutes = int(custom_round(a=packing_minutes, b=5, rounding="nearest_half_even", pre_round_precision=1))
         m.row(
             "packing",
-            size=packing_minutes // 5,
+            size=int(custom_round(a=packing_times[i], b=5, rounding="nearest_half_even", pre_round_precision=1)) // 5,
             x=pumping.x[0] + 1,  # 5 minutes after pumping starts
             label="/".join(
                 [f"{row['sku'].brand_name} {row['sku'].weight_netto}" for i, row in boiling_group_df.iterrows()]

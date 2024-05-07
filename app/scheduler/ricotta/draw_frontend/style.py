@@ -3,6 +3,7 @@ STYLE = {
     "pouring": {"text": lambda b: f"Набор сыворотки {int(b.props['whey_kg'])}кг", "color": "#00B050"},
     "heating": {"text": "Нагрев до 90 градусов", "color": "#E26B0A"},
     "lactic_acid": {"text": "Молочная кислота/выдерживание", "color": "#00B0F0"},
+    "heating_short": {"text": "", "color": "red"},
     "draw_whey": {"text": "Слив сыворотки", "color": "#FFC000"},
     "dray_ricotta": {
         "text": lambda b: f"Слив рикотты {int(b.props['output_kg'])}кг п/ф",
