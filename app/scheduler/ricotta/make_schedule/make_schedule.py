@@ -14,7 +14,7 @@ from utils_ak.numeric import custom_round
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.ricotta.make_schedule._make_boiling import _make_boiling
+from app.scheduler.ricotta.make_schedule._make_boiling import _make_boilings
 from app.scheduler.ricotta.to_boiling_plan import to_boiling_plan
 from app.scheduler.split_shifts_utils import split_shifts_by_time
 from app.scheduler.time_utils import cast_t
@@ -125,7 +125,7 @@ def make_schedule(
     for i, (idx, grp) in enumerate(boiling_plan_df.groupby("batch_id")):
         # - Prepare boiling
 
-        boiling = _make_boiling(grp, current_floculator_index=current_floculator_index)
+        boiling = _make_boilings(grp, floculator_num=current_floculator_index)
 
         # - Insert new boiling
 
@@ -226,7 +226,7 @@ def test():
     # - Make schedule
 
     schedule = make_schedule(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2023-09-23 Расписание рикотта.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-07 Расписание рикотта.xlsx"),
     )["schedule"]
 
     print(schedule)
