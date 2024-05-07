@@ -14,7 +14,7 @@ from utils_ak.numeric import custom_round
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.ricotta.make_schedule._make_boiling import _make_boilings
+from app.scheduler.ricotta.make_schedule._make_boilings import _make_boilings
 from app.scheduler.ricotta.to_boiling_plan import to_boiling_plan
 from app.scheduler.split_shifts_utils import split_shifts_by_time
 from app.scheduler.time_utils import cast_t
@@ -27,55 +27,56 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling__boiling(b1, b2):
         # - Validate main
+        validate_disjoint_by_axis(b1["pouring"], b2["pouring"], ordered=True)
+        validate_disjoint_by_axis(b1["pumping"], b2["pumping"], ordered=True)
+        validate_disjoint_by_axis(b1["packing"], b2["packing"], ordered=True)
 
-        f1, f2 = b1["floculator", True][-1], b2["floculator", True][0]
-        validate_disjoint_by_axis(f1["pouring"], f2["pouring"])
-        if f1.props["floculator_num"] == f2.props["floculator_num"]:
-            validate_disjoint_by_axis(f1["draw_whey"], f2["heating"])
-        if f1.props["drenator_num"] == f2.props["drenator_num"]:
-            validate_disjoint_by_axis(b1["extra_processing"], f2["dray_ricotta"], ordered=True)
+        if b1.props["floculator_num"] == b2.props["floculator_num"]:
+            validate_disjoint_by_axis(b1["draw_whey"], b2["heating"])
+        if b1.props["drenator_num"] == b2.props["drenator_num"]:
+            validate_disjoint_by_axis(b1["extra_processing"], b2["dray_ricotta"], ordered=True)
 
-        # - Validate pumping
+        # - Validate pumping # todo next: mark, ask guys
 
-        # -- Calculate current lag between pumping and packing
-
-        current_lag = b1["packing"].y[0] - b1["pumping"].y[0]
-        assert current_lag >= 0, "Packing should be after pumping"
-        new_lag = current_lag + b2["packing"].size[0] - b1["pumping"].size[0]
-        new_lag = max(1, new_lag)  # lag cannot be less than 1
+        # # -- Calculate current lag between pumping and packing
+        #
+        # current_lag = b1["packing"].y[0] - b1["pumping"].y[0]
+        # assert current_lag >= 0, "Packing should be after pumping"
+        # new_lag = current_lag + b2["packing"].size[0] - b1["pumping"].size[0]
+        # new_lag = max(1, new_lag)  # lag cannot be less than 1
 
         # -- Calculate buffer tank distance to meet capacity requirements
 
-        min_pumping_start_to_not_overfill_buffer_tank = 0
-        left_kg = 1000 * 0.8  # buffer tank size with 20% reserve
-        for is_first, is_last, packing in mark_ends([b2["packing"]] + list(reversed(b1["packing", True]))):
-            if packing.props["kg"] <= left_kg:
-                left_kg -= packing.props["kg"]
-                continue
-            else:
-                # finish here
-                min_pumping_start_to_not_overfill_buffer_tank = (
-                    packing.y[0] if not is_first else b1["packing"].y[0] + b2["packing"].size[0]
-                ) - left_kg / packing.props["kg"] * packing.size[0]
-                min_pumping_start_to_not_overfill_buffer_tank = math.ceil(min_pumping_start_to_not_overfill_buffer_tank)
-                break
-
-        min_distance_to_not_overfill_buffer_tank = max(
-            0, (min_pumping_start_to_not_overfill_buffer_tank - b2["pumping"].size[0] - b1["pumping"].y[0])
-        )
-
-        # -- Validate
-
-        validate_disjoint_by_axis(
-            b1["pumping"],
-            b2["pumping"],
-            distance=max(min(3, new_lag - 1), min_distance_to_not_overfill_buffer_tank),
-            ordered=True,
-        )
+        # min_pumping_start_to_not_overfill_buffer_tank = 0
+        # left_kg = 1000 * 0.8  # buffer tank size with 20% reserve
+        # for is_first, is_last, packing in mark_ends([b2["packing"]] + list(reversed(b1["packing", True]))):
+        #     if packing.props["kg"] <= left_kg:
+        #         left_kg -= packing.props["kg"]
+        #         continue
+        #     else:
+        #         # finish here
+        #         min_pumping_start_to_not_overfill_buffer_tank = (
+        #             packing.y[0] if not is_first else b1["packing"].y[0] + b2["packing"].size[0]
+        #         ) - left_kg / packing.props["kg"] * packing.size[0]
+        #         min_pumping_start_to_not_overfill_buffer_tank = math.ceil(min_pumping_start_to_not_overfill_buffer_tank)
+        #         break
+        #
+        # min_distance_to_not_overfill_buffer_tank = max(
+        #     0, (min_pumping_start_to_not_overfill_buffer_tank - b2["pumping"].size[0] - b1["pumping"].y[0])
+        # )
+        #
+        # # -- Validate
+        #
+        # validate_disjoint_by_axis(
+        #     b1["pumping"],
+        #     b2["pumping"],
+        #     distance=max(min(3, new_lag - 1), min_distance_to_not_overfill_buffer_tank),
+        #     ordered=True,
+        # )
 
         # - Validate packing and pumping
 
-        if b1.props["percent"] != b2.props["percent"]:
+        if b1.props["percent"] != b2.props["percent"]:  # todo next: mark, ask guys
             validate_disjoint_by_axis(b1["packing"], b2["pumping"], ordered=True)
 
     @staticmethod
@@ -84,13 +85,8 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
-        floculator = nth(
-            [f for f in b1["floculator", True] if f.props["floculator_num"] == b2.props["floculator_num"]],
-            0,
-            default=None,
-        )
-        if b2.props["cleaning_object"] == "floculator" and floculator:
-            validate_disjoint_by_axis(floculator["dray_ricotta"], b2, ordered=True)
+        if b2.props["cleaning_object"] == "floculator" and b1.props["floculator_num"] == b2.props["floculator_num"]:
+            validate_disjoint_by_axis(b1["dray_ricotta"], b2, ordered=True)
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -121,52 +117,30 @@ def make_schedule(
 
     # - Make boilings
 
-    current_floculator_index = 0
+    current_floculator_num = 0
+    current_drenator_num = 0
     for i, (idx, grp) in enumerate(boiling_plan_df.groupby("batch_id")):
         # - Prepare boiling
 
-        boiling = _make_boilings(grp, floculator_num=current_floculator_index)
+        boilings = _make_boilings(grp, first_floculator_num=current_floculator_num)
 
         # - Insert new boiling
 
-        m.block(
-            boiling,
-            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-            push_kwargs={"validator": Validator()},
-            floculator_num=i % 3 + 1,
-            drenator_num=i % 2 + 1,
-        )
-
-        current_floculator_index += grp.iloc[0]["floculators_num"]
-
-        # - Fix packing group if there is a overlap
-
-        if len(m.root.children) >= 2:
-            b1, b2 = m.root.children[-2:]
-
-            if b1.props["cls"] == "boiling" and b2.props["cls"] == "boiling":
-                # - Fix packing position
-
-                try:
-                    validate_disjoint_by_axis(b1["packing"], b2["packing"], ordered=True)
-                except AssertionError as e:
-                    disposition = json.loads(str(e))["disposition"]
-
-                    b2["packing"].props.update(x=[b2["packing"].props["x_rel"][0] + disposition, b2["packing"].x[1]])
-
-        # - Fix packing placement if packing is earlier than pumping
-
-        if boiling["packing"].y[0] <= boiling["pumping"].y[0]:
-            boiling["packing"].props.update(
-                x=[
-                    boiling["pumping"].props["x_rel"][0] + boiling["pumping"].size[0] - boiling["packing"].size[0] + 1,
-                    boiling["packing"].x[1],
-                ]
+        for j, boiling in enumerate(boilings):
+            m.block(
+                boiling,
+                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                push_kwargs={"validator": Validator()},
+                floculator_num=(current_floculator_num + j) % 3 + 1,
+                drenator_num=(current_drenator_num + j) % 2 + 1,
             )
+
+        current_floculator_num += len(boilings)
+        current_drenator_num += len(boilings)
 
     # - Add cleanings
 
-    for floculator_num in [floculator.props["floculator_num"] for floculator in m.root.iter(cls="floculator")][-3:]:
+    for floculator_num in [floculator.props["floculator_num"] for floculator in m.root.iter(cls="boiling")][-3:]:
         m.block(
             "cleaning",
             size=(12, 0),
@@ -226,7 +200,7 @@ def test():
     # - Make schedule
 
     schedule = make_schedule(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-07 Расписание рикотта.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-06 Расписание рикотта.xlsx"),
     )["schedule"]
 
     print(schedule)

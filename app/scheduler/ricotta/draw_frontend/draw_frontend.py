@@ -58,7 +58,7 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2023-09-23 Расписание рикотта.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-05 Расписание рикотта.xlsx"),
     )
 
     output["workbook"].save("test.xlsx")

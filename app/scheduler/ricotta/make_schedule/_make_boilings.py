@@ -20,8 +20,6 @@ warnings.filterwarnings("ignore")
 
 def _make_boilings(
     boiling_group_df: pd.DataFrame,
-    floculator_num: int,
-    drenator_num: int,
     **kwargs,
 ):
     # - Unfold boiling group params
@@ -67,30 +65,25 @@ def _make_boilings(
             absolute_batch_id=boiling_group_df.iloc[0]["absolute_batch_id"],
             whey_kg=boiling_group_df.iloc[0]["sum_weight_kg"] / boiling_group_df.iloc[0]["floculators_num"],
             kg=boiling_group_df["kg"].sum(),
+            output_kg=boiling_group_df.iloc[0]["output_kg"] / 2,  # one boiling is measured in 2 floculators
             **kwargs,
         )
 
-        with m.row(
-            "floculator",
-            push_func=add_push,
-            floculator_num=(floculator_num + i) % 3 + 1,
-            output_kg=boiling_group_df.iloc[0]["output_kg"] / 2,  # one boiling is measured in 2 floculators
-        ):
-            m.row("boiling_preparation", size=2)
-            pouring = m.row("pouring", size=technology.pouring_time // 5).block
-            m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
-            m.row("lactic_acid", size=technology.lactic_acid_time // 5)
-            m.row("heating_short", size=1)  # todo next: kolya: insert from model [@marklidenberg]
-            m.row(
-                "draw_whey", size=(technology.drain_whey_time - 5) // 5
-            )  # todo next: kolya: reduce by 5 minutes [@marklidenberg]
-            m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
+        m.row("boiling_preparation", size=2)
+        pouring = m.row("pouring", size=technology.pouring_time // 5).block
+        m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
+        m.row("lactic_acid", size=technology.lactic_acid_time // 5)
+        m.row("heating_short", size=1)  # todo next: kolya: insert from model [@marklidenberg]
+        m.row(
+            "draw_whey", size=(technology.drain_whey_time - 5) // 5
+        )  # todo next: kolya: reduce by 5 minutes [@marklidenberg]
+        m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
 
         # -- Extra processing: salting, ingredient
 
         with m.row("extra_processing"):
             m.row("salting", size=technology.salting_time // 5)
-            m.row("ingredient", size=technology.ingredient_time // 5)
+            m.row("ingredient", size=technology.ingredient_time // 5)  # todo next kolya: fix parameters
 
         # -- Pumping
 
@@ -127,9 +120,9 @@ def test():
         str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-07 Расписание рикотта.xlsx"),
     )
     print(boiling_plan_df)
-    boiling_group_df = boiling_plan_df.groupby("batch_id").get_group(1)
+    boiling_group_df = boiling_plan_df.groupby("batch_id").get_group(9)
 
-    print(_make_boilings(boiling_group_df, floculator_num=0, drenator_num=0))
+    print(_make_boilings(boiling_group_df))
 
 
 if __name__ == "__main__":
