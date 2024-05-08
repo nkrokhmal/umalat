@@ -170,8 +170,11 @@ class PackerParser:
         pause_df = self.df[(self.df["x1"] == x1 + 2) & (self.df["color"] == self.params.reconfiguration_color)]
         pause_time = (pause_df["y0"] - pause_df["x0"]).sum() + 1
 
-        reconfig_df = self.df[self.df["label"] == "переностройка терки (ножей) FAM"].iloc[0]
-        reconfig_time = reconfig_df["y0"] - reconfig_df["x0"]
+        reconfig_df = self.df[self.df["label"] == "переностройка терки (ножей) FAM"]
+        if reconfig_df.empty:
+            reconfig_time = 0
+        else:
+            reconfig_time = reconfig_df.iloc[0]["y0"] - reconfig_df.iloc[0]["x0"]
 
         result = []
         for i, (_, row) in enumerate(df_total.iterrows()):
