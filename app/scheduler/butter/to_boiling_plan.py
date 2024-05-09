@@ -77,6 +77,9 @@ def test():
     )
     print(df.iloc[0])
 
+    print("--")
+    print(df)
+
 
 if __name__ == "__main__":
     test()

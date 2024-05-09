@@ -71,10 +71,12 @@ def _wrap_child(child):
 
     if child.props["cls"] == "pasteurization":
         with m.block(
-            "pasteurization", push_func=add_push, x=(child.x[0], 0), boiling_model=child.props["boiling_model"]
+            "pasteurization",
+            push_func=add_push,
+            x=(child.x[0], 0),
+            boiling_model=child.props["boiling_model"],
         ):
             m.block("pasteurization_1", push_func=add_push, size=(child.size[0], 1), x=(0, 0))
-
             m.block("pasteurization_2", push_func=add_push, size=(child.size[0], 1), x=(0, 1))
     else:
         m.row(m.copy(child, with_props=True), push_func=add_push)
@@ -157,6 +159,7 @@ def wrap_frontend(
     start_time = cast_time(start_t)
 
     m.block(wrap_header(date=date, start_time=start_time, header="График работы маслоцеха"))
+
     with m.block(start_time=start_time, axis=1):
         m.block(_wrap_boiling_lines(schedule))
 
@@ -174,7 +177,7 @@ def test():
     print(
         wrap_frontend(
             str(get_repo_path() / "app/data/static/samples/by_department/butter/2023-09-03 План по варкам масло.xlsx")
-        )
+        )["frontend"]
     )
 
 

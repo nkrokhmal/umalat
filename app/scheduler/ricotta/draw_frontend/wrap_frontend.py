@@ -79,7 +79,7 @@ def wrap_line(
     for i in range(2):
         with m.block(f"drenator_{i + 1}", start_time=start_time, size=(0, 1)):
             for block in schedule.iter(
-                cls=lambda cls: cls in ["dray_ricotta", "salting", "ingredient"], drenator_num=i + 1
+                cls=lambda cls: cls in ["dray_ricotta", "salting", "ingredient", "manual_cleaning"], drenator_num=i + 1
             ):
                 m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 

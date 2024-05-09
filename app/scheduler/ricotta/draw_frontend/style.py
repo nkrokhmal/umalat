@@ -10,6 +10,7 @@ STYLE = {
         "color": "#948A54",
         "font_size": 9,
     },
+    "manual_cleaning": {"text": "Ручная мойка лишатричи", "color": "#92D050"},
     "draw_ricotta_break": {"text": "", "color": "white"},
     "salting": {"text": "Посолка/анализ", "color": "#D9D9D9"},
     "ingredient": {"text": "Внесение ингедиентов", "color": "yellow"},

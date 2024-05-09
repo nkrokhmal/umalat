@@ -27,6 +27,7 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling__boiling(b1, b2):
         # - Validate main
+
         validate_disjoint_by_axis(b1["pouring"], b2["pouring"], ordered=True)
         validate_disjoint_by_axis(b1["pumping"], b2["pumping"], ordered=True)
         validate_disjoint_by_axis(b1["packing"], b2["packing"], ordered=True)
@@ -34,9 +35,14 @@ class Validator(ClassValidator):
         if b1.props["floculator_num"] == b2.props["floculator_num"]:
             validate_disjoint_by_axis(b1["draw_whey"], b2["heating"])
         if b1.props["drenator_num"] == b2.props["drenator_num"]:
-            validate_disjoint_by_axis(b1["extra_processing"], b2["dray_ricotta"], ordered=True)
+            validate_disjoint_by_axis(
+                b1["extra_processing"],
+                b2["dray_ricotta"],
+                ordered=True,
+                distance=8 if b2.props["is_manual_cleaning_needed"] else 0,
+            )
 
-        # - Validate pumping # todo next: mark, ask guys
+        # - Validate pumping # todo next: mark, ask guys [@marklidenberg]
 
         # -- Calculate current lag between pumping and packing
 
@@ -48,7 +54,7 @@ class Validator(ClassValidator):
         # -- Calculate buffer tank distance to meet capacity requirements
 
         min_pumping_start_to_not_overfill_buffer_tank = 0
-        left_kg = 1000 * 0.8  # buffer tank size with 20% reserve
+        left_kg = 1000 * 0.5  # buffer tank size with 20% reserve
         for is_first, is_last, packing in mark_ends([b2["packing"]] + list(reversed(b1["packing", True]))):
             if packing.props["kg"] <= left_kg:
                 left_kg -= packing.props["kg"]
@@ -76,7 +82,7 @@ class Validator(ClassValidator):
 
         # - Validate packing and pumping
 
-        if b1.props["percent"] != b2.props["percent"]:  # todo next: mark, ask guys
+        if b1.props["percent"] != b2.props["percent"]:  # todo next: mark, ask guys [@marklidenberg]
             validate_disjoint_by_axis(b1["packing"], b2["pumping"], ordered=True)
 
     @staticmethod
@@ -127,13 +133,54 @@ def make_schedule(
         # - Insert new boiling
 
         for j, boiling in enumerate(boilings):
+            # - Check if manual cleaning is needed
+
+            # -- Get drenator objects
+
+            drenator_boilings = [
+                b for b in m.root["boiling", True] if b.props["drenator_num"] == (current_drenator_num + j) % 2 + 1
+            ]
+            drenator_cleanings = [
+                c
+                for c in m.root["manual_cleaning", True]
+                if c.props["drenator_num"] == (current_drenator_num + j) % 2 + 1
+            ]
+
+            # -- Get if manual cleaning is needed
+
+            is_manual_cleaning_needed = False
+            if drenator_cleanings:
+                drenator_boilings = [
+                    b for b in drenator_boilings if b["dray_ricotta"].x[0] > drenator_cleanings[-1].x[0]
+                ]
+
+            if drenator_boilings:
+                print(drenator_boilings[-1]["dray_ricotta"].x[0] - drenator_boilings[0]["dray_ricotta"].y[0])
+                is_manual_cleaning_needed = (
+                    drenator_boilings[-1]["dray_ricotta"].x[0] - drenator_boilings[0]["dray_ricotta"].y[0]
+                ) > cast_t("06:00")
+                print(is_manual_cleaning_needed)
+            # - Push block
+
             m.block(
                 boiling,
                 push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                 push_kwargs={"validator": Validator()},
                 floculator_num=(current_floculator_num + j) % 3 + 1,
                 drenator_num=(current_drenator_num + j) % 2 + 1,
+                is_manual_cleaning_needed=is_manual_cleaning_needed,
             )
+
+            # - Push manual cleaning if needed
+
+            if is_manual_cleaning_needed:
+                m.block(
+                    "manual_cleaning",
+                    size=(8, 0),
+                    x=(boiling["dray_ricotta"].x[0] - 8, 0),
+                    push_func=add_push,
+                    drenator_num=(current_drenator_num + j) % 2 + 1,
+                )
 
         current_floculator_num += len(boilings)
         current_drenator_num += len(boilings)
