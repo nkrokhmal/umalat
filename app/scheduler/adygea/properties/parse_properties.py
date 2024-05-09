@@ -44,8 +44,8 @@ def parse_schedule_file(wb_obj):
         df,
         "boilings",
         "boiling",
-        [time_index_row_nums[-1] + i for i in [1, 5, 9, 13]],
-        start_times[-1],
+        [time_index_row_nums[0] + i for i in [1, 5, 9, 13]],
+        start_times[0],
         length=100,
         split_func=_split_func,
         filter_=_filter_func,
@@ -57,21 +57,22 @@ def parse_schedule_file(wb_obj):
         df,
         "blocks",
         "block",
-        [time_index_row_nums[-1] + i for i in [1, 5, 9, 13]],
-        start_times[-1],
+        [time_index_row_nums[0] + i for i in [1, 5, 9, 13]],
+        start_times[0],
         length=100,
         split_func=_split_func,
     )
+
     return m.root
 
 
 def fill_properties(parsed_schedule):
     props = AdygeaProperties()
-
+    props.is_present = True
     # save boiling_model to parsed_schedule blocks
     boilings = list(sorted(parsed_schedule.iter(cls="boiling"), key=lambda boiling: boiling.y[0]))
     props.n_boilings = len(boilings)
-    props.end_time = cast_human_time(parsed_schedule.y[0])
+    props.end_time = cast_human_time(boilings[-1].y[0])
     return props
 
 
@@ -84,9 +85,7 @@ def parse_properties(filename):
 def test():
     print(
         parse_properties(
-            filename=str(
-                get_repo_path() / "app/data/static/samples/by_department/adygea/2023-09-03 Расписание милкпроджект.xlsx"
-            )
+            """/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved/2024-03-15 Расписание милкпроджект.xlsx"""
         )
     )
 
