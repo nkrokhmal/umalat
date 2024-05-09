@@ -1,3 +1,5 @@
+from typing import Optional
+
 from utils_ak.block_tree.block import Block
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.pushers import add_push, push, simple_push
@@ -11,6 +13,7 @@ from app.enum import LineName
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.mozzarella.make_schedule.make_schedule import make_schedule
+from app.scheduler.mozzarella.rubber.wrap_frontend import wrap_frontend as wrap_frontend_rubber
 from app.scheduler.time_utils import cast_time
 from app.scheduler.wrap_header import wrap_header
 
@@ -481,12 +484,13 @@ def wrap_extra_packings(extra_packings):
 
 
 def wrap_frontend(
-    boiling_plan: BoilingPlanLike,
+    boiling_plan: str,
     coolings_mode="first",
     saturate=True,
     normalization=True,
     validate=True,
     first_batch_ids_by_type={"mozzarella": 1},
+    rubber_start_time="07:00",
     # - Make basic_example schedule kwargs
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
     exact_start_time_line_name=None,
@@ -539,22 +543,43 @@ def wrap_frontend(
     m.block(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
 
     with m.block("melting", start_time=start_time, axis=1):
-        # m.block(wrap_multihead_cleanings(master))
-        if schedule["shifts"]:
-            m.block(wrap_shifts(schedule["shifts"]["water_meltings"]))
-        m.block(
-            wrap_meltings_1(
-                master,
-                LineName.WATER,
-                "Линия плавления моцареллы в воде №1",
-                coolings_mode=coolings_mode,
-            )
+        is_water_present = (
+            len(list(master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == LineName.WATER))) > 0
         )
 
-        # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
-        if schedule["shifts"]:
-            m.block(wrap_shifts(schedule["shifts"]["water_packings"]))
-        m.block(wrap_packings(master, LineName.WATER))
+        if not is_water_present:
+            m.col("stub", size=1)
+            m.block(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
+            m.col("stub", size=1)
+
+            m.block(
+                "template",
+                push_func=add_push,
+                x=(1, 1),
+                size=(3, 2),
+                text=f"Терка на мультиголове",
+                index_width=0,
+                start_time="00:00",
+            )
+        else:
+            # m.block(wrap_multihead_cleanings(master))
+            if schedule["shifts"]:
+                m.block(wrap_shifts(schedule["shifts"]["water_meltings"]))
+
+            m.block(
+                wrap_meltings_1(
+                    master,
+                    LineName.WATER,
+                    "Линия плавления моцареллы в воде №1",
+                    coolings_mode=coolings_mode,
+                )
+            )
+
+            # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
+            if schedule["shifts"]:
+                m.block(wrap_shifts(schedule["shifts"]["water_packings"]))
+
+            m.block(wrap_packings(master, LineName.WATER))
         if schedule["shifts"]:
             m.block(wrap_shifts(schedule["shifts"]["salt_meltings"]))
         m.block(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
@@ -573,10 +598,8 @@ def wrap_frontend(
 def test():
     print(
         wrap_frontend(
-            str(
-                get_repo_path()
-                / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
-            )
+            """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx""",
+            boiling_plan_rubber="""/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx""",
         )
     )
 

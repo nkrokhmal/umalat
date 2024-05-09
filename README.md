@@ -2,9 +2,9 @@
 ```sh
   docker-compose up -d
 ```
-Next
+Next next next blalala
 
-Запуск тестов
+Run all tests
 ```sh
   docker-compose -f docker-compose-test.yaml up --build
 ```

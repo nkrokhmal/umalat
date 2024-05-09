@@ -49,6 +49,7 @@ def download_mozzarella():
             "Откачка": sku.made_from_boilings[0].boiling_technologies[0].pumping_out_time,
             "Kод": sku.code,
             "Скорость плавления": sku.melting_speed,
+            "Терка мультиголовы": "Да" if sku.is_multihead_rubber else "Нет",
         }
         for sku in skus
     ]

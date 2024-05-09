@@ -33,20 +33,11 @@ def brynza_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         beg_time = form.beg_time.data
-        brynza_kg = form.brynza_kg.data
-        chanakh_kg = form.chanakh_kg.data
+        brynza_boilings = form.brynza_boilings.data
+        halumi_boilings = form.halumi_boilings.data
+        n_cheese_makers = form.n_cheese_makers.data
 
         skus = db.session.query(BrynzaSKU).all()
-        chanakh_output = [sku for sku in skus if sku.group.name == "Чанах"][0].made_from_boilings[0].output_kg
-        brynza_output = [sku for sku in skus if sku.group.name == "Брынза"][0].made_from_boilings[0].output_kg
-        if abs(brynza_kg - round_to_base(brynza_kg, brynza_output)) > 50:
-            raise BrynzaScheduleException("Значение входа брынзы превышает допустимую погрешность в 50 кг")
-
-        if abs(chanakh_kg - round_to_base(chanakh_kg, chanakh_output)) > 50:
-            raise BrynzaScheduleException("Значение входа чаназа превышает допустимую погрешность в 50 кг")
-
-        brynza_kg = round_to_base(brynza_kg, brynza_output) / brynza_output * 3150
-        chanakh_kg = round_to_base(chanakh_kg, chanakh_output) / chanakh_output * 3150
 
         data_dir = os.path.join(
             flask.current_app.config["DYNAMIC_DIR"],
@@ -56,8 +47,10 @@ def brynza_schedule():
         create_if_not_exists(data_dir)
 
         output = draw_frontend2(
-            brynza_kg=brynza_kg,
-            chanah_kg=chanakh_kg,
+            brynza_boilings=brynza_boilings,
+            halumi_boilings=halumi_boilings,
+            n_cheese_makers=n_cheese_makers,
+            start_time=beg_time,
             first_batch_ids_by_type={"brynza": form.batch_number.data},
             date=date,
             workbook=None,

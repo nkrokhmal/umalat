@@ -12,7 +12,6 @@ from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
 from app.enum import LineName
-from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.mozzarella.draw_frontend.style import STYLE
 from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
@@ -24,7 +23,7 @@ from app.utils.mozzarella.parse_schedule_json import prepare_schedule_json
 
 
 def draw_frontend(
-    boiling_plan: BoilingPlanLike,
+    boiling_plan: str,
     date: Optional[datetime] = None,
     workbook: Workbook = None,
     saturate=True,
@@ -35,6 +34,7 @@ def draw_frontend(
     exact_start_time_line_name=None,
     optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
+    rubber_start_time="07:00",
     start_configuration=None,
 ) -> dict:
     # - Wrap frontend
@@ -45,6 +45,7 @@ def draw_frontend(
         saturate=saturate,
         normalization=normalization,
         validate=validate,
+        rubber_start_time=rubber_start_time,
         # - Make schedule basic_example kwargs
         date=date,
         optimize_cleanings=optimize_cleanings,
@@ -89,13 +90,14 @@ def test():
     #     Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
     # )
 
-    fn = """/Users/marklidenberg/Desktop/2024.02.29 mozzarella fix/2024-03-01 План по варкам моцарелла.xlsx"""
+    fn = """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/С мультиголовой.xlsx"""
 
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
     )
     output = draw_frontend(
         boiling_plan=fn,
+        boiling_plan_rubber=fn,
         workbook=schedule_wb,
         start_times={LineName.SALT: "07:00", LineName.WATER: "08:00"},
         exact_start_time_line_name=LineName.SALT,
@@ -122,8 +124,8 @@ def test():
     schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
     # print(output["schedule"])
-    schedule_wb.save("schedule2.xlsx")
-    open_file_in_os("schedule2.xlsx")
+    schedule_wb.save("schedule3.xlsx")
+    open_file_in_os("schedule3.xlsx")
 
     print("Elapsed", time.time() - started_at)
 

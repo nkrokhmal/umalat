@@ -91,6 +91,12 @@ def draw_skus(wb, skus):
         cur_i += 1
 
 
+def draw_rubber(wb, skus: list[MozzarellaSKU]):
+    client = ExcelBlock(wb["Терка"])
+    for i, sku in enumerate(x for x in skus if x.is_multihead_rubber):
+        client.draw_row(i + 2, [sku.name, 0], set_border=False)
+
+
 def get_colour_by_name(sku_name, skus):
     sku = [x for x in skus if x.name == sku_name]
     if len(sku) > 0:
@@ -113,6 +119,8 @@ def draw_boiling_plan(df, df_extra, wb):
     draw_boiling_names(wb=wb)
     draw_extra_packing(wb=wb, df=df_extra, skus=skus)
     draw_form_factors(wb=wb, form_factors=form_factors)
+    draw_rubber(wb=wb, skus=skus)
+
     for sheet_name in ["Соль", "Вода"]:
         draw_skus_sheet(wb, sheet_name, data_sku)
 

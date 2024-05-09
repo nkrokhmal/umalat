@@ -40,4 +40,28 @@ STYLE = {
         "font_size": 16,
         "bold": True,
     },
+    # - Rubber
+    "rubber_packing_group": {"text": lambda b: f"{b.props['sku'].name} - {b.props['kg']} кг"},
+    "rubber_packing": {"text": lambda b: f"{b.props['sku'].name} - {b.props['sku'].packing_speed}/ч"},
+    "rubber_preparation": {
+        "text": "подготовка мультиголовы (мойка, дезинфекция) + терка FAM (мойка, дезинфекция)",
+        "color": "#E1EFDA",
+    },
+    "rubber_refurbishment": {
+        "text": "переностройка терки (ножей) FAM",
+        "color": "#E1EFDA",
+    },
+    "rubber_cleaning": {
+        "text": "мойка мультиголовы, терки FAM",
+        "color": "#E1EFDA",
+    },
+    "rubber_long_switch": {
+        "text": "земена газа и пленки",
+        "color": "red",
+        "font_size": 8,
+    },
+    "rubber_short_switch": {
+        "text": "",
+        "color": "red",
+    },
 }

@@ -170,14 +170,15 @@ class SkuPlanClient:
                     )
         end_row = cur_row - 1
         excel_client.colour = flask.current_app.config["COLORS"]["DefaultGray"][1:]
-        excel_client.merge_cells(
-            beg_row=beg_row,
-            end_row=end_row,
-            beg_col=CELLS["Boiling"].column,
-            end_col=CELLS["Boiling"].column,
-            value=sku_grouped.boiling.to_str(),
-            alignment=Alignment(horizontal="center", vertical="center", wrapText=True),
-        )
+        if beg_row <= end_row:
+            excel_client.merge_cells(
+                beg_row=beg_row,
+                end_row=end_row,
+                beg_col=CELLS["Boiling"].column,
+                end_col=CELLS["Boiling"].column,
+                value=sku_grouped.boiling.to_str(),
+                alignment=Alignment(horizontal="center", vertical="center", wrapText=True),
+            )
         excel_client.draw_cell(row=beg_row, col=CELLS["Volume"].column, value=sku_grouped.volume)
         formula_boiling_count = "{}".format(str(formula_group).strip("[]").replace(",", " +").replace("'", "").upper())
 

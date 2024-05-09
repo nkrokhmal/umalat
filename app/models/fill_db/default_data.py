@@ -58,6 +58,7 @@ def generate_group():
             "Черкесский": "ЧРКС",
             "Брынза": "БРНЗ",
             "Чанах": "ЧНХ",
+            "Халуми": "ХЛМ",
         }
         for name, short_name in groups.items():
             ff = Group(name=name, short_name=short_name)
@@ -97,7 +98,7 @@ def generate_mozzarella_lines():
     mozzarella_department = Department.query.filter_by(name="Моцарельный цех").first()
     for params in [
         (LineName.SALT, 180, 960, 8300, 1020, 30, 30),
-        (LineName.WATER, 240, 1100, 8300, 900, 30, 30),
+        (LineName.WATER, 240, 1200, 8300, 900, 30, 30),
     ]:
         line = MozzarellaLine(
             name=params[0],

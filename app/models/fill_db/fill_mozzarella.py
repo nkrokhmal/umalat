@@ -248,6 +248,7 @@ def fill_sku():
         "Время посолки",
         "Kод",
         "Скорость плавления",
+        "Терка мультиголовы",
     ]
 
     sku_data = df[columns]
@@ -266,6 +267,7 @@ def fill_sku():
             in_box=sku["Коробки"],
             melting_speed=sku["Скорость плавления"],
             code=sku["Kод"],
+            is_multihead_rubber=False if sku["Терка мультиголовы"] == "Нет" else True,
         )
 
         sku_packers = [x for x in packer if x.name in sku["Упаковщик"].split("/")]

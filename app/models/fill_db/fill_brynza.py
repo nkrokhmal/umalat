@@ -30,8 +30,8 @@ class BrynzaFiller(BaseFiller):
     def validate_params(self, df: pd.DataFrame) -> str | None:
         for data in [
             ValidateData(
-                columns=TECHNOLOGIES_COLUMNS + ["Процент"],
-                group_columns=["Процент"],
+                columns=TECHNOLOGIES_COLUMNS + ["Процент", "Название форм фактора"],
+                group_columns=["Процент", "Название форм фактора"],
                 msg="Технологии варки с одинаковым именем имеют разные параметры. Проверьте строки {} и {}",
             ),
         ]:

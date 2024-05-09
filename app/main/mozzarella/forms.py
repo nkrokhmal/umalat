@@ -46,6 +46,11 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default="08:00",
     )
+    rubber_beg_time = wtforms.StringField(
+        "Начало терки мультиголовы, если есть",
+        validators=[Optional()],
+        default="07:00",
+    )
     exact_melting_time_by_line = wtforms.SelectField(
         "Выберите линию, по которой время будет выставляться точно (по оставшейся - приблизительно)",
         validators=[Optional()],

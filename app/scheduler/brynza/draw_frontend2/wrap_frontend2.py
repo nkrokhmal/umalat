@@ -10,8 +10,9 @@ from app.scheduler.wrap_header import wrap_header
 
 
 def wrap_frontend2(
-    brynza_kg: int,
-    chanah_kg: int,
+    brynza_boilings: int,
+    halumi_boilings: int,
+    n_cheese_makers: int = 4,
     date=None,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
@@ -19,7 +20,11 @@ def wrap_frontend2(
     # - Get schedule
 
     output = make_schedule2(
-        brynza_kg=brynza_kg, chanah_kg=chanah_kg, start_time=start_time, first_batch_ids_by_type=first_batch_ids_by_type
+        brynza_boilings=brynza_boilings,
+        halumi_boilings=halumi_boilings,
+        n_cheese_makers=n_cheese_makers,
+        start_time=start_time,
+        first_batch_ids_by_type=first_batch_ids_by_type,
     )
     schedule = output["schedule"]
 
@@ -40,7 +45,7 @@ def wrap_frontend2(
 
     # - Make cheese makers
 
-    for cheese_maker_num in range(1, 5):
+    for cheese_maker_num in range(1, n_cheese_makers + 1):
         with m.block(f"cheese_maker", start_time=start_time):
             for boiling in schedule.iter(
                 cls="boiling",
@@ -59,7 +64,7 @@ def wrap_frontend2(
                         m.row(
                             "boiling_name_label",
                             size=boiling.size[0] - 6,
-                            boiling_label=f"{'Брынза' if boiling.props['group_name'] == 'Брынза' else 'Халуми'} 3,05 PCS(12-13)  3150кг",
+                            boiling_label=f"{boiling.props['group_name'] if boiling.props['group_name'] != 'Чанах' else 'Халуми'} 3,05 PCS(12-13)  3150кг",
                         )
                     with m.block(font_size=8):
                         m.row("pouring", size=boiling["pouring"].size[0])
@@ -88,7 +93,7 @@ def wrap_frontend2(
 
     # -- Saltings
 
-    for cheese_maker_num in range(1, 5):
+    for cheese_maker_num in range(1, n_cheese_makers + 1):
         with m.block(
             f"salting_cheese_maker",
             start_time=start_time,
@@ -121,11 +126,11 @@ def wrap_frontend2(
     # - Add template
 
     with m.block("template_block", index_width=1, push_func=add_push):
-        for cheese_maker_num in range(1, 5):
+        for cheese_maker_num in range(1, n_cheese_makers + 1):
             m.block(
                 "template",
                 push_func=add_push,
-                x=(1, 2 + 4 * (cheese_maker_num - 1)),
+                x=(1, 2 + n_cheese_makers * (cheese_maker_num - 1)),
                 size=(2, 2),
                 text=f"Сыроизготовитель №1 Poly {cheese_maker_num}",
                 color=(183, 222, 232),
@@ -133,7 +138,7 @@ def wrap_frontend2(
         m.block(
             "template",
             push_func=add_push,
-            x=(1, 20),
+            x=(1, 5 * n_cheese_makers + 2),
             size=(2, 2),
             text="ПОСОЛКА",
         )
@@ -146,8 +151,8 @@ def wrap_frontend2(
 
 
 def test():
-    print(wrap_frontend2(brynza_kg=10000, chanah_kg=10000)["schedule"])
-    print(wrap_frontend2(brynza_kg=10000, chanah_kg=10000)["frontend"])
+    print(wrap_frontend2(brynza_boilings=3, halumi_boilings=3)["schedule"])
+    print(wrap_frontend2(brynza_boilings=3, halumi_boilings=3)["frontend"])
 
 
 if __name__ == "__main__":

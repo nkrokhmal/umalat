@@ -13,8 +13,9 @@ from app.scheduler.frontend_utils import draw_excel_frontend
 
 
 def draw_frontend2(
-    brynza_kg: int,
-    chanah_kg: int,
+    brynza_boilings: int,
+    halumi_boilings: int,
+    n_cheese_makers: int = 4,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
     date: Optional[datetime] = None,
@@ -23,8 +24,9 @@ def draw_frontend2(
     # - Wrap frontend
 
     output = wrap_frontend2(
-        brynza_kg=brynza_kg,
-        chanah_kg=chanah_kg,
+        brynza_boilings=brynza_boilings,
+        halumi_boilings=halumi_boilings,
+        n_cheese_makers=n_cheese_makers,
         start_time=start_time,
         date=date,
         first_batch_ids_by_type=first_batch_ids_by_type,
@@ -47,8 +49,9 @@ def draw_frontend2(
 
 def test():
     output = draw_frontend2(
-        brynza_kg=10000,
-        chanah_kg=10000,
+        brynza_boilings=3,
+        halumi_boilings=4,
+        n_cheese_makers=4,
         start_time="07:00",
         date=datetime(2021, 1, 1),
     )
