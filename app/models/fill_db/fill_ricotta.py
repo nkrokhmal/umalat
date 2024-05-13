@@ -16,6 +16,7 @@ class RicottaFillerException(Exception):
 TECHNOLOGIES_COLUMNS: list[str] = [
     "Набор сыворотки",
     "Нагрев",
+    "Нагрев короткий",
     "молочная кислота/выдерживание",
     "слив сыворотки",
     "слив рикотты",
@@ -92,6 +93,7 @@ class RicottaFiller(BaseFiller):
                 name=self._boiling_technology_name(row),
                 pouring_time=row["Набор сыворотки"],
                 heating_time=row["Нагрев"],
+                heating_short_time=row["Нагрев короткий"],
                 lactic_acid_time=row["молочная кислота/выдерживание"],
                 drain_whey_time=row["слив сыворотки"],
                 dray_ricotta_time=row["слив рикотты"],

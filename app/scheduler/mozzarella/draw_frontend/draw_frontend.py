@@ -97,7 +97,6 @@ def test():
     )
     output = draw_frontend(
         boiling_plan=fn,
-        boiling_plan_rubber=fn,
         workbook=schedule_wb,
         start_times={LineName.SALT: "07:00", LineName.WATER: "08:00"},
         exact_start_time_line_name=LineName.SALT,

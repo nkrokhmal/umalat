@@ -64,21 +64,22 @@ def wrap_line(
 
     for i in range(3):
         with m.block(f"floculator_{i + 1}", start_time=start_time, size=(0, 2)):
-            for floculator in schedule.iter(cls="floculator", floculator_num=i + 1):
+            for boiling in schedule.iter(cls="boiling", floculator_num=i + 1):
                 with m.block("first_row", size=(0, 1), x=(0, 0), push_func=add_push):
-                    m.row(m.copy(floculator["boiling_preparation"], with_props=True, size=(2, 1)), push_func=add_push)
-                    m.row(m.copy(floculator["pouring"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.row(m.copy(boiling["boiling_preparation"], with_props=True, size=(2, 1)), push_func=add_push)
+                    m.row(m.copy(boiling["pouring"], with_props=True, size=(None, 1)), push_func=add_push)
                 with m.block("second_row", size=(0, 1), x=(0, 1), push_func=add_push):
-                    m.row(m.copy(floculator["heating"], with_props=True, size=(None, 1)), push_func=add_push)
-                    m.row(m.copy(floculator["lactic_acid"], with_props=True, size=(None, 1)), push_func=add_push)
-                    m.row(m.copy(floculator["draw_whey"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.row(m.copy(boiling["heating"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.row(m.copy(boiling["lactic_acid"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.row(m.copy(boiling["heating_short"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.row(m.copy(boiling["draw_whey"], with_props=True, size=(None, 1)), push_func=add_push)
 
     # -- Drenators
 
     for i in range(2):
         with m.block(f"drenator_{i + 1}", start_time=start_time, size=(0, 1)):
             for block in schedule.iter(
-                cls=lambda cls: cls in ["dray_ricotta", "salting", "ingredient"], drenator_num=i + 1
+                cls=lambda cls: cls in ["dray_ricotta", "salting", "ingredient", "manual_cleaning"], drenator_num=i + 1
             ):
                 m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 

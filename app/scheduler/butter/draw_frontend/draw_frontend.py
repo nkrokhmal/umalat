@@ -36,7 +36,7 @@ def draw_frontend(
         fn=None,
         wb=workbook,
     )
-    #
+
     # - Return
 
     return output

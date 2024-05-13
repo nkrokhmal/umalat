@@ -36,6 +36,7 @@ def download_ricotta() -> flask.Response:
                 "Скорость упаковки": sku.packing_speed,
                 "Набор сыворотки": technology.pouring_time,
                 "Нагрев": technology.heating_time,
+                "Нагрев короткий": technology.heating_short_time,
                 "молочная кислота/выдерживание": technology.lactic_acid_time,
                 "слив сыворотки": technology.drain_whey_time,
                 "слив рикотты": technology.dray_ricotta_time,

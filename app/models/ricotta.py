@@ -54,6 +54,7 @@ class RicottaBoilingTechnology(BoilingTechnology):
     id = mdb.Column(mdb.Integer, mdb.ForeignKey("boiling_technologies.id"), primary_key=True)
     pouring_time = mdb.Column(mdb.Integer)  # Набор сыворотки 6500 кг
     heating_time = mdb.Column(mdb.Integer)  # Нагрев до 90 градусов
+    heating_short_time = mdb.Column(mdb.Integer)
     lactic_acid_time = mdb.Column(mdb.Integer)  # молочная кислота/выдерживание
     drain_whey_time = mdb.Column(mdb.Integer)  # слив сыворотки
     dray_ricotta_time = mdb.Column(mdb.Integer)  # слив рикотты

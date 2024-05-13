@@ -10,13 +10,20 @@ from utils_ak.dict import dotdict
 from utils_ak.numeric.numeric import custom_round
 from utils_ak.pandas import mark_consecutive_groups
 
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.mascarpone.make_schedule.get_packing_switch_size import get_packing_swith_size
+from app.scheduler.ricotta.to_boiling_plan import to_boiling_plan
 
 
 warnings.filterwarnings("ignore")
 
 
-def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int, **kwargs):
+def _make_boiling(
+    boiling_group_df: pd.DataFrame,
+    floculator_num: int,
+    drenator_num: int,
+    **kwargs,
+):
     # - Unfold boiling group params
 
     sample_row = boiling_group_df.iloc[0]
@@ -48,7 +55,7 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
             "floculator",
             x=current_shift,
             push_func=add_push,
-            floculator_num=(current_floculator_index + i) % 3 + 1,
+            floculator_num=(floculator_num + i) % 3 + 1,
             output_kg=boiling_group_df.iloc[0]["output_kg"] / 2,  # one boiling is measured in 2 floculators
         ):
             m.row("boiling_preparation", size=2)
@@ -95,3 +102,22 @@ def _make_boiling(boiling_group_df: pd.DataFrame, current_floculator_index: int,
     )
 
     return m.root
+
+
+def test():
+
+    pd.set_option("display.max_rows", 500)
+    pd.set_option("display.max_columns", 500)
+    pd.set_option("display.width", 1000)
+
+    boiling_plan_df = to_boiling_plan(
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-07 Расписание рикотта.xlsx"),
+    )
+    print(boiling_plan_df)
+    boiling_group_df = boiling_plan_df.groupby("batch_id").get_group(1)
+
+    print(_make_boiling(boiling_group_df, floculator_num=0, drenator_num=0))
+
+
+if __name__ == "__main__":
+    test()
