@@ -73,9 +73,9 @@ def _make_boilings(
         pouring = m.row("pouring", size=technology.pouring_time // 5).block
         m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
         m.row("lactic_acid", size=technology.lactic_acid_time // 5)
-        m.row("heating_short", size=1)  # todo next: kolya: insert from model [@marklidenberg]
+        m.row("heating_short", size=technology.heating_short_time // 5)
         m.row(
-            "draw_whey", size=(technology.drain_whey_time - 5) // 5
+            "draw_whey", size=technology.drain_whey_time // 5
         )  # todo next: kolya: reduce by 5 minutes [@marklidenberg]
         m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
 
