@@ -214,6 +214,9 @@ class PackerParser:
             for _, row in batch_df[batch_df["is_int"]].iterrows():
                 descr_df = batch_df[batch_df["x0"] == row["y0"]]
                 if descr_df.empty:
+                    descr_df = batch_df[batch_df["x0"] == row["y0"] - 1]
+
+                if descr_df.empty:
                     raise PackerParserException(f"Не удается считать варку с номером {row['label']}")
 
                 beg, end = row["x0"], descr_df.iloc[0]["y0"]
