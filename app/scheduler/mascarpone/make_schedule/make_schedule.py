@@ -196,7 +196,7 @@ def make_schedule(
         current_non_cream_group_number = 1
         current_tub_num = 1  # 1 or 2
 
-        for is_first, is_last, (prev_indexed_grp, indexed_grp) in mark_ends(
+        for is_first, is_last, (prev_indexed_grp, indexed_grp) in mark_ends( # todo next: rename is_first -> is_first_in_group
             pairwise(
                 boiling_plan_df1.groupby("group_id"),
                 add_prefix=True,
@@ -216,9 +216,9 @@ def make_schedule(
                 else prev_grp.iloc[0]["semifinished_group"] != grp.iloc[0]["semifinished_group"]
                 or prev_grp.iloc[0]["block_id"] != grp.iloc[0]["block_id"]
             )
-            prev_group = None if is_first else prev_grp.iloc[0]["semifinished_group"]
-            group = None if is_last else grp.iloc[0]["semifinished_group"]
-            is_cleaning_needed = False if is_first else prev_grp.iloc[0]["washing"]
+            prev_group = None if is_first else prev_grp.iloc[0]["semifinished_group"] # todo next: rename
+            group = None if is_last else grp.iloc[0]["semifinished_group"]  # todo next: rename
+            is_cleaning_needed = False if is_first else prev_grp.iloc[0]["washing"] # todo next: нет моек из плана в расписании
 
             is_mascarpone_filled = (
                 (current_group_count >= 8 + 1 and current_group_count % 8 == 1)
@@ -236,7 +236,7 @@ def make_schedule(
                 current_group_count = 1
 
             if is_new_group or is_mascarpone_filled:
-                current_group_number += 1
+                current_group_number += 1 # в одной группе не может быть больше 8 варок маскарпоне
 
                 if prev_group != "cream" and group != "cream":
                     current_non_cream_group_number += 1
