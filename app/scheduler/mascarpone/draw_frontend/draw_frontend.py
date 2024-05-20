@@ -18,6 +18,7 @@ def draw_frontend(
     date: Optional[datetime] = None,
     workbook: Workbook = None,
     add_cleaning_after_eight_mascarpone_boilings: bool = False,
+    cream_cheese_batch_number: Optional[int] = 1,
 ) -> dict:
     # - Wrap frontend
 
@@ -27,6 +28,7 @@ def draw_frontend(
         first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,
         add_cleaning_after_eight_mascarpone_boilings=add_cleaning_after_eight_mascarpone_boilings,
+        cream_cheese_batch_number=cream_cheese_batch_number,
     )
 
     # - Draw frontend
@@ -50,6 +52,7 @@ def test():
         "/Users/marklidenberg/Desktop/2024.01.09 fix mascarpone/2024-01-10 План по варкам маскарпоне.xlsx",
         # "/Users/marklidenberg/Downloads/2023-12-24 План по варкам маскарпоне.xlsx",
         start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:00"},
+        cream_cheese_batch_number=15
     )
 
     output["workbook"].save("test.xlsx")

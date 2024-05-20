@@ -3,10 +3,10 @@ def boiling_header_text(b):
         return f"Сливки {int(b.props['percent'])}% {int(b.props['total_input_kg'])}кг"
     elif b.props["semifinished_group"] == "cream_cheese":
         litres = int(sum(boiling.props["input_kg"] for boiling in b.props["boilings"]))
-        return f"Кремчиз/{litres}л партия {b.props['batch_number']}"
+        return f"Кремчиз/{litres}л партия {b.props['month_batch_number']}"
     elif b.props["semifinished_group"] == "robiola":
         litres = int(sum(boiling.props["input_kg"] for boiling in b.props["boilings"]))
-        return f"Робиола/{litres}л партия {b.props['batch_number']}"
+        return f"Робиола/{litres}л партия {b.props['month_batch_number']}"
     elif b.props["semifinished_group"] == "cottage_cheese":
         litres = int(sum(boiling.props["input_kg"] for boiling in b.props["boilings"]))
         return f"Творожный/{litres}л партия {b.props['batch_number']}"

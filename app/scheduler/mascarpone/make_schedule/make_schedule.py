@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 import pandas as pd
 
@@ -153,6 +154,7 @@ def make_schedule(
     start_times_by_line: dict[str, str] = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     add_cleaning_after_eight_mascarpone_boilings: bool = False,
+    cream_cheese_batch_number: Optional[int] = 1,
 ) -> dict:
     # - Get boiling plan
 
@@ -161,6 +163,11 @@ def make_schedule(
     # - Init block maker
 
     m = BlockMaker("schedule")
+
+    # - Set cream_cheese_batch_number
+
+    cream_cheese_month_batch_number = cream_cheese_batch_number
+    cream_cheese_day_batch_number = 0
 
     # - Make schedule by lines
 
@@ -472,6 +479,8 @@ def make_schedule(
                     line=line,
                     batch_number=grp.iloc[0]["batch_number"],
                 )
+                cream_cheese_month_batch_number += 1
+                cream_cheese_day_batch_number += 1
 
             elif grp.iloc[0]["semifinished_group"] != "mascarpone":
                 m.block(
@@ -540,7 +549,12 @@ def make_schedule(
 
     # - Return result
 
-    return {"schedule": m.root, "boiling_plan_df": boiling_plan_df}
+    additional_props = {
+        "cream_cheese_month_batch_number": cream_cheese_month_batch_number,
+        "cream_cheese_day_batch_number": cream_cheese_day_batch_number,
+    }
+
+    return {"schedule": m.root, "boiling_plan_df": boiling_plan_df, 'additional_props': additional_props}
 
 
 def test():
