@@ -145,7 +145,7 @@ class Validator(ClassValidator):
         if b1.props["contour"] == b2.props["contour"]:
             validate_disjoint_by_axis(b1, b2, distance=1, ordered=b1.props["line"] == b2.props["line"])
 
-        if b2.props["cleaning_object"] == "heat_exchanger":
+        if b2.props["cleaning_object"] == "heat_exchanger" and b1.props["contour"] == b2.props["contour"]:
             validate_disjoint_by_axis(b1, b2, distance=1, ordered=True)
 
 
@@ -324,6 +324,20 @@ def make_schedule(
                     line=line,
                 )
 
+            current_block_id = grp.iloc[0]["block_id"] if grp is not None else None
+            prev_block_id = prev_grp.iloc[0]["block_id"] if prev_grp is not None else None
+            if (current_block_id is not None and prev_block_id is not None) and current_block_id != prev_block_id:
+                if line == "Кремчиз":
+                    m.block(
+                        "cleaning",
+                        size=(7, 0),
+                        push_func=AxisPusher(start_from="last_beg", start_shift=0),
+                        push_kwargs={"validator": Validator()},
+                        cleaning_object="heat_exchanger",
+                        contour="2",
+                        line=line,
+                    )
+
             if is_last:
                 # last element
                 continue
@@ -340,6 +354,7 @@ def make_schedule(
                 weight_netto=grp.iloc[0]["sku"].weight_netto,
                 name=grp.iloc[0]["sku"].name,
                 block_id=grp.iloc[0]["block_id"],
+                prev_grp=prev_grp,
             )
 
             # - Insert packing_switch if needed
@@ -479,6 +494,7 @@ def make_schedule(
                     boilings=grp["boiling"].tolist(),
                     line=line,
                     batch_number=grp.iloc[0]["batch_number"],
+                    month_batch_number=cream_cheese_month_batch_number
                 )
                 cream_cheese_month_batch_number += 1
                 cream_cheese_day_batch_number += 1

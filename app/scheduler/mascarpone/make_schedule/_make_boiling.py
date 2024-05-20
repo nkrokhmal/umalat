@@ -112,7 +112,6 @@ def _make_boiling(boiling_group_df, **kwargs):
             packing_size = int(custom_round(packing_size, 5, "ceil", pre_round_precision=1))
             packing_m.row("packing", size=packing_size // 5, push_func=stack_push, weight_netto=current_weight)
 
-            previous_weight = current_weight
     packing_group = packing_m.root["packing_group"]
 
     # - Make other
