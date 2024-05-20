@@ -16,6 +16,8 @@ warnings.filterwarnings("ignore")
 def _make_boiling(boiling_group_df, **kwargs):
     # - Unfold boiling group params
 
+    prev_grp = kwargs.get("prev_grp", None)
+
     sample_row = boiling_group_df.iloc[0]
 
     boiling_model = sample_row["boiling"]
@@ -95,11 +97,11 @@ def _make_boiling(boiling_group_df, **kwargs):
 
         # - Add packings
 
-        previous_weight = None
+        previous_weight = prev_grp.iloc[0]['weight_netto'] if prev_grp is not None else None
         for i, grp in boiling_group_df.groupby("weight_group_id"):
             current_weight = grp.iloc[0]["weight_netto"]
 
-            if previous_weight and current_weight != previous_weight:
+            if previous_weight and current_weight != previous_weight and {previous_weight, current_weight} != {0.14, 0.18}:
                 packing_m.row(
                     "packing_switch",
                     size=get_packing_swith_size(weight_netto1=previous_weight, weight_netto2=current_weight),
