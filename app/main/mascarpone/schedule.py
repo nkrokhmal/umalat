@@ -14,18 +14,26 @@ from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 
 
-BATCH_TYPES = ["mascarpone", "cream_cheese", "robiola", "cottage_cheese", "cream"]
+BATCH_TYPES = [
+    "mascarpone",
+    "cream_cheese",
+    "robiola",
+    "cottage_cheese",
+    "cream",
+]
 
 
 @main.route("/mascarpone_schedule", methods=["GET", "POST"])
 @flask_login.login_required
 def mascarpone_schedule():
     form = ScheduleForm(flask.request.form)
+    additional_props = {}
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         beg_time_mascarpone = form.beg_mascarpone_time.data
         beg_time_cream_cheese = form.beg_cream_cheese_time.data
         add_washing = form.add_washing
+        cream_cheese_batch_number = form.cream_cheese_batch_number.data
 
         # validate time
         time_validator(form, form.beg_mascarpone_time)
@@ -66,9 +74,14 @@ def mascarpone_schedule():
             date=date,
             workbook=wb,
             add_cleaning_after_eight_mascarpone_boilings=add_washing,
+            cream_cheese_batch_number=cream_cheese_batch_number,
         )
 
         schedule, schedule_wb = output["schedule"], output["workbook"]
+
+        # - Get additional props
+
+        additional_props["cream_cheese_day_batch_number"] = output.get("additional_props", {}).get("cream_cheese_day_batch_number", 1)
 
         write_metadata(schedule_wb, json.dumps({"first_batch_ids": first_batch_ids_by_type, "date": str(date)}))
 
@@ -88,14 +101,17 @@ def mascarpone_schedule():
 
     form.date.data = datetime.today() + timedelta(days=1)
 
+    cream_cheese_day_batch_number = additional_props.get("cream_cheese_day_batch_number", 1)
+
     for batch_type in BATCH_TYPES:
+        term = cream_cheese_day_batch_number if batch_type == "cream_cheese" else 1
         getattr(form, f"{batch_type}_batch_number").data = (
             BatchNumber.last_batch_number(
                 date=datetime.today() + timedelta(days=1),
                 department_name=DepartmentName.MASCARPONE,
                 group=batch_type,
             )
-            + 1
+            + term
         )
 
     return flask.render_template("mascarpone/schedule.html", form=form, filename=None)

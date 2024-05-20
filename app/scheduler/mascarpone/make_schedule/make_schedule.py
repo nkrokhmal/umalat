@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 import pandas as pd
 
@@ -144,7 +145,7 @@ class Validator(ClassValidator):
         if b1.props["contour"] == b2.props["contour"]:
             validate_disjoint_by_axis(b1, b2, distance=1, ordered=b1.props["line"] == b2.props["line"])
 
-        if b2.props["cleaning_object"] == "heat_exchanger":
+        if b2.props["cleaning_object"] == "heat_exchanger" and b1.props["contour"] == b2.props["contour"]:
             validate_disjoint_by_axis(b1, b2, distance=1, ordered=True)
 
 
@@ -153,6 +154,7 @@ def make_schedule(
     start_times_by_line: dict[str, str] = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
     add_cleaning_after_eight_mascarpone_boilings: bool = False,
+    cream_cheese_batch_number: Optional[int] = 1,
 ) -> dict:
     # - Get boiling plan
 
@@ -161,6 +163,11 @@ def make_schedule(
     # - Init block maker
 
     m = BlockMaker("schedule")
+
+    # - Set cream_cheese_batch_number
+
+    cream_cheese_month_batch_number = cream_cheese_batch_number
+    cream_cheese_day_batch_number = 0
 
     # - Make schedule by lines
 
@@ -189,7 +196,7 @@ def make_schedule(
         current_non_cream_group_number = 1
         current_tub_num = 1  # 1 or 2
 
-        for is_first, is_last, (prev_indexed_grp, indexed_grp) in mark_ends(
+        for is_first, is_last, (prev_indexed_grp, indexed_grp) in mark_ends( # todo next: rename is_first -> is_first_in_group
             pairwise(
                 boiling_plan_df1.groupby("group_id"),
                 add_prefix=True,
@@ -209,9 +216,9 @@ def make_schedule(
                 else prev_grp.iloc[0]["semifinished_group"] != grp.iloc[0]["semifinished_group"]
                 or prev_grp.iloc[0]["block_id"] != grp.iloc[0]["block_id"]
             )
-            prev_group = None if is_first else prev_grp.iloc[0]["semifinished_group"]
-            group = None if is_last else grp.iloc[0]["semifinished_group"]
-            is_cleaning_needed = False if is_first else prev_grp.iloc[0]["washing"]
+            prev_group = None if is_first else prev_grp.iloc[0]["semifinished_group"] # todo next: rename
+            group = None if is_last else grp.iloc[0]["semifinished_group"]  # todo next: rename
+            is_cleaning_needed = False if is_first else prev_grp.iloc[0]["washing"] # todo next: нет моек из плана в расписании
 
             is_mascarpone_filled = (
                 (current_group_count >= 8 + 1 and current_group_count % 8 == 1)
@@ -229,7 +236,7 @@ def make_schedule(
                 current_group_count = 1
 
             if is_new_group or is_mascarpone_filled:
-                current_group_number += 1
+                current_group_number += 1 # в одной группе не может быть больше 8 варок маскарпоне
 
                 if prev_group != "cream" and group != "cream":
                     current_non_cream_group_number += 1
@@ -317,6 +324,20 @@ def make_schedule(
                     line=line,
                 )
 
+            current_block_id = grp.iloc[0]["block_id"] if grp is not None else None
+            prev_block_id = prev_grp.iloc[0]["block_id"] if prev_grp is not None else None
+            if (current_block_id is not None and prev_block_id is not None) and current_block_id != prev_block_id:
+                if line == "Кремчиз":
+                    m.block(
+                        "cleaning",
+                        size=(7, 0),
+                        push_func=AxisPusher(start_from="last_beg", start_shift=0),
+                        push_kwargs={"validator": Validator()},
+                        cleaning_object="heat_exchanger",
+                        contour="2",
+                        line=line,
+                    )
+
             if is_last:
                 # last element
                 continue
@@ -331,7 +352,9 @@ def make_schedule(
                 input_kg=grp.iloc[0]["input_kg"],
                 percent=grp.iloc[0]["boiling"].percent,
                 weight_netto=grp.iloc[0]["sku"].weight_netto,
+                name=grp.iloc[0]["sku"].name,
                 block_id=grp.iloc[0]["block_id"],
+                prev_grp=prev_grp,
             )
 
             # - Insert packing_switch if needed
@@ -471,7 +494,10 @@ def make_schedule(
                     boilings=grp["boiling"].tolist(),
                     line=line,
                     batch_number=grp.iloc[0]["batch_number"],
+                    month_batch_number=cream_cheese_month_batch_number
                 )
+                cream_cheese_month_batch_number += 1
+                cream_cheese_day_batch_number += 1
 
             elif grp.iloc[0]["semifinished_group"] != "mascarpone":
                 m.block(
@@ -540,7 +566,12 @@ def make_schedule(
 
     # - Return result
 
-    return {"schedule": m.root, "boiling_plan_df": boiling_plan_df}
+    additional_props = {
+        "cream_cheese_month_batch_number": cream_cheese_month_batch_number,
+        "cream_cheese_day_batch_number": cream_cheese_day_batch_number,
+    }
+
+    return {"schedule": m.root, "boiling_plan_df": boiling_plan_df, 'additional_props': additional_props}
 
 
 def test():
