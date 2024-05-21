@@ -46,7 +46,7 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule_mascarpone.xlsx"),
         start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:00"},
         first_batch_ids_by_type={
             "cream": 1,

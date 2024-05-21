@@ -81,7 +81,10 @@ class Validator(ClassValidator):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        if b2.props["cleaning_object"] in ["pasteurizer", "separator"] and "separation" in b1.children_by_cls:
+        if (
+            b2.props["cleaning_object"] in ["pasteurizer", "separator", "heat_exchanger"]
+            and "separation" in b1.children_by_cls
+        ):
             validate_disjoint_by_axis(b1["separation"], b2, ordered=True)
 
         if (
@@ -144,8 +147,8 @@ class Validator(ClassValidator):
         if b1.props["contour"] == b2.props["contour"]:
             validate_disjoint_by_axis(b1, b2, distance=1, ordered=b1.props["line"] == b2.props["line"])
 
-        if b2.props["cleaning_object"] == "heat_exchanger":
-            validate_disjoint_by_axis(b1, b2, distance=1, ordered=True)
+            if b2.props["cleaning_object"] == "heat_exchanger":
+                validate_disjoint_by_axis(b1, b2, distance=1, ordered=True)
 
 
 def make_schedule(
@@ -306,14 +309,15 @@ def make_schedule(
                         contour="1",
                         line=line,
                     )
-                elif is_new_batch:
+
+                if is_new_batch:
                     m.push_row(
                         "cleaning",
                         size=7,
                         push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                         push_kwargs={"validator": Validator()},
-                        cleaning_object="cream_cheese_tub",
-                        contour="1",
+                        cleaning_object="heat_exchanger",
+                        contour="2",
                         line=line,
                     )
 
