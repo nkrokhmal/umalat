@@ -13,9 +13,12 @@ from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 
 def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"adygea": 1}):
-    """
-    :param wb_obj: str or openpyxl.Workbook
-    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
+    """Считать файл плана варок в датафрейм
+
+    Может читать и файл расписания, т.к. там там обычно есть лист с планом варок
+
+    :param boiling_plan_source: str or openpyxl.Workbook
+    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
     """
 
     if isinstance(wb_obj, pd.DataFrame):

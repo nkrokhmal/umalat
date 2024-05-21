@@ -17,9 +17,12 @@ def to_boiling_plan(
     boiling_plan_source: BoilingPlanLike,
     first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
 ) -> pd.DataFrame:
-    """
+    """Считать файл плана варок в датафрейм
+
+    Может читать и файл расписания, т.к. там там обычно есть лист с планом варок
+
     :param boiling_plan_source: str or openpyxl.Workbook
-    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg'])
+    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
     """
 
     if isinstance(boiling_plan_source, pd.DataFrame):
