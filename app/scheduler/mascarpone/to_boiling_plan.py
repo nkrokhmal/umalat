@@ -1,14 +1,6 @@
-from typing import Union
-
 import pandas as pd
 
-from openpyxl import Workbook
-from utils_ak.builtin import delistify
-from utils_ak.openpyxl.openpyxl_tools import cast_workbook
-from utils_ak.pandas import mark_consecutive_groups
-
 from app.lessmore.utils.get_repo_path import get_repo_path
-from app.models import MascarponeSKU, cast_model
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.calc_absolute_batch_id import calc_absolute_batch_id
 from app.utils.mascarpone.boiling_plan_read import BoilingPlanReader
@@ -48,16 +40,15 @@ def to_boiling_plan(
 
 
 def test():
+
+    df = to_boiling_plan(
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/2024-05-21 Расписание маскарпоне.xlsx")
+    )
+    print(df.iloc[0])
+    print("-" * 100)
     pd.set_option("display.max_rows", 500)
     pd.set_option("display.max_columns", 500)
     pd.set_option("display.width", 1000)
-    df = to_boiling_plan(
-        # str(
-        #     get_repo_path()
-        #     / "app/data/static/samples/by_department/mascarpone/2023-09-12 Расписание маскарпоне (2).xlsx"
-        # )
-        "/Users/marklidenberg/Desktop/2023.12.23 Маскарпоне и брынза/mascarpone_example.xlsx",
-    )
     print(df)
 
 

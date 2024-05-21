@@ -265,14 +265,23 @@ def to_boiling_plan(
     df["batch_id"] = df["group_id"]
     df["boiling_id"] = df["group_id"]  # boiling_id is the same as batch_id
     df["batch_type"] = "mozzarella"
-    df = calc_absolute_batch_id(df, first_batch_ids_by_type)
+    df["absolute_batch_id"] = calc_absolute_batch_id(df, first_batch_ids_by_type)
     return df
 
 
 def test():
-    df = to_boiling_plan(str("/Users/arsenijkadaner/Desktop/моцарелла/2023-11-25 План по варкам моцарелла.xlsx"))
-    print(df["batch_id"])
+    df = to_boiling_plan(
+        str(
+            get_repo_path()
+            / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
+        )
+    )
     print(df.iloc[0])
+    print("-" * 100)
+    pd.set_option("display.max_rows", 500)
+    pd.set_option("display.max_columns", 500)
+    pd.set_option("display.width", 1000)
+    print(df)
 
 
 if __name__ == "__main__":
