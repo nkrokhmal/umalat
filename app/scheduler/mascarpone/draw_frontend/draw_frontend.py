@@ -50,8 +50,8 @@ def test():
         start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:00"},
     )
 
-    output["workbook"].save("/tmp/test_mozzarella.xlsx")
-    open_file_in_os("/tmp/test_mozzarella.xlsx")
+    output["workbook"].save("/tmp/schedule_mascarpone.xlsx")
+    open_file_in_os("/tmp/schedule_mascarpone.xlsx")
 
 
 if __name__ == "__main__":

@@ -117,9 +117,8 @@ def test():
     schedule_df = prepare_schedule_json(schedule_json, cleanings)
     schedule_wb = draw_boiling_plan_merged(schedule_df, output["workbook"])
 
-    # print(output["schedule"])
-    schedule_wb.save("schedule3.xlsx")
-    open_file_in_os("schedule3.xlsx")
+    schedule_wb.save("/tmp/schedule_mozzarella.xlsx")
+    open_file_in_os("/tmp/schedule_mozzarella.xlsx")
 
     print("Elapsed", time.time() - started_at)
 

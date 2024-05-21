@@ -244,14 +244,7 @@ def make_schedule(
 
 
 def test():
-    print(
-        make_schedule(
-            str(
-                get_repo_path()
-                / "app/data/static/samples/by_department/adygea/2023-09-03 План по варкам милкпроджект.xlsx"
-            )
-        )
-    )
+    print(make_schedule(str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule.xlsx")))
 
 
 if __name__ == "__main__":

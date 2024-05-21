@@ -44,14 +44,12 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(
-            get_repo_path() / "app/data/static/samples/by_department/adygea/2023-09-03 План по варкам милкпроджект.xlsx"
-        ),
+        str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule.xlsx"),
         start_time="10:00",
     )
 
-    output["workbook"].save("/tmp/test_adygea.xlsx")
-    open_file_in_os("/tmp/test_adygea.xlsx")
+    output["workbook"].save("/tmp/schedule_adygea.xlsx")
+    open_file_in_os("/tmp/schedule_adygea.xlsx")
 
 
 if __name__ == "__main__":
