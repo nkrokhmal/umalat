@@ -77,7 +77,7 @@ class BoilingPlanReader:
                         raise BoilingPlanReaderException(
                             f"Неверно указано имя sku {item['sku_name']}, линия {i}, {item}"
                         )
-                    boiling.type = self._get_type(sku)
+                    boiling.type = self._get_group(sku)
                     boiling.skus.append(item)
         return boilings
 
@@ -151,17 +151,16 @@ class BoilingPlanReader:
     def _saturate(self, df: pd.DataFrame) -> pd.DataFrame:
         df.index = range(len(df))
         df["sku"] = df["sku_name"].apply(lambda x: cast_model([MascarponeSKU], x))
-        df["group"] = df["sku"].apply(lambda x: self._get_type(x))
-        df["batch_id"] = 0
+        df["group"] = df["sku"].apply(lambda x: self._get_group(x))
+        df["semifinished_group"] = df["group"].apply(lambda group: group if group != "cottage_cheese" else "robiola")
         df["batch_type"] = df["group"]
+        df["batch_id"] = 0
         df["boiling"] = df["sku"].apply(lambda x: x.made_from_boilings[0])
         df["boiling_id"] = df["boiling"].apply(lambda boiling: boiling.id)
-        df["semifinished_group"] = df["group"].apply(lambda group: group if group != "cottage_cheese" else "robiola")
-
         return df
 
     @staticmethod
-    def _get_type(sku: MascarponeSKU) -> str:
+    def _get_group(sku: MascarponeSKU) -> str:
         match sku.group.name.lower():
             case "сливки":
                 return "cream"

@@ -74,8 +74,6 @@ def to_boiling_plan(
     # - Saturate boiling plan
 
     df["boiling"] = df["sku"].apply(lambda sku: delistify(sku.made_from_boilings, single=True))
-    df["start"] = None
-    df["finish"] = None
 
     # - Return
 
