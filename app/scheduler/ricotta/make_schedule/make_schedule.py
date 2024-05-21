@@ -30,7 +30,7 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(b1["draw_whey"], b2["heating"])
         if b1.props["drenator_num"] == b2.props["drenator_num"]:
             validate_disjoint_by_axis(
-                b1["extra_processing"],
+                b1["pumping"],
                 b2["dray_ricotta"],
                 ordered=True,
                 distance=8 if b2.props["is_manual_cleaning_needed"] else 0,
@@ -78,6 +78,10 @@ class Validator(ClassValidator):
 
         if b1.props["percent"] != b2.props["percent"]:  # todo next: mark, ask guys [@marklidenberg]
             validate_disjoint_by_axis(b1["packing"], b2["pumping"], ordered=True)
+
+        # - Validate extra processinng
+
+        validate_disjoint_by_axis(b1["extra_processing"], b2["dray_ricotta"], ordered=True)
 
     @staticmethod
     def validate__preparation__boiling(b1, b2):
@@ -149,11 +153,10 @@ def make_schedule(
                 ]
 
             if drenator_boilings:
-                print(drenator_boilings[-1]["dray_ricotta"].x[0] - drenator_boilings[0]["dray_ricotta"].y[0])
                 is_manual_cleaning_needed = (
                     drenator_boilings[-1]["dray_ricotta"].x[0] - drenator_boilings[0]["dray_ricotta"].y[0]
                 ) > cast_t("06:00")
-                print(is_manual_cleaning_needed)
+
             # - Push block
 
             m.push(
