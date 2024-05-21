@@ -220,6 +220,22 @@ def to_boiling_plan(
     Returns
     -------
     pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
+
+    Custom columns:
+    - packing_team_id: id команды упаковки
+
+    - sheet: номер листа в файле
+
+    - kg: килограммы варки
+    - original_kg: кг варки до нормализации - столько, сколько было указано в плане варок
+
+    - cleaning: нужна ли мойка после варки (short, full)
+
+    - line: линия, "Моцарелла в воде" или "Соль"
+    - bff: форм-фактор плавления (boiling form factor)
+
+    - configuration: раньше # todo next: значение зашито хардкодом и используется в проде. Надо убрать и сделать нормально
+    - total_volume: # todo next
     """
 
     # - Check if already a dataframe
