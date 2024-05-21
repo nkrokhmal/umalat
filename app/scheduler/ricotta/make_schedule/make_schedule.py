@@ -192,9 +192,9 @@ def make_schedule(
         )
 
     for cleaning_object in ["drenator", "lishat_richi", "buffer_tank"]:
-        m.push(
+        m.push_row(
             "cleaning",
-            size=(12, 0),
+            size=20 if cleaning_object == "drenator" else 12,
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
             push_kwargs={"validator": Validator()},
             cleaning_object=cleaning_object,

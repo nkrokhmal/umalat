@@ -58,11 +58,11 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-05 Расписание рикотта.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/sample_schedule_ricotta.xlsx"),
     )
 
-    output["workbook"].save("test.xlsx")
-    open_file_in_os("test.xlsx")
+    output["workbook"].save("/tmp/schedule_ricotta.xlsx")
+    open_file_in_os("/tmp/schedule_ricotta.xlsx")
 
 
 if __name__ == "__main__":
