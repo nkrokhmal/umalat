@@ -7,12 +7,14 @@ from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaSKU, BrynzaSKU, cast_model
-from app.scheduler.adygea.to_boiling_plan._handle_adygea import _split_by_boilings
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.calc_absolute_batch_id import calc_absolute_batch_id
 
 
-def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"brynza": 1}):
+def to_boiling_plan(
+    wb_obj: BoilingPlanLike,
+    first_batch_ids_by_type={"brynza": 1},
+):
     """Считать файл плана варок в датафрейм
 
     Может читать и файл расписания, т.к. там там обычно есть лист с планом варок
@@ -27,21 +29,26 @@ def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"brynza": 
     pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
     """
 
+    # - Check if already a dataframe
+
     if isinstance(wb_obj, pd.DataFrame):
         # already a dataframe
         return wb_obj
 
+    # - Cast to workbook
+
     wb = cast_workbook(wb_obj)
 
-    cur_id = 0
+    # - Load worksheet
 
-    with code("Load boiling plan"):
-        ws = None
-        for key in ["План варок", "План варок брынза"]:
-            if key in wb.sheetnames:
-                ws = wb[key]
-        if not ws:
-            raise Exception("Не найдена вкладка для плана варок")
+    ws = None
+    for key in ["План варок", "План варок брынза"]:
+        if key in wb.sheetnames:
+            ws = wb[key]
+    if not ws:
+        raise Exception("Не найдена вкладка для плана варок")
+
+    # - Read data
 
     values = []
 
@@ -55,6 +62,11 @@ def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"brynza": 
         values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
     df = pd.DataFrame(values, columns=header)
+
+    # - Post-process data
+
+    # -- Basic
+
     df = df[["Номер группы варок", "SKU", "КГ"]]
     df.columns = [
         "group_id",
@@ -73,9 +85,17 @@ def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"brynza": 
 
         df = df[["boiling_id", "sku", "kg", "boiling"]]
 
-    # batch_id and boiling_id are the same
-    df["batch_id"] = df["boiling_id"]
+    # -- Batches
+
+    df["batch_id"] = df["boiling_id"]  # batch_id is the same as boiling_id for brynza
     df["batch_type"] = "brynza"
+    df["absolute_batch_id"] = calc_absolute_batch_id(
+        boiling_plan_df=df,
+        first_batch_ids_by_type=first_batch_ids_by_type,
+    )
+
+    # - Return
+
     return df
 
 
@@ -87,6 +107,11 @@ def test():
         )
     )
     print(df.iloc[0])
+    print("-" * 120)
+    pd.set_option("display.max_rows", 500)
+    pd.set_option("display.max_columns", 500)
+    pd.set_option("display.width", 1000)
+    print(df)
 
 
 if __name__ == "__main__":
