@@ -546,9 +546,9 @@ def wrap_frontend(
         )
 
         if not is_water_present:
-            m.col("stub", size=1)
+            m.push_column("stub", size=1)
             m.push(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
-            m.col("stub", size=1)
+            m.push_column("stub", size=1)
 
             m.push(
                 "template",

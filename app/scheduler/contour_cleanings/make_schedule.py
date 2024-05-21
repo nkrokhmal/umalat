@@ -729,6 +729,6 @@ def make_schedule(
     ]
 
     for contour in contours:
-        m.col(contour, push_func=add_push)
+        m.push_column(contour, push_func=add_push)
 
     return m.root
