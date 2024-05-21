@@ -5,7 +5,7 @@ from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaSKU, cast_model
-from app.scheduler.adygea.to_boiling_plan._handle_adygea import _split_by_boilings
+from app.scheduler.adygea.to_boiling_plan._split_by_boilings import _split_by_boilings
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.calc_absolute_batch_id import calc_absolute_batch_id
 
@@ -26,6 +26,7 @@ def to_boiling_plan(
     Returns
     -------
     pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
+
     """
 
     if isinstance(wb_obj, pd.DataFrame):
@@ -82,16 +83,15 @@ def to_boiling_plan(
 
     if df.empty:
         logger.info("Empty data frame")
-        df = pd.DataFrame(columns=["boiling_id", "sku", "n_baths", "kg", "boiling"])
+        df = pd.DataFrame(columns=["boiling_id", "sku", "kg", "boiling"])
     else:
         df["boiling_id"] = df["id"]
         df["kg"] = df["plan"]
-        df["n_baths"] = 1  # todo maybe: redundant [@marklidenberg]
         df["boiling_id"] = df["boiling_id"].astype(int) + 1
         df["sku"] = df["sku"].apply(lambda sku: cast_model(AdygeaSKU, sku.name))
         df["boiling"] = df["sku"].apply(lambda x: x.made_from_boilings[0])
 
-        df = df[["boiling_id", "sku", "n_baths", "kg", "boiling"]]
+        df = df[["boiling_id", "sku", "kg", "boiling"]]
 
     # -- Batches
 

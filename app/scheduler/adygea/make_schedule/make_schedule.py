@@ -104,7 +104,7 @@ def _make_schedule(
 
     boiling_num_generator = itertools.cycle(BOILING_NUMS)
 
-    # todo maybe: a little bit messy with batch_id, cur_batch_id and n_baths [@marklidenberg]
+    # todo maybe: a little bit messy with batch_id, cur_batch_id [@marklidenberg]
     for batch_id, grp in boiling_plan_df.groupby("batch_id"):
         row = grp.iloc[0]
         cur_boiler_num = next(boiling_num_generator)
