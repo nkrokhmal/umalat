@@ -69,14 +69,14 @@ def _make_boiling(boiling_group_df, **kwargs):
     # - Make pouring
 
     if technology.separation_time:
-        m.row("separation", size=technology.separation_time // 5)
+        m.push_row("separation", size=technology.separation_time // 5)
 
-    pouring = m.row("pouring", size=technology.pouring_time // 5, push_func=add_push).block
+    pouring = m.push_row("pouring", size=technology.pouring_time // 5, push_func=add_push).block
 
     # - Salt if needed
 
     if technology.salting_time:
-        m.row("salting", size=technology.salting_time // 5)
+        m.push_row("salting", size=technology.salting_time // 5)
 
     # - Get packing_group block
 
@@ -89,9 +89,9 @@ def _make_boiling(boiling_group_df, **kwargs):
         # - Add ingredient if needed
 
         if technology.analysis_time:
-            packing_m.row("analysis", size=technology.analysis_time // 5)
+            packing_m.push_row("analysis", size=technology.analysis_time // 5)
         if technology.ingredient_time:
-            packing_m.row("ingredient", size=technology.ingredient_time // 5)
+            packing_m.push_row("ingredient", size=technology.ingredient_time // 5)
 
         # - Add packings
 
@@ -100,7 +100,7 @@ def _make_boiling(boiling_group_df, **kwargs):
             current_weight = grp.iloc[0]["weight_netto"]
 
             if previous_weight and current_weight != previous_weight:
-                packing_m.row(
+                packing_m.push_row(
                     "packing_switch",
                     size=get_packing_swith_size(weight_netto1=previous_weight, weight_netto2=current_weight),
                     push_func=stack_push,
@@ -108,7 +108,7 @@ def _make_boiling(boiling_group_df, **kwargs):
 
             packing_size = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in grp.iterrows()])
             packing_size = int(custom_round(packing_size, 5, "ceil", pre_round_precision=1))
-            packing_m.row("packing", size=packing_size // 5, push_func=stack_push, weight_netto=current_weight)
+            packing_m.push_row("packing", size=packing_size // 5, push_func=stack_push, weight_netto=current_weight)
 
             previous_weight = current_weight
     packing_group = packing_m.root["packing_group"]
@@ -116,14 +116,14 @@ def _make_boiling(boiling_group_df, **kwargs):
     # - Make other
 
     if technology.heating_time:
-        m.row("heating", size=technology.heating_time // 5)
+        m.push_row("heating", size=technology.heating_time // 5)
 
     if sample_row["semifinished_group"] == "cream":
-        current_block = m.row(
+        current_block = m.push_row(
             "pumping", size=technology.pumping_time // 5, x=pouring.x[0] + 3, push_func=add_push
         ).block
     else:
-        current_block = m.row("pumping", size=technology.pumping_time // 5).block
+        current_block = m.push_row("pumping", size=technology.pumping_time // 5).block
 
     packing_group.props.update(x=(current_block.x[0] + 5 // 5, 0))
     add_push(m.root, packing_group)

@@ -174,7 +174,7 @@ def make_schedule(
 
         # -- Make preparation block
 
-        m.row(
+        m.push_row(
             "preparation",
             size=6,
             line=line,

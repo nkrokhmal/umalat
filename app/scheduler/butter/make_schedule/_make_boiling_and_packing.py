@@ -24,9 +24,9 @@ def _make_boiling_and_packing(boiling_group_df, tank_number):
         boiling_model.boiling_technologies, single=True
     )  # there is only one boiling technology is for every boiling model in butter department
 
-    m.row("separator_runaway", size=bt.separator_runaway_time // 5)
-    m.row("pasteurization", size=bt.pasteurization_time // 5)
-    m.row("increasing_temperature", size=bt.increasing_temperature_time // 5)
+    m.push_row("separator_runaway", size=bt.separator_runaway_time // 5)
+    m.push_row("pasteurization", size=bt.pasteurization_time // 5)
+    m.push_row("increasing_temperature", size=bt.increasing_temperature_time // 5)
 
     boiling_block = m.root
 

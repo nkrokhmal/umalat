@@ -23,7 +23,7 @@ def wrap_contour(contour, contour_id):
             continue
 
         child.update_size(size=(child.size[0], 1))
-        m.row(m.copy(child, with_props=True), push_func=add_push)
+        m.push_row(m.copy(child, with_props=True), push_func=add_push)
     return m.root
 
 
@@ -42,7 +42,7 @@ def wrap_frontend(schedule, date=None):
         # props
         axis=1,
     )
-    m.row("stub", size=0)  # start with 1
+    m.push_row("stub", size=0)  # start with 1
     m.push(wrap_header(date=date, start_time=start_time, header="CIP Мойка контура 1-4"))
     with m.push("contours 1-4", start_time=start_time, axis=1):
         for i, contour in enumerate(schedule.children[:4]):
@@ -55,7 +55,7 @@ def wrap_frontend(schedule, date=None):
                 text=f"Контур {i + 1}",
                 color="yellow",
             )
-            m.row("stub", size=0)
+            m.push_row("stub", size=0)
 
     m.push(wrap_header(date=date, start_time=start_time, header="CIP Мойка MPINOX"))
     with m.push("mpinox", start_time=start_time, axis=1):
@@ -69,5 +69,5 @@ def wrap_frontend(schedule, date=None):
                 text=f"Контур {i + 1}",
                 color="yellow",
             )
-            m.row("stub", size=0)
+            m.push_row("stub", size=0)
     return m.root

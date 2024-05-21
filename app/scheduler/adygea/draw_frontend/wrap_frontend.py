@@ -29,13 +29,13 @@ def wrap_boiling(boiling):
     )
 
     with m.push("Upper line"):
-        m.row("boiling_num", size=1)
-        m.row("boiling_name", size=boiling.size[0] - 1)
+        m.push_row("boiling_num", size=1)
+        m.push_row("boiling_name", size=boiling.size[0] - 1)
 
     with m.push("Lower line"):
-        m.row("collecting", size=boiling["collecting"].size[0], font_size=6)
-        m.row("coagulation", size=boiling["coagulation"].size[0])
-        m.row("pouring_off", size=boiling["pouring_off"].size[0], font_size=6)
+        m.push_row("collecting", size=boiling["collecting"].size[0], font_size=6)
+        m.push_row("coagulation", size=boiling["coagulation"].size[0])
+        m.push_row("pouring_off", size=boiling["pouring_off"].size[0], font_size=6)
 
     return m.root
 
@@ -92,7 +92,7 @@ def wrap_boiling_lines(schedule):
         for i in range(n_lines):
             boiling_lines.append(m.push(f"boiling_line_{i}", size=(0, 3)).push)
             if i <= n_lines - 2:
-                m.row("stub", size=0)
+                m.push_row("stub", size=0)
 
     push(boiling_lines[0], wrap_preparation(schedule["preparation"]), push_func=add_push)
 
@@ -145,7 +145,7 @@ def wrap_frontend(
         # props
         axis=1,
     )
-    m.row("stub", size=0)  # start with 1
+    m.push_row("stub", size=0)  # start with 1
 
     with code("Calc start time"):
         # calc start time

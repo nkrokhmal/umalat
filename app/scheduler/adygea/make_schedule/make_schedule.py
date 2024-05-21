@@ -72,7 +72,7 @@ def _make_schedule(
     normed_lunch_times = [cast_time(cast_t(lt) - cast_t(prepare_start_time)) for lt in lunch_times]
 
     m = BlockMaker("schedule")
-    m.row(make_preparation(adygea_line.preparation_time // 5), push_func=add_push)
+    m.push_row(make_preparation(adygea_line.preparation_time // 5), push_func=add_push)
 
     boiling_plan_df = boiling_plan_df.copy()
 
@@ -152,7 +152,7 @@ def _make_schedule(
         cleaning_start = min(b.y[0] for b in last_boilings)
         if len(m.root["lunch", True]) > 0:
             cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root["lunch", True]))
-        m.row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
+        m.push_row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
 
     m.root.props.update(x=(cast_t(prepare_start_time), 0))
     return m.root

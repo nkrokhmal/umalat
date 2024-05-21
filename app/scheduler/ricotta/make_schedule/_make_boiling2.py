@@ -51,19 +51,19 @@ def _make_boiling(
 
     current_shift = 0
     for i in range(boiling_group_df.iloc[0]["floculators_num"]):
-        with m.row(
+        with m.push_row(
             "floculator",
             x=current_shift,
             push_func=add_push,
             floculator_num=(floculator_num + i) % 3 + 1,
             output_kg=boiling_group_df.iloc[0]["output_kg"] / 2,  # one boiling is measured in 2 floculators
         ):
-            m.row("boiling_preparation", size=2)
-            pouring = m.row("pouring", size=technology.pouring_time // 5).block
-            m.row("heating", size=technology.heating_time // 5, x=pouring.x[0] - current_shift, push_func=add_push)
-            m.row("lactic_acid", size=technology.lactic_acid_time // 5)
-            m.row("draw_whey", size=technology.drain_whey_time // 5)
-            m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
+            m.push_row("boiling_preparation", size=2)
+            pouring = m.push_row("pouring", size=technology.pouring_time // 5).block
+            m.push_row("heating", size=technology.heating_time // 5, x=pouring.x[0] - current_shift, push_func=add_push)
+            m.push_row("lactic_acid", size=technology.lactic_acid_time // 5)
+            m.push_row("draw_whey", size=technology.drain_whey_time // 5)
+            m.push_row("dray_ricotta", size=technology.dray_ricotta_time // 5)
         current_shift += technology.pouring_time // 5 + 2
 
     # - Draw_whey and dray_ricotta should not overlap
@@ -80,19 +80,21 @@ def _make_boiling(
 
     # -- Extra processing: salting, ingredient
 
-    with m.row("extra_processing"):
-        m.row("salting", size=technology.salting_time // 5)
-        m.row("ingredient", size=technology.ingredient_time // 5)
+    with m.push_row("extra_processing"):
+        m.push_row("salting", size=technology.salting_time // 5)
+        m.push_row("ingredient", size=technology.ingredient_time // 5)
 
     # -- Pumping
 
-    pumping = m.row("pumping", size=technology.pumping_time // 5 * boiling_group_df.iloc[0]["floculators_num"]).block
+    pumping = m.push_row(
+        "pumping", size=technology.pumping_time // 5 * boiling_group_df.iloc[0]["floculators_num"]
+    ).block
 
     # -- Packing
 
     packing_minutes = sum([row["kg"] / row["sku"].packing_speed * 60 for i, row in boiling_group_df.iterrows()])
     packing_minutes = int(custom_round(a=packing_minutes, b=5, rounding="nearest_half_even", pre_round_precision=1))
-    m.row(
+    m.push_row(
         "packing",
         size=packing_minutes // 5,
         x=pumping.x[0] + 1,  # 5 minutes after pumping starts

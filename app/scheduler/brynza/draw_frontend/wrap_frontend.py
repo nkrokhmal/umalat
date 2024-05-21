@@ -31,7 +31,7 @@ def wrap_frontend(
         # props
         axis=1,
     )
-    m.row("stub", size=0)  # start with 1
+    m.push_row("stub", size=0)  # start with 1
 
     m.push(wrap_header(date=date, start_time=start_time, header="График паковки"))
 

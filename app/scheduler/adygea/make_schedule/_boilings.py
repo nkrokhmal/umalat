@@ -16,16 +16,16 @@ def make_boiling(boiling_model, batch_id, boiler_num, group_name, pair_num):
         boiling_model.boiling_technologies, single=True
     )  # there is only one boiling technology is for every boiling model in ricotta department
 
-    m.row("collecting", size=bt.collecting_time // 5)
-    m.row("coagulation", size=bt.coagulation_time // 5)
-    m.row("pouring_off", size=bt.pouring_off_time // 5)
+    m.push_row("collecting", size=bt.collecting_time // 5)
+    m.push_row("coagulation", size=bt.coagulation_time // 5)
+    m.push_row("pouring_off", size=bt.pouring_off_time // 5)
 
     return m.root
 
 
 def make_cleaning(size, **kwargs):
     m = BlockMaker("cleaning", **kwargs)
-    m.row(f"cleaning", size=size)
+    m.push_row(f"cleaning", size=size)
     return m.root
 
 
@@ -36,5 +36,5 @@ def make_preparation(size, **kwargs):
 
 def make_lunch(size, **kwargs):
     m = BlockMaker("lunch", **kwargs)
-    m.row(f"lunch", size=size)
+    m.push_row(f"lunch", size=size)
     return m.root

@@ -108,7 +108,7 @@ def make_schedule(
 
     # - Make preparation block
 
-    m.row(
+    m.push_row(
         "preparation",
         size=6,
         push_func=AxisPusher(start_from=cast_t(start_time)),

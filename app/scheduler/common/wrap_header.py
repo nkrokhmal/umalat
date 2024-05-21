@@ -15,13 +15,13 @@ def wrap_header(date, start_time="07:00", header="", period=566):
     )
 
     with m.push("header", size=(0, 1), index_width=2):
-        m.row(size=1, text=header)
-        m.row(size=1, text=cast_str(date, "%d.%m.%Y"), bold=True)
+        m.push_row(size=1, text=header)
+        m.push_row(size=1, text=cast_str(date, "%d.%m.%Y"), bold=True)
         for i in range(period):
             cur_time = cast_time(i + cast_t(start_time))
             days, hours, minutes = cur_time.split(":")
             if cur_time[-2:] == "00":
-                m.row(
+                m.push_row(
                     size=1,
                     text=cast_label_from_time(cur_time),
                     color=(218, 150, 148),
@@ -29,7 +29,7 @@ def wrap_header(date, start_time="07:00", header="", period=566):
                     font_size=9,
                 )
             else:
-                m.row(
+                m.push_row(
                     size=1,
                     text=minutes,
                     color=(204, 255, 255),

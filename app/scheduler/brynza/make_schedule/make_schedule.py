@@ -26,7 +26,7 @@ def make_packing_schedule(
 
     m = BlockMaker("schedule")
 
-    m.row("preparation", size=6)
+    m.push_row("preparation", size=6)
 
     # boiling_technology = df1.iloc[0]["boiling"].boiling_technologies[0]
 
@@ -39,13 +39,13 @@ def make_packing_schedule(
         values.append(f"{sku.name} - {round(grp['kg'].sum())}кг")
     label = ", ".join(values)
 
-    m.row(
+    m.push_row(
         "packing_brynza",
         size=round((df1["kg"] / df1["sku"].apply(lambda sku: sku.packing_speed)).sum() * 12),
         label=label,
     )
-    m.row("small_cleaning", size=5)
-    m.row("labelling", size=14)
+    m.push_row("small_cleaning", size=5)
+    m.push_row("labelling", size=14)
 
     df2["boiling_type"] = df2["boiling"].apply(lambda boiling: str(boiling.weight_netto) + "-" + str(boiling.percent))
 
@@ -62,18 +62,18 @@ def make_packing_schedule(
         pieces_kg = [piece_kg for piece_kg in pieces_kg if abs(piece_kg) > 0.1]
 
         for _is_first, _is_last, piece_kg in mark_ends(pieces_kg):
-            m.row(
+            m.push_row(
                 "packing_adygea",
                 size=round(piece_kg / packing_speed * 12),
                 label=f"Адыгейский {boiling.weight_netto}, {round(piece_kg)}кг",
             )
             if not _is_last:
-                m.row("packing_configuration", size=1)
+                m.push_row("packing_configuration", size=1)
 
         if not is_last:
-            m.row("packing_configuration", size=1)
+            m.push_row("packing_configuration", size=1)
 
-    m.row("cleaning", size=12)
+    m.push_row("cleaning", size=12)
 
     return {
         "schedule": m.root,

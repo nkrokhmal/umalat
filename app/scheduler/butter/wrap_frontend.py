@@ -79,7 +79,7 @@ def _wrap_child(child):
             m.push("pasteurization_1", push_func=add_push, size=(child.size[0], 1), x=(0, 0))
             m.push("pasteurization_2", push_func=add_push, size=(child.size[0], 1), x=(0, 1))
     else:
-        m.row(m.copy(child, with_props=True), push_func=add_push)
+        m.push_row(m.copy(child, with_props=True), push_func=add_push)
 
     return m.root
 
@@ -104,7 +104,7 @@ def _wrap_boiling(boiling):
 
                 m.push("pasteurization_2", push_func=add_push, size=(child.size[0], 1), x=(0, 1))
         else:
-            m.row(m.copy(child, with_props=True), push_func=add_push)
+            m.push_row(m.copy(child, with_props=True), push_func=add_push)
 
     return m.root
 
@@ -122,7 +122,7 @@ def _wrap_packing(schedule):
         if child_prev:
             m.push("cooling", size=(4, 2), x=(child.x[0] - 4, 0), push_func=add_push)
 
-        m.row(m.copy(child, with_props=True), push_func=add_push)
+        m.push_row(m.copy(child, with_props=True), push_func=add_push)
     return m.root
 
 
@@ -152,7 +152,7 @@ def wrap_frontend(
         # props
         axis=1,
     )
-    m.row("stub", size=0)  # start with 1
+    m.push_row("stub", size=0)  # start with 1
 
     # calc start time
     start_t = int(custom_round(schedule.x[0], 12, "floor"))  # round to last hour

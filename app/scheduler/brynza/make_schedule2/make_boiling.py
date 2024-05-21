@@ -37,11 +37,11 @@ def make_boiling(boiling_id: int, group_name: Literal["Брынза", "Чана�
     # - Make brynza boiling
 
     with m.push("boiling", boiling_id=boiling_id, group_name=group_name, **props):
-        m.row("pouring", size=boiling_technology.pouring_time // 5)
-        m.row("soldification", size=boiling_technology.soldification_time // 5)
-        m.row("cutting", size=boiling_technology.cutting_time // 5)
-        m.row("pouring_off", size=boiling_technology.pouring_off_time // 5)
-        m.row("extra", size=2)
+        m.push_row("pouring", size=boiling_technology.pouring_time // 5)
+        m.push_row("soldification", size=boiling_technology.soldification_time // 5)
+        m.push_row("cutting", size=boiling_technology.cutting_time // 5)
+        m.push_row("pouring_off", size=boiling_technology.pouring_off_time // 5)
+        m.push_row("extra", size=2)
 
     return m.root["boiling"]
 

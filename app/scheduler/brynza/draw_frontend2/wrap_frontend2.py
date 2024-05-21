@@ -57,18 +57,18 @@ def wrap_frontend2(
                     axis=1,
                 ):
                     with m.push():
-                        m.row("boiling_id_label", size=6, boiling_id=boiling.props["boiling_id"])
-                        m.row(
+                        m.push_row("boiling_id_label", size=6, boiling_id=boiling.props["boiling_id"])
+                        m.push_row(
                             "boiling_name_label",
                             size=boiling.size[0] - 6,
                             boiling_label=f"{boiling.props['group_name'] if boiling.props['group_name'] != 'Чанах' else 'Халуми'} 3,05 PCS(12-13)  3150кг",
                         )
                     with m.push(font_size=8):
-                        m.row("pouring", size=boiling["pouring"].size[0])
-                        m.row("soldification", size=boiling["soldification"].size[0])
-                        m.row("cutting", size=boiling["cutting"].size[0])
-                        m.row("pouring_off", size=boiling["pouring_off"].size[0])
-                        m.row("extra", size=2)
+                        m.push_row("pouring", size=boiling["pouring"].size[0])
+                        m.push_row("soldification", size=boiling["soldification"].size[0])
+                        m.push_row("cutting", size=boiling["cutting"].size[0])
+                        m.push_row("pouring_off", size=boiling["pouring_off"].size[0])
+                        m.push_row("extra", size=2)
 
         m.push("stub", size=(0, 2))
 
@@ -81,7 +81,7 @@ def wrap_frontend2(
     # -- Total salting block
 
     saltings = list(schedule.iter(cls="salting"))
-    m.row(
+    m.push_row(
         "total_salting",
         x=saltings[0].x[0],
         size=saltings[-1].y[0] - saltings[0].x[0],

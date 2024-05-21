@@ -82,9 +82,9 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
 
     m = BlockMaker("melting_and_packing", axis=0, make_with_copy_cut=True)
     with m.push("melting"):
-        serving = m.row("serving", push_func=add_push, size=boiling_model.line.serving_time // 5).push
+        serving = m.push_row("serving", push_func=add_push, size=boiling_model.line.serving_time // 5).push
 
-        with m.row("meltings", push_func=add_push, x=serving.size[0]):
+        with m.push_row("meltings", push_func=add_push, x=serving.size[0]):
             for i, block in enumerate(mp["melting_and_packing_process", True]):
                 m.push(
                     m.copy(block["melting_process"], with_props=True),
@@ -92,7 +92,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                     bff=block["melting_process"].props["bff"],
                 )
 
-        with m.row(
+        with m.push_row(
             "coolings",
             push_func=add_push,
             x=(serving.size[0], 0),
@@ -119,7 +119,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
 
             if blocks:
                 shift = blocks[0].x[0]
-                with m.row(
+                with m.push_row(
                     key,
                     push_func=add_push,
                     x=boiling_model.line.serving_time // 5 + shift,
@@ -127,5 +127,5 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                 ):
                     for block in blocks:
                         # fix start with coolings
-                        m.row(block, push_func=add_push, x=block.props["x_rel"][0] - shift)
+                        m.push_row(block, push_func=add_push, x=block.props["x_rel"][0] - shift)
     return m.root

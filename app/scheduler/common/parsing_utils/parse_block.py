@@ -20,7 +20,7 @@ def parse_elements(
     split_func: Optional[Callable] = None,
     filter_: Optional[Callable] = None,
 ):
-    with m.row(label, x=start_time, push_func=add_push):
+    with m.push_row(label, x=start_time, push_func=add_push):
         for i, row_num in enumerate(rows):
             df1 = cells_df[(cells_df["x1"] == row_num) & (cells_df["x0"] >= 4)]  # filter column header
             groups = group_neighbor_intervals(
@@ -39,7 +39,7 @@ def parse_elements(
                 except Exception as e:
                     boiling_id = None
 
-                m.row(
+                m.push_row(
                     element_label,
                     size=group[-1]["y0"] - group[0]["x0"],
                     x=group[0]["x0"] - 5,  # subtract column header

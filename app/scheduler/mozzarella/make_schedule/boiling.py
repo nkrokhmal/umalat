@@ -25,15 +25,15 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
     ):
         with m.push("pouring"):
             with m.push("first"):
-                m.row("termizator", size=termizator_time // 5)
-                m.row("fermenting", size=bt.pouring_time // 5 - termizator_time // 5)
-                m.row("soldification", size=bt.soldification_time // 5)
-                m.row("cutting", size=bt.cutting_time // 5)
-                m.row("pumping_out", size=bt.pumping_out_time // 5)
+                m.push_row("termizator", size=termizator_time // 5)
+                m.push_row("fermenting", size=bt.pouring_time // 5 - termizator_time // 5)
+                m.push_row("soldification", size=bt.soldification_time // 5)
+                m.push_row("cutting", size=bt.cutting_time // 5)
+                m.push_row("pumping_out", size=bt.pumping_out_time // 5)
             with m.push("second"):
-                m.row("pouring_off", size=bt.pouring_off_time // 5)
-                m.row("extra", size=bt.extra_time // 5)
-        m.row(
+                m.push_row("pouring_off", size=bt.pouring_off_time // 5)
+                m.push_row("extra", size=bt.extra_time // 5)
+        m.push_row(
             "drenator",
             push_func=add_push,
             x=m.root["boiling"]["pouring"]["first"].y[0],

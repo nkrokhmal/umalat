@@ -42,13 +42,13 @@ def wrap_line(
 
     with m.push("shift_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="shift", team="Бригадир"):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+            m.push_row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add shifts
 
     with m.push("shift_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="shift", team="Упаковка"):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+            m.push_row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Boilings
 
@@ -58,13 +58,13 @@ def wrap_line(
         with m.push(f"floculator_{i + 1}", start_time=start_time, size=(0, 2)):
             for boiling in schedule.iter(cls="boiling", floculator_num=i + 1):
                 with m.push("first_row", size=(0, 1), x=(0, 0), push_func=add_push):
-                    m.row(m.copy(boiling["boiling_preparation"], with_props=True, size=(2, 1)), push_func=add_push)
-                    m.row(m.copy(boiling["pouring"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.push_row(m.copy(boiling["boiling_preparation"], with_props=True, size=(2, 1)), push_func=add_push)
+                    m.push_row(m.copy(boiling["pouring"], with_props=True, size=(None, 1)), push_func=add_push)
                 with m.push("second_row", size=(0, 1), x=(0, 1), push_func=add_push):
-                    m.row(m.copy(boiling["heating"], with_props=True, size=(None, 1)), push_func=add_push)
-                    m.row(m.copy(boiling["lactic_acid"], with_props=True, size=(None, 1)), push_func=add_push)
-                    m.row(m.copy(boiling["heating_short"], with_props=True, size=(None, 1)), push_func=add_push)
-                    m.row(m.copy(boiling["draw_whey"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.push_row(m.copy(boiling["heating"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.push_row(m.copy(boiling["lactic_acid"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.push_row(m.copy(boiling["heating_short"], with_props=True, size=(None, 1)), push_func=add_push)
+                    m.push_row(m.copy(boiling["draw_whey"], with_props=True, size=(None, 1)), push_func=add_push)
 
     # -- Drenators
 
@@ -73,13 +73,13 @@ def wrap_line(
             for block in schedule.iter(
                 cls=lambda cls: cls in ["dray_ricotta", "salting", "ingredient", "manual_cleaning"], drenator_num=i + 1
             ):
-                m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+                m.push_row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # -- Pumping
 
     with m.push("pumping_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="pumping"):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+            m.push_row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # -- Packing
 
@@ -92,13 +92,15 @@ def wrap_line(
                 absolute_batch_id=block.props["absolute_batch_id"],
                 push_func=add_push,
             )
-            m.row(m.copy(block, with_props=True, size=(block.size[0] - 2, 1)), x=block.x[0] + 2, push_func=add_push)
+            m.push_row(
+                m.copy(block, with_props=True, size=(block.size[0] - 2, 1)), x=block.x[0] + 2, push_func=add_push
+            )
 
     # - Cleaning
 
     with m.push("cleaning_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="cleaning"):
-            m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
+            m.push_row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add preparation
 
@@ -162,7 +164,7 @@ def wrap_frontend(
         # props
         axis=1,
     )
-    m.row("stub", size=0)  # start with 1
+    m.push_row("stub", size=0)  # start with 1
 
     m.push(wrap_line(schedule, line="Кремчиз", date=date, start_time=start_time))
 

@@ -110,25 +110,25 @@ def wrap_cheese_makers(master, rng):
                     axis=1,
                 ):
                     with m.push():
-                        m.row("termizator", size=boiling["pouring"]["first"]["termizator"].size[0])
-                        m.row(
+                        m.push_row("termizator", size=boiling["pouring"]["first"]["termizator"].size[0])
+                        m.push_row(
                             "pouring_name",
                             size=boiling["pouring"].size[0] - boiling["pouring"]["first"]["termizator"].size[0],
                             boiling_label=boiling_label,
                         )
                     with m.push(font_size=8):
-                        m.row(
+                        m.push_row(
                             "pouring_and_fermenting",
                             push_func=add_push,
                             size=boiling["pouring"]["first"]["termizator"].size[0]
                             + boiling["pouring"]["first"]["fermenting"].size[0],
                         )
 
-                        m.row("soldification", size=boiling["pouring"]["first"]["soldification"].size[0])
-                        m.row("cutting", size=boiling["pouring"]["first"]["cutting"].size[0])
-                        m.row("pumping_out", size=boiling["pouring"]["first"]["pumping_out"].size[0])
-                        m.row("pouring_off", size=boiling["pouring"]["second"]["pouring_off"].size[0])
-                        m.row("extra", size=boiling["pouring"]["second"]["extra"].size[0])
+                        m.push_row("soldification", size=boiling["pouring"]["first"]["soldification"].size[0])
+                        m.push_row("cutting", size=boiling["pouring"]["first"]["cutting"].size[0])
+                        m.push_row("pumping_out", size=boiling["pouring"]["first"]["pumping_out"].size[0])
+                        m.push_row("pouring_off", size=boiling["pouring"]["second"]["pouring_off"].size[0])
+                        m.push_row("extra", size=boiling["pouring"]["second"]["extra"].size[0])
 
                     with code("Steam consumption"):
                         pass
@@ -209,7 +209,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
                 form_factor_label=form_factor_label,
             ):
                 with m.push("serving_row"):
-                    m.row(
+                    m.push_row(
                         "serving",
                         push_func=add_push,
                         x=boiling["melting_and_packing"]["melting"]["serving"].x[0],
@@ -217,27 +217,27 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
                     )
 
                 with m.push("label_row"):
-                    m.row(
+                    m.push_row(
                         "serving",
                         push_func=add_push,
                         x=boiling["melting_and_packing"]["melting"]["serving"].x[0],
                         size=boiling["melting_and_packing"]["melting"]["serving"].size[0],
                         visible=False,
                     )
-                    m.row("melting_label", size=4)
+                    m.push_row("melting_label", size=4)
 
                     assert (
                         boiling["melting_and_packing"]["melting"]["meltings"].size[0] >= 5
                     ), "В расписании есть блок плавления меньше 5 блоков. Такой случай не поддерживается. "
 
-                    m.row(
+                    m.push_row(
                         "melting_name",
                         size=boiling["melting_and_packing"]["melting"]["meltings"].size[0] - 4,
                         form_factor_label=boiling.props["form_factor_label"],
                     )
 
                 with m.push("melting_row"):
-                    m.row(
+                    m.push_row(
                         "melting_process",
                         push_func=add_push,
                         x=boiling["melting_and_packing"]["melting"]["meltings"].x[0],
@@ -330,32 +330,32 @@ def wrap_melting(boiling, line_name):
         boiling_id=boiling.props["boiling_id"],
         form_factor_label=form_factor_label,
     ):
-        with m.row("label_row", push_func=add_push, x=boiling["melting_and_packing"]["melting"]["serving"].x[0]):
-            m.row("melting_label", size=4, block_front_id=boiling.props["block_front_id"])
+        with m.push_row("label_row", push_func=add_push, x=boiling["melting_and_packing"]["melting"]["serving"].x[0]):
+            m.push_row("melting_label", size=4, block_front_id=boiling.props["block_front_id"])
             assert (
                 boiling["melting_and_packing"]["melting"].size[0] >= 5
             ), "В расписании есть блок плавления меньше 5 блоков. Такой случай пока не обработан. "
-            m.row(
+            m.push_row(
                 "melting_name",
                 size=boiling["melting_and_packing"]["melting"].size[0] - 4,
                 form_factor_label=boiling.props["form_factor_label"],
             )
 
         with m.push("melting_row"):
-            m.row(
+            m.push_row(
                 "serving",
                 push_func=add_push,
                 x=boiling["melting_and_packing"]["melting"]["serving"].x[0],
                 size=boiling["melting_and_packing"]["melting"]["serving"].size[0],
             )
 
-            m.row(
+            m.push_row(
                 "melting_process",
                 push_func=add_push,
                 x=(boiling["melting_and_packing"]["melting"]["meltings"].x[0], 0),
                 size=(boiling["melting_and_packing"]["melting"]["meltings"].size[0], 1),
             )
-            m.row(
+            m.push_row(
                 cooling_label,
                 size=boiling["melting_and_packing"]["melting"]["coolings"]["cooling_process", True][-1]["start"].size[
                     0
@@ -363,7 +363,7 @@ def wrap_melting(boiling, line_name):
             )
 
         with m.push("cooling_row"):
-            m.row(
+            m.push_row(
                 cooling_label,
                 push_func=add_push,
                 x=boiling["melting_and_packing"]["melting"]["coolings"]["cooling_process", True][0]["start"].x[0],
@@ -420,26 +420,26 @@ def wrap_packing_block(packing_block, boiling_id):
     )
     with m.push():
         if packing_block.size[0] >= 4:
-            m.row("packing_label", size=3)
-            m.row("packing_name", size=packing_block.size[0] - 3)
+            m.push_row("packing_label", size=3)
+            m.push_row("packing_name", size=packing_block.size[0] - 3)
         elif packing_block.size[0] >= 2:
             # update 2021.10.21
-            m.row("packing_label", size=1)
-            m.row("packing_name", size=packing_block.size[0] - 1)
+            m.push_row("packing_label", size=1)
+            m.push_row("packing_name", size=packing_block.size[0] - 1)
         elif packing_block.size[0] == 1:
             # update 2021.10.21
-            m.row("packing_label", size=1)
+            m.push_row("packing_label", size=1)
 
     with m.push():
-        m.row("packing_brand", size=packing_block.size[0])
+        m.push_row("packing_brand", size=packing_block.size[0])
 
     with m.push():
         for packing_process in packing_block.iter(cls="process"):
-            m.row(
+            m.push_row(
                 "packing_process", push_func=add_push, x=packing_process.props["x_rel"][0], size=packing_process.size[0]
             )
         for conf in packing_block.iter(cls="packing_configuration"):
-            m.row("packing_configuration", push_func=add_push, x=conf.props["x_rel"][0], size=conf.size[0])
+            m.push_row("packing_configuration", push_func=add_push, x=conf.props["x_rel"][0], size=conf.size[0])
     return m.root
 
 
@@ -462,7 +462,9 @@ def wrap_packings(master, line_name):
                     # first level only
                     if conf.props["packing_team_id"] != packing_team_id or conf.props["line_name"] != line_name:
                         continue
-                    m.row("packing_configuration", push_func=add_push, x=(conf.props["x"][0], 2), size=conf.size[0])
+                    m.push_row(
+                        "packing_configuration", push_func=add_push, x=(conf.props["x"][0], 2), size=conf.size[0]
+                    )
             except:
                 # no packing_configuration in schedule first level
                 pass

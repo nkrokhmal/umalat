@@ -79,7 +79,7 @@ def make_schedule(
 
     # -- Make preparation block
 
-    m.row("preparation", size=line.preparing_time // 5)
+    m.push_row("preparation", size=line.preparing_time // 5)
 
     # -- Make boiling and packing blocks
 

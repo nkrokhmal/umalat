@@ -15,11 +15,11 @@ def make_cooling_process(line_name, cooling_technology, melting_process_size=Non
             else [cooling_technology.salting_time]
         )
         for cooling_time in cooling_times:
-            m.row("cooling", size=cooling_time // 5)
+            m.push_row("cooling", size=cooling_time // 5)
 
     if size:
         melting_process_size = size - m.root["start"].size[0]
 
     with m.push("finish"):
-        m.row("cooling", size=melting_process_size)
+        m.push_row("cooling", size=melting_process_size)
     return m.root

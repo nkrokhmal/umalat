@@ -69,25 +69,25 @@ def _make_boilings(
             **kwargs,
         )
 
-        m.row("boiling_preparation", size=2)
-        pouring = m.row("pouring", size=technology.pouring_time // 5).block
-        m.row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
-        m.row("lactic_acid", size=technology.lactic_acid_time // 5)
-        m.row("heating_short", size=technology.heating_short_time // 5)
-        m.row(
+        m.push_row("boiling_preparation", size=2)
+        pouring = m.push_row("pouring", size=technology.pouring_time // 5).block
+        m.push_row("heating", size=technology.heating_time // 5, x=pouring.x[0], push_func=add_push)
+        m.push_row("lactic_acid", size=technology.lactic_acid_time // 5)
+        m.push_row("heating_short", size=technology.heating_short_time // 5)
+        m.push_row(
             "draw_whey", size=technology.drain_whey_time // 5
         )  # todo next: kolya: reduce by 5 minutes [@marklidenberg]
-        m.row("dray_ricotta", size=technology.dray_ricotta_time // 5)
+        m.push_row("dray_ricotta", size=technology.dray_ricotta_time // 5)
 
         # -- Extra processing: salting, ingredient
 
-        with m.row("extra_processing"):
-            m.row("salting", size=technology.salting_time // 5)
-            m.row("ingredient", size=technology.ingredient_time // 5)  # todo next kolya: fix parameters
+        with m.push_row("extra_processing"):
+            m.push_row("salting", size=technology.salting_time // 5)
+            m.push_row("ingredient", size=technology.ingredient_time // 5)  # todo next kolya: fix parameters
 
         # -- Pumping
 
-        pumping = m.row(
+        pumping = m.push_row(
             "pumping",
             size=technology.pumping_time
             // 5,  # todo next: kolya: fix parameters, 25 for non-ingredient, 30 for ingredient. Some formula using speeds? (2 ton/h) [@marklidenberg]
@@ -99,7 +99,7 @@ def _make_boilings(
             int(custom_round(a=packing_times[i], b=5, rounding="nearest_half_even", pre_round_precision=1)) // 5
         )
 
-        m.row(
+        m.push_row(
             "packing",
             size=int(custom_round(a=packing_times[i], b=5, rounding="nearest_half_even", pre_round_precision=1)) // 5,
             x=pumping.x[0] + 1

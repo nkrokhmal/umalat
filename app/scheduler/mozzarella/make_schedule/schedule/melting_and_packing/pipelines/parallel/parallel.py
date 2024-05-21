@@ -118,14 +118,14 @@ def make_mpp(boiling_df, left_boiling_volume):
         df = boiling_df[boiling_df["packing_team_id"] == packing_team_id]
         df = df[~df["beg_ts"].isnull()]
         if len(df) > 0:
-            packing = m.row(
+            packing = m.push_row(
                 "packing",
                 push_func=add_push,
                 packing_team_id=packing_team_id,
                 x=df.iloc[0]["beg_ts"] // 5,
             ).block
 
-            with m.row(
+            with m.push_row(
                 "collecting",
                 push_func=add_push,
                 packing_team_id=packing_team_id,
@@ -141,9 +141,9 @@ def make_mpp(boiling_df, left_boiling_volume):
                                 df.iloc[i - 1]["sku"],
                             )
                             if conf_time_size:
-                                block = m.row("packing_configuration", size=conf_time_size // 5).block
+                                block = m.push_row("packing_configuration", size=conf_time_size // 5).block
                                 push(packing, m.copy(block), push_func=add_push)
-                        block = m.row(
+                        block = m.push_row(
                             "process",
                             size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5,
                             sku=row["sku"],
@@ -161,7 +161,7 @@ def make_mpp(boiling_df, left_boiling_volume):
                         )
                     else:
                         # rubber
-                        block = m.row(
+                        block = m.push_row(
                             "process",
                             size=custom_round(row["end_ts"] - row["beg_ts"], 5, "ceil") // 5,
                             sku=row["sku"],
@@ -188,7 +188,7 @@ def make_mpp(boiling_df, left_boiling_volume):
         else last_collecting_process_y
     )
 
-    m.row(
+    m.push_row(
         "melting_process",
         size=melting_process_size,
         bff=bff,
