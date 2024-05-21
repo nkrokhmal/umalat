@@ -420,45 +420,45 @@ def make_schedule(
             if semifinished_group != "cream":
                 current_tub_num = 1 if current_tub_num == 2 else 2
 
-            # - Add last cleanings
+        # - Add last cleanings
 
-            # -- Skip if not boilings
-            if len(list(m.root.iter(cls="boiling", line=line))) == 0:
-                continue
+        # -- Skip if not boilings
+        if len(list(m.root.iter(cls="boiling", line=line))) == 0:
+            continue
 
-            # -- Add last cleaning
+        # -- Add last cleaning
 
-            m.push(
-                "cleaning",
-                size=(13, 0),
-                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                push_kwargs={"validator": Validator()},
-                cleaning_object="separator",
-                contour="2",
-                line=line,
-            )
+        m.push(
+            "cleaning",
+            size=(13, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="separator",
+            contour="2",
+            line=line,
+        )
 
-            m.push(
-                "cleaning",
-                size=(13, 0),
-                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                push_kwargs={"validator": Validator()},
-                cleaning_object="tubs",
-                contour="2",
-                line=line,
-            )
+        m.push(
+            "cleaning",
+            size=(13, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="tubs",
+            contour="2",
+            line=line,
+        )
 
-            m.push(
-                "cleaning",
-                size=(13, 0),
-                push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                push_kwargs={"validator": Validator()},
-                cleaning_object="buffer_tank_and_packer",
-                contour="2",
-                line=line,
-            )
+        m.push(
+            "cleaning",
+            size=(13, 0),
+            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+            push_kwargs={"validator": Validator()},
+            cleaning_object="buffer_tank_and_packer",
+            contour="2",
+            line=line,
+        )
 
-    # -- Add headers for each block
+    # -- Add headers for each batch
 
     for line in ["Кремчиз", "Маскарпоне"]:
         # - Skip if no boilings
