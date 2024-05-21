@@ -222,11 +222,17 @@ def to_boiling_plan(
     pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
     """
 
+    # - Check if already a dataframe
+
     if isinstance(boiling_plan_source, pd.DataFrame):
         # already a dataframe
         return boiling_plan_source
 
+    # - Cast workbook
+
     wb = cast_workbook(boiling_plan_source)
+
+    # - Read and post-process sheets
 
     dfs = []
 
@@ -240,15 +246,24 @@ def to_boiling_plan(
         else:
             default_boiling_volume = None
 
-        df = read_sheet(wb, ws_name, default_boiling_volume=default_boiling_volume, sheet_number=i)
+        df = read_sheet(
+            wb=wb,
+            sheet_name=ws_name,
+            default_boiling_volume=default_boiling_volume,
+            sheet_number=i,
+        )
         dfs.append(df)
 
-    df = update_boiling_plan(dfs, normalization, saturate, validate)
+    df = update_boiling_plan(
+        dfs=dfs,
+        normalization=normalization,
+        saturate=staticmethod,
+        validate=validate,
+    )
     df["packing_team_id"] = df["packing_team_id"].apply(lambda x: int(x))
 
-    # batch_id and boiling_id are the same as group_id
     df["batch_id"] = df["group_id"]
-    df["boiling_id"] = df["group_id"]
+    df["boiling_id"] = df["group_id"]  # boiling_id is the same as batch_id
     df["batch_type"] = "mozzarella"
     df = calc_absolute_batch_id(df, first_batch_ids_by_type)
     return df
