@@ -50,7 +50,7 @@ STYLE = {
     "salting": {"text": "посолка/нормализация/анализ", "color": "#92D050"},
     "pumping": {"text": "П", "color": "#948A54"},
     "analysis": {"text": "анализ", "color": "white"},
-    "packing": {"text": lambda b: f"фасовка {b.props['weight_netto']}кг", "color": "#C0504D"},
+    "packing": {"text": lambda b: f"{b.props['sku_name']}", "color": "#C0504D", "font_size": 8},
     "packing_switch": {"text": "Ф", "color": "grey"},
     "separation": {"text": lambda b: f"Сепарирование {int(b.props['input_kg'])}кг", "color": "#00B0F0"},
     "heating": {"text": "Н", "color": "#F79646"},

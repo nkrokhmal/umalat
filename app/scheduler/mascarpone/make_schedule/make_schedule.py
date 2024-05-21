@@ -331,6 +331,7 @@ def make_schedule(
                 output_kg=grp["kg"].sum(),
                 input_kg=grp.iloc[0]["input_kg"],
                 percent=grp.iloc[0]["boiling"].percent,
+                sku_name=grp.iloc[0]["sku"].name,
                 weight_netto=grp.iloc[0]["sku"].weight_netto,
             )
 
