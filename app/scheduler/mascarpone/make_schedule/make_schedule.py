@@ -295,27 +295,27 @@ def make_schedule(
                     line=line,
                 )
 
-            if prev_semifinished_group == "cream_cheese" and (is_cleaning_needed or is_last):
-                m.push_row(
-                    "cleaning",
-                    size=13,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                    push_kwargs={"validator": Validator()},
-                    cleaning_object="cream_cheese_tub",
-                    contour="1",
-                    line=line,
-                )
-
-            if prev_semifinished_group == "robiola" and (is_cleaning_needed or is_last):
-                m.push_row(
-                    "cleaning",
-                    size=13,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                    push_kwargs={"validator": Validator()},
-                    cleaning_object="cream_cheese_tub",
-                    contour="1",
-                    line=line,
-                )
+            if prev_semifinished_group in ["cream_cheese", "robiola"]:
+                if is_cleaning_needed or is_last:
+                    m.push_row(
+                        "cleaning",
+                        size=13,
+                        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                        push_kwargs={"validator": Validator()},
+                        cleaning_object="cream_cheese_tub",
+                        contour="1",
+                        line=line,
+                    )
+                elif is_new_batch:
+                    m.push_row(
+                        "cleaning",
+                        size=7,
+                        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                        push_kwargs={"validator": Validator()},
+                        cleaning_object="cream_cheese_tub",
+                        contour="1",
+                        line=line,
+                    )
 
             if is_last:
                 # last element
