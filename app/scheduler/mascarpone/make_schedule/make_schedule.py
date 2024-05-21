@@ -250,7 +250,7 @@ def make_schedule(
 
                     # - Full cleaning
 
-                    if not is_last:
+                    if not is_last and mascarpone_boilings_without_full_cleaning_count >= 8:
                         # full cleaning
 
                         # - Reset mascarpone_boilings_without_cleaning_count
