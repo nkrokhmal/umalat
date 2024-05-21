@@ -15,7 +15,12 @@ from app.utils.ricotta.boiling_plan_read import BoilingPlanReader
 
 def to_boiling_plan(
     boiling_plan_source: BoilingPlanLike,
-    first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
+    first_batch_ids_by_type: dict = {
+        "cottage_cheese": 1,
+        "cream": 1,
+        "mascarpone": 1,
+        "cream_cheese": 1,
+    },
 ) -> pd.DataFrame:
     """Считать файл плана варок в датафрейм
 
@@ -30,6 +35,8 @@ def to_boiling_plan(
     -------
     pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
     """
+
+    # - Check if already a dataframe
 
     if isinstance(boiling_plan_source, pd.DataFrame):
         # already a dataframe
@@ -46,10 +53,14 @@ def to_boiling_plan(
 
 
 def test():
+    df = to_boiling_plan(
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-21 Расписание рикотта.xlsx")
+    )
+    print(df.iloc[0])
+    print("-" * 100)
     pd.set_option("display.max_rows", 500)
     pd.set_option("display.max_columns", 500)
     pd.set_option("display.width", 1000)
-    df = to_boiling_plan(str(get_repo_path() / "app/data/tests/ricotta/boiling.xlsx"))
     print(df)
 
 
