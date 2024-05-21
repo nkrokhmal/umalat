@@ -188,7 +188,7 @@ def make_schedule(
         # -- Make boiling and packing blocks
 
         # init counters
-        mascarpone_boilings_without_cleaning_count = 0
+        mascarpone_boilings_without_full_cleaning_count = 0
         current_tub_num = 1  # 1 or 2
 
         # iterate over boilings
@@ -215,27 +215,12 @@ def make_schedule(
                 else prev_grp.iloc[0]["semifinished_group"] != grp.iloc[0]["semifinished_group"]
                 or prev_grp.iloc[0]["batch_id"] != grp.iloc[0]["batch_id"]
             )
-            is_cleaning_needed = (
-                False
-                if is_first
-                else is_new_batch
-                and (
-                    prev_grp.iloc[-1]["washing"]
-                    or (
-                        add_cleaning_after_eight_mascarpone_boilings
-                        and mascarpone_boilings_without_cleaning_count >= 8
-                        and mascarpone_boilings_without_cleaning_count % 8 == 0
-                        and prev_semifinished_group == "mascarpone"
-                        and semifinished_group == "mascarpone"
-                    )
-                )
-            )
 
-            # - Process edge cases
+            # - Add auxiliary blocks between batchs
 
-            # -- Separator acceleration
+            # - Before non-cream batches: separator_acceleration
 
-            if semifinished_group != "cream" and (is_first or prev_semifinished_group == "cream" and is_new_batch):
+            if semifinished_group != "cream" and (is_first or (prev_semifinished_group == "cream" and is_new_batch)):
                 # first non-cream of first non-cream after cream
                 m.push_row(
                     "separator_acceleration",
@@ -245,61 +230,66 @@ def make_schedule(
                     line=line,
                 )
 
-            # -- Pasteurizer cleaning
+            if is_new_batch or is_last:
+                # - Mascarpone cleanings
 
-            if prev_semifinished_group == "mascarpone" and (is_cleaning_needed or is_last):
-                # add pasteurizer cleaning
-                m.push_row(
-                    "cleaning",
-                    size=19,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                    push_kwargs={"validator": Validator()},
-                    cleaning_object="pasteurizer",
-                    contour="0",
-                    line=line,
-                )
+                if prev_semifinished_group == "mascarpone":
+                    # - Pasturizer cleaning
 
-            # - Full cleaning
+                    m.push_row(
+                        "cleaning",
+                        size=19 if mascarpone_boilings_without_full_cleaning_count >= 8 else 10,
+                        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                        push_kwargs={"validator": Validator()},
+                        cleaning_object="pasteurizer",
+                        contour="0",
+                        line=line,
+                    )
 
-            if prev_semifinished_group == "mascarpone" and is_cleaning_needed and not is_last:
-                # - Reset mascarpone_boilings_without_cleaning_count
+                    # - Full cleaning
 
-                mascarpone_boilings_without_cleaning_count = 0
+                    if not is_last:
+                        # full cleaning
 
-                # - Add full cleaning
+                        # - Reset mascarpone_boilings_without_cleaning_count
 
-                m.push_row(
-                    "cleaning",
-                    size=13,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                    push_kwargs={"validator": Validator()},
-                    cleaning_object="separator",
-                    contour="2",
-                    line=line,
-                )
+                        mascarpone_boilings_without_full_cleaning_count = 0
 
-                m.push_row(
-                    "cleaning",
-                    size=13,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                    push_kwargs={"validator": Validator()},
-                    cleaning_object="tubs",
-                    contour="2",
-                    line=line,
-                )
+                        # - Add full cleaning
 
-                m.push_row(
-                    "cleaning",
-                    size=13,
-                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                    push_kwargs={"validator": Validator()},
-                    cleaning_object="buffer_tank_and_packer",
-                    contour="2",
-                    line=line,
-                )
+                        m.push_row(
+                            "cleaning",
+                            size=13,
+                            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                            push_kwargs={"validator": Validator()},
+                            cleaning_object="separator",
+                            contour="2",
+                            line=line,
+                        )
 
-            if prev_semifinished_group in ["cream_cheese", "robiola"]:
-                if is_cleaning_needed or is_last:
+                        m.push_row(
+                            "cleaning",
+                            size=13,
+                            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                            push_kwargs={"validator": Validator()},
+                            cleaning_object="tubs",
+                            contour="2",
+                            line=line,
+                        )
+
+                        m.push_row(
+                            "cleaning",
+                            size=13,
+                            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                            push_kwargs={"validator": Validator()},
+                            cleaning_object="buffer_tank_and_packer",
+                            contour="2",
+                            line=line,
+                        )
+
+                # - Cream cheese cleanings
+
+                if prev_semifinished_group in ["cream_cheese", "robiola"]:
                     m.push_row(
                         "cleaning",
                         size=13,
@@ -310,16 +300,16 @@ def make_schedule(
                         line=line,
                     )
 
-                if is_new_batch:
-                    m.push_row(
-                        "cleaning",
-                        size=7,
-                        push_func=AxisPusher(start_from="last_beg", start_shift=-50),
-                        push_kwargs={"validator": Validator()},
-                        cleaning_object="heat_exchanger",
-                        contour="2",
-                        line=line,
-                    )
+                    if not is_last:
+                        m.push_row(
+                            "cleaning",
+                            size=7,
+                            push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                            push_kwargs={"validator": Validator()},
+                            cleaning_object="heat_exchanger",
+                            contour="2",
+                            line=line,
+                        )
 
             if is_last:
                 # last element
@@ -402,7 +392,7 @@ def make_schedule(
             # - Increment mascarpone_boilings_without_cleaning_count
 
             if semifinished_group == "mascarpone":
-                mascarpone_boilings_without_cleaning_count += 1
+                mascarpone_boilings_without_full_cleaning_count += 1
 
             # - Switch tub_num
 
