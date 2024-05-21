@@ -48,6 +48,12 @@ def test():
     output = draw_frontend(
         str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"),
         start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:00"},
+        first_batch_ids_by_type={
+            "cream": 1,
+            "mascarpone": 10,
+            "cream_cheese": 100,
+            "cottage_cheese": 1000,
+        },
     )
 
     output["workbook"].save("/tmp/schedule_mascarpone.xlsx")

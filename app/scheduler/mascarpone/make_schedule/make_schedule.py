@@ -158,16 +158,6 @@ def make_schedule(
 
     boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type).copy()
 
-    # - Rename columns of group_id, boiling_id
-
-    boiling_plan_df["_group_id"] = boiling_plan_df["group_id"]
-    boiling_plan_df["_boiling_id"] = boiling_plan_df["boiling_id"]
-    boiling_plan_df["_block_id"] = boiling_plan_df["block_id"]
-
-    boiling_plan_df["batch_id"] = boiling_plan_df["block_id"]
-    boiling_plan_df["boiling_id"] = boiling_plan_df["_group_id"]
-    # boiling_plan_df['batch_index'] = boiling_plan_df['_block_id'] # number of batch within a whole plan
-
     # - Init block maker
 
     m = BlockMaker("schedule")
@@ -195,7 +185,6 @@ def make_schedule(
         # -- Make boiling and packing blocks
 
         # init counters
-        current_non_cream_batch_count = 1
         mascarpone_boilings_without_cleaning_count = 0
         current_tub_num = 1  # 1 or 2
 
@@ -238,11 +227,6 @@ def make_schedule(
                     )
                 )
             )
-
-            # - Update group counters
-
-            if is_new_batch and prev_semifinished_group != "cream" and semifinished_group != "cream":
-                current_non_cream_batch_count += 1
 
             # - Process edge cases
 
@@ -342,8 +326,7 @@ def make_schedule(
             boiling = _make_boiling(
                 grp,
                 tub_num=current_tub_num,
-                batch_id=grp.iloc[0]["batch_id"],
-                non_cream_batch_id=current_non_cream_batch_count,
+                batch_id=grp.iloc[0]["absolute_batch_id"],
                 line=line,
                 output_kg=grp["kg"].sum(),
                 input_kg=grp.iloc[0]["input_kg"],
