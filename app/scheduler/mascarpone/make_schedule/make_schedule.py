@@ -117,12 +117,11 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__separator_acceleration(b1, b2):
-        if b1.props["semifinished_group"] == "cream":
-            validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
-
         if b1.props["line"] != b2.props["line"]:
             return
 
+        if b1.props["semifinished_group"] == "cream":
+            validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
         validate_disjoint_by_axis(b1["pumping"], b2, ordered=True)
 
     @staticmethod
@@ -144,6 +143,9 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
+        if b1.props["line"] != b2.props["line"]:
+            return
+
         if b1.props["contour"] == b2.props["contour"]:
             validate_disjoint_by_axis(b1, b2, distance=1, ordered=b1.props["line"] == b2.props["line"])
 
@@ -549,7 +551,7 @@ def make_schedule(
 
 def test():
     schedule = make_schedule(
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule_mascarpone.xlsx"),
     )["schedule"]
 
     print(schedule)
