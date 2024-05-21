@@ -226,14 +226,16 @@ def make_schedule(
             is_cleaning_needed = (
                 False
                 if is_first
-                else prev_grp.iloc[0]["washing"]
-                or (
-                    add_cleaning_after_eight_mascarpone_boilings
-                    and is_new_batch
-                    and mascarpone_boilings_without_cleaning_count >= 8
-                    and mascarpone_boilings_without_cleaning_count % 8 == 0
-                    and prev_semifinished_group == "mascarpone"
-                    and semifinished_group == "mascarpone"
+                else is_new_batch
+                and (
+                    prev_grp.iloc[-1]["washing"]
+                    or (
+                        add_cleaning_after_eight_mascarpone_boilings
+                        and mascarpone_boilings_without_cleaning_count >= 8
+                        and mascarpone_boilings_without_cleaning_count % 8 == 0
+                        and prev_semifinished_group == "mascarpone"
+                        and semifinished_group == "mascarpone"
+                    )
                 )
             )
 
@@ -273,7 +275,6 @@ def make_schedule(
             # - Full cleaning
 
             if prev_semifinished_group == "mascarpone" and is_cleaning_needed and not is_last:
-
                 # - Reset mascarpone_boilings_without_cleaning_count
 
                 mascarpone_boilings_without_cleaning_count = 0
