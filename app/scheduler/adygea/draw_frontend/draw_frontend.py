@@ -50,8 +50,8 @@ def test():
         start_time="10:00",
     )
 
-    output["workbook"].save("test.xlsx")
-    open_file_in_os("test.xlsx")
+    output["workbook"].save("/tmp/test_adygea.xlsx")
+    open_file_in_os("/tmp/test_adygea.xlsx")
 
 
 if __name__ == "__main__":

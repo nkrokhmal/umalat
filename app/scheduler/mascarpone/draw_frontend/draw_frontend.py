@@ -4,6 +4,7 @@ from typing import Optional
 from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.common.frontend_utils import draw_excel_frontend
 from app.scheduler.mascarpone.draw_frontend.style import STYLE
 from app.scheduler.mascarpone.draw_frontend.wrap_frontend import wrap_frontend
@@ -45,14 +46,12 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        # str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/2023-09-15 Расписание маскарпоне.xlsx"),
-        "/Users/marklidenberg/Desktop/2024.01.09 fix mascarpone/2024-01-10 План по варкам маскарпоне.xlsx",
-        # "/Users/marklidenberg/Downloads/2023-12-24 План по варкам маскарпоне.xlsx",
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"),
         start_times_by_line={"Маскарпоне": "06:00", "Кремчиз": "06:00"},
     )
 
-    output["workbook"].save("test.xlsx")
-    open_file_in_os("test.xlsx")
+    output["workbook"].save("/tmp/test_mozzarella.xlsx")
+    open_file_in_os("/tmp/test_mozzarella.xlsx")
 
 
 if __name__ == "__main__":

@@ -545,11 +545,7 @@ def make_schedule(
 
 def test():
     schedule = make_schedule(
-        # str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/План по варкам.xlsx")
-        str(
-            get_repo_path()
-            / "app/data/static/samples/by_department/mascarpone/2023-09-17 План по варкам маскарпоне.xlsx"
-        ),
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"),
     )["schedule"]
 
     print(schedule)

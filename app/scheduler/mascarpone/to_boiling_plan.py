@@ -66,9 +66,7 @@ def to_boiling_plan(
 
 
 def test():
-    df = to_boiling_plan(
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/2024-05-21 Расписание маскарпоне.xlsx")
-    )
+    df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"))
     print(df.iloc[0])
     print("-" * 100)
     pd.set_option("display.max_rows", 500)
