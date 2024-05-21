@@ -33,7 +33,7 @@ def make_salting(boiling_id: int, **props):
     boiling_technology = boiling.boiling_technologies[0]
 
     # - Make brynza boiling
-    with m.block("salting", boiling_id=boiling_id, **props):
+    with m.push("salting", boiling_id=boiling_id, **props):
         m.row("main", size=boiling_technology.salting_time // 5)
 
     return m.root["salting"]

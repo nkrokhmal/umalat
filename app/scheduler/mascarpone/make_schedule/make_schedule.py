@@ -240,7 +240,7 @@ def make_schedule(
 
             if group != "cream" and (is_first or prev_group == "cream" and is_new_group):
                 # first non-cream of first non-cream after cream
-                m.block(
+                m.push(
                     "separator_acceleration",
                     size=(3, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -252,7 +252,7 @@ def make_schedule(
 
             if prev_group == "mascarpone" and (is_cleaning_needed or is_last):
                 # add pasteurizer cleaning
-                m.block(
+                m.push(
                     "cleaning",
                     size=(19, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -265,7 +265,7 @@ def make_schedule(
             # - Full cleaning
 
             if prev_group == "mascarpone" and is_cleaning_needed and not is_last:
-                m.block(
+                m.push(
                     "cleaning",
                     size=(13, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -275,7 +275,7 @@ def make_schedule(
                     line=line,
                 )
 
-                m.block(
+                m.push(
                     "cleaning",
                     size=(13, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -285,7 +285,7 @@ def make_schedule(
                     line=line,
                 )
 
-                m.block(
+                m.push(
                     "cleaning",
                     size=(13, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -296,7 +296,7 @@ def make_schedule(
                 )
 
             if prev_group == "cream_cheese" and (is_cleaning_needed or is_last):
-                m.block(
+                m.push(
                     "cleaning",
                     size=(13, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -307,7 +307,7 @@ def make_schedule(
                 )
 
             if prev_group == "robiola" and (is_cleaning_needed or is_last):
-                m.block(
+                m.push(
                     "cleaning",
                     size=(13, 0),
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -343,7 +343,7 @@ def make_schedule(
                 and grp.iloc[0]["sku"].weight_netto != prev_grp.iloc[-1]["sku"].weight_netto
                 and {grp.iloc[0]["sku"].weight_netto, prev_grp.iloc[-1]["sku"].weight_netto} != {0.14, 0.18}
             ):
-                packing_switch = m.block(
+                packing_switch = m.push(
                     "packing_switch",
                     push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                     push_kwargs={"validator": Validator()},
@@ -355,15 +355,15 @@ def make_schedule(
                         0,
                     ),
                     line=line,
-                ).block
+                ).push
 
             # - Insert new boiling
 
-            boiling_block = m.block(
+            boiling_block = m.push(
                 boiling,
                 push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                 push_kwargs={"validator": Validator()},
-            ).block
+            ).push
 
             # - Mark packing switch disabled if distance between next boilign is too large
 
@@ -411,7 +411,7 @@ def make_schedule(
 
         # - Add last cleanings
 
-        m.block(
+        m.push(
             "cleaning",
             size=(13, 0),
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -421,7 +421,7 @@ def make_schedule(
             line=line,
         )
 
-        m.block(
+        m.push(
             "cleaning",
             size=(13, 0),
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -431,7 +431,7 @@ def make_schedule(
             line=line,
         )
 
-        m.block(
+        m.push(
             "cleaning",
             size=(13, 0),
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -460,7 +460,7 @@ def make_schedule(
             pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
             pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
             if grp.iloc[0]["semifinished_group"] in ["cream_cheese", "robiola"]:
-                m.block(
+                m.push(
                     "boiling_header",
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start, 0),
@@ -474,7 +474,7 @@ def make_schedule(
                 )
 
             elif grp.iloc[0]["semifinished_group"] != "mascarpone":
-                m.block(
+                m.push(
                     "boiling_header",
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start, 0),
@@ -490,7 +490,7 @@ def make_schedule(
             else:
                 # shifted 10 minutes to the left. Also add pouring_cream block
 
-                m.block(
+                m.push(
                     "boiling_header",
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start - 2, 0),
@@ -501,7 +501,7 @@ def make_schedule(
                     batch_number=grp.iloc[0]["batch_number"],
                 )
 
-                m.block(
+                m.push(
                     "pouring_cream",
                     size=(pouring_finish - pouring_start, 0),
                     x=(pouring_start - 2, 0),
@@ -522,13 +522,13 @@ def make_schedule(
                 min_shift=6,
             )
         ):
-            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line, shift_num=i)
-            m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", line=line, shift_num=i)
+            m.push("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", line=line, shift_num=i)
+            m.push("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", line=line, shift_num=i)
 
     # - Add last cleaning
 
     if any(m.root.iter(cls="boiling", line="Кремчиз")):
-        m.block(
+        m.push(
             "cleaning",
             size=(13, 0),
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),

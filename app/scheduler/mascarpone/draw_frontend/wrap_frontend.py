@@ -34,7 +34,7 @@ def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
     m = BlockMaker(
         "line",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
         line=line,
@@ -46,80 +46,80 @@ def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
 
     # - Add header
 
-    m.block(wrap_header(date=date, start_time=start_time, header="График работы маскарпоне"))
+    m.push(wrap_header(date=date, start_time=start_time, header="График работы маскарпоне"))
 
     # - Add shifts
 
-    with m.block("shift_line", start_time=start_time, size=(0, 1)):
+    with m.push("shift_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="shift", team="Бригадир"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add shifts
 
-    with m.block("shift_line", start_time=start_time, size=(0, 1)):
+    with m.push("shift_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="shift", team="Упаковка"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add boiling header
 
-    with m.block("boiling_header_line", start_time=start_time, size=(0, 1)):
+    with m.push("boiling_header_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="boiling_header"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add pouring cream line
 
-    with m.block("pouring_cream_line", start_time=start_time, size=(0, 1)):
+    with m.push("pouring_cream_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="pouring_cream"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add separator
 
-    with m.block("separator_line", start_time=start_time, size=(0, 1)):
+    with m.push("separator_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: cls in ["separation", "separator_acceleration"]):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add бак 1
 
-    with m.block("tub_1_line", start_time=start_time, size=(0, 1)):
+    with m.push("tub_1_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: cls in ["pouring", "salting", "heating"], tub_num=1):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add бак 2
 
-    with m.block("tub_2_line", start_time=start_time, size=(0, 1)):
+    with m.push("tub_2_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: cls in ["pouring", "salting", "heating"], tub_num=2):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add pumping
 
-    with m.block("pumping_line", start_time=start_time, size=(0, 1)):
+    with m.push("pumping_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="pumping"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add бак 3
 
-    with m.block("tub_3_line", start_time=start_time, size=(0, 1)):
+    with m.push("tub_3_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: cls in ["analysis", "ingredient", "packing", "packing_switch"]):
             if not block.props["disabled"]:
                 m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add packing lines
 
-    with m.block("contour_0", start_time=start_time, size=(0, 1)):
+    with m.push("contour_0", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: "cleaning", contour="0"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
-    with m.block("contour_1", start_time=start_time, size=(0, 1)):
+    with m.push("contour_1", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: "cleaning", contour="1"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
-    with m.block("contour_2", start_time=start_time, size=(0, 1)):
+    with m.push("contour_2", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls=lambda cls: "cleaning", contour="2"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add preparation
 
-    m.block(
+    m.push(
         "preparation",
         x=(next(schedule.iter(cls="preparation")).x[0], 4),
         start_time=start_time,
@@ -129,57 +129,57 @@ def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
 
     # - Add template
 
-    with m.block("template_block", index_width=1, push_func=add_push):
-        m.block(
+    with m.push("template_block", index_width=1, push_func=add_push):
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 6),
             size=(2, 1),
             text="Сепаратор",
         )
-        m.block(
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 7),
             size=(2, 1),
             text="Бак 1",
         )
-        m.block(
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 8),
             size=(2, 1),
             text="Бак 2",
         )
-        m.block(
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 9),
             size=(2, 1),
             text="Перекачивание в фасовочный танк",
         )
-        m.block(
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 10),
             size=(2, 1),
             text="Бак 3",
         )
-        m.block(
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 11),
             size=(2, 1),
             text="Грюнвальд" if line == 1 else "Ильпра роторная",
         )
-        m.block(
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 12),
             size=(2, 1),
             text="Контур 1",
         )
-        m.block(
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 13),
@@ -216,14 +216,14 @@ def wrap_frontend(
     m = BlockMaker(
         "frontend",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
     m.row("stub", size=0)  # start with 1
 
-    m.block(wrap_line(schedule, line="Кремчиз", date=date, start_time=min(start_times_by_line.values())))
-    m.block(wrap_line(schedule, line="Маскарпоне", date=date, start_time=min(start_times_by_line.values())))
+    m.push(wrap_line(schedule, line="Кремчиз", date=date, start_time=min(start_times_by_line.values())))
+    m.push(wrap_line(schedule, line="Маскарпоне", date=date, start_time=min(start_times_by_line.values())))
 
     # - Return
 

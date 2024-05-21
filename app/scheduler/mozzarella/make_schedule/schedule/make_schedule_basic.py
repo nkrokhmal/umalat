@@ -205,16 +205,16 @@ class ScheduleMaker:
     def _init_block_maker(self):
         self.m = BlockMaker("schedule")
         self.m.root.props.update(date=self.date)
-        self.m.block("master")
-        self.m.block("extra")
-        self.m.block("extra_packings")
+        self.m.push("master")
+        self.m.push("extra")
+        self.m.push("extra_packings")
 
-        with self.m.block("shifts"):
-            self.m.block("cheese_makers")
-            self.m.block("water_meltings")
-            self.m.block("water_packings")
-            self.m.block("salt_meltings")
-            self.m.block("salt_packings")
+        with self.m.push("shifts"):
+            self.m.push("cheese_makers")
+            self.m.push("water_meltings")
+            self.m.push("water_packings")
+            self.m.push("salt_meltings")
+            self.m.push("salt_packings")
 
     def _init_lines_df(self):
         # init lines df

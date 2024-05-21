@@ -27,20 +27,20 @@ def wrap_frontend(
     m = BlockMaker(
         "frontend",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
     m.row("stub", size=0)  # start with 1
 
-    m.block(wrap_header(date=date, start_time=start_time, header="График паковки"))
+    m.push(wrap_header(date=date, start_time=start_time, header="График паковки"))
 
     # make packing line
 
     _m = BlockMaker(
         "packing_line",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
@@ -49,25 +49,25 @@ def wrap_frontend(
         is_packing = block.props["cls"].startswith("packing_")
         is_packing_brynza = block.props["cls"] == "packing_brynza"
         is_packing_adygea = block.props["cls"] == "packing_adygea"
-        _m.block(
+        _m.push(
             _m.copy(block, with_props=True, size=(block.size[0], 4 if not is_packing else 2)),
             x=(block.x[0], 0 if not is_packing_brynza else 2),
             push_func=add_push,
         )
 
-    m.block(_m.root)
+    m.push(_m.root)
 
     # - Add template
 
-    with m.block("template_block", index_width=1, push_func=add_push):
-        m.block(
+    with m.push("template_block", index_width=1, push_func=add_push):
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 2),
             size=(2, 2),
             label="САККАРДО",
         )
-        m.block(
+        m.push(
             "template",
             push_func=add_push,
             x=(1, 4),

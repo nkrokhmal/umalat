@@ -13,7 +13,7 @@ def wrap_contour(contour, contour_id):
     m = BlockMaker(
         "contour",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         font_size=9,
     )
@@ -38,16 +38,16 @@ def wrap_frontend(schedule, date=None):
     m = BlockMaker(
         "frontend",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
     m.row("stub", size=0)  # start with 1
-    m.block(wrap_header(date=date, start_time=start_time, header="CIP Мойка контура 1-4"))
-    with m.block("contours 1-4", start_time=start_time, axis=1):
+    m.push(wrap_header(date=date, start_time=start_time, header="CIP Мойка контура 1-4"))
+    with m.push("contours 1-4", start_time=start_time, axis=1):
         for i, contour in enumerate(schedule.children[:4]):
-            m.block(wrap_contour(contour, i))
-            m.block(
+            m.push(wrap_contour(contour, i))
+            m.push(
                 "label",
                 push_func=add_push,
                 size=(1, 1),
@@ -57,11 +57,11 @@ def wrap_frontend(schedule, date=None):
             )
             m.row("stub", size=0)
 
-    m.block(wrap_header(date=date, start_time=start_time, header="CIP Мойка MPINOX"))
-    with m.block("mpinox", start_time=start_time, axis=1):
+    m.push(wrap_header(date=date, start_time=start_time, header="CIP Мойка MPINOX"))
+    with m.push("mpinox", start_time=start_time, axis=1):
         for i, contour in enumerate(schedule.children[4:]):
-            m.block(wrap_contour(contour, i))
-            m.block(
+            m.push(wrap_contour(contour, i))
+            m.push(
                 "label",
                 push_func=add_push,
                 size=(1, 1),

@@ -5,7 +5,7 @@ from app.enum import LineName
 
 def make_cooling_process(line_name, cooling_technology, melting_process_size=None, size=None, *args, **kwargs):
     m = BlockMaker("cooling_process", *args, **kwargs)
-    with m.block("start"):
+    with m.push("start"):
         cooling_times = (
             [
                 cooling_technology.first_cooling_time,
@@ -20,6 +20,6 @@ def make_cooling_process(line_name, cooling_technology, melting_process_size=Non
     if size:
         melting_process_size = size - m.root["start"].size[0]
 
-    with m.block("finish"):
+    with m.push("finish"):
         m.row("cooling", size=melting_process_size)
     return m.root

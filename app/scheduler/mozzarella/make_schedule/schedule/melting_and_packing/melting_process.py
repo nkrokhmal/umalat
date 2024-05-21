@@ -72,21 +72,21 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
     start_from = 0
     for c in blocks:
         if c.props["cls"] == "packing_configuration":
-            m.block(c, push_func=AxisPusher(start_from="max_end"), push_kwargs={"validator": Validator()})
+            m.push(c, push_func=AxisPusher(start_from="max_end"), push_kwargs={"validator": Validator()})
         else:
-            m.block(c, push_func=AxisPusher(start_from=start_from), push_kwargs={"validator": Validator()})
+            m.push(c, push_func=AxisPusher(start_from=start_from), push_kwargs={"validator": Validator()})
         if c.props["cls"] == "melting_and_packing_process":
             start_from = c["melting_process"].y[0]
 
     mp = m.root
 
     m = BlockMaker("melting_and_packing", axis=0, make_with_copy_cut=True)
-    with m.block("melting"):
-        serving = m.row("serving", push_func=add_push, size=boiling_model.line.serving_time // 5).block
+    with m.push("melting"):
+        serving = m.row("serving", push_func=add_push, size=boiling_model.line.serving_time // 5).push
 
         with m.row("meltings", push_func=add_push, x=serving.size[0]):
             for i, block in enumerate(mp["melting_and_packing_process", True]):
-                m.block(
+                m.push(
                     m.copy(block["melting_process"], with_props=True),
                     push_func=add_push,
                     bff=block["melting_process"].props["bff"],
@@ -98,7 +98,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
             x=(serving.size[0], 0),
         ):
             for i, block in enumerate(mp["melting_and_packing_process", True]):
-                m.block(m.copy(block["cooling_process"], with_props=True), push_func=add_push)
+                m.push(m.copy(block["cooling_process"], with_props=True), push_func=add_push)
 
     for packing_team_id in range(1, N_PACKING_TEAMS + 1):
         for key in ["packing", "collecting"]:

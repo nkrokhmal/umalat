@@ -68,15 +68,15 @@ def wrap_cheese_makers(master, rng):
     m = BlockMaker(
         "cheese_makers",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
 
     for i in rng:
-        with m.block(f"cheese_maker"):
-            with m.block("header", push_func=add_push, index_width=0, start_time="00:00"):
-                m.block(
+        with m.push(f"cheese_maker"):
+            with m.push("header", push_func=add_push, index_width=0, start_time="00:00"):
+                m.push(
                     "template",
                     push_func=add_push,
                     x=(1, 0),
@@ -101,7 +101,7 @@ def wrap_cheese_makers(master, rng):
                     boiling_size,
                 )
 
-                with m.block(
+                with m.push(
                     "pouring_block",
                     boiling_label=boiling_label,
                     boiling_id=boiling.props["boiling_id"],
@@ -109,14 +109,14 @@ def wrap_cheese_makers(master, rng):
                     push_func=add_push,
                     axis=1,
                 ):
-                    with m.block():
+                    with m.push():
                         m.row("termizator", size=boiling["pouring"]["first"]["termizator"].size[0])
                         m.row(
                             "pouring_name",
                             size=boiling["pouring"].size[0] - boiling["pouring"]["first"]["termizator"].size[0],
                             boiling_label=boiling_label,
                         )
-                    with m.block(font_size=8):
+                    with m.push(font_size=8):
                         m.row(
                             "pouring_and_fermenting",
                             push_func=add_push,
@@ -138,7 +138,7 @@ def wrap_cheese_makers(master, rng):
                         #     for b in boiling["steams"]["steam_consumption", True]:
                         #         m.block(make_steam_blocks(b, x=b.x_rel), push_func=add_push)
 
-        m.block("stub", size=(0, 2))
+        m.push("stub", size=(0, 2))
 
     return m.root
 
@@ -147,23 +147,23 @@ def wrap_cleanings(master):
     m = BlockMaker(
         "cleanings_row",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
 
-    with m.block("header", push_func=add_push, index_width=0, start_time="00:00"):
-        m.block(
+    with m.push("header", push_func=add_push, index_width=0, start_time="00:00"):
+        m.push(
             "template", push_func=add_push, x=(1, 0), size=(3, 2), text="Мойка термизатора", color="white", bold=True
         )
 
     for cleaning in master.iter(cls="cleaning"):
         b = m.copy(cleaning, with_props=True)
         b.update_size((b.props["size"][0], 2))
-        m.block(b, push_func=add_push)
+        m.push(b, push_func=add_push)
 
     # add two lines for "Расход пара"
-    m.block("stub", size=(0, 2))
+    m.push("stub", size=(0, 2))
     return m.root
 
 
@@ -172,7 +172,7 @@ def wrap_multihead_cleanings(master):
     for multihead_cleaning in master.iter(cls="multihead_cleaning"):
         b = m.copy(multihead_cleaning, with_props=True)
         b.update_size((b.props["size"][0], 1))
-        m.block(b, push_func=add_push)
+        m.push(b, push_func=add_push)
     return m.root
 
 
@@ -180,13 +180,13 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
     m = BlockMaker(
         "melting",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
 
-    with m.block("header", push_func=add_push, start_time="00:00"):
-        m.block(
+    with m.push("header", push_func=add_push, start_time="00:00"):
+        m.push(
             "template",
             index_width=0,
             x=(1, 0),
@@ -195,20 +195,20 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
             push_func=add_push,
         )
 
-    with m.block("melting_row", push_func=add_push):
+    with m.push("melting_row", push_func=add_push):
         for boiling in master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == line_name):
             form_factor_label = calc_form_factor_label(
                 [melting_process.props["bff"] for melting_process in boiling.iter(cls="melting_process")]
             )
 
-            with m.block(
+            with m.push(
                 "melting_block",
                 push_func=add_push,
                 axis=1,
                 boiling_id=boiling.props["boiling_id"],
                 form_factor_label=form_factor_label,
             ):
-                with m.block("serving_row"):
+                with m.push("serving_row"):
                     m.row(
                         "serving",
                         push_func=add_push,
@@ -216,7 +216,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
                         size=boiling["melting_and_packing"]["melting"]["serving"].size[0],
                     )
 
-                with m.block("label_row"):
+                with m.push("label_row"):
                     m.row(
                         "serving",
                         push_func=add_push,
@@ -236,7 +236,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
                         form_factor_label=boiling.props["form_factor_label"],
                     )
 
-                with m.block("melting_row"):
+                with m.push("melting_row"):
                     m.row(
                         "melting_process",
                         push_func=add_push,
@@ -245,7 +245,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
                     )
 
     n_cooling_lines = 0
-    m.block("cooling_row", axis=1)
+    m.push("cooling_row", axis=1)
     cooling_lines = []
 
     for boiling in master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == line_name):
@@ -302,7 +302,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
                 if n_cooling_lines == 100:
                     raise AssertionError("Создано слишком много линий охлаждения.")
 
-    m.block("stub", size=(0, 2))
+    m.push("stub", size=(0, 2))
     return m.root
 
 
@@ -311,19 +311,19 @@ def wrap_shifts(shifts):
     shifts = m.copy(shifts, with_props=True)
     for shift in shifts.iter(cls="shift"):
         shift.update_size(size=(shift.size[0], 1))  # todo maybe: refactor. Should be better [@marklidenberg]
-    m.block(shifts, push_func=add_push)
+    m.push(shifts, push_func=add_push)
     return m.root
 
 
 def wrap_melting(boiling, line_name):
-    m = BlockMaker("meltings", default_row_width=1, default_col_width=1, axis=1)
+    m = BlockMaker("meltings", default_row_width=1, default_column_width=1, axis=1)
 
     form_factor_label = calc_form_factor_label(
         [melting_process.props["bff"] for melting_process in boiling.iter(cls="melting_process")]
     )
     cooling_label = "cooling" if line_name == LineName.WATER else "salting"
 
-    with m.block(
+    with m.push(
         "melting_block",
         push_func=add_push,
         axis=1,
@@ -341,7 +341,7 @@ def wrap_melting(boiling, line_name):
                 form_factor_label=boiling.props["form_factor_label"],
             )
 
-        with m.block("melting_row"):
+        with m.push("melting_row"):
             m.row(
                 "serving",
                 push_func=add_push,
@@ -362,7 +362,7 @@ def wrap_melting(boiling, line_name):
                 ],
             )
 
-        with m.block("cooling_row"):
+        with m.push("cooling_row"):
             m.row(
                 cooling_label,
                 push_func=add_push,
@@ -382,12 +382,12 @@ def wrap_meltings_2(master, line_name, title):
 
     melting_lines = []
     for i in range(n_lines):
-        melting_lines.append(m.block(f"salt_melting_{i}", size=(0, 3)).block)
+        melting_lines.append(m.push(f"salt_melting_{i}", size=(0, 3)).push)
 
         # add line for "Расход пара"
-        m.block("stub", size=(0, 1))
+        m.push("stub", size=(0, 1))
 
-    m.block(
+    m.push(
         "template",
         push_func=add_push,
         index_width=0,
@@ -410,7 +410,7 @@ def wrap_packing_block(packing_block, boiling_id):
         "packing_block",
         push_func=add_push,
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         x=(packing_block.x[0], 0),
         boiling_id=boiling_id,
@@ -418,7 +418,7 @@ def wrap_packing_block(packing_block, boiling_id):
         brand_label=brand_label,
         group_form_factor_label=group_form_factor_label,
     )
-    with m.block():
+    with m.push():
         if packing_block.size[0] >= 4:
             m.row("packing_label", size=3)
             m.row("packing_name", size=packing_block.size[0] - 3)
@@ -430,10 +430,10 @@ def wrap_packing_block(packing_block, boiling_id):
             # update 2021.10.21
             m.row("packing_label", size=1)
 
-    with m.block():
+    with m.push():
         m.row("packing_brand", size=packing_block.size[0])
 
-    with m.block():
+    with m.push():
         for packing_process in packing_block.iter(cls="process"):
             m.row(
                 "packing_process", push_func=add_push, x=packing_process.props["x_rel"][0], size=packing_process.size[0]
@@ -447,16 +447,16 @@ def wrap_packings(master, line_name):
     m = BlockMaker(
         "packing",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
 
     for packing_team_id in range(1, 3):
-        with m.block("packing_team", size=(0, 3), axis=0):
+        with m.push("packing_team", size=(0, 3), axis=0):
             for boiling in master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == line_name):
                 for packing_block in boiling.iter(cls="collecting", packing_team_id=packing_team_id):
-                    m.block(wrap_packing_block(packing_block, boiling.props["boiling_id"]), push_func=add_push)
+                    m.push(wrap_packing_block(packing_block, boiling.props["boiling_id"]), push_func=add_push)
             try:
                 for conf in master["packing_configuration", True]:
                     # first level only
@@ -472,7 +472,7 @@ def wrap_packings(master, line_name):
 def wrap_extra_packings(extra_packings):
     m = BlockMaker("packing", axis=1)
     for packing_block in extra_packings.iter(cls="packing"):
-        m.block(
+        m.push(
             wrap_packing_block(packing_block, packing_block.props["boiling_id"]),
             push_func=add_push,
         )
@@ -518,37 +518,37 @@ def wrap_frontend(
 
     m = BlockMaker("root", axis=1)
 
-    m.block("stub", size=(0, 1))
+    m.push("stub", size=(0, 1))
 
     start_t = min([boiling.x[0] for boiling in master["boiling", True]])  # first pouring time
     start_t = int(custom_round(start_t, 12, "floor"))  # round to last hour
     start_t -= 24
     start_time = cast_time(start_t)
-    m.block(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
-    with m.block("pouring", start_time=start_time, axis=1):
+    m.push(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
+    with m.push("pouring", start_time=start_time, axis=1):
         if schedule["shifts"]:
-            m.block(wrap_shifts(schedule["shifts"]["cheese_makers"]))
-        m.block(wrap_cheese_makers(master, range(2)))
-        m.block(wrap_cleanings(master))
-        m.block(wrap_cheese_makers(master, range(2, 4)))
+            m.push(wrap_shifts(schedule["shifts"]["cheese_makers"]))
+        m.push(wrap_cheese_makers(master, range(2)))
+        m.push(wrap_cleanings(master))
+        m.push(wrap_cheese_makers(master, range(2, 4)))
 
     start_t = min([boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]])  # first melting time
     start_t = int(custom_round(start_t, 12, "floor"))  # round to last hour
     start_t -= 24
     start_time = cast_time(start_t)
-    m.block(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
+    m.push(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
 
-    with m.block("melting", start_time=start_time, axis=1):
+    with m.push("melting", start_time=start_time, axis=1):
         is_water_present = (
             len(list(master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == LineName.WATER))) > 0
         )
 
         if not is_water_present:
             m.col("stub", size=1)
-            m.block(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
+            m.push(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
             m.col("stub", size=1)
 
-            m.block(
+            m.push(
                 "template",
                 push_func=add_push,
                 x=(1, 1),
@@ -560,9 +560,9 @@ def wrap_frontend(
         else:
             # m.block(wrap_multihead_cleanings(master))
             if schedule["shifts"]:
-                m.block(wrap_shifts(schedule["shifts"]["water_meltings"]))
+                m.push(wrap_shifts(schedule["shifts"]["water_meltings"]))
 
-            m.block(
+            m.push(
                 wrap_meltings_1(
                     master,
                     LineName.WATER,
@@ -573,16 +573,16 @@ def wrap_frontend(
 
             # make(make_meltings_2(schedule, LineName.WATER, 'Линия плавления моцареллы в воде №1'))
             if schedule["shifts"]:
-                m.block(wrap_shifts(schedule["shifts"]["water_packings"]))
+                m.push(wrap_shifts(schedule["shifts"]["water_packings"]))
 
-            m.block(wrap_packings(master, LineName.WATER))
+            m.push(wrap_packings(master, LineName.WATER))
         if schedule["shifts"]:
-            m.block(wrap_shifts(schedule["shifts"]["salt_meltings"]))
-        m.block(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
+            m.push(wrap_shifts(schedule["shifts"]["salt_meltings"]))
+        m.push(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
         if schedule["shifts"]:
-            m.block(wrap_shifts(schedule["shifts"]["salt_packings"]))
-        m.block(wrap_packings(master, LineName.SALT))
-        m.block(wrap_extra_packings(extra_packings))
+            m.push(wrap_shifts(schedule["shifts"]["salt_packings"]))
+        m.push(wrap_packings(master, LineName.SALT))
+        m.push(wrap_extra_packings(extra_packings))
 
     # - Add frontend to output and return
 

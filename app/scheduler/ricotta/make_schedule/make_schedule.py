@@ -156,7 +156,7 @@ def make_schedule(
                 print(is_manual_cleaning_needed)
             # - Push block
 
-            m.block(
+            m.push(
                 boiling,
                 push_func=AxisPusher(start_from="last_beg", start_shift=-50),
                 push_kwargs={"validator": Validator()},
@@ -168,7 +168,7 @@ def make_schedule(
             # - Push manual cleaning if needed
 
             if is_manual_cleaning_needed:
-                m.block(
+                m.push(
                     "manual_cleaning",
                     size=(8, 0),
                     x=(boiling["dray_ricotta"].x[0] - 8, 0),
@@ -182,7 +182,7 @@ def make_schedule(
     # - Add cleanings
 
     for floculator_num in [floculator.props["floculator_num"] for floculator in m.root.iter(cls="boiling")][-3:]:
-        m.block(
+        m.push(
             "cleaning",
             size=(12, 0),
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -192,7 +192,7 @@ def make_schedule(
         )
 
     for cleaning_object in ["drenator", "lishat_richi", "buffer_tank"]:
-        m.block(
+        m.push(
             "cleaning",
             size=(12, 0),
             push_func=AxisPusher(start_from="last_beg", start_shift=-50),
@@ -212,7 +212,7 @@ def make_schedule(
             min_shift=6,
         )
     ):
-        m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", shift_num=i)
+        m.push("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Бригадир", shift_num=i)
 
     # -- Packing
 
@@ -224,7 +224,7 @@ def make_schedule(
             min_shift=6,
         )
     ):
-        m.block("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", shift_num=i)
+        m.push("shift", size=(b - a, 0), x=(a, 0), push_func=add_push, team="Упаковка", shift_num=i)
 
     # - Return result
 

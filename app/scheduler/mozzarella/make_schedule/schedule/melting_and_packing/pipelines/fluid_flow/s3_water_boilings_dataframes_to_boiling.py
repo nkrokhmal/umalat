@@ -37,14 +37,14 @@ class BoilingsDataframesToBoilings:
                 size=(row["end"] - row["beg"]) // 5,
                 x=(row["beg"] // 5 - start_from // 5, 0),
             )
-            m.block(cooling_process, push_func=add_push, bff=row["item"])
+            m.push(cooling_process, push_func=add_push, bff=row["item"])
         return m.root
 
     def _make_melting_and_packing(self, boiling_dataframes, boiling_model):
         m = BlockMaker("melting_and_packing")
 
-        with m.block("melting"):
-            serving = m.row("serving", push_func=add_push, size=boiling_model.line.serving_time // 5).block
+        with m.push("melting"):
+            serving = m.row("serving", push_func=add_push, size=boiling_model.line.serving_time // 5).push
 
             line = self._make_line(boiling_dataframes["meltings"], "meltings", "bff")
             line.props.update(x=(serving.size[0], 0))

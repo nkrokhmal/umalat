@@ -26,7 +26,7 @@ def wrap_frontend(
     m = BlockMaker(
         "frontend",
         default_row_width=3,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
@@ -38,7 +38,7 @@ def wrap_frontend(
     # - Make packing groups
 
     for packing_group in schedule["packing_group"]:
-        m.block(
+        m.push(
             "packing_group",
             size=(packing_group.size[0], 1),
             x=(packing_group.x[0], 0),
@@ -49,11 +49,11 @@ def wrap_frontend(
 
     for key in ["packing", "long_switch", "short_switch"]:
         for block in schedule.iter(cls=key):
-            m.block(m.copy(block, with_props=True), size=(block.size[0], 2), x=(block.x[0], 1), push_func=add_push)
+            m.push(m.copy(block, with_props=True), size=(block.size[0], 2), x=(block.x[0], 1), push_func=add_push)
 
     for key in ["preparation", "refurbishment", "cleaning"]:
         for block in schedule.iter(cls=key):
-            m.block(m.copy(block, with_props=True), size=(block.size[0], 3), x=(block.x[0], 0), push_func=add_push)
+            m.push(m.copy(block, with_props=True), size=(block.size[0], 3), x=(block.x[0], 0), push_func=add_push)
 
     # - Add rubber_ prefix to all blocks
 

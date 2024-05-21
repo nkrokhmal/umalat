@@ -88,13 +88,13 @@ def make_schedule(
 
         boiling, packing = _make_boiling_and_packing(grp, tank_number=tank_number)
 
-        m.block(
+        m.push(
             boiling,
             push_func=AxisPusher(start_from="max_beg", start_shift=-50),
             push_kwargs={"validator": Validator()},
             is_first=i == 0,
         )
-        m.block(
+        m.push(
             packing,
             push_func=AxisPusher(start_from="max_beg", start_shift=0),
             push_kwargs={"validator": Validator()},
@@ -102,7 +102,7 @@ def make_schedule(
 
     # -- Make displacement and cleaning blocks
 
-    m.block(
+    m.push(
         m.create_block("displacement", size=(line.displacement_time // 5, 1)),
         push_func=AxisPusher(start_from="max_beg", start_shift=-50),
         push_kwargs={"validator": Validator()},
@@ -110,7 +110,7 @@ def make_schedule(
 
     # -- Make cleaning block
 
-    m.block(
+    m.push(
         m.create_block("cleaning", size=(line.cleaning_time // 5, 1)),
         push_func=AxisPusher(start_from="max_beg", start_shift=-50),
         push_kwargs={"validator": Validator()},

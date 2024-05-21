@@ -9,12 +9,12 @@ def wrap_header(date, start_time="07:00", header="", period=566):
     m = BlockMaker(
         "header",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
 
-    with m.block("header", size=(0, 1), index_width=2):
+    with m.push("header", size=(0, 1), index_width=2):
         m.row(size=1, text=header)
         m.row(size=1, text=cast_str(date, "%d.%m.%Y"), bold=True)
         for i in range(period):

@@ -16,14 +16,19 @@ def make_schedule(
 
     # - Init block maker
 
-    m = BlockMaker("schedule", default_row_width=1, default_col_width=1, axis=0)
+    m = BlockMaker(
+        "schedule",
+        default_row_width=1,
+        default_column_width=1,
+        axis=0,
+    )
 
     # - Make schedule
 
     m.row("preparation", size=24)  # 2 hours
 
     for is_first, is_last, (i, row) in mark_ends(boiling_plan_df.iterrows()):
-        with m.block("packing_group", kg=row["kg"], sku=row["sku"]):
+        with m.push("packing_group", kg=row["kg"], sku=row["sku"]):
             # - Get packing_speed
 
             packing_speed = row["sku"].packing_speed

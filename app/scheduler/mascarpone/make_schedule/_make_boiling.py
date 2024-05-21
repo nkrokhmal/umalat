@@ -85,7 +85,7 @@ def _make_boiling(boiling_group_df, **kwargs):
     mark_consecutive_groups(boiling_group_df, "weight_netto", "weight_group_id")
 
     packing_m = BlockMaker()
-    with packing_m.block("packing_group"):
+    with packing_m.push("packing_group"):
         # - Add ingredient if needed
 
         if technology.analysis_time:

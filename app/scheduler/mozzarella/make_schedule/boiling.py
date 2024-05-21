@@ -17,20 +17,20 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
         termizator_time = boiling_model.line.pouring_time * boiling_volume / boiling_model.line.output_kg
         termizator_time = custom_round(termizator_time, 5, "ceil")
 
-    with m.block(
+    with m.push(
         "boiling",
         boiling_id=boiling_id,
         boiling_volume=boiling_volume,
         boiling_model=boiling_model,
     ):
-        with m.block("pouring"):
-            with m.block("first"):
+        with m.push("pouring"):
+            with m.push("first"):
                 m.row("termizator", size=termizator_time // 5)
                 m.row("fermenting", size=bt.pouring_time // 5 - termizator_time // 5)
                 m.row("soldification", size=bt.soldification_time // 5)
                 m.row("cutting", size=bt.cutting_time // 5)
                 m.row("pumping_out", size=bt.pumping_out_time // 5)
-            with m.block("second"):
+            with m.push("second"):
                 m.row("pouring_off", size=bt.pouring_off_time // 5)
                 m.row("extra", size=bt.extra_time // 5)
         m.row(

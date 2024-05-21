@@ -25,7 +25,7 @@ def wrap_line(
     m = BlockMaker(
         "line",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
         line=line,
@@ -36,17 +36,17 @@ def wrap_line(
 
     # - Add header
 
-    m.block(wrap_header(date=date, start_time=start_time, header="График работы рикотты"))
+    m.push(wrap_header(date=date, start_time=start_time, header="График работы рикотты"))
 
     # - Add shifts
 
-    with m.block("shift_line", start_time=start_time, size=(0, 1)):
+    with m.push("shift_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="shift", team="Бригадир"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add shifts
 
-    with m.block("shift_line", start_time=start_time, size=(0, 1)):
+    with m.push("shift_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="shift", team="Упаковка"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
@@ -55,12 +55,12 @@ def wrap_line(
     # -- Floculators
 
     for i in range(3):
-        with m.block(f"floculator_{i + 1}", start_time=start_time, size=(0, 2)):
+        with m.push(f"floculator_{i + 1}", start_time=start_time, size=(0, 2)):
             for boiling in schedule.iter(cls="boiling", floculator_num=i + 1):
-                with m.block("first_row", size=(0, 1), x=(0, 0), push_func=add_push):
+                with m.push("first_row", size=(0, 1), x=(0, 0), push_func=add_push):
                     m.row(m.copy(boiling["boiling_preparation"], with_props=True, size=(2, 1)), push_func=add_push)
                     m.row(m.copy(boiling["pouring"], with_props=True, size=(None, 1)), push_func=add_push)
-                with m.block("second_row", size=(0, 1), x=(0, 1), push_func=add_push):
+                with m.push("second_row", size=(0, 1), x=(0, 1), push_func=add_push):
                     m.row(m.copy(boiling["heating"], with_props=True, size=(None, 1)), push_func=add_push)
                     m.row(m.copy(boiling["lactic_acid"], with_props=True, size=(None, 1)), push_func=add_push)
                     m.row(m.copy(boiling["heating_short"], with_props=True, size=(None, 1)), push_func=add_push)
@@ -69,7 +69,7 @@ def wrap_line(
     # -- Drenators
 
     for i in range(2):
-        with m.block(f"drenator_{i + 1}", start_time=start_time, size=(0, 1)):
+        with m.push(f"drenator_{i + 1}", start_time=start_time, size=(0, 1)):
             for block in schedule.iter(
                 cls=lambda cls: cls in ["dray_ricotta", "salting", "ingredient", "manual_cleaning"], drenator_num=i + 1
             ):
@@ -77,15 +77,15 @@ def wrap_line(
 
     # -- Pumping
 
-    with m.block("pumping_line", start_time=start_time, size=(0, 1)):
+    with m.push("pumping_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="pumping"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # -- Packing
 
-    with m.block("packing_line", start_time=start_time, size=(0, 1)):
+    with m.push("packing_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="packing"):
-            m.block(
+            m.push(
                 "packing_header",
                 size=(2, 1),
                 x=(block.x[0], 0),
@@ -96,17 +96,17 @@ def wrap_line(
 
     # - Cleaning
 
-    with m.block("cleaning_line", start_time=start_time, size=(0, 1)):
+    with m.push("cleaning_line", start_time=start_time, size=(0, 1)):
         for block in schedule.iter(cls="cleaning"):
             m.row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add preparation
 
-    m.block(m.copy(schedule["preparation"], with_props=True), size=(6, 13), x=(0, 1), push_func=add_push)
+    m.push(m.copy(schedule["preparation"], with_props=True), size=(6, 13), x=(0, 1), push_func=add_push)
 
     # - Add template
 
-    with m.block("template_block", index_width=1, push_func=add_push):
+    with m.push("template_block", index_width=1, push_func=add_push):
         current_row = 1
         for i, (row_name, size) in enumerate(
             [
@@ -122,7 +122,7 @@ def wrap_line(
                 ("Сип-мойка контур 2", 1),
             ]
         ):
-            m.block(
+            m.push(
                 "template",
                 push_func=add_push,
                 x=(1, current_row),
@@ -158,13 +158,13 @@ def wrap_frontend(
     m = BlockMaker(
         "frontend",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
     m.row("stub", size=0)  # start with 1
 
-    m.block(wrap_line(schedule, line="Кремчиз", date=date, start_time=start_time))
+    m.push(wrap_line(schedule, line="Кремчиз", date=date, start_time=start_time))
 
     # - Return
 

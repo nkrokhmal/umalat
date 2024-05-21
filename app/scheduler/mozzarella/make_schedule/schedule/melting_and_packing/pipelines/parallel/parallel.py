@@ -194,7 +194,7 @@ def make_mpp(boiling_df, left_boiling_volume):
         bff=bff,
     )
 
-    m.block(
+    m.push(
         make_cooling_process(
             line_name=boiling_model.line.name,
             cooling_technology=bff.default_cooling_technology,
