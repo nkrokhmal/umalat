@@ -10,7 +10,6 @@ from app.globals import db
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models.helpers import cast_model
 from app.models.ricotta import RicottaSKU
-from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
 
 
 class RicottaBoilingPlanReaderException(Exception):

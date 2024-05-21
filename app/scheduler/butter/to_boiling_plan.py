@@ -9,7 +9,7 @@ from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import ButterSKU, cast_model
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
+from app.scheduler.calc_absolute_batch_id import calc_absolute_batch_id
 
 
 def to_boiling_plan(
@@ -20,8 +20,14 @@ def to_boiling_plan(
 
     Может читать и файл расписания, т.к. там там обычно есть лист с планом варок
 
-    :param boiling_plan_source: str or openpyxl.Workbook
-    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
+    Parameters
+    ----------
+    boiling_plan_source : str or openpyxl.Workbook or pd.DataFrame
+        Путь к файлу плана варок или сам файл
+
+    Returns
+    -------
+    pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
     """
 
     if isinstance(boiling_plan_source, pd.DataFrame):
@@ -32,7 +38,6 @@ def to_boiling_plan(
 
     wb = cast_workbook(boiling_plan_source)
 
-    cur_id = 0
     ws = wb["План варок"]
 
     values = []
@@ -47,27 +52,33 @@ def to_boiling_plan(
         values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
     df = pd.DataFrame(values, columns=header)
+
+    # - Post-process dataframe
+
+    # -- Basic
+
     df = df[["Номер группы варок", "SKU", "КГ"]]
     df.columns = ["group_id", "sku", "kg"]
     df = df[df["sku"] != "-"]
-
     df["group_id"] = df["group_id"].astype(int)
-
-    # batch_id and boiling_id are the same with group_id
-    df["batch_id"] = df["group_id"]
-    df["boiling_id"] = df["group_id"]
-    df["batch_type"] = "butter"
     df["sku"] = df["sku"].apply(lambda sku: cast_model(ButterSKU, sku))
+
+    # -- Batches
+
+    df["batch_type"] = "butter"
+    """used later for storing batch ids for continuous numbering. 
+    `Batch` mean different things in different departments. For mozzarella it's a boiling, for mascarpone it is a tank"""
+    df["batch_id"] = df["group_id"]  # the same as group_id for butter
+    df["absolute_batch_id"] = calc_absolute_batch_id(  # continuous numbering, offset by first_batch_ids_by_type
+        boiling_plan_df=df,
+        first_batch_ids_by_type=first_batch_ids_by_type,
+    )
 
     # - Saturate boiling plan
 
     df["boiling"] = df["sku"].apply(lambda sku: delistify(sku.made_from_boilings, single=True))
     df["start"] = None
     df["finish"] = None
-
-    # - Update absolute batch id
-
-    df = update_absolute_batch_id(boiling_plan_df=df, first_batch_ids_by_type=first_batch_ids_by_type)
 
     # - Return
 
@@ -79,7 +90,9 @@ def test():
         str(get_repo_path() / "app/data/static/samples/by_department/butter/2023-09-03 План по варкам масло.xlsx")
     )
     print(df.iloc[0])
-
+    pd.set_option("display.max_rows", 500)
+    pd.set_option("display.max_columns", 500)
+    pd.set_option("display.width", 1000)
     print("--")
     print(df)
 

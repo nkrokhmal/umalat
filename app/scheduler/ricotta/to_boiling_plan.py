@@ -9,7 +9,7 @@ from utils_ak.pandas import mark_consecutive_groups
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
+from app.scheduler.calc_absolute_batch_id import calc_absolute_batch_id
 from app.utils.ricotta.boiling_plan_read import BoilingPlanReader
 
 
@@ -21,8 +21,14 @@ def to_boiling_plan(
 
     Может читать и файл расписания, т.к. там там обычно есть лист с планом варок
 
-    :param boiling_plan_source: str or openpyxl.Workbook
-    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
+    Parameters
+    ----------
+    boiling_plan_source : str or openpyxl.Workbook or pd.DataFrame
+        Путь к файлу плана варок или сам файл
+
+    Returns
+    -------
+    pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
     """
 
     if isinstance(boiling_plan_source, pd.DataFrame):

@@ -1,7 +1,10 @@
 import pandas as pd
 
 
-def update_absolute_batch_id(boiling_plan_df: pd.DataFrame, first_batch_ids_by_type: dict):
+def calc_absolute_batch_id(
+    boiling_plan_df: pd.DataFrame,
+    first_batch_ids_by_type: dict,
+):
     # - Set absolute_batch_id
 
     boiling_plan_df["absolute_batch_id"] = boiling_plan_df["batch_id"]
@@ -15,4 +18,8 @@ def update_absolute_batch_id(boiling_plan_df: pd.DataFrame, first_batch_ids_by_t
 
     # - Return
 
-    return boiling_plan_df
+    result = boiling_plan_df["absolute_batch_id"]
+
+    boiling_plan_df.pop("absolute_batch_id")
+
+    return result

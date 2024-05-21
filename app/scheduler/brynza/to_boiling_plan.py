@@ -9,7 +9,7 @@ from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaSKU, BrynzaSKU, cast_model
 from app.scheduler.adygea.to_boiling_plan._handle_adygea import _handle_adygea
 from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.update_absolute_batch_id import update_absolute_batch_id
+from app.scheduler.calc_absolute_batch_id import calc_absolute_batch_id
 
 
 def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"brynza": 1}):
@@ -17,8 +17,14 @@ def to_boiling_plan(wb_obj: BoilingPlanLike, first_batch_ids_by_type={"brynza": 
 
     Может читать и файл расписания, т.к. там там обычно есть лист с планом варок
 
-    :param boiling_plan_source: str or openpyxl.Workbook
-    :return: pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
+    Parameters
+    ----------
+    boiling_plan_source : str or openpyxl.Workbook or pd.DataFrame
+        Путь к файлу плана варок или сам файл
+
+    Returns
+    -------
+    pd.DataFrame(columns=['id', 'boiling', 'sku', 'kg', ...])
     """
 
     if isinstance(wb_obj, pd.DataFrame):
