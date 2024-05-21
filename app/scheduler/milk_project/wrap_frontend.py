@@ -15,7 +15,7 @@ def wrap_line(schedule):
     m = BlockMaker(
         "line",
         default_row_width=2,
-        default_col_width=2,
+        default_column_width=2,
         # props
         font_size=9,
     )
@@ -63,7 +63,7 @@ def wrap_frontend(
     m = BlockMaker(
         "frontend",
         default_row_width=1,
-        default_col_width=1,
+        default_column_width=1,
         # props
         axis=1,
     )
