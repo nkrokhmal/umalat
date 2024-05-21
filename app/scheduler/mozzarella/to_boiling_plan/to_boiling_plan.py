@@ -28,6 +28,10 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
         values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
 
     df = pd.DataFrame(values, columns=header)
+    pd.set_option("display.max_rows", 500)
+    pd.set_option("display.max_columns", 500)
+    pd.set_option("display.width", 1000)
+
     df = df[
         [
             "Тип варки",
@@ -36,9 +40,9 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
             "КГ",
             "Форм фактор плавления",
             "Номер команды",
-            "Конфигурация варки",
             "Вес варки",
             "Мойка",
+            "Конфигурация варки",  # deprecated
         ]
     ]
     df.columns = [
@@ -48,10 +52,11 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
         "kg",
         "bff",
         "packing_team_id",
-        "configuration",
         "total_volume",
         "cleaning",
+        "configuration",
     ]
+    df.pop("configuration")
 
     # fill group id
     df["group_id"] = (df["boiling_params"] == "-").astype(int).cumsum() + 1
@@ -165,7 +170,6 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
             "packing_team_id",
             "boiling",
             "bff",
-            "configuration",
             "cleaning",
             "sheet",
             "total_volume",
@@ -212,8 +216,7 @@ def to_boiling_plan(
     - line: линия, "Моцарелла в воде" или "Соль"
     - bff: форм-фактор плавления (boiling form factor)
 
-    - configuration: раньше # todo next: значение зашито хардкодом и используется в проде. Надо убрать и сделать нормально
-    - total_volume: # todo next
+    - boiling_volumes: [line.output_kg]
     """
 
     # - Check if already a dataframe
@@ -260,15 +263,19 @@ def to_boiling_plan(
     df["boiling_id"] = df["group_id"]  # boiling_id is the same as batch_id
     df["batch_type"] = "mozzarella"
     df["absolute_batch_id"] = calc_absolute_batch_id(df, first_batch_ids_by_type)
+
+    # - Pop unused
+
+    df.pop("total_volume")
+
+    # - Return
+
     return df
 
 
 def test():
     df = to_boiling_plan(
-        str(
-            get_repo_path()
-            / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
-        )
+        str(get_repo_path() / "app/data/static/samples/by_department/mozzarella/2024-05-21 Расписание моцарелла.xlsx")
     )
     print(df.iloc[0])
     print("-" * 100)

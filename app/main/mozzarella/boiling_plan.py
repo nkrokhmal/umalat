@@ -8,6 +8,7 @@ from app.utils.mozzarella.boiling_plan_draw import draw_boiling_plan
 from app.utils.parse_remainings import *
 from app.utils.sku_plan import *
 
+from ...scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from .forms import BoilingPlanFastForm
 
 
@@ -38,7 +39,7 @@ def mozzarella_boiling_plan():
                     filename=tmp_file_path,
                     data_only=True,
                 )
-                yesterday_boiling_plan_df = read_boiling_plan(wb_not_calculated, validate=False)[
+                yesterday_boiling_plan_df = to_boiling_plan(wb_not_calculated, validate=False)[
                     ["sku_name", "original_kg"]
                 ]
                 yesterday_boiling_plan_df = yesterday_boiling_plan_df.groupby("sku_name").sum()
