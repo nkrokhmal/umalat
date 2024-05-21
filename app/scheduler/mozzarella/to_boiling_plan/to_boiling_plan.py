@@ -83,28 +83,6 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
         }.get(cleaning_type, "")
     )
 
-    # fill configuration
-    def format_configuration(value):
-        if is_int_like(value):
-            return str(int(value))
-        elif value is None:
-            return None
-        elif np.isnan(value):
-            return None
-        elif isinstance(value, str):
-            assert "," not in value, "Группы варок не поддерживаются в моцаррельном цеху."
-            return value
-        else:
-            raise AssertionError("Unknown format")
-
-    df["configuration"] = df["configuration"].apply(format_configuration)
-    df["configuration"] = np.where(
-        (df["sku"] == "-") & (df["configuration"].isnull()),
-        "8300",
-        df["configuration"],
-    )
-    df["configuration"] = df["configuration"].fillna(method="bfill")
-
     # remove separators and empty lines
     df = df[df["sku"] != "-"]
     df = df[~df["kg"].isnull()]
