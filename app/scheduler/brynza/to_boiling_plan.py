@@ -7,7 +7,7 @@ from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaSKU, BrynzaSKU, cast_model
-from app.scheduler.adygea.to_boiling_plan._handle_adygea import _handle_adygea
+from app.scheduler.adygea.to_boiling_plan._handle_adygea import _split_by_boilings
 from app.scheduler.boiling_plan_like import BoilingPlanLike
 from app.scheduler.calc_absolute_batch_id import calc_absolute_batch_id
 

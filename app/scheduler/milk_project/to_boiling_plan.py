@@ -81,7 +81,10 @@ def to_boiling_plan(boiling_plan: BoilingPlanLike, first_batch_ids_by_type={"mil
     df["boiling"] = df["sku"].apply(lambda sku: delistify(sku.made_from_boilings, single=True))
 
     df["batch_type"] = "milk_project"
-    df = calc_absolute_batch_id(boiling_plan_df=df, first_batch_ids_by_type=first_batch_ids_by_type)
+    df["absolute_batch_id"] = calc_absolute_batch_id(
+        boiling_plan_df=df,
+        first_batch_ids_by_type=first_batch_ids_by_type,
+    )
     return df
 
 
