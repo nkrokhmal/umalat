@@ -28,7 +28,7 @@ def update_task_and_batches(schedule_obj):
 
     # - Batch
 
-    add_batch_from_boiling_plan_df(date, DepartmentName.MASCARPONE, boiling_plan_df)
+    add_batch_from_boiling_plan_df(date, DepartmentName.MASCARPONE, boiling_plan_df, key="batch_id")
 
     # - Task
 

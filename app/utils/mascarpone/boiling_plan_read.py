@@ -181,6 +181,11 @@ class BoilingPlanReader:
                 )
 
     def _set_batches(self, df: pd.DataFrame) -> pd.DataFrame:
+        for _, grp in df.groupby("batch_type"):
+            group = grp.iloc[0][["group"]]
+            for i, (_, block_grp) in enumerate(grp.groupby("block_id")):
+                df.loc[block_grp.index, "block_id"] = self.first_batches[group[0]] + i
+
         for _, grp in df.groupby(["group_id", "batch_type"]):
             group = grp.iloc[0][["group"]]
             df.loc[grp.index, "batch_id"] = self.first_batches[group[0]]
@@ -196,6 +201,12 @@ class BoilingPlanReader:
         df = self._set_batches(df)
 
         # update_absolute_batch_id(df, self.first_batches)
+        df.drop(columns=["id"], inplace=True)
+        df.rename(columns={
+            "block_id": "batch_id",
+            "batch_id": "absolute_batch_id",
+        })
+        df["boiling_id"] = df.pop("group_id")
         return df
 
 
