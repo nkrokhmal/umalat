@@ -1,9 +1,5 @@
-from loguru import logger
-
 from app.enum import LineName
 from app.lessmore.utils.get_repo_path import get_repo_path
-from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_basic import make_schedule_basic
 from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_with_optimal_cleanings import (
     make_schedule_with_optimal_cleanings,
 )

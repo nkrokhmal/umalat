@@ -1,8 +1,7 @@
 import pandas as pd
 
 from app.lessmore.utils.get_repo_path import get_repo_path
-from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.calc_absolute_batch_id import calc_absolute_batch_id
+from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.utils.mascarpone.boiling_plan_read import BoilingPlanReader
 
 

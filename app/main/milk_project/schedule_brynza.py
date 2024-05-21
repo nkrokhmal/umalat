@@ -5,14 +5,12 @@ from datetime import datetime, timedelta
 import flask
 import flask_login
 
-from utils_ak import openpyxl
-
 from app.imports.runtime import db
 from app.main import main
 from app.main.milk_project.forms import BrynzaScheduleForm
 from app.models import BatchNumber, BrynzaSKU
 from app.scheduler.brynza.draw_frontend2.draw_frontend2 import draw_frontend2
-from app.scheduler.frontend_utils import fill_grid
+from app.scheduler.common.frontend_utils import fill_grid
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 
 

@@ -1,23 +1,17 @@
-import json
-import math
-
 import pandas as pd
 
-from loguru import logger
-from more_itertools import first, last, mark_ends, nth
+from more_itertools import first, last
 from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
-from utils_ak.loguru import configure_loguru
-from utils_ak.numeric import custom_round
 
 from app.lessmore.utils.get_repo_path import get_repo_path
-from app.scheduler.boiling_plan_like import BoilingPlanLike
+from app.scheduler.common.boiling_plan_like import BoilingPlanLike
+from app.scheduler.common.split_shifts_utils import split_shifts_by_time
+from app.scheduler.common.time_utils import cast_t
 from app.scheduler.ricotta.make_schedule._make_boilings import _make_boilings
 from app.scheduler.ricotta.to_boiling_plan import to_boiling_plan
-from app.scheduler.split_shifts_utils import split_shifts_by_time
-from app.scheduler.time_utils import cast_t
 
 
 class Validator(ClassValidator):

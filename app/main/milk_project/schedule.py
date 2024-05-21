@@ -1,7 +1,3 @@
-import flask
-import flask_login
-import openpyxl
-
 from utils_ak.openpyxl import draw_sheet_sequence, write_metadata
 
 from app.main import main
@@ -14,8 +10,8 @@ from app.main.validators import *
 from app.models import BrynzaSKU
 from app.scheduler.adygea.draw_frontend.draw_frontend import draw_frontend as draw_frontend_adygea
 from app.scheduler.brynza.draw_frontend.draw_frontend import draw_frontend as draw_frontend_brynza
-from app.scheduler.frontend_utils import fill_grid
-from app.scheduler.time_utils import *
+from app.scheduler.common.frontend_utils import fill_grid
+from app.scheduler.common.time_utils import *
 from app.utils.base.schedule_task import BaseScheduleTask
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict

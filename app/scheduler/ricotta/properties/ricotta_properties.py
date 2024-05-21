@@ -2,8 +2,6 @@ import pydantic
 
 from pydantic import Field
 
-from app.scheduler.time_utils import cast_human_time
-
 
 class RicottaProperties(pydantic.BaseModel):
     is_present: bool = Field(False, description="Присутствует ли рикотта в этот день")

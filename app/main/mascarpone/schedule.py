@@ -1,14 +1,10 @@
-import flask
-import flask_login
-import openpyxl
-
 from utils_ak.openpyxl import write_metadata
 
 from app.main import main
 from app.main.mascarpone.forms import ScheduleForm
 from app.main.mascarpone.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
-from app.scheduler.frontend_utils import fill_grid
+from app.scheduler.common.frontend_utils import fill_grid
 from app.scheduler.mascarpone.draw_frontend.draw_frontend import draw_frontend
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict

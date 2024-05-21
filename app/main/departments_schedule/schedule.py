@@ -1,9 +1,7 @@
-import flask
-
 from app.imports.runtime import *
 from app.main import main
+from app.scheduler.common.run_consolidated import run_consolidated
 
-from ...scheduler.run_consolidated import run_consolidated
 from .forms import ScheduleForm
 
 

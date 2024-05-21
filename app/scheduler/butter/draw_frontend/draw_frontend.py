@@ -8,7 +8,7 @@ from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.butter.draw_frontend.style import STYLE
 from app.scheduler.butter.to_boiling_plan import BoilingPlanLike
 from app.scheduler.butter.wrap_frontend import wrap_frontend
-from app.scheduler.frontend_utils import draw_excel_frontend
+from app.scheduler.common.frontend_utils import draw_excel_frontend
 
 
 def draw_frontend(

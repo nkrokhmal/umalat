@@ -6,10 +6,10 @@ from utils_ak.numeric.types import is_int_like
 from utils_ak.openpyxl.openpyxl_tools import read_merged_cells_df
 
 from app.lessmore.utils.get_repo_path import get_repo_path
-from app.scheduler.parsing_new_utils.group_intervals import basic_criteria
-from app.scheduler.parsing_new_utils.parse_line import parse_line
-from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
-from app.scheduler.time_utils import cast_human_time, cast_t, cast_time
+from app.scheduler.common.parsing_new_utils.group_intervals import basic_criteria
+from app.scheduler.common.parsing_new_utils.parse_line import parse_line
+from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
+from app.scheduler.common.time_utils import cast_human_time, cast_t, cast_time
 
 
 COLUMN_SHIFT = 5  # header 4 + 1 for one-indexing

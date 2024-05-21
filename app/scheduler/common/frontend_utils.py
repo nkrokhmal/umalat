@@ -1,7 +1,6 @@
 from loguru import logger
 from openpyxl.styles import Side
 from openpyxl.styles.borders import BORDER_THIN
-from utils_ak.block_tree import is_disjoint, validate_disjoint_by_axis
 from utils_ak.color.color import cast_color
 from utils_ak.openpyxl.openpyxl_tools import (
     cast_worksheet,
@@ -14,7 +13,7 @@ from utils_ak.openpyxl.openpyxl_tools import (
 )
 from utils_ak.os.os_tools import makedirs, open_file_in_os
 
-from app.scheduler.time_utils import cast_t
+from app.scheduler.common.time_utils import cast_t
 
 
 def fill_grid(ws):

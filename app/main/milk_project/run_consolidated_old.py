@@ -8,10 +8,10 @@ from utils_ak.code_block.code import code
 from utils_ak.os.os_tools import makedirs
 
 from app.globals import basedir
-from app.scheduler.frontend_utils import draw_excel_frontend
-from app.scheduler.load_schedules import load_schedules_by_department
+from app.scheduler.common.frontend_utils import draw_excel_frontend
+from app.scheduler.common.load_schedules import load_schedules_by_department
+from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.mozzarella.wrap_frontend import wrap_frontend
-from app.scheduler.parsing_utils.load_cells_df import load_cells_df
 from config import config
 
 

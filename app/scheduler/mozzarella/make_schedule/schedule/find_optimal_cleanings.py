@@ -5,10 +5,8 @@ import pandas as pd
 
 from utils_ak.iteration.simple_iterator import iter_pairs
 
-from app.enum import LineName
 from app.models import Washer, cast_model
-from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_boilings
-from app.scheduler.time_utils import cast_t
+from app.scheduler.common.time_utils import cast_t
 
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):

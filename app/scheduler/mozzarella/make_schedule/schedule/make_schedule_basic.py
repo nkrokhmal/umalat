@@ -1,12 +1,7 @@
 import itertools
-import json
-import os
 import warnings
 
-from copy import deepcopy
 from datetime import datetime
-from functools import partial
-from multiprocessing import Pool
 from typing import Literal, Optional
 
 import numpy as np
@@ -25,17 +20,16 @@ from utils_ak.iteration.simple_iterator import iter_pairs
 
 from app.enum import LineName
 from app.models import Washer, cast_model
+from app.scheduler.common.split_shifts_utils import split_shifts
+from app.scheduler.common.time_utils import cast_t
 from app.scheduler.mozzarella.make_schedule.packing import boiling_has_multihead_packing, make_configuration_blocks
 from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
-from app.scheduler.mozzarella.make_schedule.schedule.calc_score import calc_score
 from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_boilings
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.awaiting_pusher import AwaitingPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.backwards_pusher import BackwardsPusher
 from app.scheduler.mozzarella.make_schedule.schedule.pushers.drenator_shrinking_pusher import DrenatorShrinkingPusher
 from app.scheduler.mozzarella.make_schedule.schedule.run_in_parallel import run_in_parallel
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
-from app.scheduler.split_shifts_utils import split_shifts
-from app.scheduler.time_utils import cast_t, cast_time
 
 
 BLOCKS = []

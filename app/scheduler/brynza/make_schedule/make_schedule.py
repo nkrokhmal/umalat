@@ -1,28 +1,12 @@
-import itertools
-import math
-
 from more_itertools import mark_ends
 from utils_ak.block_tree.block_maker import BlockMaker
-from utils_ak.block_tree.pushers.iterative import AxisPusher
-from utils_ak.block_tree.pushers.pushers import add_push, push
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
-from utils_ak.builtin.collection import iter_get
-from utils_ak.code_block import code
-from utils_ak.code_block.code import code
-from utils_ak.iteration.simple_iterator import iter_sequences
 from utils_ak.pandas import mark_consecutive_groups
-from utils_ak.portion.portion_tools import cast_interval
 
-from app.lessmore.utils.get_repo_path import get_repo_path
-from app.models import AdygeaLine, BrynzaLine, Washer, cast_model
-from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_cleaning, make_lunch, make_preparation
-from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import (
-    to_boiling_plan,
-    to_boiling_plan as to_boiling_plan_adygea,
-)
-from app.scheduler.boiling_plan_like import BoilingPlanLike
+from app.models import BrynzaLine, cast_model
+from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan as to_boiling_plan_adygea
 from app.scheduler.brynza.to_boiling_plan import to_boiling_plan as to_boiling_plan_brynza
-from app.scheduler.time_utils import cast_t, cast_time
+from app.scheduler.common.boiling_plan_like import BoilingPlanLike
+from app.scheduler.common.time_utils import cast_t
 
 
 def make_packing_schedule(

@@ -12,8 +12,8 @@ from utils_ak.numeric.numeric import custom_round
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.butter.make_schedule.make_schedule import make_schedule
 from app.scheduler.butter.to_boiling_plan import BoilingPlanLike
-from app.scheduler.time_utils import cast_time
-from app.scheduler.wrap_header import wrap_header
+from app.scheduler.common.time_utils import cast_time
+from app.scheduler.common.wrap_header import wrap_header
 
 
 def _wrap_boiling_lines(schedule):

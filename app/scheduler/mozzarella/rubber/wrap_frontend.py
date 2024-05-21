@@ -1,18 +1,9 @@
-import xml.sax
-
 from datetime import datetime
 from typing import Optional
 
-from openpyxl import Workbook
 from utils_ak.block_tree import BlockMaker, add_push
-from utils_ak.os import open_file_in_os
 
-from app.lessmore.utils.get_repo_path import get_repo_path
-from app.scheduler.boiling_plan_like import BoilingPlanLike
-from app.scheduler.brynza.draw_frontend2.style import STYLE
-from app.scheduler.brynza.draw_frontend2.wrap_frontend2 import wrap_frontend2
 from app.scheduler.brynza.draw_frontend.wrap_frontend import wrap_frontend
-from app.scheduler.frontend_utils import draw_excel_frontend
 from app.scheduler.mozzarella.rubber.make_schedule import make_schedule
 
 

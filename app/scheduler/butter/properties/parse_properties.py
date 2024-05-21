@@ -6,10 +6,10 @@ from utils_ak.code_block.code import code
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.butter.properties.butter_properties import ButterProperties
-from app.scheduler.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
-from app.scheduler.parsing_utils.load_cells_df import load_cells_df
-from app.scheduler.parsing_utils.parse_block import parse_elements
-from app.scheduler.time_utils import cast_human_time, cast_t
+from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
+from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
+from app.scheduler.common.parsing_utils.parse_block import parse_elements
+from app.scheduler.common.time_utils import cast_human_time, cast_t
 
 
 def parse_schedule_file(wb_obj):

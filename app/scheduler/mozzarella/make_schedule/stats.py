@@ -1,4 +1,4 @@
-from app.scheduler.time_utils import cast_time
+from app.scheduler.common.time_utils import cast_time
 
 
 def calc_schedule_stats(schedule):

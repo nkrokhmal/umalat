@@ -1,5 +1,3 @@
-import pandas as pd
-
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
@@ -7,7 +5,7 @@ from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.butter.make_schedule._make_boiling_and_packing import _make_boiling_and_packing
 from app.scheduler.butter.to_boiling_plan import BoilingPlanLike, to_boiling_plan
-from app.scheduler.time_utils import cast_t
+from app.scheduler.common.time_utils import cast_t
 
 
 class Validator(ClassValidator):

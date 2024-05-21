@@ -1,16 +1,11 @@
-import flask
-
 from utils_ak.openpyxl import set_visible_sheets, write_metadata
 
-from app.imports.runtime import *
 from app.main import main
 from app.main.butter.forms import ScheduleForm
 from app.main.butter.update_task_and_batches import update_task_and_batches
 from app.main.validators import *
 from app.scheduler.butter.draw_frontend.draw_frontend import draw_frontend
-from app.scheduler.butter.draw_frontend.style import STYLE
-from app.scheduler.butter.to_boiling_plan import to_boiling_plan
-from app.scheduler.frontend_utils import fill_grid
+from app.scheduler.common.frontend_utils import fill_grid
 from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 

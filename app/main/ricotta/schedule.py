@@ -14,15 +14,15 @@ from app.main.ricotta.forms import ScheduleForm
 from app.main.ricotta.update_task_and_batches import update_task_and_batches
 from app.main.validators import time_validator
 from app.models import BatchNumber
-from app.scheduler.frontend_utils import fill_grid
+from app.scheduler.common.frontend_utils import fill_grid
 from app.scheduler.ricotta.draw_frontend.draw_frontend import draw_frontend
 
 # from app.scheduler import *
 # from app.utils.batches.batch import *
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
 
+
 # from app.utils.ricotta.schedule_tasks import schedule_task_boilings, update_total_schedule_task
-from app.utils.ricotta.schedule_tasks import RicottaScheduleTask
 
 
 @main.route("/ricotta_schedule", methods=["GET", "POST"])

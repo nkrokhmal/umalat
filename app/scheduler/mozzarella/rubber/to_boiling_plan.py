@@ -2,8 +2,8 @@ import pandas as pd
 
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
-from app.models import AdygeaSKU, MozzarellaSKU, cast_model
-from app.scheduler.boiling_plan_like import BoilingPlanLike
+from app.models import MozzarellaSKU, cast_model
+from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 
 
 def to_boiling_plan(wb_obj: BoilingPlanLike):

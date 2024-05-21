@@ -5,7 +5,7 @@ import pandas as pd
 from utils_ak.openpyxl.openpyxl_tools import read_merged_cells_df
 
 from app.globals import basedir
-from app.scheduler.parsing_new_utils.group_intervals import basic_criteria, group_intervals
+from app.scheduler.common.parsing_new_utils.group_intervals import basic_criteria, group_intervals
 
 
 def parse_line(merged_cells_df, line_row, split_criteria):
