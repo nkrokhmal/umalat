@@ -4,7 +4,7 @@ from typing import Optional
 from utils_ak.block_tree import BlockMaker, add_push
 
 from app.scheduler.brynza.draw_frontend.wrap_frontend import wrap_frontend
-from app.scheduler.mozzarella.rubber.make_schedule import make_schedule
+from app.scheduler.rubber.make_schedule import make_schedule
 
 
 def wrap_frontend(

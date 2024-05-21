@@ -11,7 +11,7 @@ from app.enum import LineName
 from app.scheduler.common.time_utils import cast_time
 from app.scheduler.common.wrap_header import wrap_header
 from app.scheduler.mozzarella.make_schedule.make_schedule import make_schedule
-from app.scheduler.mozzarella.rubber.wrap_frontend import wrap_frontend as wrap_frontend_rubber
+from app.scheduler.rubber.wrap_frontend import wrap_frontend as wrap_frontend_rubber
 
 
 def calc_form_factor_label(form_factors):

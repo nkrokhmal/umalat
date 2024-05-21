@@ -3,7 +3,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.time_utils import cast_t
-from app.scheduler.mozzarella.rubber.to_boiling_plan import to_boiling_plan
+from app.scheduler.rubber.to_boiling_plan import to_boiling_plan
 
 
 def make_schedule(
