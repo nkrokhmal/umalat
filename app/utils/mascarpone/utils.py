@@ -43,6 +43,7 @@ class MascarponeBoilingsHandler(BoilingsHandler):
 
         for sku in skus:
             new_max_weight = max_weight if not self.use_boiling_weight else self.get_input_kg(sku["sku_name"])
+
             if abs(new_max_weight - max_weight) > 10:
                 if self.check_boiling:
                     self.check_boiling_kg(boiling)
@@ -57,7 +58,6 @@ class MascarponeBoilingsHandler(BoilingsHandler):
                     self.boilings.append(boiling)
                     self.boiling_id += 1
                     boiling = BoilingGroup(max_weight, id=self.boiling_id)
-
                 else:
                     weight = min(sku[weight_key], boiling.leftovers)
                     group_sku = deepcopy(sku)
