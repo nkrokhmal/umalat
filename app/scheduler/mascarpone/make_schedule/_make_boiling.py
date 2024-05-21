@@ -26,7 +26,7 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     # - Define scaling factor for cream and apply to technology
 
-    PUMPING_SPEED = 1500  # todo later: put to parameters
+    PUMPING_SPEED = 1500  # todo later: put to parameters [@marklidenberg]
 
     technology = {
         "separation_time": technology.separation_time,
@@ -57,6 +57,7 @@ def _make_boiling(boiling_group_df, **kwargs):
     technology = dotdict(technology)
 
     # - Init block maker
+
     m = BlockMaker(
         "boiling",
         boiling_model=boiling_model,
@@ -82,7 +83,7 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     boiling_group_df["weight_netto"] = boiling_group_df["sku"].apply(lambda sku: sku.weight_netto)
     boiling_group_df["sku_name"] = boiling_group_df["sku"].apply(lambda sku: sku.name)
-    mark_consecutive_groups(boiling_group_df, "weight_netto", "weight_group_id")
+    mark_consecutive_groups(boiling_group_df, key="weight_netto", groups_key="weight_group_id")
 
     packing_m = BlockMaker()
     with packing_m.push("packing_group"):
@@ -99,7 +100,11 @@ def _make_boiling(boiling_group_df, **kwargs):
         for i, grp in boiling_group_df.groupby("weight_group_id"):
             current_weight = grp.iloc[0]["weight_netto"]
 
-            if previous_weight and current_weight != previous_weight:
+            if (
+                previous_weight
+                and current_weight != previous_weight
+                and {previous_weight, current_weight} != {0.14, 0.18}
+            ):
                 packing_m.push_row(
                     "packing_switch",
                     size=get_packing_swith_size(weight_netto1=previous_weight, weight_netto2=current_weight),
