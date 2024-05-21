@@ -164,7 +164,7 @@ def make_schedule(
     boiling_plan_df["_boiling_id"] = boiling_plan_df["boiling_id"]
     boiling_plan_df["_block_id"] = boiling_plan_df["block_id"]
 
-    boiling_plan_df["group_id"] = boiling_plan_df["block_id"]
+    boiling_plan_df["batch_id"] = boiling_plan_df["block_id"]
     boiling_plan_df["boiling_id"] = boiling_plan_df["_group_id"]
     # boiling_plan_df['batch_index'] = boiling_plan_df['_block_id'] # number of batch within a whole plan
 
@@ -177,9 +177,9 @@ def make_schedule(
     for line in ["Кремчиз", "Маскарпоне"]:
         # -- Filter boiling_plan_df
 
-        boiling_plan_df1 = boiling_plan_df[boiling_plan_df["line"] == line].copy()
+        _boiling_plan_df = boiling_plan_df[boiling_plan_df["line"] == line].copy()
 
-        if boiling_plan_df1.empty:
+        if _boiling_plan_df.empty:
             continue
 
         # -- Make preparation block
@@ -195,15 +195,14 @@ def make_schedule(
         # -- Make boiling and packing blocks
 
         # init counters
-        current_group_count = 1
-        current_batch_count = 1
         current_non_cream_batch_count = 1
+        mascarpone_boilings_without_cleaning_count = 0
         current_tub_num = 1  # 1 or 2
 
         # iterate over boilings
         for is_first, is_last, (prev_indexed_grp, indexed_grp) in mark_ends(
             pairwise(
-                boiling_plan_df1.groupby("boiling_id"),
+                _boiling_plan_df.groupby("boiling_id"),
                 add_prefix=True,
                 add_suffix=True,
             )
@@ -218,43 +217,36 @@ def make_schedule(
 
             # - Calc helpers
 
-            is_new_group = (
+            is_new_batch = (
                 False
                 if (is_first or is_last)
                 else prev_grp.iloc[0]["semifinished_group"] != grp.iloc[0]["semifinished_group"]
-                or prev_grp.iloc[0]["group_id"] != grp.iloc[0]["group_id"]
+                or prev_grp.iloc[0]["batch_id"] != grp.iloc[0]["batch_id"]
             )
-            is_cleaning_needed = False if is_first else prev_grp.iloc[0]["washing"]
-
-            is_new_batch = is_new_group or (
-                (current_group_count >= 8 + 1 and current_group_count % 8 == 1)
-                and prev_semifinished_group == "mascarpone"
-                and semifinished_group == "mascarpone"
-            )  # split blocks also when every 8 mascarpone boilings are done
-
-            is_cleaning_needed = is_cleaning_needed or (
-                add_cleaning_after_eight_mascarpone_boilings
-                and is_new_batch
-                and prev_semifinished_group == "mascarpone"
-                and semifinished_group == "mascarpone"
+            is_cleaning_needed = (
+                False
+                if is_first
+                else prev_grp.iloc[0]["washing"]
+                or (
+                    add_cleaning_after_eight_mascarpone_boilings
+                    and is_new_batch
+                    and mascarpone_boilings_without_cleaning_count >= 8
+                    and mascarpone_boilings_without_cleaning_count % 8 == 0
+                    and prev_semifinished_group == "mascarpone"
+                    and semifinished_group == "mascarpone"
+                )
             )
 
             # - Update group counters
 
-            if is_new_group:
-                current_group_count = 1
-
-            if is_new_batch:
-                current_batch_count += 1
-
-                if prev_semifinished_group != "cream" and semifinished_group != "cream":
-                    current_non_cream_batch_count += 1
+            if is_new_batch and prev_semifinished_group != "cream" and semifinished_group != "cream":
+                current_non_cream_batch_count += 1
 
             # - Process edge cases
 
             # -- Separator acceleration
 
-            if semifinished_group != "cream" and (is_first or prev_semifinished_group == "cream" and is_new_group):
+            if semifinished_group != "cream" and (is_first or prev_semifinished_group == "cream" and is_new_batch):
                 # first non-cream of first non-cream after cream
                 m.push_row(
                     "separator_acceleration",
@@ -281,6 +273,13 @@ def make_schedule(
             # - Full cleaning
 
             if prev_semifinished_group == "mascarpone" and is_cleaning_needed and not is_last:
+
+                # - Reset mascarpone_boilings_without_cleaning_count
+
+                mascarpone_boilings_without_cleaning_count = 0
+
+                # - Add full cleaning
+
                 m.push_row(
                     "cleaning",
                     size=13,
@@ -343,7 +342,6 @@ def make_schedule(
                 grp,
                 tub_num=current_tub_num,
                 batch_id=current_non_cream_batch_count,
-                group_id=grp.iloc[0]["group_id"],
                 line=line,
                 output_kg=grp["kg"].sum(),
                 input_kg=grp.iloc[0]["input_kg"],
@@ -356,7 +354,7 @@ def make_schedule(
             packing_switch = None
             if (
                 not is_first
-                and not is_new_group
+                and not is_new_batch
                 and grp.iloc[0]["sku"].weight_netto != prev_grp.iloc[-1]["sku"].weight_netto
                 and {grp.iloc[0]["sku"].weight_netto, prev_grp.iloc[-1]["sku"].weight_netto} != {0.14, 0.18}
             ):
@@ -411,9 +409,10 @@ def make_schedule(
                             x=[b2["packing_group"].props["x_rel"][0] + disposition, b2["packing_group"].x[1]]
                         )
 
-            # - Increment current group count
+            # - Increment mascarpone_boilings_without_cleaning_count
 
-            current_group_count += 1
+            if semifinished_group == "mascarpone":
+                mascarpone_boilings_without_cleaning_count += 1
 
             # - Switch tub_num
 
@@ -423,6 +422,7 @@ def make_schedule(
         # - Add last cleanings
 
         # -- Skip if not boilings
+
         if len(list(m.root.iter(cls="boiling", line=line))) == 0:
             continue
 
@@ -472,7 +472,6 @@ def make_schedule(
         df = pd.DataFrame(boilings, columns=["boiling"])
 
         df["batch_id"] = df["boiling"].apply(lambda boiling: boiling.props["batch_id"])
-        df["group_id"] = df["boiling"].apply(lambda boiling: boiling.props["group_id"])
         df["percent"] = df["boiling"].apply(lambda boiling: boiling.props["boiling_model"].percent)
         df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
         df["input_kg"] = df["boiling"].apply(lambda boiling: boiling.props["input_kg"])
@@ -480,7 +479,7 @@ def make_schedule(
         df["semifinished_group"] = df["boiling"].apply(lambda boiling: boiling.props["semifinished_group"])
         df["total_input_kg"] = df["boiling"].apply(lambda boiling: boiling.props["total_input_kg"])
 
-        for i, grp in df.groupby("group_id"):
+        for i, grp in df.groupby("batch_id"):
             pouring_start = grp.iloc[0]["boiling"]["pouring"].x[0]
             pouring_finish = grp.iloc[-1]["boiling"]["pouring"].y[0]
             if grp.iloc[0]["semifinished_group"] in ["cream_cheese", "robiola"]:
