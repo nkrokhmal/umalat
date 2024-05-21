@@ -84,11 +84,12 @@ class BoilingPlanReader:
     def _get_boilings(self, boilings: list[HugeBoiling]) -> pd.DataFrame:
         dfs = []
         group_dict = defaultdict(lambda: 1)
-        for boiling in boilings:
+        for i, boiling in enumerate(boilings):
             df = pd.DataFrame(boiling.skus)
-            df[["output_kg", "input_kg", "group_id"]] = (
+            df[["output_kg", "input_kg", "group_id", "block_id"]] = (
                 boiling.output_kg,
                 boiling.input_kg,
+                group_dict[boiling.type],
                 group_dict[boiling.type],
             )
             dfs.append(df)
@@ -181,17 +182,13 @@ class BoilingPlanReader:
                 )
 
     def _set_batches(self, df: pd.DataFrame) -> pd.DataFrame:
-        for _, grp in df.groupby("batch_type"):
-            group = grp.iloc[0][["group"]]
-            for i, (_, block_grp) in enumerate(grp.groupby("block_id")):
-                df.loc[block_grp.index, "block_id"] = self.first_batches[group[0]] + i
-
-        for _, grp in df.groupby(["group_id", "batch_type"]):
-            group = grp.iloc[0][["group"]]
-            df.loc[grp.index, "batch_id"] = self.first_batches[group[0]]
-            self.first_batches[group[0]] += 1
-
+        df["batch_id"] = df.pop("block_id")
         df["absolute_batch_id"] = df["batch_id"]
+        for batch_type, first_id in self.first_batches.items():
+            df.loc[df["group"] == batch_type, "absolute_batch_id"] = (
+                df.loc[df["group"] == batch_type, "batch_id"] + first_id - 1
+            )
+
         return df
 
     def parse(self, unwind: bool = False) -> pd.DataFrame:
@@ -201,11 +198,6 @@ class BoilingPlanReader:
         df = self._set_batches(df)
 
         # update_absolute_batch_id(df, self.first_batches)
-        df.drop(columns=["id"], inplace=True)
-        df.rename(columns={
-            "block_id": "batch_id",
-            "batch_id": "absolute_batch_id",
-        })
         df["boiling_id"] = df.pop("group_id")
         return df
 
