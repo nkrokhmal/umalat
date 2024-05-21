@@ -102,6 +102,9 @@ class Validator(ClassValidator):
         if b1.props["cleaning_object"] == "buffer_tank_and_packer" and "pumping" in b2.children_by_cls:
             validate_disjoint_by_axis(b1, b2["pumping"], ordered=True)
 
+        if b1.props["cleaning_object"] == "pasteurizer":
+            validate_disjoint_by_axis(b1, b2, ordered=True)
+
     @staticmethod
     def validate__separator_acceleration__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
@@ -110,10 +113,7 @@ class Validator(ClassValidator):
         if "separation" not in [child.props["cls"] for child in b2.children]:
             return
 
-        if b2.props["semifinished_group"] != "mascarpone":
-            validate_disjoint_by_axis(b1, b2["separation"], ordered=True)
-        else:
-            validate_disjoint_by_axis(b1, b2["separation"], ordered=True, distance=2)
+        validate_disjoint_by_axis(b1, b2["separation"], ordered=True)
 
     @staticmethod
     def validate__boiling__separator_acceleration(b1, b2):
@@ -494,12 +494,10 @@ def make_schedule(
                     batch_id=grp.iloc[0]["batch_id"],
                 )
             else:
-                # shifted 10 minutes to the left. Also add pouring_cream block
-
                 m.push(
                     "boiling_header",
                     size=(pouring_finish - pouring_start, 0),
-                    x=(pouring_start - 2, 0),
+                    x=(pouring_start, 0),
                     push_func=add_push,
                     semifinished_group=grp.iloc[0]["semifinished_group"],
                     boilings=grp["boiling"].tolist(),
@@ -510,7 +508,7 @@ def make_schedule(
                 m.push(
                     "pouring_cream",
                     size=(pouring_finish - pouring_start, 0),
-                    x=(pouring_start - 2, 0),
+                    x=(pouring_start, 0),
                     boilings=grp["boiling"].tolist(),
                     push_func=add_push,
                     line=line,
