@@ -342,7 +342,8 @@ def make_schedule(
             boiling = _make_boiling(
                 grp,
                 tub_num=current_tub_num,
-                batch_id=current_non_cream_batch_count,
+                batch_id=grp.iloc[0]["batch_id"],
+                non_cream_batch_id=current_non_cream_batch_count,
                 line=line,
                 output_kg=grp["kg"].sum(),
                 input_kg=grp.iloc[0]["input_kg"],
@@ -473,6 +474,7 @@ def make_schedule(
         df = pd.DataFrame(boilings, columns=["boiling"])
 
         df["batch_id"] = df["boiling"].apply(lambda boiling: boiling.props["batch_id"])
+        df["non_cream_batch_id"] = df["boiling"].apply(lambda boiling: boiling.props["non_cream_batch_id"])
         df["percent"] = df["boiling"].apply(lambda boiling: boiling.props["boiling_model"].percent)
         df["output_kg"] = df["boiling"].apply(lambda boiling: boiling.props["output_kg"])
         df["input_kg"] = df["boiling"].apply(lambda boiling: boiling.props["input_kg"])

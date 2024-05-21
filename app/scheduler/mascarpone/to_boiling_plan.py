@@ -66,7 +66,15 @@ def to_boiling_plan(
 
 
 def test():
-    df = to_boiling_plan(str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"))
+    df = to_boiling_plan(
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"),
+        first_batch_ids_by_type={
+            "cream": 1,
+            "mascarpone": 10,
+            "cream_cheese": 100,
+            "cottage_cheese": 1000,
+        },
+    )
     print(df.iloc[0])
     print("-" * 100)
     pd.set_option("display.max_rows", 500)
