@@ -54,19 +54,6 @@ def to_boiling_plan(
         first_batches=first_batch_ids_by_type,
     ).parse(unwind=unwind)
 
-    # - Fix bugged ids
-
-    # -- batch_id and absolute_batch_id
-
-    # df.pop("absolute_batch_id")  # it's wrong
-    # df["batch_id"] = df.pop("block_id")
-    # df["absolute_batch_id"] = df["batch_id"]
-    # for batch_type, first_id in first_batch_ids_by_type.items():
-    #     df.loc[df["group"] == batch_type, "absolute_batch_id"] = (
-    #         df.loc[df["group"] == batch_type, "batch_id"] + first_id - 1
-    #     )
-    # df["boiling_id"] = df.pop("group_id")
-
     # - Return
 
     return df
@@ -74,10 +61,10 @@ def to_boiling_plan(
 
 def test():
     df = to_boiling_plan(
-        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/mascarpone/sample_schedule_mascarpone.xlsx"),
         first_batch_ids_by_type={
             "cream": 1,
-            "mas    carpone": 10,
+            "mascarpone": 10,
             "cream_cheese": 100,
             "cottage_cheese": 1000,
         },
