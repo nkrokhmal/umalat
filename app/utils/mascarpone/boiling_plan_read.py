@@ -182,8 +182,15 @@ class BoilingPlanReader:
                 )
 
     def _set_batches(self, df: pd.DataFrame) -> pd.DataFrame:
-        df["batch_id"] = df.pop("block_id")
         df["absolute_batch_id"] = df["batch_id"]
+
+        group_counts = df.groupby(['block_id', 'group']).size().reset_index(name='count')
+        idx = group_counts.groupby(['block_id'])['count'].transform(max) == group_counts['count']
+        most_popular_groups = group_counts[idx].drop('count', axis=1)
+        most_popular_groups = most_popular_groups.drop_duplicates(subset=['block_id'])
+        df = df.merge(most_popular_groups, on='block_id', suffixes=('', '_total_group'))
+        df["batch_id"] = df.pop("block_id")
+
         for batch_type, first_id in self.first_batches.items():
             df.loc[df["group"] == batch_type, "absolute_batch_id"] = (
                 df.loc[df["group"] == batch_type, "batch_id"] + first_id - 1
