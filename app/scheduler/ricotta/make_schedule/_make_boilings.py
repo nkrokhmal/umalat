@@ -120,7 +120,7 @@ def test():
     pd.set_option("display.width", 1000)
 
     boiling_plan_df = to_boiling_plan(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-07 Расписание рикотта.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/sample_schedule_ricotta.xlsx"),
     )
     print(boiling_plan_df)
     boiling_group_df = boiling_plan_df.groupby("batch_id").get_group(9)

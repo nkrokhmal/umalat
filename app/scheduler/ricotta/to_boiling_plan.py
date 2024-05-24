@@ -39,6 +39,13 @@ def to_boiling_plan(
     reader = BoilingPlanReader(wb=boiling_plan_source, first_batches=first_batch_ids_by_type)
     df = reader.parse()
 
+    # - Validate that output_kg = sum(kg) for each boiling
+
+    for boiling_id, group in df.groupby("batch_id"):
+        assert (
+            abs(group["kg"].sum() - group["output_kg"].iloc[0]) < 1e-2
+        ), "При считывании плана варок в одной из варок оказалось килограмм сыра не столько же, сколько должно быть на выходе"
+
     # - Return
 
     return df
@@ -46,7 +53,7 @@ def to_boiling_plan(
 
 def test():
     df = to_boiling_plan(
-        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/2024-05-21 Расписание рикотта.xlsx")
+        str(get_repo_path() / "app/data/static/samples/by_department/ricotta/sample_schedule_ricotta.xlsx")
     )
     print(df.iloc[0])
     print("-" * 100)
