@@ -90,7 +90,7 @@ def wrap_boiling_lines(schedule):
         boiling_lines = []
         n_lines = 4
         for i in range(n_lines):
-            boiling_lines.append(m.push(f"boiling_line_{i}", size=(0, 3)).push)
+            boiling_lines.append(m.push(f"boiling_line_{i}", size=(0, 3)).block)
             if i <= n_lines - 2:
                 m.push_row("stub", size=0)
 

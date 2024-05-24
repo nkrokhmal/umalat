@@ -382,7 +382,7 @@ def wrap_meltings_2(master, line_name, title):
 
     melting_lines = []
     for i in range(n_lines):
-        melting_lines.append(m.push(f"salt_melting_{i}", size=(0, 3)).push)
+        melting_lines.append(m.push(f"salt_melting_{i}", size=(0, 3)).block)
 
         # add line for "Расход пара"
         m.push("stub", size=(0, 1))
