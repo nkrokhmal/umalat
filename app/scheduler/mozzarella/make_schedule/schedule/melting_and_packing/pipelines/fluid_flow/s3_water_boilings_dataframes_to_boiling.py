@@ -44,7 +44,7 @@ class BoilingsDataframesToBoilings:
         m = BlockMaker("melting_and_packing")
 
         with m.push("melting"):
-            serving = m.push_row("serving", push_func=add_push, size=boiling_model.line.serving_time // 5).push
+            serving = m.push_row("serving", push_func=add_push, size=boiling_model.line.serving_time // 5).block
 
             line = self._make_line(boiling_dataframes["meltings"], "meltings", "bff")
             line.props.update(x=(serving.size[0], 0))

@@ -28,9 +28,9 @@ def _wrap_boiling_lines(schedule):
 
     with code("Init lines"):
         boiling_lines = []
-        boiling_line = m.push("boiling_line_1", size=(0, 2)).push
+        boiling_line = m.push("boiling_line_1", size=(0, 2)).block
         boiling_lines.append(boiling_line)
-        boiling_line = m.push("boiling_line_2", size=(0, 2)).push
+        boiling_line = m.push("boiling_line_2", size=(0, 2)).block
         boiling_lines.append(boiling_line)
         # m.row("stub", size=0, boiling_line=boiling_line) # create  reference for upper boiling line in stub
 

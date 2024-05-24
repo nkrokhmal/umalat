@@ -10,6 +10,7 @@ from openpyxl import Workbook
 from utils_ak.os import open_file_in_os
 
 from app.enum import LineName
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.common.frontend_utils import draw_excel_frontend
 from app.scheduler.mozzarella.draw_frontend.style import STYLE
 from app.scheduler.mozzarella.wrap_frontend import wrap_frontend
@@ -85,13 +86,13 @@ def test():
     #     Path(repo_path) / "app/data/static/samples/by_department/mozzarella/2024-01-10 План по варкам моцарелла.xlsx"
     # )
 
-    fn = """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/С мультиголовой.xlsx"""
-
     schedule_wb = openpyxl.load_workbook(
         filename=Path(repo_path) / "app/data/static/templates/constructor_schedule.xlsx"
     )
     output = draw_frontend(
-        boiling_plan=fn,
+        boiling_plan=str(
+            get_repo_path() / "app/data/static/samples/by_department/mozzarella/sample_schedule_mozzarella.xlsx"
+        ),
         workbook=schedule_wb,
         start_times={LineName.SALT: "07:00", LineName.WATER: "08:00"},
         exact_start_time_line_name=LineName.SALT,
