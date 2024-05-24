@@ -86,6 +86,21 @@ class BoilingPlanReader:
         group_id = 0
         for boiling in boilings:
             full_boilings = int(boiling.boiling_num)
+            df = pd.DataFrame(boiling.skus)
+
+            if len(df) > 1 and full_boilings > 1:
+                skus = " ,\n".join(df.sku_name.to_list())
+                raise RicottaBoilingPlanReaderException(f"""
+                    В плане варок есть варка с SKU
+                    
+                    {skus}
+                    
+                    и количеством варок {full_boilings}. 
+                    
+                    Разрешается иметь только одну SKU, когда количество варок больше 1. 
+                    Пожалуйста, исправьте файл варок! 
+                """)
+
             for i in range(full_boilings):
                 df = pd.DataFrame(boiling.skus)
                 df[["output_kg", "group_id", "floculators_num", "boilings_num", "sum_weight_kg"]] = (
