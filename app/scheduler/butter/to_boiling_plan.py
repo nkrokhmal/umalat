@@ -63,6 +63,7 @@ def to_boiling_plan(
     # -- Batches
 
     df["batch_type"] = "butter"
+    df["boiling_id"] = df["group_id"]
     """used later for storing batch ids for continuous numbering. 
     `Batch` mean different things in different departments. For mozzarella it's a boiling, for mascarpone it is a tank"""
     df["batch_id"] = df["group_id"]  # the same as group_id for butter
