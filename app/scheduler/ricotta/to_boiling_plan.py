@@ -43,7 +43,7 @@ def to_boiling_plan(
 
     for boiling_id, group in df.groupby("batch_id"):
         assert (
-            abs(group["kg"].sum() - group["output_kg"].iloc[0]) < 1e-2
+            abs(group["kg"].sum() - group["output_kg"].iloc[0] * group["boilings_num"].iloc[0]) < 1e-2
         ), "При считывании плана варок в одной из варок оказалось килограмм сыра не столько же, сколько должно быть на выходе"
 
     # - Return
