@@ -207,6 +207,7 @@ class BoilingPlanReader:
                 od[row["batch_type"]] += row["kg"]
             _df = pd.DataFrame(od.items(), columns=["batch_type", "kg"])
             _df = _df.sort_values("kg", ascending=False)
+            _df["kg"] = _df["kg"].round(2)
             _df = _df[_df["kg"] == _df["kg"].max()]
             batch_type = _df["batch_type"].values[0]
 
