@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
 
 import openpyxl
@@ -184,17 +184,36 @@ class BoilingPlanReader:
     def _set_batches(self, df: pd.DataFrame) -> pd.DataFrame:
         df["absolute_batch_id"] = df["batch_id"]
 
-        group_counts = df.groupby(['block_id', 'group']).size().reset_index(name='count')
-        idx = group_counts.groupby(['block_id'])['count'].transform(max) == group_counts['count']
-        most_popular_groups = group_counts[idx].drop('count', axis=1)
-        most_popular_groups = most_popular_groups.drop_duplicates(subset=['block_id'])
-        df = df.merge(most_popular_groups, on='block_id', suffixes=('', '_total_group'))
+        # - Set batch_id
+
+        group_counts = df.groupby(["block_id", "group"]).size().reset_index(name="count")
+        idx = group_counts.groupby(["block_id"])["count"].transform(max) == group_counts["count"]
+        most_popular_groups = group_counts[idx].drop("count", axis=1)
+        most_popular_groups = most_popular_groups.drop_duplicates(subset=["block_id"])
+        df = df.merge(most_popular_groups, on="block_id", suffixes=("", "_total_group"))
         df["batch_id"] = df.pop("block_id")
 
-        for batch_type, first_id in self.first_batches.items():
-            df.loc[df["group"] == batch_type, "absolute_batch_id"] = (
-                df.loc[df["group"] == batch_type, "batch_id"] + first_id - 1
-            )
+        # - Set absolute_batch_id
+
+        batch_by_type = dict(self.first_batches)
+
+        for batch_id, grp in df.groupby("batch_id"):
+            # - Find batch_type with max kg for the batch (in one batch we can have multiple batch types)
+
+            od = OrderedDict()
+            for i, row in grp.iterrows():
+                if row["batch_type"] not in od:
+                    od[row["batch_type"]] = 0
+                od[row["batch_type"]] += row["kg"]
+            _df = pd.DataFrame(od.items(), columns=["batch_type", "kg"])
+            _df = _df.sort_values("kg", ascending=False)
+            _df = _df[_df["kg"] == _df["kg"].max()]
+            batch_type = _df["batch_type"].values[0]
+
+            # - Set batch_type for all rows in the batch
+
+            df.loc[grp.index, "absolute_batch_id"] = batch_by_type[batch_type]
+            batch_by_type[batch_type] += 1
 
         return df
 
