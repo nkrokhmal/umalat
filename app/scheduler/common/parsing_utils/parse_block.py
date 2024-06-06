@@ -15,7 +15,7 @@ def parse_elements(
     label: str,
     element_label: str,
     rows: list,
-    start_time,
+    start_time: int,
     length: int = 2,
     split_func: Optional[Callable] = None,
     filter_: Optional[Callable] = None,

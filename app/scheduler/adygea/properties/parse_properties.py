@@ -7,6 +7,7 @@ from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
 from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.common.parsing_utils.parse_block import parse_elements
+from app.scheduler.common.parsing_utils.parse_start_times import parse_time_headers
 from app.scheduler.common.time_utils import cast_human_time, cast_t
 
 
@@ -15,16 +16,11 @@ def parse_schedule_file(wb_obj):
 
     m = BlockMaker("root")
 
-    with code("Find start times"):
-        time_index_row_nums = df[df["label"].astype(str).str.contains("График")]["x1"].unique()
+    # - Find start times
 
-        start_times = []
+    time_index_row_nums, start_times = parse_time_headers(df)
 
-        for row_num in time_index_row_nums:
-            start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
-
-        # todo maybe: refactor, start_times -> start_ts [@marklidenberg]
-        start_times = [cast_t(v) for v in start_times]
+    # - Parse elements
 
     def _split_func(row):
         try:

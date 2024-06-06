@@ -12,7 +12,10 @@ def cast_time_from_hour_label(hour_label):
         splitter = ""
         split = [hour_label, ""]
 
-    return cast_time(split[0] + ":00" + splitter + split[-1])
+    try:
+        return cast_time(split[0] + ":00" + splitter + split[-1])
+    except:
+        return None
 
 
 def cast_label_from_time(label_time):
@@ -29,9 +32,7 @@ def test():
     assert cast_time_from_hour_label("23") == "0:23:00"
     assert cast_time_from_hour_label("23+1") == "1:23:00"
     assert cast_time_from_hour_label("23-1") == "-1:23:00"
-    print(cast_label_from_time("23:00+1"))
-    print(cast_label_from_time("23:00-1"))
-    print(cast_label_from_time("23:00"))
+    assert cast_time_from_hour_label("foobar") == None
 
 
 if __name__ == "__main__":

@@ -17,27 +17,10 @@ from app.enum import LineName
 from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.common.parsing_utils.parse_block import parse_elements
+from app.scheduler.common.parsing_utils.parse_start_times import parse_time_headers
 from app.scheduler.common.time_utils import cast_human_time, cast_t
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
-
-
-def _is_datetime(v: Union[str, datetime]):
-    # main check 09.07.2023 format, but other formats are also possible
-
-    if isinstance(v, datetime):
-        return True
-
-    from dateutil.parser import parse
-
-    if len(v) < 8:
-        # skip 00, 05, 10,
-        return False
-    try:
-        parse(v)
-        return True
-    except:
-        return False
 
 
 def _filter_func(group):
@@ -55,27 +38,13 @@ def _split_func(row):
 
 
 def parse_schedule_file(wb_obj):
-    cells_df = load_cells_df(wb_obj, "Расписание")
+    cells_df = load_cells_df(wb_obj=wb_obj, sheet_name="Расписание")
 
     m = BlockMaker("root")
 
     # - Find start times
 
-    time_index_row_nums = cells_df[cells_df["label"].astype(str).apply(_is_datetime)]["x1"].unique()
-
-    start_times = []
-
-    for row_num in time_index_row_nums:
-        start_times.append(
-            cast_time_from_hour_label(cells_df[(cells_df["x0"] == 5) & (cells_df["x1"] == row_num)].iloc[0]["label"])
-        )
-
-    start_times = [cast_t(v) for v in start_times]
-
-    # - Precaution for minimum start time
-
-    minimum_start_time = "21:00"
-    start_times = [t if t <= cast_t(minimum_start_time) else t - 24 * 12 for t in start_times]
+    _, start_times = parse_time_headers(cells_df)
 
     # - Calc split rows
 

@@ -66,10 +66,7 @@ def load_cells_df(wb_obj, sheet_name):
 def test():
     print(
         load_cells_df(
-            str(
-                get_repo_path()
-                / "app/data/static/samples/by_department/mozzarella/2023-09-04 Расписание моцарелла.xlsx"
-            ),
+            str(get_repo_path() / "app/data/static/samples/by_department/mozzarella/sample_schedule_mozzarella.xlsx"),
             "Расписание",
         )
     )

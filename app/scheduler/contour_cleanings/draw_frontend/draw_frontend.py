@@ -21,7 +21,6 @@ def draw_frontend(
     # - Make frontend
 
     properties = properties or load_properties_by_department(path=input_path, prefix=prefix)
-
     schedule = schedule or make_schedule(
         properties,
         naslavuchich=naslavuchich,
@@ -52,27 +51,27 @@ def test():
 
     warnings.filterwarnings("ignore")
 
-    # draw_frontend(
-    #     input_path="""/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/2024-03-02/approved""",
-    #     prefix="2024-03-02",
-    #     open_file=True,
-    #     is_today_day_off=True,
-    # )
-    import glob
-
-    import tqdm
-
-    for dirname in tqdm.tqdm(
-        sorted(glob.glob("""/Users/marklidenberg/Desktop/inbox/2024.04.06 contour_cleanings/*"""))
-    ):
-        date = dirname.split("/")[-1]
-        print(date)
-        draw_frontend(
-            input_path=os.path.join(dirname, "approved"),
-            prefix=date,
-            open_file=False,
-            is_today_day_off=False,
-        )
+    draw_frontend(
+        input_path="""/Users/marklidenberg/Desktop/inbox/2024.04.06 contour_cleanings/2024-05-28/approved""",
+        prefix="2024-05-28",
+        open_file=True,
+        is_today_day_off=False,
+    )
+    # import glob
+    # p
+    # import tqdm
+    #
+    # for dirname in tqdm.tqdm(
+    #     sorted(glob.glob("""/Users/marklidenberg/Desktop/inbox/2024.04.06 contour_cleanings/*"""))
+    # ):
+    #     date = dirname.split("/")[-1]
+    #     print(date)
+    #     draw_frontend(
+    #         input_path=os.path.join(dirname, "approved"),
+    #         prefix=date,
+    #         open_file=False,
+    #         is_today_day_off=False,
+    #     )
 
 
 if __name__ == "__main__":

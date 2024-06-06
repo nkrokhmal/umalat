@@ -720,12 +720,12 @@ def make_schedule(
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(properties, basement_brine=basement_brine, is_today_day_off=is_today_day_off),
-        make_contour_2(properties, naslavuchich=naslavuchich, is_today_day_off=is_today_day_off),
+        # make_contour_1(properties, basement_brine=basement_brine, is_today_day_off=is_today_day_off),
+        # make_contour_2(properties, naslavuchich=naslavuchich, is_today_day_off=is_today_day_off),
         make_contour_3(properties, is_today_day_off=is_today_day_off),
-        make_contour_4(properties, is_today_day_off=is_today_day_off),
-        make_contour_5(properties, is_today_day_off=is_today_day_off),
-        make_contour_6(properties, is_today_day_off=is_today_day_off),
+        # make_contour_4(properties, is_today_day_off=is_today_day_off),
+        # make_contour_5(properties, is_today_day_off=is_today_day_off),
+        # make_contour_6(properties, is_today_day_off=is_today_day_off),
     ]
 
     for contour in contours:

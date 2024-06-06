@@ -5,6 +5,7 @@ from utils_ak.block_tree.block_maker import BlockMaker
 from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.common.parsing_utils.parse_block import parse_elements
+from app.scheduler.common.parsing_utils.parse_time_headers import parse_time_headers
 from app.scheduler.common.time_utils import cast_human_time, cast_t
 from app.scheduler.mascarpone.properties.mascarpone_properties import MascarponeProperties
 
@@ -42,14 +43,9 @@ def parse_schedule_file(wb_obj):
 
     # -- Find start times
 
-    time_index_row_nums = df[df["label"].astype(str).str.contains("График")]["x1"].unique()
+    time_index_row_nums, start_times = parse_time_headers(cells_df=df)
 
-    start_times = []
-
-    for row_num in time_index_row_nums:
-        start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
-
-    start_times = [cast_t(v) for v in start_times]
+    # - Parse rows to schedule
 
     for i, row_num in enumerate(time_index_row_nums):
         parse_elements(

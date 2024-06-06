@@ -6,6 +6,7 @@ from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.common.parsing_utils.parse_block import parse_elements
+from app.scheduler.common.parsing_utils.parse_time_headers import parse_time_headers
 from app.scheduler.common.time_utils import cast_human_time, cast_t
 from app.scheduler.milk_project.properties.milk_project_properties import MilkProjectProperties
 
@@ -15,20 +16,16 @@ def parse_schedule_file(wb_obj):
 
     m = BlockMaker("root")
 
-    with code("Find split rows"):
-        df1 = df[df["label"] == "Набор смеси"]
-        split_rows = df1["x1"].unique()
+    # - Find split rows
 
-    with code("Find start times"):
-        time_index_row_nums = df[df["label"].astype(str).str.contains("График")]["x1"].unique()
+    df1 = df[df["label"] == "Набор смеси"]
+    split_rows = df1["x1"].unique()
 
-        start_times = []
+    # - Find start times
 
-        for row_num in time_index_row_nums:
-            start_times.append(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row_num)].iloc[0]["label"]))
+    time_index_row_nums, start_times = parse_time_headers(cells_df=df)
 
-        # todo maybe: refactor start_times -> start_ts [@marklidenberg]
-        start_times = [cast_t(v) for v in start_times]
+    # - Parse boilings
 
     def _split_func(row):
         try:
