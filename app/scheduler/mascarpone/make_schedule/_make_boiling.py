@@ -26,7 +26,7 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     # - Define scaling factor for cream and apply to technology
 
-    PUMPING_SPEED = 1500  # todo later: put to parameters [@marklidenberg]
+    PUMPING_SPEED = 1440  # todo later: put to parameters [@marklidenberg]
 
     technology = {
         "separation_time": technology.separation_time,
