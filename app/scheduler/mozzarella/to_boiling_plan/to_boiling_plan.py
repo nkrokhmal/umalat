@@ -42,7 +42,7 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
             "Номер команды",
             "Вес варки",
             "Мойка",
-            "Конфигурация варки",  # deprecated
+            "Конфигурация варки",
         ]
     ]
     df.columns = [
@@ -56,7 +56,6 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
         "cleaning",
         "configuration",
     ]
-    df.pop("configuration")
 
     # fill group id
     df["group_id"] = (df["boiling_params"] == "-").astype(int).cumsum() + 1
@@ -87,6 +86,28 @@ def read_sheet(wb, sheet_name, default_boiling_volume=1000, sheet_number=1):
             "Длинная мойка": "full",
         }.get(cleaning_type, "")
     )
+
+    # fill configuration
+    def format_configuration(value):
+        if is_int_like(value):
+            return str(int(value))
+        elif value is None:
+            return None
+        elif np.isnan(value):
+            return None
+        elif isinstance(value, str):
+            assert "," not in value, "Группы варок не поддерживаются в моцаррельном цеху."
+            return value
+        else:
+            raise AssertionError("Unknown format")
+
+    df["configuration"] = df["configuration"].apply(format_configuration)
+    df["configuration"] = np.where(
+        (df["sku"] == "-") & (df["configuration"].isnull()),
+        "missing",  # will be replaced in saturation
+        df["configuration"],
+    )
+    df["configuration"] = df["configuration"].fillna(method="bfill")
 
     # remove separators and empty lines
     df = df[df["sku"] != "-"]
@@ -173,6 +194,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
             "cleaning",
             "sheet",
             "total_volume",
+            "configuration",
         ]
     ]
 
