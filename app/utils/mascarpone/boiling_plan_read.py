@@ -201,6 +201,8 @@ class BoilingPlanReader:
 
         for batch_id, grp in df.groupby("batch_id"):
             batch_type = grp.iloc[0]["batch_type"]
+            if batch_type == "cottage_cheese" or batch_type == "robiola":
+                batch_type = "cream_cheese"
             df.loc[grp.index, "absolute_batch_id"] = batch_by_type[batch_type]
             batch_by_type[batch_type] += 1
 
