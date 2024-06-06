@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import openpyxl
 import pandas as pd
+import numpy as np
 
 from utils_ak.openpyxl import cast_workbook
 
@@ -103,6 +104,7 @@ class BoilingPlanReader:
 
         df["input_kg"] = boilings.apply(lambda x: x.input_kg)
         df["output_kg"] = boilings.apply(lambda x: x.input_kg * x.output_coeff)
+        df["output_kg"] = np.round(df["output_kg"], -1)
 
     def _unwind_boilings(self, boilings: list[HugeBoiling]) -> pd.DataFrame:
         dfs = []

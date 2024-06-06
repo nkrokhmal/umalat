@@ -111,8 +111,8 @@ class ScheduleForm(FlaskForm):
 
     mascarpone_batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
     cream_cheese_batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
-    robiola_batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
-    cottage_cheese_batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
+    # robiola_batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
+    # cottage_cheese_batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
     cream_batch_number = IntegerField("Введите номер первой партии в текущем дне", validators=[Optional()])
     add_washing = BooleanField("Вставить мойку после 8 варок", default=False, validators=[Optional()])
 

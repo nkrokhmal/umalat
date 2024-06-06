@@ -18,7 +18,7 @@ class MascarponeBoilingsHandler(BoilingsHandler):
     @staticmethod
     def get_input_kg(sku_name: str) -> int:
         boiling = cast_sku_name(sku_name).made_from_boilings[0]
-        return boiling.input_kg * boiling.output_coeff
+        return round(boiling.input_kg * boiling.output_coeff, -1)
 
     @staticmethod
     def check_boiling_kg(boiling: BoilingGroup) -> None:

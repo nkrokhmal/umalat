@@ -156,7 +156,7 @@ def cast_volume(obj):
         return obj.made_from_boilings[0].output_kg
     elif isinstance(obj, MascarponeSKU):
         b = obj.made_from_boilings[0]
-        return b.input_kg * b.output_coeff + b.output_constant
+        return round(b.input_kg * b.output_coeff, -1) + b.output_constant
     elif isinstance(obj, ButterSKU):
         return obj.line.output_kg
     elif isinstance(obj, MilkProjectSKU):
