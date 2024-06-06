@@ -105,6 +105,9 @@ class Validator(ClassValidator):
         if b1.props["cleaning_object"] == "pasteurizer":
             validate_disjoint_by_axis(b1, b2, ordered=True)
 
+        if b1.props["cleaning_object"] == "heat_exchanger":
+            validate_disjoint_by_axis(b1, b2["separation"], distance=1, ordered=True)
+
     @staticmethod
     def validate__separator_acceleration__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
@@ -211,12 +214,7 @@ def make_schedule(
 
             # - Calc helpers
 
-            is_new_batch = (
-                False
-                if (is_first or is_last)
-                else prev_grp.iloc[0]["semifinished_group"] != grp.iloc[0]["semifinished_group"]
-                or prev_grp.iloc[0]["batch_id"] != grp.iloc[0]["batch_id"]
-            )
+            is_new_batch = False if (is_first or is_last) else prev_grp.iloc[0]["batch_id"] != grp.iloc[0]["batch_id"]
 
             # - Add auxiliary blocks between batchs
 
