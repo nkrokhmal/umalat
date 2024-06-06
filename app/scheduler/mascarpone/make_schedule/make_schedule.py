@@ -59,6 +59,28 @@ class Validator(ClassValidator):
             validate_disjoint_by_axis(b1["pumping"], b2["separation"], distance=0)
 
     @staticmethod
+    def validate__boiling__cream_normalization(b1, b2):
+        if b1.props["line"] != b2.props["line"]:
+            return
+
+        if b1.props["semifinished_group"] != "cream":
+            # should not happen
+            return
+
+        validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
+
+    @staticmethod
+    def validate__cream_normalization__boiling(b1, b2):
+        if b1.props["line"] != b2.props["line"]:
+            return
+
+        if b2.props["semifinished_group"] != "cream":
+            # should not happen
+            return
+
+        validate_disjoint_by_axis(b1, b2["pouring"], ordered=True)
+
+    @staticmethod
     def validate__preparation__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
             return
@@ -314,6 +336,22 @@ def make_schedule(
             if is_last:
                 # last element
                 continue
+
+            # - Insert cream normalization from 38% to 35%
+
+            if (
+                prev_semifinished_group == "cream"
+                and semifinished_group == "cream"
+                and prev_grp.iloc[-1]["boiling"].percent == 38.0
+                and grp.iloc[0]["boiling"].percent == 35.0
+            ):
+                m.push_row(
+                    "cream_normalization",
+                    size=8,
+                    push_func=AxisPusher(start_from="last_beg", start_shift=-50),
+                    push_kwargs={"validator": Validator()},
+                    line=line,
+                )
 
             # - Prepare boiling
 

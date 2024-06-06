@@ -63,7 +63,7 @@ def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
     # - Add boiling header
 
     with m.push("boiling_header_line", start_time=start_time, size=(0, 1)):
-        for block in schedule.iter(cls="boiling_header"):
+        for block in schedule.iter(cls=lambda cls: cls in ["boiling_header", "cream_normalization"]):
             m.push_row(m.copy(block, with_props=True, size=(None, 1)), push_func=add_push)
 
     # - Add pouring cream line
