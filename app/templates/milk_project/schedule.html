@@ -68,6 +68,12 @@
                                 {{form.beg_time(place_holder='SaltBegTime', class='form-control')}}
                             </div>
                         </div>
+                         <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Добавить фасовку халуми </label>
+                                {{form.add_halumi_packing(place_holder='AddHalumyPacking', checked=False)}}
+                            </div>
+                        </div>
                     </div>
                     <div class="col-lg-6 col-sm-6">
                         <div class="col-md-12 mb-3">
@@ -80,6 +86,12 @@
                             <div class="form-group">
                                 <label>Введите время начала паковки</label>
                                 {{form.packing_beg_time(place_holder='PackingBegTime', class='form-control')}}
+                            </div>
+                        </div>
+                         <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label>Количество варок халуми</label>
+                                {{form.halumi_boiling_num(place_holder='HalumiBoilingNum', class='form-control')}}
                             </div>
                         </div>
                     </div>

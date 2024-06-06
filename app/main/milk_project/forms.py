@@ -42,6 +42,8 @@ class ScheduleForm(FlaskForm):
         validators=[Optional()],
         default="11:00",
     )
+    halumi_boiling_num = IntegerField("Введите количество варок халуми", default=0, validators=[Optional()])
+    add_halumi_packing = BooleanField("Вставить паковку халуми",  default=False, validators=[Optional()])
 
 
 class BrynzaScheduleForm(FlaskForm):
