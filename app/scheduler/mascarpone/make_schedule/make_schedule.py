@@ -373,7 +373,6 @@ def make_schedule(
             packing_switch = None
             if (
                 not is_first
-                and not is_new_batch
                 and grp.iloc[0]["sku"].weight_netto != prev_grp.iloc[-1]["sku"].weight_netto
                 and {grp.iloc[0]["sku"].weight_netto, prev_grp.iloc[-1]["sku"].weight_netto} != {0.14, 0.18}
             ):
