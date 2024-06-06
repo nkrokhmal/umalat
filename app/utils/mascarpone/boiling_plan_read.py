@@ -198,21 +198,7 @@ class BoilingPlanReader:
         batch_by_type = dict(self.first_batches)
 
         for batch_id, grp in df.groupby("batch_id"):
-            # - Find batch_type with max kg for the batch (in one batch we can have multiple batch types)
-
-            od = OrderedDict()
-            for i, row in grp.iterrows():
-                if row["batch_type"] not in od:
-                    od[row["batch_type"]] = 0
-                od[row["batch_type"]] += row["kg"]
-            _df = pd.DataFrame(od.items(), columns=["batch_type", "kg"])
-            _df = _df.sort_values("kg", ascending=False)
-            _df["kg"] = _df["kg"].round(2)
-            _df = _df[_df["kg"] == _df["kg"].max()]
-            batch_type = _df["batch_type"].values[0]
-
-            # - Set batch_type for all rows in the batch
-
+            batch_type = grp.iloc[0]["batch_type"]
             df.loc[grp.index, "absolute_batch_id"] = batch_by_type[batch_type]
             batch_by_type[batch_type] += 1
 
