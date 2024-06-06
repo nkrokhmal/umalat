@@ -7,7 +7,7 @@ from app.scheduler.adygea.properties.adygea_properties import AdygeaProperties
 from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.common.parsing_utils.parse_block import parse_elements
-from app.scheduler.common.parsing_utils.parse_start_times import parse_time_headers
+from app.scheduler.common.parsing_utils.parse_time_headers import parse_time_headers
 from app.scheduler.common.time_utils import cast_human_time, cast_t
 
 

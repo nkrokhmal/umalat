@@ -5,7 +5,6 @@ from typing import Union
 
 import pandas as pd
 
-# from deeplay.utils.print_json import print_json
 from loguru import logger
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
@@ -17,7 +16,7 @@ from app.enum import LineName
 from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.common.parsing_utils.parse_block import parse_elements
-from app.scheduler.common.parsing_utils.parse_start_times import parse_time_headers
+from app.scheduler.common.parsing_utils.parse_time_headers import parse_time_headers
 from app.scheduler.common.time_utils import cast_human_time, cast_t
 from app.scheduler.mozzarella.properties.mozzarella_properties import MozzarellaProperties
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
@@ -488,14 +487,16 @@ def parse_properties(filename):
 def test():
     import warnings
 
+    from deeplay.utils.print_json import print_json
+
     warnings.filterwarnings("ignore")
-    # print_json(
-    #     dict(
-    #         parse_properties(
-    #             """/Users/marklidenberg/Desktop/2024.04.06 contour_cleanings/2024-03-02/approved/2024-03-02 Расписание моцарелла.xlsx"""
-    #         )
-    #     )
-    # )
+    print_json(
+        dict(
+            parse_properties(
+                """/Users/marklidenberg/Desktop/inbox/2024.04.06 contour_cleanings/2024-05-28/approved/2024-05-28 Расписание моцарелла.xlsx"""
+            )
+        )
+    )
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from utils_ak.numeric import is_int_like
 from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.common.parsing_utils.parse_block import parse_elements
+from app.scheduler.common.parsing_utils.parse_time_headers import parse_time_headers
 from app.scheduler.common.time_utils import cast_t, cast_time
 from app.scheduler.ricotta.properties.ricotta_properties import RicottaProperties
 
@@ -12,6 +13,10 @@ def parse_schedule_file(wb_obj):
     # - Load cells
 
     df = load_cells_df(wb_obj, "Расписание")
+
+    # - Get start times
+
+    time_index_row_nums, start_times = parse_time_headers(cells_df=df)
 
     # - Init block maker
 
@@ -47,7 +52,7 @@ def parse_schedule_file(wb_obj):
         "boiling_first_rows",
         "boiling_first_row",
         [4, 6, 8],
-        start_time=cast_t(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == 1)].iloc[0]["label"])),
+        start_time=start_times[0],
         length=100,
         split_func=_split_func,
         filter_=_filter_func,
@@ -59,7 +64,7 @@ def parse_schedule_file(wb_obj):
         "pouring_offs",
         "pouring_off",
         [6, 8, 10],
-        start_time=cast_t(cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == 1)].iloc[0]["label"])),
+        start_time=start_times[0],
         length=100,
         split_func=_split_func,
         filter_=lambda group: "Слив" in group[0]["label"],
@@ -104,7 +109,7 @@ def parse_properties(fn):
 def test():
     print(
         parse_properties(
-            """/Users/marklidenberg/Documents/coding/repos/umalat/app/data/dynamic/2024-03-15/approved/2024-03-15 Расписание рикотта.xlsx"""
+            """/Users/marklidenberg/Desktop/inbox/2024.04.06 contour_cleanings/2024-05-28/approved/2024-05-28 Расписание рикотта.xlsx"""
         )
     )
 

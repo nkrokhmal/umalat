@@ -9,9 +9,6 @@ from app.models import Washer, cast_model
 from app.scheduler.common.time_utils import cast_t
 
 
-# from lessmore.utils.easy_printing.print_json import print_json
-
-
 class CleaningValidator(ClassValidator):
     def __init__(self, window=30, ordered=False):
         self.ordered = ordered
@@ -720,12 +717,12 @@ def make_schedule(
     m = BlockMaker("schedule")
 
     contours = [
-        # make_contour_1(properties, basement_brine=basement_brine, is_today_day_off=is_today_day_off),
-        # make_contour_2(properties, naslavuchich=naslavuchich, is_today_day_off=is_today_day_off),
+        make_contour_1(properties, basement_brine=basement_brine, is_today_day_off=is_today_day_off),
+        make_contour_2(properties, naslavuchich=naslavuchich, is_today_day_off=is_today_day_off),
         make_contour_3(properties, is_today_day_off=is_today_day_off),
-        # make_contour_4(properties, is_today_day_off=is_today_day_off),
-        # make_contour_5(properties, is_today_day_off=is_today_day_off),
-        # make_contour_6(properties, is_today_day_off=is_today_day_off),
+        make_contour_4(properties, is_today_day_off=is_today_day_off),
+        make_contour_5(properties, is_today_day_off=is_today_day_off),
+        make_contour_6(properties, is_today_day_off=is_today_day_off),
     ]
 
     for contour in contours:
