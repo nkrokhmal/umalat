@@ -1,9 +1,8 @@
 import io
-import flask
-import pytest
 
 from pathlib import Path
 
+import flask
 import pytest
 
 from tests.conftest import client
@@ -28,5 +27,3 @@ def test_mascarpone_post_boiling_plan(client: flask.Flask, filename: str) -> Non
             data["input_file"] = (io.BytesIO(f.read()), filename)
         response = client.post(url, data=data, follow_redirects=True, content_type="multipart/form-data")
         assert response.status_code == 200
-
-

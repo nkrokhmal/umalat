@@ -8,7 +8,7 @@ from app.enum import LineName
 from app.globals import basedir
 
 
-os.environ["APP_ENVIRONMENT"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "test"
 
 import warnings
 

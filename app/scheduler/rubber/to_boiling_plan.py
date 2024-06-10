@@ -2,6 +2,7 @@ import pandas as pd
 
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import MozzarellaSKU, cast_model
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 
@@ -61,9 +62,15 @@ def to_boiling_plan(wb_obj: BoilingPlanLike):
 
 def test():
     df = to_boiling_plan(
-        """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx"""
+        str(get_repo_path() / "app/data/static/samples/by_department/rubber/sample_rubber_schedule.xlsx")
     )
     print(df.iloc[0])
+
+    print("-" * 88)
+    pd.set_option("display.max_rows", 500)
+    pd.set_option("display.max_columns", 500)
+    pd.set_option("display.width", 1000)
+    print(df)
 
 
 if __name__ == "__main__":

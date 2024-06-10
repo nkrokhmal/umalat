@@ -10,7 +10,8 @@ def get_last_commit_name():
     last_commit_name = str(process.stdout.read()).lower()
 
     if "--no-tests" in last_commit_name or "--no-test" in last_commit_name:
-        # todo: fast tests
+
+        # todo later: fast tests [@marklidenberg]
         pass
     else:
         from tests.run_test import run_test

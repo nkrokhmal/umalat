@@ -5,7 +5,7 @@ from utils_ak.pandas.pandas_tools import mark_consecutive_groups
 from app.globals import basedir
 
 
-os.environ["APP_ENVIRONMENT"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "test"
 
 import warnings
 

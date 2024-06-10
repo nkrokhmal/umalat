@@ -9,7 +9,8 @@ def test_mascarpone_get_schedule(client: flask.Flask) -> None:
         response = client.get(url)
         assert response.status_code == 200
 
-# todo: uncomment
+
+# todo later: uncomment [@marklidenberg]
 # def test_mascarpone_post_schedule(client):
 #     filepath = client.config["TEST_MASCARPONE"]
 #     BatchNumber.remove_department_batches(DepartmentName.MASCARPONE)

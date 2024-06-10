@@ -1,7 +1,7 @@
 import os
 
 
-os.environ["APP_ENVIRONMENT"] = "interactive"
+os.environ["APP_ENVIRONMENT"] = "test"
 
 from app.models import *
 
