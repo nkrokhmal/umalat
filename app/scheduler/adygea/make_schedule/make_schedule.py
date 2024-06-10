@@ -2,11 +2,11 @@ import itertools
 
 import pandas as pd
 
+from more_itertools import last, nth
 from utils_ak.block_tree import Block
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push, push
-from utils_ak.builtin.collection import iter_get
 from utils_ak.iteration.simple_iterator import iter_sequences
 from utils_ak.portion.portion_tools import cast_interval
 
@@ -31,8 +31,6 @@ Boilings are pushed in the following order of sublines: 0, 2, 1, 3
 Halumi is made on sublines 2 and 3
 
 """
-
-BOILER_NUM_ORDER = [0, 2, 1, 3]  # there are 4 "sublines", one for each boiler. We insert boilings in that order
 
 
 def _make_schedule(
@@ -84,9 +82,10 @@ def _make_schedule(
 1            2  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
 ..."""
 
-    boiling_num_generator = itertools.cycle(BOILER_NUM_ORDER)
+    boiling_num_generator = itertools.cycle(
+        [0, 2, 1, 3]
+    )  # there are 4 "sublines", one for each boiler. We insert boilings in that order
 
-    # todo maybe: a little bit messy with batch_id, cur_batch_id [@marklidenberg]
     for batch_id, grp in boiling_plan_df.groupby("batch_id"):
 
         # - Take first row as sample (any row is fine)
@@ -155,14 +154,25 @@ def _make_schedule(
 
     # - Push cleaning
 
+    # -- Get last boilings
+
     last_boilings = [
-        iter_get([boiling for boiling in m.root["boiling", True] if boiling.props["boiler_num"] == boiler_num], -1)
+        last(
+            [boiling for boiling in m.root["boiling", True] if boiling.props["boiler_num"] == boiler_num],
+            default=None,
+        )
         for boiler_num in range(4)
     ]
     last_boilings = [b for b in last_boilings if b]
+
+    # -- Get cleaning start
+
     cleaning_start = min(b.y[0] for b in last_boilings)
     if len(m.root["lunch", True]) > 0:
         cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root["lunch", True]))
+
+    # -- Push
+
     m.push_row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
 
     # - Start schedule from preparation
