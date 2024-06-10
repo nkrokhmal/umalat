@@ -11,7 +11,6 @@ def to_boiling_plan(
         "cream": 1,
         "mascarpone": 1,
         "cream_cheese": 1,
-        "cottage_cheese": 1,
     },
     unwind: bool = False,
 ) -> pd.DataFrame:

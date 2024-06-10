@@ -14,11 +14,16 @@ from app.scheduler.mascarpone.to_boiling_plan import BoilingPlanLike
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
     start_times_by_line: dict = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
-    first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
+    first_batch_ids_by_type: dict = {
+        "cream": 1,
+        "mascarpone": 1,
+        "cream_cheese": 1,
+    },
     date: Optional[datetime] = None,
     workbook: Workbook = None,
     add_cleaning_after_eight_mascarpone_boilings: bool = False,
 ) -> dict:
+
     # - Wrap frontend
 
     output = wrap_frontend(
@@ -52,7 +57,6 @@ def test():
             "cream": 1,
             "mascarpone": 10,
             "cream_cheese": 100,
-            "cottage_cheese": 1000,
         },
     )
 

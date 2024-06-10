@@ -64,6 +64,7 @@ class Validator(ClassValidator):
             return
 
         if b1.props["semifinished_group"] != "cream":
+
             # should not happen
             return
 
@@ -75,6 +76,7 @@ class Validator(ClassValidator):
             return
 
         if b2.props["semifinished_group"] != "cream":
+
             # should not happen
             return
 
@@ -181,9 +183,14 @@ class Validator(ClassValidator):
 def make_schedule(
     boiling_plan: BoilingPlanLike,
     start_times_by_line: dict[str, str] = {"Маскарпоне": "07:00", "Кремчиз": "08:00"},
-    first_batch_ids_by_type: dict = {"cottage_cheese": 1, "cream": 1, "mascarpone": 1, "cream_cheese": 1},
+    first_batch_ids_by_type: dict = {
+        "cream": 1,
+        "mascarpone": 1,
+        "cream_cheese": 1,
+    },
     add_cleaning_after_eight_mascarpone_boilings: bool = False,
 ) -> dict:
+
     # - Get boiling plan
 
     boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type).copy()
@@ -195,6 +202,7 @@ def make_schedule(
     # - Make schedule by lines
 
     for line in ["Кремчиз", "Маскарпоне"]:
+
         # -- Filter boiling_plan_df
 
         _boiling_plan_df = boiling_plan_df[boiling_plan_df["line"] == line].copy()
@@ -226,6 +234,7 @@ def make_schedule(
                 add_suffix=True,
             )
         ):
+
             # - Remove indices
 
             prev_grp = prev_indexed_grp[1] if prev_indexed_grp else None
@@ -243,6 +252,7 @@ def make_schedule(
             # - Before non-cream batches: separator_acceleration
 
             if semifinished_group != "cream" and (is_first or (prev_semifinished_group == "cream" and is_new_batch)):
+
                 # first non-cream of first non-cream after cream
                 m.push_row(
                     "separator_acceleration",
@@ -253,9 +263,11 @@ def make_schedule(
                 )
 
             if is_new_batch or is_last:
+
                 # - Mascarpone cleanings
 
                 if prev_semifinished_group == "mascarpone":
+
                     # - Pasturizer cleaning
 
                     m.push_row(
@@ -334,6 +346,7 @@ def make_schedule(
                         )
 
             if is_last:
+
                 # last element
                 continue
 
@@ -479,6 +492,7 @@ def make_schedule(
     # -- Add headers for each batch
 
     for line in ["Кремчиз", "Маскарпоне"]:
+
         # - Skip if no boilings
 
         if len(list(m.root.iter(cls="boiling", line=line))) == 0:
