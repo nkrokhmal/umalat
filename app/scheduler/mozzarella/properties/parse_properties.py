@@ -13,6 +13,7 @@ from utils_ak.numeric.types import is_int, is_int_like
 from utils_ak.portion.portion_tools import calc_interval_length, cast_interval
 
 from app.enum import LineName
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.common.parsing_new_utils.parse_time_utils import cast_time_from_hour_label
 from app.scheduler.common.parsing_utils.load_cells_df import load_cells_df
 from app.scheduler.common.parsing_utils.parse_block import parse_elements
@@ -493,7 +494,10 @@ def test():
     print_json(
         dict(
             parse_properties(
-                """/Users/marklidenberg/Desktop/inbox/2024.04.06 contour_cleanings/2024-05-28/approved/2024-05-28 Расписание моцарелла.xlsx"""
+                str(
+                    get_repo_path()
+                    / "app/data/static/samples/by_day/contour_cleanings_sample_day/sample Расписание моцарелла.xlsx"
+                )
             )
         )
     )

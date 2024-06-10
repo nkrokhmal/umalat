@@ -1,5 +1,6 @@
 import os
 
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.common.frontend_utils import draw_excel_frontend
 from app.scheduler.contour_cleanings.draw_frontend.style import STYLE
 from app.scheduler.contour_cleanings.load_properties_by_department import load_properties_by_department
@@ -18,6 +19,7 @@ def draw_frontend(
     basement_brine: bool = True,
     is_today_day_off: bool = False,
 ):
+
     # - Make frontend
 
     properties = properties or load_properties_by_department(path=input_path, prefix=prefix)
@@ -52,8 +54,8 @@ def test():
     warnings.filterwarnings("ignore")
 
     draw_frontend(
-        input_path="""/Users/marklidenberg/Desktop/inbox/2024.04.06 contour_cleanings/2024-05-28/approved""",
-        prefix="2024-05-28",
+        input_path=str(get_repo_path() / "app/data/static/samples/by_day/contour_cleanings_sample_day"),
+        prefix="sample",
         open_file=True,
         is_today_day_off=False,
     )
