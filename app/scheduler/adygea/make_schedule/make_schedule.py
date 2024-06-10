@@ -23,7 +23,7 @@ from app.scheduler.common.time_utils import cast_t, cast_time
 
 """ 
 
-There are 4 sublines: 0, 1, 2, 3
+There are 4 sublines: 0, 1, 2, 3. Also called boilers (in code, boiler_num) 
 
 They are split into pairs: 0-1: pair_num=0, 2-3: pair_num=1
 Each pair has it's own lunch (zero or one for each pair) 
@@ -102,20 +102,14 @@ def _make_schedule(
     adygea_line = cast_model(cls=AdygeaLine, obj="Адыгейский")
     adygea_cleaning = cast_model(Washer, "adygea_cleaning")
 
-    # - Change start time to add preparation
-
-    corrected_start_time = cast_time(cast_t(start_time) - adygea_line.preparation_time // 5)
-
-    # - Subtract prepare_start_time to get relative time
-
-    corrected_lunch_times = [
-        cast_time(cast_t(lunch_time) - adygea_line.preparation_time // 5) for lunch_time in lunch_times
-    ]
-
     # - Init block maker with preparation
 
     m = BlockMaker("schedule")
-    m.push_row(make_preparation(adygea_line.preparation_time // 5), push_func=add_push)
+    m.push_row(
+        make_preparation(adygea_line.preparation_time // 5),
+        push_func=add_push,
+        x=cast_t(start_time) - adygea_line.preparation_time // 5,
+    )
 
     # - Copy boiling plan to avoid side effects
 
@@ -142,7 +136,7 @@ def _make_schedule(
 
         # - Get pair num
 
-        pair_num = 0 if cur_boiler_num in [0, 1] else 1
+        pair_num = 0 if cur_boiler_num in [0, 1] else 1  # [2, 3] -> 1
 
         # - Make boiling
 
@@ -169,19 +163,19 @@ def _make_schedule(
 
         # - Push lunch if needed
 
-        if corrected_lunch_times:
-            if corrected_lunch_times[pair_num] and cast_time(boiling.y[0]) >= corrected_lunch_times[pair_num]:
+        if lunch_times:
+            if lunch_times[pair_num] and cast_time(boiling.y[0]) >= lunch_times[pair_num]:
                 push(
                     m.root,
                     make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num),
-                    push_func=AxisPusher(start_from=cast_t(corrected_lunch_times[pair_num])),
+                    push_func=AxisPusher(start_from=cast_t(lunch_times[pair_num])),
                     validator=Validator(),
                 )
-                corrected_lunch_times[pair_num] = None  # pushed lunch, delete lunch time
+                lunch_times[pair_num] = None  # pushed lunch, delete lunch time
 
     # - Push lunches if finished earlier
 
-    for pair_num, lunch_time in enumerate(corrected_lunch_times):
+    for pair_num, lunch_time in enumerate(lunch_times):
         # if processed before, deleted from corrected_lunch_times
 
         if lunch_time:
@@ -204,9 +198,14 @@ def _make_schedule(
         cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root["lunch", True]))
     m.push_row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
 
-    # - Update start time
+    # - Start schedule from preparation
 
-    m.root.props.update(x=(cast_t(corrected_start_time), 0))
+    # Because use used absolute final time in schedule creation, we need to update childrens x to be relative to the start time
+
+    for child in m.root.children:
+        child.props.update(x=(child.x[0] - cast_t(start_time) + adygea_line.preparation_time // 5, 0))
+
+    m.root.props.update(x=(cast_t(start_time) - adygea_line.preparation_time // 5, 0))
 
     # - Return
 
