@@ -199,23 +199,33 @@ def make_schedule(
 
     boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type)
 
-    # - Make scedule
+    # - Find lunch times
+
+    # We first build a schedule without lunch and find lunch times from it
 
     no_lunch_schedule = _make_schedule(boiling_plan_df, start_time=start_time)
 
     need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12  # work more than 8 hours
     if not need_a_break:
+        # no lunch
 
-        # no lunch in these cases
         lunch_times = []
-
-        # print('No lunch needed')
     else:
         lunch_times = []
-        for i, r in enumerate([range(0, 2), range(2, 4)]):
+
+        # - Go though each pair of boilers separately and find lunch time
+
+        for i, rng in enumerate([range(0, 2), range(2, 4)]):
+            # - Get boilings
+
             range_boilings = [
-                boiling for boiling in no_lunch_schedule["boiling", True] if boiling.props["boiler_num"] in r
+                boiling for boiling in no_lunch_schedule["boiling", True] if boiling.props["boiler_num"] in rng
             ]
+
+            # - Calc helpers
+
+            working_interval = cast_interval(no_lunch_schedule.x[0], no_lunch_schedule.y[0])
+            lunch_interval = cast_interval(cast_t("12:00"), cast_t("14:30"))
 
             def find_first_after(time):
                 for b1, b2, b3 in iter_sequences(range_boilings, 3, method="any"):
@@ -237,9 +247,6 @@ def make_schedule(
                             return cast_time(b2.y[0])
 
                 raise Exception("Did not find lunch time")
-
-            working_interval = cast_interval(no_lunch_schedule.x[0], no_lunch_schedule.y[0])
-            lunch_interval = cast_interval(cast_t("12:00"), cast_t("14:30"))
 
             if lunch_interval.upper - working_interval.lower <= working_interval.upper - lunch_interval.lower:
 
@@ -275,11 +282,16 @@ def make_schedule(
 
                 # print(4, lunch_times)
                 continue
+
+    # - Make schedule with lunch times
+
     schedule = _make_schedule(
         boiling_plan_df,
         start_time=start_time,
         lunch_times=lunch_times,
     )
+
+    # - Return
 
     return {"schedule": schedule, "boiling_plan_df": boiling_plan_df}
 
