@@ -146,7 +146,11 @@ def _make_schedule(
         push(
             m.root,
             boiling,
-            push_func=AxisPusher(start_from="max_beg", start_shift=-30, min_start=cast_t(start_time)),
+            push_func=AxisPusher(
+                start_from="max_beg",
+                start_shift=-30,
+                min_start=cast_t(start_time),
+            ),
             validator=Validator(),
         )
 
@@ -157,21 +161,21 @@ def _make_schedule(
                 push(
                     m.root,
                     make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num),
-                    push_func=AxisPusher(
-                        start_from=cast_t(corrected_lunch_times[pair_num]), min_start=cast_t(start_time)
-                    ),
+                    push_func=AxisPusher(start_from=cast_t(corrected_lunch_times[pair_num])),
                     validator=Validator(),
                 )
                 corrected_lunch_times[pair_num] = None  # pushed lunch, delete lunch time
 
-    # - Push lunches if not pushed yet
+    # - Push lunches if finished earlier
 
     for pair_num, lunch_time in enumerate(corrected_lunch_times):
+        # if processed before, deleted from corrected_lunch_times
+
         if lunch_time:
             push(
                 m.root,
                 make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num),
-                push_func=AxisPusher(start_from=cast_t(lunch_time), min_start=cast_t(start_time)),
+                push_func=AxisPusher(start_from=cast_t(lunch_time)),
                 validator=Validator(),
             )
 
