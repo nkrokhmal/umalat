@@ -14,6 +14,7 @@ warnings.filterwarnings("ignore")
 
 
 def _make_boiling(boiling_group_df, **kwargs):
+
     # - Unfold boiling group params
 
     sample_row = boiling_group_df.iloc[0]
@@ -45,7 +46,7 @@ def _make_boiling(boiling_group_df, **kwargs):
         else boiling_group_df["kg"].sum() + 100
     )
     if sample_row["semifinished_group"] == "cream":
-        scaling_factor = total_input_kg / 900
+        scaling_factor = boiling_group_df["input_kg"].iloc[0] / 900  # todo later: put to parameters [@marklidenberg]
 
         technology["pouring_time"] = custom_round(
             technology["pouring_time"] * scaling_factor, 5, rounding="nearest_half_even"
@@ -87,6 +88,7 @@ def _make_boiling(boiling_group_df, **kwargs):
 
     packing_m = BlockMaker()
     with packing_m.push("packing_group"):
+
         # - Add ingredient if needed
 
         if technology.analysis_time:

@@ -65,7 +65,6 @@ def test():
             "cream": 1,
             "mascarpone": 10,
             "cream_cheese": 100,
-            "cottage_cheese": 1000,
         },
     )
     print(df.iloc[0])
