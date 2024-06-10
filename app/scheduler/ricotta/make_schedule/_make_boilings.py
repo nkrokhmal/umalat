@@ -3,7 +3,7 @@ import warnings
 
 import pandas as pd
 
-from utils_ak.block_tree import add_push, stack_push, validate_disjoint_by_axis
+from utils_ak.block_tree import add_push, stack_push, validate_disjoint
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
 from utils_ak.dict import dotdict

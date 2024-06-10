@@ -6,16 +6,14 @@ from utils_ak.block_tree import Block
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push, push
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
 from utils_ak.builtin.collection import iter_get
-from utils_ak.code_block import code
-from utils_ak.code_block.code import code
 from utils_ak.iteration.simple_iterator import iter_sequences
 from utils_ak.portion.portion_tools import cast_interval
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaLine, Washer, cast_model
 from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_cleaning, make_lunch, make_preparation
+from app.scheduler.adygea.make_schedule.validator import Validator
 from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.time_utils import cast_t, cast_time
@@ -35,41 +33,6 @@ Halumi is made on sublines 2 and 3
 """
 
 BOILER_NUM_ORDER = [0, 2, 1, 3]  # there are 4 "sublines", one for each boiler. We insert boilings in that order
-
-
-class Validator(ClassValidator):
-    def __init__(self):
-        super().__init__(window=30)
-
-    @staticmethod
-    def validate__preparation__boiling(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
-
-    @staticmethod
-    def validate__boiling__boiling(b1, b2):
-        validate_disjoint_by_axis(b1["collecting"], b2["collecting"])
-        if b1.props["boiler_num"] == b2.props["boiler_num"]:
-            if b1.props["boiling_model"].weight_netto != b2.props["boiling_model"].weight_netto:
-                validate_disjoint_by_axis(b1, b2, ordered=True, distance=2)
-            else:
-                validate_disjoint_by_axis(b1, b2)
-
-        if b2.parent["boiling", True].index(b2) <= 3 and b1.props["pair_num"] == b2.props["pair_num"]:
-            validate_disjoint_by_axis(b1["coagulation"], b2["coagulation"], ordered=True)
-
-    @staticmethod
-    def validate__boiling__lunch(b1, b2):
-        if b1.props["pair_num"] == b2.props["pair_num"]:
-            validate_disjoint_by_axis(b1, b2, ordered=True)
-
-    @staticmethod
-    def validate__lunch__boiling(b1, b2):
-        if b1.props["pair_num"] == b2.props["pair_num"]:
-            validate_disjoint_by_axis(b1, b2, ordered=True)
-
-    @staticmethod
-    def validate__lunch__lunch(b1, b2):
-        pass
 
 
 def _make_schedule(
@@ -312,7 +275,11 @@ def make_schedule(
 
 
 def test():
-    print(make_schedule(str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule.xlsx")))
+    print(
+        make_schedule(
+            str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"),
+        )["schedule"],
+    )
 
 
 if __name__ == "__main__":

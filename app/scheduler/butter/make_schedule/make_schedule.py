@@ -1,6 +1,7 @@
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
+from utils_ak.block_tree.validation.class_validator import ClassValidator
+from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.butter.make_schedule._make_boiling_and_packing import _make_boiling_and_packing
@@ -14,23 +15,23 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__preparation__boiling(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__boiling__displacement(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__boiling__boiling(b1, b2):
-        validate_disjoint_by_axis(b1["pasteurization"], b2["pasteurization"], ordered=True)
+        validate_disjoint(b1["pasteurization"], b2["pasteurization"], ordered=True)
 
     @staticmethod
     def validate__displacement__cleaning(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__boiling__packing(b1, b2):
@@ -39,24 +40,24 @@ class Validator(ClassValidator):
         else:
             distance_needed = 4  # for cooling
 
-        validate_disjoint_by_axis(b1, b2, ordered=True, distance=distance_needed)
+        validate_disjoint(b1, b2, ordered=True, distance=distance_needed)
 
     @staticmethod
     def validate__packing__boiling(b1, b2):
         if b1.props["tank_number"] == b2.props["tank_number"]:
-            validate_disjoint_by_axis(b1, b2["pasteurization"], ordered=True, distance=4)
+            validate_disjoint(b1, b2["pasteurization"], ordered=True, distance=4)
 
     @staticmethod
     def validate__packing__packing(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True, distance=4)
+        validate_disjoint(b1, b2, ordered=True, distance=4)
 
     @staticmethod
     def validate__packing__displacement(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__packing__cleaning(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
 
 def make_schedule(

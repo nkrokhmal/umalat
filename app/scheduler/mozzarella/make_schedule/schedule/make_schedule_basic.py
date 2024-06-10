@@ -12,7 +12,9 @@ from utils_ak.block_tree import ParallelepipedBlock
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push, push
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis, validate_order_by_axis
+from utils_ak.block_tree.validation.class_validator import ClassValidator
+from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
+from utils_ak.block_tree.validation.validate_order_by_axis import validate_order_by_axis
 from utils_ak.builtin.collection import delistify
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
@@ -54,21 +56,21 @@ class Validator(ClassValidator):
 
         # - Basic validations
 
-        validate_disjoint_by_axis(b1s["pouring"]["first"]["termizator"], b2s["pouring"]["first"]["termizator"])
-        validate_disjoint_by_axis(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["second"]["pouring_off"])
-        validate_disjoint_by_axis(b1s["pouring"]["first"]["pumping_out"], b2s["pouring"]["second"]["pouring_off"])
-        validate_disjoint_by_axis(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["first"]["pumping_out"])
+        validate_disjoint(b1s["pouring"]["first"]["termizator"], b2s["pouring"]["first"]["termizator"])
+        validate_disjoint(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["second"]["pouring_off"])
+        validate_disjoint(b1s["pouring"]["first"]["pumping_out"], b2s["pouring"]["second"]["pouring_off"])
+        validate_disjoint(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["first"]["pumping_out"])
 
         # - Process boilings on the same pouring line
 
         if b1s["pouring"].props["pouring_line"] == b2s["pouring"].props["pouring_line"]:
 
             # pourings should not intersect, but also five minutes should be between boilings
-            validate_disjoint_by_axis(b1s["pouring"], b2s["pouring"], distance=1, ordered=True)
+            validate_disjoint(b1s["pouring"], b2s["pouring"], distance=1, ordered=True)
 
             # if boilings use same drenator - drenator should not intersect with meltings
             if b1s.props["drenator_num"] == b2s.props["drenator_num"]:
-                validate_disjoint_by_axis(b1s["melting_and_packing"]["melting"]["meltings"], b2s["drenator"])
+                validate_disjoint(b1s["melting_and_packing"]["melting"]["meltings"], b2s["drenator"])
 
         # - Define line names (water/salt) that we work on (which corresponds to the pouring line)
 
@@ -81,13 +83,13 @@ class Validator(ClassValidator):
             # same lines
 
             # basic_example validation
-            validate_disjoint_by_axis(
+            validate_disjoint(
                 b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"]
             )
             for p1, p2 in itertools.product(
                 b1s["melting_and_packing"]["collecting", True], b2s["melting_and_packing"]["collecting", True]
             ):
-                validate_disjoint_by_axis(p1, p2)
+                validate_disjoint(p1, p2)
 
             # - Process lactose to non-lactose and vice versa
 
@@ -101,14 +103,14 @@ class Validator(ClassValidator):
                     _df["is_lactose"] = _df["sku"].apply(lambda sku: sku.made_from_boilings[0].is_lactose)
                     _is_full = not _df["is_lactose"].any()
 
-                    validate_disjoint_by_axis(
+                    validate_disjoint(
                         b1s["melting_and_packing"]["melting"]["meltings"],
                         b2s["melting_and_packing"]["melting"]["serving"],
                         distance=-2 if _is_full else -6,  # 10 минут, если полная и 30м, если неполная
                         ordered=True,
                     )
                 elif boiling_model1.is_lactose and not boiling_model2.is_lactose:
-                    validate_disjoint_by_axis(
+                    validate_disjoint(
                         b1s["melting_and_packing"]["melting"]["meltings"],
                         b2s["melting_and_packing"]["melting"]["serving"],
                         distance=2,
@@ -121,16 +123,16 @@ class Validator(ClassValidator):
                 # same working lines (means that salt and water on the same working line - due to salt switching to the first pouring_line)
 
                 # basic_example validations
-                validate_disjoint_by_axis(
+                validate_disjoint(
                     b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"]
                 )
-                validate_disjoint_by_axis(
+                validate_disjoint(
                     b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["serving"]
                 )
 
                 _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
                 _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
-                validate_disjoint_by_axis(_b1s, _b2s, distance=7, ordered=True)
+                validate_disjoint(_b1s, _b2s, distance=7, ordered=True)
 
         if self.strict_order:
             validate_order_by_axis(b1, b2)
@@ -138,12 +140,12 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
         boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
-        validate_disjoint_by_axis(boiling["pouring"]["first"]["termizator"], cleaning)
+        validate_disjoint(boiling["pouring"]["first"]["termizator"], cleaning)
 
     @staticmethod
     def validate__cleaning__boiling(b1, b2):
         boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
-        validate_disjoint_by_axis(cleaning, boiling["pouring"]["first"]["termizator"])
+        validate_disjoint(cleaning, boiling["pouring"]["first"]["termizator"])
 
     @staticmethod
     def validate__boiling__packing_configuration(b1, b2):
@@ -152,7 +154,7 @@ class Validator(ClassValidator):
             return
 
         for p1 in boiling.iter(cls="collecting", packing_team_id=packing_configuration.props["packing_team_id"]):
-            validate_disjoint_by_axis(p1, b2)
+            validate_disjoint(p1, b2)
 
     @staticmethod
     def validate__packing_configuration__boiling(b1, b2):
@@ -161,7 +163,7 @@ class Validator(ClassValidator):
             return
 
         for p1 in boiling.iter(cls="collecting", packing_team_id=packing_configuration.props["packing_team_id"]):
-            validate_disjoint_by_axis(b1, p1)
+            validate_disjoint(b1, p1)
 
 
 def make_termizator_cleaning_block(cleaning_type, **kwargs):
@@ -698,7 +700,7 @@ class ScheduleMaker:
 
             @staticmethod
             def validate__packing__packing(b1, b2):
-                return validate_disjoint_by_axis(b1, b2)
+                return validate_disjoint(b1, b2)
 
             @staticmethod
             def validate__multihead_cleaning__packing(b1, b2):
@@ -706,7 +708,7 @@ class ScheduleMaker:
                 for process in packing.iter(cls="process"):
                     packer = delistify(process.props["sku"].packers, single=True)
                     if packer.name == "Мультиголова":
-                        validate_disjoint_by_axis(multihead_cleaning, process, distance=1, ordered=True)
+                        validate_disjoint(multihead_cleaning, process, distance=1, ordered=True)
 
         # add multihead to "extra_packings"
         for multihead_cleaning in self.m.root["extra"].iter(cls="multihead_cleaning"):

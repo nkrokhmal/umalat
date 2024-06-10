@@ -4,7 +4,8 @@ from more_itertools import first, last
 from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
+from utils_ak.block_tree.validation.class_validator import ClassValidator
+from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
@@ -23,14 +24,14 @@ class Validator(ClassValidator):
 
         # - Validate main
 
-        validate_disjoint_by_axis(b1["pouring"], b2["pouring"], ordered=True)
-        validate_disjoint_by_axis(b1["pumping"], b2["pumping"], ordered=True)
-        validate_disjoint_by_axis(b1["packing"], b2["packing"], ordered=True)
+        validate_disjoint(b1["pouring"], b2["pouring"], ordered=True)
+        validate_disjoint(b1["pumping"], b2["pumping"], ordered=True)
+        validate_disjoint(b1["packing"], b2["packing"], ordered=True)
 
         if b1.props["floculator_num"] == b2.props["floculator_num"]:
-            validate_disjoint_by_axis(b1["draw_whey"], b2["heating"])
+            validate_disjoint(b1["draw_whey"], b2["heating"])
         if b1.props["drenator_num"] == b2.props["drenator_num"]:
-            validate_disjoint_by_axis(
+            validate_disjoint(
                 b1["pumping"],
                 b2["dray_ricotta"],
                 ordered=True,
@@ -78,24 +79,24 @@ class Validator(ClassValidator):
         # - Validate packing and pumping
 
         if b1.props["percent"] != b2.props["percent"]:  # todo next: mark, ask guys [@marklidenberg]
-            validate_disjoint_by_axis(b1["packing"], b2["pumping"], ordered=True)
+            validate_disjoint(b1["packing"], b2["pumping"], ordered=True)
 
         # - Validate extra processinng
 
-        validate_disjoint_by_axis(b1["extra_processing"], b2["dray_ricotta"], ordered=True)
+        validate_disjoint(b1["extra_processing"], b2["dray_ricotta"], ordered=True)
 
     @staticmethod
     def validate__preparation__boiling(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
         if b2.props["cleaning_object"] == "floculator" and b1.props["floculator_num"] == b2.props["floculator_num"]:
-            validate_disjoint_by_axis(b1["dray_ricotta"], b2, ordered=True)
+            validate_disjoint(b1["dray_ricotta"], b2, ordered=True)
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True, distance=1)
+        validate_disjoint(b1, b2, ordered=True, distance=1)
 
 
 def make_schedule(

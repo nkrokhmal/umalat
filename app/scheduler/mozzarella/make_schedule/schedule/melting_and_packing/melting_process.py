@@ -3,7 +3,8 @@ import itertools
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
+from utils_ak.block_tree.validation.class_validator import ClassValidator
+from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 from utils_ak.iteration.simple_iterator import iter_pairs
 
 from app.scheduler.mozzarella.make_schedule.packing import make_configuration_blocks
@@ -35,12 +36,12 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
 
         @staticmethod
         def validate__melting_and_packing_process__melting_and_packing_process(b1, b2):
-            validate_disjoint_by_axis(b1["melting_process"], b2["melting_process"])
+            validate_disjoint(b1["melting_process"], b2["melting_process"])
 
             for p1, p2 in itertools.product(b1.iter(cls="packing_team"), b2.iter(cls="packing_team")):
                 if p1.props["packing_team_id"] != p2.props["packing_team_id"]:
                     continue
-                validate_disjoint_by_axis(p1, p2)
+                validate_disjoint(p1, p2)
 
         @staticmethod
         def validate__melting_and_packing_process__packing_configuration(b1, b2):
@@ -53,7 +54,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                 return
 
             for packing in packings:
-                validate_disjoint_by_axis(packing, b2)
+                validate_disjoint(packing, b2)
 
         @staticmethod
         def validate__packing_configuration__melting_and_packing_process(b1, b2):
@@ -66,7 +67,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                 return
 
             for packing in packings:
-                validate_disjoint_by_axis(b2, packing)
+                validate_disjoint(b2, packing)
 
     blocks = fill_configurations(m, mpps, boiling_model)
 

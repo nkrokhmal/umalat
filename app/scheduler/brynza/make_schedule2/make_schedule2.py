@@ -1,5 +1,6 @@
-from utils_ak.block_tree import AxisPusher, ClassValidator, push, validate_disjoint_by_axis
 from utils_ak.block_tree.block_maker import BlockMaker
+from utils_ak.block_tree.validation.class_validator import ClassValidator
+from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 
 from app.scheduler.brynza.make_schedule2.make_boiling import make_boiling
 from app.scheduler.brynza.make_schedule2.make_salting import make_salting
@@ -15,23 +16,23 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__boiling(b1, b2):
-        validate_disjoint_by_axis(b1["pouring_off"], b2["cutting"], ordered=True)
+        validate_disjoint(b1["pouring_off"], b2["cutting"], ordered=True)
 
         if b1.props["cheese_maker_num"] == b2.props["cheese_maker_num"]:
-            validate_disjoint_by_axis(b1, b2, ordered=True)
+            validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__boiling__salting(b1, b2):
-        validate_disjoint_by_axis(b1["pouring_off"], b2, ordered=True)
+        validate_disjoint(b1["pouring_off"], b2, ordered=True)
 
     @staticmethod
     def validate__salting__salting(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True, distance=2)
+        validate_disjoint(b1, b2, ordered=True, distance=2)
 
     @staticmethod
     def validate__lunch__boiling(b1, b2):
         if b1.props["pair_num"] == b2.props["pair_num"]:
-            validate_disjoint_by_axis(b1, b2, ordered=True)
+            validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__lunch__lunch(b1, b2):

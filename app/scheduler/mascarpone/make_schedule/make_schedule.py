@@ -6,7 +6,8 @@ from more_itertools import last, mark_ends
 from utils_ak.block_tree import add_push
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
+from utils_ak.block_tree.validation.class_validator import ClassValidator
+from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 
 from app.lessmore.utils.fp import pairwise
 from app.lessmore.utils.get_repo_path import get_repo_path
@@ -27,36 +28,36 @@ class Validator(ClassValidator):
             return
 
         if "separation" in b1.children_by_cls and "separation" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1["separation"], b2["separation"])
+            validate_disjoint(b1["separation"], b2["separation"])
 
-        validate_disjoint_by_axis(b1["pouring"], b2["pouring"])
+        validate_disjoint(b1["pouring"], b2["pouring"])
         if "salting" in b1.children_by_cls and "salting" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1["salting"], b2["salting"])
+            validate_disjoint(b1["salting"], b2["salting"])
 
         if b1.props["semifinished_group"] == "cream" and b2.props["semifinished_group"] == "cream":
-            validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
+            validate_disjoint(b1["packing_group"], b2["packing_group"])
         else:
-            validate_disjoint_by_axis(b1["packing_group"], b2["pumping"], distance=-4)  # 20 minutes buffer
+            validate_disjoint(b1["packing_group"], b2["pumping"], distance=-4)  # 20 minutes buffer
 
-        validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
+        validate_disjoint(b1["packing_group"], b2["packing_group"])
 
         if "heating" in b1.children_by_cls and "heating" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1["heating"], b2["heating"])
+            validate_disjoint(b1["heating"], b2["heating"])
 
         if b1.props["semifinished_group"] != "mascarpone":
-            validate_disjoint_by_axis(b1["packing_group"], b2["pumping"])
+            validate_disjoint(b1["packing_group"], b2["pumping"])
 
         if (
             "separation" in b1.children_by_cls
             and "separation" in b2.children_by_cls
             and b1.props["semifinished_group"] != b2.props["semifinished_group"]
         ):
-            validate_disjoint_by_axis(b1["separation"], b2["separation"], distance=2)
+            validate_disjoint(b1["separation"], b2["separation"], distance=2)
 
         # - Validate pumping and separation overlap for the same tub
 
         if b1.props["tub_num"] == b2.props["tub_num"] and "separation" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1["pumping"], b2["separation"], distance=0)
+            validate_disjoint(b1["pumping"], b2["separation"], distance=0)
 
     @staticmethod
     def validate__boiling__cream_normalization(b1, b2):
@@ -68,7 +69,7 @@ class Validator(ClassValidator):
             # should not happen
             return
 
-        validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
+        validate_disjoint(b1["pouring"], b2, ordered=True)
 
     @staticmethod
     def validate__cream_normalization__boiling(b1, b2):
@@ -80,25 +81,25 @@ class Validator(ClassValidator):
             # should not happen
             return
 
-        validate_disjoint_by_axis(b1, b2["pouring"], ordered=True)
+        validate_disjoint(b1, b2["pouring"], ordered=True)
 
     @staticmethod
     def validate__preparation__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__preparation__preparation(b1, b2):
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__preparation__separator_acceleration(b1, b2):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        validate_disjoint_by_axis(b1, b2, ordered=True)
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
@@ -109,14 +110,14 @@ class Validator(ClassValidator):
             b2.props["cleaning_object"] in ["pasteurizer", "separator", "heat_exchanger"]
             and "separation" in b1.children_by_cls
         ):
-            validate_disjoint_by_axis(b1["separation"], b2, ordered=True)
+            validate_disjoint(b1["separation"], b2, ordered=True)
 
         if (
             b2.props["cleaning_object"] == "cream_cheese_tub"
             and "separation" in b1.children_by_cls
             and b1.props["semifinished_group"] in ["cream_cheese", "robiola"]
         ):
-            validate_disjoint_by_axis(b1["separation"], b2, ordered=True)
+            validate_disjoint(b1["separation"], b2, ordered=True)
 
     @staticmethod
     def validate__cleaning__boiling(b1, b2):
@@ -124,13 +125,13 @@ class Validator(ClassValidator):
             return
 
         if b1.props["cleaning_object"] == "buffer_tank_and_packer" and "pumping" in b2.children_by_cls:
-            validate_disjoint_by_axis(b1, b2["pumping"], ordered=True)
+            validate_disjoint(b1, b2["pumping"], ordered=True)
 
         if b1.props["cleaning_object"] == "pasteurizer":
-            validate_disjoint_by_axis(b1, b2, ordered=True)
+            validate_disjoint(b1, b2, ordered=True)
 
         if b1.props["cleaning_object"] == "heat_exchanger":
-            validate_disjoint_by_axis(b1, b2["separation"], distance=1, ordered=True)
+            validate_disjoint(b1, b2["separation"], distance=1, ordered=True)
 
     @staticmethod
     def validate__separator_acceleration__boiling(b1, b2):
@@ -140,7 +141,7 @@ class Validator(ClassValidator):
         if "separation" not in [child.props["cls"] for child in b2.children]:
             return
 
-        validate_disjoint_by_axis(b1, b2["separation"], ordered=True)
+        validate_disjoint(b1, b2["separation"], ordered=True)
 
     @staticmethod
     def validate__boiling__separator_acceleration(b1, b2):
@@ -148,25 +149,25 @@ class Validator(ClassValidator):
             return
 
         if b1.props["semifinished_group"] == "cream":
-            validate_disjoint_by_axis(b1["pouring"], b2, ordered=True)
-        validate_disjoint_by_axis(b1["pumping"], b2, ordered=True)
+            validate_disjoint(b1["pouring"], b2, ordered=True)
+        validate_disjoint(b1["pumping"], b2, ordered=True)
 
     @staticmethod
     def validate__boiling__packing_switch(b1, b2):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        validate_disjoint_by_axis(b1["packing_group"], b2, ordered=True)
+        validate_disjoint(b1["packing_group"], b2, ordered=True)
 
     @staticmethod
     def validate__packing_switch__boiling(b1, b2):
         if b1.props["line"] != b2.props["line"]:
             return
 
-        validate_disjoint_by_axis(b1, b2["packing_group"], ordered=True)
+        validate_disjoint(b1, b2["packing_group"], ordered=True)
 
         if b2.props["semifinished_group"] != "cream":  # todo maybe: why cream excluded? [@marklidenberg]
-            validate_disjoint_by_axis(b1, b2["pumping"], distance=-4)  # 20 minutes buffer
+            validate_disjoint(b1, b2["pumping"], distance=-4)  # 20 minutes buffer
 
     @staticmethod
     def validate__cleaning__cleaning(b1, b2):
@@ -174,10 +175,10 @@ class Validator(ClassValidator):
             return
 
         if b1.props["contour"] == b2.props["contour"]:
-            validate_disjoint_by_axis(b1, b2, distance=1, ordered=b1.props["line"] == b2.props["line"])
+            validate_disjoint(b1, b2, distance=1, ordered=b1.props["line"] == b2.props["line"])
 
             if b2.props["cleaning_object"] == "heat_exchanger":
-                validate_disjoint_by_axis(b1, b2, distance=1, ordered=True)
+                validate_disjoint(b1, b2, distance=1, ordered=True)
 
 
 def make_schedule(
@@ -423,7 +424,7 @@ def make_schedule(
 
                 if b1.props["cls"] == "boiling" and b2.props["cls"] == "boiling":
                     try:
-                        validate_disjoint_by_axis(b1["packing_group"], b2["packing_group"])
+                        validate_disjoint(b1["packing_group"], b2["packing_group"])
                     except AssertionError as e:
                         disposition = json.loads(str(e))["disposition"]
 
@@ -433,7 +434,7 @@ def make_schedule(
 
                 elif b1.props["cls"] == "packing_switch" and b2.props["cls"] == "boiling":
                     try:
-                        validate_disjoint_by_axis(b1, b2["packing_group"])
+                        validate_disjoint(b1, b2["packing_group"])
                     except AssertionError as e:
                         disposition = json.loads(str(e))["disposition"]
                         b2["packing_group"].props.update(

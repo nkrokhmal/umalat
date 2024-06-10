@@ -3,7 +3,8 @@ import types
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
+from utils_ak.block_tree.validation.class_validator import ClassValidator
+from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 
 from app.models import Washer, cast_model
 from app.scheduler.common.time_utils import cast_t
@@ -15,7 +16,7 @@ class CleaningValidator(ClassValidator):
         super().__init__(window=window)
 
     def validate__cleaning__cleaning(self, b1, b2):
-        validate_disjoint_by_axis(b1, b2, distance=2, ordered=self.ordered)
+        validate_disjoint(b1, b2, distance=2, ordered=self.ordered)
 
 
 def run_order(function_or_generators, order):

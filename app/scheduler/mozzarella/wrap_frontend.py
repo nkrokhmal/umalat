@@ -1,7 +1,8 @@
 from utils_ak.block_tree.block import Block
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.pushers import add_push, push, simple_push
-from utils_ak.block_tree.validation import ClassValidator, validate_disjoint_by_axis
+from utils_ak.block_tree.validation.class_validator import ClassValidator
+from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 from utils_ak.builtin.collection import remove_neighbor_duplicates
 from utils_ak.code_block import code
 from utils_ak.code_block.code import code
@@ -248,7 +249,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
 
             @staticmethod
             def validate__cooling_block__cooling_block(b1, b2):
-                validate_disjoint_by_axis(b1, b2)
+                validate_disjoint(b1, b2)
 
         cooling_label = "cooling" if line_name == LineName.WATER else "salting"
 
