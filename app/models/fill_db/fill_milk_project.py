@@ -104,7 +104,7 @@ def fill_boilings():
             line_id=line_id,
             weight_netto=b["Вес нетто"],
             output_kg=b["Выход"],
-            # todo: delete
+            # todo later: delete [@marklidenberg]
             equipment_check_time=10,
         )
         db.session.add(boiling)

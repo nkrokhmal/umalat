@@ -28,6 +28,7 @@ def read_params():
 
 def fill_db():
     fill_boiling_technologies()
+
     # fill_cooling_technologies()
     fill_boilings()
     fill_form_factors()
@@ -190,6 +191,7 @@ def fill_form_factors():
 
         form_factor = MozzarellaFormFactor(name=name, relative_weight=value["Вес форм фактора"])
         form_factor.line = [x for x in lines if x.name == line_name][0]
+
         # cooling_technologies = db.session.query(MozzarellaCoolingTechnology).all()
         if "Терка" not in name:
             cooling_technology = MozzarellaCoolingTechnology(

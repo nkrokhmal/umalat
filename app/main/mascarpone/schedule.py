@@ -15,7 +15,7 @@ BATCH_TYPES = [
     "cream_cheese",
     # "robiola",
     # "cottage_cheese",
-    "cream"
+    "cream",
 ]
 
 

@@ -13,6 +13,7 @@ COLUMN_SHIFT = 5  # header 4 + 1 for one-indexing
 
 
 def parse_schedule(ws_obj):
+
     # - Get cells from worksheet object
 
     df = read_merged_cells_df(ws_obj, basic_features=False)

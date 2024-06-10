@@ -14,6 +14,7 @@ def wrap_frontend2(
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
 ) -> dict:
+
     # - Get schedule
 
     output = make_schedule2(

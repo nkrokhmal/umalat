@@ -21,6 +21,7 @@ def to_boiling_plan(boiling_plan: BoilingPlanLike, first_batch_ids_by_type={"mil
     """
 
     if isinstance(boiling_plan, pd.DataFrame):
+
         # already boiling plan
         return boiling_plan
 
@@ -28,13 +29,16 @@ def to_boiling_plan(boiling_plan: BoilingPlanLike, first_batch_ids_by_type={"mil
 
     cur_id = 0
 
-    with code("Load boiling plan"):
-        ws = None
-        for key in ["План варок адыгейский", "План варок милкпроджект"]:
-            if key in wb.sheetnames:
-                ws = wb[key]
-        if not ws:
-            raise Exception("Не найдена вкладка для плана варок")
+    # - Load boiling plan
+
+    ws = None
+    for key in ["План варок адыгейский", "План варок милкпроджект"]:
+        if key in wb.sheetnames:
+            ws = wb[key]
+    if not ws:
+        raise Exception("Не найдена вкладка для плана варок")
+
+    # - Collect data
 
     values = []
 
@@ -46,6 +50,8 @@ def to_boiling_plan(boiling_plan: BoilingPlanLike, first_batch_ids_by_type={"mil
             continue
 
         values.append([ws.cell(i, j).value for j in range(1, len(header) + 1)])
+
+    # - Create dataframe
 
     df = pd.DataFrame(values, columns=header)
     df = df[
@@ -60,6 +66,9 @@ def to_boiling_plan(boiling_plan: BoilingPlanLike, first_batch_ids_by_type={"mil
         "sku",
         "kg",
     ]
+
+    # - Process dataframe
+
     df = df[df["sku"] != "-"]
     df["group_id"] = df["group_id"].astype(int)
 

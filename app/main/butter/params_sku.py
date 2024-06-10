@@ -152,5 +152,6 @@ def butter_delete_sku(sku_id):
     if sku:
         db.session.delete(sku)
         db.session.commit()
+
         # flask.flash("SKU успешно удалено", "success")
     return redirect(flask.url_for(".butter_get_sku", page=1))

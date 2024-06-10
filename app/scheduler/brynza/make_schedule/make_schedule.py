@@ -13,6 +13,7 @@ def make_packing_schedule(
     boiling_plan: BoilingPlanLike,
     start_time="07:00",
 ):
+
     # - Alias dataframes
 
     df1 = to_boiling_plan_brynza(boiling_plan)
@@ -83,6 +84,7 @@ def make_packing_schedule(
 
 
 def test():
+
     # - Read boiling plan
 
     print(

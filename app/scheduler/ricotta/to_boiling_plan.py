@@ -31,6 +31,7 @@ def to_boiling_plan(
     # - Check if already a dataframe
 
     if isinstance(boiling_plan_source, pd.DataFrame):
+
         # already a dataframe
         return boiling_plan_source
 

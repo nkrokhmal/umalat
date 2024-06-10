@@ -21,6 +21,7 @@ def _is_datetime(v: Union[str, datetime]):
     from dateutil.parser import parse
 
     if len(v) < 8:
+
         # skip 00, 05, 10,
         return False
     try:
@@ -46,6 +47,7 @@ def parse_time_headers(cells_df: pd.DataFrame) -> tuple[list, list]:
         List of start times for each time header
 
     """
+
     # - Find datetime values as a label
 
     time_index_row_nums = cells_df[cells_df["label"].astype(str).apply(_is_datetime)]["x1"].unique()
@@ -55,6 +57,7 @@ def parse_time_headers(cells_df: pd.DataFrame) -> tuple[list, list]:
     start_times = []
 
     for row_num in time_index_row_nums:
+
         # - Get values
 
         values = cells_df[cells_df["x1"] == row_num][
@@ -83,6 +86,7 @@ def parse_time_headers(cells_df: pd.DataFrame) -> tuple[list, list]:
         first_value_after_55 = first([(a, b) for a, b in iter_pairs(values) if a == "55"], [None, None])[1]  # "1"
 
         if not first_value_after_55:
+
             # shoudn't happen, really
             continue
 

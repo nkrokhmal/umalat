@@ -12,6 +12,7 @@ def wrap_frontend(
     date=None,
     start_time: str = "07:00",
 ) -> dict:
+
     # - Get schedule
 
     output = make_packing_schedule(

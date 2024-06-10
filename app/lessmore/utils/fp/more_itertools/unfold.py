@@ -5,6 +5,7 @@ from more_itertools import one as _one, only as _only, strictly_n
 
 
 def test():
+
     # -- One
 
     assert _one([1], too_short=ValueError, too_long=ValueError) == 1

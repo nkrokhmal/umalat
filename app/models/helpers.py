@@ -54,7 +54,7 @@ def cast_model(
 def cast_mozzarella_form_factor(obj):
     if isinstance(obj, str):
         # 'Вода: 200'
-        # todo maybe: make 'Вода: 200' a default name for form factor, not 0.2.
+        # todo maybe: make 'Вода: 200' a default name for form factor, not 0.2 [@marklidenberg]
         short_line_name, relative_weight = obj.split(":")
         relative_weight = relative_weight.strip()
         short_line_names_map = {"Вода": "Моцарелла в воде", "Соль": "Пицца чиз"}
@@ -79,6 +79,7 @@ def cast_mozzarella_form_factor(obj):
 def cast_mozzarella_boiling(obj):
     if isinstance(obj, str):
         try:
+
             # water, 2.7, Альче
             values = obj.split(",")
             line_name, percent, ferment = values[:3]

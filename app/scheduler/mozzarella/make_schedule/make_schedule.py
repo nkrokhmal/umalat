@@ -19,6 +19,7 @@ def make_schedule(
     start_configuration=None,
     date=None,
 ) -> dict:
+
     # - Get boiling plan
 
     boiling_plan_df = to_boiling_plan(

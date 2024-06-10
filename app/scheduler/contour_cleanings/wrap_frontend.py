@@ -30,10 +30,13 @@ def wrap_contour(contour, contour_id):
 def wrap_frontend(schedule, date=None):
     date = date or datetime.now()
 
-    with code("Calc start time"):
-        min_t = min([block.x[0] for block in schedule.iter(cls="cleaning")])
-        days, _, _ = parse_time(min_t)
-        start_time = cast_time((days, 0, 0))
+    # - Calc start time
+
+    min_t = min([block.x[0] for block in schedule.iter(cls="cleaning")])
+    days, _, _ = parse_time(min_t)
+    start_time = cast_time((days, 0, 0))
+
+    # - Wrap frontend
 
     m = BlockMaker(
         "frontend",

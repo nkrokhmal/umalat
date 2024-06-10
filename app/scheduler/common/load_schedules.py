@@ -12,6 +12,7 @@ from config import config
 
 
 def load_schedules_by_department(path: str, prefix: str, departments: list = []):
+
     # NOTE: DOES NOT RETURN DEPARTMENT IF NOT PRESENT
     schedules_by_department = {}
     departments = list(departments)
@@ -25,6 +26,7 @@ def load_schedules_by_department(path: str, prefix: str, departments: list = [])
                 schedules_by_department[department] = ParallelepipedBlock.from_dict(pickle.load(f))
 
             if department == "mozzarella":
+
                 # reload models for mozzarella - need for use later
                 for block in schedules_by_department[department].iter(cls="boiling"):
                     _id = int(

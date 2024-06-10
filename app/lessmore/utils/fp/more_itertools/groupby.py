@@ -8,6 +8,7 @@ from more_itertools import bucket as _bucket, groupby_transform as groupby_conse
 
 
 def test():
+
     # - Groupby
 
     assert _map_reduce(

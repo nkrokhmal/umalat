@@ -41,6 +41,7 @@ def make_mpp(boiling_df, left_boiling_volume):
     assert left < boiling_df["left"].sum() + ERROR  # have enough packers to collect |this volume
 
     while left > ERROR:
+
         # get next skus
         cur_skus_values = []
         for packing_team_id in packing_team_ids:
@@ -92,6 +93,7 @@ def make_mpp(boiling_df, left_boiling_volume):
     )
 
     def round_timestamps(df, packing_team_ids):
+
         # round to five-minute intervals
         df["beg_ts"] = df["beg_ts"].apply(lambda ts: None if ts is None else custom_round(ts, 5, "nearest_half_down"))
         df["end_ts"] = df["end_ts"].apply(lambda ts: None if ts is None else custom_round(ts, 5, "nearest_half_down"))
@@ -133,6 +135,7 @@ def make_mpp(boiling_df, left_boiling_volume):
             ):
                 for i, (_, row) in enumerate(df.iterrows()):
                     if row["collecting_speed"] == row["packing_speed"]:
+
                         # add configuration if needed
                         if i >= 1:
                             conf_time_size = get_configuration_time(
@@ -160,6 +163,7 @@ def make_mpp(boiling_df, left_boiling_volume):
                             push_func=add_push,
                         )
                     else:
+
                         # rubber
                         block = m.push_row(
                             "process",
@@ -253,6 +257,7 @@ def make_boilings_parallel_dynamic(boiling_group_df, first_boiling_id=1):
         left = boiling_volume
 
         while left > ERROR:
+
             # get next cur_boiling_df if necessary
             if cur_boiling_df["left"].sum() < ERROR:
                 assert form_factors.index(cur_form_factor) + 1 < len(form_factors)  # check there are form factors left

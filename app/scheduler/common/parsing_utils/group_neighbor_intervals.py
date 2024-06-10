@@ -7,6 +7,7 @@ def group_neighbor_intervals(
     interval_func: Optional[Callable] = None,  # returns [start, end] of interval
     split_func: Optional[Callable] = None,  # condition that can split a neighbor group
 ):
+
     # - Preprocess arguments
 
     interval_func = interval_func or (lambda interval: [interval[0], interval[1]])
@@ -25,12 +26,14 @@ def group_neighbor_intervals(
             continue
 
         if interval_func(cur_group[-1])[-1] == interval_func(interval)[0] and not (split_func and split_func(interval)):
+
             # subsequent
             cur_group.append(interval)
             if max_group_size and len(cur_group) == max_group_size:
                 groups.append(cur_group)
                 cur_group = []
         else:
+
             # gap between
             groups.append(cur_group)
             cur_group = [interval]

@@ -26,6 +26,7 @@ def run_consolidated(
     wb: Union[Workbook, list] = ["Расписание"],
     open_file: bool = False,
 ) -> Workbook:
+
     # - Make directories if not exist
 
     makedirs(output_path)

@@ -21,6 +21,7 @@ COLUMN_SHIFT = 5  # header 4 + 1 for one-indexing
 
 
 def parse_schedule(ws_obj):
+
     # - Read merged cells dataframe
 
     df = read_merged_cells_df(ws_obj, basic_features=False)
@@ -40,6 +41,7 @@ def parse_schedule(ws_obj):
     adygea_rows = []
     milk_project_rows = []
     for row_num in df1["x1"].unique():
+
         # - Find labels
 
         row_labels = [str(row["label"]) for i, row in df1[df1["x1"] == row_num].iterrows()]
@@ -57,6 +59,7 @@ def parse_schedule(ws_obj):
         int_labels = [int(label) for label in _labels if is_int_like(label)]
 
         if not ("05" in row_labels and "55" in row_labels):
+
             # not a time header
             if int_labels:
                 adygea_rows.append(row_num)
@@ -65,6 +68,7 @@ def parse_schedule(ws_obj):
 
     parsed_schedule = {"milk_project_boilings": [], "adygea_boilings": []}
     for i, row in enumerate(milk_project_rows):
+
         # - Find line blocks
 
         def _filter_func(group):
@@ -111,6 +115,7 @@ def parse_schedule(ws_obj):
     # - Adygea
 
     for i, row in enumerate(adygea_rows):
+
         # - Find line blocks
 
         def _filter_func(group):

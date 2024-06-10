@@ -38,6 +38,7 @@ def load_properties_by_department(
     path: str,
     prefix: str,
 ):
+
     # NOTE: RETURNS BLANK PROPERTIES IF NOT PRESENT
     properties = {}
 

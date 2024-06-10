@@ -18,6 +18,7 @@ def fill_configurations(maker, mpps, boiling_model):
     for mpp1, mpp2 in iter_pairs(mpps):
         configuration_blocks = make_configuration_blocks(mpp1, mpp2, maker, boiling_model.line.name)
         for b in configuration_blocks:
+
             # reset x position
             b.props.update(x=[0, 0])
         res += configuration_blocks
@@ -111,7 +112,9 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                             continue
                         blocks.append(m.copy(child_block, with_props=True))
 
-            if "packing_configuration" in [block.props["cls"] for block in mp.children]:  # todo archive: refactor
+            if "packing_configuration" in [
+                block.props["cls"] for block in mp.children
+            ]:  # todo later: archive: refactor [@marklidenberg]
                 for block in [
                     b for b in mp["packing_configuration", True] if b.props["packing_team_id"] == packing_team_id
                 ]:
@@ -126,6 +129,7 @@ def make_melting_and_packing_from_mpps(boiling_model, mpps):
                     packing_team_id=packing_team_id,
                 ):
                     for block in blocks:
+
                         # fix start with coolings
                         m.push_row(block, push_func=add_push, x=block.props["x_rel"][0] - shift)
     return m.root

@@ -2,6 +2,7 @@ from more_itertools import peekable as _peekable, seekable as _seekable, spy as 
 
 
 def test():
+
     # - Lookback and lookahead
 
     # -- Spy: get head and original iterable

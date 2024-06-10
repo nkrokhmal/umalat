@@ -12,6 +12,7 @@ def wrap_frontend(
     date: Optional[datetime] = None,
     start_time: str = "07:00",
 ) -> dict:
+
     # - Get schedule
 
     output = make_schedule(boiling_plan=boiling_plan, start_time=start_time)

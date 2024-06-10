@@ -90,6 +90,7 @@ class BaseClass:
         "zeros": "M",
         "start_row": 2,
     }
+
     # cache files for 30 seconds
     CACHE_FILE_MAX_AGE = 30
 

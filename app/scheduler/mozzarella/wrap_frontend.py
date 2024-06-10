@@ -130,14 +130,6 @@ def wrap_cheese_makers(master, rng):
                         m.push_row("pouring_off", size=boiling["pouring"]["second"]["pouring_off"].size[0])
                         m.push_row("extra", size=boiling["pouring"]["second"]["extra"].size[0])
 
-                    with code("Steam consumption"):
-                        pass
-
-                        # deprecated (2021.06.04). Steam consumption is not needed anymore
-                        # with m.block('steam consumption'):
-                        #     for b in boiling["steams"]["steam_consumption", True]:
-                        #         m.block(make_steam_blocks(b, x=b.x_rel), push_func=add_push)
-
         m.push("stub", size=(0, 2))
 
     return m.root
@@ -295,6 +287,7 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
 
                 res = simple_push(cooling_lines[j], cooling_block, validator=Validator())
                 if isinstance(res, Block):
+
                     # pushed block successfully
                     break
                 j += 1
@@ -370,8 +363,6 @@ def wrap_melting(boiling, line_name):
                 size=boiling["melting_and_packing"]["melting"]["coolings"]["cooling_process", True][0]["start"].size[0],
             )
 
-        with code("Steam consumption"):
-            pass
     return m.root
 
 
@@ -423,10 +414,12 @@ def wrap_packing_block(packing_block, boiling_id):
             m.push_row("packing_label", size=3)
             m.push_row("packing_name", size=packing_block.size[0] - 3)
         elif packing_block.size[0] >= 2:
+
             # update 2021.10.21
             m.push_row("packing_label", size=1)
             m.push_row("packing_name", size=packing_block.size[0] - 1)
         elif packing_block.size[0] == 1:
+
             # update 2021.10.21
             m.push_row("packing_label", size=1)
 
@@ -459,6 +452,7 @@ def wrap_packings(master, line_name):
                     m.push(wrap_packing_block(packing_block, boiling.props["boiling_id"]), push_func=add_push)
             try:
                 for conf in master["packing_configuration", True]:
+
                     # first level only
                     if conf.props["packing_team_id"] != packing_team_id or conf.props["line_name"] != line_name:
                         continue
@@ -466,6 +460,7 @@ def wrap_packings(master, line_name):
                         "packing_configuration", push_func=add_push, x=(conf.props["x"][0], 2), size=conf.size[0]
                     )
             except:
+
                 # no packing_configuration in schedule first level
                 pass
     return m.root
@@ -496,6 +491,7 @@ def wrap_frontend(
     start_configuration=None,
     date=None,
 ):
+
     # - Get schedule first
 
     output = make_schedule(
@@ -560,6 +556,7 @@ def wrap_frontend(
                 start_time="00:00",
             )
         else:
+
             # m.block(wrap_multihead_cleanings(master))
             if schedule["shifts"]:
                 m.push(wrap_shifts(schedule["shifts"]["water_meltings"]))

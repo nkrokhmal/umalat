@@ -18,6 +18,7 @@ def submit_schedule(
     open_file: bool = False,
     split_file: bool = False,
 ):
+
     # - Preprocess arguments
 
     if prefix:

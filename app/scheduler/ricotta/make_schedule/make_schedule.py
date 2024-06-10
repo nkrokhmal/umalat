@@ -20,6 +20,7 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__boiling(b1, b2):
+
         # - Validate main
 
         validate_disjoint_by_axis(b1["pouring"], b2["pouring"], ordered=True)
@@ -102,6 +103,7 @@ def make_schedule(
     start_time="07:00",
     first_batch_ids_by_type: dict = {"ricotta": 1},
 ) -> dict:
+
     # - Get boiling plan
 
     boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type).copy()
@@ -124,6 +126,7 @@ def make_schedule(
     current_floculator_num = 0
     current_drenator_num = 0
     for i, (idx, grp) in enumerate(boiling_plan_df.groupby("batch_id")):
+
         # - Prepare boiling
 
         boilings = _make_boilings(grp, first_floculator_num=current_floculator_num)
@@ -131,6 +134,7 @@ def make_schedule(
         # - Insert new boiling
 
         for j, boiling in enumerate(boilings):
+
             # - Check if manual cleaning is needed
 
             # -- Get drenator objects
@@ -235,6 +239,7 @@ def make_schedule(
 
 
 def test():
+
     # - Configure pandas
 
     pd.set_option("display.max_rows", 500)

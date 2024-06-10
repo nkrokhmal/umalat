@@ -4,6 +4,7 @@ from app.lessmore.utils.get_frame_path.get_frame_path import get_parent_frame_pa
 
 
 def get_repo_path() -> Path:
+
     # - Find nearest .git folder path
 
     current_path = Path(get_parent_frame_path()).parent  # move from utils to current repo

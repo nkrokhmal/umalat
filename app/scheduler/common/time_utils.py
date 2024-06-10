@@ -14,11 +14,15 @@ t: 575
 
 
 def cast_t(obj):
-    with code("Handle None"):
-        if obj == 0:
-            return 0
-        if not obj:
-            return None
+
+    # - Handle None
+
+    if obj == 0:
+        return 0
+    if not obj:
+        return None
+
+    # - Handle int
 
     if is_int_like(obj):
         return int(obj)
@@ -32,6 +36,7 @@ def cast_t(obj):
         return cast_t((0, obj.hour, obj.minute))
     elif isinstance(obj, str):
         if obj.count(":") == 1:
+
             # human time format: 23:55+1
             if "-" in obj:
                 obj, days = obj.split("-")
@@ -42,6 +47,7 @@ def cast_t(obj):
                 days = 0
             hours, minutes = obj.split(":")
         elif obj.count(":") == 2:
+
             # classic time format: 1:23:55
             days, hours, minutes = obj.split(":")
         else:

@@ -18,7 +18,8 @@ def make_boiling(boiling_group_df):
 
     m.push_row("mixture_collecting", size=bt.mixture_collecting_time // 5)
     m.push_row("processing", size=bt.processing_time // 5)
-    # todo later: rename
+
+    # todo later: rename [@marklidenberg]
     m.push_row("red", size=bt.red_time // 5)
     return m.root
 

@@ -3,6 +3,7 @@ from loguru import logger
 
 def f(b):
     try:
+
         # NOTE: SHOULD NOT HAPPEN IN NEWER VERSIONS SINCE 2021.10.21 (# update 2021.10.21)
         return b.props["boiling_model_name"]
     except:

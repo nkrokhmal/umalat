@@ -15,6 +15,7 @@ from app.utils.files.utils import create_if_not_exists, save_schedule, save_sche
 def butter_schedule():
     form = ScheduleForm(flask.request.form)
     if flask.request.method == "POST" and "submit" in flask.request.form:
+
         # - Unpack form
 
         date = form.date.data

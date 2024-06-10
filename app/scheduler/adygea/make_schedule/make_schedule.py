@@ -186,6 +186,10 @@ def _make_schedule(
                 validator=Validator(),
             )
 
+    # - Add halumi boilings
+
+    ...
+
     # - Push cleaning
 
     last_boilings = [

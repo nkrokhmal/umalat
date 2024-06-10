@@ -33,6 +33,7 @@ def draw_frontend(
     rubber_start_time="07:00",
     start_configuration=None,
 ) -> dict:
+
     # - Wrap frontend
 
     output = wrap_frontend(

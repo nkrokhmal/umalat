@@ -18,6 +18,7 @@ LINE_HEIGHT = 14
 
 
 def wrap_line(schedule, line: str, date: datetime, start_time="07:00"):
+
     # - Copy schedule
 
     schedule = copy.deepcopy(schedule)
@@ -197,6 +198,7 @@ def wrap_frontend(
     date: Optional[datetime] = None,
     add_cleaning_after_eight_mascarpone_boilings: bool = False,
 ):
+
     # - Get schedule
 
     output = make_schedule(

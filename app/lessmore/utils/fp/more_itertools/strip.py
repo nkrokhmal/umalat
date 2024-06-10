@@ -2,6 +2,7 @@ from more_itertools import strip
 
 
 def test():
+
     # -- Strip: generalized string strip
 
     assert list(

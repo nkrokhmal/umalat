@@ -10,6 +10,7 @@ from app.scheduler.common.time_utils import cast_t
 
 
 def _find_optimal_cleanings_combination_by_schedule(schedule):
+
     # extract full cleaning duration
     full_cleaning_length = cast_model(Washer, "Длинная мойка термизатора").time
 
@@ -44,6 +45,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     df["is_water_done"] = ~df["is_water_done"]
 
     def _is_cleaning_combination_fit(cleaning_combination):
+
         # check that distance between boilings without cleaning is less than 15 hours
         separators = [-1] + list(cleaning_combination) + [df.index[-1]]
         for s1, s2 in iter_pairs(separators):
@@ -55,6 +57,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
         return True
 
     for n_cleanings in range(5):
+
         # find first available combination
         available_combinations = [
             combo
@@ -66,6 +69,7 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
             continue
 
         if n_cleanings == 0:
+
             # no cleanings needed, all is good
             return {}
 

@@ -13,6 +13,7 @@ def make_schedule(
     start_time="07:00",
     first_batch_ids_by_type: dict = {"milk_project": 1},
 ) -> dict:
+
     # - Process boiling plna
 
     boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type).copy()

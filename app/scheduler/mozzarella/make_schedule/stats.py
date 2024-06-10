@@ -2,6 +2,7 @@ from app.scheduler.common.time_utils import cast_time
 
 
 def calc_schedule_stats(schedule):
+
     # calc schedule stats
     stats = {}
 

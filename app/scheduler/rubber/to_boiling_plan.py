@@ -22,6 +22,7 @@ def to_boiling_plan(wb_obj: BoilingPlanLike):
     """
 
     if isinstance(wb_obj, pd.DataFrame):
+
         # already a dataframe
         return wb_obj
 

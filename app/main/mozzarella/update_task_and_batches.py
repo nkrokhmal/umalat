@@ -37,6 +37,7 @@ def update_interval_times(schedule_wb, boiling_plan_df):
 
 
 def update_task_and_batches(schedule_obj, boiling_plan_df=None):
+
     # - Prepare
 
     wb = cast_schedule(schedule_obj)

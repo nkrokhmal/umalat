@@ -78,6 +78,7 @@ class SKUMascarponeForm(FlaskForm):
 
 
 class MascarponeBoilingForm(FlaskForm):
+
     # readonly fields
     boiling_type = StringField("Тип варки", validators=[Optional()])
     weight_netto = FloatField("Вес варки", validators=[Optional()])

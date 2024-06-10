@@ -18,6 +18,7 @@ def draw_frontend2(
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:
+
     # - Wrap frontend
 
     output = wrap_frontend2(

@@ -18,10 +18,12 @@ def group_intervals(intervals, split_criteria=None, interval_func=None):
             groups.append(cur_group)
             cur_group = [cur_interval]
         else:
+
             # subsequent
             cur_group.append(cur_interval)
 
     if cur_group:
+
         # cur_group is initialized and
         groups.append(cur_group)
     return groups

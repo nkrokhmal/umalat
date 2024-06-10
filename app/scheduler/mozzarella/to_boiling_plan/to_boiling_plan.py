@@ -128,12 +128,12 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     if len(df) == 0:
         return pd.DataFrame()
 
-    with code("Fix group ids: first water -> then salt"):
-        cur_group_id = 1
-        for line_name in [LineName.WATER, LineName.SALT]:
-            for ind, grp in df[df["sku_obj"] == line_name].groupby("group_id"):
-                df.loc[grp.index, "group_id"] = cur_group_id
-                cur_group_id += 1
+    # Fix group ids: first water -> then salt
+    cur_group_id = 1
+    for line_name in [LineName.WATER, LineName.SALT]:
+        for ind, grp in df[df["sku_obj"] == line_name].groupby("group_id"):
+            df.loc[grp.index, "group_id"] = cur_group_id
+            cur_group_id += 1
 
     df["sku"] = df["sku"].apply(lambda sku: cast_model(MozzarellaSKU, sku))
 
@@ -148,6 +148,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     # fill Терка empty form factor values
     for idx, grp in df.copy().groupby("group_id"):
         if grp["_bff"].isnull().all():
+
             # take from bff input if not specified
             df.loc[grp.index, "_bff"] = cast_mozzarella_form_factor(config.DEFAULT_RUBBER_FORM_FACTOR)
         else:
@@ -179,6 +180,7 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
                             grp.iloc[0]["total_volume"] / grp["kg"].sum()
                         )  # scale to total_volume
                     else:
+
                         # all fine
                         pass
 
@@ -244,6 +246,7 @@ def to_boiling_plan(
     # - Check if already a dataframe
 
     if isinstance(boiling_plan_source, pd.DataFrame):
+
         # already a dataframe
         return boiling_plan_source
 

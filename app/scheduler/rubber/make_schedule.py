@@ -10,6 +10,7 @@ def make_schedule(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
 ) -> dict:
+
     # - Get boiling plan
 
     boiling_plan_df = to_boiling_plan(wb_obj=boiling_plan).copy()
@@ -29,6 +30,7 @@ def make_schedule(
 
     for is_first, is_last, (i, row) in mark_ends(boiling_plan_df.iterrows()):
         with m.push("packing_group", kg=row["kg"], sku=row["sku"]):
+
             # - Get packing_speed
 
             packing_speed = row["sku"].packing_speed

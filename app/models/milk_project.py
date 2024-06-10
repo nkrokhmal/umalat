@@ -34,7 +34,8 @@ class MilkProjectBoiling(Boiling):
     weight_netto = mdb.Column(mdb.Float)
     output_kg = mdb.Column(mdb.Integer)
     percent = mdb.Column(mdb.Integer)
-    # todo: delete
+
+    # todo later: delete [@marklidenberg]
     equipment_check_time = mdb.Column(mdb.Integer)
 
     def to_str(self) -> str:
@@ -49,7 +50,8 @@ class MilkProjectBoilingTechnology(BoilingTechnology):
 
     mixture_collecting_time = mdb.Column(mdb.Integer)
     processing_time = mdb.Column(mdb.Integer)
-    # todo later: rename
+
+    # todo later: rename [@marklidenberg]
     red_time = mdb.Column(mdb.Integer)
 
     @staticmethod

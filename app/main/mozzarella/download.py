@@ -1,6 +1,5 @@
 import typing as tp
 
-from app.models import MozzarellaSKU
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,6 +13,7 @@ from utils_ak.openpyxl.openpyxl_tools import (  # todo next: fix import [@markli
 
 from app.imports.runtime import *
 from app.main import main
+from app.models import MozzarellaSKU
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
 
 
@@ -160,11 +160,12 @@ class PackerParser:
         rubber_skus = db.session.query(MozzarellaSKU).filter_by(is_multihead_rubber=True).all()
 
         df_total = self.df[self.df["x1"] == x1 + 1]
-        df_total = pd.concat([df_total[df_total.label.str.contains(re.escape(sku.name), case=False)] for sku in
-                              rubber_skus])
+        df_total = pd.concat(
+            [df_total[df_total.label.str.contains(re.escape(sku.name), case=False)] for sku in rubber_skus]
+        )
 
-        pattern = r'-\s*(\d+)\s*кг'
-        df_total['kg'] = df_total['label'].str.extract(pattern, expand=True).astype(int)
+        pattern = r"-\s*(\d+)\s*кг"
+        df_total["kg"] = df_total["label"].str.extract(pattern, expand=True).astype(int)
         total_kg = df_total["kg"].sum()
 
         pause_df = self.df[(self.df["x1"] == x1 + 2) & (self.df["color"] == self.params.reconfiguration_color)]
@@ -183,13 +184,13 @@ class PackerParser:
                 "beg": row["x0"],
                 "end": row["y0"],
                 "batch_id": "-",
-                "total_time": round(row['kg'] / (sku.packing_speed or sku.collecting_speed) * 12) * 5,
+                "total_time": round(row["kg"] / (sku.packing_speed or sku.collecting_speed) * 12) * 5,
                 "sku": sku,
-                "original_kg": row['kg'],
-                "pause": row['kg'] / total_kg * pause_time * 5,
+                "original_kg": row["kg"],
+                "pause": row["kg"] / total_kg * pause_time * 5,
                 "sku_name": sku.name,
                 "code": sku.code,
-                "packer": sku.packers[0].name
+                "packer": sku.packers[0].name,
             }
             if i >= 1:
                 packing_info["pause"] += reconfig_time * 5
@@ -342,6 +343,7 @@ class PackerParser:
 
     def parse_water(self) -> tp.Generator[pd.DataFrame, None, None]:
         if self.params.water_packer_x is None:
+
             # yield pd.DataFrame()
             yield pd.DataFrame(self.parse_rubber())
             return

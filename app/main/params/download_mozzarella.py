@@ -32,15 +32,21 @@ def download_mozzarella():
             "Тип упаковки": "",
             "Скорость сборки": sku.collecting_speed,
             "Скорость упаковки": sku.packing_speed,
-            "Охлаждение 1(для воды)": ""
-            if not sku.form_factor.default_cooling_technology
-            else sku.form_factor.default_cooling_technology.first_cooling_time,
-            "Охлаждение 2(для воды)": ""
-            if not sku.form_factor.default_cooling_technology
-            else sku.form_factor.default_cooling_technology.second_cooling_time,
-            "Время посолки": ""
-            if not sku.form_factor.default_cooling_technology
-            else sku.form_factor.default_cooling_technology.salting_time,
+            "Охлаждение 1(для воды)": (
+                ""
+                if not sku.form_factor.default_cooling_technology
+                else sku.form_factor.default_cooling_technology.first_cooling_time
+            ),
+            "Охлаждение 2(для воды)": (
+                ""
+                if not sku.form_factor.default_cooling_technology
+                else sku.form_factor.default_cooling_technology.second_cooling_time
+            ),
+            "Время посолки": (
+                ""
+                if not sku.form_factor.default_cooling_technology
+                else sku.form_factor.default_cooling_technology.salting_time
+            ),
             "Время налива": sku.made_from_boilings[0].boiling_technologies[0].pouring_time,
             "Время отвердевания": sku.made_from_boilings[0].boiling_technologies[0].soldification_time,
             "Время нарезки": sku.made_from_boilings[0].boiling_technologies[0].cutting_time,

@@ -9,13 +9,18 @@ from utils_ak.numeric.numeric import custom_round
 def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing):
     m = BlockMaker("root")
 
+    # - Get boiling technology
+
     bt = delistify(
         boiling_model.boiling_technologies, single=True
     )  # there is only one boiling technology is for every boiling model in mozzarella department
 
-    with code("termizator time"):
-        termizator_time = boiling_model.line.pouring_time * boiling_volume / boiling_model.line.output_kg
-        termizator_time = custom_round(termizator_time, 5, "ceil")
+    # - Calculate termizator time
+
+    termizator_time = boiling_model.line.pouring_time * boiling_volume / boiling_model.line.output_kg
+    termizator_time = custom_round(termizator_time, 5, "ceil")
+
+    # - Push boiling
 
     with m.push(
         "boiling",
@@ -40,14 +45,10 @@ def make_boiling(boiling_model, boiling_id, boiling_volume, melting_and_packing)
             size=boiling_model.line.chedderization_time // 5,
         )
 
-        with code("Steam consumption"):
-            pass
-
-    with code("Steam consumption"):
-        pass
+    # - Push melting and packing
 
     push(m.root["boiling"], melting_and_packing)
 
-    # todo archive: make proper drenator
-    # push(maker.root['boiling'], maker.create_block('full_drenator', x=[maker.root['boiling']['pouring']['second']['pouring_off'].x[0], 0], size=[maker.root['drenator'].size[0] + melting_and_packing['melting']['serving'].size[0] + melting_and_packing['melting']['meltings'].size[0], 0]), push_func=add_push)
+    # - Return
+
     return m.root["boiling"]

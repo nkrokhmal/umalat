@@ -12,6 +12,7 @@ from app.models import BrynzaBoiling, BrynzaSKU
 
 
 def make_boiling(boiling_id: int, group_name: Literal["Брынза", "Чанах"] = "Брынза", **props):
+
     # - Init block maker
 
     m = BlockMaker("root")

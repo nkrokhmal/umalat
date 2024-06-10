@@ -15,6 +15,7 @@ from app.globals import ERROR
 
 class SchemaToBoilingsDataframes:
     def _calc_melting_actors_by_boiling(self, boilings_meltings, melting_speed):
+
         # generate meltings by boilings
         res = []
         for boiling_meltings in boilings_meltings:
@@ -53,6 +54,7 @@ class SchemaToBoilingsDataframes:
         return res
 
     def _calc_packing_queues(self, packings):
+
         # generate packing queues
         packing_queues = {}
         for packing_team_id, grp in sorted(packings.items(), key=lambda v: v[0]):
@@ -167,10 +169,12 @@ class SchemaToBoilingsDataframes:
         return res
 
     def _post_process_dataframe(self, df, fix_small_intervals=True, rounding="nearest_half_down"):
+
         # move to minutes
         df["beg"] = df["beg"] * 60
         df["end"] = df["end"] * 60
         if rounding:
+
             # round to five-minute intervals
             df["beg"] = df["beg"].apply(lambda ts: None if ts is None else custom_round(ts, 5, rounding))
             df["end"] = df["end"].apply(lambda ts: None if ts is None else custom_round(ts, 5, rounding))

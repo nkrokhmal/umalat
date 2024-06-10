@@ -19,6 +19,7 @@ def make_schedule_with_optimal_cleanings(
     optimize_cleanings: bool = True,
     first_batch_ids_by_type: dict = {"mozzarella": 1},
 ):
+
     # - Process case with not optimized cleanings
 
     if not optimize_cleanings:
@@ -57,6 +58,7 @@ def make_schedule_with_optimal_cleanings(
     cleanings = {int(k): v for k, v in cleanings.items() if v}
 
     # - Make schedule with cleanings, with configuration from previously built schedule
+
     logger.info(
         "Using configuration",
         configuration=[b.props["boiling_model"].line.name for b in schedule["master"]["boiling", True]],

@@ -121,7 +121,8 @@ class SKUForm(FlaskForm):
     def validate_sku(self, name):
         sku = db.session.query(MozzarellaSKU).filter_by(MozzarellaSKU.name == name.data).first()
         if sku is not None:
-            # todo: fix
+
+            # todo later: fix [@marklidenberg]
             ...
             # raise flask_restplus.ValidationError("SKU с таким именем уже существует")
 

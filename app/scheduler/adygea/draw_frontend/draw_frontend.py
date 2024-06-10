@@ -13,11 +13,13 @@ from app.scheduler.common.frontend_utils import draw_excel_frontend
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
+    halumi_boilings_count: int = 0,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"adygea": 1},
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:
+
     # - Wrap frontend
 
     output = wrap_frontend(

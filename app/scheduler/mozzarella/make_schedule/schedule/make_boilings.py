@@ -17,10 +17,13 @@ def make_boilings(boiling_plan_df):
     first_boiling_id = boiling_plan_df["absolute_batch_id"].min()
     boiling_plan_df = boiling_plan_df.copy()
 
-    with code("Count boilings per line"):
-        counter = collections.Counter()
-        for i, grp in boiling_plan_df.groupby("group_id"):
-            counter[grp.iloc[0]["boiling"].line.name] += 1
+    # - Count boilings per line
+
+    counter = collections.Counter()
+    for i, grp in boiling_plan_df.groupby("group_id"):
+        counter[grp.iloc[0]["boiling"].line.name] += 1
+
+    # - Make boilings
 
     res = []
     res_w = []

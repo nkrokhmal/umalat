@@ -90,7 +90,8 @@ class BoilingPlanReader:
 
             if len(df) > 1 and full_boilings > 1:
                 skus = " ,\n".join(df.sku_name.to_list())
-                raise RicottaBoilingPlanReaderException(f"""
+                raise RicottaBoilingPlanReaderException(
+                    f"""
                     В плане варок есть варка с SKU
                     
                     {skus}
@@ -99,7 +100,8 @@ class BoilingPlanReader:
                     
                     Разрешается иметь только одну SKU, когда количество варок больше 1. 
                     Пожалуйста, исправьте файл варок! 
-                """)
+                """
+                )
 
             for i in range(full_boilings):
                 df = pd.DataFrame(boiling.skus)
@@ -156,6 +158,7 @@ class BoilingPlanReader:
 
 
 def test():
+
     # - Configure pandas
 
     pd.set_option("display.max_rows", 500)

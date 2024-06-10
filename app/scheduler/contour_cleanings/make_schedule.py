@@ -28,6 +28,7 @@ def run_order(function_or_generators, order):
 
 
 def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_off: bool = False):
+
     # - Init block maker
 
     m = BlockMaker("1 contour")
@@ -193,6 +194,7 @@ def make_contour_2(
     # - Комет (После окончания фасовки на моцарелле в воде + 2 часа)
 
     if properties["mozzarella"].is_present:
+
         # -- Find time
 
         times = []
@@ -367,6 +369,7 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
     # - Сыроизготовитель (Через 10 минут после того, как он слился)
 
     if properties["mozzarella"].is_present:
+
         # get when cheese makers end (values -> [('1', 97), ('0', 116), ('2', 149), ('3', 160)])
         values = properties["mozzarella"].cheesemaker_times()
 
@@ -456,11 +459,13 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
     if properties["mozzarella"].is_present:
 
         def _make_drenators(values, cleaning_time, label_suffix="", force_pairs=False):
+
             # logic
             i = 0
             while i < len(values):
                 drenator_id, drenator_end = values[i]
                 if i == 0 and not force_pairs:
+
                     # run first drenator single if not force pairs
                     ids = [str(drenator_id)]
                     block = m.push_row(
@@ -472,6 +477,7 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
                     ).block
                 else:
                     if i + 1 < len(values) and (force_pairs or values[i + 1][1] <= block.y[0] + 2):
+
                         # run pair
                         ids = [str(drenator_id), str(values[i + 1][0])]
                         block = m.push_row(
@@ -483,6 +489,7 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
                         ).block
                         i += 1
                     else:
+
                         # run single
                         ids = [str(drenator_id)]
                         block = m.push_row(
@@ -664,6 +671,7 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
         )
 
     if properties["mascarpone"].is_present:
+
         # - Танк сливок 4/5 (после каждого 8-го набора маскарпоне)
 
         for i, time in enumerate(properties["mascarpone"].every_8t_of_separation):

@@ -9,6 +9,7 @@ def named_partial(func, *args, **kwargs):
 
 
 def test():
+
     # - Init function
 
     def func(a, b, c):

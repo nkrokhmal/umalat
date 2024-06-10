@@ -2,6 +2,7 @@ from itertools import dropwhile, takewhile
 
 
 def test():
+
     # - Takewhile
 
     assert list(takewhile(lambda x: x < 5, [1, 4, 6, 4, 1])) == [1, 4]

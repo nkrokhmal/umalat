@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired, Optional
 from app.models import *
 
 
-# todo maybe: better list form
+# todo maybe: better list form [@marklidenberg]
 
 
 def create_form(request_form, properties):

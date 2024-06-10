@@ -5,6 +5,7 @@ def split_shifts(a, b):
     s = b - a
 
     if s / 12 <= 10:
+
         # working 10 hours or less - one shift
         return [[a, b]]
 

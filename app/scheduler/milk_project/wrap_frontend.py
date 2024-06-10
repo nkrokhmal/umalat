@@ -23,6 +23,7 @@ def wrap_line(schedule):
         if child.props["cls"] == "boiling_sequence":
             for i, block in enumerate(child.children):
                 if i <= 1:
+
                     # water collecting
                     _block = m.copy(block, with_props=True)
                     _block.update_size(size=(block.size[0], 2))
@@ -46,6 +47,7 @@ def wrap_frontend(
     start_time="07:00",
     first_batch_ids_by_type={"milk_project": 1},
 ) -> dict:
+
     # - Get schedule and boiling_plan_df
 
     output = make_schedule(

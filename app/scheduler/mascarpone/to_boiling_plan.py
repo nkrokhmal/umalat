@@ -43,6 +43,7 @@ def to_boiling_plan(
     """
 
     if isinstance(boiling_plan_source, pd.DataFrame):
+
         # already a dataframe
         return boiling_plan_source
 

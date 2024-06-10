@@ -2,6 +2,7 @@ from more_itertools import stagger as _stagger, windowed as _windowed, windowed_
 
 
 def test():
+
     # - Windowing
 
     # -- Windowed: Sliding window

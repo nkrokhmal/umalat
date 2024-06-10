@@ -26,13 +26,14 @@ def _wrap_boiling_lines(schedule):
         axis=1,
     )
 
-    with code("Init lines"):
-        boiling_lines = []
-        boiling_line = m.push("boiling_line_1", size=(0, 2)).block
-        boiling_lines.append(boiling_line)
-        boiling_line = m.push("boiling_line_2", size=(0, 2)).block
-        boiling_lines.append(boiling_line)
-        # m.row("stub", size=0, boiling_line=boiling_line) # create  reference for upper boiling line in stub
+    # - Init lines
+
+    boiling_lines = []
+    boiling_line = m.push("boiling_line_1", size=(0, 2)).block
+    boiling_lines.append(boiling_line)
+    boiling_line = m.push("boiling_line_2", size=(0, 2)).block
+    boiling_lines.append(boiling_line)
+    # m.row("stub", size=0, boiling_line=boiling_line) # create  reference for upper boiling line in stub
 
     for child in schedule.iter(cls=lambda cls: cls in ["preparation", "displacement", "cleaning"]):
         if not child.is_leaf():
@@ -132,6 +133,7 @@ def wrap_frontend(
     first_batch_ids_by_type: dict = {"butter": 1},
     date: Optional[datetime] = None,
 ):
+
     # - Get schedule
 
     output = make_schedule(

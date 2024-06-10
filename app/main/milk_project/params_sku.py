@@ -153,5 +153,6 @@ def milk_project_delete_sku(sku_id):
     if sku:
         db.session.delete(sku)
         db.session.commit()
+
         # flask.flash("SKU успешно удалено", "success")
     return redirect(flask.url_for(".milk_project_get_sku", page=1))

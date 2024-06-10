@@ -36,6 +36,7 @@ def contour_washers_schedule():
         date = datetime.strptime(date, "%Y-%m-%d")
 
         if flask.request.method == "GET":
+
             # - Get path
 
             path = os.path.join(
@@ -98,6 +99,7 @@ def contour_washers_schedule():
             )
 
         if flask.request.method == "POST":
+
             # fill properties
             form = flask.request.form.to_dict(flat=True)
             properties_by_department = {

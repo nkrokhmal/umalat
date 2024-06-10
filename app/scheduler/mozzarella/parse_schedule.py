@@ -16,6 +16,7 @@ COLUMN_SHIFT = 5  # header 4 + 1 for one-indexing
 
 
 def parse_schedule(ws_obj):
+
     # - Read merged cells
 
     df = read_merged_cells_df(ws_obj, basic_features=False)
@@ -29,11 +30,12 @@ def parse_schedule(ws_obj):
     # extract time
     start_time = cast_time_from_hour_label(df[(df["x0"] == 5) & (df["x1"] == row)].iloc[0]["label"])
 
-    with code("Precaution for minimum start time"):
-        minimum_start_time = "21:00"
-        start_time = (
-            start_time if cast_t(start_time) <= cast_t(minimum_start_time) else cast_time(cast_t(start_time) - 24 * 12)
-        )
+    # - Precaution for minimum start time
+
+    minimum_start_time = "21:00"
+    start_time = (
+        start_time if cast_t(start_time) <= cast_t(minimum_start_time) else cast_time(cast_t(start_time) - 24 * 12)
+    )
 
     # - FInd cheese makers rows
 
@@ -51,6 +53,7 @@ def parse_schedule(ws_obj):
     parsed_schedule = {"boilings": []}
 
     for i, row in enumerate(rows):
+
         # - Find line blocks
 
         def _filter_func(group):

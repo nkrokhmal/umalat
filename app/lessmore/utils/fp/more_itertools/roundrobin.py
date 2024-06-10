@@ -2,6 +2,7 @@ from more_itertools import interleave as _interleave, interleave_evenly as _inte
 
 
 def test():
+
     # -- Interleave: round-robing
 
     assert list(_roundrobin([1, 2, 3], [4, 5], [6, 7, 8])) == [1, 4, 6, 2, 5, 7, 3, 8]  # same as interleave_longest

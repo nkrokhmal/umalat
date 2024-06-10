@@ -58,6 +58,7 @@ def milk_project_schedule():
         adygea_output = draw_frontend_adygea(boiling_plan=wb, start_time=beg_time, workbook=wb, date=date)
         adygea_schedule, adygea_schedule_wb = adygea_output["schedule"], adygea_output["workbook"]
         if len(adygea_output["boiling_plan_df"]) > 0 and len(adygea_output["boiling_plan_df"]) > 0:
+
             # Set preferred header time"
             adygea_output["schedule"].props.update(preferred_header_time=cast_time(adygea_output["schedule"].x[0]))
 

@@ -19,6 +19,7 @@ def init_task(date, boiling_plan_df):
 
 
 def update_task_and_batches(schedule_obj):
+
     # - Prepare
 
     wb = cast_schedule(schedule_obj)

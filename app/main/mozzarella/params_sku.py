@@ -160,5 +160,6 @@ def mozzarella_delete_sku(sku_id: int):
     if sku:
         db.session.delete(sku)
         db.session.commit()
+
         # flask.flash("SKU успешно удалено", "success")
     return redirect(flask.request.referrer or flask.url_for(".mozzarella_get_sku", page=1))

@@ -20,6 +20,7 @@ def wrap_line(
     date: datetime,
     start_time="07:00",
 ):
+
     # - Init block maker
 
     m = BlockMaker(
@@ -142,6 +143,7 @@ def wrap_frontend(
     first_batch_ids_by_type: dict = {"ricotta": 1},
     date: Optional[datetime] = None,
 ):
+
     # - Get schedule
 
     output = make_schedule(

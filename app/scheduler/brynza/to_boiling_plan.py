@@ -30,6 +30,7 @@ def to_boiling_plan(
     # - Check if already a dataframe
 
     if isinstance(wb_obj, pd.DataFrame):
+
         # already a dataframe
         return wb_obj
 

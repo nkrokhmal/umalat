@@ -78,6 +78,7 @@ def parse_schedule_file(wb_obj):
         int_labels = [int(label) for label in _labels if is_int_like(label)]
 
         if not ("05" in row_labels and "55" in row_labels):
+
             # not a time header
             if int_labels:
                 headers.append(row_num)
@@ -87,6 +88,7 @@ def parse_schedule_file(wb_obj):
     if water_melting_headers and salt_melting_headers:
         packing_headers = packing_headers[:2]
     else:
+
         # no water or no salt
         packing_headers = packing_headers[:1]
 
@@ -168,6 +170,7 @@ def parse_schedule_file(wb_obj):
                 if calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row["x0"], row["y0"])) > 0
             ]
             if not overlapping:
+
                 # first cooling in each boiling does not qualify the filter
                 continue
 
@@ -292,8 +295,10 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     # save boiling_model to parsed_schedule blocks
     for block in list(parsed_schedule.iter(cls=lambda cls: cls in ["boiling", "melting_header", "packing"])):
+
         # remove little blocks
         if "boiling_id" not in block.props.all() or not is_int(block.props["boiling_id"]):
+
             # NOTE: SHOULD NOT HAPPEN IN NEWER FILES SINCE update 2021.10.21 (# update 2021.10.21)
             logger.error("Removing small block", block=block)
             block.detach_from_parent()
@@ -435,6 +440,7 @@ def fill_properties(parsed_schedule, boiling_plan_df):
                 if b2.y[0] < b1_melting.y[0]:
                     cur_drenator_num += 1
                 else:
+
                     # use same drenator for the next boiling
                     pass
             b2_melting = parsed_schedule.find_one(cls="melting_body", boiling_id=b2.props["boiling_id"])

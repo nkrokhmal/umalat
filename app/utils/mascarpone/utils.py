@@ -30,6 +30,7 @@ class MascarponeBoilingsHandler(BoilingsHandler):
                 )
             except Exception as e:
                 if "Working outside of request context" not in str(e):
+
                     # this error happens on local development
                     raise
 

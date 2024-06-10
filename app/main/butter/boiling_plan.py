@@ -13,6 +13,7 @@ from .forms import BoilingPlanForm
 @main.route("/butter_boiling_plan", methods=["POST", "GET"])
 @flask_login.login_required
 def butter_boiling_plan():
+
     # - Create form
 
     form = BoilingPlanForm(flask.request.form)
@@ -20,6 +21,7 @@ def butter_boiling_plan():
     # - Process POST
 
     if flask.request.method == "POST" and "submit" in flask.request.form:
+
         # - Get form data
 
         date = form.date.data

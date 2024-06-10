@@ -7,6 +7,7 @@ from app.scheduler.butter.to_boiling_plan import to_boiling_plan
 
 
 def _make_boiling_and_packing(boiling_group_df, tank_number):
+
     # - Get sample model
 
     sample_row = boiling_group_df.iloc[0]
@@ -16,7 +17,7 @@ def _make_boiling_and_packing(boiling_group_df, tank_number):
 
     m = BlockMaker(
         "boiling",
-        # - metadata, will be used later in frontend
+        # - Metadata, will be used later in frontend
         boiling_model=boiling_model,
         tank_number=tank_number,
     )
@@ -37,7 +38,7 @@ def _make_boiling_and_packing(boiling_group_df, tank_number):
     packing_block = m.create_block(
         "packing",
         size=(_packing_time // 5, 1),
-        # - metadata
+        # - Metadata
         boiling_model=boiling_model,
         tank_number=tank_number,
     )

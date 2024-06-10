@@ -11,6 +11,7 @@ from app.scheduler.mascarpone.properties.mascarpone_properties import Mascarpone
 
 
 def parse_schedule_file(wb_obj):
+
     # - Load cells
 
     df = load_cells_df(wb_obj, "Расписание")
@@ -23,6 +24,7 @@ def parse_schedule_file(wb_obj):
 
     values = []
     for i, row in df.loc[df["label"].str.contains("Производство маскарпоне")].iterrows():
+
         # - Find all separation blocks in +2 row that are within the same column range
 
         _separation_blocks_df = df[
@@ -62,6 +64,7 @@ def parse_schedule_file(wb_obj):
 
 
 def fill_properties(parsed_schedule):
+
     # - Init properties
 
     props = MascarponeProperties()

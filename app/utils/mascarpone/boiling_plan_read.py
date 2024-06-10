@@ -1,9 +1,9 @@
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
 
+import numpy as np
 import openpyxl
 import pandas as pd
-import numpy as np
 
 from utils_ak.openpyxl import cast_workbook
 

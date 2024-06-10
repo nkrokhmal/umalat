@@ -10,6 +10,7 @@ from app.scheduler.ricotta.properties.ricotta_properties import RicottaPropertie
 
 
 def parse_schedule_file(wb_obj):
+
     # - Load cells
 
     df = load_cells_df(wb_obj, "Расписание")
@@ -74,10 +75,12 @@ def parse_schedule_file(wb_obj):
 
 
 def fill_properties(parsed_schedule):
+
     # - Init properties
 
     props = RicottaProperties()
     props.is_present = True
+
     # - Last pumping out time
 
     pouring_offs = parsed_schedule["pouring_offs"]["pouring_off", True]

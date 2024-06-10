@@ -9,7 +9,7 @@ from app.utils.features.draw_utils import *
 from app.utils.files.utils import create_dir
 
 
-# todo maybe: possible
+# todo maybe: possible [@marklidenberg]
 class MascarponeScheduleTask(BaseScheduleTask[MascarponeSKU]):
     def update_boiling_schedule_task(self):
         data_dir = create_dir(

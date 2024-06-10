@@ -23,6 +23,7 @@ def pouring_text(b):
     elif b.props["semifinished_group"] == "mascarpone":
         return f"Прием п/ф {int(b.props['kg'])} кг"
     else:
+
         # should not happen
         return "Прием"
 
@@ -41,6 +42,7 @@ def cleaning_text(b):
     elif b.props["cleaning_object"] == "buffer_tank_and_packer":
         return "Мойка буферного танка и фасовочника"
     else:
+
         # should not happen
         return "Мойка"
 

@@ -10,6 +10,7 @@ from app.models import BrynzaBoiling, BrynzaSKU
 
 
 def make_salting(boiling_id: int, **props):
+
     # - Init block maker
 
     m = BlockMaker("root")
@@ -33,6 +34,7 @@ def make_salting(boiling_id: int, **props):
     boiling_technology = boiling.boiling_technologies[0]
 
     # - Make brynza boiling
+
     with m.push("salting", boiling_id=boiling_id, **props):
         m.push_row("main", size=boiling_technology.salting_time // 5)
 

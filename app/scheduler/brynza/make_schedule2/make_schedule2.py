@@ -45,6 +45,7 @@ def make_schedule2(
     start_time="07:00",
     first_batch_ids_by_type: dict = {"brynza": 1},
 ) -> dict:
+
     # - Init blockmaker
 
     m = BlockMaker("schedule", x=(cast_t(start_time), 0))
