@@ -21,6 +21,19 @@ from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.time_utils import cast_t, cast_time
 
 
+""" 
+
+There are 4 sublines: 0, 1, 2, 3
+
+They are split into pairs: 0-1: pair_num=0, 2-3: pair_num=1
+Each pair has it's own lunch (zero or one for each pair) 
+
+Boilings are pushed in the following order of sublines: 0, 2, 1, 3
+
+Halumi is made on sublines 2 and 3
+
+"""
+
 BOILER_NUM_ORDER = [0, 2, 1, 3]  # there are 4 "sublines", one for each boiler. We insert boilings in that order
 
 
