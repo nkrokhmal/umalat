@@ -44,7 +44,7 @@ def draw_frontend(
 
 def test():
     output = draw_frontend(
-        str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule.xlsx"),
+        str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"),
         start_time="10:00",
     )
 

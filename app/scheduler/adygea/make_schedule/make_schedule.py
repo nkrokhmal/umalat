@@ -1,5 +1,8 @@
 import itertools
 
+import pandas as pd
+
+from utils_ak.block_tree import Block
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.iterative import AxisPusher
 from utils_ak.block_tree.pushers.pushers import add_push, push
@@ -18,7 +21,7 @@ from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.time_utils import cast_t, cast_time
 
 
-BOILING_NUMS = [0, 2, 1, 3]
+BOILER_NUM_ORDER = [0, 2, 1, 3]  # there are 4 "sublines", one for each boiler. We insert boilings in that order
 
 
 class Validator(ClassValidator):
@@ -57,123 +60,159 @@ class Validator(ClassValidator):
 
 
 def _make_schedule(
-    boiling_plan_df,
-    start_time="07:00",
-    prepare_start_time="07:00",
-    lunch_times=None,
-):
-    lunch_times = lunch_times or []
-    lunch_times = list(lunch_times)
+    boiling_plan_df: pd.DataFrame,
+    start_time: str = "07:00",
+    lunch_times: list[str] = [],
+) -> Block:
+    """
+    Parameters
+    ----------
+    boiling_plan_df: pd.DataFrame
+        План варок
+    start_time: str
+        Когда начинается расписание
+    lunch_times
+        Время обедов
+    Returns
+    -------
+    Block
+        Расписание
+    """
+
+    # - Validate lunch times
+
+    lunch_times = list(lunch_times)  # copy to avoid side effects
     assert len(lunch_times) in [0, 2]  # no lunches or two lunches for two teams
 
-    adygea_line = cast_model(cls=AdygeaLine, obj="Адыгейский")
+    # - Get some models
 
-    local_start_t = cast_t(start_time) - cast_t(prepare_start_time)
-    normed_lunch_times = [cast_time(cast_t(lt) - cast_t(prepare_start_time)) for lt in lunch_times]
+    adygea_line = cast_model(cls=AdygeaLine, obj="Адыгейский")
+    adygea_cleaning = cast_model(Washer, "adygea_cleaning")
+
+    # - Change start time to add preparation
+
+    corrected_start_time = cast_time(cast_t(start_time) - adygea_line.preparation_time // 5)
+
+    # - Subtract prepare_start_time to get relative time
+
+    corrected_lunch_times = [
+        cast_time(cast_t(lunch_time) - adygea_line.preparation_time // 5) for lunch_time in lunch_times
+    ]
+
+    # - Init block maker with preparation
 
     m = BlockMaker("schedule")
     m.push_row(make_preparation(adygea_line.preparation_time // 5), push_func=add_push)
 
+    # - Copy boiling plan to avoid side effects
+
     boiling_plan_df = boiling_plan_df.copy()
 
-    """example: boiling_plan_df example
+    """
      batch_id            sku  n_baths    kg            boiling
 0            1  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
 1            2  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-2            3  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-3            4  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-4            5  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-5            6  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-6            7  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-7            8  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-8            9  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-9           10  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-10          11  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
-11          12  <AdygeaSKU 1>        1   8.0  <AdygeaBoiling 1>
-12          12  <AdygeaSKU 2>        1   9.0  <AdygeaBoiling 1>
-13          12  <AdygeaSKU 3>        1  33.0  <AdygeaBoiling 1>
-14          13  <AdygeaSKU 3>        1  50.0  <AdygeaBoiling 1>
-15          14  <AdygeaSKU 3>        1  44.0  <AdygeaBoiling 1>
-16          14  <AdygeaSKU 4>        1   6.0  <AdygeaBoiling 1>
-17          15  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>
-18          16  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>
-19          17  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>
-20          18  <AdygeaSKU 5>        1  50.0  <AdygeaBoiling 2>"""
+..."""
 
-    adygea_cleaning = cast_model(Washer, "adygea_cleaning")
-
-    boiling_num_generator = itertools.cycle(BOILING_NUMS)
+    boiling_num_generator = itertools.cycle(BOILER_NUM_ORDER)
 
     # todo maybe: a little bit messy with batch_id, cur_batch_id [@marklidenberg]
     for batch_id, grp in boiling_plan_df.groupby("batch_id"):
-        row = grp.iloc[0]
+
+        # - Take first row as sample (any row is fine)
+
+        sample_row = grp.iloc[0]
+
+        # - Get next boiler number
+
         cur_boiler_num = next(boiling_num_generator)
-        pair_num = BOILING_NUMS.index(cur_boiler_num) % 2
+
+        # - Get pair num
+
+        pair_num = 0 if cur_boiler_num in [0, 1] else 1
+
+        # - Make boiling
+
         boiling = make_boiling(
-            row["boiling"],
+            sample_row["boiling"],
             batch_id=batch_id,
             boiler_num=cur_boiler_num,
-            group_name=row["sku"].group.name,
+            group_name=sample_row["sku"].group.name,
             pair_num=pair_num,
         )
+
+        # - Push boiling
+
         push(
             m.root,
             boiling,
-            push_func=AxisPusher(start_from="max_beg", start_shift=-30, min_start=local_start_t),
+            push_func=AxisPusher(start_from="max_beg", start_shift=-30, min_start=cast_t(start_time)),
             validator=Validator(),
         )
-        with code("Push lunch if needed"):
-            if normed_lunch_times:
-                if normed_lunch_times[pair_num] and cast_time(boiling.y[0]) >= normed_lunch_times[pair_num]:
-                    push(
-                        m.root,
-                        make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num),
-                        push_func=AxisPusher(start_from=cast_t(normed_lunch_times[pair_num]), min_start=local_start_t),
-                        validator=Validator(),
-                    )
-                    normed_lunch_times[pair_num] = None  # pushed lunch, nonify lunch time
 
-    with code("Push lunches if not pushed yet"):
-        for pair_num, lunch_time in enumerate(normed_lunch_times):
-            if lunch_time:
+        # - Push lunch if needed
+
+        if corrected_lunch_times:
+            if corrected_lunch_times[pair_num] and cast_time(boiling.y[0]) >= corrected_lunch_times[pair_num]:
                 push(
                     m.root,
                     make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num),
-                    push_func=AxisPusher(start_from=cast_t(lunch_time), min_start=local_start_t),
+                    push_func=AxisPusher(
+                        start_from=cast_t(corrected_lunch_times[pair_num]), min_start=cast_t(start_time)
+                    ),
                     validator=Validator(),
                 )
+                corrected_lunch_times[pair_num] = None  # pushed lunch, delete lunch time
 
-    with code("Cleaning"):
-        last_boilings = [
-            iter_get([boiling for boiling in m.root["boiling", True] if boiling.props["boiler_num"] == boiler_num], -1)
-            for boiler_num in range(4)
-        ]
-        last_boilings = [b for b in last_boilings if b]
-        cleaning_start = min(b.y[0] for b in last_boilings)
-        if len(m.root["lunch", True]) > 0:
-            cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root["lunch", True]))
-        m.push_row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
+    # - Push lunches if not pushed yet
 
-    m.root.props.update(x=(cast_t(prepare_start_time), 0))
+    for pair_num, lunch_time in enumerate(corrected_lunch_times):
+        if lunch_time:
+            push(
+                m.root,
+                make_lunch(size=adygea_line.lunch_time // 5, pair_num=pair_num),
+                push_func=AxisPusher(start_from=cast_t(lunch_time), min_start=cast_t(start_time)),
+                validator=Validator(),
+            )
+
+    # - Push cleaning
+
+    last_boilings = [
+        iter_get([boiling for boiling in m.root["boiling", True] if boiling.props["boiler_num"] == boiler_num], -1)
+        for boiler_num in range(4)
+    ]
+    last_boilings = [b for b in last_boilings if b]
+    cleaning_start = min(b.y[0] for b in last_boilings)
+    if len(m.root["lunch", True]) > 0:
+        cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root["lunch", True]))
+    m.push_row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
+
+    # - Update start time
+
+    m.root.props.update(x=(cast_t(corrected_start_time), 0))
+
+    # - Return
+
     return m.root
 
 
 def make_schedule(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
-    prepare_start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"adygea": 1},
 ) -> dict:
+
     # - Get boiling plan
 
     boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type)
 
     # - Make scedule
 
-    no_lunch_schedule = _make_schedule(boiling_plan_df, start_time=start_time, prepare_start_time=prepare_start_time)
+    no_lunch_schedule = _make_schedule(boiling_plan_df, start_time=start_time)
 
     need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12  # work more than 8 hours
     if not need_a_break:
+
         # no lunch in these cases
         lunch_times = []
 
@@ -192,12 +231,15 @@ def make_schedule(
                     if b2.y[0] >= cast_t(time):
                         if b3 and b1:
                             if b2.y[0] - b1.y[0] >= b3.y[0] - b2.y[0]:
+
                                 # wait for next boiling and make lunch
                                 return cast_time(b3.y[0])
                             else:
+
                                 # make lunch now
                                 return cast_time(b2.y[0])
                         else:
+
                             # make lunch now
                             return cast_time(b2.y[0])
 
@@ -207,6 +249,7 @@ def make_schedule(
             lunch_interval = cast_interval(cast_t("12:00"), cast_t("14:30"))
 
             if lunch_interval.upper - working_interval.lower <= working_interval.upper - lunch_interval.lower:
+
                 # lunch is closer to the start
                 if lunch_interval.upper - working_interval.lower >= 2 * 12:
                     lunch_times.append(find_first_after("00:13:30"))
@@ -215,6 +258,7 @@ def make_schedule(
                     continue
 
             else:
+
                 # lunch is close to the end
                 if working_interval.upper - lunch_interval.lower >= 2 * 12:
                     lunch_times.append(find_first_after("00:12:00"))
@@ -222,9 +266,11 @@ def make_schedule(
                     # print(2, lunch_times)
                     continue
                 elif working_interval.upper - lunch_interval.lower >= 0:
+
                     # less than two hours till end - still possibly need a break
                     if need_a_break:
                         if lunch_interval.lower - working_interval.lower <= 7 * 12:
+
                             # work around 7 hours
                             lunch_times.append(find_first_after("00:12:00"))
 
@@ -237,7 +283,9 @@ def make_schedule(
                 # print(4, lunch_times)
                 continue
     schedule = _make_schedule(
-        boiling_plan_df, start_time=start_time, prepare_start_time=prepare_start_time, lunch_times=lunch_times
+        boiling_plan_df,
+        start_time=start_time,
+        lunch_times=lunch_times,
     )
 
     return {"schedule": schedule, "boiling_plan_df": boiling_plan_df}

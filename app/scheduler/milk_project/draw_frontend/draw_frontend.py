@@ -11,6 +11,10 @@ from app.scheduler.milk_project.draw_frontend.style import STYLE
 from app.scheduler.milk_project.wrap_frontend import wrap_frontend
 
 
+# NOTE!!!: MILK PROJECT IS DEPRECATED AND WILL BE REMOVED SOON
+# Current milk project is actually adygea +
+
+
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
