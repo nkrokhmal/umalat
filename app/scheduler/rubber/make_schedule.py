@@ -1,6 +1,7 @@
 from more_itertools import mark_ends
 from utils_ak.block_tree.block_maker import BlockMaker
 
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.time_utils import cast_t
 from app.scheduler.rubber.to_boiling_plan import to_boiling_plan
@@ -86,7 +87,9 @@ def make_schedule(
 def test():
     print(
         make_schedule(
-            """/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx"""
+            boiling_plan=str(
+                get_repo_path() / "app/data/static/samples/by_department/rubber/sample_rubber_schedule.xlsx"
+            ),
         )["schedule"]
     )
 
