@@ -7,10 +7,30 @@ from app.models import *
 
 
 def test_models():
-    print(cast_model(MozzarellaSKU, 1))
-    print(cast_model(MozzarellaSKU, "1.0"))
-    print(cast_mozzarella_boiling(1))
-    print(cast_mozzarella_form_factor(1))
+    for i in range(1, 1000):
+        try:
+            sku = cast_model(SKU, i)
+            print(sku, sku.name)
+        except Exception as e:
+            if "Failed to fetch element" not in str(e):
+                # unexpected error
+                raise
+
+            # found all
+            break
+
+    for i in range(1, 1000):
+        try:
+            boiling = cast_model(Boiling, i)
+            print(boiling, getattr(boiling, "name", None))
+        except Exception as e:
+            if "Failed to fetch element" not in str(e):
+                # unexpected error
+                raise
+
+            # found all
+            break
+    # print(cast_model(BrynzaSKU, 'Халуми для жарки «kλαssikós», 45%, 0,3 кг, к/к').made_from_boilings)
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ def draw_frontend(
 
     output = wrap_frontend(
         boiling_plan=boiling_plan,
+        halumi_boilings_count=halumi_boilings_count,
         start_time=start_time,
         first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,

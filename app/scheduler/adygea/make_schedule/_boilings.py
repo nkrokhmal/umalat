@@ -1,8 +1,17 @@
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.builtin.collection import delistify
 
+from app.globals import mdb
+from app.models import AdygeaBoiling, AdygeaSKU, BrynzaSKU, cast_model
 
-def make_boiling(boiling_model, batch_id, boiler_num, group_name, pair_num):
+
+def make_boiling(
+    boiling_model: mdb.Model,
+    batch_id: int,
+    boiler_num: int,
+    group_name: str,
+    pair_num: int,
+):
     m = BlockMaker(
         "boiling",
         boiling_model=boiling_model,
@@ -23,6 +32,18 @@ def make_boiling(boiling_model, batch_id, boiler_num, group_name, pair_num):
     return m.root
 
 
+def test():
+    print(
+        make_boiling(
+            boiling_model=cast_model(AdygeaBoiling, "Линия Адыгейский, Форм фактор Кавказский, Вес 0.37, 45"),
+            batch_id=1,
+            group_name="group_name",
+            boiler_num=1,
+            pair_num=1,
+        )
+    )
+
+
 def make_cleaning(size, **kwargs):
     m = BlockMaker("cleaning", **kwargs)
     m.push_row(f"cleaning", size=size)
@@ -38,3 +59,7 @@ def make_lunch(size, **kwargs):
     m = BlockMaker("lunch", **kwargs)
     m.push_row(f"lunch", size=size)
     return m.root
+
+
+if __name__ == "__main__":
+    test()

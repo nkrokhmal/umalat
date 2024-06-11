@@ -124,6 +124,7 @@ def wrap_boiling_lines(schedule):
 
 def wrap_frontend(
     boiling_plan: BoilingPlanLike,
+    halumi_boilings_count: int = 0,
     date=None,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"adygea": 1},
@@ -133,6 +134,7 @@ def wrap_frontend(
 
     output = make_schedule(
         boiling_plan=boiling_plan,
+        halumi_boilings_count=halumi_boilings_count,
         start_time=start_time,
         first_batch_ids_by_type=first_batch_ids_by_type,
     )

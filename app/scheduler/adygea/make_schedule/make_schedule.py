@@ -2,6 +2,7 @@ import itertools
 
 import pandas as pd
 
+from box import Box
 from more_itertools import last, nth
 from utils_ak.block_tree import Block
 from utils_ak.block_tree.block_maker import BlockMaker
@@ -35,6 +36,7 @@ Halumi is made on sublines 2 and 3
 
 def _make_schedule(
     boiling_plan_df: pd.DataFrame,
+    halumi_boilings_count: int = 0,
     start_time: str = "07:00",
     lunch_times: list[str] = [],
 ) -> Block:
@@ -82,33 +84,53 @@ def _make_schedule(
 1            2  <AdygeaSKU 1>        1  50.0  <AdygeaBoiling 1>
 ..."""
 
-    boiling_num_generator = itertools.cycle(
-        [0, 2, 1, 3]
-    )  # there are 4 "sublines", one for each boiler. We insert boilings in that order
+    # - Generate boilings
 
-    for batch_id, grp in boiling_plan_df.groupby("batch_id"):
+    boilings = []
 
-        # - Take first row as sample (any row is fine)
+    # -- Adygea boilings
 
-        sample_row = grp.iloc[0]
-
-        # - Get next boiler number
-
-        cur_boiler_num = next(boiling_num_generator)
-
-        # - Get pair num
-
-        pair_num = 0 if cur_boiler_num in [0, 1] else 1  # [2, 3] -> 1
-
-        # - Make boiling
-
-        boiling = make_boiling(
-            sample_row["boiling"],
+    boilings += [
+        make_boiling(
+            grp.iloc[0]["boiling"],
             batch_id=batch_id,
-            boiler_num=cur_boiler_num,
-            group_name=sample_row["sku"].group.name,
-            pair_num=pair_num,
+            boiler_num=nth(
+                itertools.cycle([0, 2, 1, 3]), i
+            ),  # # there are 4 "sublines", one for each boiler. We insert boilings in that order
+            group_name=grp.iloc[0]["sku"].group.name,
+            pair_num=0 if nth(itertools.cycle([0, 2, 1, 3]), i) in [0, 1] else 1,  # [2, 3] -> 1
         )
+        for i, (batch_id, grp) in enumerate(boiling_plan_df.groupby("batch_id"))
+    ]
+
+    # -- Halumi boilings
+
+    boilings += [
+        make_boiling(
+            boiling_model=Box(
+                boiling_technologies=[
+                    Box(
+                        collecting_time=5,
+                        coagulation_time=25,
+                        pouring_off_time=10,
+                    )
+                ]
+            ),
+            boiler_num=3 if i % 2 == 0 else 2,
+            batch_id=i,
+            group_name="halumi",
+            pair_num=1,
+        )
+        for i in range(halumi_boilings_count * 5)  # 5 boilings for each
+    ]
+
+    # - Push boilings
+
+    for boiling in boilings:
+
+        # - Extract pair_num
+
+        pair_num = boiling.props["pair_num"]
 
         # - Push boiling
 
@@ -191,6 +213,7 @@ def _make_schedule(
 
 def make_schedule(
     boiling_plan: BoilingPlanLike,
+    halumi_boilings_count: int = 0,
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"adygea": 1},
 ) -> dict:
@@ -203,7 +226,9 @@ def make_schedule(
 
     # We first build a schedule without lunch and find lunch times from it
 
-    no_lunch_schedule = _make_schedule(boiling_plan_df, start_time=start_time)
+    no_lunch_schedule = _make_schedule(
+        boiling_plan_df, start_time=start_time, halumi_boilings_count=halumi_boilings_count
+    )
 
     need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12  # work more than 8 hours
     if not need_a_break:
@@ -216,6 +241,7 @@ def make_schedule(
         # - Go though each pair of boilers separately and find lunch time
 
         for i, rng in enumerate([range(0, 2), range(2, 4)]):
+
             # - Get boilings
 
             range_boilings = [
@@ -287,6 +313,7 @@ def make_schedule(
 
     schedule = _make_schedule(
         boiling_plan_df,
+        halumi_boilings_count=halumi_boilings_count,
         start_time=start_time,
         lunch_times=lunch_times,
     )
