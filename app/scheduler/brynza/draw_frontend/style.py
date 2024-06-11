@@ -1,6 +1,7 @@
 STYLE = {
     "preparation": {"text": "Подготовка, мойка, дезинфекция оборудования. Вызов микробиолога."},
     "packing_brynza": {"text": lambda b: b.props["label"], "color": "#DAE4C0"},
+    "packing_halumi": {"text": lambda b: "Фасовка Халуми", "color": "#DAE4C0"},
     "small_cleaning": {"text": "Мойка"},
     "cleaning": {"text": "Мойка цеха"},
     "packing_configuration": {"color": "red"},

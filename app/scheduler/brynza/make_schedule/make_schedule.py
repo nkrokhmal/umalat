@@ -2,6 +2,7 @@ from more_itertools import mark_ends
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.pandas import mark_consecutive_groups
 
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import BrynzaLine, cast_model
 from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan as to_boiling_plan_adygea
 from app.scheduler.brynza.to_boiling_plan import to_boiling_plan as to_boiling_plan_brynza
@@ -11,6 +12,7 @@ from app.scheduler.common.time_utils import cast_t
 
 def make_packing_schedule(
     boiling_plan: BoilingPlanLike,
+    halumi_packings_count: int = 0,
     start_time="07:00",
 ):
 
@@ -28,6 +30,13 @@ def make_packing_schedule(
     m = BlockMaker("schedule")
 
     m.push_row("preparation", size=6)
+
+    # - Add halumi packings
+
+    for _ in range(halumi_packings_count):
+        m.push_row("packing_halumi", size=12)  # 1 hour packing of halumi
+
+    # - Add brynza packings
 
     # boiling_technology = df1.iloc[0]["boiling"].boiling_technologies[0]
 
@@ -89,8 +98,12 @@ def test():
 
     print(
         make_packing_schedule(
-            boiling_plan=f"/Users/arsenijkadaner/FileApps/coding_projects/umalat/app/data/static/samples/by_department/milk_project/2023-11-19 План по варкам милкпроджект Новый.xlsx"
-        )
+            boiling_plan=str(
+                get_repo_path()
+                / "app/data/static/samples/by_department/milk_project/sample_boiling_plan_milk_project.xlsx"
+            ),
+            halumi_packings_count=2,
+        )["schedule"]
     )
 
 

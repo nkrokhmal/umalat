@@ -2,6 +2,7 @@ from datetime import datetime
 
 from utils_ak.block_tree import BlockMaker, add_push
 
+from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.brynza.make_schedule.make_schedule import make_packing_schedule
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.wrap_header import wrap_header
@@ -9,6 +10,7 @@ from app.scheduler.common.wrap_header import wrap_header
 
 def wrap_frontend(
     boiling_plan: BoilingPlanLike,
+    halumi_packings_count: int = 0,
     date=None,
     start_time: str = "07:00",
 ) -> dict:
@@ -17,6 +19,7 @@ def wrap_frontend(
 
     output = make_packing_schedule(
         boiling_plan=boiling_plan,
+        halumi_packings_count=halumi_packings_count,
         start_time=start_time,
     )
     schedule = output["schedule"]
@@ -50,9 +53,10 @@ def wrap_frontend(
         is_packing = block.props["cls"].startswith("packing_")
         is_packing_brynza = block.props["cls"] == "packing_brynza"
         is_packing_adygea = block.props["cls"] == "packing_adygea"
+        is_packing_halumi = block.props["cls"] == "packing_halumi"
         _m.push(
             _m.copy(block, with_props=True, size=(block.size[0], 4 if not is_packing else 2)),
-            x=(block.x[0], 0 if not is_packing_brynza else 2),
+            x=(block.x[0], 0 if not is_packing_brynza and not is_packing_halumi else 2),
             push_func=add_push,
         )
 
@@ -86,7 +90,11 @@ def wrap_frontend(
 def test():
     print(
         wrap_frontend(
-            boiling_plan=f"/Users/arsenijkadaner/FileApps/coding_projects/umalat/app/data/static/samples/by_department/milk_project/2023-11-19 План по варкам милкпроджект Новый.xlsx"
+            boiling_plan=str(
+                get_repo_path()
+                / "app/data/static/samples/by_department/milk_project/sample_boiling_plan_milk_project.xlsx"
+            ),
+            halumi_packings_count=2,
         )
     )
 

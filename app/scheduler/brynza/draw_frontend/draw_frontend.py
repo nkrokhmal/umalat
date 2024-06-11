@@ -13,6 +13,7 @@ from app.scheduler.common.frontend_utils import draw_excel_frontend
 
 def draw_frontend(
     boiling_plan: BoilingPlanLike,
+    halumi_packings_count: int = 0,
     start_time: str = "07:00",
     date: Optional[datetime] = None,
     workbook: Workbook = None,
@@ -22,6 +23,7 @@ def draw_frontend(
 
     output = wrap_frontend(
         boiling_plan=boiling_plan,
+        halumi_packings_count=halumi_packings_count,
         start_time=start_time,
         date=date,
     )
@@ -44,9 +46,9 @@ def draw_frontend(
 def test():
     output = draw_frontend(
         str(
-            get_repo_path()
-            / "app/data/static/samples/by_department/milk_project/2023_12_04_План_по_варкам_милкпроджект (2).xlsx"
-        )
+            get_repo_path() / "app/data/static/samples/by_department/milk_project/sample_boiling_plan_milk_project.xlsx"
+        ),
+        halumi_packings_count=2,
     )
 
     output["workbook"].save("test.xlsx")
