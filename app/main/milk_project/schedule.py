@@ -27,7 +27,7 @@ def milk_project_schedule():
         packing_beg_time = form.packing_beg_time.data
 
         # halumi params
-        halumi_boiling_num, add_halumi_packing = form.halumi_boiling_num.data, form.add_halumi_packing.data
+        halumi_boiling_num, halumi_packings_count = form.halumi_boiling_num.data, form.halumi_packings_count.data
 
         # validate time
         time_validator(form, form.beg_time)

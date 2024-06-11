@@ -11,6 +11,7 @@ LineName = dotdict(
         "MILK_PROJECT": "Милкпроджект",
         "ADYGEA": "Адыгейский",
         "BRYNZA": "Брынза",
+        "HALUMI": "Халуми"
     }
 )
 DepartmentName = dotdict(

@@ -19,6 +19,7 @@ if __name__ == "__main__":
     from app.models.fill_db.fill_milk_project import fill_db as milk_project_fill_db
     from app.models.fill_db.fill_mozzarella import fill_db as mozzarella_fill_db
     from app.models.fill_db.fill_ricotta import RicottaFiller
+    from app.models.fill_db.fill_halumi import HalumiFiller
 
     with app.app_context():
         generate_all()
@@ -29,3 +30,4 @@ if __name__ == "__main__":
         butter_fill_db()
         mozzarella_fill_db()
         mascarpone_fill_db()
+        HalumiFiller().fill_db()

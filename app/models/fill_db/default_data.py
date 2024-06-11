@@ -165,7 +165,7 @@ def generate_washer():
         db.session.add(washer)
 
     for data in [
-        WasherData("adygea_cleaning", 120),
+        WasherData("adygea_cleaning", 90),
     ]:
         washer = Washer(
             name=data.name,

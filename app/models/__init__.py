@@ -7,3 +7,5 @@ from app.models.mascarpone import *
 from app.models.milk_project import *
 from app.models.mozzarella import *
 from app.models.ricotta import *
+from app.models.halumi import *
+

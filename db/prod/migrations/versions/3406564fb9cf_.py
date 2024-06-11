@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 26bd77f3f043
+Revision ID: 3406564fb9cf
 Revises: 
-Create Date: 2024-06-11 11:31:55.009932
+Create Date: 2024-06-11 14:30:39.115661
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '26bd77f3f043'
+revision = '3406564fb9cf'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -121,6 +121,11 @@ def upgrade():
     sa.ForeignKeyConstraint(['line_id'], ['lines.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('halumi_lines',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['lines.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('mascarpone_lines',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('params', sa.String(), nullable=True),
@@ -215,6 +220,18 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('butter_form_factors',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['form_factors.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('halumi_boilings',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('weight_netto', sa.Float(), nullable=True),
+    sa.Column('percent', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id'], ['boilings.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('halumi_form_factors',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id'], ['form_factors.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -344,6 +361,19 @@ def upgrade():
     sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('halumi_boiling_technologies',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('collecting_time', sa.Integer(), nullable=True),
+    sa.Column('coagulation_time', sa.Integer(), nullable=True),
+    sa.Column('pouring_off_time', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id'], ['boiling_technologies.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('halumi_skus',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['skus.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('mascarpone_boiling_technologies',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('weight', sa.Integer(), nullable=True),
@@ -445,6 +475,8 @@ def downgrade():
     op.drop_table('milk_project_boiling_technologies')
     op.drop_table('mascarpone_skus')
     op.drop_table('mascarpone_boiling_technologies')
+    op.drop_table('halumi_skus')
+    op.drop_table('halumi_boiling_technologies')
     op.drop_table('butter_skus')
     op.drop_table('butter_boiling_technologies')
     op.drop_table('brynza_skus')
@@ -460,6 +492,8 @@ def downgrade():
     op.drop_table('milk_project_boilings')
     op.drop_table('mascarpone_form_factors')
     op.drop_table('mascarpone_boilings')
+    op.drop_table('halumi_form_factors')
+    op.drop_table('halumi_boilings')
     op.drop_table('butter_form_factors')
     op.drop_table('butter_boilings')
     op.drop_table('brynza_form_factors')
@@ -473,6 +507,7 @@ def downgrade():
     op.drop_table('mozzarella_lines')
     op.drop_table('milk_project_lines')
     op.drop_table('mascarpone_lines')
+    op.drop_table('halumi_lines')
     op.drop_table('form_factors')
     op.drop_table('butter_lines')
     op.drop_table('brynza_lines')

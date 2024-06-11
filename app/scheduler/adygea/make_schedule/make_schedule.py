@@ -11,6 +11,7 @@ from utils_ak.block_tree.pushers.pushers import add_push, push
 from utils_ak.iteration.simple_iterator import iter_sequences
 from utils_ak.portion.portion_tools import cast_interval
 
+from app.globals import db
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaLine, Washer, cast_model
 from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_cleaning, make_lunch, make_preparation
@@ -18,6 +19,7 @@ from app.scheduler.adygea.make_schedule.validator import Validator
 from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.time_utils import cast_t, cast_time
+from app.models import HalumiBoiling
 
 
 """ 
@@ -107,17 +109,18 @@ def _make_schedule(
 
     boilings += [
         make_boiling(
-            boiling_model=Box(
-                boiling_technologies=[
-                    Box(
-                        collecting_time=5,
-                        coagulation_time=25,
-                        pouring_off_time=10,
-                    )
-                ],
-                weight_netto="placeholder",
-                percent="placeholder",
-            ),
+            boiling_model=db.session.query(HalumiBoiling).first(),
+            # Box(
+            #     boiling_technologies=[
+            #         Box(
+            #             collecting_time=5,
+            #             coagulation_time=25,
+            #             pouring_off_time=10,
+            #         )
+            #     ],
+            #     weight_netto="placeholder",
+            #     percent="placeholder",
+            # ),
             boiler_num=3 if i % 2 == 0 else 2,
             batch_id=i,
             group_name="halumi",

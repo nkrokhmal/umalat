@@ -30,7 +30,7 @@ class ParametersException(Exception):
 
 
 class BaseFiller(ABC):
-    def __init__(self, department: tp.Literal["mascarpone", "ricotta", "brynza"]) -> None:
+    def __init__(self, department: tp.Literal["mascarpone", "ricotta", "brynza", "halumi"]) -> None:
         self.department = department
 
     def _read_df(self) -> pd.DataFrame:
