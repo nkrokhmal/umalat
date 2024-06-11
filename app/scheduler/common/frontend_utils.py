@@ -1,6 +1,7 @@
 from loguru import logger
 from openpyxl.styles import Side
 from openpyxl.styles.borders import BORDER_THIN
+from utils_ak.block_tree.validation.is_disjoint import is_disjoint
 from utils_ak.color.color import cast_color
 from utils_ak.openpyxl.openpyxl_tools import (
     cast_worksheet,
@@ -61,11 +62,16 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
     # - Check for conflicts (not tested extensively, hence for debugging only for now)
 
     # leaves = [
-    #     b for b in schedule.iter() if b.is_leaf() and b.props.get("visible", True) and b.size[0] > 0 and b.size[1] > 0
+    #     b for b in schedule.iter() if b.is_leaf() and b.props.get("visible", True)
     # ]
     # for i, b2 in enumerate(leaves):
+    #     if b2.size[0] < 0 or b2.size[1] < 0:
+    #         print("Block size is negative")
+    #         print(b2)
+    #         raise Exception(
+    #             "Ошибка в построении расписания, произошли накладки одних блоков на другие. Такого быть не должно, нужно обращатсья к разработчикам."
+    #         )
     #     for b1 in leaves[:i]:
-    #         from utils_ak.block_tree import is_disjoint
     #
     #         if not is_disjoint(b1, b2):
     #             print("Block conflict")
@@ -128,7 +134,7 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
                 logger.error("Failed to draw block", b=b, x=(x1, b.x[1]), size=b.size)
                 logger.error("Relative props", props=b.props.relative_props)
                 raise Exception(
-                    "Ошибка в построении расписания, произошли накладки одних блоков на другие. Такого быть не должно, нужно обращатсья к разработчикам."
+                    "Ошибка в построении расписания. Такого быть не должно, нужно обращаться к разработчикам."
                 )
 
     if fn:

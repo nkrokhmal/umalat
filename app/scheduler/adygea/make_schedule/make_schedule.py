@@ -114,14 +114,16 @@ def _make_schedule(
                         coagulation_time=25,
                         pouring_off_time=10,
                     )
-                ]
+                ],
+                weight_netto="placeholder",
+                percent="placeholder",
             ),
             boiler_num=3 if i % 2 == 0 else 2,
             batch_id=i,
             group_name="halumi",
             pair_num=1,
         )
-        for i in range(halumi_boilings_count * 5)  # 5 boilings for each
+        for i in range(halumi_boilings_count * 1)  # 5 boilings for each
     ]
 
     # - Push boilings
@@ -131,6 +133,18 @@ def _make_schedule(
         # - Extract pair_num
 
         pair_num = boiling.props["pair_num"]
+
+        # - Push "набор сыворотки" before first halumi boilings if needed
+
+        if boiling.props["group_name"] == "halumi" and boiling.props["batch_id"] in [0, 1]:
+            push(
+                m.root,
+                m.create_block("serum_collection", size=2),
+                push_func=AxisPusher(start_from="min_beg"),
+                validator=Validator(),
+                boiler_num=boiling.props["boiler_num"],
+                pair_num=pair_num,
+            )
 
         # - Push boiling
 

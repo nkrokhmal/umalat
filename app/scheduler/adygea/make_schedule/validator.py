@@ -33,5 +33,29 @@ class Validator(ClassValidator):
             validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
-    def validate__lunch__lunch(b1, b2):
-        pass
+    def validate__serum_collection__boiling(b1, b2):
+        if b1.props["boiler_num"] != b2.props["boiler_num"]:
+            return
+        validate_disjoint(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__boiling__serum_collection(b1, b2):
+        if b1.props["boiler_num"] != b2.props["boiler_num"]:
+            return
+        validate_disjoint(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__serum_collection__lunch(b1, b2):
+        if b1.props["pair_num"] != b2.props["pair_num"]:
+            return
+        validate_disjoint(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__lunch__serum_collection(b1, b2):
+        if b1.props["pair_num"] != b2.props["pair_num"]:
+            return
+        validate_disjoint(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__serum_collection__serum_collection(b1, b2):
+        validate_disjoint(b1, b2, ordered=True)
