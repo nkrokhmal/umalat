@@ -73,7 +73,11 @@ def milk_project_schedule():
         brynza_schedule, brynza_schedule_wb = brynza_output["schedule"], brynza_output["workbook"]
 
         draw_sheet_sequence(
-            (wb, "Расписание"), [(adygea_schedule_wb, "Расписание"), (brynza_schedule_wb, "Расписание")]
+            ws_obj=(wb, "Расписание"),
+            sheet_objs=[
+                (adygea_schedule_wb, "Расписание"),
+                (brynza_schedule_wb, "Расписание"),
+            ],
         )
 
         write_metadata(adygea_schedule_wb, json.dumps({"first_batch_ids": first_batch_ids, "date": str(date)}))
