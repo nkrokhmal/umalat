@@ -62,21 +62,6 @@ def wrap_preparation(block):
     return m.root
 
 
-def wrap_cleaning(block, last_block):
-    a = block.x[0]
-    b = last_block.y[0]
-
-    m = BlockMaker(
-        block.props["cls"],
-        font_size=9,
-        axis=1,
-        # draw from last boiling with cropped size
-        x=(b, 0),
-        size=(block.size[0] - (b - a), 14),
-    )
-    return m.root
-
-
 def wrap_boiling_lines(schedule):
     m = BlockMaker(
         "boiling_lines",
@@ -114,11 +99,15 @@ def wrap_boiling_lines(schedule):
     # - Add cleaning
 
     block = schedule.find_one(cls="cleaning")
-    last_block = max([b for b in schedule["boiling", True]], key=lambda b: b.y[0])
-    if len(schedule["lunch", True]) > 0:
-        last_block = max([last_block, schedule["lunch", True][-1]], key=lambda b: b.y[0])
-    push(boiling_lines[0], wrap_cleaning(block, last_block), push_func=add_push)
-
+    push(
+        boiling_lines[0],
+        m.copy(
+            block,
+            size=(block.size[0], 14),
+            with_props=True,
+        ),
+        push_func=add_push,
+    )
     return m.root
 
 
@@ -183,7 +172,9 @@ def wrap_frontend(
 
 
 def test():
-    print(wrap_frontend(str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule.xlsx")))
+    print(
+        wrap_frontend(str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"))
+    )
 
 
 if __name__ == "__main__":

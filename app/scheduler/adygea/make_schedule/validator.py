@@ -23,6 +23,14 @@ class Validator(ClassValidator):
             validate_disjoint(b1["coagulation"], b2["coagulation"], ordered=True)
 
     @staticmethod
+    def validate__boiling__cleaning(b1, b2):
+        validate_disjoint(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__lunch__boiling(b1, b2):
+        validate_disjoint(b1, b2, ordered=True)
+
+    @staticmethod
     def validate__boiling__lunch(b1, b2):
         if b1.props["pair_num"] == b2.props["pair_num"]:
             validate_disjoint(b1, b2, ordered=True)
