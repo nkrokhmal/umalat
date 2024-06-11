@@ -13,13 +13,12 @@ from utils_ak.portion.portion_tools import cast_interval
 
 from app.globals import db
 from app.lessmore.utils.get_repo_path import get_repo_path
-from app.models import AdygeaLine, Washer, cast_model
+from app.models import AdygeaLine, HalumiBoiling, Washer, cast_model
 from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_lunch, make_preparation
 from app.scheduler.adygea.make_schedule.validator import Validator
 from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.time_utils import cast_t, cast_time
-from app.models import HalumiBoiling
 
 
 """ 
@@ -234,8 +233,8 @@ def make_schedule(
         start_time=start_time,
         halumi_boilings_count=halumi_boilings_count,
     )
-
     need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12  # work more than 8 hours
+
     if not need_a_break:
         # no lunch
 
@@ -246,7 +245,6 @@ def make_schedule(
         # - Go though each pair of boilers separately and find lunch time
 
         for i, rng in enumerate([range(0, 2), range(2, 4)]):
-
             # - Get boilings
 
             range_boilings = [
@@ -262,6 +260,7 @@ def make_schedule(
                 for b1, b2, b3 in iter_sequences(range_boilings, 3, method="any"):
                     if not b2:
                         continue
+
                     if b2.y[0] >= cast_t(time):
                         if b3 and b1:
                             if b2.y[0] - b1.y[0] >= b3.y[0] - b2.y[0]:
@@ -276,8 +275,8 @@ def make_schedule(
 
                             # make lunch now
                             return cast_time(b2.y[0])
-
-                raise Exception("Did not find lunch time")
+                # returns None if no time found. For example, for the case when lunch is inbetween halumi boilings
+                return None
 
             if lunch_interval.upper - working_interval.lower <= working_interval.upper - lunch_interval.lower:
 
