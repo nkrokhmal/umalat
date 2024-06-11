@@ -8,8 +8,14 @@ STYLE = {
         )
     },
     "collecting": {"color": "red", "text": "набор"},
-    "coagulation": {"color": "yellow", "text": "коагуляция и сбор белка"},
-    "pouring_off": {"color": "#92D050", "text": "слив"},  # green
+    "coagulation": {
+        "color": "yellow",
+        "text": lambda b: "коагуляция и сбор белка" if b.props["group_name"] != "Халуми" else "варка 30 кг",
+    },
+    "pouring_off": {
+        "color": "#92D050",
+        "text": lambda b: "слив" if b.props["group_name"] != "Халуми" else "извлечение",
+    },  # green
     "serum_collection": {"text": "набор сыворотки", "font_size": 8},
     "cleaning": {
         "color": "#DAEEF3",
