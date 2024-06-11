@@ -10,6 +10,7 @@ STYLE = {
     "collecting": {"color": "red", "text": "набор"},
     "coagulation": {"color": "yellow", "text": "коагуляция и сбор белка"},
     "pouring_off": {"color": "#92D050", "text": "слив"},  # green
+    "serum_collection": {"text": "набор сыворотки", "font_size": 8},
     "cleaning": {
         "color": "#DAEEF3",
         "text": "мойка оборудования и цеха",

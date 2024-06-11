@@ -80,12 +80,33 @@ def wrap_boiling_lines(schedule):
         if i <= n_lines - 2:
             m.push_row("stub", size=0)
 
-    push(boiling_lines[0], wrap_preparation(schedule["preparation"]), push_func=add_push)
+    push(
+        boiling_lines[0],
+        wrap_preparation(schedule["preparation"]),
+        push_func=add_push,
+    )
 
     # - Add boilings
 
     for boiling in schedule["boiling", True]:
-        push(boiling_lines[boiling.props["boiler_num"]], wrap_boiling(boiling), push_func=add_push)
+        push(
+            boiling_lines[boiling.props["boiler_num"]],
+            wrap_boiling(boiling),
+            push_func=add_push,
+        )
+
+    # - Add serum collection if present
+
+    for serum_collection in schedule["serum_collection", True]:
+        push(
+            boiling_lines[serum_collection.props["boiler_num"]],
+            m.copy(
+                serum_collection,
+                size=(serum_collection.size[0], 2),
+                with_props=True,
+            ),
+            push_func=add_push,
+        )
 
     # - Add lunches
 
@@ -175,6 +196,7 @@ def test():
     print(
         wrap_frontend(
             str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"),
+            halumi_boilings_count=2,
         )["frontend"]
     )
 

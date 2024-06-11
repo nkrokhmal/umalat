@@ -93,7 +93,7 @@ def _make_schedule(
     boilings += [
         make_boiling(
             grp.iloc[0]["boiling"],
-            batch_id=batch_id,
+            boiling_id=batch_id,
             boiler_num=nth(
                 itertools.cycle([0, 2, 1, 3]), i
             ),  # # there are 4 "sublines", one for each boiler. We insert boilings in that order
@@ -119,7 +119,7 @@ def _make_schedule(
                 percent="",
             ),
             boiler_num=3 if i % 2 == 0 else 2,  # 3-2-3-2-...
-            batch_id=i % 5 + 1,
+            boiling_id=i % 5 + 1,
             group_name="Халуми",
             pair_num=1,
         )
@@ -136,14 +136,26 @@ def _make_schedule(
 
         # - Push "набор сыворотки" before first halumi boilings if needed
 
-        if boiling.props["group_name"] == "halumi" and boiling.props["batch_id"] in [0, 1]:
+        if (
+            boiling.props["group_name"] == "Халуми"
+            and boiling.props["boiling_id"] in [1, 2]
+            and not list(
+                m.root.iter(  # haven't created already
+                    cls="serum_collection",
+                    boiler_num=boiling.props["boiler_num"],
+                )
+            )
+        ):
             push(
                 m.root,
-                m.create_block("serum_collection", size=2),
-                push_func=AxisPusher(start_from="min_beg"),
+                m.create_block(
+                    "serum_collection",
+                    size=(2, 0),
+                    boiler_num=boiling.props["boiler_num"],
+                    pair_num=pair_num,
+                ),
+                push_func=AxisPusher(start_from="max_beg"),
                 validator=Validator(),
-                boiler_num=boiling.props["boiler_num"],
-                pair_num=pair_num,
             )
 
         # - Push boiling
@@ -328,6 +340,7 @@ def test():
     print(
         make_schedule(
             str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"),
+            halumi_boilings_count=2,
         )["schedule"],
     )
 
