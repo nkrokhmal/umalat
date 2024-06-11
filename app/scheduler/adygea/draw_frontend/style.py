@@ -3,8 +3,8 @@ STYLE = {
     "boiling_name": {
         "text": lambda b: "{} {} {}".format(
             b.props["group_name"],
-            b.props["boiling_model"].weight_netto,
-            str(b.props["boiling_model"].percent) + "%" if b.props["boiling_model"].percent else "",
+            b.props["boiling_model"].weight_netto if b.props["group_name"] != "Халуми" else "",
+            str(b.props["boiling_model"].percent) + "%" if b.props["group_name"] != "Халуми" else "",
         )
     },
     "collecting": {"color": "red", "text": "набор"},
