@@ -173,7 +173,9 @@ def wrap_frontend(
 
 def test():
     print(
-        wrap_frontend(str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"))
+        wrap_frontend(
+            str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"),
+        )["frontend"]
     )
 
 

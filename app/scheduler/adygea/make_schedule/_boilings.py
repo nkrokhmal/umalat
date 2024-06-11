@@ -44,12 +44,6 @@ def test():
     )
 
 
-def make_cleaning(size, **kwargs):
-    m = BlockMaker("cleaning", **kwargs)
-    m.push_row(f"cleaning", size=size)
-    return m.root
-
-
 def make_preparation(size, **kwargs):
     m = BlockMaker("preparation", size=(size, 0), **kwargs)
     return m.root

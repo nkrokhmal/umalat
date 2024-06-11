@@ -13,7 +13,7 @@ from utils_ak.portion.portion_tools import cast_interval
 
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaLine, Washer, cast_model
-from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_cleaning, make_lunch, make_preparation
+from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_lunch, make_preparation
 from app.scheduler.adygea.make_schedule.validator import Validator
 from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
@@ -118,12 +118,12 @@ def _make_schedule(
                 weight_netto="",
                 percent="",
             ),
-            boiler_num=3 if i % 2 == 0 else 2,
-            batch_id=i,
+            boiler_num=3 if i % 2 == 0 else 2,  # 3-2-3-2-...
+            batch_id=i % 5 + 1,
             group_name="Халуми",
             pair_num=1,
         )
-        for i in range(halumi_boilings_count * 1)  # 5 boilings for each
+        for i in range(halumi_boilings_count * 5)  # 5 boilings for each
     ]
 
     # - Push boilings
@@ -191,7 +191,8 @@ def _make_schedule(
     # - Push cleaning
 
     m.push_row(
-        make_cleaning(size=adygea_cleaning.time // 5),
+        "cleaning",
+        size=adygea_cleaning.time // 5,
         push_func=AxisPusher(start_from="max_end"),
     )
 

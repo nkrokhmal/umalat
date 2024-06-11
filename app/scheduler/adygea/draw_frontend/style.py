@@ -1,8 +1,10 @@
 STYLE = {
     "boiling_num": {"text": "{boiling_id}"},
     "boiling_name": {
-        "text": lambda b: "{} {} {}%".format(
-            b.props["group_name"], b.props["boiling_model"].weight_netto, b.props["boiling_model"].percent
+        "text": lambda b: "{} {} {}".format(
+            b.props["group_name"],
+            b.props["boiling_model"].weight_netto,
+            str(b.props["boiling_model"].percent) + "%" if b.props["boiling_model"].percent else "",
         )
     },
     "collecting": {"color": "red", "text": "набор"},
