@@ -55,14 +55,21 @@ def milk_project_schedule():
 
         first_batch_ids = {"milk_project": form.batch_number.data}
 
-        adygea_output = draw_frontend_adygea(boiling_plan=wb, start_time=beg_time, workbook=wb, date=date)
+        adygea_output = draw_frontend_adygea(
+            boiling_plan=wb, halumi_boilings_count=halumi_boiling_num, start_time=beg_time, workbook=wb, date=date
+        )
         adygea_schedule, adygea_schedule_wb = adygea_output["schedule"], adygea_output["workbook"]
         if len(adygea_output["boiling_plan_df"]) > 0 and len(adygea_output["boiling_plan_df"]) > 0:
 
             # Set preferred header time"
             adygea_output["schedule"].props.update(preferred_header_time=cast_time(adygea_output["schedule"].x[0]))
 
-        brynza_output = draw_frontend_brynza(boiling_plan=wb, date=date, start_time=packing_beg_time)
+        brynza_output = draw_frontend_brynza(
+            boiling_plan=wb,
+            halumi_packings_count=halumi_packings_count,
+            date=date,
+            start_time=packing_beg_time,
+        )
         brynza_schedule, brynza_schedule_wb = brynza_output["schedule"], brynza_output["workbook"]
 
         draw_sheet_sequence(
