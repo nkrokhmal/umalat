@@ -7,7 +7,7 @@ from app.models import AdygeaBoiling, AdygeaSKU, BrynzaSKU, cast_model
 
 def make_boiling(
     boiling_model: mdb.Model,
-    batch_id: int,
+    boiling_id: int,
     boiler_num: int,
     group_name: str,
     pair_num: int,
@@ -15,7 +15,7 @@ def make_boiling(
     m = BlockMaker(
         "boiling",
         boiling_model=boiling_model,
-        boiling_id=batch_id,
+        boiling_id=boiling_id,
         boiler_num=boiler_num,
         group_name=group_name,
         pair_num=pair_num,
@@ -36,18 +36,12 @@ def test():
     print(
         make_boiling(
             boiling_model=cast_model(AdygeaBoiling, "Линия Адыгейский, Форм фактор Кавказский, Вес 0.37, 45"),
-            batch_id=1,
+            boiling_id=1,
             group_name="group_name",
             boiler_num=1,
             pair_num=1,
         )
     )
-
-
-def make_cleaning(size, **kwargs):
-    m = BlockMaker("cleaning", **kwargs)
-    m.push_row(f"cleaning", size=size)
-    return m.root
 
 
 def make_preparation(size, **kwargs):

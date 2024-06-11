@@ -13,6 +13,7 @@ class Validator(ClassValidator):
     @staticmethod
     def validate__boiling__boiling(b1, b2):
         validate_disjoint(b1["collecting"], b2["collecting"])
+
         if b1.props["boiler_num"] == b2.props["boiler_num"]:
             if b1.props["boiling_model"].weight_netto != b2.props["boiling_model"].weight_netto:
                 validate_disjoint(b1, b2, ordered=True, distance=2)
@@ -21,6 +22,17 @@ class Validator(ClassValidator):
 
         if b2.parent["boiling", True].index(b2) <= 3 and b1.props["pair_num"] == b2.props["pair_num"]:
             validate_disjoint(b1["coagulation"], b2["coagulation"], ordered=True)
+
+        if b1.props["group_name"] == "Халуми" and b2.props["group_name"] == "Халуми":
+            validate_disjoint(b1["collecting"], b2["collecting"], ordered=True)
+
+    @staticmethod
+    def validate__boiling__cleaning(b1, b2):
+        validate_disjoint(b1, b2, ordered=True)
+
+    @staticmethod
+    def validate__lunch__boiling(b1, b2):
+        validate_disjoint(b1, b2, ordered=True)
 
     @staticmethod
     def validate__boiling__lunch(b1, b2):

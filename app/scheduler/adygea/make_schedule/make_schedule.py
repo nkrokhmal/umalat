@@ -14,7 +14,7 @@ from utils_ak.portion.portion_tools import cast_interval
 from app.globals import db
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import AdygeaLine, Washer, cast_model
-from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_cleaning, make_lunch, make_preparation
+from app.scheduler.adygea.make_schedule._boilings import make_boiling, make_lunch, make_preparation
 from app.scheduler.adygea.make_schedule.validator import Validator
 from app.scheduler.adygea.to_boiling_plan.to_boiling_plan import to_boiling_plan
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
@@ -95,7 +95,7 @@ def _make_schedule(
     boilings += [
         make_boiling(
             grp.iloc[0]["boiling"],
-            batch_id=batch_id,
+            boiling_id=batch_id,
             boiler_num=nth(
                 itertools.cycle([0, 2, 1, 3]), i
             ),  # # there are 4 "sublines", one for each boiler. We insert boilings in that order
@@ -110,23 +110,12 @@ def _make_schedule(
     boilings += [
         make_boiling(
             boiling_model=db.session.query(HalumiBoiling).first(),
-            # Box(
-            #     boiling_technologies=[
-            #         Box(
-            #             collecting_time=5,
-            #             coagulation_time=25,
-            #             pouring_off_time=10,
-            #         )
-            #     ],
-            #     weight_netto="placeholder",
-            #     percent="placeholder",
-            # ),
-            boiler_num=3 if i % 2 == 0 else 2,
-            batch_id=i,
-            group_name="halumi",
+            boiler_num=3 if i % 2 == 0 else 2,  # 3-2-3-2-...
+            boiling_id=i % 5 + 1,
+            group_name="Халуми",
             pair_num=1,
         )
-        for i in range(halumi_boilings_count * 1)  # 5 boilings for each
+        for i in range(halumi_boilings_count * 5)  # 5 boilings for each
     ]
 
     # - Push boilings
@@ -139,14 +128,26 @@ def _make_schedule(
 
         # - Push "набор сыворотки" before first halumi boilings if needed
 
-        if boiling.props["group_name"] == "halumi" and boiling.props["batch_id"] in [0, 1]:
+        if (
+            boiling.props["group_name"] == "Халуми"
+            and boiling.props["boiling_id"] in [1, 2]
+            and not list(
+                m.root.iter(  # haven't created already
+                    cls="serum_collection",
+                    boiler_num=boiling.props["boiler_num"],
+                )
+            )
+        ):
             push(
                 m.root,
-                m.create_block("serum_collection", size=2),
-                push_func=AxisPusher(start_from="min_beg"),
+                m.create_block(
+                    "serum_collection",
+                    size=(2, 0),
+                    boiler_num=boiling.props["boiler_num"],
+                    pair_num=pair_num,
+                ),
+                push_func=AxisPusher(start_from="max_beg"),
                 validator=Validator(),
-                boiler_num=boiling.props["boiler_num"],
-                pair_num=pair_num,
             )
 
         # - Push boiling
@@ -193,26 +194,11 @@ def _make_schedule(
 
     # - Push cleaning
 
-    # -- Get last boilings
-
-    last_boilings = [
-        last(
-            [boiling for boiling in m.root["boiling", True] if boiling.props["boiler_num"] == boiler_num],
-            default=None,
-        )
-        for boiler_num in range(4)
-    ]
-    last_boilings = [b for b in last_boilings if b]
-
-    # -- Get cleaning start
-
-    cleaning_start = min(b.y[0] for b in last_boilings)
-    if len(m.root["lunch", True]) > 0:
-        cleaning_start = max(cleaning_start, min(b.y[0] for b in m.root["lunch", True]))
-
-    # -- Push
-
-    m.push_row(make_cleaning(size=adygea_cleaning.time // 5), x=cleaning_start, push_func=add_push)
+    m.push_row(
+        "cleaning",
+        size=adygea_cleaning.time // 5,
+        push_func=AxisPusher(start_from="max_end"),
+    )
 
     # - Start schedule from preparation
 
@@ -244,7 +230,9 @@ def make_schedule(
     # We first build a schedule without lunch and find lunch times from it
 
     no_lunch_schedule = _make_schedule(
-        boiling_plan_df, start_time=start_time, halumi_boilings_count=halumi_boilings_count
+        boiling_plan_df,
+        start_time=start_time,
+        halumi_boilings_count=halumi_boilings_count,
     )
 
     need_a_break = no_lunch_schedule.y[0] - no_lunch_schedule.x[0] >= 8 * 12  # work more than 8 hours
@@ -344,6 +332,7 @@ def test():
     print(
         make_schedule(
             str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"),
+            halumi_boilings_count=2,
         )["schedule"],
     )
 
