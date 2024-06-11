@@ -55,6 +55,8 @@ def _make_boiling(boiling_group_df, **kwargs):
             technology["pumping_time"] * scaling_factor, 5, rounding="nearest_half_even"
         )
 
+        technology["pumping_time"] = max(technology["pumping_time"], 10)
+
     technology = dotdict(technology)
 
     # - Init block maker
