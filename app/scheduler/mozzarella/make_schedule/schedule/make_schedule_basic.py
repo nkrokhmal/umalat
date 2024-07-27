@@ -473,21 +473,6 @@ class ScheduleMaker:
                 shrink_drenators=True,
             )
 
-        # - Fix timing
-
-        first_line_boiling = [
-            b
-            for b in self.m.root["master"]["boiling", True]
-            if b.props["boiling_model"].line.name == self.exact_start_time_line_name
-        ][0]
-        self.m.root.props.update(
-            x=[
-                cast_t(self.start_times[self.exact_start_time_line_name])
-                - first_line_boiling["melting_and_packing"].x[0],
-                self.m.root.x[0],
-            ]
-        )
-
         logger.info("Final score", score=calc_partial_score(self.m.root, start_times=self.start_times))
 
     def get_earliest_boiling(self, line_name: Optional[str] = None):
@@ -905,12 +890,12 @@ class ScheduleMaker:
         boilings_on_line1 = [
             b for b in boilings if b.props["boiling_model"].line.name == b1.props["boiling_model"].line.name
         ]
-        index = boilings_on_line1.index(b1)
+        _index = boilings_on_line1.index(b1)
 
-        if index != len(boilings_on_line1) - 1:
+        if _index != len(boilings_on_line1) - 1:
 
             # not last boiling
-            b3 = boilings_on_line1[index + 1]
+            b3 = boilings_on_line1[_index + 1]
 
             # - Find packing configuration between b2 and b3
 
@@ -958,6 +943,20 @@ class ScheduleMaker:
         # - Fix order of master blocks
 
         self.m.root["master"].reorder_children(lambda b: b.x[0])
+
+    def _fix_timing(self):
+        first_line_boiling = [
+            b
+            for b in self.m.root["master"]["boiling", True]
+            if b.props["boiling_model"].line.name == self.exact_start_time_line_name
+        ][0]
+        self.m.root.props.update(
+            x=[
+                cast_t(self.start_times[self.exact_start_time_line_name])
+                - first_line_boiling["melting_and_packing"].x[0],
+                self.m.root.x[0],
+            ]
+        )
 
     def make(
         self,
@@ -1027,6 +1026,7 @@ class ScheduleMaker:
         self._fix_first_boiling_of_later_line()
         self._process_cleanings()
         self._process_shifts()
+        self._fix_timing()
         return self.m.root
 
 
