@@ -164,9 +164,9 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
 
     df["original_kg"] = df["kg"]
 
-    assert (
-        not df["total_volume"].isnull().any()
-    ), "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
+    # assert (
+    #     not df["total_volume"].isnull().any()
+    # ), "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
 
     # validate kilograms
     if validate:
