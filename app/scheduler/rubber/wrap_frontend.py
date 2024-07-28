@@ -71,7 +71,7 @@ def wrap_frontend(
 def test():
     print(
         wrap_frontend(
-            boiling_plan="""/Users/marklidenberg/Desktop/2024.04.19 терка мультиголовы/2024-03-08 План по варкам моцарелла.xlsx"""
+            boiling_plan="""/Users/marklidenberg/Downloads/Telegram Desktop/2024_07_29_План_по_варкам_моцарелла_1.xlsx"""
         )["frontend"]
     )
 

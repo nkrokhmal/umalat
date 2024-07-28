@@ -9,7 +9,7 @@ from utils_ak.code_block.code import code
 from utils_ak.numeric.numeric import custom_round
 
 from app.enum import LineName
-from app.scheduler.common.time_utils import cast_time
+from app.scheduler.common.time_utils import cast_t, cast_time
 from app.scheduler.common.wrap_header import wrap_header
 from app.scheduler.mozzarella.make_schedule.make_schedule import make_schedule
 from app.scheduler.rubber.wrap_frontend import wrap_frontend as wrap_frontend_rubber
@@ -533,6 +533,7 @@ def wrap_frontend(
 
     start_t = min([boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]])  # first melting time
     start_t = int(custom_round(start_t, 12, "floor"))  # round to last hour
+    start_t = min(start_t, cast_t(rubber_start_time))
     start_t -= 24
     start_time = cast_time(start_t)
     m.push(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
