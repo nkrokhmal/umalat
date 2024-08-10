@@ -470,7 +470,7 @@ class ScheduleMaker:
 
             self._process_boiling(
                 next_row["boiling"],
-                shrink_drenators=True,
+                shrink_drenators=False,
             )
 
         logger.info("Final score", score=calc_partial_score(self.m.root, start_times=self.start_times))

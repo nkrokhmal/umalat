@@ -148,7 +148,6 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
     # fill Терка empty form factor values
     for idx, grp in df.copy().groupby("group_id"):
         if grp["_bff"].isnull().all():
-
             # take from bff input if not specified
             df.loc[grp.index, "_bff"] = cast_mozzarella_form_factor(config.DEFAULT_RUBBER_FORM_FACTOR)
         else:
@@ -164,9 +163,9 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
 
     df["original_kg"] = df["kg"]
 
-    # assert (
-    #     not df["total_volume"].isnull().any()
-    # ), "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
+    assert (
+        not df["total_volume"].isnull().any()
+    ), "Ошибка в чтении плана варок. Если вы работаете с файлом расписания, убедитесь что вы его сохранили перед тем, как залить на сайт"
 
     # validate kilograms
     if validate:
@@ -180,7 +179,6 @@ def update_boiling_plan(dfs, normalization, saturate, validate=True):
                             grp.iloc[0]["total_volume"] / grp["kg"].sum()
                         )  # scale to total_volume
                     else:
-
                         # all fine
                         pass
 
