@@ -47,8 +47,10 @@ CREAM_CHEESE_ORDER: list[Order] = [
     Order(["Творожный"], "Зелень", True, 8000),
     Order(["Творожный"], "Томаты", True, 8000),
     Order(["Творожный"], "Травы", True, 8000),
+    Order(["Творожный"], "Соль", True, 8000),
     Order(["Творожный"], "Огурец", True, 8000),
     Order(["Робиола"], None, True, 8000),
+    Order(["Рбили"], None, True, 8000),
 ]
 
 
