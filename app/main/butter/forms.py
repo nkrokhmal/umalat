@@ -1,11 +1,10 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired
-from wtforms import *
-from wtforms.validators import DataRequired, Optional
+from wtforms import DateTimeField, FileField, IntegerField, StringField, FloatField, BooleanField, SubmitField, SelectField
+from wtforms.validators import DataRequired, Optional, ValidationError
 
 from app.imports.runtime import *
 from app.models import *
-
 
 class UploadForm(FlaskForm):
     validators = [FileRequired(message="Отсутствует файл!")]
@@ -73,7 +72,7 @@ class SKUButterForm(FlaskForm):
     def validate_sku(self, name):
         sku = db.session.query(ButterSKU).filter_by(ButterSKU.name == name.data).first()
         if sku is not None:
-            raise flask_restplus.ValidationError("SKU с таким именем уже существует")
+            raise ValidationError("SKU с таким именем уже существует")
 
 
 class CopySKUForm(FlaskForm):

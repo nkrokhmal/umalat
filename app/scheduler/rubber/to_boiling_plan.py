@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from utils_ak.openpyxl.openpyxl_tools import cast_workbook
@@ -5,6 +6,22 @@ from utils_ak.openpyxl.openpyxl_tools import cast_workbook
 from app.lessmore.utils.get_repo_path import get_repo_path
 from app.models import MozzarellaSKU, cast_model
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
+
+def split_rubber_boiling_plan(df: pd.DataFrame):
+    result = []
+    for _, row in df.iterrows():
+        packing_speed = row["sku"].packing_speed
+        kg = row["kg"]
+        n = kg // packing_speed
+        kgs = [packing_speed * 1] * n + [kg - packing_speed * n * 1]
+        result += [[row["sku"], kg] for kg in kgs if kg > 0]
+
+    df = pd.DataFrame(result, columns=["sku", "kg"])
+    df["sku_name"] = df["sku"].apply(lambda x: x.name)
+    df["original_kg"] = df["kg"]
+    df["line"] = df["sku"].apply(lambda x: x.line)
+    df["absolute_batch_id"] = np.arange(len(df)) + 1
+    return df
 
 
 def to_boiling_plan(wb_obj: BoilingPlanLike):

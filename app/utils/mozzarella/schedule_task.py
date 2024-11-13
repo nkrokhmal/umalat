@@ -90,8 +90,14 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
         df_task = df_task[columns]  # fix order just in case
         df_task.to_csv(path, index=False, sep=";")
 
-    def draw_task_original(self, excel_client, cur_row, task_name, line_name, draw_packing=True):
+    def draw_task_original(self, excel_client, cur_row, task_name, line_name, draw_packing=True, df_rubber=None):
         df_filter = self.df[self.df["line"].apply(lambda x: x.name == line_name)]
+        if df_filter.empty and (df_rubber is None or df_rubber.empty):
+            return cur_row
+
+        if df_filter.empty:
+            df_filter = df_rubber
+
         index = 1
 
         cur_row, excel_client = draw_header(excel_client, self.date, cur_row, task_name)
@@ -134,8 +140,13 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
 
         return cur_row
 
-    def draw_task_boiling(self, excel_client, cur_row, task_name, line_name, draw_packing=True):
+    def draw_task_boiling(self, excel_client, cur_row, task_name, line_name, draw_packing=True, df_rubber=None):
         df_filter = self.df[self.df["line"].apply(lambda x: x.name == line_name)]
+        if df_filter.empty and (df_rubber is None or df_rubber.empty):
+            return cur_row
+
+        if df_filter.empty:
+            df_filter = df_rubber
 
         cur_row, excel_client = draw_header(excel_client, self.date, cur_row, task_name, "варки")
         for batch_id, grp in df_filter.groupby("absolute_batch_id"):
@@ -179,7 +190,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
 
         return cur_row
 
-    def schedule_task_original(self, wb):
+    def schedule_task_original(self, wb, df_rubber = None):
         sheet_name = "Печать заданий"
         water_task_name = f"Задание на упаковку линии воды {self.department}"
         salt_task_name = f"Задание на упаковку линии пиццы {self.department}"
@@ -196,6 +207,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             water_task_name,
             LineName.WATER,
             draw_packing=False,
+            df_rubber=df_rubber
         )
         cur_row += space_row
 
@@ -207,7 +219,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
         )
         return wb
 
-    def schedule_task_boilings(self, wb):
+    def schedule_task_boilings(self, wb, df_rubber = None):
         sheet_name = "Печать заданий 2"
         water_task_name = f"Задание на упаковку линии воды {self.department}"
         salt_task_name = f"Задание на упаковку линии пиццы {self.department}"
@@ -224,6 +236,7 @@ class MozzarellaScheduleTask(BaseScheduleTask[MozzarellaSKU]):
             water_task_name,
             LineName.WATER,
             draw_packing=False,
+            df_rubber=df_rubber
         )
         cur_row += space_row
 

@@ -14,6 +14,7 @@ from app.scheduler.mozzarella import *
 from app.scheduler.mozzarella.draw_frontend.draw_frontend import draw_frontend
 from app.scheduler.mozzarella.to_boiling_plan.read_additional_packing import read_additional_packing
 from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_plan
+from app.scheduler.rubber.to_boiling_plan import split_rubber_boiling_plan, to_boiling_plan as to_boiling_plan_rubber
 from app.utils.batches.batch import *
 from app.utils.features.openpyxl_wrapper import set_default_sheet
 from app.utils.files.utils import create_if_not_exists, save_schedule, save_schedule_dict
@@ -59,6 +60,8 @@ def mozzarella_schedule():
 
         first_batch_ids = {"mozzarella": form.batch_number.data}
         boiling_plan_df = to_boiling_plan(wb, first_batch_ids_by_type=first_batch_ids)
+        rubber_boiling_plan_df = to_boiling_plan_rubber(wb)
+        rubber_boiling_plan_df = split_rubber_boiling_plan(rubber_boiling_plan_df)
 
         schedule_wb = openpyxl.load_workbook(filename=flask.current_app.config["TEMPLATE_SCHEDULE_PLAN"])
 
@@ -101,8 +104,8 @@ def mozzarella_schedule():
 
         schedule_task = update_task_and_batches(schedule_wb, boiling_plan_df=boiling_plan_df)
 
-        schedule_wb = schedule_task.schedule_task_original(schedule_wb)
-        schedule_wb = schedule_task.schedule_task_boilings(schedule_wb)
+        schedule_wb = schedule_task.schedule_task_original(schedule_wb, df_rubber=rubber_boiling_plan_df)
+        schedule_wb = schedule_task.schedule_task_boilings(schedule_wb, df_rubber=rubber_boiling_plan_df)
 
         set_default_sheet(schedule_wb)
 
