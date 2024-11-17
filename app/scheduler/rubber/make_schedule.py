@@ -1,3 +1,5 @@
+from itertools import chain
+
 from more_itertools import mark_ends
 from utils_ak.block_tree.block_maker import BlockMaker
 
@@ -5,13 +7,13 @@ from app.lessmore.utils.get_repo_path import get_repo_path
 from app.scheduler.common.boiling_plan_like import BoilingPlanLike
 from app.scheduler.common.time_utils import cast_t
 from app.scheduler.rubber.to_boiling_plan import to_boiling_plan
+from more_itertools import pairwise
 
 
 def make_schedule(
     boiling_plan: BoilingPlanLike,
     start_time: str = "07:00",
 ) -> dict:
-
     # - Get boiling plan
 
     boiling_plan_df = to_boiling_plan(wb_obj=boiling_plan).copy()
@@ -29,9 +31,24 @@ def make_schedule(
 
     m.push_row("preparation", size=24)  # 2 hours
 
-    for is_first, is_last, (i, row) in mark_ends(boiling_plan_df.iterrows()):
-        with m.push("packing_group", kg=row["kg"], sku=row["sku"]):
+    for is_first, is_last, ((prev_i, prev_row), (i, row)) in mark_ends(
+        pairwise(chain([[None, None]], boiling_plan_df.iterrows()))
+    ):
+        if not is_first:
+            if {prev_row["sku"].weight_netto, row["sku"].weight_netto} == {120.0, 150.0}:
+                m.push_row(
+                    "refurbishment_and_cleaning",
+                    size=8,
+                )
+            elif (("сулугуни" in prev_row["sku"].name.lower()) or ("сулугуни" in row["sku"].name.lower())) and (
+                ("моцарелла" in prev_row["sku"].name.lower()) or ("моцарелла" in row["sku"].name.lower())
+            ):
+                m.push_row(
+                    "refurbishment",
+                    size=4,
+                )
 
+        with m.push("packing_group", kg=row["kg"], sku=row["sku"]):
             # - Get packing_speed
 
             packing_speed = row["sku"].packing_speed
@@ -64,12 +81,7 @@ def make_schedule(
                             size=1,
                         )
 
-        if not is_last:
-            m.push_row(
-                "refurbishment",
-                size=4,
-            )
-        else:
+        if is_last:
             m.push_row(
                 "cleaning",
                 size=37,

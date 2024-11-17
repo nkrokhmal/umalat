@@ -92,7 +92,8 @@ def test():
     )
     output = draw_frontend(
         boiling_plan=str(
-            get_repo_path() / "app/data/static/samples/by_department/mozzarella/sample_schedule_mozzarella.xlsx"
+            # get_repo_path() / "app/data/static/samples/by_department/mozzarella/sample_schedule_mozzarella.xlsx"
+            get_repo_path() / "app/data/static/samples/by_department/rubber/sample_rubber_schedule.xlsx"
         ),
         workbook=schedule_wb,
         start_times={LineName.SALT: "07:00", LineName.WATER: "08:00"},

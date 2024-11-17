@@ -52,7 +52,7 @@ def wrap_frontend(
         for block in schedule.iter(cls=key):
             m.push(m.copy(block, with_props=True), size=(block.size[0], 2), x=(block.x[0], 1), push_func=add_push)
 
-    for key in ["preparation", "refurbishment", "cleaning"]:
+    for key in ["preparation", "refurbishment", "refurbishment_and_cleaning", "cleaning"]:
         for block in schedule.iter(cls=key):
             m.push(m.copy(block, with_props=True), size=(block.size[0], 3), x=(block.x[0], 0), push_func=add_push)
 
