@@ -51,6 +51,10 @@ STYLE = {
         "text": "переностройка терки (ножей) FAM",
         "color": "#E1EFDA",
     },
+    "rubber_refurbishment_and_cleaning": {
+        "text": "переностройка, мойка терки (ножей) FAM",
+        "color": "#E1EFDA",
+    },
     "rubber_cleaning": {
         "text": "мойка мультиголовы, терки FAM",
         "color": "#E1EFDA",
