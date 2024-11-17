@@ -34,7 +34,7 @@ def make_schedule(
     for is_first, is_last, ((prev_i, prev_row), (i, row)) in mark_ends(
         pairwise(chain([[None, None]], boiling_plan_df.iterrows()))
     ):
-        if not is_first and prev_row is not None:
+        if not is_first:
             if {prev_row["sku"].weight_netto, row["sku"].weight_netto} == {120.0, 150.0}:
                 m.push_row(
                     "refurbishment_and_cleaning",
