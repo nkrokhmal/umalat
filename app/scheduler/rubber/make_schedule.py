@@ -40,7 +40,9 @@ def make_schedule(
                     "refurbishment_and_cleaning",
                     size=8,
                 )
-            else:
+            elif (("сулугуни" in prev_row["sku"].name.lower()) or ("сулугуни" in row["sku"].name.lower())) and (
+                ("моцарелла" in prev_row["sku"].name.lower()) or ("моцарелла" in row["sku"].name.lower())
+            ):
                 m.push_row(
                     "refurbishment",
                     size=4,
