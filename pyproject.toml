@@ -17,7 +17,7 @@ sections = "FUTURE,STDLIB,THIRDPARTY,APP,FIRSTPARTY,LOCALFOLDER"
 
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.12" # 3.12 fails for numpy install
 Flask = "2.3.2"
 Flask-Admin = "1.6.1"
 Flask-Bootstrap = "3.3.7.1"
