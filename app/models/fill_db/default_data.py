@@ -97,7 +97,7 @@ def generate_mozzarella_lines():
 
     mozzarella_department = Department.query.filter_by(name="Моцарельный цех").first()
     for params in [
-        (LineName.SALT, 180, 960, 8300, 1020, 30, 30),
+        (LineName.SALT, 180, 1000, 8300, 1020, 30, 30),
         (LineName.WATER, 240, 1100, 8300, 900, 30, 30),
     ]:
         line = MozzarellaLine(
