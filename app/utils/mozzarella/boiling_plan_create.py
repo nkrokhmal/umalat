@@ -49,7 +49,7 @@ def boiling_plan_create(df):
     return result
 
 
-def handle_water(df, max_weight=1100, min_weight=1100, portion=100, boiling_number=1):
+def handle_water(df, max_weight=1150, min_weight=1150, portion=100, boiling_number=1):
     boilings_water = Boilings(max_weight=max_weight, min_weight=min_weight, boiling_number=boiling_number)
     orders = [
         (False, 1.75, "Biotec", None),
