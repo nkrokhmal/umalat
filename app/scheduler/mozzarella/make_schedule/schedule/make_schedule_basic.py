@@ -72,6 +72,15 @@ class Validator(ClassValidator):
                 ordered=True,
             )
 
+        # - Early exit if on the same pouring line - strict termizator
+
+        if b1s["pouring"].props["pouring_line"] == b2s["pouring"].props["pouring_line"]:
+            validate_disjoint(
+                b1s["pouring"]["first"]["termizator"],
+                b2s["pouring"]["first"]["termizator"],
+                ordered=True,
+            )
+
         # - Basic validations
 
         if b1s.props["boiling_model"].line.name == b2s.props["boiling_model"].line.name:
@@ -325,7 +334,6 @@ class ScheduleMaker:
             validator=Validator(strict_order="same_line"),
             max_tries=100,
         )
-
 
         # - Fix water a little bit: try to push water before - allowing awaiting in line
 
