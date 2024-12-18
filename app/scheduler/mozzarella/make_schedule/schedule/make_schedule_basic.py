@@ -326,19 +326,19 @@ class ScheduleMaker:
             max_tries=100,
         )
 
-        #
-        # # - Fix water a little bit: try to push water before - allowing awaiting in line
-        #
-        # if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
-        #     # SIDE EFFECT
-        #     boiling.detach_from_parent()
-        #     push(
-        #         self.m.root["master"],
-        #         boiling,
-        #         push_func=AwaitingPusher(max_period=13),
-        #         validator=Validator(strict_order="same_line"),
-        #         max_tries=14,
-        #     )
+
+        # - Fix water a little bit: try to push water before - allowing awaiting in line
+
+        if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
+            # SIDE EFFECT
+            boiling.detach_from_parent()
+            push(
+                self.m.root["master"],
+                boiling,
+                push_func=AwaitingPusher(max_period=13),
+                validator=Validator(strict_order="same_line"),
+                max_tries=14,
+            )
 
         # - Shrink drenators
 
@@ -351,7 +351,7 @@ class ScheduleMaker:
                     self.m.root["master"],
                     boiling,
                     push_func=DrenatorShrinkingPusher(max_period=-2),
-                    validator=Validator(strict_order="all"),
+                    validator=Validator(strict_order="same_line"),
                     max_tries=3,
                 )
 
