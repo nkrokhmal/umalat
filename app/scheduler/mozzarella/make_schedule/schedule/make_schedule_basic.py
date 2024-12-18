@@ -51,7 +51,13 @@ class Validator(ClassValidator):
     def validate__boiling__boiling(self, b1, b2):
         # - Sort by x
 
-        b1s, b2s = min([b1, b2], key=lambda b: b.x[0]), max([b1, b2], key=lambda b: b.x[0])
+        if b1.x[0] == b2.x[0]:
+            b1s, b2s = b1, b2
+        else:
+            b1s, b2s = (
+                min([b1, b2], key=lambda b: b.x[0]),
+                max([b1, b2], key=lambda b: b.x[0]),
+            )
 
         # - Define line names (water/salt) that we work on (which corresponds to the pouring line)
 
@@ -289,7 +295,9 @@ class ScheduleMaker:
             # start from latest boiling
             start_from = latest_boiling.x[0] - self.m.root.x[0]  # remove root offset
         else:
-            start_from = 0
+            start_from = (
+                cast_t(self.start_times[boiling.props["boiling_model"].line.name]) - boiling["melting_and_packing"].x[0]
+            )
 
         # - Add configuration if needed
 
@@ -335,33 +343,33 @@ class ScheduleMaker:
             max_tries=100,
         )
 
-        # - Fix water a little bit: try to push water before - allowing awaiting in line
+        # # - Fix water a little bit: try to push water before - allowing awaiting in line
+        # DEPRECATED (2024-12-18): became irrelevant after we got the second termizator. This optimization aims to make pouring earlier, it's not needed anymore
+        # if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
+        #     # SIDE EFFECT
+        #     boiling.detach_from_parent()
+        #     push(
+        #         self.m.root["master"],
+        #         boiling,
+        #         push_func=AwaitingPusher(max_period=13),
+        #         validator=Validator(strict_order="same_line"),
+        #         max_tries=14,
+        #     )
 
-        if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
-            # SIDE EFFECT
-            boiling.detach_from_parent()
-            push(
-                self.m.root["master"],
-                boiling,
-                push_func=AwaitingPusher(max_period=13),
-                validator=Validator(strict_order="same_line"),
-                max_tries=14,
-            )
-
-        # - Shrink drenators
-
-        if shrink_drenators:
-            # fix water a little bit: try to shrink drenator a little bit for compactness
-            if self.get_latest_boiling(LineName.WATER):
-                # SIDE EFFECT
-                boiling.detach_from_parent()
-                push(
-                    self.m.root["master"],
-                    boiling,
-                    push_func=DrenatorShrinkingPusher(max_period=-2),
-                    validator=Validator(strict_order="same_line"),
-                    max_tries=3,
-                )
+        # # - Shrink drenators
+        # DEPRECATED (2024-12-18): became irrelevant after we got the second termizator. This optimization aims to make pouring earlier, it's not needed anymore
+        # if shrink_drenators:
+        #     # fix water a little bit: try to shrink drenator a little bit for compactness
+        #     if self.get_latest_boiling(LineName.WATER):
+        #         # SIDE EFFECT
+        #         boiling.detach_from_parent()
+        #         push(
+        #             self.m.root["master"],
+        #             boiling,
+        #             push_func=DrenatorShrinkingPusher(max_period=-2),
+        #             validator=Validator(strict_order="same_line"),
+        #             max_tries=3,
+        #         )
 
         # - Move rubber packing to extras
 
@@ -759,20 +767,6 @@ class ScheduleMaker:
 
         self.m.root["master"].reorder_children(lambda b: b.x[0])
 
-    def _fix_timing(self):
-        first_line_boiling = [
-            b
-            for b in self.m.root["master"]["boiling", True]
-            if b.props["boiling_model"].line.name == self.exact_start_time_line_name
-        ][0]
-        self.m.root.props.update(
-            x=[
-                cast_t(self.start_times[self.exact_start_time_line_name])
-                - first_line_boiling["melting_and_packing"].x[0],
-                self.m.root.x[0],
-            ]
-        )
-
     def make(
         self,
         boilings,
@@ -780,7 +774,6 @@ class ScheduleMaker:
         cleanings=None,
         start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
         start_configuration=None,
-        exact_start_time_line_name: str = LineName.WATER,
     ):
         # - Arguments
 
@@ -794,23 +787,6 @@ class ScheduleMaker:
         # -- Set start_times
 
         self.start_times = {k: v if v else None for k, v in start_times.items()}
-
-        # -- Set exact_start_time_line_name
-
-        if len(set(b.props["boiling_model"].line.name for b in boilings)) == 1:
-            self.exact_start_time_line_name = list(set(b.props["boiling_model"].line.name for b in boilings))[0]
-            if not self.start_times.get(self.exact_start_time_line_name):
-                raise Exception(f"Укажите время на линии {self.exact_start_time_line_name}")
-        else:
-            # two lines
-            if len(self.start_times) == 2:
-                self.exact_start_time_line_name = exact_start_time_line_name
-            elif len(self.start_times) == 1:
-                self.exact_start_time_line_name = list(self.start_times.keys())[
-                    0
-                ]  # overwrite exact start time line name
-            else:
-                raise Exception("Не указано время начала подачи на линиях")
 
         # -- Add a flag that time has been set
 
@@ -827,7 +803,6 @@ class ScheduleMaker:
         # self._fix_first_boiling_of_later_line()
         # self._process_cleanings()
         self._process_shifts()
-        self._fix_timing()
         return self.m.root
 
 
@@ -835,7 +810,6 @@ def make_schedule_basic(
     boiling_plan_obj,
     cleanings=None,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
-    exact_start_time_line_name: Optional[str] = LineName.WATER,
     start_configuration=None,
     date=None,
     first_batch_ids_by_type: dict = {"mozzarella": 1},
@@ -860,5 +834,4 @@ def make_schedule_basic(
         cleanings=cleanings,
         start_times=dict(start_times),
         start_configuration=start_configuration,
-        exact_start_time_line_name=exact_start_time_line_name,
     )
