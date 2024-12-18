@@ -43,7 +43,8 @@ MAX_SCORE = 10000000000
 
 
 class Validator(ClassValidator):
-    def __init__(self, window=20, strict_order=False):
+    def __init__(self, window=100, strict_order: Literal["none", "all", "same_line"] = "none"):
+        # NOTE: we have window 100 - so we basically check every combination of boilings with each other. It was easier to do this way, just brute validation
         super().__init__(window=window)
         self.strict_order = strict_order
 
@@ -52,9 +53,24 @@ class Validator(ClassValidator):
 
         b1s, b2s = min([b1, b2], key=lambda b: b.x[0]), max([b1, b2], key=lambda b: b.x[0])
 
-        # - extract boiling models
+        # - Define line names (water/salt) that we work on (which corresponds to the pouring line)
+
+        wln1 = LineName.WATER if b1s["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
+        wln2 = LineName.WATER if b2s["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
+
+        # - Extract boiling models
+
         boiling_model1 = b1s.props["boiling_model"]
         boiling_model2 = b2s.props["boiling_model"]
+
+        # - Early exit if the salt is on the 3 line
+
+        if b1s.props["boiling_model"].line.name != b2s.props["boiling_model"].line.name and wln1 == wln2:
+            validate_disjoint(
+                b1s["pouring"]["first"]["termizator"],
+                b2s["pouring"]["first"]["termizator"],
+                ordered=True,
+            )
 
         # - Basic validations
 
@@ -73,11 +89,6 @@ class Validator(ClassValidator):
             # if boilings use same drenator - drenator should not intersect with meltings
             if b1s.props["drenator_num"] == b2s.props["drenator_num"]:
                 validate_disjoint(b1s["melting_and_packing"]["melting"]["meltings"], b2s["drenator"])
-
-        # - Define line names (water/salt) that we work on (which corresponds to the pouring line)
-
-        wln1 = LineName.WATER if b1s["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
-        wln2 = LineName.WATER if b2s["pouring"].props["pouring_line"] in ["0", "1"] else LineName.SALT
 
         # - Process lines
 
@@ -134,9 +145,16 @@ class Validator(ClassValidator):
 
                 _b1s = b1s["melting_and_packing"]["melting"]["meltings"]
                 _b2s = b2s["melting_and_packing"]["melting"]["meltings"]
+
                 validate_disjoint(_b1s, _b2s, distance=7, ordered=True)
 
-        if self.strict_order:
+        # - Validate strict order
+
+        if (
+            self.strict_order == "all"
+            or self.strict_order == "same_line"
+            and b1.props["boiling_model"].line.name == b2.props["boiling_model"].line.name
+        ):
             validate_order_by_axis(b1, b2)
 
     @staticmethod
@@ -260,7 +278,7 @@ class ScheduleMaker:
 
         if latest_boiling := self.get_latest_boiling(line_name=boiling.props["boiling_model"].line.name):
             # start from latest boiling
-            start_from = latest_boiling.x[0] - self.m.root.x[0] # remove root offset
+            start_from = latest_boiling.x[0] - self.m.root.x[0]  # remove root offset
         else:
             start_from = 0
 
@@ -304,22 +322,23 @@ class ScheduleMaker:
             boiling,
             push_func=AxisPusher(start_from=start_from),
             iter_props=iter_props,
-            validator=Validator(strict_order=True),
+            validator=Validator(strict_order="same_line"),
             max_tries=100,
         )
 
-        # - Fix water a little bit: try to push water before - allowing awaiting in line
-
-        if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
-            # SIDE EFFECT
-            boiling.detach_from_parent()
-            push(
-                self.m.root["master"],
-                boiling,
-                push_func=AwaitingPusher(max_period=13),
-                validator=Validator(strict_order=True),
-                max_tries=14,
-            )
+        #
+        # # - Fix water a little bit: try to push water before - allowing awaiting in line
+        #
+        # if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
+        #     # SIDE EFFECT
+        #     boiling.detach_from_parent()
+        #     push(
+        #         self.m.root["master"],
+        #         boiling,
+        #         push_func=AwaitingPusher(max_period=13),
+        #         validator=Validator(strict_order="same_line"),
+        #         max_tries=14,
+        #     )
 
         # - Shrink drenators
 
@@ -332,7 +351,7 @@ class ScheduleMaker:
                     self.m.root["master"],
                     boiling,
                     push_func=DrenatorShrinkingPusher(max_period=-2),
-                    validator=Validator(strict_order=True),
+                    validator=Validator(strict_order="all"),
                     max_tries=3,
                 )
 
@@ -403,9 +422,10 @@ class ScheduleMaker:
                 validator=Validator(),
             )
 
-        # - Check if only salt left -> start working on 3 line
+        # - Check if only salt left -> start working on 3 (third) line
 
         if (self.left_df["line_name"] == LineName.SALT).all():
+            logger.info("Only salt left, start working on third line")
             self.lines_df.at[LineName.SALT, "iter_props"] = [
                 {"pouring_line": str(v1), "drenator_num": str(v2)}
                 for v1, v2 in itertools.product([2, 3, 1], [4, 5, 6, 7])
@@ -415,48 +435,23 @@ class ScheduleMaker:
 
         return boiling
 
-    def _find_configuration(self):
-        # logger.debug('Start configuration', start_configuration=start_configuration)
-
-        # - Find optimal configuration
-
-        if self.start_configuration and len(self.start_configuration) >= len(self.left_df):
-            # - Take self.start_configuration as is, but crop it to fit the left_df
-
-            water_count = len(self.left_df[self.left_df["line_name"] == LineName.WATER])
-            salt_count = len(self.left_df[self.left_df["line_name"] == LineName.SALT])
-
-            configuration = []
-            for line_name in self.start_configuration:
-                if line_name == LineName.WATER and water_count > 0:
-                    configuration.append(line_name)
-                    water_count -= 1
-                if line_name == LineName.SALT and salt_count > 0:
-                    configuration.append(line_name)
-                    salt_count -= 1
-
-            if len(configuration) < len(self.left_df):
-                raise Exception("Start configuration is not enough to process all boilings")
-
-            score = 0
-
-        else:
-            if len(self.left_df["sheet"].unique()) == 1:
-                # take from list as is (usually from final schedule where everything is in order, both lines on one boiling plan sheet)
-                configuration, score = self.left_df["line_name"].tolist(), 0
-            else:
-                configuration, score = self._find_optimal_configuration()
-
-        self.configuration, self.score = configuration, score
-
     def _process_boilings(self):
-        logger.error(
-            "Optimal configuration",
-            score=self.score,
-            configuration="-".join(["В" if x == LineName.WATER else "С" for x in self.configuration]),
-        )
+        # - Configuration is water first, then salt
 
-        for i, line_name in enumerate(self.configuration):
+        """
+        NOTE: before the production had only one termizator, we had to find the optimal configuration of water and salt boilings.
+        Now they are independent - so we first do the water and then the salt
+        """
+
+        configuration = [LineName.WATER] * len(self.left_df[self.left_df["line_name"] == LineName.WATER]) + [
+            LineName.SALT
+        ] * len(self.left_df[self.left_df["line_name"] == LineName.SALT])
+
+        logger.info("Configuration", configuration=configuration)
+
+        # - Process configuration
+
+        for i, line_name in enumerate(configuration):
             # - Select next row
 
             next_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
@@ -471,8 +466,6 @@ class ScheduleMaker:
                 next_row["boiling"],
                 shrink_drenators=False,
             )
-
-        logger.info("Final score", score=calc_partial_score(self.m.root, start_times=self.start_times))
 
     def get_earliest_boiling(self, line_name: Optional[str] = None):
         boilings = self.m.root["master"]["boiling", True]
@@ -500,177 +493,6 @@ class ScheduleMaker:
         result = [self.get_latest_boiling(line_name) for line_name in [LineName.WATER, LineName.SALT]]
         result = [b for b in result if b is not None]
         return result
-
-    def _process_line(self, configuration, line_name, depth: int = 1):
-        # logger.debug("Process line", configuration_prefix=configuration_prefix, line_name=line_name, depth=depth)
-
-        # - Preprocess
-
-        old_iter_props = self.lines_df["iter_props"].copy()
-        boiling_row = self.left_df[self.left_df["line_name"] == line_name].iloc[0]
-        boiling_index, boiling = boiling_row.name, boiling_row["boiling"]
-        boiling_dic = boiling.to_dict()  # copy props to restore later from it
-
-        # - Process boiling
-
-        self._process_boiling(
-            boiling,
-            shrink_drenators=False,
-            tag=str(depth),
-        )
-
-        # - Post-process
-
-        # -- Calculate configuration and its properties
-
-        current_boilings = self.m.root["master"]["boiling", True]
-        current_boilings = list(sorted(current_boilings, key=lambda b: b.x[0]))
-        current_line_names = [
-            pair[0]
-            for pair in sorted(
-                [(b.props["boiling_model"].line.name, b.x[0]) for b in current_boilings], key=lambda pair: pair[1]
-            )
-        ]
-        current_timed_configuration = tuple(
-            sorted([(boiling.props["line_name"], boiling.x[0]) for boiling in current_boilings], key=lambda x: x[1])
-        )
-
-        # - Set time
-
-        old_root_x = list(self.m.root.x)
-
-        if (line_name == self.exact_start_time_line_name) and (
-            boiling
-            == [b for b in current_boilings if b.props["boiling_model"].line.name == self.exact_start_time_line_name][0]
-        ):
-            self.m.root.props.update(
-                x=[
-                    cast_t(self.start_times[self.exact_start_time_line_name]) - boiling["melting_and_packing"].x[0],
-                    self.m.root.x[1],
-                ]
-            )
-
-        is_time_set = (
-            len([b for b in current_boilings if b.props["boiling_model"].line.name == self.exact_start_time_line_name])
-            > 0
-        )
-
-        # -- Remove boiling from left_df
-
-        self.left_df = self.left_df[self.left_df["index"] != boiling_row["index"]]
-
-        # -- Reset self.depth_to_min_score if needed
-
-        if depth == 2 and self.prev_prefix != current_line_names:
-            print("Resetting depth_to_min_score", current_line_names)
-            self.depth_to_min_score = {}
-            self.prev_prefix = current_line_names
-
-        # -- Calc current depth score
-
-        score = calc_partial_score(self.m.root, start_times=self.start_times)
-        current_best_score = self.depth_to_min_score.get(depth, 100000000)
-        self.depth_to_min_score[depth] = min(current_best_score, score)
-
-        # [DEBUG]
-        # if len(configuration) >= 1 and (configuration + [line_name])[:2] != [LineName.SALT, LineName.SALT]:
-        #     configuration, score = [], MAX_SCORE
-
-        # - Check if configuration is valid. If not - set score to MAX_SCORE (basically, exit)
-
-        if not (
-            (current_line_names and all(line_name == current_line_names[0] for line_name in current_line_names))
-            or (score - current_best_score <= 3)
-        ):
-            configuration, score = [], MAX_SCORE
-
-        if score != MAX_SCORE:
-            # - Recursively find optimal configuration
-
-            configuration, score = self._find_optimal_configuration(configuration + [line_name], depth=depth + 1)
-
-        # if score == 0:
-        #     return configuration, 0
-
-        # -- Set line_name_and_types_to_prefix
-
-        self.timed_configuration_to_prefix[current_timed_configuration] = tuple(configuration + [line_name])
-
-        # -- Clean up - remove temporary blocks, add boiling back to left_df and restore iter_props
-
-        for block in list(self.m.root.iter(cls="boiling", tag_boiling=str(depth))) + list(
-            self.m.root.iter(tag=str(depth))
-        ):
-            # print('Cleaning up block', block.props['cls'])
-            block.props.update(tag="")
-            block.detach_from_parent()
-            block.props.update(x=[0, 0])
-
-        boiling_row["boiling"] = ParallelepipedBlock.from_dict(boiling_dic)
-        self.left_df = pd.concat([pd.DataFrame([boiling_row]), self.left_df])
-        self.lines_df["iter_props"] = old_iter_props
-
-        # - Rest timing set up
-
-        self.m.root.props.update(x=old_root_x)
-
-        return configuration, score
-
-    def _find_optimal_configuration(self, configuration: list = [], depth: int = 1):
-        # logger.debug("Find optimal configuration", configuration=configuration, depth=depth)
-
-        # - Get cur_lines
-
-        lines_left_count = len(set([row["line_name"] for i, row in self.left_df.iterrows()]))
-
-        if lines_left_count == 0:
-            score = calc_partial_score(self.m.root, start_times=self.start_times)
-
-            logger.info(
-                "Configuration",
-                score=int(score),
-                configuration="-".join(["В" if x == LineName.WATER else "С" for x in configuration]),
-            )
-
-            return configuration, score
-
-            # return configuration, 0
-        elif lines_left_count == 1:
-            return self._process_line(
-                configuration=configuration,
-                line_name=self.left_df.iloc[0]["line_name"],
-                depth=depth,
-            )
-        elif self.start_configuration and depth <= len(self.start_configuration):
-            return self._process_line(
-                configuration=configuration,
-                line_name=self.start_configuration[depth - 1],
-                depth=depth,
-            )
-        elif lines_left_count == 2:
-            if (
-                len(configuration) >= 2
-                and configuration[-2] == configuration[-1]
-                and not all(value == configuration[0] for value in configuration)
-            ):
-                # no sequential element s
-                return self._process_line(
-                    configuration=configuration,
-                    line_name=LineName.WATER if configuration[-1] == LineName.SALT else LineName.SALT,  # reverse
-                    depth=depth,
-                )
-            else:
-                return min(
-                    [
-                        self._process_line(
-                            configuration=configuration,
-                            line_name=line_name,
-                            depth=depth,
-                        )
-                        for line_name in [LineName.WATER, LineName.SALT]
-                    ],
-                    key=lambda x: x[1],
-                )
 
     def _process_extras(self):
         # push extra packings
@@ -951,7 +773,6 @@ class ScheduleMaker:
         start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
         start_configuration=None,
         exact_start_time_line_name: str = LineName.WATER,
-        target_object: Literal["schedule", "configuration_and_score"] = "schedule",
     ):
         # - Arguments
 
@@ -989,21 +810,10 @@ class ScheduleMaker:
 
         # - Other
 
-        # used for _find_optimal_configuration
-        self.prev_prefix = None
-        self.timed_configuration_to_prefix = {}
-
-        self.depth_to_min_score = {}
-
         self._init_block_maker()
         self._init_lines_df()
         self._init_left_df()
         self._init_multihead_water_boilings()
-        self._find_configuration()
-
-        if target_object == "configuration_and_score":
-            return self.configuration, self.score
-
         self._process_boilings()
         # self._process_extras()
         # self._fix_first_boiling_of_later_line()
@@ -1020,8 +830,6 @@ def make_schedule_basic(
     exact_start_time_line_name: Optional[str] = LineName.WATER,
     start_configuration=None,
     date=None,
-    parallelism: int = 1,
-    target_object: Literal["schedule", "configuration_and_score"] = "schedule",
     first_batch_ids_by_type: dict = {"mozzarella": 1},
 ):
     logger.info(
@@ -1030,54 +838,6 @@ def make_schedule_basic(
         start_configuration=start_configuration,
         cleanings=cleanings,
     )
-
-    # - Configure parallel environment
-
-    if target_object == "configuration_and_score":
-        # - Configure logs (needed for multiprocessing)
-
-        from utils_ak.loguru import configure_loguru
-
-        configure_loguru()
-
-        # - Remove warnings
-
-        warnings.filterwarnings("ignore")
-
-    # - Find optimal configuration
-
-    results = None
-    if not start_configuration and parallelism > 1:
-        # - Assert parallelism is a power of 2
-
-        assert parallelism & (parallelism - 1) == 0, "Parallelism should be a power of 2"
-
-        # - Find optimal configuration as multiprocessing
-
-        logger.info("Finding optimal configuration as multiprocessing")
-
-        from app.scheduler.mozzarella.make_schedule.schedule.make_schedule_basic_parallel import (
-            make_schedule_basic_parallel,
-        )
-
-        results = run_in_parallel(
-            make_schedule_basic_parallel,
-            kwargs_list=[
-                dict(
-                    boiling_plan_obj=boiling_plan_obj,
-                    cleanings=cleanings,
-                    start_times=start_times,
-                    exact_start_time_line_name=exact_start_time_line_name,
-                    start_configuration=sc,
-                    date=date,
-                    target_object="configuration_and_score",
-                )
-                for sc in list(itertools.product([LineName.WATER, LineName.SALT], repeat=int(np.log2(parallelism))))
-            ],
-            parallelism=parallelism,
-        )
-
-        logger.info("Optimal configuration", results=results)
 
     # - Make schedule
 
@@ -1091,9 +851,6 @@ def make_schedule_basic(
         date=date,
         cleanings=cleanings,
         start_times=dict(start_times),
-        start_configuration=(
-            start_configuration if not results else min([result for result in results], key=lambda r: r[1])[0]
-        ),  # get results from multiprocessing optimization
+        start_configuration=start_configuration,
         exact_start_time_line_name=exact_start_time_line_name,
-        target_object=target_object,
     )

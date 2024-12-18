@@ -35,7 +35,6 @@ def make_schedule_with_optimal_cleanings(
             start_configuration=start_configuration,
             exact_start_time_line_name=exact_start_time_line_name,
             date=date,
-            parallelism=1,
             first_batch_ids_by_type=first_batch_ids_by_type,
         )
 
@@ -48,7 +47,6 @@ def make_schedule_with_optimal_cleanings(
         start_configuration=start_configuration,
         exact_start_time_line_name=exact_start_time_line_name,
         date=date,
-        parallelism=4,
         first_batch_ids_by_type=first_batch_ids_by_type,
     )
 
