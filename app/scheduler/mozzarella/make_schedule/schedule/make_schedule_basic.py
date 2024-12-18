@@ -48,9 +48,11 @@ class Validator(ClassValidator):
         self.strict_order = strict_order
 
     def validate__boiling__boiling(self, b1, b2):
+        # - Sort by x
+
         b1s, b2s = min([b1, b2], key=lambda b: b.x[0]), max([b1, b2], key=lambda b: b.x[0])
 
-        # extract boiling models
+        # - extract boiling models
         boiling_model1 = b1s.props["boiling_model"]
         boiling_model2 = b2s.props["boiling_model"]
 
@@ -82,7 +84,8 @@ class Validator(ClassValidator):
         if boiling_model1.line.name == boiling_model2.line.name:
             # same lines
 
-            # basic_example validation
+            # - Meltings with meltings, collecting with collecting
+
             validate_disjoint(
                 b1s["melting_and_packing"]["melting"]["meltings"], b2s["melting_and_packing"]["melting"]["meltings"]
             )
@@ -248,18 +251,18 @@ class ScheduleMaker:
         else:
             self.last_multihead_water_boiling = None
 
-    def _process_boiling(self, boiling, shrink_drenators=True, tag: str = ""):
+    def _process_boiling(self, boiling, shrink_drenators: bool = True, tag: str = ""):
         # - Extract line name
 
         line_name = boiling.props["boiling_model"].line.name
 
         # - Find start_from
 
-        if not self.get_latest_boiling():
-            start_from = 0
-        else:
+        if latest_boiling := self.get_latest_boiling(line_name=boiling.props["boiling_model"].line.name):
             # start from latest boiling
-            start_from = self.get_latest_boiling().x[0] - self.m.root.x[0]  # remove root offset
+            start_from = latest_boiling.x[0] - self.m.root.x[0] # remove root offset
+        else:
+            start_from = 0
 
         # - Add configuration if needed
 
