@@ -23,7 +23,7 @@ from utils_ak.iteration.simple_iterator import iter_pairs
 from app.enum import LineName
 from app.models import Washer, cast_model
 from app.scheduler.common.split_shifts_utils import split_shifts
-from app.scheduler.common.time_utils import cast_t
+from app.scheduler.common.time_utils import cast_t, cast_time
 from app.scheduler.mozzarella.make_schedule.packing import boiling_has_multihead_packing, make_configuration_blocks
 from app.scheduler.mozzarella.make_schedule.schedule.calc_partial_score import calc_partial_score
 from app.scheduler.mozzarella.make_schedule.schedule.make_boilings import make_boilings
@@ -174,11 +174,17 @@ class Validator(ClassValidator):
 
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
+        if b1.props["boiling_model"].line.name != b2.props["line_name"]:
+            return
+
         boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
         validate_disjoint(boiling["pouring"]["first"]["termizator"], cleaning)
 
     @staticmethod
     def validate__cleaning__boiling(b1, b2):
+        if b1.props["line_name"] != b2.props["boiling_model"].line.name:
+            return
+
         boiling, cleaning = list(sorted([b1, b2], key=lambda b: b.props["cls"]))
         validate_disjoint(cleaning, boiling["pouring"]["first"]["termizator"])
 
@@ -203,7 +209,8 @@ class Validator(ClassValidator):
 
 def make_termizator_cleaning_block(cleaning_type, **kwargs):
     washer = cast_model(
-        Washer, "Короткая мойка термизатора" if cleaning_type == "short" else "Длинная мойка термизатора"
+        Washer,
+        "Короткая мойка термизатора" if cleaning_type == "short" else "Длинная мойка термизатора",
     )
     m = BlockMaker(
         "cleaning",
@@ -545,43 +552,57 @@ class ScheduleMaker:
         # - Add cleanings if necessary
 
         # extract boilings
-        boilings = self.m.root["master"]["boiling", True]
-        boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
-        for a, b in iter_pairs(boilings):
-            rest = b["pouring"]["first"]["termizator"].x[0] - a["pouring"]["first"]["termizator"].y[0]
+        for line_name in [LineName.WATER, LineName.SALT]:
+            boilings = self.m.root["master"]["boiling", True]
+            boilings = [b for b in boilings if b.props["boiling_model"].line.name == line_name]
+            boilings = list(sorted(boilings, key=lambda b: b.x[0]))
 
-            # extract current cleanings
-            cleanings = list(self.m.root["master"].iter(cls="cleaning"))
+            for a, b in iter_pairs(boilings):
+                rest = b["pouring"]["first"]["termizator"].x[0] - a["pouring"]["first"]["termizator"].y[0]
 
-            # calc in_between and previous cleanings
-            in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
-            previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
-            if previous_cleanings:
-                previous_cleaning = max(previous_cleanings, key=lambda c: c.x[0])
-            else:
-                previous_cleaning = None
+                # extract current cleanings
+                cleanings = list(self.m.root["master"].iter(cls="cleaning"))
 
-            if not in_between_cleanings:
-                # no current in between cleanings -> try to add if needed
+                # calc in_between and previous cleanings
+                in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
+                previous_cleanings = [c for c in cleanings if c.x[0] <= a.x[0]]
+                if previous_cleanings:
+                    previous_cleaning = max(previous_cleanings, key=lambda c: c.x[0])
+                else:
+                    previous_cleaning = None
 
-                # if rest is more than an hour and less than 80 minutes -> short cleaning
-                if rest >= 24:
-                    cleaning = make_termizator_cleaning_block("short", rule="rest_after_two_hours")
-                    cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0] - self.m.root.x[0], 0))
-                    push(self.m.root["master"], cleaning, push_func=add_push)
+                if not in_between_cleanings:
+                    # no current in between cleanings -> try to add if needed
+
+                    # if rest is more than an hour and less than 80 minutes -> short cleaning
+                    if rest >= 24:
+                        cleaning = make_termizator_cleaning_block(
+                            "short",
+                            rule="rest_after_two_hours",
+                            line_name=line_name,
+                        )
+                        cleaning.props.update(x=(a["pouring"]["first"]["termizator"].y[0] - self.m.root.x[0], 0))
+                        push(self.m.root["master"], cleaning, push_func=add_push)
 
         # - Add last full cleaning
 
-        last_boiling = max(self.m.root["master"]["boiling", True], key=lambda b: b.y[0])
-        start_from = last_boiling["pouring"]["first"]["termizator"].y[0] + 1 - self.m.root.x[0]
-        cleaning = make_termizator_cleaning_block("full", rule="closing")  # add five extra minutes
-        push(
-            self.m.root["master"],
-            cleaning,
-            push_func=AxisPusher(start_from=start_from),
-            validator=Validator(),
-        )
+        for line_name in [LineName.WATER, LineName.SALT]:
+            last_boiling = self.get_latest_boiling(line_name=line_name)
+            if last_boiling:
+                start_from = (
+                    last_boiling["pouring"]["first"]["termizator"].y[0] + 1 - self.m.root.x[0]
+                )  # add five extra minutes
+                push(
+                    self.m.root["master"],
+                    make_termizator_cleaning_block(
+                        "full",
+                        rule="closing",
+                        line_name=line_name,
+                    ),
+                    push_func=AxisPusher(start_from=start_from),
+                    validator=Validator(),
+                )
 
     def _process_shifts(self):
         # - Cheese makers
@@ -681,92 +702,6 @@ class ScheduleMaker:
             except:
                 pass
 
-    def _fix_first_boiling_of_later_line(self):
-        # - Get boilings
-
-        boilings = list(sorted(self.m.root["master"]["boiling", True], key=lambda b: b.x[0]))
-
-        # - Get configuration
-
-        configuration = [b.props["boiling_model"].line.name for b in boilings]
-
-        if len(set(configuration)) == 1:
-            # only one line
-            return
-
-        # - Get later line
-
-        later_line = LineName.WATER if configuration[0] == LineName.SALT else LineName.SALT
-
-        # - Get index of later line in configuration and boilings at that index and next boiling
-
-        # first_boiling_of_later_line_index
-        index = configuration.index(later_line)
-
-        if index == len(boilings) - 1:
-            # first boiling of later line is last boiling
-            return
-
-        b1, b2 = boilings[index], boilings[index + 1]
-
-        # - Fix packing configuration if needed
-
-        boilings_on_line1 = [
-            b for b in boilings if b.props["boiling_model"].line.name == b1.props["boiling_model"].line.name
-        ]
-        _index = boilings_on_line1.index(b1)
-
-        if _index != len(boilings_on_line1) - 1:
-            # not last boiling
-            b3 = boilings_on_line1[_index + 1]
-
-            # - Find packing configuration between b2 and b3
-
-            packing_configurations = [
-                pc
-                for pc in self.m.root["master"]["packing_configuration", True]
-                if pc.x[0]
-                > b1["melting_and_packing"]["collecting", True][0].x[
-                    0
-                ]  # todo maybe: we take first collecting here, but this is not very straightforward [@marklidenberg]
-                and pc.x[0] <= b3["melting_and_packing"]["collecting", True][0].x[0]
-                and pc.props["line_name"] == b1.props["boiling_model"].line.name
-            ]
-
-            if packing_configurations:
-                pc = delistify(packing_configurations, single=True)
-            else:
-                pc = None
-
-            # - Push packing configuration further
-
-            if pc:
-                max_push = b3["melting_and_packing"]["collecting", True][0].x[0] - pc.x[0]
-                pc.detach_from_parent()
-                push(
-                    self.m.root["master"],
-                    pc,
-                    push_func=BackwardsPusher(max_period=max_push),
-                    validator=Validator(window=100),
-                    max_tries=max_push + 1,
-                )
-
-        # - Fix boiling
-
-        max_push = b2.x[0] - b1.x[0]
-        b1.detach_from_parent()
-        push(
-            self.m.root["master"],
-            b1,
-            push_func=BackwardsPusher(max_period=max_push),
-            validator=Validator(window=100),
-            max_tries=max_push + 1,
-        )
-
-        # - Fix order of master blocks
-
-        self.m.root["master"].reorder_children(lambda b: b.x[0])
-
     def make(
         self,
         boilings,
@@ -799,9 +734,8 @@ class ScheduleMaker:
         self._init_left_df()
         self._init_multihead_water_boilings()
         self._process_boilings()
-        # self._process_extras()
-        # self._fix_first_boiling_of_later_line()
-        # self._process_cleanings()
+        self._process_extras()
+        self._process_cleanings()
         self._process_shifts()
         return self.m.root
 

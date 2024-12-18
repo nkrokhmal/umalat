@@ -137,27 +137,37 @@ def wrap_cheese_makers(master, rng):
 
 
 def wrap_cleanings(master):
-    m = BlockMaker(
-        "cleanings_row",
-        default_row_width=1,
-        default_column_width=1,
-        # props
-        axis=1,
-    )
-
-    with m.push("header", push_func=add_push, index_width=0, start_time="00:00"):
-        m.push(
-            "template", push_func=add_push, x=(1, 0), size=(3, 2), text="Мойка термизатора", color="white", bold=True
+    result = []
+    for line_name in [LineName.WATER, LineName.SALT]:
+        m = BlockMaker(
+            "cleanings_row",
+            default_row_width=1,
+            default_column_width=1,
+            # props
+            axis=1,
         )
 
-    for cleaning in master.iter(cls="cleaning"):
-        b = m.copy(cleaning, with_props=True)
-        b.update_size((b.props["size"][0], 2))
-        m.push(b, push_func=add_push)
+        with m.push("header", push_func=add_push, index_width=0, start_time="00:00"):
+            m.push(
+                "template",
+                push_func=add_push,
+                x=(1, 0),
+                size=(3, 2),
+                text="Мойка термизатора",
+                color="white",
+                bold=True,
+            )
 
-    # add two lines for "Расход пара"
-    m.push("stub", size=(0, 2))
-    return m.root
+        for cleaning in master.iter(cls="cleaning", line_name=line_name):
+            b = m.copy(cleaning, with_props=True)
+            b.update_size((b.props["size"][0], 2))
+            m.push(b, push_func=add_push)
+
+        # add two lines for "Расход пара"
+        m.push("stub", size=(0, 2))
+
+        result.append(m.root)
+    return result
 
 
 def wrap_multihead_cleanings(master):
@@ -288,7 +298,6 @@ def wrap_meltings_1(master, line_name, title, coolings_mode="all"):
 
                 res = simple_push(cooling_lines[j], cooling_block, validator=Validator())
                 if isinstance(res, Block):
-
                     # pushed block successfully
                     break
                 j += 1
@@ -415,12 +424,10 @@ def wrap_packing_block(packing_block, boiling_id):
             m.push_row("packing_label", size=3)
             m.push_row("packing_name", size=packing_block.size[0] - 3)
         elif packing_block.size[0] >= 2:
-
             # update 2021.10.21
             m.push_row("packing_label", size=1)
             m.push_row("packing_name", size=packing_block.size[0] - 1)
         elif packing_block.size[0] == 1:
-
             # update 2021.10.21
             m.push_row("packing_label", size=1)
 
@@ -453,7 +460,6 @@ def wrap_packings(master, line_name):
                     m.push(wrap_packing_block(packing_block, boiling.props["boiling_id"]), push_func=add_push)
             try:
                 for conf in master["packing_configuration", True]:
-
                     # first level only
                     if conf.props["packing_team_id"] != packing_team_id or conf.props["line_name"] != line_name:
                         continue
@@ -461,7 +467,6 @@ def wrap_packings(master, line_name):
                         "packing_configuration", push_func=add_push, x=(conf.props["x"][0], 2), size=conf.size[0]
                     )
             except:
-
                 # no packing_configuration in schedule first level
                 pass
     return m.root
@@ -492,7 +497,6 @@ def wrap_frontend(
     start_configuration=None,
     date=None,
 ):
-
     # - Get schedule first
 
     output = make_schedule(
@@ -528,7 +532,8 @@ def wrap_frontend(
         if schedule["shifts"]:
             m.push(wrap_shifts(schedule["shifts"]["cheese_makers"]))
         m.push(wrap_cheese_makers(master, range(2)))
-        m.push(wrap_cleanings(master))
+        for cleaning_block in wrap_cleanings(master):
+            m.push(cleaning_block)
         m.push(wrap_cheese_makers(master, range(2, 4)))
 
     start_t = min([boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]])  # first melting time
@@ -558,7 +563,6 @@ def wrap_frontend(
                 start_time="00:00",
             )
         else:
-
             # m.block(wrap_multihead_cleanings(master))
             if schedule["shifts"]:
                 m.push(wrap_shifts(schedule["shifts"]["water_meltings"]))
