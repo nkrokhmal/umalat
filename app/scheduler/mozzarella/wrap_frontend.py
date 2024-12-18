@@ -136,38 +136,35 @@ def wrap_cheese_makers(master, rng):
     return m.root
 
 
-def wrap_cleanings(master):
-    result = []
-    for line_name in [LineName.WATER, LineName.SALT]:
-        m = BlockMaker(
-            "cleanings_row",
-            default_row_width=1,
-            default_column_width=1,
-            # props
-            axis=1,
+def wrap_cleanings(master, line_name:str):
+    m = BlockMaker(
+        "cleanings_row",
+        default_row_width=1,
+        default_column_width=1,
+        # props
+        axis=1,
+    )
+
+    with m.push("header", push_func=add_push, index_width=0, start_time="00:00"):
+        m.push(
+            "template",
+            push_func=add_push,
+            x=(1, 0),
+            size=(3, 2),
+            text="Мойка термизатора",
+            color="white",
+            bold=True,
         )
 
-        with m.push("header", push_func=add_push, index_width=0, start_time="00:00"):
-            m.push(
-                "template",
-                push_func=add_push,
-                x=(1, 0),
-                size=(3, 2),
-                text="Мойка термизатора",
-                color="white",
-                bold=True,
-            )
+    for cleaning in master.iter(cls="cleaning", line_name=line_name):
+        b = m.copy(cleaning, with_props=True)
+        b.update_size((b.props["size"][0], 2))
+        m.push(b, push_func=add_push)
 
-        for cleaning in master.iter(cls="cleaning", line_name=line_name):
-            b = m.copy(cleaning, with_props=True)
-            b.update_size((b.props["size"][0], 2))
-            m.push(b, push_func=add_push)
+    # add two lines for "Расход пара"
+    m.push("stub", size=(0, 2))
 
-        # add two lines for "Расход пара"
-        m.push("stub", size=(0, 2))
-
-        result.append(m.root)
-    return result
+    return m.root
 
 
 def wrap_multihead_cleanings(master):
@@ -532,9 +529,9 @@ def wrap_frontend(
         if schedule["shifts"]:
             m.push(wrap_shifts(schedule["shifts"]["cheese_makers"]))
         m.push(wrap_cheese_makers(master, range(2)))
-        for cleaning_block in wrap_cleanings(master):
-            m.push(cleaning_block)
+        m.push(wrap_cleanings(master, LineName.WATER))
         m.push(wrap_cheese_makers(master, range(2, 4)))
+        m.push(wrap_cleanings(master, LineName.SALT))
 
     start_t = min([boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]])  # first melting time
     start_t = int(custom_round(start_t, 12, "floor"))  # round to last hour
