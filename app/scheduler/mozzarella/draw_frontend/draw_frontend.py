@@ -68,7 +68,7 @@ def draw_frontend(
 def test():
     from utils_ak.loguru import configure_loguru
 
-    configure_loguru()
+    configure_loguru(level="TRACE")
 
     # - Ignore warnings
 
@@ -95,9 +95,9 @@ def test():
             # get_repo_path() / "app/data/static/samples/by_department/rubber/sample_rubber_schedule.xlsx"
         ),
         workbook=schedule_wb,
-        start_times={LineName.SALT: "07:00", LineName.WATER: "08:00"},
+        start_times={LineName.SALT: "09:00", LineName.WATER: "12:00"},
         exact_start_time_line_name=LineName.SALT,
-        first_batch_ids_by_type={"mozzarella": 1000},
+        first_batch_ids_by_type={"mozzarella": 415},
         # start_configuration=[
         #     LineName.WATER if value == "В" else LineName.SALT
         #     for value in "В-С-В-С-В-С-В-С-В-С-В-С-В-С-В-С-С-В-С-В-С-В-С-В-С-С-С-С-С-С-С".split("-")  # 4
