@@ -56,10 +56,7 @@ class Validator(ClassValidator):
 
         # - Basic validations
 
-        if (
-            b1s.props["boiling_model"].line.name
-            == b2s.props["boiling_model"].line.name
-        ):
+        if b1s.props["boiling_model"].line.name == b2s.props["boiling_model"].line.name:
             validate_disjoint(b1s["pouring"]["first"]["termizator"], b2s["pouring"]["first"]["termizator"])
             validate_disjoint(b1s["pouring"]["second"]["pouring_off"], b2s["pouring"]["second"]["pouring_off"])
             validate_disjoint(b1s["pouring"]["first"]["pumping_out"], b2s["pouring"]["second"]["pouring_off"])
@@ -252,17 +249,20 @@ class ScheduleMaker:
             self.last_multihead_water_boiling = None
 
     def _process_boiling(self, boiling, shrink_drenators=True, tag: str = ""):
-        # extract line name
+        # - Extract line name
+
         line_name = boiling.props["boiling_model"].line.name
 
-        # find start_from
+        # - Find start_from
+
         if not self.get_latest_boiling():
             start_from = 0
         else:
             # start from latest boiling
             start_from = self.get_latest_boiling().x[0] - self.m.root.x[0]  # remove root offset
 
-        # add configuration if needed
+        # - Add configuration if needed
+
         if self.get_latest_boiling(line_name):
             configuration_blocks = make_configuration_blocks(
                 self.get_latest_boiling(line_name),
@@ -283,13 +283,15 @@ class ScheduleMaker:
                     validator=Validator(),
                 )
 
-        # filter iter_props: no two boilings allowed sequentially on the same pouring line
+        # - Filter iter_props: no two boilings allowed sequentially on the same pouring line
+
         iter_props = self.lines_df.at[line_name, "iter_props"]
         if self.get_latest_boiling(line_name):
             current_pouring_line = self.get_latest_boiling(line_name).props["pouring_line"]
             iter_props = [props for props in iter_props if props["pouring_line"] != current_pouring_line]
 
-        # push boiling
+        # - Push boiling
+
         # SIDE EFFECT
         boiling.props.update(tag_boiling=tag)
         # print("Pushing", boiling.props['cls'])
@@ -303,7 +305,8 @@ class ScheduleMaker:
             max_tries=100,
         )
 
-        # fix water a little bit: try to push water before - allowing awaiting in line
+        # - Fix water a little bit: try to push water before - allowing awaiting in line
+
         if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
             # SIDE EFFECT
             boiling.detach_from_parent()
@@ -314,6 +317,8 @@ class ScheduleMaker:
                 validator=Validator(strict_order=True),
                 max_tries=14,
             )
+
+        # - Shrink drenators
 
         if shrink_drenators:
             # fix water a little bit: try to shrink drenator a little bit for compactness
@@ -328,7 +333,8 @@ class ScheduleMaker:
                     max_tries=3,
                 )
 
-        # move rubber packing to extras
+        # - Move rubber packing to extras
+
         for packing in boiling.iter(cls="packing"):
             if not list(
                 packing.iter(
@@ -348,7 +354,8 @@ class ScheduleMaker:
             packing_copy.props.update(tag=tag)
             push(self.m.root["extra"], packing_copy, push_func=add_push)
 
-        # add multihead boiling after all water boilings if multihead was present
+        # - Add multihead boiling after all water boilings if multihead was present
+
         if boiling == self.last_multihead_water_boiling:
             # SIDE EFFECT
             # print("Pushing", 'multihead_cleaning')
@@ -374,10 +381,9 @@ class ScheduleMaker:
                 push_func=add_push,
             )
 
-        # add cleaning after boiling if needed
-        cleaning_type = self.cleanings.get(boiling.props["group_id"])
+        # - Add cleaning after boiling if needed
 
-        if cleaning_type:
+        if cleaning_type := self.cleanings.get(boiling.props["group_id"]):
             start_from = boiling["pouring"]["first"]["termizator"].y[0]
             cleaning = make_termizator_cleaning_block(
                 cleaning_type,
@@ -394,12 +400,15 @@ class ScheduleMaker:
                 validator=Validator(),
             )
 
-        # check if only salt left -> start working on 3 line
+        # - Check if only salt left -> start working on 3 line
+
         if (self.left_df["line_name"] == LineName.SALT).all():
             self.lines_df.at[LineName.SALT, "iter_props"] = [
                 {"pouring_line": str(v1), "drenator_num": str(v2)}
                 for v1, v2 in itertools.product([2, 3, 1], [4, 5, 6, 7])
             ]
+
+        # - Return
 
         return boiling
 
@@ -443,8 +452,6 @@ class ScheduleMaker:
             score=self.score,
             configuration="-".join(["В" if x == LineName.WATER else "С" for x in self.configuration]),
         )
-
-        # - Process boilings
 
         for i, line_name in enumerate(self.configuration):
             # - Select next row
@@ -995,9 +1002,9 @@ class ScheduleMaker:
             return self.configuration, self.score
 
         self._process_boilings()
-        self._process_extras()
-        self._fix_first_boiling_of_later_line()
-        self._process_cleanings()
+        # self._process_extras()
+        # self._fix_first_boiling_of_later_line()
+        # self._process_cleanings()
         self._process_shifts()
         self._fix_timing()
         return self.m.root
