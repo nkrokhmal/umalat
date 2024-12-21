@@ -81,9 +81,9 @@ def run_consolidated(
 
 def test():
     run_consolidated(
-        input_path=str(get_repo_path() / "app/data/dynamic/2024-03-02/approved"),
+        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2024-11-10"),
         add_contour_cleanings=False,
-        prefix="2024-03-02",
+        prefix="2024-11-10",
         open_file=True,
     )
 
