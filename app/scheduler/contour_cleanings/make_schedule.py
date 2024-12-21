@@ -324,10 +324,8 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
     if is_today_day_off:
         for duration, name in [
             (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора"),
-            ("01:20", "Сыроизготовитель 1"),
-            ("01:20", "Сыроизготовитель 2"),
-            ("01:20", "Сыроизготовитель 3"),
-            ("01:20", "Сыроизготовитель 4"),
+            ("01:20", "Сыроизготовитель 1+2"),
+            ("01:20", "Сыроизготовитель 3+4"),
             ("01:30", "Плавилка линия пицца чиз"),
             ("01:10", "Контур циркуляции рассола"),
             ("01:10", "Линия пицца чиз формовщик"),
@@ -377,14 +375,26 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
             value[1] = cast_t(value[1])
         values = list(sorted(values, key=lambda value: value[1]))
 
-        for n, cheese_maker_end in values:
-            m.push_row(
+        # clean in pairs
+
+        n1, n2 = min(values[0][0], values[1][0]), max(values[0][0], values[1][0])
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(values[1][1]) + 1, validator=CleaningValidator()
+            ),  # 10 minutes after pouring_off, 5 minutes after boiling ens
+            size=cast_t("01:20"),
+            label=f"Сыроизготовитель {int(n1)}+{int(n2)}",
+        )
+
+        n1, n2 = min(values[2][0], values[3][0]), max(values[2][0], values[3][0])
+        m.push_row(
                 "cleaning",
                 push_func=AxisPusher(
-                    start_from=cast_t(cheese_maker_end) + 1, validator=CleaningValidator()
+                    start_from=cast_t(values[3][1]) + 1, validator=CleaningValidator()
                 ),  # 10 minutes after pouring_off, 5 minutes after boiling ens
                 size=cast_t("01:20"),
-                label=f"Сыроизготовитель {int(n)}",
+                label=f"Сыроизготовитель {int(n1)}+{int(n2)}",
             )
 
     #  Плавилка линия пицца чиз (конец плавления пицца чиз + 1 час)
