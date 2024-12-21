@@ -58,6 +58,11 @@ class ScheduleDateForm(FlaskForm):
         validators=[Optional()],
         default=False
     )
+    goat_cream = BooleanField(
+        "Линия козьих сливок (ставится в 10:00 и 22:00)",
+        validators=[Optional()],
+        default=False
+    )
     is_today_day_off = BooleanField(
         "Сегодня был нерабочий день",
         validators=[Optional()],

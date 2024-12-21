@@ -166,7 +166,10 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
 
 
 def make_contour_2(
-    properties, naslavuchich: bool = False, is_today_day_off: bool = False, comet_rubber_end_time: str = ""
+    properties,
+    naslavuchich: bool = False,
+    is_today_day_off: bool = False,
+    comet_rubber_end_time: str = "",
 ):
     m = BlockMaker("2 contour")
 
@@ -617,7 +620,11 @@ def make_contour_5(properties: dict, is_today_day_off: bool = False):
     return m.root
 
 
-def make_contour_6(properties: dict, is_today_day_off: bool = False):
+def make_contour_6(
+    properties: dict,
+    is_today_day_off: bool = False,
+    goat_cream: bool = True,
+):
     m = BlockMaker("6 contour")
 
     # - Process day off - clean, starting from 12:00
@@ -634,6 +641,7 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
             ("01:00", "Линия сливок на маскарпоне"),
             ("00:55", "Линия сливок на подмес на рикотте"),
             ("02:50", "Линия сливок маслоцех + обратка"),
+            ("01:05", "Линия козьих сливок"),
         ]:
             m.push_row(
                 "cleaning",
@@ -646,6 +654,19 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
             )
 
         return m.root
+
+    # - Линия козьих сливок (10:00, с галочкой)
+
+    if goat_cream:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("10:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:05"),
+            label="Линия козьих сливок",
+        )
 
     # - Линия сладкой сыворотки (Завершаем слив на рикотте + час)
 
@@ -743,6 +764,19 @@ def make_contour_6(properties: dict, is_today_day_off: bool = False):
             label=f"Линия сливок маслоцех + обратка",
         )
 
+    # - Линия козьих сливок (22:00, с галочкой)
+
+    if goat_cream:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("22:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:05"),
+            label="Линия козьих сливок",
+        )
+
     return m.root
 
 
@@ -750,6 +784,7 @@ def make_schedule(
     properties: dict,
     naslavuchich: bool = True,
     basement_brine: bool = True,
+    goat_cream: bool = True,
     is_today_day_off: bool = False,
 ):
     m = BlockMaker("schedule")
@@ -760,7 +795,7 @@ def make_schedule(
         make_contour_3(properties, is_today_day_off=is_today_day_off),
         make_contour_4(properties, is_today_day_off=is_today_day_off),
         make_contour_5(properties, is_today_day_off=is_today_day_off),
-        make_contour_6(properties, is_today_day_off=is_today_day_off),
+        make_contour_6(properties, is_today_day_off=is_today_day_off, goat_cream=goat_cream),
     ]
 
     for contour in contours:

@@ -17,6 +17,7 @@ def draw_frontend(
     open_file: bool = False,
     naslavuchich: bool = True,
     basement_brine: bool = True,
+    goat_cream: bool = True,
     is_today_day_off: bool = False,
 ):
 
@@ -27,6 +28,7 @@ def draw_frontend(
         properties,
         naslavuchich=naslavuchich,
         basement_brine=basement_brine,
+        goat_cream=goat_cream,
         is_today_day_off=is_today_day_off,
     )
     frontend = wrap_frontend(schedule)
