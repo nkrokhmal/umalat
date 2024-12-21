@@ -108,7 +108,22 @@ def parse_schedule_file(wb_obj):
         split_func=_split_func,
     )
 
-    parse_elements(m, cells_df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 8], start_times[0])
+    parse_elements(
+        m,
+        cells_df,
+        "cleanings",
+        "cleaning1",
+        [cheese_maker_headers[-1] - 8],
+        start_times[0],
+    )
+    parse_elements(
+        m,
+        cells_df,
+        "cleanings",
+        "cleaning2",
+        [cheese_maker_headers[-1] + 4],
+        start_times[0],
+    )
 
     # -- Parse water melting
 
@@ -359,14 +374,25 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     # - Cleanings
 
-    props.short_cleaning_times = [
+    props.short_cleaning_times1 = [
         cast_human_time(cleaning.x[0])
-        for cleaning in parsed_schedule.iter(cls="cleaning")
+        for cleaning in parsed_schedule.iter(cls="cleaning1")
         if "Короткая мойка" in cleaning.props["group"][0]["label"]
     ]
-    props.full_cleaning_times = [
+    props.full_cleaning_times1 = [
         cast_human_time(cleaning.x[0])
-        for cleaning in parsed_schedule.iter(cls="cleaning")
+        for cleaning in parsed_schedule.iter(cls="cleaning1")
+        if "Полная мойка" in cleaning.props["group"][0]["label"]
+    ]
+
+    props.short_cleaning_times2 = [
+        cast_human_time(cleaning.x[0])
+        for cleaning in parsed_schedule.iter(cls="cleaning2")
+        if "Короткая мойка" in cleaning.props["group"][0]["label"]
+    ]
+    props.full_cleaning_times2 = [
+        cast_human_time(cleaning.x[0])
+        for cleaning in parsed_schedule.iter(cls="cleaning2")
         if "Полная мойка" in cleaning.props["group"][0]["label"]
     ]
 
@@ -500,10 +526,7 @@ def test():
     print_json(
         dict(
             parse_properties(
-                str(
-                    get_repo_path()
-                    / "app/data/static/samples/by_day/contour_cleanings_sample_day/sample Расписание моцарелла.xlsx"
-                )
+                str(get_repo_path() / "app/data/static/samples/by_day/2024-11-10/2024-11-10 Расписание моцарелла.xlsx")
             )
         )
     )
