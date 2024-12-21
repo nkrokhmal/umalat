@@ -33,7 +33,8 @@ class MozzarellaProperties(pydantic.BaseModel):
     water_packing_end_time: str = Field("", description="Конец работы паковки воды")
     salt_packing_end_time: str = Field("", description="Конец работы паковки соли")
     water_melting_end_time: str = Field("", description="Конец работы плавления воды")
-    salt_melting_end_time: str = Field("", description="Конец работы плавления соли")
+    salt_melting_end_time: str = Field("", description="Конец работы плавления соли (вместе с посолкой)")
+    salt_melting_without_salting_end_time: str = Field("", description="Конец работы плавления соли (без посолки)")
 
     drenator1_end_time: str = Field("", description="Конец работы 1 дренатора")
     drenator2_end_time: str = Field("", description="Конец работы 2 дренатора")
