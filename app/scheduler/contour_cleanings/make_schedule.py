@@ -17,7 +17,12 @@ class CleaningValidator(ClassValidator):
         super().__init__(window=window)
 
     def validate__cleaning__cleaning(self, b1, b2):
-        validate_disjoint(b1, b2, distance=2, ordered=self.ordered)
+        validate_disjoint(
+            b1,
+            b2,
+            distance=2 if "Дренатор" not in b1.props["label"] or "Дренатор" not in b2.props["label"] else 1,
+            ordered=self.ordered,
+        )
 
 
 def run_order(function_or_generators, order):
