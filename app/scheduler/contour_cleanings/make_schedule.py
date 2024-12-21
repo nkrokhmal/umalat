@@ -43,7 +43,6 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
 
     if is_today_day_off:
         for duration, name in [
-            ("01:15", "Танк Моцарелла и дозаторы"),
             ("01:00", "Танки роникс 1/2"),
             ("01:30", "Сырое молоко на адыгейский"),
             ("01:20", "Танк смесей"),
@@ -66,20 +65,21 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
 
         return m.root
 
-    # - Танк “Моцарелла и дозаторы” (после фасовки на моцарелле в воде + 20 минут)
-
-    if properties["mozzarella"].is_present:
-        if properties["mozzarella"].water_packing_end_time:
-            m.push_row(
-                "cleaning",
-                push_func=AxisPusher(
-                    start_from=cast_t(properties["mozzarella"].water_packing_end_time)
-                    + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
-                    validator=CleaningValidator(),
-                ),
-                size=cast_t("01:15"),
-                label="Танк Моцарелла и дозаторы",
-            )
+    # # - Танк “Моцарелла и дозаторы” (после фасовки на моцарелле в воде + 20 минут)
+    # DEPRECATED (2024.12.21)
+    #
+    # if properties["mozzarella"].is_present:
+    #     if properties["mozzarella"].water_packing_end_time:
+    #         m.push_row(
+    #             "cleaning",
+    #             push_func=AxisPusher(
+    #                 start_from=cast_t(properties["mozzarella"].water_packing_end_time)
+    #                 + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
+    #                 validator=CleaningValidator(),
+    #             ),
+    #             size=cast_t("01:15"),
+    #             label="Танк Моцарелла и дозаторы",
+    #         )
 
     # - Танки роникс 1/2 (после адыгейского + час)
 
