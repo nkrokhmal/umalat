@@ -53,11 +53,18 @@ def test():
 
     warnings.filterwarnings("ignore")
 
+    # draw_frontend(
+    #     input_path=str(get_repo_path() / "app/data/static/samples/by_day/2024-11-10"),
+    #     prefix="2024-11-10",
+    #     is_today_day_off=False,
+    #     open_file=True,
+    # )
+
     draw_frontend(
-        input_path=str(get_repo_path() / "app/data/static/samples/by_day/2024-11-10"),
-        prefix="2024-11-10",
-        open_file=True,
+        input_path=str(get_repo_path() / "app/data/static/samples/by_day/sample"),
+        prefix="sample",
         is_today_day_off=False,
+        open_file=True,
     )
     # import glob
     # p

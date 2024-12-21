@@ -19,7 +19,6 @@ def make_schedule_with_optimal_cleanings(
     optimize_cleanings: bool = True,
     first_batch_ids_by_type: dict = {"mozzarella": 1},
 ):
-
     # - Process case with not optimized cleanings
 
     if not optimize_cleanings:
