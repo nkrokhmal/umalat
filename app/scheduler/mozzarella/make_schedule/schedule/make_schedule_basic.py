@@ -434,6 +434,7 @@ class ScheduleMaker:
                 cleaning_type,
                 x=(boiling["pouring"]["first"]["termizator"].y[0], 0),
                 rule="manual",
+                line_name=boiling.props["boiling_model"].line.name,
             )
 
             # SIDE EFFECT
@@ -448,7 +449,7 @@ class ScheduleMaker:
         # - Check if only salt left -> start working on 3 (third) line
 
         if (self.left_df["line_name"] == LineName.SALT).all():
-            logger.info("Only salt left, start working on third line")
+            logger.info("Only salt left, working on the third line")
             self.lines_df.at[LineName.SALT, "iter_props"] = [
                 {"pouring_line": str(v1), "drenator_num": str(v2)}
                 for v1, v2 in itertools.product([2, 3, 1], [4, 5, 6, 7])
@@ -562,7 +563,12 @@ class ScheduleMaker:
                 rest = b["pouring"]["first"]["termizator"].x[0] - a["pouring"]["first"]["termizator"].y[0]
 
                 # extract current cleanings
-                cleanings = list(self.m.root["master"].iter(cls="cleaning"))
+                cleanings = list(
+                    self.m.root["master"].iter(
+                        cls="cleaning",
+                        line_name=line_name,
+                    )
+                )
 
                 # calc in_between and previous cleanings
                 in_between_cleanings = [c for c in cleanings if a.x[0] <= c.x[0] <= b.x[0]]
