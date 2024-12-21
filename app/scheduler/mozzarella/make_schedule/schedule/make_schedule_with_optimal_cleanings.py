@@ -19,7 +19,6 @@ def make_schedule_with_optimal_cleanings(
     optimize_cleanings: bool = True,
     first_batch_ids_by_type: dict = {"mozzarella": 1},
 ):
-
     # - Process case with not optimized cleanings
 
     if not optimize_cleanings:
@@ -33,9 +32,7 @@ def make_schedule_with_optimal_cleanings(
             cleanings=cleanings,
             start_times=start_times,
             start_configuration=start_configuration,
-            exact_start_time_line_name=exact_start_time_line_name,
             date=date,
-            parallelism=4,
             first_batch_ids_by_type=first_batch_ids_by_type,
         )
 
@@ -46,9 +43,7 @@ def make_schedule_with_optimal_cleanings(
         cleanings={},
         start_times=start_times,
         start_configuration=start_configuration,
-        exact_start_time_line_name=exact_start_time_line_name,
         date=date,
-        parallelism=4,
         first_batch_ids_by_type=first_batch_ids_by_type,
     )
 
@@ -68,7 +63,6 @@ def make_schedule_with_optimal_cleanings(
         cleanings=cleanings,
         start_times=start_times,
         start_configuration=[b.props["boiling_model"].line.name for b in schedule["master"]["boiling", True]],
-        exact_start_time_line_name=exact_start_time_line_name,
         first_batch_ids_by_type=first_batch_ids_by_type,
         date=date,
     )
@@ -86,7 +80,6 @@ def test():
         # ),
         "/Users/arsenijkadaner/Desktop/моцарелла/2023-11-24 План по варкам моцарелла no water.xlsx",
         start_times={LineName.WATER: "06:00", LineName.SALT: "11:00"},
-        exact_start_time_line_name=LineName.SALT,
     )
 
 

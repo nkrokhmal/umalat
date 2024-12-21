@@ -38,7 +38,6 @@ def load_properties_by_department(
     path: str,
     prefix: str,
 ):
-
     # NOTE: RETURNS BLANK PROPERTIES IF NOT PRESENT
     properties = {}
 
@@ -55,6 +54,7 @@ def load_properties_by_department(
             path,
             f"{prefix} Расписание {config.DEPARTMENT_ROOT_NAMES_BY_DEPARTMENT[department]}.xlsx",
         )
+
         if os.path.exists(filename):
             try:
                 properties[department] = EXCEL_PARSERS[department](filename)
