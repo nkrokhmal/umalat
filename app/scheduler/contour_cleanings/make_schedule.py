@@ -8,6 +8,7 @@ from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 
 from app.models import Washer, cast_model
 from app.scheduler.common.time_utils import cast_t
+from utils_ak.builtin import crop_to_chunks
 
 
 class CleaningValidator(ClassValidator):
@@ -389,13 +390,13 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
 
         n1, n2 = min(values[2][0], values[3][0]), max(values[2][0], values[3][0])
         m.push_row(
-                "cleaning",
-                push_func=AxisPusher(
-                    start_from=cast_t(values[3][1]) + 1, validator=CleaningValidator()
-                ),  # 10 minutes after pouring_off, 5 minutes after boiling ens
-                size=cast_t("01:20"),
-                label=f"Сыроизготовитель {int(n1)}+{int(n2)}",
-            )
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(values[3][1]) + 1, validator=CleaningValidator()
+            ),  # 10 minutes after pouring_off, 5 minutes after boiling ens
+            size=cast_t("01:20"),
+            label=f"Сыроизготовитель {int(n1)}+{int(n2)}",
+        )
 
     #  Плавилка линия пицца чиз (конец плавления пицца чиз + 1 час)
 
@@ -462,54 +463,34 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
 
         return m.root
 
-    # - Дренаторы (сложная логика)
+    # - Дренаторы
 
     if properties["mozzarella"].is_present:
 
-        def _make_drenators(values, cleaning_time, label_suffix="", force_pairs=False):
-            # logic
-            i = 0
-            while i < len(values):
-                drenator_id, drenator_end = values[i]
-                if i == 0 and not force_pairs:
-                    # run first drenator single if not force pairs
-                    ids = [str(drenator_id)]
-                    block = m.push_row(
-                        "cleaning",
-                        push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator()),
-                        size=cast_t(cleaning_time),
-                        ids=ids,
-                        label=f'Дренатор {", ".join(ids)}{label_suffix}',
-                    ).block
-                else:
-                    if i + 1 < len(values) and (force_pairs or values[i + 1][1] <= block.y[0] + 2):
-                        # run pair
-                        ids = [str(drenator_id), str(values[i + 1][0])]
-                        block = m.push_row(
-                            "cleaning",
-                            push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator()),
-                            size=cast_t(cleaning_time),
-                            ids=ids,
-                            label=f'Дренатор {", ".join(ids)}{label_suffix}',
-                        ).block
-                        i += 1
-                    else:
-                        # run single
-                        ids = [str(drenator_id)]
-                        block = m.push_row(
-                            "cleaning",
-                            push_func=AxisPusher(start_from=drenator_end, validator=CleaningValidator()),
-                            size=cast_t(cleaning_time),
-                            ids=[drenator_id],
-                            label=f'Дренатор {", ".join(ids)}{label_suffix}',
-                        ).block
-                i += 1
+        def _make_drenators(values, cleaning_time):
+            # [[4, 242], [1, 264], [3, 286], [8, 293], [5, 305], [2, 308], [7, 317], [6, 326]], "01:20"
+
+            # - Sort by time
+
+            values = sorted(values, key=lambda x: x[1])
+
+            # - Run pairs
+
+            for chunk in crop_to_chunks(values, 2):
+                ids = sorted([str(drenator_id) for drenator_id, _ in chunk])
+
+                m.push_row(
+                    "cleaning",
+                    push_func=AxisPusher(start_from=chunk[-1][1], validator=CleaningValidator()),
+                    size=cast_t(cleaning_time),
+                    ids=ids,
+                    label=f'Дренатор {", ".join(sorted(ids))}',
+                )
 
         # get when drenators end: [[3, 96], [2, 118], [4, 140], [1, 159], [5, 151], [7, 167], [6, 180], [8, 191]]
         values = properties["mozzarella"].drenator_times()
         for value in values:
             value[1] = cast_t(value[1])
-        values = list(sorted(values, key=lambda value: value[1]))
         _make_drenators(values, cleaning_time="01:20")
 
     # - Траспортер + линия кислой сыворотки (после дренаторов)
