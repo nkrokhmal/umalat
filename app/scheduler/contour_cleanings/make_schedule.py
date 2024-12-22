@@ -20,7 +20,7 @@ class CleaningValidator(ClassValidator):
         validate_disjoint(
             b1,
             b2,
-            distance=2 if "Дренатор" not in b1.props["label"] or "Дренатор" not in b2.props["label"] else 1,
+            distance=1,
             ordered=self.ordered,
         )
 
