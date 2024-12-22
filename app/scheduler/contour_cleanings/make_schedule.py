@@ -214,14 +214,28 @@ def make_contour_2(
 
         return m.root
 
-    # - Комет (После окончания фасовки на моцарелле в воде + 2 часа)
+    # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
+
+    if properties["mozzarella"].is_present:
+        if properties["mozzarella"].water_packing_end_time:
+            m.push_row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 3,
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t("01:00"),
+                label="Фасовочная вода",
+            )
+
+    # - Комет (сразу после фасовочной воды или после терки, если есть)
 
     if properties["mozzarella"].is_present:
         # -- Find time
 
         times = []
         if properties["mozzarella"].water_packing_end_time:
-            times.append(cast_t(properties["mozzarella"].water_packing_end_time) + 24)
+            times.append(cast_t(properties["mozzarella"].water_packing_end_time) + 3)
         if comet_rubber_end_time:
             times.append(cast_t(comet_rubber_end_time))
 
@@ -236,20 +250,6 @@ def make_contour_2(
                 ),
                 size=cast_t("01:20"),
                 label="Комет",
-            )
-
-    # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
-
-    if properties["mozzarella"].is_present:
-        if properties["mozzarella"].water_packing_end_time:
-            m.push_row(
-                "cleaning",
-                push_func=AxisPusher(
-                    start_from=cast_t(properties["mozzarella"].water_packing_end_time) + 3,
-                    validator=CleaningValidator(),
-                ),
-                size=cast_t("01:00"),
-                label="Фасовочная вода",
             )
 
     # - Танки жирной воды (22:00, 07:00)
