@@ -15,8 +15,10 @@ class MozzarellaProperties(pydantic.BaseModel):
     multihead_end_time: str = Field("", description="Конец работы мультиголовы (пусто, если мультиголова не работает)")
     water_multihead_present: bool = Field(False, description="Есть ли мультиголова на воде в этот день")
 
-    short_cleaning_times: List[str] = Field([], description="Короткие мойки")
-    full_cleaning_times: List[str] = Field([], description="Полные мойки")
+    short_cleaning_times1: List[str] = Field([], description="Короткие мойки 1")
+    full_cleaning_times1: List[str] = Field([], description="Полные мойки 1")
+    short_cleaning_times2: List[str] = Field([], description="Короткие мойки 2")
+    full_cleaning_times2: List[str] = Field([], description="Полные мойки 2")
 
     salt_melting_start_time: str = Field("", description="Начало плавления на линии соли")
 
@@ -33,7 +35,8 @@ class MozzarellaProperties(pydantic.BaseModel):
     water_packing_end_time: str = Field("", description="Конец работы паковки воды")
     salt_packing_end_time: str = Field("", description="Конец работы паковки соли")
     water_melting_end_time: str = Field("", description="Конец работы плавления воды")
-    salt_melting_end_time: str = Field("", description="Конец работы плавления соли")
+    salt_melting_end_time: str = Field("", description="Конец работы плавления соли (вместе с посолкой)")
+    salt_melting_without_salting_end_time: str = Field("", description="Конец работы плавления соли (без посолки)")
 
     drenator1_end_time: str = Field("", description="Конец работы 1 дренатора")
     drenator2_end_time: str = Field("", description="Конец работы 2 дренатора")

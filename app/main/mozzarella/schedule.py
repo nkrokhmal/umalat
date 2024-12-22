@@ -31,7 +31,6 @@ def mozzarella_schedule():
     if flask.request.method == "POST" and "submit" in flask.request.form:
         date = form.date.data
         add_full_boiling = form.add_full_boiling.data
-        exact_melting_time_by_line = form.exact_melting_time_by_line.data
         rubber_beg_time = form.rubber_beg_time.data
 
         # validate time
@@ -73,7 +72,6 @@ def mozzarella_schedule():
                     LineName.SALT: form.salt_beg_time.data,
                 },
                 rubber_start_time=rubber_beg_time,
-                exact_start_time_line_name=exact_melting_time_by_line,
                 first_batch_ids_by_type=first_batch_ids,
                 optimize_cleanings=add_full_boiling,
                 date=date,

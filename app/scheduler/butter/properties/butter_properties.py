@@ -8,5 +8,7 @@ class ButterProperties(pydantic.BaseModel):
 
     end_time: str = Field("", description="Конец работы маслоцеха")
 
+    separation_end_time: str = Field("", description="Конец работы сепарирования")
+
     def department(self):
         return "butter"

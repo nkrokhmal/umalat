@@ -78,7 +78,6 @@ def parse_schedule_file(wb_obj):
         int_labels = [int(label) for label in _labels if is_int_like(label)]
 
         if not ("05" in row_labels and "55" in row_labels):
-
             # not a time header
             if int_labels:
                 headers.append(row_num)
@@ -88,7 +87,6 @@ def parse_schedule_file(wb_obj):
     if water_melting_headers and salt_melting_headers:
         packing_headers = packing_headers[:2]
     else:
-
         # no water or no salt
         packing_headers = packing_headers[:1]
 
@@ -110,7 +108,22 @@ def parse_schedule_file(wb_obj):
         split_func=_split_func,
     )
 
-    parse_elements(m, cells_df, "cleanings", "cleaning", [cheese_maker_headers[-1] - 8], start_times[0])
+    parse_elements(
+        m,
+        cells_df,
+        "cleanings",
+        "cleaning1",
+        [cheese_maker_headers[-1] - 8],
+        start_times[0],
+    )
+    parse_elements(
+        m,
+        cells_df,
+        "cleanings",
+        "cleaning2",
+        [cheese_maker_headers[-1] + 4],
+        start_times[0],
+    )
 
     # -- Parse water melting
 
@@ -170,7 +183,6 @@ def parse_schedule_file(wb_obj):
                 if calc_interval_length(cast_interval(m.x[0], m.y[0]) & cast_interval(row["x0"], row["y0"])) > 0
             ]
             if not overlapping:
-
                 # first cooling in each boiling does not qualify the filter
                 continue
 
@@ -295,10 +307,8 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     # save boiling_model to parsed_schedule blocks
     for block in list(parsed_schedule.iter(cls=lambda cls: cls in ["boiling", "melting_header", "packing"])):
-
         # remove little blocks
         if "boiling_id" not in block.props.all() or not is_int(block.props["boiling_id"]):
-
             # NOTE: SHOULD NOT HAPPEN IN NEWER FILES SINCE update 2021.10.21 (# update 2021.10.21)
             logger.error("Removing small block", block=block)
             block.detach_from_parent()
@@ -364,14 +374,25 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     # - Cleanings
 
-    props.short_cleaning_times = [
+    props.short_cleaning_times1 = [
         cast_human_time(cleaning.x[0])
-        for cleaning in parsed_schedule.iter(cls="cleaning")
+        for cleaning in parsed_schedule.iter(cls="cleaning1")
         if "Короткая мойка" in cleaning.props["group"][0]["label"]
     ]
-    props.full_cleaning_times = [
+    props.full_cleaning_times1 = [
         cast_human_time(cleaning.x[0])
-        for cleaning in parsed_schedule.iter(cls="cleaning")
+        for cleaning in parsed_schedule.iter(cls="cleaning1")
+        if "Полная мойка" in cleaning.props["group"][0]["label"]
+    ]
+
+    props.short_cleaning_times2 = [
+        cast_human_time(cleaning.x[0])
+        for cleaning in parsed_schedule.iter(cls="cleaning2")
+        if "Короткая мойка" in cleaning.props["group"][0]["label"]
+    ]
+    props.full_cleaning_times2 = [
+        cast_human_time(cleaning.x[0])
+        for cleaning in parsed_schedule.iter(cls="cleaning2")
         if "Полная мойка" in cleaning.props["group"][0]["label"]
     ]
 
@@ -422,6 +443,12 @@ def fill_properties(parsed_schedule, boiling_plan_df):
 
     props.water_melting_end_time = cast_human_time(_get_melting_end(water_boilings))
     props.salt_melting_end_time = cast_human_time(_get_melting_end(salt_boilings))
+    try:
+        props.salt_melting_without_salting_end_time = cast_human_time(
+            max(parsed_schedule["salt_melting_bodies", True], key=lambda b: b.y[0]).y[0],
+        )
+    except:
+        props.salt_melting_without_salting_end_time = ""
 
     # - Drenators
 
@@ -440,7 +467,6 @@ def fill_properties(parsed_schedule, boiling_plan_df):
                 if b2.y[0] < b1_melting.y[0]:
                     cur_drenator_num += 1
                 else:
-
                     # use same drenator for the next boiling
                     pass
             b2_melting = parsed_schedule.find_one(cls="melting_body", boiling_id=b2.props["boiling_id"])
@@ -500,10 +526,7 @@ def test():
     print_json(
         dict(
             parse_properties(
-                str(
-                    get_repo_path()
-                    / "app/data/static/samples/by_day/contour_cleanings_sample_day/sample Расписание моцарелла.xlsx"
-                )
+                str(get_repo_path() / "app/data/static/samples/by_day/2024-11-10/2024-11-10 Расписание моцарелла.xlsx")
             )
         )
     )

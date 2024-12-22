@@ -58,9 +58,10 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
             b.props.update(**block_style)
 
     schedule.props.update(index_width=4)
-
-    # - Check for conflicts (not tested extensively, hence for debugging only for now)
-
+    #
+    # # - Check for conflicts (not tested extensively, hence for debugging only for now)
+    # # [AttributeError: 'MergedCell' object attribute 'value' is read-only]
+    #
     # leaves = [
     #     b for b in schedule.iter() if b.is_leaf() and b.props.get("visible", True)
     # ]
@@ -75,8 +76,8 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
     #
     #         if not is_disjoint(b1, b2):
     #             print("Block conflict")
-    #             print(b1)
-    #             print(b2)
+    #             print(b1, b1.props["boiling_id"])
+    #             print(b2, b2.props["boiling_id"])
     #             raise Exception(
     #                 "Ошибка в построении расписания, произошли накладки одних блоков на другие. Такого быть не должно, нужно обращатсья к разработчикам."
     #             )
@@ -84,7 +85,6 @@ def draw_schedule(schedule, style, O=None, fn=None, wb=None, debug=False, init=T
     # - Draw schedule
 
     for b in schedule.iter():
-        logger.trace("Processing", b=b)
         if b.is_leaf() and b.props.get("visible", True):
             if b.size[0] == 0 or b.size[1] == 0:
                 continue
