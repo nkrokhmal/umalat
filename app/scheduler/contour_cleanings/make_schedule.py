@@ -192,6 +192,7 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
 def make_contour_2(
     properties,
     naslavuchich: bool = False,
+    air_knives: bool = True,
     is_today_day_off: bool = False,
     comet_rubber_end_time: str = "",
 ):
@@ -216,6 +217,8 @@ def make_contour_2(
             ]
             + [("01:25", "Линия наславучич")]
             if naslavuchich
+            else [] + [("00:40", "Воздушные ножи")]
+            if air_knives
             else []
         ):
             m.push_row(
@@ -386,24 +389,46 @@ def make_contour_2(
             label="Линия наславучич",
         )
 
+    # - Воздушные ножи (09:00, с галочкой, не приоритет)
+
+    if air_knives:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("09:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("00:40"),
+            label="Воздушные ножи",
+        )
+
     return m.root
 
 
-def make_contour_3(properties: dict, is_today_day_off: bool = False):
+def make_contour_3(
+    properties: dict,
+    hohland: bool = True,
+    is_today_day_off: bool = False,
+):
     m = BlockMaker("3 contour")
 
     # - Process day off - clean, starting from 12:00
 
     if is_today_day_off:
-        for duration, name in [
-            (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 1"),
-            ("01:30", "Сыроизготовитель 1+2"),
-            ("01:30", "Сыроизготовитель 3+4"),
-            ("01:30", "Плавилка линия пицца чиз"),
-            ("01:20", "Ванны моцарелла воды"),
-            ("01:00", "Контур циркуляции рассола"),
-            ("01:40", "Линия пицца чиз формовщик"),
-        ]:
+        for duration, name in (
+            [
+                (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 1"),
+                ("01:30", "Сыроизготовитель 1+2"),
+                ("01:30", "Сыроизготовитель 3+4"),
+                ("01:30", "Плавилка линия пицца чиз"),
+                ("01:20", "Ванны моцарелла воды"),
+                ("01:00", "Контур циркуляции рассола"),
+                ("01:40", "Линия пицца чиз формовщик"),
+            ]
+            + [("01:30", "Ванны охлаждения хохланд")]
+            if hohland
+            else []
+        ):
             m.push_row(
                 "cleaning",
                 push_func=AxisPusher(
@@ -517,24 +542,48 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
                 label="Линия пицца чиз формовщик",
             )
 
+    # - Ванны охлаждения хохланд (18:00, с галочкой, не приоритет)
+
+    if hohland:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("18:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Ванны охлаждения хохланд",
+        )
+
+    # - Return
+
     return m.root
 
 
-def make_contour_4(properties: dict, is_today_day_off: bool = False):
+def make_contour_4(
+    properties: dict,
+    hohland: bool = True,
+    is_today_day_off: bool = False,
+):
     m = BlockMaker("4 contour")
 
     # - Process day off - clean, starting from 12:00
 
     if is_today_day_off:
-        for duration, name in [
-            ("01:30", "Дренатор 1, 2"),
-            ("01:30", "Дренатор 3, 4"),
-            ("01:30", "Дренатор 5, 6"),
-            ("01:30", "Дренатор 7, 8"),
-            ("01:20", "Транспортер + линия кислой сыворотки"),
-            ("01:05", "Линия кислой сыворотки"),
-            ("00:55", "Танки сливок масло"),
-        ]:
+        for duration, name in (
+            [
+                ("01:30", "Дренатор 1, 2"),
+                ("01:30", "Дренатор 3, 4"),
+                ("01:30", "Дренатор 5, 6"),
+                ("01:30", "Дренатор 7, 8"),
+                ("01:20", "Транспортер + линия кислой сыворотки"),
+                ("01:05", "Линия кислой сыворотки"),
+                ("00:55", "Танки сливок масло"),
+            ]
+            + [("01:30", "Плавилка хохланд ")]
+            if hohland
+            else []
+        ):
             m.push_row(
                 "cleaning",
                 push_func=AxisPusher(
@@ -606,6 +655,21 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
             size=cast_t("0:55"),
             label=f"Танки сливок масло",
         )
+
+    # - Плавилка хохланд (18:00, с галочкой, не приоритет)
+
+    if hohland:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("18:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Плавилка хохланд",
+        )
+
+    # - Return
 
     return m.root
 
@@ -836,17 +900,43 @@ def make_schedule(
     naslavuchich: bool = True,
     basement_brine: bool = True,
     goat_cream: bool = True,
+    air_knives: bool = True,
+    hohland: bool = True,
     is_today_day_off: bool = False,
 ):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(properties, basement_brine=basement_brine, is_today_day_off=is_today_day_off),
-        make_contour_2(properties, naslavuchich=naslavuchich, is_today_day_off=is_today_day_off),
-        make_contour_3(properties, is_today_day_off=is_today_day_off),
-        make_contour_4(properties, is_today_day_off=is_today_day_off),
-        make_contour_5(properties, is_today_day_off=is_today_day_off),
-        make_contour_6(properties, is_today_day_off=is_today_day_off, goat_cream=goat_cream),
+        make_contour_1(
+            properties,
+            basement_brine=basement_brine,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_2(
+            properties,
+            naslavuchich=naslavuchich,
+            air_knives=air_knives,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_3(
+            properties,
+            hohland=hohland,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_4(
+            properties,
+            hohland=hohland,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_5(
+            properties,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_6(
+            properties,
+            goat_cream=goat_cream,
+            is_today_day_off=is_today_day_off,
+        ),
     ]
 
     for contour in contours:
