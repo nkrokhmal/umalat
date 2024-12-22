@@ -712,19 +712,6 @@ def make_contour_6(
 
         return m.root
 
-    # - Линия козьих сливок (10:00, с галочкой)
-
-    if goat_cream:
-        m.push_row(
-            "cleaning",
-            push_func=AxisPusher(
-                start_from=cast_t("10:00"),
-                validator=CleaningValidator(),
-            ),
-            size=cast_t("01:05"),
-            label="Линия козьих сливок",
-        )
-
     # - Линия сладкой сыворотки (Завершаем слив на рикотте + час)
 
     if properties["ricotta"].is_present:
@@ -809,7 +796,20 @@ def make_contour_6(
             label=f"Линия сливок маслоцех + обратка",
         )
 
-    # - Линия козьих сливок (22:00, с галочкой)
+    # - Линия козьих сливок (10:00, с галочкой, не приоритет)
+
+    if goat_cream:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("10:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:05"),
+            label="Линия козьих сливок",
+        )
+
+    # - Линия козьих сливок (22:00, с галочкой, не приоритет)
 
     if goat_cream:
         m.push_row(
