@@ -1,3 +1,4 @@
+from app.scheduler.rubber.to_boiling_plan import to_boiling_plan
 from utils_ak.block_tree.block import Block
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.pushers import add_push, push, simple_push
@@ -533,7 +534,6 @@ def wrap_frontend(
         m.push("stub", size=(0, 2))
         m.push(wrap_cheese_makers(master, range(2, 4), line_name=LineName.SALT))
 
-
     start_t = min([boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]])  # first melting time
     start_t = int(custom_round(start_t, 12, "floor"))  # round to last hour
     start_t = min(start_t, cast_t(rubber_start_time))
@@ -542,25 +542,13 @@ def wrap_frontend(
     m.push(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
 
     with m.push("melting", start_time=start_time, axis=1):
+        # - Check if water present
+
         is_water_present = (
             len(list(master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == LineName.WATER))) > 0
         )
 
-        if not is_water_present:
-            m.push_column("stub", size=1)
-            m.push(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
-            m.push_column("stub", size=1)
-
-            m.push(
-                "template",
-                push_func=add_push,
-                x=(1, 1),
-                size=(3, 2),
-                text=f"Терка на мультиголове",
-                index_width=0,
-                start_time="00:00",
-            )
-        else:
+        if is_water_present:
             # m.block(wrap_multihead_cleanings(master))
             if schedule["shifts"]:
                 m.push(wrap_shifts(schedule["shifts"]["water_meltings"]))
@@ -579,6 +567,18 @@ def wrap_frontend(
                 m.push(wrap_shifts(schedule["shifts"]["water_packings"]))
 
             m.push(wrap_packings(master, LineName.WATER))
+
+        # - Process rubber
+
+        rubber_boiling_plan_df = to_boiling_plan(boiling_plan)
+
+        if not rubber_boiling_plan_df.empty and rubber_boiling_plan_df["kg"].sum() > 0:
+            m.push_column("stub", size=1)
+            m.push(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
+            m.push_column("stub", size=1)
+
+        # - Process salt
+
         if schedule["shifts"]:
             m.push(wrap_shifts(schedule["shifts"]["salt_meltings"]))
         m.push(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
