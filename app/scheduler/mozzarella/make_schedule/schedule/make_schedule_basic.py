@@ -43,10 +43,16 @@ MAX_SCORE = 10000000000
 
 
 class Validator(ClassValidator):
-    def __init__(self, window=100, strict_order: Literal["none", "all", "same_line"] = "none"):
+    def __init__(
+        self,
+        window=100,
+        strict_order: Literal["none", "all", "same_line"] = "none",
+        water_melting_overlap_limit: Optional[int] = None,
+    ):
         # NOTE: we have window 100 - so we basically check every combination of boilings with each other. It was easier to do this way, just brute validation
         super().__init__(window=window)
         self.strict_order = strict_order
+        self.water_melting_overlap_limit = water_melting_overlap_limit
 
     def validate__boiling__boiling(self, b1, b2):
         # - Sort by x
@@ -144,6 +150,16 @@ class Validator(ClassValidator):
                         distance=2,
                         ordered=True,
                     )
+
+            # - Process water melting overlap
+
+            if self.water_melting_overlap_limit:
+                validate_disjoint(
+                    b1s["melting_and_packing"]["melting"]["meltings"],
+                    b2s["melting_and_packing"]["melting"]["serving"],
+                    distance=self.water_melting_overlap_limit,
+                    ordered=True,
+                )
         else:
             # different lines
 
@@ -353,13 +369,32 @@ class ScheduleMaker:
         # - Fix water a little bit: try to push water before - allowing awaiting in line
 
         if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
-            # SIDE EFFECT
+            # - Get current boiling serving start
+
+            boiling_serving_start_t = cast_t(boiling["melting_and_packing"]["melting"]["serving"].x[0])
+
+            # - Detach from the parent
+
             boiling.detach_from_parent()
+
+            # - Get latest melting end
+
+            current_melting_end_t = cast_t(
+                self.get_latest_boiling(line_name)["melting_and_packing"]["melting"]["meltings"].y[0]
+            )
+
+            # - Push
+
             push(
                 self.m.root["master"],
                 boiling,
                 push_func=AwaitingPusher(max_period=24),
-                validator=Validator(strict_order="same_line"),
+                validator=Validator(
+                    strict_order="same_line",
+                    water_melting_overlap_limit=min(
+                        -2, boiling_serving_start_t - current_melting_end_t
+                    ),  # when optimizing - max 10 minutes overlap is allowed (but if already more - keep it)
+                ),
                 max_tries=25,
             )
 
@@ -429,20 +464,16 @@ class ScheduleMaker:
         # - Add cleaning after boiling if needed
 
         if cleaning_type := self.cleanings.get(boiling.props["group_id"]):
-            start_from = boiling["pouring"]["first"]["termizator"].y[0]
-            cleaning = make_termizator_cleaning_block(
-                cleaning_type,
-                x=(boiling["pouring"]["first"]["termizator"].y[0], 0),
-                rule="manual",
-                line_name=boiling.props["boiling_model"].line.name,
-            )
-
-            # SIDE EFFECT
-            cleaning.props.update(tag=tag)
             push(
                 self.m.root["master"],
-                cleaning,
-                push_func=AxisPusher(start_from=start_from),
+                make_termizator_cleaning_block(
+                    cleaning_type,
+                    x=(boiling["pouring"]["first"]["termizator"].y[0], 0),
+                    rule="manual",
+                    line_name=boiling.props["boiling_model"].line.name,
+                    tag=tag,
+                ),
+                push_func=AxisPusher(start_from=boiling["pouring"]["first"]["termizator"].y[0]),
                 validator=Validator(),
             )
 

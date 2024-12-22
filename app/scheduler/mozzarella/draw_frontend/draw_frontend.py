@@ -68,7 +68,7 @@ def draw_frontend(
 def test():
     from utils_ak.loguru import configure_loguru
 
-    configure_loguru(level="TRACE")
+    configure_loguru(level="DEBUG")
 
     # - Ignore warnings
 

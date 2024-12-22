@@ -1,13 +1,17 @@
+from typing import Optional
+
 from utils_ak.block_tree import IterativePusher
 
 
 class AwaitingPusher(IterativePusher):
-    def __init__(self, max_period):
+    def __init__(
+        self,
+        max_period,
+    ):
         super().__init__()
         self.max_period = max_period
 
     def add(self, period):
-
         # move boiling block left
         self.block.props.update(x=[self.block.props["x_rel"][0] - period, self.block.x[1]])
 
