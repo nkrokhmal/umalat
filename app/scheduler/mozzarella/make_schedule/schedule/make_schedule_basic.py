@@ -350,18 +350,18 @@ class ScheduleMaker:
             max_tries=100,
         )
 
-        # # - Fix water a little bit: try to push water before - allowing awaiting in line
-        # DEPRECATED (2024-12-18): became irrelevant after we got the second termizator. This optimization aims to make pouring earlier, it's not needed anymore
-        # if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
-        #     # SIDE EFFECT
-        #     boiling.detach_from_parent()
-        #     push(
-        #         self.m.root["master"],
-        #         boiling,
-        #         push_func=AwaitingPusher(max_period=13),
-        #         validator=Validator(strict_order="same_line"),
-        #         max_tries=14,
-        #     )
+        # - Fix water a little bit: try to push water before - allowing awaiting in line
+
+        if line_name == LineName.WATER and boiling != self.get_earliest_boiling(line_name):
+            # SIDE EFFECT
+            boiling.detach_from_parent()
+            push(
+                self.m.root["master"],
+                boiling,
+                push_func=AwaitingPusher(max_period=24),
+                validator=Validator(strict_order="same_line"),
+                max_tries=25,
+            )
 
         # # - Shrink drenators
         # DEPRECATED (2024-12-18): became irrelevant after we got the second termizator. This optimization aims to make pouring earlier, it's not needed anymore
