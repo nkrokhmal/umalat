@@ -191,6 +191,7 @@ def make_contour_2(
 
     if is_today_day_off:
         for duration, name in [
+            ("01:30", "Плавилка линии воды"),
             ("01:20", "Комет"),
             ("01:00", "Фасовочная вода"),
             ("01:00", "Танк жирной воды 1"),
@@ -213,6 +214,19 @@ def make_contour_2(
             )
 
         return m.root
+
+    # - Плавилка линия воды (конец плавления + 1 час)
+
+    if properties["mozzarella"].is_present and properties["mozzarella"].water_melting_end_time:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["mozzarella"].water_melting_end_time) + 12,
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Плавилка линия воды",
+        )
 
     # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
 
