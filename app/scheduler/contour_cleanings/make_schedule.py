@@ -191,6 +191,7 @@ def make_contour_2(
 
     if is_today_day_off:
         for duration, name in [
+            (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 2"),
             ("01:30", "Плавилка линии воды"),
             ("01:20", "Комет"),
             ("01:00", "Фасовочная вода"),
@@ -227,6 +228,27 @@ def make_contour_2(
             size=cast_t("01:30"),
             label="Плавилка линия воды",
         )
+
+    # - Термизатор 2 (короткие и длинные мойки)
+
+    if properties["mozzarella"].is_present:
+        for cleaning_time in properties["mozzarella"].short_cleaning_times2:
+            m.push_row(
+                "cleaning",
+                push_func=add_push,
+                size=cast_model(Washer, "Короткая мойка термизатора").time // 5,
+                x=cast_t(cleaning_time),
+                label="Короткая мойка термизатора 2",
+            )
+
+        for cleaning_time in properties["mozzarella"].full_cleaning_times2:
+            m.push_row(
+                "cleaning",
+                push_func=add_push,
+                size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
+                x=cast_t(cleaning_time),
+                label="Полная мойка термизатора 2",
+            )
 
     # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
 
@@ -361,7 +383,6 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
     if is_today_day_off:
         for duration, name in [
             (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 1"),
-            (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 2"),
             ("01:30", "Сыроизготовитель 1+2"),
             ("01:30", "Сыроизготовитель 3+4"),
             ("01:30", "Плавилка линия пицца чиз"),
@@ -381,7 +402,7 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
 
         return m.root
 
-    # - Термизатор (короткие и длинные мойки)
+    # - Термизатор 1 (короткие и длинные мойки)
 
     if properties["mozzarella"].is_present:
         for cleaning_time in properties["mozzarella"].short_cleaning_times1:
@@ -400,23 +421,6 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
                 size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
                 x=cast_t(cleaning_time),
                 label="Полная мойка термизатора 1",
-            )
-        for cleaning_time in properties["mozzarella"].short_cleaning_times2:
-            m.push_row(
-                "cleaning",
-                push_func=add_push,
-                size=cast_model(Washer, "Короткая мойка термизатора").time // 5,
-                x=cast_t(cleaning_time),
-                label="Короткая мойка термизатора 2",
-            )
-
-        for cleaning_time in properties["mozzarella"].full_cleaning_times2:
-            m.push_row(
-                "cleaning",
-                push_func=add_push,
-                size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
-                x=cast_t(cleaning_time),
-                label="Полная мойка термизатора 2",
             )
 
     # - Сыроизготовитель (Через 10 минут после того, как он слился)
