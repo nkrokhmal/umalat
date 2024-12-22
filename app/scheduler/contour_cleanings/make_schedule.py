@@ -519,6 +519,7 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
             ("01:30", "Дренатор 7, 8"),
             ("01:20", "Транспортер + линия кислой сыворотки"),
             ("01:05", "Линия кислой сыворотки"),
+            ("00:55", "Танки сливок масло"),
         ]:
             m.push_row(
                 "cleaning",
@@ -579,6 +580,18 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
         size=cast_t("01:05"),
         label="Линия кислой сыворотки",
     )
+
+    # - Танки сливок масло (последнее сепарирование + 30 минут, не приоритет)
+
+    if properties["butter"].is_present:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["butter"].separation_end_time) + 6, validator=CleaningValidator()
+            ),
+            size=cast_t("0:55"),
+            label=f"Танки сливок масло",
+        )
 
     return m.root
 
@@ -760,18 +773,6 @@ def make_contour_6(
             push_func=AxisPusher(start_from="last_end", validator=CleaningValidator()),
             size=cast_t("00:50"),
             label=f"Линия сливок на маскарпоне",
-        )
-
-    # - Танк сливок масло (последнее сепарирование + 30 минут)
-
-    if properties["butter"].is_present:
-        m.push_row(
-            "cleaning",
-            push_func=AxisPusher(
-                start_from=cast_t(properties["butter"].separation_end_time) + 6, validator=CleaningValidator()
-            ),
-            size=cast_t("0:55"),
-            label=f"Танк сливок масло",
         )
 
     # - Линия сливок на подмес на рикотте (после последнего набора рикотты + 10 минут)
