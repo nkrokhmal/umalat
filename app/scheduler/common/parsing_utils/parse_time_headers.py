@@ -75,7 +75,7 @@ def parse_time_headers(cells_df: pd.DataFrame) -> tuple[list, list]:
         counter = Counter(values)
         if any(
             [
-                counter.get(value, 0) <= 20
+                counter.get(value, 0) <= 10
                 for value in ["05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"]
             ]
         ):
@@ -112,7 +112,7 @@ def test():
         parse_time_headers(
             load_cells_df(
                 wb_obj=str(
-                    get_repo_path() / "app/data/static/samples/by_department/mozzarella/sample_schedule_mozzarella.xlsx"
+                    get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"
                 ),
                 sheet_name="Расписание",
             )

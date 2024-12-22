@@ -113,7 +113,7 @@ def parse_schedule_file(wb_obj):
         cells_df,
         "cleanings",
         "cleaning1",
-        [cheese_maker_headers[-1] - 8],
+        [cheese_maker_headers[-1] - 14],
         start_times[0],
     )
     parse_elements(
@@ -121,7 +121,7 @@ def parse_schedule_file(wb_obj):
         cells_df,
         "cleanings",
         "cleaning2",
-        [cheese_maker_headers[-1] + 4],
+        [cheese_maker_headers[-1] - 2],
         start_times[0],
     )
 

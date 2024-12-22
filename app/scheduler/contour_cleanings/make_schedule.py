@@ -20,7 +20,7 @@ class CleaningValidator(ClassValidator):
         validate_disjoint(
             b1,
             b2,
-            distance=2 if "Дренатор" not in b1.props["label"] or "Дренатор" not in b2.props["label"] else 1,
+            distance=1,
             ordered=self.ordered,
         )
 
@@ -42,18 +42,24 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
     # - Process day off - clean, starting from 12:00
 
     if is_today_day_off:
-        for duration, name in [
-            ("00:50", "Танки роникс 1/2"),
-            ("00:50", "Сырое молоко на адыгейский"),
-            ("01:05", "Танк смесей"),
-            ("01:10", "Линия подвал рассол"),
-            ("01:30", "Плавилка линия воды"),
-            ("01:05", "Танк сырого молока 1"),
-            ("01:05", "Танк сырого молока 2"),
-            ("00:55", "Линия приемки молока 1"),
-            ("00:40", "Линия приемки молока 2"),
-            ("00:40", "Линия отгрузки сырья"),
-        ]:
+        for duration, name in (
+            [
+                ("00:50", "Танки роникс 1/2"),
+                ("00:50", "Сырое молоко на адыгейский"),
+                ("01:05", "Танк смесей"),
+                ("01:30", "Плавилка линия воды"),
+                ("01:05", "Танк сырого молока 1"),
+                ("01:05", "Танк сырого молока 2"),
+                ("00:55", "Линия приемки молока 1"),
+                ("00:40", "Линия приемки молока 2"),
+                ("00:40", "Линия отгрузки сырья"),
+                ("01:05", "Танк обрата 1"),
+                ("01:05", "Танк обрата 2"),
+            ]
+            + [("01:10", "Линия подвал рассол")]
+            if basement_brine
+            else []
+        ):
             m.push_row(
                 "cleaning",
                 push_func=AxisPusher(
@@ -65,22 +71,6 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
             )
 
         return m.root
-
-    # # - Танк “Моцарелла и дозаторы” (после фасовки на моцарелле в воде + 20 минут)
-    # DEPRECATED (2024.12.21)
-    #
-    # if properties["mozzarella"].is_present:
-    #     if properties["mozzarella"].water_packing_end_time:
-    #         m.push_row(
-    #             "cleaning",
-    #             push_func=AxisPusher(
-    #                 start_from=cast_t(properties["mozzarella"].water_packing_end_time)
-    #                 + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
-    #                 validator=CleaningValidator(),
-    #             ),
-    #             size=cast_t("01:15"),
-    #             label="Танк Моцарелла и дозаторы",
-    #         )
 
     # - Танки роникс 1/2 (после адыгейского + час)
 
@@ -176,12 +166,33 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
         label="Линия отгрузки сырья",
     )
 
+    # - Танк обрата 1 (08:00, не приоритет)
+
+    if basement_brine:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t("08:00"), validator=CleaningValidator()),
+            size=cast_t("01:05"),
+            label="Танк обрата 1",
+        )
+
+    # - Танк обрата 2 (00:00+1, не приоритет)
+
+    if basement_brine:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t("00:00+1"), validator=CleaningValidator()),
+            size=cast_t("01:05"),
+            label="Танк обрата 2",
+        )
+
     return m.root
 
 
 def make_contour_2(
     properties,
     naslavuchich: bool = False,
+    air_knives: bool = True,
     is_today_day_off: bool = False,
     comet_rubber_end_time: str = "",
 ):
@@ -190,18 +201,26 @@ def make_contour_2(
     # - Process day off - clean, starting from 12:00
 
     if is_today_day_off:
-        for duration, name in [
-            ("01:20", "Комет"),
-            ("01:00", "Фасовочная вода"),
-            ("01:00", "Танк жирной воды 1"),
-            ("01:00", "Танк жирной воды 2"),
-            ("01:00", "Жирная вода на сепаратор"),
-            ("01:20", "Ванны моцарелла соль"),
-            ("01:00", "Сливки от сепаратора жирной воды"),
-            ("01:00", "Сливки отпастера 25"),
-            ("00:40", "Линия обрата в сливки"),
-            ("01:25", "Линия наславучич"),
-        ]:
+        for duration, name in (
+            [
+                (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 2"),
+                ("01:30", "Плавилка линии воды"),
+                ("01:20", "Комет"),
+                ("01:00", "Фасовочная вода"),
+                ("01:00", "Танк жирной воды 1"),
+                ("01:00", "Танк жирной воды 2"),
+                ("01:00", "Жирная вода на сепаратор"),
+                ("01:20", "Ванны моцарелла соль"),
+                ("01:00", "Сливки от сепаратора жирной воды"),
+                ("01:00", "Сливки отпастера 25"),
+                ("00:40", "Линия обрата в сливки"),
+            ]
+            + [("01:25", "Линия наславучич")]
+            if naslavuchich
+            else [] + [("00:40", "Воздушные ножи")]
+            if air_knives
+            else []
+        ):
             m.push_row(
                 "cleaning",
                 push_func=AxisPusher(
@@ -214,28 +233,38 @@ def make_contour_2(
 
         return m.root
 
-    # - Комет (После окончания фасовки на моцарелле в воде + 2 часа)
+    # - Плавилка линия воды (конец плавления + 1 час)
+
+    if properties["mozzarella"].is_present and properties["mozzarella"].water_melting_end_time:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["mozzarella"].water_melting_end_time) + 12,
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Плавилка линия воды",
+        )
+
+    # - Термизатор 2 (короткие и длинные мойки)
 
     if properties["mozzarella"].is_present:
-        # -- Find time
-
-        times = []
-        if properties["mozzarella"].water_packing_end_time:
-            times.append(cast_t(properties["mozzarella"].water_packing_end_time) + 24)
-        if comet_rubber_end_time:
-            times.append(cast_t(comet_rubber_end_time))
-
-        # -- Make row
-
-        if times:
+        for cleaning_time in properties["mozzarella"].short_cleaning_times2:
             m.push_row(
                 "cleaning",
-                push_func=AxisPusher(
-                    start_from=max(times),
-                    validator=CleaningValidator(),
-                ),
-                size=cast_t("01:20"),
-                label="Комет",
+                push_func=add_push,
+                size=cast_model(Washer, "Короткая мойка термизатора").time // 5,
+                x=cast_t(cleaning_time),
+                label="Короткая мойка термизатора 2",
+            )
+
+        for cleaning_time in properties["mozzarella"].full_cleaning_times2:
+            m.push_row(
+                "cleaning",
+                push_func=add_push,
+                size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
+                x=cast_t(cleaning_time),
+                label="Полная мойка термизатора 2",
             )
 
     # - Фасовочная вода (После окончания фасовки на моцарелле в воде + 15 минут)
@@ -250,6 +279,30 @@ def make_contour_2(
                 ),
                 size=cast_t("01:00"),
                 label="Фасовочная вода",
+            )
+
+    # - Комет (сразу после фасовочной воды или после терки, если есть)
+
+    if properties["mozzarella"].is_present:
+        # -- Find time
+
+        times = []
+        if properties["mozzarella"].water_packing_end_time:
+            times.append(cast_t(properties["mozzarella"].water_packing_end_time) + 3)
+        if comet_rubber_end_time:
+            times.append(cast_t(comet_rubber_end_time))
+
+        # -- Make row
+
+        if times:
+            m.push_row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=max(times),
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t("01:20"),
+                label="Комет",
             )
 
     # - Танки жирной воды (22:00, 07:00)
@@ -336,25 +389,60 @@ def make_contour_2(
             label="Линия наславучич",
         )
 
+    # - Воздушные ножи (09:00, с галочкой, не приоритет)
+
+    if air_knives:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("09:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("00:40"),
+            label="Воздушные ножи",
+        )
+
+    # - Сыроизготовители брынзы (после окончания брынзы, не приоритет)
+
+    if properties["adygea"].is_present and properties["adygea"].brynza_cleaning_time:
+        for i in range(4):
+            m.push_row(
+                "cleaning",
+                push_func=AxisPusher(
+                    start_from=cast_t(properties["adygea"].brynza_cleaning_time),
+                    validator=CleaningValidator(),
+                ),
+                size=cast_t("01:30"),
+                label=f"Сыроизготовитель брынзы {i + 1}",
+            )
+
     return m.root
 
 
-def make_contour_3(properties: dict, is_today_day_off: bool = False):
+def make_contour_3(
+    properties: dict,
+    hohland: bool = True,
+    is_today_day_off: bool = False,
+):
     m = BlockMaker("3 contour")
 
     # - Process day off - clean, starting from 12:00
 
     if is_today_day_off:
-        for duration, name in [
-            (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 1"),
-            (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 2"),
-            ("01:30", "Сыроизготовитель 1+2"),
-            ("01:30", "Сыроизготовитель 3+4"),
-            ("01:30", "Плавилка линия пицца чиз"),
-            ("01:20", "Ванны моцарелла воды"),
-            ("01:00", "Контур циркуляции рассола"),
-            ("01:40", "Линия пицца чиз формовщик"),
-        ]:
+        for duration, name in (
+            [
+                (cast_model(Washer, "Длинная мойка термизатора").time // 5, "Полная мойка термизатора 1"),
+                ("01:30", "Сыроизготовитель 1+2"),
+                ("01:30", "Сыроизготовитель 3+4"),
+                ("01:30", "Плавилка линия пицца чиз"),
+                ("01:20", "Ванны моцарелла воды"),
+                ("01:00", "Контур циркуляции рассола"),
+                ("01:40", "Линия пицца чиз формовщик"),
+            ]
+            + [("01:30", "Ванны охлаждения хохланд")]
+            if hohland
+            else []
+        ):
             m.push_row(
                 "cleaning",
                 push_func=AxisPusher(
@@ -367,7 +455,7 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
 
         return m.root
 
-    # - Термизатор (короткие и длинные мойки)
+    # - Термизатор 1 (короткие и длинные мойки)
 
     if properties["mozzarella"].is_present:
         for cleaning_time in properties["mozzarella"].short_cleaning_times1:
@@ -386,23 +474,6 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
                 size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
                 x=cast_t(cleaning_time),
                 label="Полная мойка термизатора 1",
-            )
-        for cleaning_time in properties["mozzarella"].short_cleaning_times2:
-            m.push_row(
-                "cleaning",
-                push_func=add_push,
-                size=cast_model(Washer, "Короткая мойка термизатора").time // 5,
-                x=cast_t(cleaning_time),
-                label="Короткая мойка термизатора 2",
-            )
-
-        for cleaning_time in properties["mozzarella"].full_cleaning_times2:
-            m.push_row(
-                "cleaning",
-                push_func=add_push,
-                size=cast_model(Washer, "Длинная мойка термизатора").time // 5,
-                x=cast_t(cleaning_time),
-                label="Полная мойка термизатора 2",
             )
 
     # - Сыроизготовитель (Через 10 минут после того, как он слился)
@@ -485,23 +556,48 @@ def make_contour_3(properties: dict, is_today_day_off: bool = False):
                 label="Линия пицца чиз формовщик",
             )
 
+    # - Ванны охлаждения хохланд (18:00, с галочкой, не приоритет)
+
+    if hohland:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("18:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Ванны охлаждения хохланд",
+        )
+
+    # - Return
+
     return m.root
 
 
-def make_contour_4(properties: dict, is_today_day_off: bool = False):
+def make_contour_4(
+    properties: dict,
+    hohland: bool = True,
+    is_today_day_off: bool = False,
+):
     m = BlockMaker("4 contour")
 
     # - Process day off - clean, starting from 12:00
 
     if is_today_day_off:
-        for duration, name in [
-            ("01:30", "Дренатор 1, 2"),
-            ("01:30", "Дренатор 3, 4"),
-            ("01:30", "Дренатор 5, 6"),
-            ("01:30", "Дренатор 7, 8"),
-            ("01:20", "Транспортер + линия кислой сыворотки"),
-            ("01:05", "Линия кислой сыворотки"),
-        ]:
+        for duration, name in (
+            [
+                ("01:30", "Дренатор 1, 2"),
+                ("01:30", "Дренатор 3, 4"),
+                ("01:30", "Дренатор 5, 6"),
+                ("01:30", "Дренатор 7, 8"),
+                ("01:20", "Транспортер + линия кислой сыворотки"),
+                ("01:05", "Линия кислой сыворотки"),
+                ("00:55", "Танки сливок масло"),
+            ]
+            + [("01:30", "Плавилка хохланд ")]
+            if hohland
+            else []
+        ):
             m.push_row(
                 "cleaning",
                 push_func=AxisPusher(
@@ -561,6 +657,33 @@ def make_contour_4(properties: dict, is_today_day_off: bool = False):
         size=cast_t("01:05"),
         label="Линия кислой сыворотки",
     )
+
+    # - Танки сливок масло (последнее сепарирование + 30 минут, не приоритет)
+
+    if properties["butter"].is_present:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["butter"].separation_end_time) + 6, validator=CleaningValidator()
+            ),
+            size=cast_t("0:55"),
+            label=f"Танки сливок масло",
+        )
+
+    # - Плавилка хохланд (18:00, с галочкой, не приоритет)
+
+    if hohland:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("18:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Плавилка хохланд",
+        )
+
+    # - Return
 
     return m.root
 
@@ -644,19 +767,27 @@ def make_contour_6(
     # - Process day off - clean, starting from 12:00
 
     if is_today_day_off:
-        for duration, name in [
-            ("02:20", "Линия сладкой сыворотки"),
-            ("01:10", "Танк рикотты 3"),
-            ("01:10", "Танк рикотты 1-2"),
-            ("01:05", "Танк сливок 1"),
-            ("01:05", "Танк сливок 2"),
-            ("01:05", "Танк сливок 3"),
-            ("01:05", "Танк сливок 4"),
-            ("00:50", "Линия сливок на маскарпоне"),
-            ("01:10", "Линия сливок на подмес на рикотте"),
-            ("02:20", "Линия сливок маслоцех + обратка"),
-            ("01:05", "Линия козьих сливок"),
-        ]:
+        for duration, name in (
+            [
+                ("02:20", "Линия сладкой сыворотки"),
+                ("01:10", "Танк рикотты 3"),
+                ("01:10", "Танк рикотты 1-2"),
+                ("01:05", "Танк сливок 1"),
+                ("01:05", "Танк сливок 2"),
+                ("01:05", "Танк сливок 3"),
+                ("01:05", "Танк сливок 4"),
+                ("00:50", "Линия сливок на маскарпоне"),
+                ("01:10", "Линия сливок на подмес на рикотте"),
+                ("02:20", "Линия сливок маслоцех + обратка"),
+                ("01:00", "Линия сырого молока на роникс"),
+            ]
+            + [
+                ("01:05", "Линия козьих сливок"),
+                ("01:05", "Линия козьих сливок"),
+            ]
+            if goat_cream
+            else []
+        ):
             m.push_row(
                 "cleaning",
                 push_func=AxisPusher(
@@ -668,19 +799,6 @@ def make_contour_6(
             )
 
         return m.root
-
-    # - Линия козьих сливок (10:00, с галочкой)
-
-    if goat_cream:
-        m.push_row(
-            "cleaning",
-            push_func=AxisPusher(
-                start_from=cast_t("10:00"),
-                validator=CleaningValidator(),
-            ),
-            size=cast_t("01:05"),
-            label="Линия козьих сливок",
-        )
 
     # - Линия сладкой сыворотки (Завершаем слив на рикотте + час)
 
@@ -744,18 +862,6 @@ def make_contour_6(
             label=f"Линия сливок на маскарпоне",
         )
 
-    # - Танк сливок масло (последнее сепарирование + 30 минут)
-
-    if properties["butter"].is_present:
-        m.push_row(
-            "cleaning",
-            push_func=AxisPusher(
-                start_from=cast_t(properties["butter"].separation_end_time) + 6, validator=CleaningValidator()
-            ),
-            size=cast_t("0:55"),
-            label=f"Танк сливок масло",
-        )
-
     # - Линия сливок на подмес на рикотте (после последнего набора рикотты + 10 минут)
 
     if properties["ricotta"].is_present:
@@ -778,7 +884,33 @@ def make_contour_6(
             label=f"Линия сливок маслоцех + обратка",
         )
 
-    # - Линия козьих сливок (22:00, с галочкой)
+    # - Линия сырого молока на роникс (конец адыгейского + 30 минут, не приоритет)
+
+    if properties["adygea"].is_present:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["adygea"].end_time) + 6,
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:00"),
+            label="Линия сырого молока на роникс",
+        )
+
+    # - Линия козьих сливок (10:00, с галочкой, не приоритет)
+
+    if goat_cream:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t("10:00"),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:05"),
+            label="Линия козьих сливок",
+        )
+
+    # - Линия козьих сливок (22:00, с галочкой, не приоритет)
 
     if goat_cream:
         m.push_row(
@@ -799,17 +931,43 @@ def make_schedule(
     naslavuchich: bool = True,
     basement_brine: bool = True,
     goat_cream: bool = True,
+    air_knives: bool = True,
+    hohland: bool = True,
     is_today_day_off: bool = False,
 ):
     m = BlockMaker("schedule")
 
     contours = [
-        make_contour_1(properties, basement_brine=basement_brine, is_today_day_off=is_today_day_off),
-        make_contour_2(properties, naslavuchich=naslavuchich, is_today_day_off=is_today_day_off),
-        make_contour_3(properties, is_today_day_off=is_today_day_off),
-        make_contour_4(properties, is_today_day_off=is_today_day_off),
-        make_contour_5(properties, is_today_day_off=is_today_day_off),
-        make_contour_6(properties, is_today_day_off=is_today_day_off, goat_cream=goat_cream),
+        make_contour_1(
+            properties,
+            basement_brine=basement_brine,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_2(
+            properties,
+            naslavuchich=naslavuchich,
+            air_knives=air_knives,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_3(
+            properties,
+            hohland=hohland,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_4(
+            properties,
+            hohland=hohland,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_5(
+            properties,
+            is_today_day_off=is_today_day_off,
+        ),
+        make_contour_6(
+            properties,
+            goat_cream=goat_cream,
+            is_today_day_off=is_today_day_off,
+        ),
     ]
 
     for contour in contours:

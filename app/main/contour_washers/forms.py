@@ -63,6 +63,16 @@ class ScheduleDateForm(FlaskForm):
         validators=[Optional()],
         default=False
     )
+    air_knives = BooleanField(
+        "Воздушные ножи (ставится в 09:00)",
+        validators=[Optional()],
+        default=False
+    )
+    hohland = BooleanField(
+        "Хохланд (ставится в 18:00), плавилка и ванны",
+        validators=[Optional()],
+        default=False
+    )
     is_today_day_off = BooleanField(
         "Сегодня был нерабочий день",
         validators=[Optional()],

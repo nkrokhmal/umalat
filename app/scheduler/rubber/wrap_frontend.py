@@ -12,7 +12,6 @@ def wrap_frontend(
     date: Optional[datetime] = None,
     start_time: str = "07:00",
 ) -> dict:
-
     # - Get schedule
 
     output = make_schedule(boiling_plan=boiling_plan, start_time=start_time)
@@ -60,6 +59,18 @@ def wrap_frontend(
 
     for block in m.root.iter():
         block.props.update(cls=f"rubber_{block.props['cls']}")
+
+    # - Add template
+
+    m.push(
+        "template",
+        push_func=add_push,
+        x=(0, 1),
+        size=(3, 2),
+        text=f"Терка на мультиголове",
+        index_width=0,
+        start_time="00:00",
+    )
 
     # - Return
 

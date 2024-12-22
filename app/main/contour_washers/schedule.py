@@ -123,6 +123,8 @@ def contour_washers_schedule():
                 naslavuchich=cast_bool(main_form.naslavuchich.data),
                 basement_brine=cast_bool(main_form.basement_brine.data),
                 goat_cream=cast_bool(main_form.goat_cream.data),
+                air_knives=cast_bool(main_form.air_knives.data),
+                hohland=cast_bool(main_form.hohland.data),
                 is_today_day_off=cast_bool(main_form.is_today_day_off.data),
             )
             run_consolidated(

@@ -18,6 +18,8 @@ def draw_frontend(
     naslavuchich: bool = True,
     basement_brine: bool = True,
     goat_cream: bool = True,
+    air_knives: bool = True,
+    hohland: bool = True,
     is_today_day_off: bool = False,
 ):
 
@@ -29,6 +31,9 @@ def draw_frontend(
         naslavuchich=naslavuchich,
         basement_brine=basement_brine,
         goat_cream=goat_cream,
+        air_knives=air_knives,
+        hohland=hohland,
+
         is_today_day_off=is_today_day_off,
     )
     frontend = wrap_frontend(schedule)

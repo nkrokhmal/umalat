@@ -1,3 +1,4 @@
+from app.scheduler.rubber.to_boiling_plan import to_boiling_plan
 from utils_ak.block_tree.block import Block
 from utils_ak.block_tree.block_maker import BlockMaker
 from utils_ak.block_tree.pushers.pushers import add_push, push, simple_push
@@ -65,7 +66,7 @@ def calc_group_form_factor_label(skus):
     return "/".join(values)
 
 
-def wrap_cheese_makers(master, rng):
+def wrap_cheese_makers(master, rng, line_name: str):
     m = BlockMaker(
         "cheese_makers",
         default_row_width=1,
@@ -74,7 +75,7 @@ def wrap_cheese_makers(master, rng):
         axis=1,
     )
 
-    for i in rng:
+    for i, cheese_maker_num in enumerate(rng):
         with m.push(f"cheese_maker"):
             with m.push("header", push_func=add_push, index_width=0, start_time="00:00"):
                 m.push(
@@ -82,11 +83,11 @@ def wrap_cheese_makers(master, rng):
                     push_func=add_push,
                     x=(1, 0),
                     size=(3, 2),
-                    text=f"Сыроизготовитель №1 Poly {i + 1}",
+                    text=f"Сыроизготовитель №1 Poly {cheese_maker_num + 1}",
                     color=(183, 222, 232),
                 )
 
-            for boiling in master.iter(cls="boiling", pouring_line=str(i)):
+            for boiling in master.iter(cls="boiling", pouring_line=str(cheese_maker_num)):
                 boiling_model = boiling.props["boiling_model"]
                 boiling_size = int(
                     round(
@@ -131,12 +132,15 @@ def wrap_cheese_makers(master, rng):
                         m.push_row("pouring_off", size=boiling["pouring"]["second"]["pouring_off"].size[0])
                         m.push_row("extra", size=boiling["pouring"]["second"]["extra"].size[0])
 
-        m.push("stub", size=(0, 2))
+        if i == 0:
+            m.push(wrap_cleanings(master, line_name))
+        else:
+            m.push("stub", size=(0, 2))
 
     return m.root
 
 
-def wrap_cleanings(master, line_name:str):
+def wrap_cleanings(master, line_name: str):
     m = BlockMaker(
         "cleanings_row",
         default_row_width=1,
@@ -160,9 +164,6 @@ def wrap_cleanings(master, line_name:str):
         b = m.copy(cleaning, with_props=True)
         b.update_size((b.props["size"][0], 2))
         m.push(b, push_func=add_push)
-
-    # add two lines for "Расход пара"
-    m.push("stub", size=(0, 2))
 
     return m.root
 
@@ -528,10 +529,10 @@ def wrap_frontend(
     with m.push("pouring", start_time=start_time, axis=1):
         if schedule["shifts"]:
             m.push(wrap_shifts(schedule["shifts"]["cheese_makers"]))
-        m.push(wrap_cheese_makers(master, range(2)))
-        m.push(wrap_cleanings(master, LineName.WATER))
-        m.push(wrap_cheese_makers(master, range(2, 4)))
-        m.push(wrap_cleanings(master, LineName.SALT))
+        m.push(wrap_cheese_makers(master, range(2), line_name=LineName.WATER))
+        m.push("stub", size=(0, 2))
+        m.push("stub", size=(0, 2))
+        m.push(wrap_cheese_makers(master, range(2, 4), line_name=LineName.SALT))
 
     start_t = min([boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]])  # first melting time
     start_t = int(custom_round(start_t, 12, "floor"))  # round to last hour
@@ -541,25 +542,13 @@ def wrap_frontend(
     m.push(wrap_header(schedule.props["date"], start_time=start_time, header="График наливов"))
 
     with m.push("melting", start_time=start_time, axis=1):
+        # - Check if water present
+
         is_water_present = (
             len(list(master.iter(cls="boiling", boiling_model=lambda bm: bm.line.name == LineName.WATER))) > 0
         )
 
-        if not is_water_present:
-            m.push_column("stub", size=1)
-            m.push(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
-            m.push_column("stub", size=1)
-
-            m.push(
-                "template",
-                push_func=add_push,
-                x=(1, 1),
-                size=(3, 2),
-                text=f"Терка на мультиголове",
-                index_width=0,
-                start_time="00:00",
-            )
-        else:
+        if is_water_present:
             # m.block(wrap_multihead_cleanings(master))
             if schedule["shifts"]:
                 m.push(wrap_shifts(schedule["shifts"]["water_meltings"]))
@@ -578,6 +567,18 @@ def wrap_frontend(
                 m.push(wrap_shifts(schedule["shifts"]["water_packings"]))
 
             m.push(wrap_packings(master, LineName.WATER))
+
+        # - Process rubber
+
+        rubber_boiling_plan_df = to_boiling_plan(boiling_plan)
+
+        if not rubber_boiling_plan_df.empty and rubber_boiling_plan_df["kg"].sum() > 0:
+            m.push_column("stub", size=1)
+            m.push(wrap_frontend_rubber(boiling_plan=boiling_plan, start_time=rubber_start_time)["frontend"])
+            m.push_column("stub", size=1)
+
+        # - Process salt
+
         if schedule["shifts"]:
             m.push(wrap_shifts(schedule["shifts"]["salt_meltings"]))
         m.push(wrap_meltings_2(master, LineName.SALT, "Линия плавления моцареллы в рассоле №2"))
