@@ -53,6 +53,8 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
                 ("00:55", "Линия приемки молока 1"),
                 ("00:40", "Линия приемки молока 2"),
                 ("00:40", "Линия отгрузки сырья"),
+                ("01:05", "Танк обрата 1"),
+                ("01:05", "Танк обрата 2"),
             ]
             + [("01:10", "Линия подвал рассол")]
             if basement_brine
@@ -69,22 +71,6 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
             )
 
         return m.root
-
-    # # - Танк “Моцарелла и дозаторы” (после фасовки на моцарелле в воде + 20 минут)
-    # DEPRECATED (2024.12.21)
-    #
-    # if properties["mozzarella"].is_present:
-    #     if properties["mozzarella"].water_packing_end_time:
-    #         m.push_row(
-    #             "cleaning",
-    #             push_func=AxisPusher(
-    #                 start_from=cast_t(properties["mozzarella"].water_packing_end_time)
-    #                 + 4,  # Моем после того, как закончилась фасовка на моцарелле в воде через 20 минут
-    #                 validator=CleaningValidator(),
-    #             ),
-    #             size=cast_t("01:15"),
-    #             label="Танк Моцарелла и дозаторы",
-    #         )
 
     # - Танки роникс 1/2 (после адыгейского + час)
 
@@ -179,6 +165,26 @@ def make_contour_1(properties: dict, basement_brine: bool = False, is_today_day_
         size=cast_t("00:40"),
         label="Линия отгрузки сырья",
     )
+
+    # - Танк обрата 1 (08:00, не приоритет)
+
+    if basement_brine:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t("08:00"), validator=CleaningValidator()),
+            size=cast_t("01:05"),
+            label="Танк обрата 1",
+        )
+
+    # - Танк обрата 2 (00:00+1, не приоритет)
+
+    if basement_brine:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(start_from=cast_t("00:00+1"), validator=CleaningValidator()),
+            size=cast_t("01:05"),
+            label="Танк обрата 2",
+        )
 
     return m.root
 
