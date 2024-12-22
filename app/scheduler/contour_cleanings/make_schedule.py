@@ -765,6 +765,7 @@ def make_contour_6(
                 ("00:50", "Линия сливок на маскарпоне"),
                 ("01:10", "Линия сливок на подмес на рикотте"),
                 ("02:20", "Линия сливок маслоцех + обратка"),
+                ("01:00", "Линия сырого молока на роникс"),
             ]
             + [("01:05", "Линия козьих сливок")]
             if goat_cream
@@ -864,6 +865,19 @@ def make_contour_6(
             push_func=AxisPusher(start_from=cast_t(properties["butter"].end_time) + 6, validator=CleaningValidator()),
             size=cast_t("02:20"),
             label=f"Линия сливок маслоцех + обратка",
+        )
+
+    # - Линия сырого молока на роникс (конец адыгейского + 30 минут, не приоритет)
+
+    if properties["adygea"].is_present:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["adygea"].end_time) + 6,
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:00"),
+            label="Линия сырого молока на роникс",
         )
 
     # - Линия козьих сливок (10:00, с галочкой, не приоритет)
