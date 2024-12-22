@@ -402,6 +402,19 @@ def make_contour_2(
             label="Воздушные ножи",
         )
 
+    # - Сыроизготовители брынзы (после окончания брынзы, не приоритет)
+
+    if properties["adygea"].is_present and properties["adygea"].brynza_cleaning_time:
+        m.push_row(
+            "cleaning",
+            push_func=AxisPusher(
+                start_from=cast_t(properties["adygea"].brynza_cleaning_time),
+                validator=CleaningValidator(),
+            ),
+            size=cast_t("01:30"),
+            label="Сыроизготовители брынзы",
+        )
+
     return m.root
 
 
