@@ -65,7 +65,7 @@ def calc_group_form_factor_label(skus):
     return "/".join(values)
 
 
-def wrap_cheese_makers(master, rng):
+def wrap_cheese_makers(master, rng, line_name: str):
     m = BlockMaker(
         "cheese_makers",
         default_row_width=1,
@@ -74,7 +74,7 @@ def wrap_cheese_makers(master, rng):
         axis=1,
     )
 
-    for i in rng:
+    for i, cheese_maker_num in enumerate(rng):
         with m.push(f"cheese_maker"):
             with m.push("header", push_func=add_push, index_width=0, start_time="00:00"):
                 m.push(
@@ -82,11 +82,11 @@ def wrap_cheese_makers(master, rng):
                     push_func=add_push,
                     x=(1, 0),
                     size=(3, 2),
-                    text=f"Сыроизготовитель №1 Poly {i + 1}",
+                    text=f"Сыроизготовитель №1 Poly {cheese_maker_num + 1}",
                     color=(183, 222, 232),
                 )
 
-            for boiling in master.iter(cls="boiling", pouring_line=str(i)):
+            for boiling in master.iter(cls="boiling", pouring_line=str(cheese_maker_num)):
                 boiling_model = boiling.props["boiling_model"]
                 boiling_size = int(
                     round(
@@ -131,12 +131,15 @@ def wrap_cheese_makers(master, rng):
                         m.push_row("pouring_off", size=boiling["pouring"]["second"]["pouring_off"].size[0])
                         m.push_row("extra", size=boiling["pouring"]["second"]["extra"].size[0])
 
-        m.push("stub", size=(0, 2))
+        if i == 0:
+            m.push(wrap_cleanings(master, line_name))
+        else:
+            m.push("stub", size=(0, 2))
 
     return m.root
 
 
-def wrap_cleanings(master, line_name:str):
+def wrap_cleanings(master, line_name: str):
     m = BlockMaker(
         "cleanings_row",
         default_row_width=1,
@@ -160,9 +163,6 @@ def wrap_cleanings(master, line_name:str):
         b = m.copy(cleaning, with_props=True)
         b.update_size((b.props["size"][0], 2))
         m.push(b, push_func=add_push)
-
-    # add two lines for "Расход пара"
-    m.push("stub", size=(0, 2))
 
     return m.root
 
@@ -528,10 +528,11 @@ def wrap_frontend(
     with m.push("pouring", start_time=start_time, axis=1):
         if schedule["shifts"]:
             m.push(wrap_shifts(schedule["shifts"]["cheese_makers"]))
-        m.push(wrap_cheese_makers(master, range(2)))
-        m.push(wrap_cleanings(master, LineName.WATER))
-        m.push(wrap_cheese_makers(master, range(2, 4)))
-        m.push(wrap_cleanings(master, LineName.SALT))
+        m.push(wrap_cheese_makers(master, range(2), line_name=LineName.WATER))
+        m.push("stub", size=(0, 2))
+        m.push("stub", size=(0, 2))
+        m.push(wrap_cheese_makers(master, range(2, 4), line_name=LineName.SALT))
+
 
     start_t = min([boiling["melting_and_packing"].x[0] for boiling in master["boiling", True]])  # first melting time
     start_t = int(custom_round(start_t, 12, "floor"))  # round to last hour
