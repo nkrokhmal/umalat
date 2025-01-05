@@ -17,6 +17,7 @@ def download_adygea():
         {
             "Название SKU": sku.name,
             "Процент": sku.made_from_boilings[0].percent,
+            "Добавка": sku.made_from_boilings[0].additive,
             "Название форм фактора": sku.group.name,
             "Вход": sku.made_from_boilings[0].input_kg,
             "Выход": sku.made_from_boilings[0].output_kg,

@@ -35,9 +35,10 @@ class AdygeaBoiling(Boiling):
     input_kg = mdb.Column(mdb.Integer)
     output_kg = mdb.Column(mdb.Integer)
     percent = mdb.Column(mdb.Integer)
+    additive = mdb.Column(mdb.String)
 
     def to_str(self) -> str:
-        return str(self.percent)
+        return " ".join([str(self.percent), self.additive])
 
 
 class AdygeaBoilingTechnology(BoilingTechnology):
@@ -56,8 +57,9 @@ class AdygeaBoilingTechnology(BoilingTechnology):
         line: str,
         percent: float | int,
         weight: float | int,
+        additive: str
     ) -> str:
-        return f"Линия {line}, Форм фактор {form_factor}, Вес {weight}, {percent}"
+        return f"Линия {line}, Форм фактор {form_factor}, Вес {weight}, {percent}, {additive}"
 
 
 __all__ = [
