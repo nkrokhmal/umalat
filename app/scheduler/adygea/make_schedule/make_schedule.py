@@ -206,7 +206,7 @@ def _make_schedule(
     m.push_row(
         "cleaning",
         size=adygea_cleaning.time // 5,
-        push_func=AxisPusher(start_from="max_end"),
+        push_func=AxisPusher(start_from="max_end", start_shift=4), # 20 minutes to wait
     )
 
     # - Start schedule from preparation
