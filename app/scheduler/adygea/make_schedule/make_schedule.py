@@ -100,6 +100,12 @@ def _make_schedule(
             ),  # # there are 4 "sublines", one for each boiler. We insert boilings in that order
             group_name=grp.iloc[0]["sku"].group.name,
             pair_num=0 if nth(itertools.cycle([0, 2, 1, 3]), i) in [0, 1] else 1,  # [2, 3] -> 1
+            addition_type="сванская соль"
+            if "сванской солью" in grp.iloc[0]["sku"].name
+            else "аджика"
+            if "аджикой" in grp.iloc[0]["sku"].name
+            else "",  # todo next: make properly [@marklidenberg]
+            is_chetuk="четук" in grp.iloc[0]["sku"].name.lower(),
         )
         for i, (batch_id, grp) in enumerate(boiling_plan_df.groupby("batch_id"))
     ]
@@ -117,10 +123,14 @@ def _make_schedule(
         for i in range(halumi_boilings_count * 5)  # 5 boilings for each
     ]
 
+    # - Set boiling consecutive number
+
+    for i, boiling in enumerate(boilings):
+        boiling.props.update(consecutive_num=i + 1)
+
     # - Push boilings
 
     for boiling in boilings:
-
         # - Extract pair_num
 
         pair_num = boiling.props["pair_num"]
@@ -219,7 +229,6 @@ def make_schedule(
     start_time: str = "07:00",
     first_batch_ids_by_type: dict = {"adygea": 1},
 ) -> dict:
-
     # - Get boiling plan
 
     boiling_plan_df = to_boiling_plan(boiling_plan, first_batch_ids_by_type=first_batch_ids_by_type)
@@ -264,22 +273,19 @@ def make_schedule(
                     if b2.y[0] >= cast_t(time):
                         if b3 and b1:
                             if b2.y[0] - b1.y[0] >= b3.y[0] - b2.y[0]:
-
                                 # wait for next boiling and make lunch
                                 return cast_time(b3.y[0])
                             else:
-
                                 # make lunch now
                                 return cast_time(b2.y[0])
                         else:
-
                             # make lunch now
                             return cast_time(b2.y[0])
+
                 # returns None if no time found. For example, for the case when lunch is inbetween halumi boilings
                 return None
 
             if lunch_interval.upper - working_interval.lower <= working_interval.upper - lunch_interval.lower:
-
                 # lunch is closer to the start
                 if lunch_interval.upper - working_interval.lower >= 2 * 12:
                     lunch_times.append(find_first_after("00:13:30"))
@@ -288,7 +294,6 @@ def make_schedule(
                     continue
 
             else:
-
                 # lunch is close to the end
                 if working_interval.upper - lunch_interval.lower >= 2 * 12:
                     lunch_times.append(find_first_after("00:12:00"))
@@ -296,11 +301,9 @@ def make_schedule(
                     # print(2, lunch_times)
                     continue
                 elif working_interval.upper - lunch_interval.lower >= 0:
-
                     # less than two hours till end - still possibly need a break
                     if need_a_break:
                         if lunch_interval.lower - working_interval.lower <= 7 * 12:
-
                             # work around 7 hours
                             lunch_times.append(find_first_after("00:12:00"))
 

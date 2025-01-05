@@ -1,6 +1,7 @@
 import re
 import typing as tp
 
+from app.models import AdygeaSKU
 from utils_ak.numeric.types import is_int_like
 from utils_ak.re.patterns import spaces_on_edge
 
@@ -79,7 +80,6 @@ def cast_mozzarella_form_factor(obj):
 def cast_mozzarella_boiling(obj):
     if isinstance(obj, str):
         try:
-
             # water, 2.7, Альче
             values = obj.split(",")
             line_name, percent, ferment = values[:3]
@@ -105,3 +105,15 @@ def cast_mozzarella_boiling(obj):
         return boilings[0]
 
     return cast_model(MozzarellaBoiling, obj)
+
+
+def test():
+    for i in range(1, 1000):
+        try:
+            print(cast_model(AdygeaSKU, i).name, cast_model(AdygeaSKU, i).id)
+        except Exception as e:
+            pass
+
+
+if __name__ == "__main__":
+    test()

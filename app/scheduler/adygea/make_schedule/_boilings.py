@@ -11,6 +11,8 @@ def make_boiling(
     boiler_num: int,
     group_name: str,
     pair_num: int,
+    addition_type: str = "",
+    is_chetuk: bool = False,
 ):
     m = BlockMaker(
         "boiling",
@@ -19,6 +21,8 @@ def make_boiling(
         boiler_num=boiler_num,
         group_name=group_name,
         pair_num=pair_num,
+        addition_type=addition_type,
+        is_chetuk=is_chetuk,
     )
 
     bt = delistify(
