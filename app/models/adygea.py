@@ -38,7 +38,7 @@ class AdygeaBoiling(Boiling):
     additive = mdb.Column(mdb.String)
 
     def to_str(self) -> str:
-        return " ".join([str(self.percent), self.additive])
+        return " ".join([str(self.percent), self.additive if self.additive else ""])
 
 
 class AdygeaBoilingTechnology(BoilingTechnology):
