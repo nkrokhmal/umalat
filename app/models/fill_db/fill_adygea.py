@@ -30,6 +30,7 @@ def fill_boiling_technologies():
         "Название форм фактора",
         "Набор",
         "Коагуляция",
+        "Добавка",
         "Слив",
         "Процент",
         "Вес нетто",
@@ -45,6 +46,7 @@ def fill_boiling_technologies():
                 percent=bt["Процент"],
                 weight=bt["Вес нетто"],
                 form_factor=bt["Название форм фактора"],
+                additive=bt["Добавка"]
             ),
             collecting_time=bt["Набор"],
             coagulation_time=bt["Коагуляция"],
@@ -61,6 +63,7 @@ def fill_boilings():
     bts = db.session.query(AdygeaBoilingTechnology).all()
     columns = [
         "Название форм фактора",
+        "Добавка",
         "Набор",
         "Коагуляция",
         "Слив",
@@ -80,6 +83,7 @@ def fill_boilings():
             percent=b["Процент"],
             weight=b["Вес нетто"],
             form_factor=b["Название форм фактора"],
+            additive=b["Добавка"]
         )
 
         line_id = [x for x in lines if x.name == line_name][0].id
@@ -91,10 +95,12 @@ def fill_boilings():
             & (x.pouring_off_time == b["Слив"])
             & (x.name == name)
         ]
+        assert len(bts_name) == 1
         boiling = AdygeaBoiling(
             percent=b["Процент"],
             boiling_technologies=bts_name,
             line_id=line_id,
+            additive=b["Добавка"],
             weight_netto=b["Вес нетто"],
             output_kg=b["Выход"],
             input_kg=b["Вход"],
@@ -129,6 +135,7 @@ def fill_sku():
     columns = [
         "Название SKU",
         "Процент",
+        "Добавка",
         "Название форм фактора",
         "Линия",
         "Имя бренда",
@@ -158,6 +165,7 @@ def fill_sku():
             percent=sku["Процент"],
             weight=sku["Вес нетто"],
             form_factor=sku["Название форм фактора"],
+            additive=sku["Добавка"]
         )
 
         add_sku.made_from_boilings = [x for x in boilings if x.name == boiling_name]
