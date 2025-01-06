@@ -19,7 +19,6 @@ def draw_frontend(
     date: Optional[datetime] = None,
     workbook: Workbook = None,
 ) -> dict:
-
     # - Wrap frontend
 
     output = wrap_frontend(
@@ -48,7 +47,7 @@ def draw_frontend(
 def test():
     output = draw_frontend(
         str(get_repo_path() / "app/data/static/samples/by_department/adygea/sample_schedule_adygea.xlsx"),
-        halumi_boilings_count=2,
+        halumi_boilings_count=10,
         start_time="07:00",
     )
 

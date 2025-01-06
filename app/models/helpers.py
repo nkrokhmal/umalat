@@ -79,7 +79,6 @@ def cast_mozzarella_form_factor(obj):
 def cast_mozzarella_boiling(obj):
     if isinstance(obj, str):
         try:
-
             # water, 2.7, Альче
             values = obj.split(",")
             line_name, percent, ferment = values[:3]
@@ -105,3 +104,17 @@ def cast_mozzarella_boiling(obj):
         return boilings[0]
 
     return cast_model(MozzarellaBoiling, obj)
+
+
+def test():
+    from app.models import AdygeaSKU, AdygeaBoiling
+
+    for i in range(1, 1000):
+        try:
+            print(cast_model(AdygeaBoiling, i).name, cast_model(AdygeaBoiling, i).id, cast_model(AdygeaBoiling, i).additive)
+        except Exception as e:
+            pass
+
+
+if __name__ == "__main__":
+    test()
