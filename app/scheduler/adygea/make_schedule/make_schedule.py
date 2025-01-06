@@ -100,11 +100,7 @@ def _make_schedule(
             ),  # # there are 4 "sublines", one for each boiler. We insert boilings in that order
             group_name=grp.iloc[0]["sku"].group.name,
             pair_num=0 if nth(itertools.cycle([0, 2, 1, 3]), i) in [0, 1] else 1,  # [2, 3] -> 1
-            addition_type="сванская соль"
-            if "сванской солью" in grp.iloc[0]["sku"].name
-            else "аджика"
-            if "аджикой" in grp.iloc[0]["sku"].name
-            else "",  # todo next: make properly [@marklidenberg]
+            addition_type=grp.iloc[0]["boiling"].additive,
             is_chetuk="четук" in grp.iloc[0]["sku"].name.lower(),
         )
         for i, (batch_id, grp) in enumerate(boiling_plan_df.groupby("batch_id"))
@@ -206,7 +202,7 @@ def _make_schedule(
     m.push_row(
         "cleaning",
         size=adygea_cleaning.time // 5,
-        push_func=AxisPusher(start_from="max_end", start_shift=4), # 20 minutes to wait
+        push_func=AxisPusher(start_from="max_end", start_shift=4),  # 20 minutes to wait
     )
 
     # - Start schedule from preparation
