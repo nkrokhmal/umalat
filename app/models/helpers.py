@@ -1,7 +1,6 @@
 import re
 import typing as tp
 
-from app.models import AdygeaSKU, AdygeaBoiling
 from utils_ak.numeric.types import is_int_like
 from utils_ak.re.patterns import spaces_on_edge
 
@@ -108,6 +107,8 @@ def cast_mozzarella_boiling(obj):
 
 
 def test():
+    from app.models import AdygeaSKU, AdygeaBoiling
+
     for i in range(1, 1000):
         try:
             print(cast_model(AdygeaBoiling, i).name, cast_model(AdygeaBoiling, i).id, cast_model(AdygeaBoiling, i).additive)
