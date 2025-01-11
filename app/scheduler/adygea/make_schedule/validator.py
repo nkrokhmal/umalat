@@ -17,25 +17,39 @@ class Validator(ClassValidator):
         if b1.props["boiler_num"] == b2.props["boiler_num"]:
             # - Find distance
 
-            is_new_14th_cycle = (
-                b2.props["consecutive_num"] >= 15
-                and b2.props["consecutive_num"] % 14 in [1, 2, 3, 4]
-                and b1.props["group_name"] != "halumi"
-            )
-            is_addition_changed = b1.props["addition_type"] != b2.props["addition_type"]
-            switched_to_chetuk = not b1.props["is_chetuk"] and b2.props["is_chetuk"]
-            switched_weight_netto = b1.props["boiling_model"].weight_netto != b2.props["boiling_model"].weight_netto
+            # region Deprecated from 2024.01.11
+            # is_new_14th_cycle = (
+            #     b2.props["consecutive_num"] >= 15
+            #     and b2.props["consecutive_num"] % 14 in [1, 2, 3, 4]
+            #     and b1.props["group_name"] != "halumi"
+            # )
+            # is_addition_changed = b1.props["addition_type"] != b2.props["addition_type"]
+            # switched_to_chetuk = not b1.props["is_chetuk"] and b2.props["is_chetuk"]
+            # switched_weight_netto = b1.props["boiling_model"].weight_netto != b2.props["boiling_model"].weight_netto
+            #
+            # if b2.props["group_name"] == "Халуми":
+            #     distance = 0
+            # else:
+            #     distance = max(
+            #         0,
+            #         2 if is_new_14th_cycle else 0,
+            #         3 if is_addition_changed else 0,
+            #         2 if switched_to_chetuk else 0,
+            #         2 if switched_weight_netto else 0,
+            #     )
+            # endregion
 
+            is_addition_changed = b1.props["addition_type"] != b2.props["addition_type"]
+            is_after_9th = b2.props["consecutive_num"] >= 9
             if b2.props["group_name"] == "Халуми":
                 distance = 0
             else:
                 distance = max(
                     0,
-                    2 if is_new_14th_cycle else 0,
+                    2 if is_after_9th else 0,
                     3 if is_addition_changed else 0,
-                    2 if switched_to_chetuk else 0,
-                    2 if switched_weight_netto else 0,
                 )
+
             validate_disjoint(b1, b2, ordered=True, distance=distance)
 
         if b2.parent["boiling", True].index(b2) <= 3 and b1.props["pair_num"] == b2.props["pair_num"]:
