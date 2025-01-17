@@ -27,7 +27,6 @@ def draw_frontend(
     validate=True,
     first_batch_ids_by_type={"mozzarella": 1},
     # - Make schedule basic_example kwargs
-    exact_start_time_line_name=None,
     optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
     rubber_start_time="07:00",
@@ -47,7 +46,6 @@ def draw_frontend(
         optimize_cleanings=optimize_cleanings,
         start_times=start_times,
         start_configuration=start_configuration,
-        exact_start_time_line_name=exact_start_time_line_name,
     )
 
     # - Draw frontend
@@ -96,7 +94,6 @@ def test():
         ),
         workbook=schedule_wb,
         start_times={LineName.SALT: "09:00", LineName.WATER: "12:00"},
-        exact_start_time_line_name=LineName.SALT,
         first_batch_ids_by_type={"mozzarella": 415},
         # start_configuration=[
         #     LineName.WATER if value == "В" else LineName.SALT

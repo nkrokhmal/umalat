@@ -15,7 +15,6 @@ def make_schedule(
     # - Make schedule basic_example kwargs
     optimize_cleanings=False,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
-    exact_start_time_line_name=None,
     start_configuration=None,
     date=None,
 ) -> dict:
@@ -35,7 +34,6 @@ def make_schedule(
     schedule = make_schedule_with_optimal_cleanings(
         boiling_plan_obj=boiling_plan,
         start_times=start_times,
-        exact_start_time_line_name=exact_start_time_line_name,
         start_configuration=start_configuration,
         date=date,
         optimize_cleanings=optimize_cleanings,

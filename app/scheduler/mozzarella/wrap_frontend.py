@@ -490,7 +490,6 @@ def wrap_frontend(
     rubber_start_time="07:00",
     # - Make basic_example schedule kwargs
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
-    exact_start_time_line_name=None,
     optimize_cleanings=False,
     start_configuration=None,
     date=None,
@@ -507,7 +506,6 @@ def wrap_frontend(
         date=date,
         optimize_cleanings=optimize_cleanings,
         start_times=start_times,
-        exact_start_time_line_name=exact_start_time_line_name,
         start_configuration=start_configuration,
     )
     schedule = output["schedule"]

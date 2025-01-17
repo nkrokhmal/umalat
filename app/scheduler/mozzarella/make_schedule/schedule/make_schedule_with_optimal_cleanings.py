@@ -13,7 +13,6 @@ from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_
 def make_schedule_with_optimal_cleanings(
     boiling_plan_obj,
     start_times={LineName.WATER: "08:00", LineName.SALT: "07:00"},
-    exact_start_time_line_name: Optional[str] = LineName.WATER,
     start_configuration=None,
     date=None,
     optimize_cleanings: bool = True,

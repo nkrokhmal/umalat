@@ -188,6 +188,10 @@ class Validator(ClassValidator):
         ):
             validate_order_by_axis(b1, b2)
 
+    def validate__cleaning__cleaning(self, b1, b2):
+        if b1.props["line_name"] == b2.props["line_name"]:
+            validate_disjoint(b1, b2)
+
     @staticmethod
     def validate__boiling__cleaning(b1, b2):
         if b1.props["boiling_model"].line.name != b2.props["line_name"]:
