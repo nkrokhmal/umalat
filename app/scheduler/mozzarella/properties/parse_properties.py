@@ -25,7 +25,10 @@ from app.scheduler.mozzarella.to_boiling_plan.to_boiling_plan import to_boiling_
 
 def _filter_func(group):
     try:
-        return is_int_like(group[0]["label"].split(" ")[0])
+        v = group[0]["label"]
+        v = v.split("/")[0].strip()
+        v = v.split(" ")[0]
+        return is_int_like(v)
     except:
         return False
 
@@ -84,11 +87,6 @@ def parse_schedule_file(wb_obj):
 
     packing_headers = set(headers) - set(cheese_maker_headers) - set(water_melting_headers) - set(salt_melting_headers)
     packing_headers = list(sorted(packing_headers))
-    if water_melting_headers and salt_melting_headers:
-        packing_headers = packing_headers[:2]
-    else:
-        # no water or no salt
-        packing_headers = packing_headers[:1]
 
     cheese_maker_headers = list(sorted(cheese_maker_headers))
     water_melting_headers = list(sorted(water_melting_headers))
@@ -234,7 +232,6 @@ def parse_schedule_file(wb_obj):
         )
 
         # set boiling id for each melting_body
-
         assert len(m.root["salt_melting_headers"].children) == len(m.root["salt_melting_bodies"].children)
         for row_1, row_2 in zip(m.root["salt_melting_headers"].children, m.root["salt_melting_bodies"].children):
             row_2.props.update(boiling_id=row_1.props["boiling_id"], label=str(row_1.props["label"]))
@@ -260,7 +257,8 @@ def parse_schedule_file(wb_obj):
         df_formings = df_formings.sort_values(by="x0")
         for i, row in df_formings.iterrows():
             melting = delistify(
-                [m for m in m.root["salt_melting_headers"].children if m.x[0] == row["serving_start"]], single=True
+                [m for m in m.root["salt_melting_headers"].children if m.x[0] == row["serving_start"]],
+                single=True,
             )
             melting.props.update(melting_start=row["x0"], melting_end=row["y0"], melting_end_with_cooling=melting.y[0])
 
@@ -271,12 +269,11 @@ def parse_schedule_file(wb_obj):
             cells_df=cells_df,
             label="salt_packings",
             element_label="packing",
-            rows=[packing_headers[-1], packing_headers[-1] + 3],
+            rows=list({packing_headers[1], packing_headers[1] + 3, packing_headers[-1], packing_headers[-1] + 3}), # sometimes users manually add extra boiling for the rubber
             start_time=start_times[1],
             split_func=_split_func,
             filter_=_filter_func,
         )
-
     return m.root
 
 
@@ -308,12 +305,17 @@ def fill_properties(parsed_schedule, boiling_plan_df):
     # save boiling_model to parsed_schedule blocks
     for block in list(parsed_schedule.iter(cls=lambda cls: cls in ["boiling", "melting_header", "packing"])):
         # remove little blocks
-        if "boiling_id" not in block.props.all() or not is_int(block.props["boiling_id"]):
+        if (
+            "boiling_id" not in block.props.all()
+            or not is_int(block.props["boiling_id"])
+            or len(boiling_group_df := boiling_plan_df[boiling_plan_df["boiling_id"] == int(block.props["boiling_id"])]) # hardcode, can happen because of manually edited excel files.
+            == 0
+        ):
             # NOTE: SHOULD NOT HAPPEN IN NEWER FILES SINCE update 2021.10.21 (# update 2021.10.21)
             logger.error("Removing small block", block=block)
             block.detach_from_parent()
             continue
-        boiling_group_df = boiling_plan_df[boiling_plan_df["boiling_id"] == int(block.props["boiling_id"])]
+
         block.props.update(
             boiling_group_df=boiling_group_df,
             line_name=boiling_group_df.iloc[0]["boiling"].line.name,
@@ -526,7 +528,8 @@ def test():
     print_json(
         dict(
             parse_properties(
-                str(get_repo_path() / "app/data/static/samples/by_day/2024-11-10/2024-11-10 Расписание моцарелла.xlsx")
+                # str(get_repo_path() / "app/data/static/samples/by_day/2024-11-10/2024-11-10 Расписание моцарелла.xlsx")
+                "/Users/marklidenberg/Downloads/2025-01-19 Расписание моцарелла.xlsx"
             )
         )
     )
