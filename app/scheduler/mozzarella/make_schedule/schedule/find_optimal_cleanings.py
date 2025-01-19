@@ -26,6 +26,10 @@ def _find_optimal_cleanings_combination_by_schedule(schedule):
     for line_name in [LineName.WATER, LineName.SALT]:
         _boilings = [boiling for boiling in boilings if boiling.props["boiling_model"].line.name == line_name]
         _boilings = list(sorted(_boilings, key=lambda b: b.x[0]))
+
+        if len(_boilings) == 0:
+            continue
+
         values = [
             [
                 b1["pouring"]["first"]["termizator"].x[0],
