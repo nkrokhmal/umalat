@@ -60,9 +60,9 @@ STYLE = {
         "color": "#E1EFDA",
     },
     "rubber_long_switch": {
-        "text": "земена газа и пленки",
+        "text": "замена газа и пленки",
         "color": "red",
-        "font_size": 8,
+        "font_size": 4,
     },
     "rubber_short_switch": {
         "text": "",

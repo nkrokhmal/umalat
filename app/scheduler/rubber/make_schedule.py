@@ -73,7 +73,7 @@ def make_schedule(
                     if len(list(m.root.iter(cls="packing"))) % 2 == 0:
                         m.push_row(
                             "long_switch",
-                            size=2,
+                            size=1,
                         )
                     else:
                         m.push_row(
